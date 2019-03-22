@@ -11,7 +11,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "--gtest_break_on_failure"
-              // ,"--gtest_filter=AutomationControllerTest.InvalidInput"
+                // ,"--gtest_filter=AutomationControllerTest.InvalidInput"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -19,7 +19,7 @@
                 {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                     "name": "ASAN_OPTIONS",
-                    "value" : "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+                    "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
                 }
             ],
             "externalConsole": true
@@ -36,8 +36,7 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}\\build",
-            "env" : {
-            },
+            "env": {},
             "environment": [
                 {
                     "name": "ANDROID_SDK_ROOT",
@@ -63,7 +62,25 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--gtest_break_on_failure"
+                "-kernel",
+                "/usr/local/google/home/jansene/Downloads/raspbian/kernel-qemu-4.14.79-stretch",
+                "-dtb",
+                "/usr/local/google/home/jansene/Downloads/raspbian/versatile-pb.dtb",
+                "-m",
+                "256",
+                "-M",
+                "versatilepb",
+                "-cpu",
+                "arm1176",
+                "-serial",
+                "stdio",
+                "-append",
+                "rw console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 loglevel=8 rootwait fsck.repair=yes memtest=1",
+                "-drive",
+                "file=/usr/local/google/home/jansene/Downloads/raspbian/2018-11-13-raspbian-stretch-lite.img,format=raw",
+                "-redir",
+                "tcp:5022::22",
+                "-no-reboot"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -97,8 +114,8 @@
             "type": "lldb",
             "request": "attach",
             // Resolved by CMake Tools:
-            "program": "${command:cmake.launchTargetPath}",
-            "pid": 0, // replace pid with your real pid
+            "program": "/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/build/qemu-upstream-aarch64",
+            "pid": 80501, // replace pid with your real pid
             // Ignore signal SIGUSR1
             "postRunCommands": [
                 "pro hand -p true -s false SIGUSR1"

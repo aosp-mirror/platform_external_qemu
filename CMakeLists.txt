@@ -23,7 +23,7 @@ set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any
 set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-
+set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
@@ -40,11 +40,15 @@ else()
   message(STATUS "Uploading symbols to ${ANDROID_SYMBOL_URL}")
 endif()
 
-if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
-  message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling.")
+if(ANDROID_EXTRACT_SYMBOLS
+   AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG
+   AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  message(
+    WARNING
+      "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling."
+    )
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
-
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
@@ -175,19 +179,17 @@ add_c_flag("-g")
 # void * or to unambiguous base classes.
 #
 # For msvc build, the msvc C++ headers are using RTTI features (typeid) so have cannot disable it.
-if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*" AND NOT MSVC)
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
   add_cxx_flag("-fno-rtti")
 endif()
 
-if(NOT MSVC)
-  # Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
-  # Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-
-  # exceptions automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to
-  # diagnose whether the objects being linked contain exceptions. If an exception propagates into a function that has
-  # been compiled without exceptions support, then the program terminates.
-  add_cxx_flag("-fno-exceptions")
-  add_cxx_flag("-Wno-invalid-offsetof")
-endif()
+# Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
+# Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-
+# exceptions automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to
+# diagnose whether the objects being linked contain exceptions. If an exception propagates into a function that has
+# been compiled without exceptions support, then the program terminates.
+add_cxx_flag("-fno-exceptions")
+add_cxx_flag("-Wno-invalid-offsetof")
 
 # Ensure that <inttypes.h> always defines all interesting macros.
 add_definitions("-D__STDC_LIMIT_MACROS=1" "-D__STDC_FORMAT_MACROS=1")
@@ -235,6 +237,7 @@ set(
   )
 
 prebuilt(GLIB2)
+prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
@@ -294,7 +297,6 @@ target_compile_options(android-qemu-deps
                                  # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
                                  "-fno-strict-aliasing")
 
-if(NOT MSVC)
   target_compile_options(android-qemu-deps
                          INTERFACE # This option instructs the compiler to assume that signed arithmetic
                                    # overflow of addition, subtraction and multiplication wraps around using
@@ -313,7 +315,6 @@ if(NOT MSVC)
                                    # variable definitions this way.
                                    # Remove this and you'll get all sorts of fun linker issues.
                                    "-fno-common")
-endif()
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN zlib)
 
@@ -370,10 +371,9 @@ android_target_compile_options(android-qemu-deps
                                "-Wno-int-to-void-pointer-cast"
                                "-Werror=implicit-function-declaration"
                                "-Wno-unused-variable"
+                               "-mms-bitfields"
                                "-mcx16")
-if(NOT MSVC)
-  android_target_compile_options(android-qemu-deps windows_msvc INTERFACE "-mms-bitfields")
-endif()
+
 android_target_compile_options(android-qemu-deps
                                windows-x86
                                INTERFACE
@@ -434,13 +434,12 @@ target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
-  # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections
-  # which the MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown.
-  # The workaround is to compile mail-loop.c with all optimizations enabled.
+  # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections which the
+  # MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown. The workaround is to
+  # compile mail-loop.c with all optimizations enabled.
   set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_FLAGS "-O2")
   set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_DEFINITIONS "NDEBUG=1")
 endif()
-
 
 android_add_library(libqemu2-util)
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
@@ -461,12 +460,21 @@ target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-de
 android_install_exe(qemu-img .)
 
 # Create the qemu targets.
-android_add_qemu_executable(i386 i386 x86 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
-android_add_qemu_executable(armel arm arm "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
-android_add_qemu_headless_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_headless_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+android_add_qemu_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+android_add_qemu_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+android_add_qemu_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+android_add_qemu_headless_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+android_add_qemu_headless_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+
+# and the upstream qemu targets, if desired.
+if(QEMU_UPSTREAM)
+  message(STATUS "Building upstream qemu.")
+  android_add_qemu_upstream_executable(i386  "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_upstream_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_upstream_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_upstream_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+endif()
 
 # The tests currently work on linux only.
 if(ANDROID_TARGET_TAG MATCHES "linux.*")

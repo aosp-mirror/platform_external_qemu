@@ -527,7 +527,7 @@ function(android_complete_archive LIBCMD LIBNAME)
   endif()
 endfunction()
 
-# Constructs the qemu executable.
+# Constructs the upstream qemu executable.
 #
 # ANDROID_AARCH The android architecture name
 # QEMU_AARCH The qemu architecture name.
@@ -536,96 +536,133 @@ endfunction()
 # CPU The target cpu architecture used by qemu
 #
 # (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
-function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
+
+
+function(android_build_qemu_variant)
+    # Parse arguments
+    set(options INSTALL)
+    set(oneValueArgs CPU EXE)
+    set(multiValueArgs SOURCES DEFINITIONS LIBRARIES)
+    cmake_parse_arguments(qemu_build "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  ## translate various names.. because of inconsistent naming in the code base..
+  if (qemu_build_CPU STREQUAL "x86_64")
+     set(CPU "i386")
+     set(QEMU_AARCH "x86_64")
+     set(CONFIG_AARCH "x86_64")
+  elseif(qemu_build_CPU STREQUAL "i386")
+    set(CPU "i386")
+    set(QEMU_AARCH "i386")
+    set(CONFIG_AARCH "x86")
+  elseif(qemu_build_CPU STREQUAL "aarch64")
+    set(CPU "arm")
+    set(QEMU_AARCH "aarch64")
+    set(CONFIG_AARCH "arm64")
+  elseif(qemu_build_CPU STREQUAL "armel")
+    set(CPU "arm")
+    set(QEMU_AARCH "arm")
+    set(CONFIG_AARCH "arm")
+  else()
+    message(FATAL_ERROR "Unknown cpu type.")
+  endif()
+
   # Workaround b/121393952, older cmake does not have proper object archives
-  if (NOT MSVC)
+  if(NOT MSVC)
     android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
   endif()
-  add_executable(qemu-system-${ANDROID_AARCH}
-                 android-qemu2-glue/main.cpp
-                 vl.c
-                 ${STUBS}
-                 ${qemu-system-${QEMU_AARCH}_sources}
-                 ${qemu-system-${QEMU_AARCH}_generated_sources})
-  target_include_directories(qemu-system-${ANDROID_AARCH}
+  set(${qemu_build_EXE}_src ${qemu_build_SOURCES}
+      ${qemu-system-${QEMU_AARCH}_sources}
+      ${qemu-system-${QEMU_AARCH}_generated_sources}
+  )
+  android_add_executable(${qemu_build_EXE})
+  target_include_directories(${qemu_build_EXE}
                              PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
-  target_compile_definitions(qemu-system-${ANDROID_AARCH}
-                             PRIVATE
-                             -DNEED_CPU_H
-                             -DCONFIG_ANDROID
-                             -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
-                             -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
-  target_link_libraries(qemu-system-${ANDROID_AARCH}
-                        PRIVATE android-qemu-deps
-                                ${QEMU_COMPLETE_LIB}
-                                libqemu2-glue
-                                libqemu2-util
-                                emulator-libui
-                                android-emu
-                                OpenGLESDispatch
-                                ${VIRGLRENDERER_LIBRARIES}
-                                android-qemu-deps)
+  target_compile_definitions(${qemu_build_EXE} PRIVATE ${qemu_build_DEFINITIONS})
+  target_link_libraries(${qemu_build_EXE}
+                        PRIVATE ${QEMU_COMPLETE_LIB} ${qemu_build_LIBRARIES})
+
   if(MSVC)
     # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
     # supported by newer cmake versions
-    target_link_libraries(qemu-system-${ANDROID_AARCH} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
-    set_target_properties(qemu-system-${ANDROID_AARCH} PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
+    target_link_libraries(${qemu_build_EXE} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
+    set_target_properties(${qemu_build_EXE} PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
   endif()
-  # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
-  add_dependencies(qemu-system-${ANDROID_AARCH} qemu2-common)
+  # Make the common dependency explicit, as some generators might not detect it properly (Xcode/MSVC native)
+  add_dependencies(${qemu_build_EXE} qemu2-common)
   # XCode bin places this not where we want this...
-  set_target_properties(qemu-system-${ANDROID_AARCH}
-                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
-  android_install_exe(qemu-system-${ANDROID_AARCH} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+  if (qemu_build_INSTALL)
+    set_target_properties(${qemu_build_EXE}
+                          PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+    android_install_exe(${qemu_build_EXE} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+  endif()
 endfunction()
 
-function(android_add_qemu_headless_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
-  # Workaround b/121393952, older cmake does not have proper object archives
-  if (NOT MSVC)
-    android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
-  endif()
-  add_executable(qemu-system-${ANDROID_AARCH}-headless
-                 android-qemu2-glue/main.cpp
-                 vl.c
-                 ${STUBS}
-                 ${qemu-system-${QEMU_AARCH}_sources}
-                 ${qemu-system-${QEMU_AARCH}_generated_sources})
-  target_include_directories(qemu-system-${ANDROID_AARCH}-headless
-                             PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
-  target_compile_definitions(qemu-system-${ANDROID_AARCH}-headless
-                             PRIVATE
-                             -DNEED_CPU_H
-                             -DCONFIG_ANDROID
-                             -DCONFIG_HEADLESS
-                             -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
-                             -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
-  target_link_libraries(qemu-system-${ANDROID_AARCH}-headless
-                        PRIVATE android-qemu-deps
-                                ${QEMU_COMPLETE_LIB}
-                                libqemu2-glue
-                                libqemu2-util
-                                android-emu
-                                emulator-libui-headless
-                                OpenGLESDispatch
-                                ${VIRGLRENDERER_LIBRARIES}
-                                android-qemu-deps)
-  if(MSVC)
-    # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
-    # supported by newer cmake versions
-    target_link_libraries(qemu-system-${ANDROID_AARCH}-headless PRIVATE $<TARGET_OBJECTS:qemu2-common>)
-    set_target_properties(qemu-system-${ANDROID_AARCH}-headless PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
-  endif()
-  # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
-  add_dependencies(qemu-system-${ANDROID_AARCH}-headless qemu2-common)
-  # XCode bin places this not where we want this...
-  set_target_properties(qemu-system-${ANDROID_AARCH}-headless
-                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
-  android_install_exe(qemu-system-${ANDROID_AARCH}-headless "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+# Constructs the qemu executable.
+#
+# ANDROID_AARCH The android architecture name
+# STUBS The set of stub sources to use.
+function(android_add_qemu_executable ANDROID_AARCH STUBS)
+  android_build_qemu_variant(INSTALL
+                             EXE qemu-system-${ANDROID_AARCH}
+                             CPU ${ANDROID_AARCH}
+                             SOURCES android-qemu2-glue/main.cpp vl.c ${STUBS}
+                             DEFINITIONS -DNEED_CPU_H
+                                         -DCONFIG_ANDROID
+                                         -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
+                                         -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}
+                             LIBRARIES   libqemu2-glue
+                                         libqemu2-util
+                                         emulator-libui
+                                         android-emu
+                                         OpenGLESDispatch
+                                         android-qemu-deps)
 endfunction()
 
-# Copies a
+
+# Constructs the qemu headless executable.
+#
+# ANDROID_AARCH The android architecture name
+# STUBS The set of stub sources to use.
+function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
+  android_build_qemu_variant(INSTALL
+                             EXE qemu-system-${ANDROID_AARCH}-headless
+                             CPU ${ANDROID_AARCH}
+                             SOURCES android-qemu2-glue/main.cpp vl.c ${STUBS}
+                             DEFINITIONS -DNEED_CPU_H
+                                         -DCONFIG_ANDROID
+                                         -DCONFIG_HEADLESS
+                                         -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
+                                         -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}
+                             LIBRARIES  libqemu2-glue
+                                        libqemu2-util
+                                        android-emu
+                                        emulator-libui-headless
+                                        OpenGLESDispatch
+                                        android-qemu-deps)
+endfunction()
+
+
+# Constructs the qemu upstream executable.
+#
+# ANDROID_AARCH The android architecture name
+# STUBS The set of stub sources to use.
+function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
+  android_build_qemu_variant( #INSTALL We do not install this target.
+                             EXE qemu-upstream-${ANDROID_AARCH}
+                             CPU ${ANDROID_AARCH}
+                             SOURCES vl.c ${STUBS}
+                             DEFINITIONS -DNEED_CPU_H
+                             LIBRARIES   android-emu
+                                         libqemu2-glue
+                                         libqemu2-util
+                                         android-emu
+                                         SDL2::SDL2
+                                         android-qemu-deps)
+endfunction()
+
+
+# Copies a shared library
 function(android_copy_shared_lib TGT SHARED_LIB NAME)
   android_copy_file(${TGT} $<TARGET_FILE:${SHARED_LIB}>
                     $<TARGET_FILE_DIR:${TGT}>/lib64/${NAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
