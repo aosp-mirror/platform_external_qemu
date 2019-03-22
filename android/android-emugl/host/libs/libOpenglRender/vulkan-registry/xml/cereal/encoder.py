@@ -96,6 +96,8 @@ ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
     "vkGetPhysicalDeviceMemoryProperties",
     "vkGetPhysicalDeviceMemoryProperties2",
     "vkGetPhysicalDeviceMemoryProperties2KHR",
+    "vkCreateDescriptorUpdateTemplate",
+    "vkCreateDescriptorUpdateTemplateKHR",
 ]
 
 ENCODER_EXPLICIT_FLUSHED_APIS = [
