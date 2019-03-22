@@ -8938,6 +8938,8 @@ void transform_fromhost_VkImportPhysicalAddressGOOGLE(
 }
 
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
 void transform_tohost_extension_struct(
     VkDecoderGlobalState* resourceTracker,
     void* structExtension_out)

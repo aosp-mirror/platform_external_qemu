@@ -360,6 +360,43 @@ public:
             VkSemaphore semaphore,
             const VkAllocationCallbacks* pAllocator);
 
+    // Descriptor update templates
+    VkResult on_vkCreateDescriptorUpdateTemplate(
+        VkDevice boxed_device,
+        const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate);
+
+    VkResult on_vkCreateDescriptorUpdateTemplateKHR(
+        VkDevice boxed_device,
+        const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate);
+
+    void on_vkDestroyDescriptorUpdateTemplate(
+        VkDevice boxed_device,
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+        const VkAllocationCallbacks* pAllocator);
+
+    void on_vkDestroyDescriptorUpdateTemplateKHR(
+        VkDevice boxed_device,
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+        const VkAllocationCallbacks* pAllocator);
+
+    void on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
+        VkDevice boxed_device,
+        VkDescriptorSet descriptorSet,
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+        uint32_t imageInfoCount,
+        uint32_t bufferInfoCount,
+        uint32_t bufferViewCount,
+        const uint32_t* pImageInfoEntryIndices,
+        const uint32_t* pBufferInfoEntryIndices,
+        const uint32_t* pBufferViewEntryIndices,
+        const VkDescriptorImageInfo* pImageInfos,
+        const VkDescriptorBufferInfo* pBufferInfos,
+        const VkBufferView* pBufferViews);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

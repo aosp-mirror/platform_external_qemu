@@ -2015,5 +2015,7 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
 
 } // namespace goldfish_vk

@@ -282,6 +282,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_color_buffer
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -756,6 +758,9 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterImageColorBufferGOOGLE");
     out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterBufferColorBufferGOOGLE");
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1267,6 +1272,9 @@ void init_vulkan_dispatch_from_instance(
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterImageColorBufferGOOGLE");
     out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterBufferColorBufferGOOGLE");
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1740,6 +1748,9 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterImageColorBufferGOOGLE");
     out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterBufferColorBufferGOOGLE");
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
 #endif
 }
 

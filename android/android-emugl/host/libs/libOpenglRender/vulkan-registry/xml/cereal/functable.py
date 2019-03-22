@@ -40,6 +40,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkGetMemoryAndroidHardwareBufferANDROID",
     "vkCreateSamplerYcbcrConversion",
     "vkCreateSamplerYcbcrConversionKHR",
+    "vkUpdateDescriptorSetWithTemplate",
 ]
 
 SUCCESS_VAL = {

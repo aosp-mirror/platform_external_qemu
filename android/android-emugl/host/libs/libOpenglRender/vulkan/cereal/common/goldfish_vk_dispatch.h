@@ -628,6 +628,9 @@ PFN_vkMapMemoryIntoAddressSpaceGOOGLE vkMapMemoryIntoAddressSpaceGOOGLE;
 PFN_vkRegisterImageColorBufferGOOGLE vkRegisterImageColorBufferGOOGLE;
 PFN_vkRegisterBufferColorBufferGOOGLE vkRegisterBufferColorBufferGOOGLE;
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE vkUpdateDescriptorSetWithTemplateSizedGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk
