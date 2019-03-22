@@ -27,10 +27,12 @@
 #endif
 
 namespace android {
+
 namespace base {
 
 class CpuUsage;
 class MemoryTracker;
+class GLObjectCounter;
 
 } // namespace base
 } // namespace android
@@ -52,6 +54,11 @@ namespace emugl {
     // Extension string query
     EMUGL_COMMON_API bool hasExtension(const char* extensionsStr,
                       const char* wantedExtension);
+
+    // GL object counter get/set
+    EMUGL_COMMON_API void setGLObjectCounter(
+            android::base::GLObjectCounter* counter);
+    EMUGL_COMMON_API android::base::GLObjectCounter* getGLObjectCounter();
 
     // CPU usage get/set.
     EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);

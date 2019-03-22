@@ -18,7 +18,8 @@
 
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/ObjectNameSpace.h"
-#include "emugl/common/gl_object_counter.h"
+#include "android/base/GLObjectCounter.h"
+#include "emugl/common/misc.h"
 #include "emugl/common/mutex.h"
 
 static constexpr int toIndex(NamedObjectType type) {
@@ -85,7 +86,7 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
             default:
                 m_globalName = 0;
         }
-        GL_OBJECT_COUNT_INC(toIndex(genNameInfo.m_type));
+        emugl::getGLObjectCounter()->incCount(toIndex(genNameInfo.m_type));
     }
 }
 
@@ -127,6 +128,6 @@ NamedObject::~NamedObject() {
     default:
         break;
     }
-    GL_OBJECT_COUNT_DEC(toIndex(m_type));
+    emugl::getGLObjectCounter()->decCount(toIndex(m_type));
 }
 
