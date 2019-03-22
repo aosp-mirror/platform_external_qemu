@@ -17,3 +17,7 @@ target_link_libraries(hello_world_asm_test PRIVATE hello_world_asm_lib gmock_mai
 
 add_subdirectory(end2end/test_crash_symbols)
 
+set(wincrash_src wincrash.cpp)
+android_add_test(wincrash)
+target_include_directories(wincrash PRIVATE ${ANDROID_QEMU2_TOP_DIR})
+target_link_libraries(wincrash PRIVATE gmock_main)
