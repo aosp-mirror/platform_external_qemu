@@ -2082,6 +2082,70 @@ public:
         pExternalSemaphoreProperties->externalSemaphoreFeatures = 0;
     }
 
+    VkResult on_vkCreateDescriptorUpdateTemplate(
+        VkDevice boxed_device,
+        const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        return vk->vkCreateDescriptorUpdateTemplate(
+            device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
+    }
+
+    VkResult on_vkCreateDescriptorUpdateTemplateKHR(
+        VkDevice boxed_device,
+        const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        return vk->vkCreateDescriptorUpdateTemplateKHR(
+            device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
+    }
+
+    void on_vkDestroyDescriptorUpdateTemplate(
+        VkDevice boxed_device,
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+        const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        vk->vkDestroyDescriptorUpdateTemplate(
+            device, descriptorUpdateTemplate, pAllocator);
+    }
+
+    void on_vkDestroyDescriptorUpdateTemplateKHR(
+        VkDevice boxed_device,
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+        const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        vk->vkDestroyDescriptorUpdateTemplateKHR(
+            device, descriptorUpdateTemplate, pAllocator);
+    }
+
+    void on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
+        VkDevice boxed_device,
+        VkDescriptorSet descriptorSet,
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+        uint32_t imageInfoCount,
+        uint32_t bufferInfoCount,
+        uint32_t bufferViewCount,
+        const uint32_t* pImageInfoEntryIndices,
+        const uint32_t* pBufferInfoEntryIndices,
+        const uint32_t* pBufferViewEntryIndices,
+        const VkDescriptorImageInfo* pImageInfos,
+        const VkDescriptorBufferInfo* pBufferInfos,
+        const VkBufferView* pBufferViews) {
+        // TODO
+    }
+
     // TODO: Support more than one kind of guest external memory handle type
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
 
@@ -2637,6 +2701,13 @@ private:
             VK_EXT_MEMORY_HANDLE_INVALID;
     };
 
+    struct DescriptorUpdateTemplateInfo {
+        std::vector<VkDescriptorUpdateTemplateEntry>
+            linearizedTemplateEntries;
+        // Preallocated pData
+        std::vector<uint8_t> pData;
+    };
+
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -2674,6 +2745,7 @@ private:
     }
     std::unordered_map<int, VkSemaphore> mExternalSemaphoresById;
 #endif
+    std::unordered_map<VkDescriptorUpdateTemplate, DescriptorUpdateTemplateInfo> mDescriptorUpdateTemplateInfo;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -3162,6 +3234,69 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     return mImpl->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
             physicalDevice, pExternalSemaphoreInfo,
             pExternalSemaphoreProperties);
+}
+
+// Descriptor update templates
+VkResult VkDecoderGlobalState::on_vkCreateDescriptorUpdateTemplate(
+    VkDevice boxed_device,
+    const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate) {
+    return mImpl->on_vkCreateDescriptorUpdateTemplate(
+        boxed_device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateDescriptorUpdateTemplateKHR(
+    VkDevice boxed_device,
+    const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate) {
+    return mImpl->on_vkCreateDescriptorUpdateTemplateKHR(
+        boxed_device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
+}
+
+void VkDecoderGlobalState::on_vkDestroyDescriptorUpdateTemplate(
+    VkDevice boxed_device,
+    VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+    const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyDescriptorUpdateTemplate(
+        boxed_device, descriptorUpdateTemplate, pAllocator);
+}
+
+void VkDecoderGlobalState::on_vkDestroyDescriptorUpdateTemplateKHR(
+    VkDevice boxed_device,
+    VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+    const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyDescriptorUpdateTemplateKHR(
+        boxed_device, descriptorUpdateTemplate, pAllocator);
+}
+
+void VkDecoderGlobalState::on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
+    VkDevice boxed_device,
+    VkDescriptorSet descriptorSet,
+    VkDescriptorUpdateTemplate descriptorUpdateTemplate,
+    uint32_t imageInfoCount,
+    uint32_t bufferInfoCount,
+    uint32_t bufferViewCount,
+    const uint32_t* pImageInfoEntryIndices,
+    const uint32_t* pBufferInfoEntryIndices,
+    const uint32_t* pBufferViewEntryIndices,
+    const VkDescriptorImageInfo* pImageInfos,
+    const VkDescriptorBufferInfo* pBufferInfos,
+    const VkBufferView* pBufferViews) {
+    mImpl->on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
+        boxed_device,
+        descriptorSet,
+        descriptorUpdateTemplate,
+        imageInfoCount,
+        bufferInfoCount,
+        bufferViewCount,
+        pImageInfoEntryIndices,
+        pBufferInfoEntryIndices,
+        pBufferViewEntryIndices,
+        pImageInfos,
+        pBufferInfos,
+        pBufferViews);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

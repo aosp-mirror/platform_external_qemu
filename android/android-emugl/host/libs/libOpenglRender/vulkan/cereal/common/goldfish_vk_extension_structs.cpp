@@ -278,6 +278,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_color_buffer
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
 uint32_t goldfish_vk_struct_type(
     const void* structExtension)
 {
