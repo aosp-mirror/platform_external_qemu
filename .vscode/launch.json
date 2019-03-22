@@ -10,7 +10,23 @@
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "--gtest_break_on_failure"
+                "-kernel","C:\\Users\\jansene\\Downloads\\kernel-qemu-4.14.79-stretch",
+                "-dtb","C:\\Users\\jansene\\Downloads\\versatile-pb.dtb",
+                "-m",
+                "256",
+                "-M",
+                "versatilepb",
+                "-cpu",
+                "arm1176",
+                "-serial",
+                "stdio",
+                "-append",
+                "rw console=ttyAMA0 root=/dev/sda2 rootfstype=ext4  loglevel=8 rootwait fsck.repair=yes memtest=1"
+                "-drive",
+                "file=C:\\Users\\jansene\\Downloads\\2018-11-13-raspbian-stretch-lite.img,format=raw",
+                "-redir",
+                "tcp:5022::22"
+                //  "--gtest_break_on_failure"
                 // ,"--gtest_filter=AutomationControllerTest.InvalidInput"
             ],
             "stopAtEntry": false,
@@ -22,7 +38,7 @@
                     "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
                 }
             ],
-            "externalConsole": true
+            "externalConsole": false
         },
         {
             "name": "(Windows) Emulator Launch",
@@ -35,12 +51,12 @@
                 "-show-kernel"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}\\build",
+            "cwd": "${workspaceFolder}\\\\build",
             "env": {},
             "environment": [
                 {
                     "name": "ANDROID_SDK_ROOT",
-                    "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
+                    "value": "C:\\\\Users\\\\EmuTest2\\\\AppData\\\\Local\\\\Android\\\\Sdk"
                 },
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 {
@@ -49,7 +65,7 @@
                 },
                 {
                     "name": "PATH",
-                    "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
+                    "value": "${workspaceFolder}\\\\build\\\\lib64;${workspaceFolder}\\\\build\\\\lib64\\\\qt\\\\lib;;${workspaceFolder}\\\\build\\\\lib64\\\\gles_swiftshaders;"
                 }
             ],
             "externalConsole": false
