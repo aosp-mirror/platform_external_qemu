@@ -1936,8 +1936,8 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
         if (currTime - m_statsStartTime >= 1000) {
             if (m_fpsStats) {
                 float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
-                printf("FPS: %5.3f \n", (float)m_statsNumFrames / dt); 
-                m_statsNumFrames = 0;   
+                printf("FPS: %5.3f \n", (float)m_statsNumFrames / dt);
+                m_statsNumFrames = 0;
             }
             m_statsStartTime = currTime;
             if (m_perfStats) {

@@ -11,15 +11,28 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
+
+#include <memory>
+#include <string>
 #include <vector>
-#include "android/utils/compiler.h"
-ANDROID_BEGIN_HEADER
-void opengl_object_count_inc(int type);
-void opengl_object_count_dec(int type);
-ANDROID_END_HEADER
 
 namespace android {
-namespace opengl {
-void getOpenGLObjectCounts(std::vector<int>* vec);
-}  // namespace opengl
+namespace base {
+class GLObjectCounter {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(GLObjectCounter);
+
+public:
+    GLObjectCounter();
+    static GLObjectCounter* get();
+    void incCount(size_t type);
+    void decCount(size_t type);
+    std::vector<size_t> getCounts();
+    std::string printUsage();
+
+private:
+    class Impl;
+    std::unique_ptr<Impl> mImpl;
+};
+}  // namespace base
 }  // namespace android
