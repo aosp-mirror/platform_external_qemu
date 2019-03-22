@@ -14272,6 +14272,117 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+            case OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE:
+            {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkUpdateDescriptorSetWithTemplateSizedGOOGLE\n");;
+                }
+                VkDevice device;
+                VkDescriptorSet descriptorSet;
+                VkDescriptorUpdateTemplate descriptorUpdateTemplate;
+                uint32_t imageInfoCount;
+                uint32_t bufferInfoCount;
+                uint32_t bufferViewCount;
+                const uint32_t* pImageInfoEntryIndices;
+                const uint32_t* pBufferInfoEntryIndices;
+                const uint32_t* pBufferViewEntryIndices;
+                const VkDescriptorImageInfo* pImageInfos;
+                const VkDescriptorBufferInfo* pBufferInfos;
+                const VkBufferView* pBufferViews;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_813;
+                vkReadStream->read((uint64_t*)&cgen_var_813, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_813, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                uint64_t cgen_var_814;
+                vkReadStream->read((uint64_t*)&cgen_var_814, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_814, (VkDescriptorSet*)&descriptorSet, 1);
+                uint64_t cgen_var_815;
+                vkReadStream->read((uint64_t*)&cgen_var_815, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_815, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
+                vkReadStream->read((uint32_t*)&imageInfoCount, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&bufferInfoCount, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&bufferViewCount, sizeof(uint32_t));
+                // WARNING PTR CHECK
+                pImageInfoEntryIndices = (const uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pImageInfoEntryIndices)
+                {
+                    vkReadStream->alloc((void**)&pImageInfoEntryIndices, ((imageInfoCount)) * sizeof(const uint32_t));
+                    vkReadStream->read((uint32_t*)pImageInfoEntryIndices, ((imageInfoCount)) * sizeof(const uint32_t));
+                }
+                // WARNING PTR CHECK
+                pBufferInfoEntryIndices = (const uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pBufferInfoEntryIndices)
+                {
+                    vkReadStream->alloc((void**)&pBufferInfoEntryIndices, ((bufferInfoCount)) * sizeof(const uint32_t));
+                    vkReadStream->read((uint32_t*)pBufferInfoEntryIndices, ((bufferInfoCount)) * sizeof(const uint32_t));
+                }
+                // WARNING PTR CHECK
+                pBufferViewEntryIndices = (const uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pBufferViewEntryIndices)
+                {
+                    vkReadStream->alloc((void**)&pBufferViewEntryIndices, ((bufferViewCount)) * sizeof(const uint32_t));
+                    vkReadStream->read((uint32_t*)pBufferViewEntryIndices, ((bufferViewCount)) * sizeof(const uint32_t));
+                }
+                // WARNING PTR CHECK
+                pImageInfos = (const VkDescriptorImageInfo*)(uintptr_t)vkReadStream->getBe64();
+                if (pImageInfos)
+                {
+                    vkReadStream->alloc((void**)&pImageInfos, ((imageInfoCount)) * sizeof(const VkDescriptorImageInfo));
+                    for (uint32_t i = 0; i < (uint32_t)((imageInfoCount)); ++i)
+                    {
+                        unmarshal_VkDescriptorImageInfo(vkReadStream, (VkDescriptorImageInfo*)(pImageInfos + i));
+                    }
+                }
+                // WARNING PTR CHECK
+                pBufferInfos = (const VkDescriptorBufferInfo*)(uintptr_t)vkReadStream->getBe64();
+                if (pBufferInfos)
+                {
+                    vkReadStream->alloc((void**)&pBufferInfos, ((bufferInfoCount)) * sizeof(const VkDescriptorBufferInfo));
+                    for (uint32_t i = 0; i < (uint32_t)((bufferInfoCount)); ++i)
+                    {
+                        unmarshal_VkDescriptorBufferInfo(vkReadStream, (VkDescriptorBufferInfo*)(pBufferInfos + i));
+                    }
+                }
+                // WARNING PTR CHECK
+                pBufferViews = (const VkBufferView*)(uintptr_t)vkReadStream->getBe64();
+                if (pBufferViews)
+                {
+                    vkReadStream->alloc((void**)&pBufferViews, ((bufferViewCount)) * sizeof(const VkBufferView));
+                    if (((bufferViewCount)))
+                    {
+                        uint64_t* cgen_var_822;
+                        vkReadStream->alloc((void**)&cgen_var_822, ((bufferViewCount)) * 8);
+                        vkReadStream->read((uint64_t*)cgen_var_822, ((bufferViewCount)) * 8);
+                        vkReadStream->handleMapping()->mapHandles_u64_VkBufferView(cgen_var_822, (VkBufferView*)pBufferViews, ((bufferViewCount)));
+                    }
+                }
+                if (pImageInfos)
+                {
+                    for (uint32_t i = 0; i < (uint32_t)((imageInfoCount)); ++i)
+                    {
+                        transform_tohost_VkDescriptorImageInfo(m_state, (VkDescriptorImageInfo*)(pImageInfos + i));
+                    }
+                }
+                if (pBufferInfos)
+                {
+                    for (uint32_t i = 0; i < (uint32_t)((bufferInfoCount)); ++i)
+                    {
+                        transform_tohost_VkDescriptorBufferInfo(m_state, (VkDescriptorBufferInfo*)(pBufferInfos + i));
+                    }
+                }
+                m_state->on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(device, descriptorSet, descriptorUpdateTemplate, imageInfoCount, bufferInfoCount, bufferViewCount, pImageInfoEntryIndices, pBufferInfoEntryIndices, pBufferViewEntryIndices, pImageInfos, pBufferInfos, pBufferViews);
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;

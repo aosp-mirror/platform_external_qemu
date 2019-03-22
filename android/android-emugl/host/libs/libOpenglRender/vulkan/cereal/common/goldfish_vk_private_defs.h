@@ -114,6 +114,8 @@ typedef struct {
 typedef VkResult (VKAPI_PTR *PFN_vkRegisterImageColorBufferGOOGLE)(VkDevice device, VkImage image, uint32_t colorBuffer);
 typedef VkResult (VKAPI_PTR *PFN_vkRegisterBufferColorBufferGOOGLE)(VkDevice device, VkBuffer image, uint32_t colorBuffer);
 
+#define VK_GOOGLE_sized_descriptor_update_template 1
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

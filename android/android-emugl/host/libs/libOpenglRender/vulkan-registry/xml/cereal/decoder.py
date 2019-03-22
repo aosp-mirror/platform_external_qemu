@@ -330,6 +330,9 @@ custom_decodes = {
     # VK_GOOGLE_color_buffer
     "vkRegisterImageColorBufferGOOGLE" : emit_global_state_wrapped_decoding,
     "vkRegisterBufferColorBufferGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # Descriptor update templates
+    "vkUpdateDescriptorSetWithTemplateSizedGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

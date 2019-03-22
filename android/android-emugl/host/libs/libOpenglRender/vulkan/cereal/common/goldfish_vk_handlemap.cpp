@@ -4744,6 +4744,8 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 }
 
 #endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
 void handlemap_extension_struct(
     VulkanHandleMapping* handlemap,
     void* structExtension_out)
