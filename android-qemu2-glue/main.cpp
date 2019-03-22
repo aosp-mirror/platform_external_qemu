@@ -938,7 +938,7 @@ extern "C" int main(int argc, char** argv) {
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
-                    "custom", 28, "x86_64", "x86_64", true, AVD_PHONE,
+                    "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
                     // TODO: Have a way to communicate GPU mode via plain QEMU command line args
                     "host", opts->no_window,
                     // LCD width, height, DPI, orientation
