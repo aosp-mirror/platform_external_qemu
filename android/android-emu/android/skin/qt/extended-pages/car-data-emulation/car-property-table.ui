@@ -32,9 +32,6 @@
    <property name="showGrid">
     <bool>true</bool>
    </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
    <property name="gridStyle">
     <enum>Qt::SolidLine</enum>
    </property>
