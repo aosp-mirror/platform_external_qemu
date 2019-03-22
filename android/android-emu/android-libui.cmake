@@ -86,6 +86,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
+    android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp
     android/skin/qt/extended-pages/car-data-page.cpp
     android/skin/qt/extended-pages/cellular-page.cpp
     android/skin/qt/extended-pages/dpad-page.cpp
