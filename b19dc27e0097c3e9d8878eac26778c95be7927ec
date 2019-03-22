@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70986a51_2469a8d1",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-22T23:27:31Z",
+      "side": 1,
+      "message": "Not critical for now as we\u0027re using Swiftshader in your env which supports es 3, but we\u0027ll have to have a non-es3 path that doesn\u0027t use VAO at some point.",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 35
+      },
+      "revId": "b19dc27e0097c3e9d8878eac26778c95be7927ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf651aa1_255b3510",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-22T23:27:31Z",
+      "side": 1,
+      "message": "VAO needs to be a member deleted w/ mGles-\u003eglBindVertexArray(0); mGles2-\u003eglDeleteVertexArrays(mVao)",
+      "revId": "b19dc27e0097c3e9d8878eac26778c95be7927ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "816d6be0_fab3d50a",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-22T23:27:31Z",
+      "side": 1,
+      "message": "if the frame dimensions are bigger than mREnderWidth/mRenderHeight, this call will fail, and you\u0027ll need to account for that here via possibly using glTexImage2D instead, if the dimensions get too big.",
+      "range": {
+        "startLine": 187,
+        "startChar": 0,
+        "endLine": 189,
+        "endChar": 38
+      },
+      "revId": "b19dc27e0097c3e9d8878eac26778c95be7927ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d67dd2c_287d007e",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-22T23:27:31Z",
+      "side": 1,
+      "message": "Since you\u0027re using a VAO, you can do this once in ::initialize as they sticky to the VAO state.",
+      "range": {
+        "startLine": 191,
+        "startChar": 0,
+        "endLine": 202,
+        "endChar": 62
+      },
+      "revId": "b19dc27e0097c3e9d8878eac26778c95be7927ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
