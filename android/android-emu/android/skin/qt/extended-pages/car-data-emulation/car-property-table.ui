@@ -45,7 +45,7 @@
     <bool>false</bool>
    </attribute>
    <property name="columnCount">
-    <number>7</number>
+    <number>6</number>
    </property>
    <attribute name="horizontalHeaderDefaultSectionSize">
     <number>130</number>
