@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "27aeb578_849aabc4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-22T22:29:01Z",
+      "side": 1,
+      "message": "The values are process through: CarDataPage::onReceiveData -\u003e CarPropertyTable::ProcessMsg -\u003e carpropertyutils:getValueString, and for Int32_vec and int64_vec, values are always separated by \";\" in carpropertyutils::int32VecToString and carpropertyutils::int64VecToString;",
+      "parentUuid": "08d4a1b6_c31f2583",
+      "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3067f504_c6f8a043",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
         "patchSetId": 7
@@ -33,6 +51,24 @@
       "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3b54452_14400b07",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-22T22:29:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3067f504_c6f8a043",
+      "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5c773d80_7377878d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-22T22:29:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce4acad3_80a9283e",
+      "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "330adb77_5d70100d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
         "patchSetId": 7
@@ -67,6 +121,24 @@
       "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6553583_2e3542fd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-22T22:29:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "330adb77_5d70100d",
+      "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9d815982_96c198ce",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-22T22:29:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc5e0765_428057e7",
+      "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e18c8ac_354b832b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
         "patchSetId": 7
@@ -101,6 +191,24 @@
       "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd919f31_6b7d695c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-22T22:29:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e18c8ac_354b832b",
+      "revId": "7b5c3ac45ee2e56a0d4a67dd5a51d526f8ee70ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
