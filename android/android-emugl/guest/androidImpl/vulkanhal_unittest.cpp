@@ -22,6 +22,7 @@
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vk_android_native_buffer.h>
 
+#include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -30,6 +31,7 @@
 #include <android/hardware_buffer.h>
 
 #include <atomic>
+#include <random>
 #include <memory>
 #include <vector>
 
@@ -836,6 +838,99 @@ TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_Dedicated_Import) {
     vk->vkDestroyImage(mDevice, testAhbImage, nullptr);
 
     AHardwareBuffer_release(testBuf);
+}
+
+// Test many host visible allocations.
+TEST_F(VulkanHalTest, HostVisibleAllocations) {
+    static constexpr VkDeviceSize kTestAllocSizesSmall[] =
+        { 4, 5, 6, 16, 32, 37, 64, 255, 256, 267,
+          1024, 1023, 1025, 4095, 4096,
+          4097, 16333, };
+
+    static constexpr size_t kNumSmallAllocSizes = android::base::arraySize(kTestAllocSizesSmall);
+    static constexpr size_t kNumTrialsSmall = 1000;
+
+    static constexpr VkDeviceSize kTestAllocSizesLarge[] =
+        { 1048576, 1048577, 1048575 };
+
+    static constexpr size_t kNumLargeAllocSizes = android::base::arraySize(kTestAllocSizesLarge);
+    static constexpr size_t kNumTrialsLarge = 20;
+
+    static constexpr float kLargeAllocChance = 0.05;
+
+    std::default_random_engine generator;
+    // Use a consistent seed value to avoid flakes
+    generator.seed(0);
+
+    std::uniform_int_distribution<size_t>
+        smallAllocIndexDistribution(0, kNumSmallAllocSizes - 1);
+    std::uniform_int_distribution<size_t>
+        largeAllocIndexDistribution(0, kNumLargeAllocSizes - 1);
+    std::bernoulli_distribution largeAllocDistribution(kLargeAllocChance);
+
+    size_t smallAllocCount = 0;
+    size_t largeAllocCount = 0;
+
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
+        0,
+        mHostVisibleMemoryTypeIndex,
+    };
+
+    std::vector<VkDeviceMemory> allocs;
+
+    while (smallAllocCount < kNumTrialsSmall ||
+           largeAllocCount < kNumTrialsLarge) {
+        
+        VkDeviceMemory mem = VK_NULL_HANDLE;
+        void* hostPtr = nullptr;
+
+        if (largeAllocDistribution(generator)) {
+            if (largeAllocCount < kNumTrialsLarge) {
+                fprintf(stderr, "%s: large alloc\n", __func__);
+                allocInfo.allocationSize =
+                    kTestAllocSizesLarge[
+                        largeAllocIndexDistribution(generator)];
+                ++largeAllocCount;
+            }
+        } else {
+            if (smallAllocCount < kNumTrialsSmall) {
+                allocInfo.allocationSize =
+                    kTestAllocSizesSmall[
+                        smallAllocIndexDistribution(generator)];
+                ++smallAllocCount;
+            }
+        }
+
+        EXPECT_EQ(VK_SUCCESS,
+            vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &mem));
+
+        if (!mem) continue;
+
+        allocs.push_back(mem);
+
+        EXPECT_EQ(VK_SUCCESS,
+        vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
+
+        memset(hostPtr, 0xff, 4);
+
+        VkMappedMemoryRange toFlush = {
+            VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
+            mem, 0, 4,
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vk->vkFlushMappedMemoryRanges(mDevice, 1, &toFlush));
+        EXPECT_EQ(VK_SUCCESS, vk->vkInvalidateMappedMemoryRanges(mDevice, 1, &toFlush));
+
+        for (uint32_t i = 0; i < 4; ++i) {
+            EXPECT_EQ(0xff, *((uint8_t*)hostPtr + i));
+        }
+    }
+
+    for (auto mem : allocs) {
+        vk->vkUnmapMemory(mDevice, mem);
+        vk->vkFreeMemory(mDevice, mem, nullptr);
+    }
 }
 
 }  // namespace aemu
