@@ -19,8 +19,10 @@
 
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
-#include "android/emulation/proto/VehicleHalProto.pb.h"
+#include <QFont>
 #include <QWidget>
+#include "android/emulation/proto/VehicleHalProto.pb.h"
+
 #include <string>
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 #include <map>
@@ -116,7 +118,8 @@ private:
     void pauseCarPropertyTableRefreshThread();
 
     QTableWidgetItem* createTableTextItem(QString info);
-    QTableWidgetItem* createTableBoolItem(bool val);
+    QTableWidgetItem* createTableTextItemWithFont(QString info, bool writable);
+    QFont nonWritableFont;
 
     void updateIndex();
 
