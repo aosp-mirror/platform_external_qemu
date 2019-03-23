@@ -120,6 +120,7 @@ public:
     void dragLeaveEvent(QDragLeaveEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+    void inputMethodEvent(QInputMethodEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void leaveEvent(QEvent* event) override;
@@ -202,6 +203,7 @@ signals:
                                         int timeoutMs);
 
     void showVirtualSceneControls(bool show);
+    void guestKeyboardIMEChanged(QString text);
 
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
@@ -259,6 +261,8 @@ public:
     int  getRightTransparency()  { return mSkinGapRight; }
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
+
+    void setKeyboardIMECallback();
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -332,6 +336,7 @@ private slots:
                                              QString dismissText,
                                              Ui::OverlayChildWidget::DismissFunc func,
                                              int timeoutMs);
+    void onGuestKeyboardIMEChanged(QString text);
 
 public slots:
     // Here are conventional slots that perform interesting high-level functions
@@ -388,6 +393,7 @@ private:
     void runAdbShellPowerDownAndQuit();
     void setVisibleExtent(QBitmap bitMap);
     void getSkinPixmap(); // For masking the skin when frameless
+
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;

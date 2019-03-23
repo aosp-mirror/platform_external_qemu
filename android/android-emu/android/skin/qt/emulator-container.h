@@ -39,6 +39,7 @@ public:
     void closeEvent(QCloseEvent* event) override;
     bool event(QEvent* e) override;
     void focusInEvent(QFocusEvent* event) override;
+    void inputMethodEvent(QInputMethodEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void moveEvent(QMoveEvent* event) override;

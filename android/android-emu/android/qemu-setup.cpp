@@ -19,6 +19,7 @@
 #include "android/boot-properties.h"
 #include "android/car-cluster.h"
 #include "android/car.h"
+#include "android/android-keyboard-ime-pipe.h"
 #include "android/clipboard-pipe.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -409,6 +410,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
+    android_init_keyboard_ime_pipe();
     if (fc::isEnabled(fc::RefCountPipe))
         android_init_refcount_pipe();
     if (fc::isEnabled(fc::WifiConfigurable)) {

@@ -26,6 +26,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/keyboard_ime_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -692,6 +693,29 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             });
 }
 
+void EmulatorQtWindow::setKeyboardIMECallback() {
+    const auto uiAgent = mToolWindow->getUiEmuAgent();
+    if (uiAgent == nullptr || uiAgent->keyboardIME == nullptr) {
+        qDebug() << "uiAgent is null. keyboard callback will not be set.";
+        return;
+    }
+
+    const auto keyboardImeAgent = uiAgent->keyboardIME;
+    connect(this, SIGNAL(guestKeyboardIMEChanged(QString)), this,
+            SLOT(onGuestKeyboardIMEChanged(QString)), Qt::QueuedConnection);
+    keyboardImeAgent->setGuestKeyboardIMECallback(
+            [](void* context, const uint8_t* data, size_t size) {
+                auto self = static_cast<EmulatorQtWindow*>(context);
+                emit self->guestKeyboardIMEChanged(
+                        QString::fromUtf8((const char*)data, size));
+            },
+            this);
+}
+
+void EmulatorQtWindow::onGuestKeyboardIMEChanged(QString text) {
+    qDebug() << "Guest keyboard status: [" << text << "]";
+}
+
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
     return sInstance.get();
 }
@@ -1028,11 +1052,36 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
     }
 }
 
+void EmulatorQtWindow::inputMethodEvent(QInputMethodEvent* event) {
+    qDebug() << "EmulatorQtWindow::" << __func__ << "(preedit=["
+             << event->preeditString() << "] commit=["
+             << event->commitString() << "]";
+//    if (event->commitString().isEmpty()) {
+//        return;
+//    }
+    // Just testing here to see if i can send unicode stuff
+    QString commitString = "你好";
+
+    const auto uiAgent = mToolWindow->getUiEmuAgent();
+    if (uiAgent == nullptr) {
+        qDebug() << "uiAgent is null";
+        return;
+    }
+
+    const auto keyboardImeAgent = uiAgent->keyboardIME;
+    QByteArray bytes = commitString.toUtf8();
+    uint8_t sz = (uint8_t)bytes.size();
+    keyboardImeAgent->setGuestKeyboardIMEContents(
+            (const uint8_t*)bytes.data(), bytes.size());
+}
+
 void EmulatorQtWindow::keyPressEvent(QKeyEvent* event) {
+    printf("%s::%s\n", "EmulatorQtWindow", __func__);
     handleKeyEvent(kEventKeyDown, event);
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
+    printf("%s::%s\n", "EmulatorQtWindow", __func__);
     handleKeyEvent(kEventKeyUp, event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement

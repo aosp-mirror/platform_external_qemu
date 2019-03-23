@@ -810,6 +810,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                 settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
 
             window->toolWindow()->switchClipboardSharing(enableClipboard);
+            window->setKeyboardIMECallback();
         });
     }
 }

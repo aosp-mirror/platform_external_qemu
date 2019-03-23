@@ -683,6 +683,7 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 // static
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
+    qDebug() << "hello";
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
 
