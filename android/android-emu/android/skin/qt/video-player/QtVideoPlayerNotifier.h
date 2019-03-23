@@ -67,6 +67,8 @@ public:
 
     void emitVideoFinished() override { emit videoFinished(); }
 
+    void emitVideoStopped() override { emit videoStopped(); }
+
 private:
 
     QTimer mTimer;
@@ -77,6 +79,7 @@ private slots:
 signals:
     void updateWidget();
     void videoFinished();
+    void videoStopped();
 };
 
 }  // namespace videoplayer

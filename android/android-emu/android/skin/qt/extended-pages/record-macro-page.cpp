@@ -105,7 +105,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
 
     switch (mState) {
         case MacroUiState::Waiting: {
-            mUi->previewLabel->setText("Select a macro to preview");
+            mUi->previewLabel->setText(tr("Select a macro to preview"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
@@ -123,8 +123,14 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->playStopButton->setEnabled(true);
             break;
         }
+        case MacroUiState::PreviewFinished: {
+            mUi->previewLabel->setText(tr("Click anywhere to replay preview"));
+            mUi->previewLabel->show();
+            mUi->previewOverlay->show();
+            break;
+        }
         case MacroUiState::Playing: {
-            mUi->previewLabel->setText("Macro playing on the Emulator");
+            mUi->previewLabel->setText(tr("Macro playing on the Emulator"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("stop"));
@@ -165,6 +171,8 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
         QListWidgetItem* item = mUi->macroList->item(i);
         if (item != listItem) {
             item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+            RecordMacroSavedItem* macroItem = getItemWidget(item);
+            macroItem->setEnabled(false);
         }
     }
 
@@ -181,6 +189,8 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
     for (int i = 0; i < mUi->macroList->count(); ++i) {
         QListWidgetItem* item = mUi->macroList->item(i);
         item->setFlags(item->flags() | Qt::ItemIsEnabled);
+        RecordMacroSavedItem* macroItem = getItemWidget(item);
+        macroItem->setEnabled(true);
     }
 
     mMacroPlaying = false;
@@ -195,7 +205,9 @@ void RecordMacroPage::showPreview(const std::string& previewName) {
             std::unique_ptr<android::videoplayer::QtVideoPlayerNotifier>(
                     new android::videoplayer::QtVideoPlayerNotifier());
     connect(videoPlayerNotifier.get(), SIGNAL(updateWidget()), this,
-            SLOT(updateVideoView()));
+            SLOT(updatePreviewVideoView()));
+    connect(videoPlayerNotifier.get(), SIGNAL(videoStopped()), this,
+            SLOT(previewVideoPlayingFinished()));
     mVideoPlayer = android::videoplayer::VideoPlayer::create(
             previewPath, mUi->videoWidget, std::move(videoPlayerNotifier));
 
@@ -209,6 +221,18 @@ RecordMacroSavedItem* RecordMacroPage::getItemWidget(
             mUi->macroList->itemWidget(listItem));
 }
 
-void RecordMacroPage::updateVideoView() {
+void RecordMacroPage::updatePreviewVideoView() {
     mUi->videoWidget->repaint();
+}
+
+void RecordMacroPage::previewVideoPlayingFinished() {
+    setMacroUiState(MacroUiState::PreviewFinished);
+}
+
+void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
+    if (mState == MacroUiState::PreviewFinished) {
+        QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
+        showPreview(getItemWidget(listItem)->getName());
+        setMacroUiState(MacroUiState::Selected);
+    }
 }

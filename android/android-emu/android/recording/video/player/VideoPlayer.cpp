@@ -1241,10 +1241,14 @@ int VideoPlayerImpl::play() {
         mVideoDecoder.reset();
     }
 
+    const bool wasRunning = mRunning;
     mRunning = false;
 
     cleanup();
 
+    if (wasRunning) {
+        mNotifier->emitVideoStopped();
+    }
     mNotifier->emitVideoFinished();
 
     return 0;
