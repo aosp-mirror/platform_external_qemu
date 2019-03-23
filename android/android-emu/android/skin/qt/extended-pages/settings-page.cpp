@@ -13,7 +13,6 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/extended-pages/perfstats-page.h"
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
@@ -643,13 +642,15 @@ void SettingsPage::on_set_resetNotifications_pressed() {
 }
 
 void SettingsPage::on_perfstatsButton_pressed() {
-    const double densityFactor = devicePixelRatioF();
-    QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
-    styleString += Ui::stylesheetForTheme(getSelectedTheme());
-
-    auto page = new PerfStatsPage(nullptr);
-    page->setStyleSheet(styleString);
-    page->show();
+    if (!mPerfStatsPage.get()) {
+        const double densityFactor = devicePixelRatioF();
+        QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
+        styleString += Ui::stylesheetForTheme(getSelectedTheme());
+        mPerfStatsPage.reset(new PerfStatsPage(nullptr));
+        mPerfStatsPage->setStyleSheet(styleString);
+    }
+    mPerfStatsPage->show();
+    setFrameOnTop(mPerfStatsPage.get(), true);
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
