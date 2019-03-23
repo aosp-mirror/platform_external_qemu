@@ -22,6 +22,7 @@
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
+#include "android/emulation/control/keyboard_ime_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/sensors_agent.h"
@@ -80,6 +81,9 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 
 // Defined in android-qemu2-glue/qemu-display-agent-impl.cpp
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
+
+// Defined in android-qemu2-glue/qemu-keyboard_ime-agent-impl.cpp
+extern const QAndroidKeyboardIMEAgent* const gQAndroidKeyboardIMEAgent;
 
 extern const QCarDataAgent* const gQCarDataAgent;
 

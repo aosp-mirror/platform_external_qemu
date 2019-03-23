@@ -28,6 +28,7 @@ set(libqemu2-glue_src
     qemu-clipboard-agent-impl.cpp
     qemu-display-agent-impl.cpp
     qemu-finger-agent-impl.c
+    qemu-keyboard-ime-agent-impl.cpp
     qemu-location-agent-impl.c
     qemu-http-proxy-agent-impl.c
     qemu-net-agent-impl.c

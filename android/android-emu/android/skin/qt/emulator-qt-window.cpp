@@ -996,11 +996,17 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
     }
 }
 
+void EmulatorQtWindow::inputMethodEvent(QInputMethodEvent* event) {
+    printf("%s::%s\n", "EmulatorQtWindow", __func__);
+}
+
 void EmulatorQtWindow::keyPressEvent(QKeyEvent* event) {
+    printf("%s::%s\n", "EmulatorQtWindow", __func__);
     handleKeyEvent(kEventKeyDown, event);
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
+    printf("%s::%s\n", "EmulatorQtWindow", __func__);
     handleKeyEvent(kEventKeyUp, event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement

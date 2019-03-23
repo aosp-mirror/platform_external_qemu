@@ -75,6 +75,7 @@ set(android-emu-common
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/goldfish_sync.cpp
     android/emulation/hostpipe/HostGoldfishPipe.cpp
+    android/emulation/KeyboardIMEPipe.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp

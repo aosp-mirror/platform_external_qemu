@@ -735,6 +735,7 @@ static int startEmulatorWithMinConfig(
             gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,
             gQAndroidVirtualSceneAgent,
+            gQAndroidKeyboardIMEAgent,
             gQCarDataAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
                      // don't set it.
@@ -1675,6 +1676,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,
             gQAndroidVirtualSceneAgent,
+            gQAndroidKeyboardIMEAgent,
             gQCarDataAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
                      // don't set it.

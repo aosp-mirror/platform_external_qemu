@@ -78,6 +78,8 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 
 #endif  // __APPLE__
 
+    setAttribute(Qt::WA_InputMethodEnabled, true);
+
     mResizeTimer.setSingleShot(true);
     connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
 
@@ -250,11 +252,18 @@ void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     }
 }
 
+void EmulatorContainer::inputMethodEvent(QInputMethodEvent* e) {
+    printf("%s::%s\n", "EmulatorContainer", __func__);
+    mEmulatorWindow->inputMethodEvent(e);
+}
+
 void EmulatorContainer::keyPressEvent(QKeyEvent* event) {
+    printf("%s::%s\n", "EmulatorContainer", __func__);
     mEmulatorWindow->keyPressEvent(event);
 }
 
 void EmulatorContainer::keyReleaseEvent(QKeyEvent* event) {
+    printf("%s::%s\n", "EmulatorContainer", __func__);
     mEmulatorWindow->keyReleaseEvent(event);
 }
 
