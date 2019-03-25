@@ -16,4 +16,4 @@ android_add_test(hello_world_asm_test)
 target_link_libraries(hello_world_asm_test PRIVATE hello_world_asm_lib gmock_main)
 
 add_subdirectory(end2end/test_crash_symbols)
-
+add_subdirectory(compiler)
