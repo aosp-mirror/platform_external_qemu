@@ -229,6 +229,9 @@ static int hax_get_capability(struct hax_state *hax)
     hax->supports_64bit_ramblock = !!(cap->winfo & HAX_CAP_64BIT_RAMBLOCK);
     hax->supports_64bit_setram = !!(cap->winfo & HAX_CAP_64BIT_SETRAM);
     hax->supports_ram_protection = !!(cap->winfo & HAX_CAP_RAM_PROTECTION);
+    hax->supports_implicit_ramblock =
+            hax->supports_64bit_setram &&
+            !!(cap->winfo & HAX_CAP_IMPLICIT_RAMBLOCK);
 
     if (cap->wstatus & HAX_CAP_MEMQUOTA) {
         if (cap->mem_quota < hax->mem_quota) {
