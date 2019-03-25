@@ -568,7 +568,8 @@ static void hax_log_sync(MemoryListener *listener,
 // User backed memory region API
 static int
 user_backed_flags_to_hax(int flags) {
-    int hax_flags = 0;
+    /* HAX_RAM_INFO_STANDALONE is ignored if not supported by HAXM */
+    int hax_flags = HAX_RAM_INFO_STANDALONE;
     if (!(flags & USER_BACKED_RAM_FLAGS_READ)) {
         hax_flags |= HAX_RAM_INFO_ROM;
     }
@@ -576,14 +577,14 @@ user_backed_flags_to_hax(int flags) {
 }
 
 static void hax_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
-    int ret;
-
-    ret = hax_populate_ram((uint64_t)(uintptr_t)hva, size);
-    if (ret < 0) {
-        fprintf(stderr, "%s: Failed to add RAM block, ret=%d\n", __func__, ret);
-        abort();
+    if (!hax_global.supports_implicit_ramblock) {
+        /* This code path is for older HAXM and does not work well. */
+        int ret = hax_populate_ram((uint64_t)(uintptr_t)hva, size);
+        if (ret < 0) {
+            fprintf(stderr, "%s: Failed to add RAM block, ret=%d\n", __func__, ret);
+            abort();
+        }
     }
-
     hax_set_phys_mem_general(hva, gpa, size, true /* add */, user_backed_flags_to_hax(flags));
 }
 

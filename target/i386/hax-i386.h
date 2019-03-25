@@ -52,6 +52,7 @@ struct hax_state {
     bool supports_64bit_ramblock;
     bool supports_64bit_setram;
     bool supports_ram_protection;
+    bool supports_implicit_ramblock;
     struct hax_slot memslots[HAX_MAX_SLOTS];
 };
 
