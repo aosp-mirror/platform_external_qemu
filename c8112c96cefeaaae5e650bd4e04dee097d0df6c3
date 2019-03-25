@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27146596_b500f009",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-25T21:52:40Z",
+      "side": 1,
+      "message": "This declaration masks the one in the class, it should be removed.",
+      "range": {
+        "startLine": 127,
+        "startChar": 4,
+        "endLine": 127,
+        "endChar": 16
+      },
+      "revId": "c8112c96cefeaaae5e650bd4e04dee097d0df6c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "872537da_f10bf64c",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-25T21:52:40Z",
+      "side": 1,
+      "message": "This should bind the vertex array again: mGles2-\u003eglBindVertexArray(mVao);",
+      "range": {
+        "startLine": 189,
+        "startChar": 32,
+        "endLine": 189,
+        "endChar": 44
+      },
+      "revId": "c8112c96cefeaaae5e650bd4e04dee097d0df6c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
