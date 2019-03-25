@@ -31,17 +31,11 @@ using android::base::LazyInstance;
 namespace android {
 namespace base {
 
-struct MallocStats {
-    std::atomic<int64_t> mAllocated{0};
-    std::atomic<int64_t> mLive{0};
-    std::atomic<int64_t> mPeak{0};
-};
-
 struct FuncRange {
     std::string mName;
     intptr_t mAddr;
     size_t mLength;
-    MallocStats mStats;
+    MemoryTracker::MallocStats mStats;
 };
 
 class MemoryTracker::Impl {
@@ -87,15 +81,6 @@ public:
                                    info.end_ip - info.start_ip});
 
         return true;
-    }
-
-    void aggregate(std::string label, MallocStats* ms) {
-        for (auto& it : mData) {
-            if (it->mName.compare(0, label.size(), label) == 0) {
-                ms->mAllocated += it->mStats.mAllocated.load();
-                ms->mLive += it->mStats.mLive.load();
-            }
-        }
     }
 
     void newHook(const void* ptr, size_t size) {
@@ -146,12 +131,11 @@ public:
             return ss.str();
         }
 
-        MallocStats stats;
-        aggregate("EMUGL", &stats);
+        auto stats = getUsage("EMUGL");
         ss << "EMUGL memory allocated: ";
-        ss << (float)stats.mAllocated.load() / 1048576.0f;
+        ss << (float)stats->mAllocated.load() / 1048576.0f;
         ss << "mb live: ";
-        ss << (float)stats.mLive.load() / 1048576.0f;
+        ss << (float)stats->mLive.load() / 1048576.0f;
         ss << "mb\n";
         // If verbose, return the memory stats for each registered functions
         // sorted by live memory
@@ -202,6 +186,19 @@ public:
         }
     }
 
+    bool isEnabled() { return enabled; }
+
+    std::unique_ptr<MallocStats> getUsage(const std::string& group) {
+        std::unique_ptr<MallocStats> ms(new MallocStats());
+        for (auto& it : mData) {
+            if (it->mName.compare(0, group.size(), group) == 0) {
+                ms->mAllocated += it->mStats.mAllocated.load();
+                ms->mLive += it->mStats.mLive.load();
+            }
+        }
+        return std::move(ms);
+    }
+
 private:
     bool enabled = false;
     std::set<FuncRange*, bool (*)(const FuncRange*, const FuncRange*)> mData;
@@ -219,6 +216,12 @@ private:
 
     std::string printUsage(int verbosity) {
         return "<memory usage tracker not implemented>";
+    }
+
+    bool isEnabled() { return false; }
+
+    std::unique_ptr<MallocStats> getUsage(const std::string& group) {
+        return nullptr;
     }
 
 #endif
@@ -241,6 +244,15 @@ void MemoryTracker::start() {
 
 void MemoryTracker::stop() {
     mImpl->stop();
+}
+
+bool MemoryTracker::isEnabled() {
+    return mImpl->isEnabled();
+}
+
+std::unique_ptr<MemoryTracker::MallocStats> MemoryTracker::getUsage(
+        const std::string& group) {
+    return mImpl->getUsage(group);
 }
 
 static LazyInstance<MemoryTracker> sMemoryTracker = LAZY_INSTANCE_INIT;

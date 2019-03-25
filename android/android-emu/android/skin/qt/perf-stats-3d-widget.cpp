@@ -18,8 +18,9 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/CpuUsage.h"
-#include "android/base/system/System.h"
 #include "android/base/Log.h"
+#include "android/base/memory/MemoryTracker.h"
+#include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/skin/qt/gl-common.h"
 
@@ -138,8 +139,55 @@ PerfStats3DWidget::PerfStats3DWidget(QWidget* parent)
         });
     }
 
-    // TODO: More real-time metrics (RAM usage, frame times, etc)
-    // currentGraphIndex++;
+    currentGraphIndex++;
+    float minResMem = 0.0f;
+    float maxResMem = 5000.0f;
+    if (android_hw) {
+        maxResMem = 3.0 * android_hw->hw_ramSize;
+    }
+
+    // Memory Usage Stats
+    mDataSources.emplace_back(
+            (DataSource){currentGraphIndex,
+                         {0.7f, 0.2f, 1.0f, 1.0f},
+                         "Resident Memory",
+                         "MB",
+                         minResMem,
+                         maxResMem,
+                         [minResMem, maxResMem]() mutable {
+                             DataSourcePoint res;
+                             auto usage = System::get()->getMemUsage();
+                             res.val = usage.resident / 1048576.0f;
+                             res.min = minResMem;
+                             if (res.val > maxResMem) {
+                                 maxResMem = res.val + 100;
+                             }
+                             res.max = maxResMem;
+                             return res;
+                         },
+                         []() {},
+                         []() {}});
+
+    auto memTracker = MemoryTracker::get();
+    if (memTracker && memTracker->isEnabled()) {
+        mDataSources.emplace_back((DataSource){
+                currentGraphIndex,
+                {0.0f, 0.7f, 0.4f, 1.0f},
+                "Emu GL Memory",
+                "MB",
+                minResMem,
+                maxResMem,
+                [memTracker, minResMem, maxResMem]() {
+                    DataSourcePoint res;
+                    res.val = memTracker->getUsage("EMUGL")->mLive.load() /
+                              1048576.0f;
+                    res.min = minResMem;
+                    res.max = maxResMem;
+                    return res;
+                },
+                []() {},
+                []() {}});
+    }
 }
 
 PerfStats3DWidget::~PerfStats3DWidget() {

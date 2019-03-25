@@ -14,7 +14,7 @@
 #include "android/skin/qt/extended-pages/perfstats-page.h"
 
 PerfStatsPage::PerfStatsPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::PerfStatsPage()) {
+    : QFrame(parent), mUi(new Ui::PerfStatsPage()) {
     mUi->setupUi(this);
 
     connect(this, SIGNAL(windowVisible()),
