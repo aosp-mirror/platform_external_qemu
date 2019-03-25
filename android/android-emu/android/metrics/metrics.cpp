@@ -97,15 +97,12 @@ bool android_metrics_start(const char* emulatorVersion,
                 // nothing to do here.
                 return true;
             });
+    // Coolect PerfStats metrics every 5 seconds.
+    sGlobalData->perfStatReporter =
+            android::metrics::PerfStatReporter::create(
+                    android::base::ThreadLooper::get(), 5000);
+    sGlobalData->perfStatReporter->start();
 
-    // Report perf stats when we are logging verbosely or
-    // -perf-stat option is enabled.
-    if (android_verbose || android_cmdLineOptions->perf_stat != nullptr) {
-        sGlobalData->perfStatReporter =
-                android::metrics::PerfStatReporter::create(
-                        android::base::ThreadLooper::get(), 1000);
-        sGlobalData->perfStatReporter->start();
-    }
     return true;
 }
 
