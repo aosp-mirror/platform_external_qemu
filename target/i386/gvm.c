@@ -288,10 +288,6 @@ unsigned long gvm_arch_vcpu_id(CPUState *cs)
     return cpu->apic_id;
 }
 
-#ifndef GVM_CPUID_SIGNATURE_NEXT
-#define GVM_CPUID_SIGNATURE_NEXT                0x40000100
-#endif
-
 static Error *invtsc_mig_blocker;
 
 #define GVM_MAX_CPUID_ENTRIES  100
@@ -307,42 +303,12 @@ int gvm_arch_init_vcpu(CPUState *cs)
     uint32_t limit, i, j, cpuid_i;
     uint32_t unused;
     struct gvm_cpuid_entry *c;
-    // Disable KVM PV Features: we may decide to totally remove
-    // it later but now let's just keep the code.
-#if 0
-    uint32_t signature[3];
-    int kvm_base = GVM_CPUID_SIGNATURE;
-#endif
     int r;
     Error *local_err = NULL;
 
     memset(&cpuid_data, 0, sizeof(cpuid_data));
 
     cpuid_i = 0;
-
-    // Disable KVM PV Features: we may decide to totally remove
-    // it later but now let's just keep the code.
-#if 0
-    if (cpu->expose_kvm) {
-        memcpy(signature, "KVMKVMKVM\0\0\0", 12);
-        c = &cpuid_data.entries[cpuid_i++];
-        c->function = KVM_CPUID_SIGNATURE | kvm_base;
-        c->eax = KVM_CPUID_FEATURES | kvm_base;
-        c->ebx = signature[0];
-        c->ecx = signature[1];
-        c->edx = signature[2];
-
-        c = &cpuid_data.entries[cpuid_i++];
-        c->function = KVM_CPUID_FEATURES | kvm_base;
-        c->eax = env->features[FEAT_KVM];
-
-        has_msr_async_pf_en = c->eax & (1 << GVM_FEATURE_ASYNC_PF);
-
-        has_msr_pv_eoi_en = c->eax & (1 << GVM_FEATURE_PV_EOI);
-
-        has_msr_gvm_steal_time = c->eax & (1 << GVM_FEATURE_STEAL_TIME);
-    }
-#endif
 
     cpu_x86_cpuid(env, 0, 0, &limit, &unused, &unused, &unused);
 
@@ -444,23 +410,6 @@ int gvm_arch_init_vcpu(CPUState *cs)
         c->function = i;
         c->flags = 0;
         cpu_x86_cpuid(env, i, 0, &c->eax, &c->ebx, &c->ecx, &c->edx);
-    }
-
-    /* Call Centaur's CPUID instructions they are supported. */
-    if (env->cpuid_xlevel2 > 0) {
-        cpu_x86_cpuid(env, 0xC0000000, 0, &limit, &unused, &unused, &unused);
-
-        for (i = 0xC0000000; i <= limit; i++) {
-            if (cpuid_i == GVM_MAX_CPUID_ENTRIES) {
-                fprintf(stderr, "unsupported xlevel2 value: 0x%x\n", limit);
-                abort();
-            }
-            c = &cpuid_data.entries[cpuid_i++];
-
-            c->function = i;
-            c->flags = 0;
-            cpu_x86_cpuid(env, i, 0, &c->eax, &c->ebx, &c->ecx, &c->edx);
-        }
     }
 
     cpuid_data.cpuid.nent = cpuid_i;
