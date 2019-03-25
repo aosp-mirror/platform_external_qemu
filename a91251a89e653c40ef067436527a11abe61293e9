@@ -34,6 +34,23 @@
       "revId": "a91251a89e653c40ef067436527a11abe61293e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ef36172_33dbce52",
+        "filename": "android/android-emu/android/skin/qt/tools.ui",
+        "patchSetId": 15
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-03-25T19:06:12Z",
+      "side": 1,
+      "message": "Why do we add this verticalSpacer in the toolbar?",
+      "revId": "a91251a89e653c40ef067436527a11abe61293e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
