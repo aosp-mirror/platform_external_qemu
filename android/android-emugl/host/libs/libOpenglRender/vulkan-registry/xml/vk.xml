@@ -6299,6 +6299,21 @@ server.
             <param><type>VkBuffer</type> <name>buffer</name></param>
             <param><type>uint32_t</type> <name>colorBuffer</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkUpdateDescriptorSetWithTemplateSizedGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true"><type>VkDescriptorSet</type> <name>descriptorSet</name></param>
+            <param><type>VkDescriptorUpdateTemplate</type> <name>descriptorUpdateTemplate</name></param>
+            <param><type>uint32_t</type> <name>imageInfoCount</name></param>
+            <param><type>uint32_t</type> <name>bufferInfoCount</name></param>
+            <param><type>uint32_t</type> <name>bufferViewCount</name></param>
+            <param optional="true" len="imageInfoCount">const <type>uint32_t</type>* <name>pImageInfoEntryIndices</name></param>
+            <param optional="true" len="bufferInfoCount">const <type>uint32_t</type>* <name>pBufferInfoEntryIndices</name></param>
+            <param optional="true" len="bufferViewCount">const <type>uint32_t</type>* <name>pBufferViewEntryIndices</name></param>
+            <param optional="true" len="imageInfoCount">const <type>VkDescriptorImageInfo</type>* <name>pImageInfos</name></param>
+            <param optional="true" len="bufferInfoCount">const <type>VkDescriptorBufferInfo</type>* <name>pBufferInfos</name></param>
+            <param optional="true" len="bufferViewCount">const <type>VkBufferView</type>* <name>pBufferViews</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9126,6 +9141,14 @@ server.
                 <type name="VkImportPhysicalAddressGOOGLE"/>
                 <command name="vkRegisterImageColorBufferGOOGLE"/>
                 <command name="vkRegisterBufferColorBufferGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_sized_descriptor_update_template" number="219" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_SPEC_VERSION"/>
+                <enum value="220"                                           name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME"/>
+                <command name="vkUpdateDescriptorSetWithTemplateSizedGOOGLE"/>
             </require>
         </extension>
     </extensions>
