@@ -98,14 +98,11 @@ bool android_metrics_start(const char* emulatorVersion,
                 return true;
             });
 
-    // Report perf stats when we are logging verbosely or
-    // -perf-stat option is enabled.
-    if (android_verbose || android_cmdLineOptions->perf_stat != nullptr) {
-        sGlobalData->perfStatReporter =
-                android::metrics::PerfStatReporter::create(
-                        android::base::ThreadLooper::get(), 1000);
-        sGlobalData->perfStatReporter->start();
-    }
+    sGlobalData->perfStatReporter =
+            android::metrics::PerfStatReporter::create(
+                    android::base::ThreadLooper::get(), 1000);
+    sGlobalData->perfStatReporter->start();
+
     return true;
 }
 
