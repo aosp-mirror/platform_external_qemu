@@ -645,6 +645,10 @@ StopResult AutomationControllerImpl::stopPlayback() {
         return Err(StopError::NotStarted);
     }
 
+    const vec3 vecZero = {0.0f, 0.0f, 0.0f};
+    physicalModel_setTargetVelocity(mPhysicalModel, vecZero,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
     mPlayingFromFile = false;
     mPlaybackEventSource.reset();
     return Ok();
