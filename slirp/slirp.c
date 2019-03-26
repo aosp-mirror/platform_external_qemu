@@ -1601,6 +1601,11 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
     Slirp *slirp = opaque;
     struct ex_list *ex_ptr;
 
+    // Clean up stale connections
+    // ip_cleanup cleans up both IPv4 and IPv6 connections, and ip6_cleanup
+    // cleans up extra data structures for IPv6. (Naming is confusing.)
+    ip_cleanup(slirp);
+
     while (qemu_get_byte(f)) {
         int ret;
         struct socket *so = socreate(slirp);
