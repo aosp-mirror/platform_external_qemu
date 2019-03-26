@@ -42,10 +42,41 @@ static constexpr int PROPERTY_ID_COLUMN = 4;
 static constexpr int AREA_ID_COLUMN = 5;
 static constexpr int TYPE_COLUMN = 6;
 
+static constexpr int REFRESH_START = 1;
+static constexpr int REFRESH_STOP = 2;
+static constexpr int REFRESH_PUASE = 3;
+
+static constexpr int64_t REFRESH_INTERVEL = 1000000LL;
+
 static map<QString, int> tableIndex;
 
 CarPropertyTable::CarPropertyTable(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::CarPropertyTable) {
+    : QWidget(parent),
+      mUi(new Ui::CarPropertyTable),
+      mCarPropertyTableRefreshThread([this] {
+          while (true) {
+              int msg;
+              mRefreshMsg.tryReceive(&msg);
+              if (msg == REFRESH_STOP) {
+                  break;
+              }
+              android::base::AutoLock lock(mCarPropertyTableRefreshLock);
+              switch (msg) {
+                  case REFRESH_START:
+                      if (mSendEmulatorMsg != nullptr) {
+                          sendGetAllPropertiesRequest();
+                      }
+                      mCarPropertyTableRefreshCV.timedWait(
+                              &mCarPropertyTableRefreshLock,
+                              nextRefreshAbsolute());
+                      break;
+                  case REFRESH_PUASE:
+                      mCarPropertyTableRefreshCV.wait(
+                              &mCarPropertyTableRefreshLock);
+                      break;
+              }
+          }
+      }) {
     mUi->setupUi(this);
 
     QStringList colHeaders;
@@ -63,7 +94,14 @@ CarPropertyTable::CarPropertyTable(QWidget* parent)
     connect(this, SIGNAL(setRowCount(int)), this, SLOT(changeRowCount(int)), Qt::QueuedConnection);
     connect(mUi->table->horizontalHeader(), SIGNAL(sectionClicked(int)),
              this, SLOT(sortTable(int)), Qt::QueuedConnection);
+
+    mRefreshMsg.trySend(REFRESH_START);
+    mCarPropertyTableRefreshThread.start();
 };
+
+CarPropertyTable::~CarPropertyTable() {
+    stopCarPropertyTableRefreshThread();
+}
 
 QString CarPropertyTable::getLabel(int row) {
     return mUi->table->item(row, LABEL_COLUMN)->text();
@@ -147,16 +185,15 @@ void CarPropertyTable::processMsg(EmulatorMessage emulatorMsg) {
         for (int valIndex = 0; valIndex < emulatorMsg.value_size(); valIndex++) {
             VehiclePropValue val = emulatorMsg.value(valIndex);
             if (!propMap.count(val.prop())) {
-                // Some received constants are vendor id and aren't on the list. 
-                // so if constants is vendor id, transfer raw value to hex and 
-                // build as vender label like Vendor(id: XXX) where XXX is hex 
+                // Some received constants are vendor id and aren't on the list.
+                // so if constants is vendor id, transfer raw value to hex and
+                // build as vender label like Vendor(id: XXX) where XXX is hex
                 // representation of the property. If not, show raw value.
                 if (carpropertyutils::isVendor(val.prop())) {
                     propMap[val.prop()] = { carpropertyutils::vendorIdToString(val.prop()) };
                 } else {
                     propMap[val.prop()] = { QString::number(val.prop()) };
                 }
-                
             }
             PropertyDescription propDesc = propMap[val.prop()];
 
@@ -339,10 +376,34 @@ void CarPropertyTable::sendGetAllPropertiesRequest() {
 }
 
 void CarPropertyTable::showEvent(QShowEvent*) {
-    // Update data when we open the tab
-    if (mSendEmulatorMsg != nullptr) { sendGetAllPropertiesRequest(); }
+    // start asking data
+    setCarPropertyTableRefreshThread();
+}
+
+void CarPropertyTable::hideEvent(QHideEvent*) {
+    // stop asking data
+    pauseCarPropertyTableRefreshThread();
 }
 
 void CarPropertyTable::setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&& func) {
     mSendEmulatorMsg = std::move(func);
+}
+
+android::base::System::Duration CarPropertyTable::nextRefreshAbsolute() {
+    return android::base::System::get()->getUnixTimeUs() + REFRESH_INTERVEL;
+}
+
+void CarPropertyTable::setCarPropertyTableRefreshThread(){
+    mRefreshMsg.trySend(REFRESH_START);
+    mCarPropertyTableRefreshCV.signal();
+}
+
+void CarPropertyTable::stopCarPropertyTableRefreshThread(){
+    mRefreshMsg.trySend(REFRESH_STOP);
+    mCarPropertyTableRefreshCV.signal();
+    mCarPropertyTableRefreshThread.wait();
+}
+
+void CarPropertyTable::pauseCarPropertyTableRefreshThread(){
+    mRefreshMsg.trySend(REFRESH_PUASE);
 }
