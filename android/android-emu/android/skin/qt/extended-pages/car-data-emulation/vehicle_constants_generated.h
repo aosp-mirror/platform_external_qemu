@@ -13,6 +13,8 @@
 
 #pragma once
 
+#undef TRY_AGAIN
+
 namespace emulator {
 enum class VehiclePropertyType : int32_t;
 enum class VehicleArea : int32_t;
