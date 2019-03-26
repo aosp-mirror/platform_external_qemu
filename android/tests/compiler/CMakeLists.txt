@@ -4,9 +4,11 @@
 #
 # For example: bit fields behave differently accross windows/posix.
 # Tests here will make sure that if we change compilers again that we catch failures early.
-set(win_clang_unittests_src enum_bit_fields.c enum_bit_fields.cpp)
+set(win_clang_unittests_src enum_bit_fields.c compiler_tests.cpp longjump_test.c)
 android_add_test(win_clang_unittests)
 
+# This will expose a compiler issue..
+# target_compile_options(win_clang_unittests PRIVATE "-O2")
 target_include_directories(win_clang_unittests PRIVATE
         ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86_64
         ${ANDROID_QEMU2_TOP_DIR}/target/i386

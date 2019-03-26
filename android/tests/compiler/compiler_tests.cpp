@@ -1,5 +1,5 @@
 extern "C" {
-#include "enum_bit_fields.h"
+#include "compiler_tests.h"
 }
 #include "gtest/gtest.h"
 
@@ -8,4 +8,8 @@ extern "C" {
 // work well either, so we have the test part that interacts with qemu in a .c file.
 TEST(CompilerTest, LargeEnumInBitThing) {
      EXPECT_TRUE(test_enum_equal());
+}
+
+TEST(CompilerTest, LongJumpTest) {
+     EXPECT_TRUE(long_jump_stack_test());
 }
