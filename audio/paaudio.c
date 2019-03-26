@@ -551,6 +551,7 @@ fail:
 static int qpa_init_out(HWVoiceOut *hw, struct audsettings *as,
                         void *drv_opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int error;
     pa_sample_spec ss;
     pa_buffer_attr ba;
@@ -572,6 +573,8 @@ static int qpa_init_out(HWVoiceOut *hw, struct audsettings *as,
     ba.prebuf = -1;
 
     obt_as.fmt = pa_to_audfmt (ss.format, &obt_as.endianness);
+
+    fprintf(stderr, "%s: call\n", __func__);
 
     pa->stream = qpa_simple_new (
         g,
