@@ -257,6 +257,9 @@ int main(int argc, char** argv)
      */
     System::get()->envSet("LC_ALL", "C");
 
+    /* Set MESA_RGB_VISUAL to something that will work on Linux */
+    System::get()->envSet("MESA_RGB_VISUAL", "TrueColor 24");
+
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
      */
