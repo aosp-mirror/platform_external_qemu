@@ -413,7 +413,7 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-tautological-compare"
                                "-Wno-tautological-pointer-compare"
                                "-Wno-unused-variable")
-android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lpulse -lutil")
+android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE msvc-posix-compat)
 
@@ -431,6 +431,17 @@ else()
 endif()
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
+
+# Not allowed to have libraries without source files.
+set(headless-paaudio_src audio/paaudio-headless-impl-placeholder.c)
+set(headless-paaudio_linux-x86_64_src audio/paaudio-headless-impl.c)
+android_add_library(headless-paaudio)
+
+android_add_interface(android-qemu-deps-headful)
+android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE "-lpulse")
+
+android_add_interface(android-qemu-deps-headless)
+android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE headless-paaudio)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
