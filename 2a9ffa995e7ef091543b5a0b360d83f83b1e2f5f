@@ -16,6 +16,24 @@
       "revId": "2a9ffa995e7ef091543b5a0b360d83f83b1e2f5f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "416eb9a7_87ff8ab0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-26T19:54:25Z",
+      "side": 1,
+      "message": "The thread is blocked with timedWait, after timeout, the message will keep the latest message with tryReceive if the message queue doesn\u0027t have anything new. then the thread will keep sending data request to android which I don\u0027t think it\u0027s correct.",
+      "parentUuid": "041d6a6b_b7490247",
+      "revId": "2a9ffa995e7ef091543b5a0b360d83f83b1e2f5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
