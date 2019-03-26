@@ -9,6 +9,25 @@
 #include "audio_int.h"
 #include "audio_pt_int.h"
 
+#ifdef CONFIG_HEADLESS
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#error "headless mode."
+#else
+
 typedef struct {
     int samples;
     char *server;
@@ -573,6 +592,8 @@ static int qpa_init_out(HWVoiceOut *hw, struct audsettings *as,
 
     obt_as.fmt = pa_to_audfmt (ss.format, &obt_as.endianness);
 
+    fprintf(stderr, "%s: call\n", __func__);
+
     pa->stream = qpa_simple_new (
         g,
         "qemu",
@@ -1009,3 +1030,4 @@ static void register_audio_pa(void)
     audio_driver_register(&pa_audio_driver);
 }
 type_init(register_audio_pa);
+#endif

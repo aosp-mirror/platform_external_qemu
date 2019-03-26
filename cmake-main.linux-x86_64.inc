@@ -387,7 +387,6 @@ set(qemu2-shared_sources ""
    qom/cpu.c
    hw/scsi/scsi-generic.c
    hw/scsi/scsi-bus.c
-   audio/paaudio.c
    block/qed-cluster.c
    chardev/char-stdio.c
    hw/core/nmi.c

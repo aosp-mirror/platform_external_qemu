@@ -413,9 +413,17 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-tautological-compare"
                                "-Wno-tautological-pointer-compare"
                                "-Wno-unused-variable")
-android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lpulse -lutil")
+android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE msvc-posix-compat)
+
+set(android-qemu-paaudio_src audio/paaudio.c)
+android_add_library(android-qemu-paaudio)
+target_compile_definitions(android-qemu-paaudio PRIVATE "-DPOISON_CONFIG_ANDROID")
+android_target_link_libraries(android-qemu-paaudio linux-x86_64 PUBLIC android-qemu-deps)
+
+android_add_interface(android-qemu-deps-headful)
+android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE "-lpulse" android-qemu-paaudio)
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
