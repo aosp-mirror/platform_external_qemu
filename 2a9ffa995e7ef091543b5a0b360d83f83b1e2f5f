@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "041d6a6b_b7490247",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-26T04:25:12Z",
+      "side": 1,
+      "message": "do we need a pause message when the thread already blocks if the message queue does not contain anything new from the producer?",
+      "revId": "2a9ffa995e7ef091543b5a0b360d83f83b1e2f5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
