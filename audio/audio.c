@@ -60,6 +60,7 @@ static QLIST_HEAD(, audio_driver) audio_drivers;
 
 void audio_driver_register(audio_driver *drv)
 {
+    fprintf(stderr, "%s: register audio driver %s\n", __func__, drv->name);
     QLIST_INSERT_HEAD(&audio_drivers, drv, next);
 }
 
@@ -88,7 +89,8 @@ static void audio_module_load_all(void)
     int i;
 
     for (i = 0; i < ARRAY_SIZE(audio_prio_list); i++) {
-        audio_driver_lookup(audio_prio_list[i]);
+        audio_driver* d = audio_driver_lookup(audio_prio_list[i]);
+        fprintf(stderr, "%s: tried to load %s: %p\n", __func__, audio_prio_list[i], d);
     }
 }
 
@@ -1786,6 +1788,8 @@ void AUD_help (void)
 
 static int audio_driver_init (AudioState *s, struct audio_driver *drv)
 {
+    fprintf(stderr, "%s: call\n", __func__);
+
     if (drv->options) {
         audio_process_options (drv->name, drv->options);
     }
@@ -1933,6 +1937,7 @@ static void audio_init (void)
     if (!done) {
         for (i = 0; !done && i < ARRAY_SIZE(audio_prio_list); i++) {
             driver = audio_driver_lookup(audio_prio_list[i]);
+            fprintf(stderr, "%s: lookup %s got %p\n", __func__, audio_prio_list[i], driver);
             if (driver && driver->can_be_default) {
                 done = !audio_driver_init(s, driver);
             }
