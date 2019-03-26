@@ -55,8 +55,8 @@ static constexpr const char* const
 kEmulatedExtensions[] = {
     "VK_ANDROID_native_buffer",
     "VK_ANDROID_external_memory_android_hardware_buffer",
-    "VK_KHR_external_memory_fuchsia",
-    "VK_KHR_external_semaphore_fuchsia",
+    "VK_FUCHSIA_external_memory",
+    "VK_FUCHSIA_external_semaphore",
     "VK_KHR_external_semaphore_fd",
     "VK_FUCHSIA_buffer_collection",
 };
