@@ -33,6 +33,7 @@
 
 #include "android/base/memory/ScopedPtr.h"
 #include "android/recording/video/player/PacketQueue.h"
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/utils/debug.h"
 
 extern "C" {
@@ -226,7 +227,11 @@ int VideoInfo::calculateDurationSecs(AVFormatContext* f) {
 
 // Show the frame
 void VideoInfo::show() {
-    mWidget->setPixelBuffer(mPreviewFrame.buf, mPreviewFrame.len);
+    VideoPlayerRenderTarget::FrameInfo info;
+    info.headerlen = mPreviewFrame.headerlen;
+    info.width = mPreviewFrame.width;
+    info.height = mPreviewFrame.height;
+    mWidget->setPixelBuffer(info, mPreviewFrame.buf, mPreviewFrame.len);
     emit updateWidget();
 }
 

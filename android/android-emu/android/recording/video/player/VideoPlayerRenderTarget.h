@@ -19,6 +19,13 @@
 // changes in the video dimensions.
 class VideoPlayerRenderTarget {
 public:
+    // Metadata for the decoded frame being passed to setPixelBuffer.
+    struct FrameInfo {
+      size_t headerlen;
+      size_t width;
+      size_t height;
+    };
+
     // An interaction between the render target (whether it is a raw buffer, Qt
     // widget, or GL texture, VkImage, or whatever) and the video player.
     //
@@ -38,6 +45,7 @@ public:
     // TODO: An interface that doesn't
     // necessarily have to use CPU memory transfers.
     virtual void setPixelBuffer(
+            const FrameInfo& frameInfo,
             const unsigned char* buf,
             size_t len) = 0;
 

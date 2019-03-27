@@ -31,7 +31,9 @@ public:
                              int* resultRenderTargetWidth,
                              int* resultRenderTargetHeight) override;
 
-    void setPixelBuffer(const unsigned char* buf, size_t len) override {
+    void setPixelBuffer(const FrameInfo& info,
+                        const unsigned char* buf,
+                        size_t len) override {
         mBuffer = buf;
         mBufferLen = len;
     }
