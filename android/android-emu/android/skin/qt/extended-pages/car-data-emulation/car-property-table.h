@@ -10,6 +10,11 @@
 // GNU General Public License for more details.
 #pragma once
 
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
 #include "ui_car-property-table.h"
 
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
@@ -20,6 +25,15 @@
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 #include <map>
 #include <vector>
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
+#include <sys/time.h>
+#endif
+
+using android::base::System;
+using android::base::FunctorThread;
 
 namespace carpropertyutils {
     struct PropertyDescription {
@@ -61,6 +75,7 @@ class CarPropertyTable : public QWidget {
 
 public:
     explicit CarPropertyTable(QWidget* parent = nullptr);
+    ~CarPropertyTable();
     void processMsg(emulator::EmulatorMessage emulatorMsg);
     void setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&&);
 
@@ -71,6 +86,7 @@ signals:
 
 protected:
     void showEvent(QShowEvent* event);
+    void hideEvent(QHideEvent* event);
 
 private slots:
     void updateTable(int row, int col, QTableWidgetItem* info);
@@ -89,6 +105,15 @@ private:
     int getPropertyId(int row);
     int getAreaId(int row);
     int getType(int row);
+
+    FunctorThread mCarPropertyTableRefreshThread;
+    android::base::MessageChannel<int, 2> mRefreshMsg;
+    android::base::ConditionVariable mCarPropertyTableRefreshCV;
+    android::base::Lock mCarPropertyTableRefreshLock;
+    android::base::System::Duration nextRefreshAbsolute();
+    void setCarPropertyTableRefreshThread();
+    void stopCarPropertyTableRefreshThread();
+    void pauseCarPropertyTableRefreshThread();
 
     QTableWidgetItem* createTableTextItem(QString info);
     QTableWidgetItem* createTableBoolItem(bool val);
