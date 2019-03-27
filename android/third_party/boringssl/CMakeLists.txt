@@ -288,7 +288,6 @@ set(crypto_sources_linux-x86_64
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/aes-x86_64.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/aesni-gcm-x86_64.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/aesni-x86_64.S
-    ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/bsaes-x86_64.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/ghash-ssse3-x86_64.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/ghash-x86_64.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/md5-x86_64.S
@@ -312,7 +311,6 @@ set(crypto_sources_darwin-x86_64
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/aes-x86_64.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/aesni-gcm-x86_64.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/aesni-x86_64.S
-    ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/bsaes-x86_64.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/ghash-ssse3-x86_64.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/ghash-x86_64.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/md5-x86_64.S
@@ -335,7 +333,6 @@ set(crypto_sources_windows_msvc-x86_64
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/aes-x86_64.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/aesni-gcm-x86_64.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/aesni-x86_64.asm
-    ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/bsaes-x86_64.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/ghash-ssse3-x86_64.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/ghash-x86_64.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/md5-x86_64.asm
