@@ -21,6 +21,7 @@ import json
 import os
 import requests
 import sys
+import time
 import urllib
 
 from absl import app
@@ -29,7 +30,7 @@ from absl import logging
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('environment', 'prod',
-                    'Which symbol server endpoint to use, can be staging or prod')
+                    'Which symbol server endpoint to use, cemuan be staging or prod')
 flags.DEFINE_string(
     'api_key', None, 'Which api key to use. By default will load contents of ~/.emulator_symbol_server_key')
 flags.DEFINE_string('symbol_file', None, 'The symbol file you wish to process')
@@ -51,23 +52,30 @@ class SymbolFileServer(object):
         'prod': 'https://prod-crashsymbolcollector-pa.googleapis.com/v1',
         'staging': 'https://staging-crashsymbolcollector-pa.googleapis.com/v1'
     }
-
     STATUS_MSG = {
         'OK': 'The symbol data was written to symbol storage.',
         'DUPLICATE_DATA': 'The symbol data was identical to data already in storage, so no changes were made.'
     }
+
+    # Old school api, we use this if we have no api key..
+    CLASSIC_API_URL = {
+        'staging': 'https://clients2.google.com/cr/staging_symbol',
+        'prod': 'https://clients2.google.com/cr/symbol'
+    }
+    CLASSIC_PRODUCT = 'AndroidEmulator'
 
     # Timeout for individual web requests.  an exception is raised if the server has not issued a response for timeout
     # seconds (more precisely, if no bytes have been received on the underlying socket for timeout seconds).
     DEFAULT_TIMEOUT = 30
 
     def __init__(self, environment='prod', api_key=None):
-        self.api_url = SymbolFileServer.API_URL[environment.lower()]
-        if not api_key:
-            with open(SymbolFileServer.API_KEY_FILE) as f:
-                self.api_key = f.read()
-        else:
-            self.api_key = api_key
+        endpoint = SymbolFileServer.API_URL if api_key else SymbolFileServer.CLASSIC_API_URL
+        self.api_url = endpoint[environment.lower()]
+        self.api_key = api_key
+
+    def use_classic_api(self):
+        '''Returns true if we should use the classic api.'''
+        return not self.api_key
 
     def _extract_symbol_info(self, symbol_file):
         '''Extracts os, archictecture, debug id and debug file.
@@ -79,7 +87,7 @@ class SymbolFileServer(object):
             info = f.readline().split()
 
         if len(info) != 5 or info[0] != 'MODULE':
-            raise('Corrupt symbol file: %s, %s' % (symbol_file, info))
+            raise IOError('Corrupt symbol file: %s, %s' % (symbol_file, info))
 
         _, os, arch, dbg_id, dbg_file = info
         return os, arch, dbg_id, dbg_file
@@ -92,7 +100,7 @@ class SymbolFileServer(object):
            This method will raise a requests.exceptions.HTTPError
            if the status code is not 4XX, 5XX
 
-           Note: If you are using verbose logging it is entirely possible that the subsystem will 
+           Note: If you are using verbose logging it is entirely possible that the subsystem will
            write your api key to the logs!
         '''
         resp = requests.request(
@@ -100,7 +108,8 @@ class SymbolFileServer(object):
 
         if resp.status_code > 399:
             # Make sure we don't leak secret keys by accident.
-            resp.url = resp.url.replace(urllib.quote(self.api_key), 'XX-HIDDEN-XX')
+            resp.url = resp.url.replace(
+                urllib.quote(self.api_key), 'XX-HIDDEN-XX')
             logging.error('Url: %s, Status: %s, response: "%s", in: %s',
                           resp.url, resp.status_code, resp.text, resp.elapsed)
             resp.raise_for_status()
@@ -111,14 +120,43 @@ class SymbolFileServer(object):
 
     def is_available(self, symbol_file):
         """True if the symbol_file is available on the server."""
+
+        # The classic api cannot answer this, so assume the symbol_file
+        # is unavailable.
+        if self.use_classic_api():
+            return False
+
         _, _, dbg_id, dbg_file = self._extract_symbol_info(symbol_file)
         url = '{}/symbols/{}/{}:checkStatus'.format(
             self.api_url, dbg_file, dbg_id)
         status = self._exec_request('get', url)
         return status['status'] == 'FOUND'
 
+    def _upload_with_classic_api(self, symbol_file):
+        """Uploads the symbols to old api end point. This is very slow."""
+        _, _, dbg_id, dbg_file = self._extract_symbol_info(symbol_file)
+
+        self._exec_request('post',
+                           self.api_url,
+                           data={
+                               'product': SymbolFileServer.CLASSIC_PRODUCT,
+                               'codeIdentifier': dbg_id,
+                               'debugIdentifier': dbg_id,
+                               'codeFile': dbg_file,
+                               'debugFile': dbg_file,
+                           },
+                           files={
+                               'symbolFile': open(symbol_file, 'rb')
+                           }
+                           )
+        # We will get exceptions when this fails.
+        return 'OK'
+
     def upload(self, symbol_file):
         """Makes the symbol_file available on the server, returning the status result."""
+        if self.use_classic_api():
+            return self._upload_with_classic_api(symbol_file)
+
         _, _, dbg_id, dbg_file = self._extract_symbol_info(symbol_file)
         upload = self._exec_request('post',
                                     '{}/uploads:create'.format(self.api_url))
@@ -136,15 +174,25 @@ class SymbolFileServer(object):
 
 def main(args):
     # The lower level enging will log individual requests!
-    logging.debug("---------------------------------------------------------------------")
-    logging.debug("--- WARNING!! You are likely going to leak your api key WARNING!! ---")
-    logging.debug("---------------------------------------------------------------------")
+    logging.debug("-----------------------------------------------------------")
+    logging.debug("- WARNING!! You are likely going to leak your api key    --")
+    logging.debug("-----------------------------------------------------------")
 
-    server = SymbolFileServer(FLAGS.environment, FLAGS.api_key)
+    api_key = FLAGS.api_key
+    if not api_key:
+        try:
+            with open(SymbolFileServer.API_KEY_FILE) as f:
+                api_key = f.read()
+        except IOError as e:
+            logging.error(
+                "Unable to read api key due to: %s, reverting to (slow) classic behavior", e)
+
+    server = SymbolFileServer(FLAGS.environment, api_key)
     if FLAGS.force or not server.is_available(FLAGS.symbol_file):
+        start = time.time()
         status = server.upload(FLAGS.symbol_file)
-        print(SymbolFileServer.STATUS_MSG.get(
-            status, 'Undefined or unknown result {}'.format(status)))
+        print("{} after {} seconds".format(SymbolFileServer.STATUS_MSG.get(
+            status, 'Undefined or unknown result {}'.format(status)), time.time() - start))
     else:
         print("Symbol already available, skipping upload.")
 

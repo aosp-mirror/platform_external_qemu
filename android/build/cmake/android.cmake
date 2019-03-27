@@ -700,8 +700,10 @@ function(android_upload_symbols TGT)
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   install(
     CODE
+    # Upload the symbols, with warnings/error logging only.
     "execute_process(COMMAND \"${PYTHON_EXECUTABLE}\"
                              \"${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/upload_symbols.py\"
+                             \"-v\" \"0\"
                              \"--symbol_file\" \"${DEST}\"
                              \"--environment\" \"${OPTION_CRASHUPLOAD}\"
                              OUTPUT_FILE ${STDOUT}
