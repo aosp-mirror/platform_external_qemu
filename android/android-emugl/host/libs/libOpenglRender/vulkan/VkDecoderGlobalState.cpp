@@ -2197,6 +2197,31 @@ public:
             info->data.data());
     }
 
+    void on_vkBeginCommandBufferAsyncGOOGLE(
+        VkCommandBuffer boxed_commandBuffer,
+        const VkCommandBufferBeginInfo* pBeginInfo) {
+
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+
+        vk->vkBeginCommandBuffer(commandBuffer, pBeginInfo);
+    }
+
+    void on_vkEndCommandBufferAsyncGOOGLE(
+        VkCommandBuffer boxed_commandBuffer) {
+
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+
+        vk->vkEndCommandBuffer(commandBuffer);
+    }
+
+    void on_vkResetCommandBufferAsyncGOOGLE(
+        VkCommandBuffer boxed_commandBuffer,
+        VkCommandBufferResetFlags flags) {
+        on_vkResetCommandBuffer(boxed_commandBuffer, flags);
+    }
+
     // TODO: Support more than one kind of guest external memory handle type
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
 
@@ -3464,6 +3489,26 @@ void VkDecoderGlobalState::on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
         pImageInfos,
         pBufferInfos,
         pBufferViews);
+}
+
+void VkDecoderGlobalState::on_vkBeginCommandBufferAsyncGOOGLE(
+    VkCommandBuffer commandBuffer,
+    const VkCommandBufferBeginInfo* pBeginInfo) {
+    mImpl->on_vkBeginCommandBufferAsyncGOOGLE(
+        commandBuffer, pBeginInfo);
+}
+
+void VkDecoderGlobalState::on_vkEndCommandBufferAsyncGOOGLE(
+    VkCommandBuffer commandBuffer) {
+    mImpl->on_vkEndCommandBufferAsyncGOOGLE(
+        commandBuffer);
+}
+
+void VkDecoderGlobalState::on_vkResetCommandBufferAsyncGOOGLE(
+    VkCommandBuffer commandBuffer,
+    VkCommandBufferResetFlags flags) {
+    mImpl->on_vkResetCommandBufferAsyncGOOGLE(
+        commandBuffer, flags);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

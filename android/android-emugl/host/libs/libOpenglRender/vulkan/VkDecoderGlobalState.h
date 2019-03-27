@@ -397,6 +397,15 @@ public:
         const VkDescriptorBufferInfo* pBufferInfos,
         const VkBufferView* pBufferViews);
 
+    void on_vkBeginCommandBufferAsyncGOOGLE(
+        VkCommandBuffer commandBuffer,
+        const VkCommandBufferBeginInfo* pBeginInfo);
+    void on_vkEndCommandBufferAsyncGOOGLE(
+        VkCommandBuffer commandBuffer);
+    void on_vkResetCommandBufferAsyncGOOGLE(
+        VkCommandBuffer commandBuffer,
+        VkCommandBufferResetFlags flags);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

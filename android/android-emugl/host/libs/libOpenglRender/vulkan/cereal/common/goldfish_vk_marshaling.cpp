@@ -13441,6 +13441,8 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)

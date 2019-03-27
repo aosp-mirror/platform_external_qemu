@@ -6382,6 +6382,8 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
 void deepcopy_extension_struct(
     Pool* pool,
     const void* structExtension,

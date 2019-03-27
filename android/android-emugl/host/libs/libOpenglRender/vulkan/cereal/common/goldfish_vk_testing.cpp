@@ -6262,6 +6262,8 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,
