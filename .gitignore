@@ -1,4 +1,5 @@
 /build*/
+/.vscode/*
 /objs/*
 /config-devices.*
 /config-all-devices.*

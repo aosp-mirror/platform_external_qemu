@@ -168,6 +168,7 @@ if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   add_c_flag("-Wno-incompatible-pointer-types-discards-qualifiers")
   add_c_flag("-Wno-int-to-void-pointer-cast")
   add_c_flag("-Wno-inconsistent-dllimport")
+  add_c_flag("-Wno-int-conversion") # Needed for setjmp hack.
   add_c_flag("-MD")
 endif()
 
@@ -485,6 +486,24 @@ if(QEMU_UPSTREAM)
   android_add_qemu_upstream_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_upstream_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_upstream_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+endif()
+
+if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  # Well, clang-cl doesn't handle optimized stack frames with longjmp/setjmp, b/129274902
+  # so we have to mark these files to not compile with optimizations enabled.
+  set_property(SOURCE accel/tcg/cpu-exec-common.c
+                              accel/tcg/cpu-exec.c
+                              monitor.c
+                              disas/i386.c
+                              target/i386/translate.c
+                              util/coroutine-sigaltstack.c
+                              util/coroutine-ucontext.c
+                              util/oslib-posix.c
+                              android/third_party/ext4_utils/src/ext4fixup.c
+                              android/third_party/ext4_utils/src/make_ext4fs.c
+                              android/android-emu/android/loadpng.c
+                              android/android-emu/android/virtualscene/TextureUtils.cpp
+                              APPEND_STRING PROPERTY COMPILE_FLAGS " -g -Zi -Od -O0")
 endif()
 
 # The tests currently work on linux only.

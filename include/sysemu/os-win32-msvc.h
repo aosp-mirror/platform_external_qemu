@@ -26,6 +26,9 @@
 #ifndef QEMU_OS_WIN32_MSVC_H
 #define QEMU_OS_WIN32_MSVC_H
 
+#ifndef _MSC_VER
+  #error "This file should only be included when targeting windows_msvc"
+#endif
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -93,27 +96,28 @@ typedef int64_t off64_t;
  * savemask parameter will always be zero we can safely define these
  * in terms of setjmp/longjmp on Win32.
  */
-#define sigjmp_buf jmp_buf
 
-#ifndef _WIN64
+#ifndef USE_CLANG_JMP
+    // Define the buffer type for holding the state information.
+    #define _JMP_BUF_DEFINED
+    typedef uint64_t jmp_buf[16];
+    #define sigjmp_buf jmp_buf
 
-#define sigsetjmp(env, savemask) setjmp(env)
-#define siglongjmp(env, val) longjmp(env, val)
-
+    __fastcall int sigsetjmp_impl(jmp_buf buf);
+    __fastcall void siglongjmp_impl(jmp_buf buf, int val);
 #else
+  #include <setjmp.h>
+    // The builtins from clang are not working. For now we will use
+    // our own versions, which seem to work.
+    // you can define USE_CLANG_JMP to see it go wrong when running win_clang_unittests
+    #define sigjmp_buf jmp_buf
+    # define sigsetjmp_impl __builtin_setjmp
 
-/* On w64, setjmp implementation tends to crash in MinGW (there were several
- * attempts to fix it, but it keeps crashing). The only good implementation
- * is the GCC's undocumented builtins - so let's use them.
- */
-# undef setjmp
-# undef longjmp
-# define setjmp __builtin_setjmp
-# define longjmp __builtin_longjmp
-# define sigsetjmp(x,y) __builtin_setjmp((x))
-# define siglongjmp(x,y) __builtin_longjmp((x),(y))
-
+    // Note, clang only accepts 1 as return.
+    # define siglongjmp_impl(x, y) __builtin_longjmp(x, 1)
 #endif
+# define sigsetjmp(x, y) sigsetjmp_impl((x))
+# define siglongjmp(x,y) siglongjmp_impl((x), (y))
 
 /* Missing POSIX functions. Don't use MinGW-w64 macros. */
 #ifndef CONFIG_LOCALTIME_R
@@ -915,7 +919,7 @@ dirent_first(
 /*
  * Get next directory entry (internal).
  *
- * Returns 
+ * Returns
  */
 static WIN32_FIND_DATAW*
 dirent_next(
@@ -958,7 +962,7 @@ dirent_next(
  */
 static DIR*
 opendir(
-    const char *dirname) 
+    const char *dirname)
 {
     struct DIR *dirp;
     int error;
