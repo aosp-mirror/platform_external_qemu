@@ -244,6 +244,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->tablet_mode_button->setHidden(true);
     }
 
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+        // Android TV should not rotate
+        // TODO: emulate VESA mounts for use with
+        // vertically scrolling arcade games
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+    }
+
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         // Android Auto doesn't supoort rotate, home, back, recent
         mToolsUi->prev_layout_button->setHidden(true);

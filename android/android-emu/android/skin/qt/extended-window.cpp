@@ -53,8 +53,6 @@ ExtendedWindow::ExtendedWindow(
 #endif
 
     QSettings settings;
-    bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
-    setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
@@ -345,7 +343,6 @@ void ExtendedWindow::switchFrameAlways(bool showFrame)
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
     mEmulatorWindow->setOnTop(isOnTop);
-    setFrameOnTop(this, isOnTop);
     mToolWindow->notifySwitchOnTop();
 }
 
