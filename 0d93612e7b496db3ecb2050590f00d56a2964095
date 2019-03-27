@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2162f91_aa99395e",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-27T21:38:07Z",
+      "side": 1,
+      "message": "breaks mingw?",
+      "range": {
+        "startLine": 214,
+        "startChar": 13,
+        "endLine": 214,
+        "endChar": 31
+      },
+      "revId": "0d93612e7b496db3ecb2050590f00d56a2964095",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
