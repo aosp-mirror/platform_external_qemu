@@ -52,6 +52,24 @@
       "revId": "2a9ffa995e7ef091543b5a0b360d83f83b1e2f5f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d83d2fc9_3fe42821",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-27T18:31:46Z",
+      "side": 1,
+      "message": "Let\u0027s see if this one pass the msvc build, it works locally.",
+      "parentUuid": "ab5887bf_bc3e8dfe",
+      "revId": "2a9ffa995e7ef091543b5a0b360d83f83b1e2f5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
