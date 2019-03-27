@@ -290,5 +290,7 @@ size_t goldfish_vk_extension_struct_size(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
 
 } // namespace goldfish_vk

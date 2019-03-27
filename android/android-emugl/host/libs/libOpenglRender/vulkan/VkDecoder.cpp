@@ -14383,6 +14383,80 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+            case OP_vkBeginCommandBufferAsyncGOOGLE:
+            {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkBeginCommandBufferAsyncGOOGLE\n");;
+                }
+                VkCommandBuffer commandBuffer;
+                const VkCommandBufferBeginInfo* pBeginInfo;
+                // Begin manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_823;
+                vkReadStream->read((uint64_t*)&cgen_var_823, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_823, (VkCommandBuffer*)&commandBuffer, 1);
+                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
+                auto vk = dispatch_VkCommandBuffer(commandBuffer);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->alloc((void**)&pBeginInfo, sizeof(const VkCommandBufferBeginInfo));
+                unmarshal_VkCommandBufferBeginInfo(vkReadStream, (VkCommandBufferBeginInfo*)(pBeginInfo));
+                if (pBeginInfo)
+                {
+                    transform_tohost_VkCommandBufferBeginInfo(m_state, (VkCommandBufferBeginInfo*)(pBeginInfo));
+                }
+                m_state->on_vkBeginCommandBufferAsyncGOOGLE(commandBuffer, pBeginInfo);
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+            case OP_vkEndCommandBufferAsyncGOOGLE:
+            {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkEndCommandBufferAsyncGOOGLE\n");;
+                }
+                VkCommandBuffer commandBuffer;
+                // Begin manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_824;
+                vkReadStream->read((uint64_t*)&cgen_var_824, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_824, (VkCommandBuffer*)&commandBuffer, 1);
+                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
+                auto vk = dispatch_VkCommandBuffer(commandBuffer);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for commandBuffer;
+                m_state->on_vkEndCommandBufferAsyncGOOGLE(commandBuffer);
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+            case OP_vkResetCommandBufferAsyncGOOGLE:
+            {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkResetCommandBufferAsyncGOOGLE\n");;
+                }
+                VkCommandBuffer commandBuffer;
+                VkCommandBufferResetFlags flags;
+                // Begin manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_825;
+                vkReadStream->read((uint64_t*)&cgen_var_825, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_825, (VkCommandBuffer*)&commandBuffer, 1);
+                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
+                auto vk = dispatch_VkCommandBuffer(commandBuffer);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->read((VkCommandBufferResetFlags*)&flags, sizeof(VkCommandBufferResetFlags));
+                m_state->on_vkResetCommandBufferAsyncGOOGLE(commandBuffer, flags);
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;
