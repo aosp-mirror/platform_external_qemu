@@ -41,4 +41,6 @@ FEATURE_CONTROL_ITEM(QuickbootFileBacked)
 // Meta feature which disables a confirmation dialog, does not affect snapshot
 // data
 FEATURE_CONTROL_ITEM(OffworldDisableSecurity)
+FEATURE_CONTROL_ITEM(MacroUi)
+FEATURE_CONTROL_ITEM(IpDisconnectOnLoad)
 // No guest feature flags seem safe to snapshot.
