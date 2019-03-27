@@ -5194,7 +5194,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 current_machine->kernel_cmdline = combined;
             }
         }
-
+        slirp_set_cleanup_ip_on_load(feature_is_enabled(kFeature_IpDisconnectOnLoad));
         qemu_android_emulation_init_slirp();
     }
 #endif
@@ -5575,7 +5575,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         if (!android_reporting_setup()) {
             return 1;
         }
-
 #if SNAPSHOT_PROFILE > 1
         printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
