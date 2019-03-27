@@ -35,7 +35,7 @@
    </widget>
    <widget class="RecordMacroPage" name="recordMacro">
     <attribute name="title">
-     <string>Macro Record</string>
+     <string>Macro Playback</string>
     </attribute>
    </widget>
   </widget>
