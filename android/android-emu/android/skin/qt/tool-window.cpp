@@ -908,14 +908,17 @@ void ToolWindow::on_home_button_released() {
 void ToolWindow::on_minimize_button_clicked() {
 #ifdef __linux__
     this->hide();
-#else
+    if (!ToolWindow2::shouldHide()) {
+        mToolWindow2->hide();
+    }
+ #else
     this->showMinimized();
-#endif
-
     if (!ToolWindow2::shouldHide()) {
         mToolWindow2->showMinimized();
     }
-    mEmulatorWindow->showMinimized();
+ #endif
+
+   mEmulatorWindow->showMinimized();
 }
 
 void ToolWindow::on_power_button_pressed() {
