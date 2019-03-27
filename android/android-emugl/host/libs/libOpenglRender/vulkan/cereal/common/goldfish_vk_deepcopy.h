@@ -2016,5 +2016,7 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
 
 } // namespace goldfish_vk

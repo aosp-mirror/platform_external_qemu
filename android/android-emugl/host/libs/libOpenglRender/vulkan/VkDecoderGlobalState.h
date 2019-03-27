@@ -252,6 +252,7 @@ public:
         bool supportsVulkan = false;
         bool supportsVulkan1_1 = false;
         bool supportsExternalMemory = false;
+        bool useDeferredCommands = false;
         uint32_t apiVersion = 0;
         uint32_t driverVersion = 0;
         uint32_t deviceID = 0;
@@ -396,6 +397,15 @@ public:
         const VkDescriptorImageInfo* pImageInfos,
         const VkDescriptorBufferInfo* pBufferInfos,
         const VkBufferView* pBufferViews);
+
+    void on_vkBeginCommandBufferAsyncGOOGLE(
+        VkCommandBuffer commandBuffer,
+        const VkCommandBufferBeginInfo* pBeginInfo);
+    void on_vkEndCommandBufferAsyncGOOGLE(
+        VkCommandBuffer commandBuffer);
+    void on_vkResetCommandBufferAsyncGOOGLE(
+        VkCommandBuffer commandBuffer,
+        VkCommandBufferResetFlags flags);
 
     // Transformations
     void deviceMemoryTransform_tohost(

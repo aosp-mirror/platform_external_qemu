@@ -631,6 +631,11 @@ PFN_vkRegisterBufferColorBufferGOOGLE vkRegisterBufferColorBufferGOOGLE;
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE vkUpdateDescriptorSetWithTemplateSizedGOOGLE;
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+PFN_vkBeginCommandBufferAsyncGOOGLE vkBeginCommandBufferAsyncGOOGLE;
+PFN_vkEndCommandBufferAsyncGOOGLE vkEndCommandBufferAsyncGOOGLE;
+PFN_vkResetCommandBufferAsyncGOOGLE vkResetCommandBufferAsyncGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk

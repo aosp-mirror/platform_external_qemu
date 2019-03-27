@@ -183,6 +183,7 @@ static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_
 
 // Vulkan
 static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
+static constexpr android::base::StringView kDeferredVulkanCommands = "ANDROID_EMU_deferred_vulkan_commands";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -262,6 +263,14 @@ static bool shouldEnableVulkan() {
     // TODO: Restrict further to devices supporting external memory.
     return supportInfo.supportsVulkan &&
            flagEnabled;
+}
+
+static bool shouldEnableDeferredVulkanCommands() {
+    auto supportInfo =
+        goldfish_vk::VkDecoderGlobalState::get()->
+            getHostFeatureSupport();
+    return supportInfo.supportsVulkan &&
+           supportInfo.useDeferredCommands;
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -366,6 +375,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         emugl_feature_is_enabled(android::featurecontrol::GLDirectMem);
     bool hostCompositionEnabled = shouldEnableHostComposition();
     bool vulkanEnabled = shouldEnableVulkan();
+    bool deferredVulkanCommandsEnabled =
+        shouldEnableVulkan() && shouldEnableDeferredVulkanCommands();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -404,6 +415,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanFeatureStr;
+        glStr += " ";
+    }
+
+    if (deferredVulkanCommandsEnabled && name == GL_EXTENSIONS) {
+        glStr += kDeferredVulkanCommands;
         glStr += " ";
     }
 

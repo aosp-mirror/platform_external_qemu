@@ -559,7 +559,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Start up Vulkan emulation info
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
         auto dispatch = emugl::vkDispatch(false /* not for testing */);
-        goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
+        auto emu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
+        bool useDeferredCommands =
+            android::base::System::get()->envGet("ANDROID_EMU_VK_IMMEDIATE_COMMANDS").empty();
+        goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
     }
 
     // Start up the single sync thread if GLAsyncSwap enabled
