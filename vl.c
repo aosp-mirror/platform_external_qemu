@@ -5171,9 +5171,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             g_free(current_machine->kernel_cmdline);
             current_machine->kernel_cmdline = combined;
         }
+        slirp_set_cleanup_ip_on_load(feature_is_enabled(kFeature_IpDisconnectOnLoad));
+        qemu_android_emulation_init_slirp();
     }
 
-    qemu_android_emulation_init_slirp();
 #endif
 
     if (qemu_opts_foreach(qemu_find_opts("object"),
