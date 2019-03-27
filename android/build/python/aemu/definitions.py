@@ -173,15 +173,3 @@ class Toolchain(ArgEnum):
 
     def to_cmd(self):
         return ['-DCMAKE_TOOLCHAIN_FILE=%s' % os.path.join(get_qemu_root(), 'android', 'build', 'cmake', self.value)]
-
-
-class SymbolUris(ArgEnum):
-    staging = 'https://clients2.google.com/cr/staging_symbol'
-    prod = 'https://clients2.google.com/cr/symbol'
-    none = None
-
-
-    def to_cmd(self):
-        if self.value:
-            return ['-DANDROID_SYMBOL_URL=%s' % self.value]
-        return []

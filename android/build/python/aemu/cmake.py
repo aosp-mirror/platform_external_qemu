@@ -29,7 +29,7 @@ import platform
 import shutil
 
 from aemu.process import run
-from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang, read_simple_properties
+from aemu.definitions import Generator, Crash, BuildConfig, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang, read_simple_properties
 from aemu.run_tests import run_tests
 from aemu.distribution import create_distribution
 
@@ -85,7 +85,6 @@ def configure():
     # Setup the right toolchain/compiler configuration.
     cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
-    cmake_cmd += SymbolUris.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     cmake_cmd += ['-DQTWEBENGINE=%s' % FLAGS.qtwebengine]
 
