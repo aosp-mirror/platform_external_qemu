@@ -16,12 +16,69 @@
 
 #include "android/camera/camera-videoplayback-render-multiplexer.h"
 
+#include <string>
+
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
+#include "android/base/files/FileShareOpen.h"
 #include "android/offworld/proto/offworld.pb.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/utils/looper.h"
 
 namespace android {
 namespace videoplayback {
+
+class VideoplaybackNotifier : public android::videoplayer::VideoPlayerNotifier {
+public:
+    VideoplaybackNotifier();
+    virtual ~VideoplaybackNotifier() override;
+
+    void initTimer() override;
+    void startTimer(int delayMs) override;
+    void stopTimer() override;
+
+    void videoRefreshTimer();
+    void emitUpdateWidget() override {}
+    void emitVideoFinished() override {}
+    void emitVideoStopped() override {}
+
+private:
+    Looper* mLooper = nullptr;
+    LoopTimer* mLoopTimer = nullptr;
+};
+
+VideoplaybackNotifier::VideoplaybackNotifier() {
+    mLooper = looper_getForThread();
+}
+
+VideoplaybackNotifier::~VideoplaybackNotifier() {
+    if (mLoopTimer != nullptr) {
+        loopTimer_free(mLoopTimer);
+    }
+}
+
+static void _on_videoplayback_time_out(void* opaque, LoopTimer* unused) {
+    VideoplaybackNotifier* const notifier = (VideoplaybackNotifier*)opaque;
+    notifier->videoRefreshTimer();
+}
+
+void VideoplaybackNotifier::initTimer() {
+    mLoopTimer = loopTimer_new(mLooper, _on_videoplayback_time_out, this);
+}
+
+void VideoplaybackNotifier::startTimer(int delayMs) {
+    loopTimer_startRelative(mLoopTimer, delayMs);
+}
+
+void VideoplaybackNotifier::stopTimer() {
+    loopTimer_stop(mLoopTimer);
+}
+
+void VideoplaybackNotifier::videoRefreshTimer() {
+    if (mPlayer) {
+        mPlayer->videoRefresh();
+    }
+}
 
 bool RenderMultiplexer::initialize(const GLESv2Dispatch* gles2,
                                    int width,
@@ -32,14 +89,35 @@ bool RenderMultiplexer::initialize(const GLESv2Dispatch* gles2,
         uninitialize();
         return false;
     }
+    mVideoRenderer = std::unique_ptr<VideoplaybackVideoRenderer>(
+            new VideoplaybackVideoRenderer());
+    if (!mVideoRenderer->initialize(gles2, width, height)) {
+        uninitialize();
+        return false;
+    }
+
     mCurrentRenderer = mDefaultRenderer.get();
     mInitialized = true;
     return true;
 }
 
 void RenderMultiplexer::uninitialize() {
+    if (mPlayer) {
+      if (mPlayer->isRunning()) {
+        mPlayer->stop();
+      }
+      mPlayer.reset();
+    }
     mCurrentRenderer = nullptr;
+    if (mDefaultRenderer) {
+        mDefaultRenderer->uninitialize();
+    }
     mDefaultRenderer.reset();
+
+    if (mVideoRenderer) {
+        mVideoRenderer->uninitialize();
+    }
+    mVideoRenderer.reset();
     mInitialized = false;
 }
 
@@ -56,14 +134,81 @@ int64_t RenderMultiplexer::render() {
     if (maybe_next_request) {
         switch (maybe_next_request->function_case()) {
             case ::offworld::VideoInjectionRequest::kDisplayDefaultFrame:
-              mCurrentRenderer = mDefaultRenderer.get();
-              break;
+                if (mPlayer && mPlayer->isRunning()) {
+                  mPlayer->stop();
+                }
+                SwitchRenderer(mDefaultRenderer.get());
+                break;
+            case ::offworld::VideoInjectionRequest::kPlay:
+                if (mPlayer == nullptr) {
+                    LOG(ERROR) << "No video loaded.";
+                    return -1;
+                }
+                SwitchRenderer(mVideoRenderer.get());
+                mPlayer->start();
+                break;
+            case ::offworld::VideoInjectionRequest::kStop:
+                if (mPlayer == nullptr) {
+                    LOG(ERROR) << "No video loaded.";
+                    return -1;
+                }
+                SwitchRenderer(mVideoRenderer.get());
+                mPlayer->stop();
+                break;
+            case ::offworld::VideoInjectionRequest::kLoad:
+                SwitchRenderer(mVideoRenderer.get());
+                loadVideo(maybe_next_request->load().video_data());
+                // Force the video player to be in a known stable state.
+                mPlayer->stop();
+                break;
             default:
-              mCurrentRenderer = mDefaultRenderer.get();
-              break;
+                SwitchRenderer(mDefaultRenderer.get());
+                break;
         }
     }
+    if (mCurrentRenderer == mVideoRenderer.get() && mPlayer) {
+      mPlayer->videoRefresh();
+    }
     return mCurrentRenderer->render();
+}
+
+void RenderMultiplexer::loadVideo(const std::string& video_data) {
+    const char* kVideoFilePath = "/tmp/videoplayback_input.mp4";
+
+    // Write sent video data to a temporary file on host machine.
+    FILE *f = fopen(kVideoFilePath, "wb");
+    fwrite(video_data.c_str(), sizeof(char), video_data.size(), f);
+    fclose(f);
+
+    mPlayer = videoplayer::VideoPlayer::create(
+            kVideoFilePath, mVideoRenderer->renderTarget(),
+            std::unique_ptr<videoplayer::VideoPlayerNotifier>(
+                    new VideoplaybackNotifier()));
+}
+
+// SwitchRenderer cleans up any previous renderer state or sets up any new
+// renderer state that is necessary to make the switch work.
+void RenderMultiplexer::SwitchRenderer(virtualscene::CameraRenderer* nextRenderer) {
+  if (mCurrentRenderer == nextRenderer) {
+    return;
+  }
+
+  // If we are changing out of the video renderer, we need to cleanup all
+  // the openGL work that we had allocated for video playing.
+  if (mCurrentRenderer == mVideoRenderer.get()) {
+    if (mPlayer && mPlayer->isRunning()) {
+      mPlayer->stop();
+    }
+  }
+  mVideoRenderer->renderTarget()->uninitialize();
+
+  // We need to make sure that we properly set up the openGL environment
+  // for video playing if we are switching to the video renderer.
+  if (nextRenderer == mVideoRenderer.get()) {
+    mVideoRenderer->renderTarget()->initialize();
+  }
+
+  mCurrentRenderer = nextRenderer;
 }
 
 }  // namespace videoplayback
