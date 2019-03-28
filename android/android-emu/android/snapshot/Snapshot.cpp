@@ -36,6 +36,8 @@
 #include <sys/mman.h>
 
 #include <algorithm>
+#include <functional>
+#include <unordered_set>
 
 #define ALLOW_CHANGE_RENDERER
 
@@ -209,7 +211,7 @@ bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
     return true;
 }
 
-static constexpr Feature sInsensitiveFeatures[] = {
+static const std::unordered_set<Feature, std::hash<size_t>> sInsensitiveFeatures({
 #undef FEATURE_CONTROL_ITEM
 #define FEATURE_CONTROL_ITEM(feature) \
     fc::feature,
@@ -217,22 +219,16 @@ static constexpr Feature sInsensitiveFeatures[] = {
 #include "android/featurecontrol/FeatureControlDefSnapshotInsensitive.h"
 
 #undef FEATURE_CONTROL_ITEM
-};
+});
 
 const std::vector<Feature> Snapshot::getSnapshotInsensitiveFeatures() {
-    std::vector<Feature> res;
-    for (int i = 0; i < sizeof(sInsensitiveFeatures) / sizeof(Feature); i++) {
-        res.push_back(sInsensitiveFeatures[i]);
-    }
-    return res;
+    return std::vector<Feature>(sInsensitiveFeatures.begin(),
+        sInsensitiveFeatures.end());
 }
 
 // static
 bool Snapshot::isFeatureSnapshotInsensitive(Feature input) {
-    for (int i = 0; i < sizeof(sInsensitiveFeatures) / sizeof(Feature); i++) {
-        if (input == sInsensitiveFeatures[i]) return true;
-    }
-    return false;
+    return sInsensitiveFeatures.count(input);
 }
 
 bool Snapshot::isCompatibleWithCurrentFeatures() {
