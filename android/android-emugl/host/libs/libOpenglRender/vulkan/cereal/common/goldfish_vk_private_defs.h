@@ -128,6 +128,17 @@ typedef void (VKAPI_PTR *PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)(
     const VkDescriptorBufferInfo* pBufferInfos,
     const VkBufferView* pBufferViews);
 
+#define VK_GOOGLE_async_command_buffers 1
+
+typedef void (VKAPI_PTR *PFN_vkBeginCommandBufferAsyncGOOGLE)(
+    VkCommandBuffer commandBuffer,
+    const VkCommandBufferBeginInfo* pBeginInfo);
+typedef void (VKAPI_PTR *PFN_vkEndCommandBufferAsyncGOOGLE)(
+    VkCommandBuffer commandBuffer);
+typedef void (VKAPI_PTR *PFN_vkResetCommandBufferAsyncGOOGLE)(
+    VkCommandBuffer commandBuffer,
+    VkCommandBufferResetFlags flags);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

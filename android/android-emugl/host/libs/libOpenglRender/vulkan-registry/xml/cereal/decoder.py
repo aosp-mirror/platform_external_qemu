@@ -337,6 +337,11 @@ custom_decodes = {
     "vkDestroyDescriptorUpdateTemplate" : emit_global_state_wrapped_decoding,
     "vkDestroyDescriptorUpdateTemplateKHR" : emit_global_state_wrapped_decoding,
     "vkUpdateDescriptorSetWithTemplateSizedGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_async_command_buffer
+    "vkBeginCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkEndCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkResetCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

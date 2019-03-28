@@ -60,6 +60,9 @@ struct VkEmulation {
     // Whether initialization succeeded.
     bool live = false;
 
+    // Whether to use deferred command submission.
+    bool useDeferredCommands = false;
+
     // Instance and device for creating the system-wide shareable objects.
     VkInstance instance = VK_NULL_HANDLE;
     VkPhysicalDevice physdev = VK_NULL_HANDLE;
@@ -222,6 +225,8 @@ struct VkEmulation {
 };
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
+void setUseDeferredCommands(VkEmulation* emu, bool useDeferred);
+
 VkEmulation* getGlobalVkEmulation();
 void teardownGlobalVkEmulation();
 

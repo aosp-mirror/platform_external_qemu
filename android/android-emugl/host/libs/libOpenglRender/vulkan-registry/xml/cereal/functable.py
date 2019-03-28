@@ -43,6 +43,9 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkUpdateDescriptorSetWithTemplate",
     "vkGetPhysicalDeviceImageFormatProperties2",
     "vkGetPhysicalDeviceImageFormatProperties2KHR",
+    "vkBeginCommandBuffer",
+    "vkEndCommandBuffer",
+    "vkResetCommandBuffer",
 ]
 
 SUCCESS_VAL = {

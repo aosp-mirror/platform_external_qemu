@@ -284,6 +284,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -761,6 +763,11 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+    out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkBeginCommandBufferAsyncGOOGLE");
+    out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkEndCommandBufferAsyncGOOGLE");
+    out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkResetCommandBufferAsyncGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1275,6 +1282,11 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_GOOGLE_sized_descriptor_update_template
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
 #endif
+#ifdef VK_GOOGLE_async_command_buffers
+    out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkBeginCommandBufferAsyncGOOGLE");
+    out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkEndCommandBufferAsyncGOOGLE");
+    out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkResetCommandBufferAsyncGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1751,6 +1763,11 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+    out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBufferAsyncGOOGLE");
+    out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkEndCommandBufferAsyncGOOGLE");
+    out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkResetCommandBufferAsyncGOOGLE");
 #endif
 }
 

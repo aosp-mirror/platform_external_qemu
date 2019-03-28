@@ -841,6 +841,14 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     return sVkEmulation;
 }
 
+void setUseDeferredCommands(VkEmulation* emu, bool useDeferredCommands) {
+    if (!emu) return;
+    if (!emu->live) return;
+
+    LOG(VERBOSE) << "Using deferred Vulkan commands: " << useDeferredCommands;
+    emu->useDeferredCommands = useDeferredCommands;
+}
+
 VkEmulation* getGlobalVkEmulation() {
     if (sVkEmulation && !sVkEmulation->live) return nullptr;
     return sVkEmulation;
