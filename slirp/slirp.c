@@ -59,6 +59,8 @@ static u_int dns_addr_time;
 static u_int dns6_addr_time;
 #endif
 
+static int enable_cleanup_ip_on_load = 0;
+
 #define TIMEOUT_FAST 2  /* milliseconds */
 #define TIMEOUT_SLOW 499  /* milliseconds */
 /* for the aging of certain requests like DNS */
@@ -1601,6 +1603,13 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
     Slirp *slirp = opaque;
     struct ex_list *ex_ptr;
 
+    // Clean up stale connections
+    // ip_cleanup cleans up both IPv4 and IPv6 connections, and ip6_cleanup
+    // cleans up extra data structures for IPv6. (Naming is confusing.)
+    if (enable_cleanup_ip_on_load) {
+        ip_cleanup(slirp);
+    }
+
     while (qemu_get_byte(f)) {
         int ret;
         struct socket *so = socreate(slirp);
@@ -1631,4 +1640,8 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
     }
 
     return vmstate_load_state(f, &vmstate_slirp, slirp, version_id);
+}
+
+void slirp_set_cleanup_ip_on_load(bool enable) {
+    enable_cleanup_ip_on_load = enable;
 }
