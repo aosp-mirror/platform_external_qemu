@@ -82,6 +82,7 @@ VAOState::VAOState(android::base::Stream* stream) {
             GLuint id = stream->getBe32();
             arraysMap->emplace(id, new GLESpointer(stream));
         }
+        legacy = true;
     } else {
         arraysMap.reset();
     }
