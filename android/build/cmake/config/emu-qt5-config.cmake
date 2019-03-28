@@ -324,7 +324,8 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   list(
       APPEND
         QT5_SHARED_DEPENDENCIES
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/libfreetype.so.6)
+
 endif()
 
 set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WidgetsAndroidEmu -lQt5GuiAndroidEmu -lQt5CoreAndroidEmu -lQt5SvgAndroidEmu)
