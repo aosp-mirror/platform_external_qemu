@@ -5162,6 +5162,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     android_op_dns_server);
             return 1;
         }
+<<<<<<< HEAD   (84867d Merge "Merge cherrypicks of [934000] into emu-3.1-release" i)
         // TODO: Find a way to pass the number of IPv6 DNS servers to
         // the guest system.
         if (dns_count > 1) {
@@ -5171,6 +5172,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             g_free(current_machine->kernel_cmdline);
             current_machine->kernel_cmdline = combined;
         }
+=======
+        slirp_set_cleanup_ip_on_load(feature_is_enabled(kFeature_IpDisconnectOnLoad));
+        qemu_android_emulation_init_slirp();
+>>>>>>> CHANGE (782fd6 Flag IP auto-disconnect on snapshot load)
     }
 
     qemu_android_emulation_init_slirp();
@@ -5535,6 +5540,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     bool tryDefaultVmLoad = true;
 #ifdef CONFIG_ANDROID
+<<<<<<< HEAD   (84867d Merge "Merge cherrypicks of [934000] into emu-3.1-release" i)
     // Initialize reporting right before starting the real VM work (load/boot
     // and the main loop). We want to track performance of a running emulator,
     // ignoring any too early exits as a result of incorrect setup.
@@ -5542,6 +5548,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
+=======
+    if (android_qemu_mode) {
+        // Initialize reporting right before starting the real VM work (load/boot
+        // and the main loop). We want to track performance of a running emulator,
+        // ignoring any too early exits as a result of incorrect setup.
+        if (!android_reporting_setup()) {
+            return 1;
+        }
+>>>>>>> CHANGE (782fd6 Flag IP auto-disconnect on snapshot load)
 #if SNAPSHOT_PROFILE > 1
     printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
