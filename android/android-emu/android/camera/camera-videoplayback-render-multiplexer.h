@@ -19,8 +19,11 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/utils/compiler.h"
+#include "android/recording/video/player/VideoPlayer.h"
 #include "android/videoinjection/VideoInjectionController.h"
+#include "android/videoplayback/VideoplaybackRenderTarget.h"
 #include "android/camera/camera-videoplayback-default-renderer.h"
+#include "android/camera/camera-virtualscene-utils.h"
 
 namespace android {
 namespace videoplayback {
