@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b328bbd_d24c3d00",
+        "filename": "android/msvc-posix-compat/src/setjmp.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-28T23:56:54Z",
+      "side": 1,
+      "message": "Very nice :) Might possibly be the toolchain portable setjmp/longjmp implementation that most poeple needed, could consider open sourcing by itself even, well after xmm/ymm taken care of i guess",
+      "revId": "84598536f9677ec633df3ffe1d03a952b030f70c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
