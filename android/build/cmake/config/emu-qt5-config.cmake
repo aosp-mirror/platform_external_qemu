@@ -316,7 +316,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
         ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5WebEngineWidgetsAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.so.5>lib64/qt/lib/libQt5WebSocketsAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
-        ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
+        ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so)
 
     list(APPEND QT5_SHARED_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
   endif()
