@@ -277,17 +277,17 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   add_qt_shared_lib(Widgets "-lQt5WidgetsAndroidEmu" "Qt5::Gui")
   add_qt_shared_lib(Svg "-lQt5SvgAndroidEmu" "Qt5::Widgets")
 
+  get_filename_component(
+    PREBUILT_WEBENGINE_DEPS_ROOT
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/qtwebengine-deps/${ANDROID_TARGET_TAG}"
+    ABSOLUTE)
+
   if(QTWEBENGINE)
       add_qt_shared_lib(Network "-lQt5NetworkAndroidEmu" "Qt5::Core")
       add_qt_shared_lib(Qml "-lQt5QmlAndroidEmu" "Qt5::Network")
       add_qt_shared_lib(WebChannel "-lQt5WebChannelAndroidEmu" "Qt5::Qml")
       add_qt_shared_lib(WebSockets "-lQt5WebSocketsAndroidEmu" "Qt5::Qml")
       add_qt_shared_lib(WebEngineWidgets "-lQt5WebEngineWidgetsAndroidEmu" "Qt5::Qml")
-
-    get_filename_component(
-      PREBUILT_WEBENGINE_DEPS_ROOT
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/qtwebengine-deps/${ANDROID_TARGET_TAG}"
-      ABSOLUTE)
 
     list(APPEND QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WebChannelAndroidEmu -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSocketsAndroidEmu)
     list(
@@ -317,10 +317,14 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
         ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.so.5>lib64/qt/lib/libQt5WebSocketsAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
         ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
 
     list(APPEND QT5_SHARED_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
   endif()
+
+  list(
+      APPEND
+        QT5_SHARED_DEPENDENCIES
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
 endif()
 
 set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WidgetsAndroidEmu -lQt5GuiAndroidEmu -lQt5CoreAndroidEmu -lQt5SvgAndroidEmu)
