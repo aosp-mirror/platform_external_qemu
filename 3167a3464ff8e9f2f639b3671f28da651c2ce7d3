@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4fade3a9_4d2fe108",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-28T21:37:59Z",
+      "side": 1,
+      "message": "\u003d nullptr",
+      "range": {
+        "startLine": 345,
+        "startChar": 27,
+        "endLine": 345,
+        "endChar": 28
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d0e72c4_f9de9bc4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-28T21:37:59Z",
+      "side": 1,
+      "message": "const std::vector\u003c\u003e...?\n\nor if not using pointer, do\nconst std::vector\u003cint32_t\u003e\u0026 getVec();",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 12
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a61eaea_30bf58e0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-28T21:37:59Z",
+      "side": 1,
+      "message": "Please use smart pointers here and elsewhere, e.g., std::unique_ptr. These raw pointers will not get their destructors called. So something like this:\nQVector\u003cstd::unique_ptr\u003cQPair\u003cstd::unique_ptr\u003cQCheckBox\u003e, int32_t\u003e\u003e mCheckboxsVec;\n\nyou probably don\u0027t need QPair to be a pointer either, so:\nQVector\u003cQPair\u003cstd::unique_ptr\u003cQCheckBox\u003e, int32_t\u003e\u003e mCheckboxsVec;",
+      "range": {
+        "startLine": 39,
+        "startChar": 12,
+        "endLine": 39,
+        "endChar": 39
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68f70b3a_657ce5b3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-28T21:37:59Z",
+      "side": 1,
+      "message": "\u003d nullptr\n\nUse std::unique_ptr\u003cstd::vector\u003cint32_t\u003e\u003e here\n\nActually, you probably don\u0027t need to have this as a pointer here, just:\nstd::vector\u003cint32_t\u003e mCheckedValues;",
+      "range": {
+        "startLine": 40,
+        "startChar": 40,
+        "endLine": 40,
+        "endChar": 41
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c7d1ed6_fd81543c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-28T21:37:59Z",
+      "side": 1,
+      "message": "std::unique_ptr\u003cQDialogButtonBox\u003e mButtonBox;",
+      "range": {
+        "startLine": 41,
+        "startChar": 32,
+        "endLine": 41,
+        "endChar": 33
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
