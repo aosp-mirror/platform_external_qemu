@@ -42,11 +42,12 @@ void RecordMacroPage::loadUi() {
     mUi->macroList->clear();
 
     const std::string macrosPath = getMacrosDirectory();
-    const std::vector<std::string> macroFileNames =
+    std::vector<std::string> macroFileNames =
             System::get()->scanDirEntries(macrosPath);
 
     // For every macro, create a macroSavedItem with its name.
-    for (const auto& macroName : macroFileNames) {
+    for (auto& macroName : macroFileNames) {
+        std::replace(macroName.begin(), macroName.end(), '_', ' ');
         RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
         macroSavedItem->setName(macroName.c_str());
         macroSavedItem->setDisplayInfo(tr("Preset macro"));
@@ -75,7 +76,8 @@ void RecordMacroPage::on_playStopButton_clicked() {
 
 void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
     RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
-    const std::string macroName = macroSavedItem->getName();
+    std::string macroName = macroSavedItem->getName();
+    std::replace(macroName.begin(), macroName.end(), ' ', '_');
 
     if (mMacroPlaying && mCurrentMacroName == macroName) {
         setMacroUiState(MacroUiState::Playing);
@@ -147,7 +149,8 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     macroSavedItem->setDisplayInfo(tr("Now playing..."));
     mVideoPlayer->stop();
 
-    const std::string macroName = macroSavedItem->getName();
+    std::string macroName = macroSavedItem->getName();
+    std::replace(macroName.begin(), macroName.end(), ' ', '_');
     const std::string macroAbsolutePath =
             PathUtils::join(getMacrosDirectory(), macroName);
 
@@ -232,7 +235,9 @@ void RecordMacroPage::previewVideoPlayingFinished() {
 void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
     if (mState == MacroUiState::PreviewFinished) {
         QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
-        showPreview(getItemWidget(listItem)->getName());
+        std::string macroName = getItemWidget(listItem)->getName();
+        std::replace(macroName.begin(), macroName.end(), ' ', '_');
+        showPreview(macroName);
         setMacroUiState(MacroUiState::Selected);
     }
 }
