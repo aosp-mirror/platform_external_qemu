@@ -196,7 +196,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
     }
     if (fc::isEnabled(fc::ScreenRecording)) {
-        default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD_SCREEN\n";
+        default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD\n";
     }
 
     QTextStream stream(&default_shortcuts);
@@ -461,9 +461,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 showOrRaiseExtendedWindow(PANE_IDX_GOOGLE_PLAY);
             }
             break;
-        case QtUICommand::SHOW_PANE_RECORD_SCREEN:
+        case QtUICommand::SHOW_PANE_RECORD:
             if (down) {
-                showOrRaiseExtendedWindow(PANE_IDX_RECORD_SCREEN);
+                showOrRaiseExtendedWindow(PANE_IDX_RECORD);
             }
             break;
         case QtUICommand::SHOW_PANE_SETTINGS:

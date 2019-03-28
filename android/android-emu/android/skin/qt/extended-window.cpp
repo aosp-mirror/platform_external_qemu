@@ -95,23 +95,23 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
 
     mPaneButtonMap = {
-        {PANE_IDX_CAR,           mExtendedUi->carDataButton},
-        {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
-        {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
-        {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
-        {PANE_IDX_CAMERA,        mExtendedUi->cameraButton},
-        {PANE_IDX_TELEPHONE,     mExtendedUi->telephoneButton},
-        {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
-        {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
-        {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
-        {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
-        {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
-        {PANE_IDX_SNAPSHOT,      mExtendedUi->snapshotButton},
-        {PANE_IDX_BUGREPORT,     mExtendedUi->bugreportButton},
-        {PANE_IDX_SETTINGS,      mExtendedUi->settingsButton},
-        {PANE_IDX_HELP,          mExtendedUi->helpButton},
-        {PANE_IDX_RECORD_SCREEN, mExtendedUi->recordScreenButton},
-        {PANE_IDX_GOOGLE_PLAY,   mExtendedUi->googlePlayButton},
+            {PANE_IDX_CAR, mExtendedUi->carDataButton},
+            {PANE_IDX_LOCATION, mExtendedUi->locationButton},
+            {PANE_IDX_CELLULAR, mExtendedUi->cellularButton},
+            {PANE_IDX_BATTERY, mExtendedUi->batteryButton},
+            {PANE_IDX_CAMERA, mExtendedUi->cameraButton},
+            {PANE_IDX_TELEPHONE, mExtendedUi->telephoneButton},
+            {PANE_IDX_DPAD, mExtendedUi->dpadButton},
+            {PANE_IDX_ROTARY, mExtendedUi->rotaryInputButton},
+            {PANE_IDX_MICROPHONE, mExtendedUi->microphoneButton},
+            {PANE_IDX_FINGER, mExtendedUi->fingerButton},
+            {PANE_IDX_VIRT_SENSORS, mExtendedUi->virtSensorsButton},
+            {PANE_IDX_SNAPSHOT, mExtendedUi->snapshotButton},
+            {PANE_IDX_BUGREPORT, mExtendedUi->bugreportButton},
+            {PANE_IDX_SETTINGS, mExtendedUi->settingsButton},
+            {PANE_IDX_HELP, mExtendedUi->helpButton},
+            {PANE_IDX_RECORD, mExtendedUi->recordButton},
+            {PANE_IDX_GOOGLE_PLAY, mExtendedUi->googlePlayButton},
     };
 
     setObjectName("ExtendedControls");
@@ -164,17 +164,9 @@ ExtendedWindow::ExtendedWindow(
 
     const bool screenRecording = android::featurecontrol::isEnabled(
             android::featurecontrol::ScreenRecording);
-    const bool macroUi = android::featurecontrol::isEnabled(
-            android::featurecontrol::MacroUi);
-    if (screenRecording || macroUi) {
-        mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
-        mExtendedUi->recordScreenButton->setVisible(true);
-
-        if (macroUi) {
-            mExtendedUi->recordScreenButton->setText(
-                    tr("  Record and Playback"));
-            mExtendedUi->recordAndPlaybackPage->enableMacroUi();
-        }
+    if (screenRecording) {
+        mSidebarButtons.addButton(mExtendedUi->recordButton);
+        mExtendedUi->recordButton->setVisible(true);
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
@@ -321,7 +313,7 @@ void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTI
 void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPSHOT); }
-void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
+void ExtendedWindow::on_recordButton_clicked()       { adjustTabs(PANE_IDX_RECORD); }
 void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
 

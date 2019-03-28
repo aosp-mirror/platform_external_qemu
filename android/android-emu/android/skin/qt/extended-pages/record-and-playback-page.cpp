@@ -14,15 +14,8 @@
 RecordAndPlaybackPage::RecordAndPlaybackPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordAndPlaybackPage()) {
     mUi->setupUi(this);
-    mUi->tabWidget->tabBar()->hide();
 }
 
 void RecordAndPlaybackPage::updateTheme() {
     mUi->recordScreen->updateTheme();
-}
-
-void RecordAndPlaybackPage::enableMacroUi() {
-    mUi->tabWidget->tabBar()->show();
-    mUi->tabWidget->resize(mUi->tabWidget->width(), 600);
-    mUi->tabWidget->move(0, 20);
 }

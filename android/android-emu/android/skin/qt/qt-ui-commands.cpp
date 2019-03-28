@@ -38,7 +38,7 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(SHOW_PANE_DPAD, "D-Pad"),
         INIT_COMMAND(SHOW_PANE_FINGER, "Fingerprint"),
         INIT_COMMAND(SHOW_PANE_GPLAY, "Google Play"),
-        INIT_COMMAND(SHOW_PANE_RECORD_SCREEN, "Screen record"),
+        INIT_COMMAND(SHOW_PANE_RECORD, "Record and Playback"),
         INIT_COMMAND(SHOW_PANE_SETTINGS, "Settings"),
         INIT_COMMAND(SHOW_PANE_HELP, "Help"),
         INIT_COMMAND(SHOW_PANE_PERFSTATS, "Performance Stats"),
