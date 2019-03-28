@@ -127,6 +127,9 @@ private:
                                               int areaId);
     emulator::EmulatorMessage makeSetPropMsgInt32(int32_t propId, int val, int areaId);
     emulator::EmulatorMessage makeSetPropMsgFloat(int32_t propId, float val, int areaId);
+    emulator::EmulatorMessage makeSetPropMsgInt32Vec(int32_t propId,
+                                                      std::vector<int32_t>* val,
+                                                      int areaId);
 
     int32_t getUserBoolValue(carpropertyutils::PropertyDescription propDesc,
                               int row, bool* pressedOk);
@@ -134,4 +137,7 @@ private:
                              int row, bool* pressedOk);
     int32_t getUserInt32Value(carpropertyutils::PropertyDescription propDesc,
                                int row, bool* pressedOk);
+    std::vector<int32_t>* getUserInt32VecValue(carpropertyutils::PropertyDescription propDesc,
+                             int row, bool* pressedOk);
+
 };

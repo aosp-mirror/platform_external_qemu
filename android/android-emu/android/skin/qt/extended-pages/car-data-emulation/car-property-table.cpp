@@ -13,6 +13,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h"
 
 #include <cfloat>
 
@@ -23,6 +24,7 @@
 
 using std::string;
 using std::map;
+using std::vector;
 
 using emulator::EmulatorMessage;
 using emulator::MsgType;
@@ -243,6 +245,7 @@ void CarPropertyTable::on_table_cellClicked(int row, int column) {
     bool pressedOk;
     int32_t int32Value;
     float floatValue;
+    vector<int32_t> *int32VecValue;
 
     EmulatorMessage writeMsg;
     string writeLog;
@@ -279,6 +282,15 @@ void CarPropertyTable::on_table_cellClicked(int row, int column) {
             writeLog = "Setting value for " + getLabel(row).toStdString();
             mSendEmulatorMsg(writeMsg, writeLog);
             break;
+        case (int32_t) VehiclePropertyType::INT32_VEC :
+            int32VecValue = getUserInt32VecValue(propDesc, row, &pressedOk);
+            if (!pressedOk) {
+                return;
+            }
+            writeMsg = makeSetPropMsgInt32Vec(prop, int32VecValue, areaId);
+            writeLog = "Setting value for " + getLabel(row).toStdString();
+            mSendEmulatorMsg(writeMsg, writeLog);
+            break;
     }
 
     mSendEmulatorMsg(writeMsg, writeLog);
@@ -292,7 +304,7 @@ int32_t CarPropertyTable::getUserBoolValue(PropertyDescription propDesc, int row
     QString oldValueString = getValueText(row);
     QStringList items;
     items << tr("True") << tr("False");
-    QString item = QInputDialog::getItem(this, QString(), propDesc.label,
+    QString item = QInputDialog::getItem(this, propDesc.label, nullptr,
                                           items, items.indexOf(oldValueString), false, pressedOk);
     return (item == "True") ? 1 : 0;
 }
@@ -306,7 +318,7 @@ int32_t CarPropertyTable::getUserInt32Value(PropertyDescription propDesc, int ro
         for (const auto &detail : *(propDesc.lookupTable)) {
             items << detail.second;
         }
-        QString item = QInputDialog::getItem(this, QString(), propDesc.label, items,
+        QString item = QInputDialog::getItem(this, propDesc.label, nullptr, items,
                                               items.indexOf(oldValueString), false, pressedOk);
         for (const auto &detail : *(propDesc.lookupTable)) {
             if (item == detail.second) {
@@ -316,17 +328,38 @@ int32_t CarPropertyTable::getUserInt32Value(PropertyDescription propDesc, int ro
         }
     } else {
         int32_t oldValue = getValueText(row).toInt();
-        value = QInputDialog::getInt(this, QString(), propDesc.label, oldValue,
+        value = QInputDialog::getInt(this, propDesc.label, nullptr, oldValue,
                                       INT_MIN, INT_MAX, 1, pressedOk);
     }
     return value;
+}
+
+vector<int32_t>* CarPropertyTable::getUserInt32VecValue(
+        carpropertyutils::PropertyDescription propDesc,
+        int row,
+        bool* pressedOk) {
+    QString oldValueString = getValueText(row);
+    QStringList valueStringList= oldValueString.split("; ");
+    QSet<QString> oldStringSet = QSet<QString>::fromList(valueStringList);
+
+    vector<int32_t>* values;
+    if (propDesc.lookupTable != nullptr) {
+        CheckboxDialog checkboxDialog(this, propDesc.lookupTable, &oldStringSet, propDesc.label);
+        if(checkboxDialog.exec() == QDialog::Accepted) {
+            values = checkboxDialog.getVec();
+            *pressedOk = true;
+        } else {
+            *pressedOk = false;
+        }
+    }
+    return values;
 }
 
 float CarPropertyTable::getUserFloatValue(PropertyDescription propDesc, int row,
                                            bool* pressedOk) {
     // No property interprets floats with table, so we only deal with raw numbers.
     double oldValue = getValueText(row).toDouble();
-    double value = QInputDialog::getDouble(this, QString(), propDesc.label, oldValue,
+    double value = QInputDialog::getDouble(this, propDesc.label, nullptr, oldValue,
                                             FLT_MIN, FLT_MAX, 3, pressedOk);
     return value;
 }
@@ -354,6 +387,17 @@ EmulatorMessage CarPropertyTable::makeSetPropMsgFloat(int32_t propId, float val,
     VehiclePropValue* value;
     EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
     value->add_float_values(val);
+    return emulatorMsg;
+}
+
+EmulatorMessage CarPropertyTable::makeSetPropMsgInt32Vec(int32_t propId,
+                                                          vector<int32_t>* vals,
+                                                          int areaId) {
+    VehiclePropValue* value;
+    EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
+    for(int32_t val : *vals){
+        value->add_int32_values(val);
+    }
     return emulatorMsg;
 }
 
