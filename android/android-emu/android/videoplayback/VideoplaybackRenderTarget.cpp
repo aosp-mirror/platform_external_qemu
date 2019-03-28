@@ -114,6 +114,10 @@ void VideoplaybackRenderTarget::setPixelBuffer(const FrameInfo& info,
 }
 
 bool VideoplaybackRenderTarget::initialize() {
+    if (mInitialized) {
+      return true;
+    }
+
     // Vertices necessary to draw a rectangle (i.e. two triangles).
     GLfloat vertices[] = {
             // Position   Tex Coords
@@ -132,6 +136,7 @@ bool VideoplaybackRenderTarget::initialize() {
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mGles2->glViewport(0, 0, mRenderWidth, mRenderHeight);
+    mGles2->glFrontFace(GL_CW);
 
     mGles2->glGenTextures(1, &mTexture);
     mGles2->glBindTexture(GL_TEXTURE_2D, mTexture);
@@ -174,19 +179,37 @@ bool VideoplaybackRenderTarget::initialize() {
     mGles2->glVertexAttribPointer(texcoordAttrib, 2, GL_FLOAT, GL_FALSE,
                                   4 * sizeof(float),
                                   (void*)(2 * sizeof(float)));
+
+
+    mInitialized = true;
+    return true;
 }
 
 void VideoplaybackRenderTarget::uninitialize() {
+    if (!mInitialized) {
+      return;
+    }
     mGles2->glBindVertexArray(0);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
     mGles2->glDeleteVertexArrays(1, &mVao);
+    mGles2->glDeleteTextures(1, &mTexture);
+    mGles2->glDeleteBuffers(1, &mVertexBuffer);
+    mGles2->glDeleteBuffers(1, &mElementBuffer);
     mGles2->glDetachShader(mProgram, mVertexShader);
     mGles2->glDetachShader(mProgram, mFragmentShader);
     mGles2->glDeleteShader(mVertexShader);
     mGles2->glDeleteShader(mFragmentShader);
     mGles2->glDeleteProgram(mProgram);
+    mInitialized = false;
 }
 
 void VideoplaybackRenderTarget::renderBuffer() {
+    if (!mInitialized) {
+      LOG(ERROR) << "Videoplayback Render Target is not initialized.";
+      return;
+    }
     if (mBuffer == nullptr) {
         return;
     }
@@ -196,7 +219,6 @@ void VideoplaybackRenderTarget::renderBuffer() {
     mGles2->glBindVertexArray(mVao);
 
     // Load the processed frame into the texture.
-    mGles2->glBindTexture(GL_TEXTURE_2D, mTexture);
     if (mFrameInfo.width <= mRenderWidth &&
         mFrameInfo.height <= mRenderHeight) {
         mGles2->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mFrameInfo.width,
