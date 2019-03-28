@@ -16,11 +16,17 @@
 
 #pragma once
 
+#include <string>
+
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/utils/compiler.h"
+#include "android/recording/video/player/VideoPlayer.h"
 #include "android/videoinjection/VideoInjectionController.h"
+#include "android/videoplayback/VideoplaybackRenderTarget.h"
 #include "android/camera/camera-videoplayback-default-renderer.h"
+#include "android/camera/camera-videoplayback-video-renderer.h"
+#include "android/camera/camera-virtualscene-utils.h"
 
 namespace android {
 namespace videoplayback {
@@ -40,9 +46,15 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
   void uninitialize() override;
   int64_t render() override;
  private:
+  void loadVideo(const std::string& video_data);
+  void switchRenderer(virtualscene::CameraRenderer* renderer);
+
   std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
+  std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
+  std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
   virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
   bool mInitialized = false;
+  size_t mCounter = 0;
 };
 
 }  // namespace videoplayback
