@@ -217,7 +217,7 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
                                                  PARAMETER_VALUE_TYPE_CURRENT),
               kVecZero);
     EXPECT_EQ(physicalModel_getParameterVelocity(mPhysicalModel.get(),
-                                                 PARAMETER_VALUE_TYPE_TARGET),
+                                                 PARAMETER_VALUE_TYPE_CURRENT),
               kVecZero);
 
     // Now go through the events and validate.
@@ -245,6 +245,11 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
               kVelocity);
 
     EXPECT_THAT(mController->stopPlayback(), IsOk());
+
+    // Velocity was different from zero before stopping playback.
+    EXPECT_EQ(physicalModel_getParameterVelocity(mPhysicalModel.get(),
+                                                 PARAMETER_VALUE_TYPE_TARGET),
+              kVecZero);
 }
 
 TEST_F(AutomationControllerTest, DestructWhileRecording) {
@@ -270,6 +275,11 @@ TEST_F(AutomationControllerTest, DestructWhileRecording) {
               kPosition1);
 
     EXPECT_THAT(mController->stopPlayback(), IsOk());
+
+    const vec3 kVecZero = {0.0f, 0.0f, 0.0f};
+    EXPECT_EQ(physicalModel_getParameterVelocity(mPhysicalModel.get(),
+                                                 PARAMETER_VALUE_TYPE_CURRENT),
+              kVecZero);
 }
 
 TEST_F(AutomationControllerTest, DestructWhilePlaying) {
