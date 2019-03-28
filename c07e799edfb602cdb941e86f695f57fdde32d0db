@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89fdec31_7fb2199b",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-28T21:39:22Z",
+      "side": 1,
+      "message": "Could you undo this part?  Clang-format probably did it, you can opt-out for this block using these comments:\n\n// clang-format off\nconst double kIdentityMatrix[] \u003d {\n  1, 0, 0,\n  0, 1, 0,\n  0, 0, 1,\n};\n// clang-format on",
+      "range": {
+        "startLine": 98,
+        "startChar": 0,
+        "endLine": 114,
+        "endChar": 66
+      },
+      "revId": "c07e799edfb602cdb941e86f695f57fdde32d0db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
