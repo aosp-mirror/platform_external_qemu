@@ -398,6 +398,11 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
         case android::featurecontrol::WifiConfigurable:
             return android_studio::EmulatorFeatureFlagState::WIFI_CONFIGURABLE;
+        case android::featurecontrol::Vulkan:
+        case android::featurecontrol::MacroUi:
+        case android::featurecontrol::IpDisconnectOnLoad:
+            // TODO: update metrics
+            return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
