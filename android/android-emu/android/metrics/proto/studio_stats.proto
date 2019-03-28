@@ -292,6 +292,21 @@ message AndroidStudioEvent {
   // gradle_sync_issues). set when kind = GRADLE_SYNC_FAILURE_DETAILS.
   repeated GradleSyncQuickFix offered_quick_fixes = 79;
 
+  // set when kind = STUDIO_PATCH_UPDATER
+  optional StudioPatchUpdaterEvent studio_patch_updater_event = 80;
+
+  // Set when kind = RESOURCE_MANAGER
+  optional ResourceManagerEvent resource_manager_event = 81;
+
+  // Set when kind = IDE_PLUGIN_INFO
+  optional IdePluginInfo ide_plugin_info = 82;
+
+  // Set when kind = EDITOR_HIGHLIGHTING_STATS
+  optional EditorHighlightingStats editor_highlighting_stats = 83;
+
+  // Set when kind = WINDOWS_DEFENDER_STATUS
+  optional WindowsDefenderStatus windows_defender_status = 84;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -738,6 +753,21 @@ message AndroidStudioEvent {
 
     // Sync issues reported to the user (after sync completed).
     GRADLE_SYNC_ISSUES = 177;
+
+    // Android Studio Patch Updater events
+    STUDIO_PATCH_UPDATER = 178;
+
+    // Resource Manager events
+    RESOURCE_MANAGER = 179;
+
+    // Info on which IDE plugins are enabled for the current session.
+    IDE_PLUGIN_INFO = 180;
+
+    // Editor syntax highlighting statistics.
+    EDITOR_HIGHLIGHTING_STATS = 181;
+
+    // Status of Windows Defender
+    WINDOWS_DEFENDER_STATUS = 182;
   }
 
   // Represents different Performance Monitoring types.
@@ -858,6 +888,25 @@ message AndroidStudioEvent {
     UNKNOWN_HOST = 11;
     UNSUPPORTED_ANDROID_MODEL_VERSION = 12;
     UNSUPPORTED_GRADLE_VERSION = 13;
+    CANNOT_BE_CAST_TO = 14;
+    BROKEN_PIPE = 15;
+    CANNOT_OPEN_ZIP_FILE = 16;
+    OBJECT_STREAM_ERROR = 17;
+    NDK_INTEGRATION_DEPRECATED = 18;
+    SDK_BUILD_TOOLS_TOO_LOW = 19;
+    CACHED_DEPENDENCY_NOT_FOUND = 20;
+    UNEXPECTED_ERROR = 21;
+    GRADLE2_REQUIRED = 22;
+    CORRUPT_GRADLE_DEPENDENCY = 23;
+    INTERNET_CONNECTION_ERROR = 24;
+    OLD_ANDROID_PLUGIN = 25;
+    MISSING_CMAKE = 26;
+    NDK_NOT_CONFIGURED = 27;
+    FAILED_TO_INSTALL_NDK_BUNDLE = 28;
+    UNSUPPORTED_MODEL_VERSION = 29;
+    DAEMON_CONTEXT_MISMATCH = 30;
+    JAVA_HEAP_ERROR = 31;
+    JDK8_REQUIRED = 32;
   }
 
   // IDE brand containing the android plugin
@@ -1025,6 +1074,8 @@ message AndroidStudioEvent {
     UPGRADE_APPENGINE_PLUGIN_VERSION_HYPERLINK = 40;
     USE_CURRENTLY_RUNNING_JDK_HYPERLINK = 41;
     USE_EMBEDDED_JDK_HYPERLINK = 42;
+    SET_NDK_DIR_HYPERLINK = 43;
+    SET_CMAKE_DIR_HYPERLINK = 44;
   }
 }
 
@@ -1062,6 +1113,7 @@ message ProductDetails {
     EMULATOR = 2;
     GRADLE = 3;
     DDMS = 4;
+    STUDIO_PATCH_UPDATER = 5;
   }
 
   // Chip the software is running on.
@@ -1379,6 +1431,7 @@ message EmulatorMemoryUsage {
   optional uint64 virtual_memory_max = 4;
   optional uint64 total_phys_memory = 5;
   optional uint64 total_page_file = 6;
+  optional uint64 total_guest_memory = 7;
 }
 
 // An enum representing all possible snapshot properties (bit flags).
@@ -2315,9 +2368,12 @@ message TestRun {
 }
 
 // Provides details on commonly used test libraries.
+// Each string field of this message holds the exact version of the given
+// library that the field name represents. The field is populated only if this
+// project uses the given library.
+// Next ID: 20
 message TestLibraries {
-  // The exact version of the given library that this project uses.
-  // Not present if project doesn't use a given library.
+  // "com.android.support.test.runner" or "androidx.test.runner".
   optional string test_support_library_version = 1;  // e.g. '0.5'
   optional string espresso_version = 2;  // e.g. '2.2.2'
   optional string robolectric_version = 3;  // e.g. '3.0'
@@ -2329,6 +2385,21 @@ message TestLibraries {
   optional string espresso_accessibility_version = 9;  // e.g. '2.2.2'
   optional string test_orchestrator_version = 10;  // e.g. '1.0.0'
   optional string test_rules_version = 11;  // e.g. '1.0.0'
+  // "androidx.test.core".
+  optional string test_core_version = 12;  // e.g. '1.0.0'
+  // "androidx.test.core-ktx".
+  optional string test_core_ktx_version = 13;  // e.g. '1.0.0'
+  // "androidx.test.ext.junit".
+  optional string test_ext_junit_version = 14;  // e.g. '1.0.0'
+  // "androidx.test.ext.junit-ktx".
+  optional string test_ext_junit_ktx_version = 15;  // e.g. '1.0.0'
+  // "androidx.test.ext.truth".
+  optional string test_ext_truth_version = 16;  // e.g. '1.0.0'
+  // "androidx.fragment.fragment-testing".
+  optional string fragment_testing_version = 17;  // e.g. '1.0.0'
+  optional string junit_version = 18;  // e.g. '4.2'
+  // "com.google.truth".
+  optional string truth_version = 19;  // e.g. '0.40'
 }
 
 // Describes the status of various Hypervisors
@@ -2963,13 +3034,42 @@ message GradleBuildProfileSpan {
     VARIANT_MANAGER_CREATE_TESTS_TASKS = 11;
     VARIANT_MANAGER_CREATE_VARIANTS = 12;
     RESOLVE_DEPENDENCIES = 13;
+    // span for task execution as reported by Gradle, that's including Gradle's
+    // pre and post task activities.
     TASK_EXECUTION = 14;
+    WORKER_EXECUTION = 15;
+    THREAD_EXECUTION = 16;
     INITIAL_METADATA = 100 [deprecated = true];
     FINAL_METADATA = 101 [deprecated = true];
     GENERAL_CONFIG = 102;
     VARIANT_CONFIG = 103;
     VARIANT_MANAGER_EXTERNAL_NATIVE_CONFIG_VALUES = 104;
     APK_METRICS = 105;
+
+    // span for task execution excluding Gradle's pre and post task activities.
+    TASK_EXECUTION_ALL_PHASES = 200;
+    // generic span types for task implementation. Phases are sequential sub
+    // parts of the task implementation that can help determine the performance
+    // of sub parts of the task implementation.
+    // For instance a task spans can look like :
+    //
+    // <---------------------- TASK_EXECUTION ------------------->
+    // <--PRE--><------- TASK_EXECUTION_ALL_PHASES ----><--POST-->
+    //          <---PHASE_1---><-PHASE_2-><--PHASE_3--->
+    //
+    TASK_EXECUTION_PHASE_1 = 201;
+    TASK_EXECUTION_PHASE_2 = 202;
+    TASK_EXECUTION_PHASE_3 = 203;
+    TASK_EXECUTION_PHASE_4 = 204;
+    TASK_EXECUTION_PHASE_5 = 205;
+    TASK_EXECUTION_PHASE_6 = 206;
+    TASK_EXECUTION_PHASE_7 = 207;
+    TASK_EXECUTION_PHASE_8 = 208;
+    TASK_EXECUTION_PHASE_9 = 209;
+    // span for gradle overhead before task execution
+    GRADLE_PRE_TASK_SPAN = 298;
+    // span for gradle overhead after task execution
+    GRADLE_POST_TASK_SPAN = 299;
 
     // ApplicationTaskManager per variant tasks.
     APP_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 1000 [deprecated = true];
@@ -4536,6 +4636,25 @@ message EnergyEventMetadata {
   repeated EnergyEvent.Subevent subevents = 3;
 }
 
+message PerfdCrashInfo {
+  // Addresses of the backstack of the crash reported by perfd.
+  repeated uint64 backstack_address_list = 1;
+}
+
+message TransportFailureMetadata {
+  enum FailureType {
+    UNKNOWN_FAILURE_TYPE = 0;
+    TIMEOUT = 1;
+    INTERRUPTED = 2;
+    IO = 3;
+    SYNC = 4;
+    SHELL_COMMAND_UNRESPONSIVE = 5;
+    ADB_COMMAND_REJECTED = 6;
+  }
+
+  optional FailureType failure_type = 1;
+}
+
 // Android Profiler metrics
 message AndroidProfilerEvent {
   // The current stage we're on when this event was generated
@@ -4578,6 +4697,12 @@ message AndroidProfilerEvent {
   // Set if |type| is |SELECT_ENERGY_EVENT|
   optional EnergyEventMetadata energy_event_metadata = 13;
 
+  // Set if |type| is |PERFD_CRASHED|
+  optional PerfdCrashInfo perfd_crash_info = 14;
+
+  // Set if |type| is |TRANSPORT_DAEMON_FAILED| OR |TRANSPORT_PROXY_FAILED|
+  optional TransportFailureMetadata transport_failure_metadata = 15;
+
   enum Stage {
     UNKNOWN_STAGE = 0;
 
@@ -4614,6 +4739,16 @@ message AndroidProfilerEvent {
     STAGE_ENTERED = 3;
     // Triggered when the user starts an app in profiling mode.
     RUN_WITH_PROFILING = 4;
+    // Triggered when perfd crashes. The callstack is sent with this metric.
+    PERFD_CRASHED = 5;
+    // Triggered when the transport device manager starts initializing a device.
+    PRE_TRANSPORT_DAEMON_STARTS = 6;
+    // Triggered when the transport daemon failed to launch.
+    TRANSPORT_DAEMON_FAILED = 7;
+    // Triggerd when the transport proxy layer fails to initialize.
+    TRANSPORT_PROXY_FAILED = 8;
+    // Triggered when the profiler service is unavailable.
+    PROFILER_INITIALIZATION_FAILED = 9;
 
     /// General
 
@@ -4630,6 +4765,10 @@ message AndroidProfilerEvent {
     // be correlated with |stage|.
     SELECT_RANGE = 110;
     FILTER = 111;
+    // Triggered when profilers starts finding a process for auto-profiling.
+    AUTO_PROFILING_REQUESTED = 112;
+    // Triggered when profilers found a auto-profiling process successfully.
+    AUTO_PROFILING_SUCCEEDED = 113;
 
     /// CPU
 
@@ -4691,6 +4830,7 @@ message AndroidProfilerEvent {
     SESSION_UI_COLLAPSED = 504;
     SESSION_UI_RESIZED = 505;
     SESSION_ARTIFACT_SELECTED = 506;
+    SESSION_DROPDOWN_CLICKED = 507;
   }
 }
 
@@ -4784,7 +4924,8 @@ message GradleSyncStats {
     TRIGGER_UNKNOWN = 0;
     // Used only when a project is opened
     TRIGGER_PROJECT_LOADED = 1;
-    // Project modifications caused a sync. This is too generic, prefer a more specific value
+    // Project modifications caused a sync. This is too generic, prefer a more
+    // specific value
     TRIGGER_PROJECT_MODIFIED = 2;
     // User has explicitly requested a sync using the sync button
     TRIGGER_USER_REQUEST = 3;
@@ -4794,7 +4935,8 @@ message GradleSyncStats {
     TRIGGER_VARIANT_SELECTION_CHANGED_BY_USER = 5;
     // User made changes in PSD that require a sync
     TRIGGER_PSD_CHANGES = 6;
-    // Sync was done as part of Android Studio testing (should not be used since logs from testing are stored in a different place)
+    // Sync was done as part of Android Studio testing (should not be used since
+    // logs from testing are stored in a different place)
     TRIGGER_TEST_REQUESTED = 7;
 
     // First marker for user initiated syncs
@@ -4874,9 +5016,11 @@ message GradleSyncStats {
 
     // First marker for syncs due to changes from PSD
     TRIGGER_PSD_FIRST_MARKER = 1500;
-    // A dependency was removed using PSD (using GradleOperations#removeDependencies)
+    // A dependency was removed using PSD (using
+    // GradleOperations#removeDependencies)
     TRIGGER_PSD_DEPENDENCY_REMOVED = 1501;
-    // A module was removed from the PSD (using AndroidProjectStructureConfigurable.DeleteModuleAction)
+    // A module was removed from the PSD (using
+    // AndroidProjectStructureConfigurable.DeleteModuleAction)
     TRIGGER_PSD_MODULE_REMOVED = 1502;
     // Last marker for syncs due to changes from PSD
     TRIGGER_PSD_LAST_MARKER = 1599;
@@ -4888,11 +5032,14 @@ message GradleSyncStats {
     // Last marker for changes in SDK
     TRIGGER_SDK_LAST_MARKER = 1899;
 
-    // First marker for sync due to changes done by AndroidGradleJavaProjectModelModifier
+    // First marker for sync due to changes done by
+    // AndroidGradleJavaProjectModelModifier
     TRIGGER_MODIFIER_FIRST_MARKER = 2100;
-    // An action was redone (from AndroidGradleJavaProjectModelModifier#registerUndoAction)
+    // An action was redone (from
+    // AndroidGradleJavaProjectModelModifier#registerUndoAction)
     TRIGGER_MODIFIER_ACTION_REDONE = 2101;
-    // An action was undone (from AndroidGradleJavaProjectModelModifier#registerUndoAction)
+    // An action was undone (from
+    // AndroidGradleJavaProjectModelModifier#registerUndoAction)
     TRIGGER_MODIFIER_ACTION_UNDONE = 2102;
     // A dependency to a module was added
     TRIGGER_MODIFIER_ADD_MODULE_DEPENDENCY = 2103;
@@ -4900,7 +5047,8 @@ message GradleSyncStats {
     TRIGGER_MODIFIER_ADD_LIBRARY_DEPENDENCY = 2104;
     // Language level was changed
     TRIGGER_MODIFIER_LANGUAGE_LEVEL_CHANGED = 2105;
-    // Last marker for sync due to changes done by AndroidGradleJavaProjectModelModifier
+    // Last marker for sync due to changes done by
+    // AndroidGradleJavaProjectModelModifier
     TRIGGER_MODIFIER_LAST_MARKER = 2199;
 
     // First marker for changes in languages
@@ -4944,7 +5092,8 @@ message GradleSyncStats {
     TRIGGER_BUILD_FIRST_MARKER = 3900;
     // Sync is needed before building an APK
     TRIGGER_BUILD_BEFORE_BUILDING_APK = 3901;
-    // There was an error in the previous sync (before building) or there were changes after build was done that require a sync
+    // There was an error in the previous sync (before building) or there were
+    // changes after build was done that require a sync
     TRIGGER_BUILD_SYNC_NEEDED_AFTER_BUILD = 3902;
     // Last marker for syncs caused by a build
     TRIGGER_BUILD_LAST_MARKER = 3999;
@@ -4953,7 +5102,8 @@ message GradleSyncStats {
     TRIGGER_RUN_FIRST_MARKER = 4200;
     // There are native unsynced variants before running
     TRIGGER_RUN_NATIVE_UNSYNCED = 4201;
-    // Sync was not performed before running and there are changes that require a sync
+    // Sync was not performed before running and there are changes that require
+    // a sync
     TRIGGER_RUN_SYNC_NEEDED_BEFORE_RUNNING = 4202;
     // Last marker for sync started due to a run
     TRIGGER_RUN_LAST_MARKER = 4299;
@@ -5425,6 +5575,12 @@ message LaunchTaskDetail {
   repeated ArtifactDetail artifact = 4;
   // Thread ID this task is running on
   optional int32 tid = 5;
+  // The completion status of the task. This value
+  // is populated from several enums in code (using enum.code())
+  // interface, each LaunchTask has its own set of error codes with
+  // some of them coming from device and being populated here. This is similar
+  // to the RunEvent.deploy_failure_id
+  optional string status = 6;
 }
 
 message StudioRunEvent {
@@ -5931,6 +6087,9 @@ message DataBindingEvent {
 
     // Data binding expression of the format @{obj::func}
     DATA_BINDING_CONTEXT_METHOD_REFERENCE = 2;
+
+    // Data binding xml tags. For example <variable> tag.
+    DATA_BINDING_CONTEXT_XML_TAG = 3;
   }
 
   // All of the stats we actively poll for
@@ -5990,20 +6149,21 @@ message DataBindingEvent {
   }
 }
 
+enum EditorFileType {
+  UNKNOWN = 0;
+  JAVA = 1;
+  KOTLIN = 2;
+  XML = 3;
+  GROOVY = 4;
+  PROPERTIES = 5;
+  JSON = 6;
+  KOTLIN_SCRIPT = 7;  // .kts
+  NATIVE = 8;         // .c, .cpp, .h, etc.
+}
+
 message TypingLatencyStats {
-  enum FileType {
-    UNKNOWN = 0;
-    JAVA = 1;
-    KOTLIN = 2;
-    XML = 3;
-    GROOVY = 4;
-    PROPERTIES = 5;
-    JSON = 6;
-    KOTLIN_SCRIPT = 7;  // .kts
-    NATIVE = 8;         // .c, .cpp, .h, etc.
-  }
   message LatencyRecord {
-    optional FileType file_type = 1;
+    optional EditorFileType file_type = 1;
     // Total number of keys typed.
     optional int64 total_keys_typed = 2;
     // Sum of latency for all keys typed.
@@ -6015,4 +6175,118 @@ message TypingLatencyStats {
   }
   // Per-file-type latency stats.
   repeated LatencyRecord latency_records = 1;
+}
+
+message EditorHighlightingStats {
+  message Stats {
+    optional EditorFileType file_type = 1;
+    // Highlighting latencies in milliseconds.
+    optional Histogram histogram = 2;
+  }
+  repeated Stats by_file_type = 1;
+}
+
+// Details of events relating to the Android Studio Patch Updater
+message StudioPatchUpdaterEvent {
+  //Removed as uses reserved words when building with mingw
+}
+
+// Event related to the resource manager
+message ResourceManagerEvent {
+  optional Kind kind = 1;
+
+  optional ResourceType resource_type = 2;
+
+  enum Kind {
+    UNKNOWN_EVENT_KIND = 0;
+
+    // Resource Manager tool window is openend
+    TOOL_WINDOW_OPEN = 1;
+
+    // Asset added pressing the "Import Drawable" action
+    ASSET_ADDED_VIA_BUTTON = 2;
+
+    // Asset added using Drag and Drop on the resource manager
+    ASSET_ADDED_VIA_DND = 3;
+
+    // User open the view showing the different version of a resource
+    DETAIL_VIEW_OPENED = 4;
+
+    // A resource has been opened via the resource manager
+    ASSET_OPENED = 5;
+
+    // List mode has been changed to grid or list
+    LIST_MODE_CHANGED = 6;
+
+    // User shows or hide libraries assets
+    LIBRARIES_SHOWN = 7;
+    LIBRARIES_HIDDEN = 8;
+
+    // A density indicator was present in the imported file
+    DENSITY_INFERED = 9;
+
+    // Drop events
+    DROP_ON_XML_BLANK_SPACE = 10;
+    DROP_ON_XML_TAG = 11;
+    DROP_ON_XML_ATTRIBUTE = 12;
+    DROP_ON_LAYOUT_VIEW = 13;
+    DROP_ON_LAYOUT_VIEWGROUP = 14;
+
+    // Default drop type when the target does not recognize the resource url
+    // type
+    DROP_AS_TEXT = 15;
+
+    // When user tries to import more resources than the supported number
+    IMPORT_LIMIT_REACHED = 16;
+  }
+
+  // The type of the resource. It could be an Android type (e.g drawable)
+  // or an external type (e.g SVG, PNG)
+  enum ResourceType {
+    UNKNOWN = 0;
+    DRAWABLE = 1;
+    COLOR = 2;
+    LAYOUT = 3;
+    STRING = 4;
+    FONT = 5;
+    SVG = 6;
+    RASTER = 7;
+  }
+}
+
+message IdePluginInfo {
+  // The set of plugins enabled for the current session.
+  repeated IdePlugin plugins = 1;
+}
+
+message IdePlugin {
+  // Unique ID (e.g., "org.jetbrains.kotlin").
+  optional string id = 1;
+  // Version (e.g., "1.3.21-release-Studio3.4-1").
+  optional string version = 2;
+  // Whether this plugin (in its current version) came bundled with Studio.
+  optional bool bundled = 3;
+}
+
+// Information about the status of Windows Defender, which can have a
+// significant impact on build speed. We check whether realtime scanning is
+// enabled, and if so, whether several important directories are excluded from
+// scanning. This message is sent once per project, since the project root is
+// one such directory.
+message WindowsDefenderStatus {
+  // Overall status of Windows Defender
+  optional Status status = 1;
+  // Whether the project root directory is excluded from scanning.
+  optional bool project_dir_excluded = 2;
+
+  // Status of Windows Defender - either scanning is disabled, or all, some, or
+  // none of the important directories are excluded, or there was some problem
+  // determining the status.
+  enum Status {
+    UNKNOWN_STATUS = 0;
+    SCANNING_DISABLED = 1;
+    ALL_EXCLUDED = 2;
+    SOME_EXCLUDED = 3;
+    NONE_EXCLUDED = 4;
+  }
 }
