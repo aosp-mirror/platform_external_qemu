@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "98d7a92c_3403f72d",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-28T20:54:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80b46cff_9cdb243a",
+      "range": {
+        "startLine": 649,
+        "startChar": 4,
+        "endLine": 649,
+        "endChar": 35
+      },
+      "revId": "1c2f4fa4adf1bdd2d89805b0071260b4e5854011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e835a7dc_3152a291",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9f07f5c8_ba053c0b",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-28T20:54:26Z",
+      "side": 1,
+      "message": "Agree. I saw no difference when I tried both, and naively decided that ARCore wouldn\u0027t notice :P",
+      "parentUuid": "e835a7dc_3152a291",
+      "range": {
+        "startLine": 650,
+        "startChar": 36,
+        "endLine": 650,
+        "endChar": 63
+      },
+      "revId": "1c2f4fa4adf1bdd2d89805b0071260b4e5854011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05806056_eb01b531",
         "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "1c2f4fa4adf1bdd2d89805b0071260b4e5854011",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "428f4656_eff8b040",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-28T20:54:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05806056_eb01b531",
+      "range": {
+        "startLine": 251,
+        "startChar": 70,
+        "endLine": 251,
+        "endChar": 77
+      },
+      "revId": "1c2f4fa4adf1bdd2d89805b0071260b4e5854011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
