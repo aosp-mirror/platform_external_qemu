@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include <functional>
+#include <memory>
 
 namespace android {
 namespace emulation {
@@ -35,23 +35,31 @@ enum AddressSpaceDeviceType {
     Power = 3,
     // TODO: All other services currently using goldfish pipe
     GenericPipe = 4,
-    Max = 5,
 };
 
 struct AddressSpaceDevicePingInfo {
-	uint64_t phys_addr;
-	uint64_t size;
-	uint64_t metadata;
-	uint64_t wait_phys_addr;
+    uint64_t phys_addr;
+    uint64_t size;
+    uint64_t metadata;
+    uint64_t wait_phys_addr;
     uint32_t wait_flags;
     uint32_t direction;
 };
 
+class AddressSpaceDeviceContext {
+public:
+    virtual ~AddressSpaceDeviceContext() {}
+    virtual void perform(uint64_t phys_addr,
+                         uint64_t size,
+                         uint64_t metadata,
+                         uint64_t wait_phys_addr,
+                         uint32_t wait_flags,
+                         uint32_t direction) = 0;
+};
+
 struct AddressSpaceContextDescription {
-    uint32_t handle = 0;
     AddressSpaceDevicePingInfo* pingInfo = nullptr;
-    AddressSpaceDeviceType deviceType =
-        AddressSpaceDeviceType::Max;
+    std::unique_ptr<AddressSpaceDeviceContext> device_context;
 };
 
 } // namespace emulation
