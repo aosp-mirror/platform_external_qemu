@@ -41,4 +41,9 @@ FEATURE_CONTROL_ITEM(QuickbootFileBacked)
 // Meta feature which disables a confirmation dialog, does not affect snapshot
 // data
 FEATURE_CONTROL_ITEM(OffworldDisableSecurity)
+<<<<<<< HEAD   (84867d Merge "Merge cherrypicks of [934000] into emu-3.1-release" i)
+=======
+FEATURE_CONTROL_ITEM(MacroUi)
+FEATURE_CONTROL_ITEM(IpDisconnectOnLoad)
+>>>>>>> CHANGE (782fd6 Flag IP auto-disconnect on snapshot load)
 // No guest feature flags seem safe to snapshot.
