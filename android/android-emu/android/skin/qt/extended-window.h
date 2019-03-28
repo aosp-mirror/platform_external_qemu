@@ -88,7 +88,7 @@ private slots:
     void on_carDataButton_clicked();
     void on_locationButton_clicked();
     void on_microphoneButton_clicked();
-    void on_recordScreenButton_clicked();
+    void on_recordButton_clicked();
     void on_rotaryInputButton_clicked();
     void on_settingsButton_clicked();
     void on_snapshotButton_clicked();

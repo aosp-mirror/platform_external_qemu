@@ -23,7 +23,6 @@ public:
     explicit RecordAndPlaybackPage(QWidget* parent = 0);
 
     void updateTheme();
-    void enableMacroUi();
 
     std::unique_ptr<Ui::RecordAndPlaybackPage> mUi;
     QTabBar* mTabBar = nullptr;
