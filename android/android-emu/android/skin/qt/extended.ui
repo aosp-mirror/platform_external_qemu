@@ -986,7 +986,7 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="recordScreenButton">
+       <widget class="QPushButton" name="recordButton">
         <property name="font">
          <font>
           <family>Roboto</family>
@@ -1005,7 +1005,7 @@ text-align: left;
 padding: 10px 0px 10px 16px;</string>
         </property>
         <property name="text">
-         <string>  Screen record</string>
+         <string>  Record and Playback</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
