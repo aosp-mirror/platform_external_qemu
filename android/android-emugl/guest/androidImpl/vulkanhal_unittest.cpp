@@ -933,4 +933,22 @@ TEST_F(VulkanHalTest, HostVisibleAllocations) {
     }
 }
 
+TEST_F(VulkanHalTest, BufferCreate) {
+    VkBufferCreateInfo bufCi = {
+        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
+        4096,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr,
+    };
+
+    VkBuffer buffer;
+    vk->vkCreateBuffer(mDevice, &bufCi, nullptr, &buffer);
+
+    VkMemoryRequirements memReqs;
+    vk->vkGetBufferMemoryRequirements(mDevice, buffer, &memReqs);
+
+    vk->vkDestroyBuffer(mDevice, buffer, nullptr);
+}
+
 }  // namespace aemu
