@@ -112,7 +112,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewOverlay->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("Play"));
+            mUi->playStopButton->setText(tr("Play "));
             mUi->playStopButton->setEnabled(false);
             break;
         }
@@ -121,7 +121,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewOverlay->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("Play"));
+            mUi->playStopButton->setText(tr("Play "));
             mUi->playStopButton->setEnabled(true);
             break;
         }
@@ -137,7 +137,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewOverlay->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->playStopButton->setProperty("themeIconName", "stop");
-            mUi->playStopButton->setText(tr("Stop"));
+            mUi->playStopButton->setText(tr("Stop "));
             mUi->playStopButton->setEnabled(true);
             break;
         }
@@ -202,7 +202,7 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
 
 void RecordMacroPage::showPreview(const std::string& previewName) {
     const std::string previewPath =
-            PathUtils::join(getMacroPreviewsDirectory(), previewName + ".gif");
+            PathUtils::join(getMacroPreviewsDirectory(), previewName + ".mp4");
 
     auto videoPlayerNotifier =
             std::unique_ptr<android::videoplayer::QtVideoPlayerNotifier>(
