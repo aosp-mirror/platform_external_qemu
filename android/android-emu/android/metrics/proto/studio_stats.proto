@@ -1410,7 +1410,8 @@ message EmulatorFeatureFlagState {
     VIDEO_PLAYBACK = 40;
     VULKAN = 41;
     MACRO_UI = 42;
-    // Next tag: 43
+    CAR_PROPERTY_TABLE = 43;
+    // Next tag: 44
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

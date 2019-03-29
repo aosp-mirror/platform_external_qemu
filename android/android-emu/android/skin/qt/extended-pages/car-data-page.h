@@ -32,6 +32,7 @@ public:
 
 private:
     static const QCarDataAgent* sCarDataAgent;
+    static const int DATA_PROPERTY_TABLE_INDEX = 1;
 
     std::unique_ptr<Ui::CarDataPage> mUi;
     void updateReceivedData(const QString msg);

@@ -65,4 +65,6 @@ enum Feature {
     WifiConfigurable = 32;
 
     VideoPlayback = 34;
+
+    CarPropertyTable = 43;
 }
