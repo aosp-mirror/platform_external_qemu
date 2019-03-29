@@ -16,6 +16,24 @@
       "revId": "5fb95556e4aadd419a91eade410056226ceff35e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64c1e4dc_599b86e6",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-29T22:26:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "077b0f86_fac8ee00",
+      "revId": "5fb95556e4aadd419a91eade410056226ceff35e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
