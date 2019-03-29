@@ -1,6 +1,6 @@
 from .common.codegen import CodeGen, VulkanWrapperGenerator, VulkanAPIWrapper
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES, NON_DISPATCHABLE_HANDLE_TYPES
 
 from .marshaling import VulkanMarshalingCodegen
 from .transform import TransformCodegen, genTransformsForVulkanType
@@ -48,6 +48,10 @@ private:
     %s m_vkStream { nullptr };
     VulkanMemReadingStream m_vkMemReadingStream { nullptr };
     BoxedHandleUnwrapMapping m_boxedHandleUnwrapMapping;
+    BoxedHandleCreateMapping m_boxedHandleCreateMapping;
+    BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
+    BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
+    android::base::Pool m_pool { 8, 4096, 64 };
 };
 
 VkDecoder::VkDecoder() :
@@ -114,25 +118,64 @@ def emit_marshal(typeInfo, param, cgen):
         API_PREFIX_MARSHAL,
         direction="write"))
 
-def emit_decode_parameters(typeInfo, api, cgen):
-    paramsToRead = []
+class DecodingParameters(object):
+    def __init__(self, api):
+        self.params = []
+        self.toRead = []
+        self.toWrite = []
 
-    for param in api.parameters:
-        paramsToRead.append(param)
+        i = 0
+
+        for param in api.parameters:
+            param.nonDispatchableHandleCreate = False
+            param.nonDispatchableHandleDestroy = False
+            param.dispatchHandle = False
+
+            if i == 0 and param.isDispatchableHandleType():
+                param.dispatchHandle = True
+
+            if param.isNonDispatchableHandleType() and param.isCreatedBy(api):
+                param.nonDispatchableHandleCreate = True
+
+            if param.isNonDispatchableHandleType() and param.isDestroyedBy(api):
+                param.nonDispatchableHandleDestroy = True
+
+            self.toRead.append(param)
+
+            if param.possiblyOutput():
+                self.toWrite.append(param)
+
+            self.params.append(param)
+
+            i += 1
+
+def emit_decode_parameters(typeInfo, api, cgen):
+
+    decodingParams = DecodingParameters(api)
+
+    paramsToRead = decodingParams.toRead
 
     for p in paramsToRead:
         emit_param_decl_for_reading(p, cgen)
 
     i = 0
     for p in paramsToRead:
-        if i == 0 and p.typeName in DISPATCHABLE_HANDLE_TYPES:
+        if p.dispatchHandle:
             emit_dispatch_unmarshal(typeInfo, p, cgen)
         else:
+            if p.nonDispatchableHandleDestroy:
+                cgen.stmt("// Begin manual non dispatchable handle destroy unboxing for %s" % p.paramName)
+                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeleteMapping)" % READ_STREAM)
+
             if p.possiblyOutput():
                 cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
                 cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
 
             emit_unmarshal(typeInfo, p, cgen)
+
+            if p.nonDispatchableHandleDestroy:
+                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+                cgen.stmt("// End manual non dispatchable handle destroy unboxing for %s" % p.paramName)
 
             if p.possiblyOutput():
                 cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
@@ -148,29 +191,51 @@ def emit_call_log(api, cgen):
     cgen.endIf()
 
 def emit_dispatch_call(api, cgen):
-    emit_call_log(api, cgen)
+
+    decodingParams = DecodingParameters(api)
+
     customParams = []
+
     for (i, p) in enumerate(api.parameters):
         customParam = p.paramName
-        if i == 0 and p.typeName in DISPATCHABLE_HANDLE_TYPES:
+        if decodingParams.params[i].dispatchHandle:
             customParam = "unboxed_%s" % p.paramName
         customParams.append(customParam)
 
     cgen.vkApiCall(api, customPrefix="vk->", customParameters=customParams)
 
 def emit_global_state_wrapped_call(api, cgen):
-    cgen.vkApiCall(api, customPrefix="m_state->on_")
+    customParams = ["&m_pool"] + list(map(lambda p: p.paramName, api.parameters))
+    cgen.vkApiCall(api, customPrefix="m_state->on_", \
+        customParameters=customParams)
 
-def emit_decode_parameters_writeback(typeInfo, api, cgen):
-    paramsToWrite = []
+def emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=True):
+    decodingParams = DecodingParameters(api)
 
-    for param in api.parameters:
-        if param.possiblyOutput():
-            paramsToWrite.append(param)
+    paramsToWrite = decodingParams.toWrite
+
+    cgen.stmt("%s->unsetHandleMapping()" % WRITE_STREAM)
 
     for p in paramsToWrite:
         emit_transform(typeInfo, p, cgen, variant="fromhost")
+
+        if autobox and p.nonDispatchableHandleCreate:
+            cgen.stmt("// Begin auto non dispatchable handle create for %s" % p.paramName)
+            cgen.stmt("%s->setHandleMapping(&m_boxedHandleCreateMapping)" % WRITE_STREAM)
+
+        if (not autobox) and p.nonDispatchableHandleCreate:
+            cgen.stmt("// Begin manual non dispatchable handle create for %s" % p.paramName)
+            cgen.stmt("%s->unsetHandleMapping()" % WRITE_STREAM)
+
         emit_marshal(typeInfo, p, cgen)
+
+        if autobox and p.nonDispatchableHandleCreate:
+            cgen.stmt("// Begin auto non dispatchable handle create for %s" % p.paramName)
+            cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % WRITE_STREAM)
+
+        if (not autobox) and p.nonDispatchableHandleCreate:
+            cgen.stmt("// Begin manual non dispatchable handle create for %s" % p.paramName)
+            cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % WRITE_STREAM)
 
 def emit_decode_return_writeback(api, cgen):
     retTypeName = api.getRetTypeExpr()
@@ -181,9 +246,11 @@ def emit_decode_return_writeback(api, cgen):
 
 def emit_decode_finish(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
+    cgen.stmt("m_pool.freeAll()")
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 def emit_default_decoding(typeInfo, api, cgen):
+    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
@@ -194,7 +261,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_global_state_wrapped_call(api, cgen)
-    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
 
