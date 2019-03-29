@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "077b0f86_fac8ee00",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-03-29T22:23:55Z",
+      "side": 1,
+      "message": "3x :-)",
+      "revId": "5fb95556e4aadd419a91eade410056226ceff35e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
