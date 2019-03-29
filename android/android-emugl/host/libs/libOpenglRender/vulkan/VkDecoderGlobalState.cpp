@@ -21,6 +21,7 @@
 #include "VulkanDispatch.h"
 #include "vk_util.h"
 
+#include "android/base/containers/EntityManager.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Optional.h"
@@ -108,8 +109,10 @@ public:
         }
 
         // Box it up
-        auto boxed = new_boxed_VkInstance(*pInstance);
-        init_vulkan_dispatch_from_instance(m_vk, *pInstance, boxed->dispatch);
+        VkInstance boxed = new_boxed_VkInstance(*pInstance, nullptr, true /* own dispatch */);
+        init_vulkan_dispatch_from_instance(
+            m_vk, *pInstance,
+            dispatch_VkInstance(boxed));
         info.boxed = boxed;
 
         mInstanceInfo[*pInstance] = info;
@@ -120,9 +123,11 @@ public:
         if (!fb) return res;
 
         fb->registerProcessCleanupCallback(
-            boxed->underlying,
+            unbox_VkInstance(boxed),
             [this, boxed] {
-                vkDestroyInstanceImpl(boxed->underlying, nullptr);
+                vkDestroyInstanceImpl(
+                    unbox_VkInstance(boxed),
+                    nullptr);
             });
 
         return res;
@@ -184,7 +189,7 @@ public:
 
 
                     physdevInfo.boxed =
-                            new_boxed_VkPhysicalDevice(physicalDevices[i], vk);
+                            new_boxed_VkPhysicalDevice(physicalDevices[i], vk, false /* does not own dispatch */);
 
                     vk->vkGetPhysicalDeviceProperties(physicalDevices[i],
                                                       &physdevInfo.props);
@@ -594,8 +599,10 @@ public:
         deviceInfo.emulateTextureEtc2 = emulateTextureEtc2;
 
         // First, get the dispatch table.
-        auto boxed = new_boxed_VkDevice(*pDevice);
-        init_vulkan_dispatch_from_device(vk, *pDevice, boxed->dispatch);
+        VkDevice boxed = new_boxed_VkDevice(*pDevice, nullptr, true /* own dispatch */);
+        init_vulkan_dispatch_from_device(
+            vk, *pDevice,
+            dispatch_VkDevice(boxed));
         deviceInfo.boxed = boxed;
 
         // Next, get information about the queue families used by this device.
@@ -625,7 +632,7 @@ public:
                 mQueueInfo[queueOut].device = *pDevice;
                 mQueueInfo[queueOut].queueFamilyIndex = index;
 
-                auto boxed = new_boxed_VkQueue(queueOut, deviceInfo.boxed->dispatch);
+                auto boxed = new_boxed_VkQueue(queueOut, dispatch_VkDevice(deviceInfo.boxed), false /* does not own dispatch */);
                 mQueueInfo[queueOut].boxed = boxed;
             }
         }
@@ -675,8 +682,7 @@ public:
         auto eraseIt = mQueueInfo.begin();
         for(; eraseIt != mQueueInfo.end();) {
             if (eraseIt->second.device == device) {
-                delete_boxed_VkQueue(eraseIt->second.boxed,
-                                     false /* dispatch not owned */);
+                delete_boxed_VkQueue(eraseIt->second.boxed);
                 eraseIt = mQueueInfo.erase(eraseIt);
             } else {
                 ++eraseIt;
@@ -1336,8 +1342,8 @@ public:
 
         VkPhysicalDevice physicalDevice = mDeviceInfo[device].physicalDevice;
         VkPhysicalDeviceMemoryProperties memProperties;
-        auto ivk = mInstanceInfo[mPhysicalDeviceToInstance[physicalDevice]]
-                           .boxed->dispatch;
+        auto ivk =
+            dispatch_VkInstance(mInstanceInfo[mPhysicalDeviceToInstance[physicalDevice]].boxed);
 
         ivk->vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
         uint32_t memIdx = 0;
@@ -1906,7 +1912,7 @@ public:
             mCmdBufferInfo[pCommandBuffers[i]] = CommandBufferInfo();
             mCmdBufferInfo[pCommandBuffers[i]].cmdPool =
                     pAllocateInfo->commandPool;
-            auto boxed = new_boxed_VkCommandBuffer(pCommandBuffers[i], vk);
+            auto boxed = new_boxed_VkCommandBuffer(pCommandBuffers[i], vk, false /* does not own dispatch */);
             mCmdBufferInfo[pCommandBuffers[i]].boxed = boxed;
             pCommandBuffers[i] = (VkCommandBuffer)boxed;
         }
@@ -2038,8 +2044,7 @@ public:
                 if (cmdPoolInfoIt != mCmdPoolInfo.end()) {
                     cmdPoolInfoIt->second.cmdBuffers.erase(pCommandBuffers[i]);
                 }
-                delete_boxed_VkCommandBuffer(cmdBufferInfoIt->second.boxed,
-                                             false /* dispatch not owned*/);
+                delete_boxed_VkCommandBuffer(cmdBufferInfoIt->second.boxed);
                 mCmdBufferInfo.erase(cmdBufferInfoIt);
             }
         }
@@ -2287,6 +2292,31 @@ public:
     DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExportMemoryAllocateInfo, handleTypes)
     DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalImageFormatProperties)
     DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalBufferProperties)
+
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_IMPL(type) \
+    type new_boxed_##type(type underlying, VulkanDispatch* dispatch, bool ownDispatch) { \
+        DispatchableHandleInfo<type> item; \
+        item.underlying = underlying; \
+        item.dispatch = dispatch ? dispatch : new VulkanDispatch; \
+        item.ownDispatch = ownDispatch; \
+        auto res = (type)mBoxedDispatchableHandles_##type.add(item); \
+        return res; \
+    } \
+    void delete_boxed_##type(type boxed) { \
+        mBoxedDispatchableHandles_##type.remove((uint64_t)boxed); \
+    } \
+    type unbox_##type(type boxed) { \
+        return VK_NULL_HANDLE; \
+    } \
+    VulkanDispatch* dispatch_##type(type boxed) { \
+        AutoLock lock(mBoxedDispatchableHandles_##type.lock); \
+        auto elt = mBoxedDispatchableHandles_##type.getLocked( \
+            (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return nullptr; \
+        return elt->dispatch; \
+    } \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_IMPL)
 
 private:
     bool isEmulatedExtension(const char* name) const {
@@ -2658,7 +2688,9 @@ private:
 
             if (instance == *otherInstance) {
                 devicesToDestroy.push_back(it.first);
-                devicesToDestroyDispatches.push_back(mDeviceInfo[it.first].boxed->dispatch);
+                devicesToDestroyDispatches.push_back(
+                    dispatch_VkDevice(
+                        mDeviceInfo[it.first].boxed));
             }
         }
 
@@ -2689,7 +2721,7 @@ private:
         std::vector<PreprocessFunc> preprocessFuncs = {};
         std::vector<VkCommandBuffer> subCmds = {};
         VkCommandPool cmdPool = nullptr;
-        BoxedDispatchable_VkCommandBuffer* boxed = nullptr;
+        VkCommandBuffer boxed = nullptr;
     };
 
     struct CommandPoolInfo {
@@ -2849,27 +2881,27 @@ private:
 
     struct InstanceInfo {
         std::vector<std::string> enabledExtensionNames;
-        BoxedDispatchable_VkInstance* boxed = nullptr;
+        VkInstance boxed = nullptr;
     };
 
     struct PhysicalDeviceInfo {
         VkPhysicalDeviceProperties props;
         VkPhysicalDeviceMemoryProperties memoryProperties;
         std::vector<VkQueueFamilyProperties> queueFamilyProperties;
-        BoxedDispatchable_VkPhysicalDevice* boxed = nullptr;
+        VkPhysicalDevice boxed = nullptr;
     };
 
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
         bool emulateTextureEtc2 = false;
         VkPhysicalDevice physicalDevice;
-        BoxedDispatchable_VkDevice* boxed = nullptr;
+        VkDevice boxed = nullptr;
     };
 
     struct QueueInfo {
         VkDevice device;
         uint32_t queueFamilyIndex;
-        BoxedDispatchable_VkQueue* boxed = nullptr;
+        VkQueue boxed = nullptr;
     };
 
     struct BufferInfo {
@@ -2900,6 +2932,37 @@ private:
         int externalHandleId = 0;
         VK_EXT_MEMORY_HANDLE externalHandle =
             VK_EXT_MEMORY_HANDLE_INVALID;
+    };
+
+    template <class T>
+    class BoxedHandleManager {
+    public:
+        using Store = android::base::EntityManager<32, 16, 16, T>;
+        Store store;
+
+        Lock lock;
+
+        uint64_t add(const T& item) {
+            AutoLock l(lock);
+            return (uint64_t)store.add(item, 1);
+        }
+
+        void remove(uint64_t h) {
+            AutoLock l(lock);
+            store.remove(h);
+        }
+
+        T* getLocked(uint64_t h) {
+            return store.get(h);
+        }
+    };
+
+    template <class T>
+    class DispatchableHandleInfo {
+    public:
+        T underlying;
+        VulkanDispatch* dispatch = nullptr;
+        bool ownDispatch = false;
     };
 
     std::unordered_map<VkInstance, InstanceInfo>
@@ -2940,6 +3003,12 @@ private:
     std::unordered_map<int, VkSemaphore> mExternalSemaphoresById;
 #endif
     std::unordered_map<VkDescriptorUpdateTemplate, DescriptorUpdateTemplateInfo> mDescriptorUpdateTemplateInfo;
+
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_STORE(type) \
+    BoxedHandleManager<DispatchableHandleInfo<type>> mBoxedDispatchableHandles_##type;
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_STORE)
+
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -3551,4 +3620,29 @@ void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
 
 LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
 
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DEF(type) \
+    type VkDecoderGlobalState::new_boxed_##type(type underlying, VulkanDispatch* dispatch, bool ownDispatch) { \
+        return mImpl->new_boxed_##type(underlying, dispatch, ownDispatch); \
+    } \
+    void VkDecoderGlobalState::delete_boxed_##type(type boxed) { \
+        mImpl->delete_boxed_##type(boxed); \
+    } \
+    type VkDecoderGlobalState::unbox_##type(type boxed) { \
+        return mImpl->unbox_##type(boxed); \
+    } \
+    VulkanDispatch* VkDecoderGlobalState::dispatch_##type(type boxed) { \
+        return mImpl->dispatch_##type(boxed); \
+    } \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DEF)
+
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
+    type unbox_##type(type boxed) { \
+        return VkDecoderGlobalState::get()->unbox_##type(boxed); \
+    } \
+    VulkanDispatch* dispatch_##type(type boxed) { \
+        return VkDecoderGlobalState::get()->dispatch_##type(boxed); \
+    } \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
 }  // namespace goldfish_vk
