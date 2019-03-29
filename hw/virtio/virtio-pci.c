@@ -2609,6 +2609,22 @@ static const TypeInfo virtio_tablet_pci_info = {
     .instance_init = virtio_tablet_initfn,
 };
 
+#ifdef CONFIG_ANDROID
+static void virtio_input_emu_initfn(Object *obj)
+{
+    VirtIOInputEmuPCI *dev = VIRTIO_INPUT_EMU_PCI(obj);
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_INPUT_EMU);
+}
+
+static const TypeInfo virtio_input_emu_pci_info = {
+    .name          = TYPE_VIRTIO_INPUT_EMU_PCI,
+    .parent        = TYPE_VIRTIO_INPUT_PCI,
+    .instance_size = sizeof(VirtIOInputEmuPCI),
+    .instance_init = virtio_input_emu_initfn,
+};
+#endif
+
 #ifdef CONFIG_LINUX
 static void virtio_host_initfn(Object *obj)
 {
@@ -2678,6 +2694,9 @@ static void virtio_pci_register_types(void)
     type_register_static(&virtio_keyboard_pci_info);
     type_register_static(&virtio_mouse_pci_info);
     type_register_static(&virtio_tablet_pci_info);
+#ifdef CONFIG_ANDROID
+    type_register_static(&virtio_input_emu_pci_info);
+#endif
 #ifdef CONFIG_LINUX
     type_register_static(&virtio_host_pci_info);
 #endif

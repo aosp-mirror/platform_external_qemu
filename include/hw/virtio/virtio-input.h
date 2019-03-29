@@ -36,6 +36,11 @@ typedef struct virtio_input_event virtio_input_event;
 #define VIRTIO_INPUT_HID_GET_PARENT_CLASS(obj) \
         OBJECT_GET_PARENT_CLASS(obj, TYPE_VIRTIO_INPUT_HID)
 
+#ifdef CONFIG_ANDROID
+#define TYPE_VIRTIO_INPUT_EMU "virtio-input-emu-device"
+#define VIRTIO_INPUT_EMU(obj) \
+    OBJECT_CHECK(VirtIOInputEmu, (obj), TYPE_VIRTIO_INPUT_EMU)
+#endif
 #define TYPE_VIRTIO_INPUT_HOST   "virtio-input-host-device"
 #define VIRTIO_INPUT_HOST(obj) \
         OBJECT_CHECK(VirtIOInputHost, (obj), TYPE_VIRTIO_INPUT_HOST)
@@ -91,6 +96,13 @@ struct VirtIOInputHID {
     int                               ledstate;
     bool                              wheel_axis;
 };
+
+#ifdef CONFIG_ANDROID
+typedef struct VirtIOInputEmu VirtIOInputEmu;
+struct VirtIOInputEmu {
+    VirtIOInput parent_obj;
+};
+#endif
 
 struct VirtIOInputHost {
     VirtIOInput                       parent_obj;

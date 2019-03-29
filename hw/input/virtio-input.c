@@ -1,4 +1,4 @@
-/*
+f/*
  * This work is licensed under the terms of the GNU GPL, version 2 or
  * (at your option) any later version.  See the COPYING file in the
  * top-level directory.
@@ -41,7 +41,6 @@ void virtio_input_send(VirtIOInput *vinput, virtio_input_event *event)
         event->code != cpu_to_le16(SYN_REPORT)) {
         return;
     }
-
     /* ... then check available space ... */
     for (i = 0; i < vinput->qindex; i++) {
         elem = virtqueue_pop(vinput->evt, sizeof(VirtQueueElement));
