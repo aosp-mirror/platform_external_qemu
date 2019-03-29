@@ -1,0 +1,326 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd857cfe_2a6f759a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e*",
+      "range": {
+        "startLine": 285,
+        "startChar": 12,
+        "endLine": 285,
+        "endChar": 55
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e9ad82f_e6f1f0be",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "getUserInt32VecValue(...);",
+      "range": {
+        "startLine": 286,
+        "startChar": 20,
+        "endLine": 287,
+        "endChar": 78
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c2b4ebb_571fd710",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "int32VecValue,",
+      "range": {
+        "startLine": 293,
+        "startChar": 20,
+        "endLine": 293,
+        "endChar": 75
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "725cf572_3d3de0a6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e*",
+      "range": {
+        "startLine": 341,
+        "startChar": 0,
+        "endLine": 341,
+        "endChar": 43
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e85d61c_4517965b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "return checkboxDialog.getVec();",
+      "range": {
+        "startLine": 354,
+        "startChar": 12,
+        "endLine": 355,
+        "endChar": 46
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94343008_1ee7e8aa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "return nullptr;",
+      "range": {
+        "startLine": 360,
+        "startChar": 4,
+        "endLine": 360,
+        "endChar": 52
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b673252_1c13e483",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e* vals,",
+      "range": {
+        "startLine": 400,
+        "startChar": 8,
+        "endLine": 400,
+        "endChar": 57
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0d0c05a_066dcfdf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e*\n\nThis avoids creating ownership of a pointer that is already owned by CheckboxDialog.",
+      "range": {
+        "startLine": 132,
+        "startChar": 12,
+        "endLine": 132,
+        "endChar": 55
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3beebe5b_244d9a97",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e*",
+      "range": {
+        "startLine": 141,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 47
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "749cdf00_d8d114e5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "QGridLayout* ...\n\nJust run \u0027git clang-format\u0027 to format your files.",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 17
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3933a25_4ff17f5b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e* CheckboxDialog::getVec()\n\nWe only want the CheckboxDialog to own the pointer, so don\u0027t need to create more unique_ptrs.",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 70
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "752026fa_4e7c9ad0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "mCheckedValues.get();",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 67
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d34d702_c6c12d0b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "const std::vector\u003cint32_t\u003e* getVec();\n\nWe don\u0027t want multiple owners of the same raw pointer. You will have undefined behavior from multiple frees on the same pointer.",
+      "range": {
+        "startLine": 32,
+        "startChar": 3,
+        "endLine": 32,
+        "endChar": 47
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3db1d9c7_6f9ea0b6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-29T22:26:43Z",
+      "side": 1,
+      "message": "Not neccessary. unique_ptr is nullptr by default.",
+      "range": {
+        "startLine": 40,
+        "startChar": 56,
+        "endLine": 40,
+        "endChar": 66
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
