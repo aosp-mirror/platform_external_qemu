@@ -314,9 +314,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
         ${PREBUILT_ROOT}/lib/libQt5WebChannelAndroidEmu.so.5>lib64/qt/lib/libQt5WebChannelAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libQt5WebEngineCoreAndroidEmu.so.5>lib64/qt/lib/libQt5WebEngineCoreAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5WebEngineWidgetsAndroidEmu.so.5;
-        ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.so.5>lib64/qt/lib/libQt5WebSocketsAndroidEmu.so.5;
-        ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
-        ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so)
+        ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.so.5>lib64/qt/lib/libQt5WebSocketsAndroidEmu.so.5)
 
     list(APPEND QT5_SHARED_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
   endif()
@@ -324,6 +322,8 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   list(
       APPEND
         QT5_SHARED_DEPENDENCIES
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
 
 endif()
