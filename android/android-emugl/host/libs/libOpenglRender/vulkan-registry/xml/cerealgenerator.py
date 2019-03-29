@@ -261,6 +261,25 @@ using android::base::Pool;
         transformImplInclude = """
 #include "VkDecoderGlobalState.h"
 """
+        unboxInclude = """
+#include "goldfish_vk_private_defs.h"
+#include "goldfish_vk_extension_structs.h"
+
+namespace android {
+namespace base {
+class Pool;
+} // namespace base
+} // namespace android
+
+using android::base::Pool;
+
+"""
+        unboxImplInclude = """
+#include "android/base/Pool.h"
+#include "VkDecoderGlobalState.h"
+#include "goldfish_vk_deepcopy.h"
+#include "goldfish_vk_handlemap.h"
+"""
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
 #include "android/base/Pool.h"
@@ -327,6 +346,13 @@ using DlSymFunc = void* (void*, const char*);
 
         decoderHeaderIncludes = """
 #include <memory>
+
+namespace android {
+namespace base {
+class Pool;
+} // namespace android
+} // namespace base
+
 """
 
         decoderImplIncludes = """
@@ -334,6 +360,7 @@ using DlSymFunc = void* (void*, const char*);
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
+#include "android/base/Pool.h"
 #include "android/base/system/System.h"
 
 #include "IOStream.h"
@@ -411,6 +438,9 @@ using DlSymFunc = void* (void*, const char*);
         self.addModule("common", "goldfish_vk_transform",
                        extraHeader=transformInclude,
                        extraImpl=transformImplInclude)
+        self.addModule("common", "goldfish_vk_unbox",
+                       extraHeader=unboxInclude,
+                       extraImpl=unboxImplInclude)
         self.addHostModule("VkDecoder",
                            extraHeader=decoderHeaderIncludes,
                            extraImpl=decoderImplIncludes,
@@ -430,6 +460,7 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
         self.addWrapper(cereal.VulkanDispatch, "goldfish_vk_dispatch")
         self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform", resourceTrackerTypeName="VkDecoderGlobalState")
+        self.addWrapper(cereal.VulkanUnbox, "goldfish_vk_unbox")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
 
         self.guestAndroidMkCppFiles = ""
