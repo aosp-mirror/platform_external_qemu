@@ -427,43 +427,25 @@ public:
     
 LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
 
+    // boxed handles
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DECL(type) \
+    type new_boxed_##type(type underlying, VulkanDispatch* dispatch, bool ownDispatch); \
+    void delete_boxed_##type(type boxed); \
+    type unbox_##type(type boxed); \
+    VulkanDispatch* dispatch_##type(type boxed); \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DECL)
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
 };
 
-#define DEFINE_BOXED_DISPATCHABLE_HANDLE_TYPE(type) \
-struct BoxedDispatchable_##type { \
-    type underlying; \
-    VulkanDispatch* dispatch; \
-}; \
-static inline BoxedDispatchable_##type* new_boxed_##type( \
-    type underlying, VulkanDispatch* otherDispatch = nullptr) { \
-    BoxedDispatchable_##type* res = new BoxedDispatchable_##type; \
-    res->underlying = underlying; \
-    res->dispatch = otherDispatch ? otherDispatch : new VulkanDispatch; \
-    return res; \
-} \
-static inline void delete_boxed_##type( \
-    BoxedDispatchable_##type* boxed, bool ownDispatch = true) { \
-    if (!boxed) return; \
-    if (ownDispatch) delete boxed->dispatch; boxed->dispatch = nullptr; \
-    delete boxed; \
-} \
-static inline void delete_boxed_##type(type boxed) { \
-    if (!boxed) return; \
-    delete_boxed_##type((BoxedDispatchable_##type*)boxed); \
-} \
-static inline type unbox_##type(type x) { \
-    if (!x) return (type)0; \
-    return ((BoxedDispatchable_##type*)(x))->underlying; \
-} \
-static inline VulkanDispatch* dispatch_##type(type x) { \
-    if (!x) return nullptr; \
-    return ((BoxedDispatchable_##type*)(x))->dispatch; \
-} \
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL(type) \
+    type unbox_##type(type boxed); \
+    VulkanDispatch* dispatch_##type(type boxed); \
 
-GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_TYPE)
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
 
 #define MAKE_HANDLE_MAPPING_FOREACH(type_name, map_impl, map_to_u64_impl, map_from_u64_impl) \
     void mapHandles_##type_name(type_name* handles, size_t count) override { \
@@ -484,9 +466,9 @@ GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_TYPE
 
 #define BOXED_DISPATCHABLE_UNWRAP_IMPL(type_name) \
     MAKE_HANDLE_MAPPING_FOREACH(type_name, \
-        if (handles[i]) { handles[i] = ((BoxedDispatchable_##type_name*)(handles[i]))->underlying; } else { handles[i] = nullptr; } ;, \
-        if (handles[i]) { handle_u64s[i] = (uint64_t)((BoxedDispatchable_##type_name*)(handles[i]))->underlying; } else { handle_u64s[i] = 0; }, \
-        if (handle_u64s[i]) { handles[i] = (type_name)((BoxedDispatchable_##type_name*)(handle_u64s[i]))->underlying; } else { handles[i] = nullptr; })
+        if (handles[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_##type_name(handles[i]); } else { handles[i] = nullptr; } ;, \
+        if (handles[i]) { handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unbox_##type_name(handles[i]); } else { handle_u64s[i] = 0; }, \
+        if (handle_u64s[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_##type_name((type_name)(uintptr_t)handle_u64s[i]); } else { handles[i] = nullptr; })
 
 #define BOXED_NON_DISPATCHABLE_UNWRAP_IMPL(type_name) \
     MAKE_HANDLE_MAPPING_FOREACH(type_name, \
