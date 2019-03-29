@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ce0ed563_32e600c4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-29T21:38:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4fade3a9_4d2fe108",
+      "range": {
+        "startLine": 345,
+        "startChar": 27,
+        "endLine": 345,
+        "endChar": 28
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d0e72c4_f9de9bc4",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "185bd79c_acdcc420",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-29T21:38:21Z",
+      "side": 1,
+      "message": "Tried const std::vector\u003cint32_t\u003e\u0026 but always meet segment fault, use smart pointer here.",
+      "parentUuid": "6d0e72c4_f9de9bc4",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 12
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e794d09c_23d48b71",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-29T21:38:21Z",
+      "side": 1,
+      "message": "As discussed, smart pointers should not work with QObject",
+      "parentUuid": "8a61eaea_30bf58e0",
+      "range": {
+        "startLine": 39,
+        "startChar": 12,
+        "endLine": 39,
+        "endChar": 39
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68f70b3a_657ce5b3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "a93be90c_5ef825a1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-29T21:38:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68f70b3a_657ce5b3",
+      "range": {
+        "startLine": 40,
+        "startChar": 40,
+        "endLine": 40,
+        "endChar": 41
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c7d1ed6_fd81543c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
         "patchSetId": 1
@@ -114,6 +210,30 @@
       "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8691bfb_10246a71",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-29T21:38:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c7d1ed6_fd81543c",
+      "range": {
+        "startLine": 41,
+        "startChar": 32,
+        "endLine": 41,
+        "endChar": 33
+      },
+      "revId": "3167a3464ff8e9f2f639b3671f28da651c2ce7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
