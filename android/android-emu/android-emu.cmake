@@ -567,6 +567,7 @@ set(android-emu_unittests_src
     android/base/async/SubscriberList_unittest.cpp
     android/base/containers/BufferQueue_unittest.cpp
     android/base/containers/CircularBuffer_unittest.cpp
+    android/base/containers/EntityManager_unittest.cpp
     android/base/containers/Lookup_unittest.cpp
     android/base/containers/SmallVector_unittest.cpp
     android/base/containers/StaticMap_unittest.cpp
