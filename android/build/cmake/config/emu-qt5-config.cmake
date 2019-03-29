@@ -322,6 +322,9 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   list(
       APPEND
         QT5_SHARED_DEPENDENCIES
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
