@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7285e78a_4c52d73a",
+        "filename": "android/build/cmake/config/emu-vulkan-config.cmake",
+        "patchSetId": 7
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-03-29T23:00:16Z",
+      "side": 1,
+      "message": "Yes, we are backwards compatible. Old tag mechanism still works. Let me fix it though.",
+      "parentUuid": "94014c93_494f7959",
+      "range": {
+        "startLine": 86,
+        "startChar": 7,
+        "endLine": 86,
+        "endChar": 45
+      },
+      "revId": "5255802a76bdd2d49fa92d575ead911b1a0adb79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b70b953e_72fbcb35",
         "filename": "android/third_party/CMakeLists.txt",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2019-03-29T20:48:44Z",
       "side": 1,
       "message": "Would it help to have one common variable that captures this?",
+      "range": {
+        "startLine": 70,
+        "startChar": 3,
+        "endLine": 70,
+        "endChar": 40
+      },
+      "revId": "5255802a76bdd2d49fa92d575ead911b1a0adb79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a34d13d0_3cd29c13",
+        "filename": "android/third_party/CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-03-29T23:00:16Z",
+      "side": 1,
+      "message": "Let me add this.",
+      "parentUuid": "b70b953e_72fbcb35",
       "range": {
         "startLine": 70,
         "startChar": 3,
