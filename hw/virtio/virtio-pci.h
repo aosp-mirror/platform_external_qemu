@@ -53,6 +53,7 @@ typedef struct VHostUserBlkPCI VHostUserBlkPCI;
 typedef struct VirtIORngPCI VirtIORngPCI;
 typedef struct VirtIOInputPCI VirtIOInputPCI;
 typedef struct VirtIOInputHIDPCI VirtIOInputHIDPCI;
+typedef struct VirtIOInputEmuPCI VirtIOInputEmuPCI;
 typedef struct VirtIOInputHostPCI VirtIOInputHostPCI;
 typedef struct VirtIOGPUPCI VirtIOGPUPCI;
 typedef struct VHostVSockPCI VHostVSockPCI;
@@ -361,6 +362,15 @@ struct VirtIOInputPCI {
 struct VirtIOInputHIDPCI {
     VirtIOPCIProxy parent_obj;
     VirtIOInputHID vdev;
+};
+
+#define TYPE_VIRTIO_INPUT_EMU_PCI       "virtio-input-emu-pci"
+#define VIRTIO_INPUT_EMU_PCI(obj) \
+    OBJECT_CHECK(VirtIOInputEmuPCI, (obj), TYPE_VIRTIO_INPUT_EMU_PCI)
+
+struct VirtIOInputEmuPCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOInputEmu vdev;
 };
 
 #ifdef CONFIG_LINUX
