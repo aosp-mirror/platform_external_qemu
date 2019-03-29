@@ -1073,7 +1073,7 @@ add_finger_event(SkinWindow* window,
     unsigned posX = x;
     unsigned posY = y;
 
-    if (skin_winsys_is_folded()) {
+    if (skin_winsys_is_folded() && finger->display) {
         switch (finger->display->rotation) {
         case SKIN_ROTATION_0:
         case SKIN_ROTATION_180:
