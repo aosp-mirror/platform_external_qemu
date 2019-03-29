@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
+#include "android/emulation/address_space_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -79,16 +80,7 @@ public:
 
         AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
         if (device_context) {
-            const uint64_t wait_phys_addr = pingInfo->wait_phys_addr;
-            const uint32_t wait_flags = pingInfo->wait_flags;
-            const uint32_t direction = pingInfo->direction;
-
-            device_context->perform(phys_addr,
-                                    size,
-                                    metadata,
-                                    wait_phys_addr,
-                                    wait_flags,
-                                    direction);
+            device_context->perform(pingInfo);
         } else {
             // The first ioctl establishes the device type
             const AddressSpaceDeviceType device_type =
@@ -107,15 +99,21 @@ private:
     buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type) {
         switch (device_type) {
         case AddressSpaceDeviceType::Graphics:
+            return nullptr;
         case AddressSpaceDeviceType::Media:
+            return nullptr;
         case AddressSpaceDeviceType::Sensors:
+            return nullptr;
         case AddressSpaceDeviceType::Power:
+            return nullptr;
         case AddressSpaceDeviceType::GenericPipe:
-        default:
-            break;
-        }
+            return nullptr;
+        case AddressSpaceDeviceType::HostMemoryAllocator:
+            return std::make_unique<AddressSpaceHostMemoryAllocatorContext>();
 
-        return nullptr;
+        default:
+            return nullptr;
+        }
     }
 };
 

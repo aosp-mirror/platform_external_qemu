@@ -35,6 +35,7 @@ enum AddressSpaceDeviceType {
     Power = 3,
     // TODO: All other services currently using goldfish pipe
     GenericPipe = 4,
+    HostMemoryAllocator = 5,
 };
 
 struct AddressSpaceDevicePingInfo {
@@ -49,12 +50,7 @@ struct AddressSpaceDevicePingInfo {
 class AddressSpaceDeviceContext {
 public:
     virtual ~AddressSpaceDeviceContext() {}
-    virtual void perform(uint64_t phys_addr,
-                         uint64_t size,
-                         uint64_t metadata,
-                         uint64_t wait_phys_addr,
-                         uint32_t wait_flags,
-                         uint32_t direction) = 0;
+    virtual void perform(AddressSpaceDevicePingInfo *info) = 0;
 };
 
 struct AddressSpaceContextDescription {
