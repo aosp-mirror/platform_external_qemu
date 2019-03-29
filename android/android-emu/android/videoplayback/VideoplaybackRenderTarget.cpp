@@ -20,6 +20,7 @@
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace android {
