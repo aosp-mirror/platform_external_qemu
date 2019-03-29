@@ -227,7 +227,7 @@ static int gvm_set_user_memory_region(GVMMemoryListener *kml, GVMSlot *slot)
 
     if (slot->memory_size && mem.flags & GVM_MEM_READONLY) {
         /* Set the slot size to 0 before setting the slot to the desired
-         * value. This is needed based on GVM commit 75d61fbc. */
+         * value. This is needed based on KVM commit 75d61fbc. */
         mem.memory_size = 0;
 	dump_user_memory_region(&mem);
         r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
@@ -1016,10 +1016,6 @@ int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
     kroute.u.msi.address_lo = (uint32_t)msg.address;
     kroute.u.msi.address_hi = msg.address >> 32;
     kroute.u.msi.data = le32_to_cpu(msg.data);
-    if (gvm_arch_fixup_msi_route(&kroute, msg.address, msg.data, dev)) {
-        gvm_irqchip_release_virq(s, virq);
-        return -EINVAL;
-    }
 
     gvm_add_routing_entry(s, &kroute);
     gvm_arch_add_msi_route_post(&kroute, vector, dev);
@@ -1047,9 +1043,6 @@ int gvm_irqchip_update_msi_route(GVMState *s, int virq, MSIMessage msg,
     kroute.u.msi.address_lo = (uint32_t)msg.address;
     kroute.u.msi.address_hi = msg.address >> 32;
     kroute.u.msi.data = le32_to_cpu(msg.data);
-    if (gvm_arch_fixup_msi_route(&kroute, msg.address, msg.data, dev)) {
-        return -EINVAL;
-    }
 
     return gvm_update_routing_entry(s, &kroute);
 }
