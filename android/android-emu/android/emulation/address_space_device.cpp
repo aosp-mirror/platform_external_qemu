@@ -65,26 +65,11 @@ public:
     void ping(uint32_t handle) {
         AutoLock lock(mLock);
         auto& contextDesc = mContexts[handle];
-
         AddressSpaceDevicePingInfo* pingInfo = contextDesc.pingInfo;
 
-        perform(
-            handle,
-            pingInfo->phys_addr,
-            pingInfo->size,
-            pingInfo->metadata,
-            pingInfo->wait_phys_addr,
-            pingInfo->wait_flags,
-            pingInfo->direction);
-    }
-
-    void perform(uint32_t handle,
-                 uint64_t phys_addr,
-                 uint64_t size,
-                 uint64_t metadata,
-                 uint64_t wait_phys_addr,
-                 uint32_t wait_flags,
-                 uint32_t direction) {
+        const uint64_t phys_addr = pingInfo->phys_addr;
+        const uint64_t size = pingInfo->size;
+        const uint64_t metadata = pingInfo->metadata;
 
         AS_DEVICE_DPRINT(
                 "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
@@ -92,48 +77,46 @@ public:
                 gQAndroidVmOperations->physicalMemoryGetAddr(phys_addr),
                 (unsigned long long)size, (unsigned long long)metadata);
 
-        // The first ioctl establishes the device type
-        auto& contextDesc = mContexts[handle];
-        if (contextDesc.deviceType == AddressSpaceDeviceType::Max) {
-            AddressSpaceDeviceType deviceType =
-                (AddressSpaceDeviceType)(metadata);
-            contextDesc.handle = handle;
-            contextDesc.deviceType = deviceType;
+        AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
+        if (device_context) {
+            const uint64_t wait_phys_addr = pingInfo->wait_phys_addr;
+            const uint32_t wait_flags = pingInfo->wait_flags;
+            const uint32_t direction = pingInfo->direction;
 
-            // TODO: Do initialization
-            switch (contextDesc.deviceType) {
-            case AddressSpaceDeviceType::Graphics:
-            case AddressSpaceDeviceType::Media:
-            case AddressSpaceDeviceType::Sensors:
-            case AddressSpaceDeviceType::Power:
-            case AddressSpaceDeviceType::GenericPipe:
-            case AddressSpaceDeviceType::Max:
-                default:
-                break;
-            }
+            device_context->perform(phys_addr,
+                                    size,
+                                    metadata,
+                                    wait_phys_addr,
+                                    wait_flags,
+                                    direction);
         } else {
-            auto& contextDesc = mContexts[handle];
+            // The first ioctl establishes the device type
+            const AddressSpaceDeviceType device_type =
+                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
 
-            // TODO: Do "perform" depending on data/size/metadata/etc
-            switch (contextDesc.deviceType) {
-            case AddressSpaceDeviceType::Graphics:
-            case AddressSpaceDeviceType::Media:
-            case AddressSpaceDeviceType::Sensors:
-            case AddressSpaceDeviceType::Power:
-            case AddressSpaceDeviceType::GenericPipe:
-            case AddressSpaceDeviceType::Max:
-                default:
-                break;
-            }
-
+            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type);
         }
     }
 
 private:
     Lock mLock;
     uint32_t mHandleIndex = 0;
-    std::unordered_map<uint32_t, AddressSpaceContextDescription>
-        mContexts;
+    std::unordered_map<uint32_t, AddressSpaceContextDescription> mContexts;
+
+    std::unique_ptr<AddressSpaceDeviceContext>
+    buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type) {
+        switch (device_type) {
+        case AddressSpaceDeviceType::Graphics:
+        case AddressSpaceDeviceType::Media:
+        case AddressSpaceDeviceType::Sensors:
+        case AddressSpaceDeviceType::Power:
+        case AddressSpaceDeviceType::GenericPipe:
+        default:
+            break;
+        }
+
+        return nullptr;
+    }
 };
 
 namespace {
