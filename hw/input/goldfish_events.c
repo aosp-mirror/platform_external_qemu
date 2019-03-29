@@ -686,8 +686,9 @@ static void goldfish_evdev_init(Object *obj)
     qemu_input_handler_register(dev, &goldfish_evdev_key_input_handler);
     // Register the mouse handler for both absolute and relative position
     // reports. (Relative reports are used in trackball mode.)
-    qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 1, "goldfish-events");
-    qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 0, "goldfish-events-rel");
+    // qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 1,
+    // "goldfish-events"); qemu_add_mouse_event_handler(goldfish_evdev_put_mouse,
+    // s, 0, "goldfish-events-rel");
 }
 
 static void goldfish_evdev_realize(DeviceState *dev, Error **errp)

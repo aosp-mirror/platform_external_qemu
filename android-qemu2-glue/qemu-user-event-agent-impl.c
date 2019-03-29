@@ -11,6 +11,8 @@
 */
 #include "android-qemu2-glue/qemu-control-impl.h"
 
+#include "android-qemu2-glue/emulation/virtio-input-android.h"
+
 #include "android/multitouch-screen.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
@@ -68,7 +70,11 @@ static void user_event_keycodes(int* kcodes, int count) {
 }
 
 static void user_event_generic(int type, int code, int value) {
-    goldfish_event_send(type, code, value);
+    if (type == EV_ABS) {
+        android_virtio_input_send(type, code, value);
+    } else {
+        goldfish_event_send(type, code, value);
+    }
 }
 
 static void user_event_generic_events(SkinGenericEventCode* events, int count) {
@@ -80,11 +86,9 @@ static void user_event_generic_events(SkinGenericEventCode* events, int count) {
 }
 
 static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
-    if (VERBOSE_CHECK(keys)) {
-        printf(">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
-    }
+    fprintf(stderr, ">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
 
-    kbd_mouse_event(dx, dy, dz, buttonsState);
+    android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState);
 }
 
 static void user_event_rotary(int delta) {

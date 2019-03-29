@@ -1635,6 +1635,9 @@ extern "C" int main(int argc, char** argv) {
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");
     args.add("virtio-rng-pci");
+
+    args.add("-device");
+    args.add("virtio-input-emu-pci");
 #else
     args.add("-device");
     args.add("virtio-rng-device");

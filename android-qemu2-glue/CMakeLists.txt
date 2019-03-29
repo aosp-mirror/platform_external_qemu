@@ -21,6 +21,7 @@ set(libqemu2-glue_src
     emulation/goldfish_sync.cpp
     emulation/serial_line.cpp
     emulation/VmLock.cpp
+    emulation/virtio-input-android.c
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
