@@ -21,6 +21,7 @@
 #include "VulkanDispatch.h"
 #include "vk_util.h"
 
+#include "android/base/containers/EntityManager.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Optional.h"
@@ -2288,6 +2289,30 @@ public:
     DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalImageFormatProperties)
     DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalBufferProperties)
 
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_IMPL(type) \
+    uint64_t new_boxed_##type(type underlying, VulkanDispatch* dispatch, bool ownDispatch) { \
+        DispatchableHandleInfo<type> item; \
+        item.underlying = underlying; \
+        item.dispatch = dispatch ? dispatch : new VulkanDispatch; \
+        auto res = mBoxedDispatchableHandles_##type.add(item); \
+        return res; \
+    } \
+    void delete_boxed_##type(uint64_t boxed, bool ownDispatch = true) { \
+        mBoxedDispatchableHandles_##type.remove(boxed);
+ \
+    } \
+    void delete_boxed_##type(type boxed) { \
+ \
+    } \
+    type unbox_##type(type boxed) { \
+ return VK_NULL_HANDLE; \
+    } \
+    VulkanDispatch* dispatch_##type(type boxed) { \
+ \
+    } \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_IMPL)
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -2902,6 +2927,29 @@ private:
             VK_EXT_MEMORY_HANDLE_INVALID;
     };
 
+    template <class T>
+    class BoxedHandleManager {
+    public:
+        android::base::HandleManager<32, 16, 16, T> store;
+        Lock lock;
+        uint64_t add(const T& item) {
+            AutoLock lock(lock);
+            return (uint64_t)store.add(item, 1);
+        }
+        void remove(uint64_t h) {
+            AutoLock lock(lock);
+            store.remove(h);
+        }
+    };
+    
+    template <class T>
+    class DispatchableHandleInfo {
+    public:
+        T underlying;
+        bool ownDispatch = false;
+        VulkanDispatch* dispatch = nullptr;
+    };
+
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -2940,6 +2988,13 @@ private:
     std::unordered_map<int, VkSemaphore> mExternalSemaphoresById;
 #endif
     std::unordered_map<VkDescriptorUpdateTemplate, DescriptorUpdateTemplateInfo> mDescriptorUpdateTemplateInfo;
+
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_STORE(type) \
+    BoxedHandleManager<DispatchableHandleInfo<type>> mBoxedDispatchableHandles_##type;
+    
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_STORE)
+
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -3550,5 +3605,24 @@ void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
     } \
 
 LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
+
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DEF(type) \
+    uint64_t VkDecoderGlobalState::new_boxed_##type(type underlying, VulkanDispatch* dispatch) { \
+        return mImpl->new_boxed_##type(underlying, dispatch); \
+    } \
+    void VkDecoderGlobalState::delete_boxed_##type(uint64_t boxed, bool ownDispatch = true) { \
+        mImpl->delete_boxed_##type(boxed, ownDispatch); \
+    } \
+    void VkDecoderGlobalState::delete_boxed_##type(type boxed) { \
+        mImpl->delete_boxed_##type(boxed); \
+    } \
+    type VkDecoderGlobalState::unbox_##type(type boxed) { \
+        return mImpl->unbox_##type(boxed); \
+    } \
+    VulkanDispatch* VkDecoderGlobalState::dispatch_##type(type boxed) { \
+        return mImpl->dispatch_##type(boxed); \
+    } \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DEF)
 
 }  // namespace goldfish_vk

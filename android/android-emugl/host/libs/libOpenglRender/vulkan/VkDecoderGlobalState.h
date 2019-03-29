@@ -427,6 +427,16 @@ public:
     
 LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
 
+    // boxed handles
+#define DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DECL(type) \
+    uint64_t new_boxed_##type(type underlying, VulkanDispatch* dispatch, bool ownDispatch); \
+    void delete_boxed_##type(uint64_t boxed); \
+    void delete_boxed_##type(type boxed); \
+    type unbox_##type(type boxed); \
+    VulkanDispatch* dispatch_##type(type boxed); \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_NEW_BOXED_DISPATCHABLE_HANDLE_API_DECL)
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
