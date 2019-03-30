@@ -495,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "4be8882d_9cf80b3d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-30T00:41:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3933a25_4ff17f5b",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 70
+      },
+      "revId": "dfd0f3b9dc48b8960bb6ef9ff7bf2772ef686d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "752026fa_4e7c9ad0",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp",
         "patchSetId": 3
