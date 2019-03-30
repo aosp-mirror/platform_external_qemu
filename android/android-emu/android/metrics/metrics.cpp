@@ -405,6 +405,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VULKAN;
         case android::featurecontrol::MacroUi:
             return android_studio::EmulatorFeatureFlagState::MACRO_UI;
+        case android::featurecontrol::CarPropertyTable:
+            return android_studio::EmulatorFeatureFlagState::CAR_PROPERTY_TABLE;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

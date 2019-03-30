@@ -15,6 +15,7 @@
 // defined in windows.h & redefined in VehicleHalProto.proto, causing conflicts.
 #undef ERROR_INVALID_OPERATION
 #include "android/emulation/proto/VehicleHalProto.pb.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
@@ -36,7 +37,11 @@ CarDataPage::CarDataPage(QWidget* parent)
         sendCarEmulatorMessageLogged(msg, log);
     };
     mUi->tab_sensor->setSendEmulatorMsgCallback(sendFunc);
-    mUi->car_property_table->setSendEmulatorMsgCallback(sendFunc);
+    if (feature_is_enabled(kFeature_CarPropertyTable)) {
+        mUi->car_property_table->setSendEmulatorMsgCallback(sendFunc);
+    } else {
+        mUi->tabWidget->removeTab(DATA_PROPERTY_TABLE_INDEX);
+    }
     if (sCarDataAgent != nullptr) {
         sCarDataAgent->setCarCallback(&CarDataPage::carDataCallback, this);
     }
