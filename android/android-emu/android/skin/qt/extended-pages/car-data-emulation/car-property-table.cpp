@@ -38,11 +38,10 @@ using carpropertyutils::propMap;
 
 static constexpr int LABEL_COLUMN = 0;
 static constexpr int VALUE_COLUMN = 1;
-static constexpr int WRITABLE_COLUMN = 2;
-static constexpr int AREA_COLUMN = 3;
-static constexpr int PROPERTY_ID_COLUMN = 4;
-static constexpr int AREA_ID_COLUMN = 5;
-static constexpr int TYPE_COLUMN = 6;
+static constexpr int AREA_COLUMN = 2;
+static constexpr int PROPERTY_ID_COLUMN = 3;
+static constexpr int AREA_ID_COLUMN = 4;
+static constexpr int TYPE_COLUMN = 5;
 
 static constexpr int REFRESH_START = 1;
 static constexpr int REFRESH_STOP = 2;
@@ -82,20 +81,20 @@ CarPropertyTable::CarPropertyTable(QWidget* parent)
     mUi->setupUi(this);
 
     QStringList colHeaders;
-    colHeaders << tr("Labels") << tr("Values") << tr("Writable?") << tr("Area")
-                << tr("Property IDs") << tr("Area IDs") << tr("Type");
+    colHeaders << tr("Labels") << tr("Values") << tr("Area")
+               << tr("Property IDs") << tr("Area IDs") << tr("Type");
     // This "hidden" data is necessary when sending changes.
     mUi->table->setColumnHidden(AREA_ID_COLUMN, true);
     mUi->table->setColumnHidden(TYPE_COLUMN, true);
-    mUi->table->setColumnWidth(WRITABLE_COLUMN, 75);
     mUi->table->setHorizontalHeaderLabels(colHeaders);
 
-    connect(this, SIGNAL(updateData(int, int, QTableWidgetItem*)),
-             this, SLOT(updateTable(int, int, QTableWidgetItem*)), Qt::QueuedConnection);
+    connect(this, SIGNAL(updateData(int, int, QTableWidgetItem*)), this,
+            SLOT(updateTable(int, int, QTableWidgetItem*)),
+            Qt::QueuedConnection);
     connect(this, SIGNAL(sort(int)), this, SLOT(sortTable(int)), Qt::BlockingQueuedConnection);
     connect(this, SIGNAL(setRowCount(int)), this, SLOT(changeRowCount(int)), Qt::QueuedConnection);
-    connect(mUi->table->horizontalHeader(), SIGNAL(sectionClicked(int)),
-             this, SLOT(sortTable(int)), Qt::QueuedConnection);
+    connect(mUi->table->horizontalHeader(), SIGNAL(sectionClicked(int)), this,
+            SLOT(sortTable(int)), Qt::QueuedConnection);
 
     mRefreshMsg.trySend(REFRESH_START);
     mCarPropertyTableRefreshThread.start();
@@ -157,16 +156,6 @@ QTableWidgetItem* CarPropertyTable::createTableTextItem(QString info) {
     return new QTableWidgetItem(info);
 }
 
-QTableWidgetItem* CarPropertyTable::createTableBoolItem(bool val) {
-    QTableWidgetItem* item = new QTableWidgetItem();
-    if (val) {
-        item->setCheckState(Qt::Checked);
-    } else {
-        item->setCheckState(Qt::Unchecked);
-    }
-    return item;
-}
-
 void CarPropertyTable::updateIndex() {
     for (int row = 0; row < mUi->table->rowCount(); row++) {
         QTableWidgetItem* currLabel = mUi->table->item(row, LABEL_COLUMN);
@@ -216,7 +205,6 @@ void CarPropertyTable::processMsg(EmulatorMessage emulatorMsg) {
             } else {
                 emit updateData(valIndex, LABEL_COLUMN, createTableTextItem(label));
                 emit updateData(valIndex, VALUE_COLUMN, createTableTextItem(value));
-                emit updateData(valIndex, WRITABLE_COLUMN, createTableBoolItem(propDesc.writable));
                 emit updateData(valIndex, AREA_COLUMN, createTableTextItem(area));
                 emit updateData(valIndex, PROPERTY_ID_COLUMN,
                                  createTableTextItem(QString::number(val.prop())));
@@ -236,7 +224,7 @@ void CarPropertyTable::processMsg(EmulatorMessage emulatorMsg) {
 void CarPropertyTable::on_table_cellClicked(int row, int column) {
     int prop = getPropertyId(row);
     PropertyDescription propDesc = propMap[prop];
-    if ((column != VALUE_COLUMN && column != WRITABLE_COLUMN) || !propDesc.writable) {
+    if (column != VALUE_COLUMN || !propDesc.writable) {
         return;
     }
     int areaId = getAreaId(row);
