@@ -174,6 +174,8 @@ bool VideoplaybackRenderTarget::initialize() {
     mGles2->glVertexAttribPointer(texcoordAttrib, 2, GL_FLOAT, GL_FALSE,
                                   4 * sizeof(float),
                                   (void*)(2 * sizeof(float)));
+
+    return true;
 }
 
 void VideoplaybackRenderTarget::uninitialize() {
@@ -194,11 +196,12 @@ void VideoplaybackRenderTarget::renderBuffer() {
     const unsigned char* frameBuf = &mBuffer[mFrameInfo.headerlen];
 
     mGles2->glBindVertexArray(mVao);
+    mGles2->glBindTexture(GL_TEXTURE_2D, mTexture);
 
     // Load the processed frame into the texture.
     mGles2->glBindTexture(GL_TEXTURE_2D, mTexture);
-    if (mFrameInfo.width <= mRenderWidth &&
-        mFrameInfo.height <= mRenderHeight) {
+    if (mFrameInfo.width != mRenderWidth &&
+        mFrameInfo.height != mRenderHeight) {
         mGles2->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mFrameInfo.width,
                                 mFrameInfo.height, GL_RGB, GL_UNSIGNED_BYTE,
                                 frameBuf);
@@ -213,6 +216,8 @@ void VideoplaybackRenderTarget::renderBuffer() {
     }
 
     mGles2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 }  // namespace videoplayback
