@@ -14,9 +14,10 @@
 
 #include "SampleApplication.h"
 
+#include "android/base/GLObjectCounter.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/threads/FunctorThread.h"
@@ -224,7 +225,7 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate), mIsCompose(compose) {
 
     setupStandaloneLibrarySearchPaths();
-
+    emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
     LazyLoadedEGLDispatch::get();
     if (glVersion == GLESApi_CM) LazyLoadedGLESv1Dispatch::get();
     LazyLoadedGLESv2Dispatch::get();
