@@ -209,8 +209,8 @@ if(OPTION_ASAN AND (LINUX_X86_64 OR DARWIN_X86_64))
 endif()
 
 # Toolchain file can get loaded multiple times, resulting in this
-# variable being overwritten at times.
-if(WINDOWS_MSVC_X86_64)
+# variable being overwritten on native windows.
+if(MSVC AND WINDOWS_MSVC_X86_64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 endif()
 
