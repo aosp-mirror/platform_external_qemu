@@ -37,13 +37,16 @@ if(WIN32)
   if(NOT EXISTS "${CLANG_CL}")
     message(
       FATAL_ERROR
-        "${CLANG_CL} does not exists, will not be able to compile properly. Make sure the symlink ${CLANG_CL} <===> ${CLANG_DIR}/bin/clang.exe exists!"
+        "${CLANG_CL} does not exists, will not be able to compile properly. "
+        "Make sure the symlink ${CLANG_CL} <===> ${CLANG_DIR}/bin/clang.exe exists!"
       )
   endif()
   find_program(CLCACHE clcache)
   # cl cache only works reasonable in debug builds due to usage of /Zi flag in release builds.
   if(CLCACHE AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(WARNING "Enabling clcache with ${CLANG_CL}, with $ENV{CLCACHE_DIR}. Make sure to set CLCACHE_DIR to point outside of your user env. For example CLCACHE_DIR=C:\\clcache")
+    message(WARNING "Enabling clcache with ${CLANG_CL}, with $ENV{CLCACHE_DIR}. "
+    "Make sure to set CLCACHE_DIR to point outside of your user env. "
+    "For example CLCACHE_DIR=C:\\clcache")
 
     # Create a clcache wrapper.
     file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.bat "@echo off\r\n")
@@ -84,9 +87,7 @@ if(WIN32)
 
   # Including windows.h will cause issues with std::min/std::max
   add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -DWIN32_LEAN_AND_MEAN)
-  toolchain_configure_tags("windows_msvc-x86_64")
 else()
-
   set(CMAKE_SYSTEM_NAME WinMSVCCrossCompile)
   toolchain_generate("${ANDROID_TARGET_TAG}")
   # need to set ar to llvm-ar to unpack windows static libs
@@ -106,4 +107,3 @@ endif()
 
 # And the asm type if we are compiling with yasm
 set(ANDROID_YASM_TYPE win64)
-set(CMAKE_SHARED_LIBRARY_PREFIX "lib")

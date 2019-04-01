@@ -73,13 +73,7 @@ prebuilt(Threads)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
-
-  if(WINDOWS_MSVC_X86_64)
-    # Clang will be running in cl compatibility mode.
-    add_c_flag("/Od /RTC1 /EHsc")
-  else()
-    add_c_flag("-O0 -g3")
-  endif()
+  add_c_flag("-O0 -g3")
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     if(NOT OPTION_ASAN)
@@ -190,7 +184,6 @@ add_cxx_flag("-Wno-invalid-offsetof")
 
 # Ensure that <inttypes.h> always defines all interesting macros.
 add_definitions("-D__STDC_LIMIT_MACROS=1" "-D__STDC_FORMAT_MACROS=1")
-
 # (From https://stackoverflow.com/questions/5582211/what-does-define-gnu-source-imply) with GNU_SOURCE, you will get:
 #
 # * access to lots of nonstandard GNU/Linux extension functions
@@ -214,6 +207,13 @@ if(OPTION_ASAN AND (LINUX_X86_64 OR DARWIN_X86_64))
     add_c_flag("-fno-omit-frame-pointer")
   endif()
 endif()
+
+# Toolchain file can get loaded multiple times, resulting in this
+# variable being overwritten at times.
+if(WINDOWS_MSVC_X86_64)
+  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+endif()
+
 
 # We now have configured our base compiler..
 
