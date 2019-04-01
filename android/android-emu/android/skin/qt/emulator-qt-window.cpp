@@ -419,6 +419,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     android::base::ThreadLooper::setLooper(mLooper, true);
 
+    // Detect when we have a locale change, in order to detect which keyboard
+    // layout we are using.
+    qDebug() << "Current locale: [" << QLocale::system().name() << "]";
+    QObject::connect(qApp->inputMethod(), &QInputMethod::localeChanged,
+                     this, &EmulatorQtWindow::onLocaleChanged);
+
     // TODO: Weird input lag with Qt will cause hang detector to trip and crash
     // the emulator, even though it works ok (but laggy) otherwise.
     // For now, disable Qt hang detection.
@@ -2763,4 +2769,8 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
         mSkinGapBottom = bitImage.height() - 1 - bottomVisible;
         mSkinGapLeft = leftVisible;
     }
+}
+
+void EmulatorQtWindow::onLocaleChanged() {
+    qDebug() << "Current locale: [" << QLocale::system().name() << "]";
 }

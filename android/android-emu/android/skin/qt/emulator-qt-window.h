@@ -346,6 +346,7 @@ public slots:
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
 
+    void onLocaleChanged();
     bool event(QEvent* ev);  // Used to resume the MV on un-minimize
 
 private:

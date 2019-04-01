@@ -110,6 +110,10 @@ EmulatorContainer::~EmulatorContainer() {
 }
 
 bool EmulatorContainer::event(QEvent* e) {
+    if (e->type() == QEvent::KeyboardLayoutChange) {
+        qDebug() << "Keyboard changed";
+        return QScrollArea::event(e);
+    }
     // Ignore MetaCall and UpdateRequest events, and don't snap in zoom mode.
     if (mEmulatorWindow->isInZoomMode() || e->type() == QEvent::MetaCall ||
         e->type() == QEvent::UpdateRequest) {
