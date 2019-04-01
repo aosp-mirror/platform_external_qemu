@@ -71,7 +71,7 @@ class SymbolFileServer(object):
     def __init__(self, environment='prod', api_key=None):
         endpoint = SymbolFileServer.API_URL if api_key else SymbolFileServer.CLASSIC_API_URL
         self.api_url = endpoint[environment.lower()]
-        self.api_key = api_key
+        self.api_key = api_key or ''
 
     def use_classic_api(self):
         '''Returns true if we should use the classic api.'''
