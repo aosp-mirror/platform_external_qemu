@@ -138,7 +138,7 @@ function(toolchain_generate TARGET_OS)
     set(ANDROID_LLVM_SYMBOLIZER ${PROJECT_BINARY_DIR}/toolchain/llvm-symbolizer CACHE PATH "symbolizer")
 endfunction()
 
-function(get_host_tag RET_VAL)
+function(_get_host_tag RET_VAL)
     # Prebuilts to be used on the host os should fall under one of
     # the below tags
     if (APPLE)
@@ -175,6 +175,45 @@ function(toolchain_generate_msvc TARGET_OS)
     set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy PARENT_SCOPE)
     set(CMAKE_STRIP ${COMPILER_PREFIX}strip PARENT_SCOPE)
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
+endfunction()
+
+
+function(toolchain_configure_tags tag)
+    set(ANDROID_TARGET_TAG ${tag})
+    string(REGEX REPLACE "-.*" "" ANDROID_TARGET_OS ${tag})
+    string(REGEX REPLACE "[-_].*" "" ANDROID_TARGET_OS_FLAVOR ${tag})
+    _get_host_tag(ANDROID_HOST_TAG)
+    if (NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+        set(CROSSCOMPILE TRUE PARENT_SCOPE)
+    endif()
+
+    if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+      set(WINDOWS_X86_64 TRUE PARENT_SCOPE)
+      set(WINDOWS TRUE PARENT_SCOPE)
+    elseif (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+      set(WINDOWS TRUE PARENT_SCOPE)
+      set(WINDOWS_MSVC_X86_64 TRUE PARENT_SCOPE)
+    elseif (ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+      set(LINUX_X86_64 TRUE PARENT_SCOPE)
+    elseif (ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+      set(DARWIN_X86_64 TRUE PARENT_SCOPE)
+    endif()
+
+    if (ANDOID_HOST_TAG STREQUAL "windows_msvc-x86_64")
+      set(HOST_WINDOWS_MSVC_X86_64 TRUE PARENT_SCOPE)
+      set(HOST_WINDOWS TRUE PARENT_SCOPE)
+    elseif (ANDOID_HOST_TAG STREQUAL "linux-x86_64")
+      set(HOST_LINUX_X86_64 TRUE PARENT_SCOPE)
+    elseif (ANDOID_HOST_TAG STREQUAL "darwin-x86_64")
+      set(HOST_DARWIN_X86_64 TRUE PARENT_SCOPE)
+    endif()
+
+    # Export the oldschool tags as well.
+    set(ANDROID_TARGET_TAG ${tag} PARENT_SCOPE)
+    set(ANDROID_HOST_TAG ${ANDROID_HOST_TAG} PARENT_SCOPE)
+
+    set(ANDROID_TARGET_OS "${ANDROID_TARGET_OS}" PARENT_SCOPE)
+    set(ANDROID_TARGET_OS_FLAVOR "${ANDROID_TARGET_OS_FLAVOR}" PARENT_SCOPE)
 endfunction()
 
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../.." ABSOLUTE)

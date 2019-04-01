@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
+if (WINDOWS)
     # Create an empty dummy lib..
     add_library(emulator-libselinux ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
 else ()
@@ -16,7 +16,7 @@ else ()
     target_link_libraries(emulator-libselinux PRIVATE android-emu-base)
     target_include_directories(emulator-libselinux PUBLIC include)
     target_include_directories(emulator-libselinux PRIVATE .)
-    if (APPLE)
+    if (DARWIN_X86_64)
         target_compile_definitions(emulator-libselinux PRIVATE -DDARWIN)
     endif ()
     target_compile_definitions(emulator-libselinux PRIVATE -DHOST)

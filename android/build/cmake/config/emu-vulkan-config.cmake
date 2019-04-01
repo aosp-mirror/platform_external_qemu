@@ -13,7 +13,7 @@ get_filename_component(
   PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
-if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+if(LINUX_X86_64)
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
@@ -49,7 +49,7 @@ if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
       "${PREBUILT_ROOT}/layers/VkLayer_standard_validation.json>testlib64/layers/VkLayer_standard_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_threading.json>testlib64/layers/VkLayer_threading.json"
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json")
-elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+elseif(DARWIN_X86_64)
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
@@ -83,7 +83,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
       "${PREBUILT_ROOT}/layers/VkLayer_standard_validation.json>testlib64/layers/VkLayer_standard_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_threading.json>testlib64/layers/VkLayer_threading.json"
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json")
-elseif(ANDROID_TARGET_TAG MATCHES "windows.*")
+elseif(WINDOWS)
   get_filename_component(PREBUILT_ROOT
                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
                          ABSOLUTE)

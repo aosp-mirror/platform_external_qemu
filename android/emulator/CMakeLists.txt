@@ -107,10 +107,10 @@ android_install_exe(emulator-headless .)
 install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
 
 # Note, these files are identical..
-if(ANDROID_TARGET_TAG MATCHES "windows.*")
+if(WINDOWS)
   install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
-elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+elseif(LINUX_X86_64)
   install(FILES ${ANDROID_QEMU2_TOP_DIR}/source.properties DESTINATION .)
-elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+elseif(DARWIN_X86_64)
   install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
 endif()

@@ -38,7 +38,7 @@ android_target_compile_options(png windows_msvc-x86_64 PRIVATE -Wno-nonportable-
 
 function(png_add_test)
   # We cannot run tests when we are cross compiling.
-  if(NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if(CROSSCOMPILE)
     return()
   endif()
 

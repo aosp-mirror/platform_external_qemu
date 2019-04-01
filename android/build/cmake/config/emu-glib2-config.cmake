@@ -15,13 +15,13 @@ get_filename_component(
 set(GLIB2_INCLUDE_DIR "${PREBUILT_ROOT}/include/glib-2.0;${PREBUILT_ROOT}/lib/glib-2.0/include")
 set(GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIR})
 
-if(APPLE OR ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+if(DARWIN_X86_64)
   set(GLIB2_LIBRARIES -lglib-2.0 -liconv -lintl "-framework CoreServices" -L${PREBUILT_ROOT}/lib)
-elseif(ANDROID_TARGET_TAG MATCHES "windows_msvc-x86_64")
+elseif(WINDOWS_MSVC_X86_64)
   set(GLIB2_LIBRARIES ${PREBUILT_ROOT}/lib/libglib-2.0.lib ole32::ole32 ws2_32::ws2_32)
-elseif(ANDROID_TARGET_TAG MATCHES "windows-x86_64")
+elseif(WINDOWS_X86_64)
   set(GLIB2_LIBRARIES -lglib-2.0 ole32::ole32 -L${PREBUILT_ROOT}/lib -lws2_32)
-elseif(UNIX OR ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+elseif(LINUX_X86_64)
   set(GLIB2_LIBRARIES -lglib-2.0 -lpthread -lrt -L${PREBUILT_ROOT}/lib)
 endif()
 
@@ -35,7 +35,7 @@ if(NOT TARGET GLIB2::GLIB2)
 
 endif()
 
-if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+if(WINDOWS_MSVC_X86_64)
   set(GLIB2_WINDOWS_DEPENDENCIES ${PREBUILT_ROOT}/lib/glib-2-vs11.dll>lib64/glib-2-vs11.dll)
 endif()
 set(PACKAGE_EXPORT "GLIB2_INCLUDE_DIR;GLIB2_WINDOWS_DEPENDENCIES;GLIB2_INCLUDE_DIRS;GLIB2_LIBRARIES;GLIB2_FOUND;RUNTIME_OS_DEPENDENCIES")

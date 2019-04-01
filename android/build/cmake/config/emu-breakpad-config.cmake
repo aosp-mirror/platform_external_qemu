@@ -17,7 +17,7 @@ get_filename_component(
 
 set(BREAKPAD_INCLUDE_DIR "${PREBUILT_ROOT}/include/breakpad")
 set(BREAKPAD_INCLUDE_DIRS "${BREAKPAD_INCLUDE_DIR}")
-if(ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if(WINDOWS_MSVC_X86_64)
   set(BREAKPAD_LIBRARIES
       ${PREBUILT_ROOT}/lib/common${CMAKE_STATIC_LIBRARY_SUFFIX}
       ${PREBUILT_ROOT}/lib/exception_handler${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -31,7 +31,7 @@ if(ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
       ${PREBUILT_ROOT}/lib/processor${CMAKE_STATIC_LIBRARY_SUFFIX}
       ${PREBUILT_ROOT}/lib/libdisasm${CMAKE_STATIC_LIBRARY_SUFFIX})
 else()
-  if(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  if(WINDOWS_X86_64)
     set(BREAKPAD_DUMPSYM_EXE "${HOST_PREBUILT_ROOT}/bin/dump_syms_dwarf")
     set(BREAKPAD_MINIDUMP_STACKWALK_EXE "${PREBUILT_ROOT}/bin/minidump_stackwalk.exe")
   else()

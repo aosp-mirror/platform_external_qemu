@@ -1,4 +1,4 @@
-if (ANDROID_TARGET_OS STREQUAL "windows_msvc")
+if (WINDOWS_MSVC_X86_64)
   add_subdirectory(msvc-posix-compat)
 endif()
 add_subdirectory(third_party)

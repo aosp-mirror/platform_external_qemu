@@ -356,7 +356,7 @@ android_target_compile_definitions(ssl windows-x86_64 PUBLIC "-DWIN32_LEAN_AND_M
 android_target_compile_options(ssl windows PRIVATE "-std=c99" "-UNDEBUG")
 
 # Setup the crypto libraries:
-if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64" OR ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+if(LINUX_X86_64 OR DARWIN_X86_64)
   set(crypto_src ${crypto_sources} ${crypto_sources_${ANDROID_TARGET_TAG}})
   android_add_library(crypto)
 else()

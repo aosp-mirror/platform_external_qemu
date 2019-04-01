@@ -300,7 +300,7 @@ android_add_library(emulator-libui)
 
 # TODO: Remove this and the "USE_WEBENGINE" defines once we have:
 # --no-window mode has no dependency on Qt
-if (QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+if (QTWEBENGINE AND NOT WINDOWS_X86_64)
     target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
     target_link_libraries(emulator-libui PRIVATE
                           Qt5::Network
@@ -313,9 +313,7 @@ target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
-if(NOT MSVC)
-  android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
-endif()
+android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
 # Linux compiler settings
 android_target_compile_options(emulator-libui

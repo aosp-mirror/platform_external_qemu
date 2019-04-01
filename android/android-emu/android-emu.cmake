@@ -495,9 +495,7 @@ android_target_link_libraries(android-emu-shared
                               iphlpapi::iphlpapi
 )
 
-if(MSVC)
-    target_link_libraries(android-emu-shared PRIVATE msvc-posix-compat)
-endif()
+android_target_link_libraries(android-emu-shared windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 # These are the libs needed for android-emu-shared on linux.
 android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)

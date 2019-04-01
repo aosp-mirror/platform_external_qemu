@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if (NOT WINDOWS_MSVC_X86_64)
   prebuilt(X264)
 endif()
 prebuilt(VPX)
@@ -22,11 +22,11 @@ set(FFMPEG_LIBAVCODEC "${PREBUILT_ROOT}/lib/libavcodec${CMAKE_STATIC_LIBRARY_SUF
 set(FFMPEG_LIBAVFORMAT "${PREBUILT_ROOT}/lib/libavformat${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(FFMPEG_LIBAVUTIL "${PREBUILT_ROOT}/lib/libavutil${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(FFMPEG_LIBRARIES "${PREBUILT_ROOT}/lib/libavformat${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libavfilter${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libavcodec${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libswresample${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libswscale${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libavutil${CMAKE_STATIC_LIBRARY_SUFFIX};${X264_LIBRARIES};${VPX_LIBRARIES}")
-if(ANDROID_TARGET_TAG MATCHES "windows-*")
+if(WINDOWS)
   # We need winsock for avformat, so make that dependency explicit
   list(APPEND FFMPEG_LIBRARIES ws2_32::ws2_32 secur32::secur32)
 endif()
-if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+if(DARWIN_X86_64)
   # Well, macos needs something extra as well
   list(APPEND FFMPEG_LIBRARIES "-framework VideoToolbox")
   list(APPEND FFMPEG_LIBRARIES "-framework VideoDecodeAcceleration")
