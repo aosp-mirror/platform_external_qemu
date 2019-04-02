@@ -1,0 +1,182 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd0211d4_45f4ef7f",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "Could you please create named constants for this?",
+      "range": {
+        "startLine": 44,
+        "startChar": 32,
+        "endLine": 44,
+        "endChar": 33
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a197513c_03a6069c",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "cfg",
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34723462_7873c37c",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "flags",
+      "range": {
+        "startLine": 73,
+        "startChar": 29,
+        "endLine": 73,
+        "endChar": 46
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b95ed52_f929b45b",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "Where does this number come from?",
+      "range": {
+        "startLine": 104,
+        "startChar": 41,
+        "endLine": 104,
+        "endChar": 43
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "727fb308_969c2e68",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "Is there a reason why it is a pointer? Can this be just\n\nvpx_codec_ctx_t mCtx;\n\n?",
+      "range": {
+        "startLine": 48,
+        "startChar": 20,
+        "endLine": 48,
+        "endChar": 21
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65b0c4c9_08458caf",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "Should you assign the owner for this pointer?",
+      "range": {
+        "startLine": 39,
+        "startChar": 10,
+        "endLine": 39,
+        "endChar": 15
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd22a9c3_9b6f1382",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "You don\u0027t need the class name here.",
+      "range": {
+        "startLine": 47,
+        "startChar": 27,
+        "endLine": 47,
+        "endChar": 55
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "387a7375_48c45da2",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-02T23:55:20Z",
+      "side": 1,
+      "message": "This function could go into the anonymous namespace, nobody outside needs to know about it.",
+      "range": {
+        "startLine": 51,
+        "startChar": 36,
+        "endLine": 51,
+        "endChar": 50
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
