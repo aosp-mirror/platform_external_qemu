@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "412f3fa7_58e17323",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-02T01:51:08Z",
+      "side": 1,
+      "message": "nit: trailing spaces",
+      "range": {
+        "startLine": 1103,
+        "startChar": 0,
+        "endLine": 1103,
+        "endChar": 4
+      },
+      "revId": "1c390b122242017f8aeffd69c395766bcd553aef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e83481b_702631ec",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-02T01:51:08Z",
+      "side": 1,
+      "message": "nit: align to beginning of line",
+      "revId": "1c390b122242017f8aeffd69c395766bcd553aef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
