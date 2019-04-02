@@ -141,6 +141,7 @@ constexpr char PER_AVD_VIRTUAL_SCENE_TV_ANIMATION[] =
 
 constexpr char PER_AVD_BATTERY_CHARGE_LEVEL[]  = "perAvd/battery/charge_level";
 constexpr char PER_AVD_BATTERY_CHARGER_TYPE2[] = "perAvd/battery/charger_type2";
+constexpr char PER_AVD_BATTERY_CHARGER_TYPE3[] = "perAvd/battery/charger_type3";
 constexpr char PER_AVD_BATTERY_HEALTH[]        = "perAvd/battery/health";
 constexpr char PER_AVD_BATTERY_STATUS[]        = "perAvd/battery/status";
 
