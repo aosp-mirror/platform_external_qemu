@@ -346,6 +346,13 @@ using DlSymFunc = void* (void*, const char*);
 
         decoderHeaderIncludes = """
 #include <memory>
+
+namespace android {
+namespace base {
+class Pool;
+} // namespace android
+} // namespace base
+
 """
 
         decoderImplIncludes = """
@@ -353,6 +360,7 @@ using DlSymFunc = void* (void*, const char*);
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
+#include "android/base/Pool.h"
 #include "android/base/system/System.h"
 
 #include "IOStream.h"

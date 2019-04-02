@@ -29,6 +29,13 @@
 
 #include <memory>
 
+namespace android {
+namespace base {
+class Pool;
+} // namespace android
+} // namespace base
+
+
 
 
 
