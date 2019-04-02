@@ -23,6 +23,8 @@ namespace emulation {
 
 class AddressSpaceHostMemoryAllocatorContext : public AddressSpaceDeviceContext {
 public:
+    ~AddressSpaceHostMemoryAllocatorContext();
+
     void perform(AddressSpaceDevicePingInfo *info) override;
 
 private:

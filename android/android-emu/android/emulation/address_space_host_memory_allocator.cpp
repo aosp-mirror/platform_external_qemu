@@ -27,6 +27,13 @@ enum class HostMemoryAllocatorCommand {
 
 }  // namespace
 
+AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext() {
+    for (const auto& kv : m_paddr2ptr) {
+        gQAndroidVmOperations->unmapUserBackedRam(kv.first, kv.second.second);
+        android::aligned_buf_free(kv.second.first);
+    }
+}
+
 void AddressSpaceHostMemoryAllocatorContext::perform(AddressSpaceDevicePingInfo *info) {
     uint64_t result;
 
