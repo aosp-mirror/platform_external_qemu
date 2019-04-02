@@ -66,6 +66,7 @@ typedef int pid_t;
 #define creat _creat
 */
 #define fstat64 _fstat64
+#define stat _stati64
 
 // From <fcntl.h>
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
