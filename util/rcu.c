@@ -334,18 +334,20 @@ static int atfork_depth = 1;
 
 void rcu_enable_atfork(void)
 {
-    atfork_depth++;
+    atomic_inc(&atfork_depth);
 }
 
 void rcu_disable_atfork(void)
 {
-    atfork_depth--;
+    atomic_dec(&atfork_depth);
 }
 
 #ifdef CONFIG_POSIX
 static void rcu_init_lock(void)
 {
-    if (atfork_depth < 1) {
+    int current_atfork_depth =
+        atomic_read(&atfork_depth);
+    if (current_atfork_depth < 1) {
         return;
     }
 
@@ -355,7 +357,9 @@ static void rcu_init_lock(void)
 
 static void rcu_init_unlock(void)
 {
-    if (atfork_depth < 1) {
+    int current_atfork_depth =
+        atomic_read(&atfork_depth);
+    if (current_atfork_depth < 1) {
         return;
     }
 
@@ -365,7 +369,9 @@ static void rcu_init_unlock(void)
 
 static void rcu_init_child(void)
 {
-    if (atfork_depth < 1) {
+    int current_atfork_depth =
+        atomic_read(&atfork_depth);
+    if (current_atfork_depth < 1) {
         return;
     }
 
