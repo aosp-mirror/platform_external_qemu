@@ -628,12 +628,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     ScreenMask::loadMask((*mAdbInterface));
 
-    (*mAdbInterface)->enqueueCommand(
-        { "shell", "settings", "put", "system",
-          "screen_off_timeout", "2147483647" });
-    (*mAdbInterface)->enqueueCommand(
-        { "shell", "logcat", "-G", "2M" });
-
     using android::snapshot::Snapshotter;
     Snapshotter::get().addOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
