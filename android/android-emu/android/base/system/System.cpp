@@ -265,7 +265,9 @@ bool parseBooleanValue(const char *value, bool def) {
 
 class HostSystem : public System {
 public:
-    HostSystem() : mProgramDir(), mHomeDir(), mAppDataDir() {}
+    HostSystem() : mProgramDir(), mHomeDir(), mAppDataDir() {
+        configureHost();
+    }
 
     virtual ~HostSystem() {}
 
@@ -1096,6 +1098,25 @@ public:
 
     void yield() const override {
         Thread::yield();
+    }
+
+#ifdef _MSC_VER
+    static void msvcInvalidParameterHandler(const wchar_t* expression,
+                                            const wchar_t* function,
+                                            const wchar_t* file,
+                                            unsigned int line,
+                                            uintptr_t pReserved) {
+        // Don't expect too much from actually getting these parameters..
+        LOG(WARNING) << "Ignoring invalid parameter detected in function: "
+                    << function << " file: " << file << ", line: " << line
+                    << ", expression: " << expression;
+    }
+#endif
+
+    void configureHost() const override {
+    #ifdef _MSC_VER
+        _set_invalid_parameter_handler(msvcInvalidParameterHandler);
+    #endif
     }
 
     Optional<std::string> runCommandWithResult(
