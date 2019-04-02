@@ -48,6 +48,9 @@ private:
     %s m_vkStream { nullptr };
     VulkanMemReadingStream m_vkMemReadingStream { nullptr };
     BoxedHandleUnwrapMapping m_boxedHandleUnwrapMapping;
+    BoxedHandleCreateMapping m_boxedHandleCreateMapping;
+    BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
+    android::base::Pool m_Pool { 8, 4096, 64 };
 };
 
 VkDecoder::VkDecoder() :
@@ -159,7 +162,19 @@ def emit_dispatch_call(api, cgen):
     cgen.vkApiCall(api, customPrefix="vk->", customParameters=customParams)
 
 def emit_global_state_wrapped_call(api, cgen):
-    cgen.vkApiCall(api, customPrefix="m_state->on_")
+    customParams = ["&m_Pool"] + list(map(lambda p: p.paramName, api.parameters))
+    cgen.vkApiCall(api, customPrefix="m_state->on_", \
+        customParameters=customParams)
+
+def emit_non_dispatchable_handle_box(api, cgen):
+    for p in api.parameters:
+        if p.typeName in DISPATCHABLE_HANDLE_TYPES:
+            continue
+        if p.isCreatedBy(api):
+            cgen.line("// %s created" % p.paramName)
+            cgen.line("// %s created" % p.paramName)
+        if p.isDestroyedBy(api):
+            cgen.line("// %s destroyed" % p.paramName)
 
 def emit_decode_parameters_writeback(typeInfo, api, cgen):
     paramsToWrite = []
@@ -181,11 +196,13 @@ def emit_decode_return_writeback(api, cgen):
 
 def emit_decode_finish(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
+    cgen.stmt("m_Pool.freeAll()")
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
+    emit_non_dispatchable_handle_box(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
@@ -194,6 +211,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_global_state_wrapped_call(api, cgen)
+    emit_non_dispatchable_handle_box(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
