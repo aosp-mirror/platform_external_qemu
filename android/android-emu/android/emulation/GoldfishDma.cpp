@@ -42,7 +42,7 @@ static void android_goldfish_dma_load_mappings(android::base::Stream* stream) {
     android::DmaMap::get()->load(stream);
 }
 
-GoldfishDmaOps android_goldfish_dma_ops = {
+const GoldfishDmaOps android_goldfish_dma_ops = {
     .add_buffer = android_goldfish_dma_add_buffer,
     .remove_buffer = android_goldfish_dma_remove_buffer,
     .get_host_addr = android_goldfish_dma_get_host_addr,

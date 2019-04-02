@@ -61,4 +61,4 @@ void (*save_mappings)(android::base::Stream* stream);
 void (*load_mappings)(android::base::Stream* stream);
 } GoldfishDmaOps;
 
-extern GoldfishDmaOps android_goldfish_dma_ops;
+extern const GoldfishDmaOps android_goldfish_dma_ops;
