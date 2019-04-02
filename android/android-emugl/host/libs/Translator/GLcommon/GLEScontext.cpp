@@ -1899,14 +1899,6 @@ bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
             *params = m_activeTexture+GL_TEXTURE0;
             break;
 
-        case GL_IMPLEMENTATION_COLOR_READ_TYPE_OES:
-            *params = GL_UNSIGNED_BYTE;
-            break;
-
-        case GL_IMPLEMENTATION_COLOR_READ_FORMAT_OES:
-            *params = GL_RGBA;
-            break;
-
         case GL_MAX_TEXTURE_SIZE:
             *params = getMaxTexSize();
             break;
