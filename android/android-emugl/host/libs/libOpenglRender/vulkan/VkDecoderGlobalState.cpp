@@ -2320,7 +2320,26 @@ public:
         return elt->dispatch; \
     } \
 
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_IMPL(type) \
+    type new_boxed_non_dispatchable_##type(type underlying) { \
+        NonDispatchableHandleInfo<type> item; \
+        item.underlying = underlying; \
+        auto res = (type)mBoxedNonDispatchableHandles_##type.add(item); \
+        return res; \
+    } \
+    void delete_boxed_non_dispatchable_##type(type boxed) { \
+        mBoxedNonDispatchableHandles_##type.remove((uint64_t)boxed); \
+    } \
+    type unbox_non_dispatchable_##type(type boxed) { \
+        AutoLock lock(mBoxedNonDispatchableHandles_##type.lock); \
+        auto elt = mBoxedNonDispatchableHandles_##type.getLocked( \
+            (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return VK_NULL_HANDLE; \
+        return elt->underlying; \
+    } \
+
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_IMPL)
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_IMPL)
 
 private:
     bool isEmulatedExtension(const char* name) const {
@@ -2969,6 +2988,12 @@ private:
         bool ownDispatch = false;
     };
 
+    template <class T>
+    class NonDispatchableHandleInfo {
+    public:
+        T underlying;
+    };
+
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -3011,7 +3036,11 @@ private:
 #define DEFINE_BOXED_DISPATCHABLE_HANDLE_STORE(type) \
     BoxedHandleManager<DispatchableHandleInfo<type>> mBoxedDispatchableHandles_##type;
 
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_STORE(type) \
+    BoxedHandleManager<NonDispatchableHandleInfo<type>> mBoxedNonDispatchableHandles_##type;
+
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_STORE)
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_STORE)
 
 };
 
@@ -3638,7 +3667,19 @@ LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
         return mImpl->dispatch_##type(boxed); \
     } \
 
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DEF(type) \
+    type VkDecoderGlobalState::new_boxed_non_dispatchable_##type(type underlying) { \
+        return mImpl->new_boxed_non_dispatchable_##type(underlying); \
+    } \
+    void VkDecoderGlobalState::delete_boxed_non_dispatchable_##type(type boxed) { \
+        mImpl->delete_boxed_non_dispatchable_##type(boxed); \
+    } \
+    type VkDecoderGlobalState::unbox_non_dispatchable_##type(type boxed) { \
+        return mImpl->unbox_non_dispatchable_##type(boxed); \
+    } \
+
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_DEF)
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DEF)
 
 #define DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
     type unbox_##type(type boxed) { \
@@ -3648,5 +3689,17 @@ GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_
         return VkDecoderGlobalState::get()->dispatch_##type(boxed); \
     } \
 
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
+    type VkDecoderGlobalState::new_boxed_non_dispatchable_##type(type underlying) { \
+        return VkDecoderGlobalState::get()->new_boxed_non_dispatchable_##type(boxed); \
+    } \
+    void VkDecoderGlobalState::delete_boxed_non_dispatchable_##type(type boxed) { \
+        VkDecoderGlobalState::get()->delete_boxed_non_dispatchable_##type(boxed); \
+    } \
+    type VkDecoderGlobalState::unbox_non_dispatchable_##type(type boxed) { \
+        return VkDecoderGlobalState::get()->unbox_non_dispatchable_##type(boxed); \
+    } \
+
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
+
 }  // namespace goldfish_vk

@@ -434,7 +434,13 @@ LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
     type unbox_##type(type boxed); \
     VulkanDispatch* dispatch_##type(type boxed); \
 
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DECL(type) \
+    type new_boxed_non_dispatchable_##type(type underlying); \
+    void delete_boxed_non_dispatchable_##type(type boxed); \
+    type unbox_non_dispatchable_##type(type boxed); \
+
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_DECL)
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DECL)
 
 private:
     class Impl;
@@ -446,6 +452,13 @@ private:
     VulkanDispatch* dispatch_##type(type boxed); \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
+
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DECL(type) \
+    type new_boxed_non_dispatchable_##type(type underlying); \
+    void delete_boxed_non_dispatchable_##type(type boxed); \
+    type unbox_non_dispatchable_##type(type boxed); \
+
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
 
 #define MAKE_HANDLE_MAPPING_FOREACH(type_name, map_impl, map_to_u64_impl, map_from_u64_impl) \
     void mapHandles_##type_name(type_name* handles, size_t count) override { \
@@ -472,9 +485,9 @@ GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOB
 
 #define BOXED_NON_DISPATCHABLE_UNWRAP_IMPL(type_name) \
     MAKE_HANDLE_MAPPING_FOREACH(type_name, \
-        (void)handles[i], \
-        handle_u64s[i] = (uint64_t)(uintptr_t)handles[i], \
-        handles[i] = (type_name)(uintptr_t)handle_u64s[i])
+        if (handles[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); } else { handles[i] = nullptr; } ;, \
+        if (handles[i]) { handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); } else { handle_u64s[i] = 0; }, \
+        if (handle_u64s[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name((type_name)(uintptr_t)handle_u64s[i]); } else { handles[i] = nullptr; })
 
 class BoxedHandleUnwrapMapping : public VulkanHandleMapping {
 public:
