@@ -436,6 +436,8 @@ public:
 
     virtual void yield() const override { Thread::yield(); }
 
+    virtual void configureHost() const override {   }
+
 private:
     std::string toTempRoot(StringView pathView) const {
         std::string path = pathView;

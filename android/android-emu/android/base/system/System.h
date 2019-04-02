@@ -400,6 +400,10 @@ public:
     // thread that's ready to run.
     virtual void yield() const = 0;
 
+    // Setup system specific handlers. For example on msvc you might
+    // want to redirect parameter validation.
+    virtual void configureHost() const = 0;
+
     // /////////////////////////////////////////////////////////////////////////
     // Execute commands.
     // /////////////////////////////////////////////////////////////////////////

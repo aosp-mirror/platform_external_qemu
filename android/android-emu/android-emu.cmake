@@ -735,6 +735,10 @@ set(android-emu_unittests_windows_src
     android/utils/win32_cmdline_quote_unittest.cpp
     android/windows_installer_unittest.cpp)
 
+# msvc specific unittests
+set(android-emu_unittests_windows_msvc-x86_64_src
+    android/base/system/WinMsvcSystem_unittest.cpp)
+
 # Darwin & Linux only tests
 set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp)
 
