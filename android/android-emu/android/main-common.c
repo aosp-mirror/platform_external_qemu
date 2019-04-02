@@ -981,7 +981,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             // whatever setting was in the config file.
             defaultBytes = defaultPartitionSize;
             if (opts->partition_size) {
-                hw->disk_dataPartition_size = atoi(opts->partition_size);
+                hw->disk_dataPartition_size = atoi(opts->partition_size) * 1048576ULL;
             } else {
                 hw->disk_dataPartition_size = defaultBytes;
             }
