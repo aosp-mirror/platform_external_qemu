@@ -204,7 +204,7 @@ static void saveCharger(BatteryCharger charger) {
     if (avdPath) {
         QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_BATTERY_CHARGER_TYPE2, charger);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_BATTERY_CHARGER_TYPE3, charger);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -256,9 +256,19 @@ static BatteryCharger getSavedCharger() {
     if (avdPath) {
         QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        int noMiscPipe = avdInfo_getApiLevel(android_avdInfo) < 26;
+
+        BatteryCharger defaultCharger = BATTERY_CHARGER_NONE;
+
+        if (noMiscPipe) {
+            defaultCharger = BATTERY_CHARGER_AC;
+        }
+
+        // If api level is lower than 26, use ac charging as the default value.
         return (BatteryCharger)avdSpecificSettings.value(
-                                   Ui::Settings::PER_AVD_BATTERY_CHARGER_TYPE2,
-                                   BATTERY_CHARGER_NONE).toInt();
+                                   Ui::Settings::PER_AVD_BATTERY_CHARGER_TYPE3,
+                                   defaultCharger).toInt();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
