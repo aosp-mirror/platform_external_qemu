@@ -729,7 +729,8 @@ void Snapshotter::deleteSnapshot(const char* name) {
 
     // then delete the folder and refresh hierarchy
     path_delete_dir(getSnapshotDir(nameWithStorage.c_str()).c_str());
-    Hierarchy::get()->currentInfo();
+    // bug: 129763714
+    // Hierarchy::get()->currentInfo();
 }
 
 void Snapshotter::invalidateSnapshot(const char* name) {
@@ -819,9 +820,10 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     bool good = mSaver->status() != OperationStatus::Error &&
                 mSaver->status() != OperationStatus::Canceled;
 
-    if (good) {
-        Hierarchy::get()->currentInfo();
-    }
+    // bug: 129763714
+    // if (good) {
+    //     Hierarchy::get()->currentInfo();
+    // }
 
     return good;
 }
@@ -872,7 +874,10 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
         return false;
     }
     mLoadedSnapshotFile = name;
-    Hierarchy::get()->currentInfo();
+    // bug: 129763714
+    // if (good) {
+    //     Hierarchy::get()->currentInfo();
+    // }
     return true;
 }
 
