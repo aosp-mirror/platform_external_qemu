@@ -61,11 +61,11 @@ if(WIN32)
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
   # Set the debug flags, erasing whatever cmake stuffs in there.
   # We are going to produce "fat" binaries with all debug information in there.
-  set(CMAKE_CXX_FLAGS_DEBUG "-MD -Z7")
-  set(CMAKE_C_FLAGS_DEBUG "-MD -Z7")
+  set(CMAKE_CXX_FLAGS_DEBUG "-MD -Z7 -fuse-ld=lld")
+  set(CMAKE_C_FLAGS_DEBUG "-MD -Z7 -fuse-ld=lld")
   # Set release flags such that we create pdbs..
-  set(CMAKE_C_FLAGS_RELEASE "-MD -Zi")
-  set(CMAKE_CXX_FLAGS_RELEASE "-MD -Zi")
+  set(CMAKE_C_FLAGS_RELEASE "-MD -Zi -fuse-ld=lld")
+  set(CMAKE_CXX_FLAGS_RELEASE "-MD -Zi  -fuse-ld=lld")
 
   # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF"
