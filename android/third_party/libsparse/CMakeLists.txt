@@ -22,9 +22,7 @@ if (WINDOWS)
     endif ()
 endif ()
 
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(emulator-libsparse PRIVATE -Wno-error)
-endif()
+target_compile_options(emulator-libsparse PRIVATE -Wno-error)
 
 add_executable(emulator_img2simg src/img2simg.c)
 target_link_libraries(emulator_img2simg PRIVATE emulator-libsparse)

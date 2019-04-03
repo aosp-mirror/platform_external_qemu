@@ -29,6 +29,7 @@ get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../.
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
 if(WIN32)
+  # set(CMAKE_SYSTEM_NAME WinMSVCCrossCompile)
   get_clang_version(CLANG_VER)
   message(STATUS "Configuring native windows build using clang-cl: ${CLANG_VER}")
   get_filename_component(CLANG_DIR "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
@@ -67,23 +68,23 @@ if(WIN32)
   set(CMAKE_C_FLAGS_RELEASE "-MD -Zi")
   set(CMAKE_CXX_FLAGS_RELEASE "-MD -Zi")
 
+  # When configuring cmake on windows, it will do a series of compiler checks
+  # we want to make sure it never tries to fall back to the msvc linker.
+  # CMake will call the linker directly, v.s. through clang when cross building.
+  set(CMAKE_LINKER "${CLANG_DIR}/bin/lld-link.exe"  CACHE STRING ""  FORCE)
+
   # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF"
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-IGNORE:4099 -DEBUG -NODEFAULTLIB:LIBCMT -OPT:REF -OPT:ICF"
       CACHE STRING ""
       FORCE)
-  set(CMAKE_EXE_LINKER_FLAGS "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT")
-
-  # Make sure nobody is accidently trying to do a 32 bit build.
-  if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-    # message(FATAL_ERROR "Please configure the compiler for a x64 build!")
-  endif()
+   set(CMAKE_EXE_LINKER_FLAGS "-IGNORE:4099 -DEBUG -NODEFAULTLIB:LIBCMT")
 
   # The Mt.exe file is a tool that generates signed files and catalogs. This normally gets invoked at the end of
   # executable creation, however anti virus software can easily interfer resulting in build breaks, so lets just not do
   # it.
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -MANIFEST:NO")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -MANIFEST:NO")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -MANIFEST:NO")
 
   # Including windows.h will cause issues with std::min/std::max
   add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -DWIN32_LEAN_AND_MEAN)
