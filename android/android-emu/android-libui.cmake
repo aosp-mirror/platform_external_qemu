@@ -354,9 +354,7 @@ target_link_libraries(emulator-libui
 # libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 # Windows-msvc specific dependencies. Need these for posix support.
-android_target_link_libraries(emulator-libui windows_msvc-x86_64 PUBLIC
-        msvc-posix-compat
-        dirent-win32)
+android_target_link_libraries(emulator-libui windows_msvc-x86_64 PUBLIC dirent-win32)
 
 set(emulator-libui_unittests_src
     android/skin/keycode_unittest.cpp
@@ -398,9 +396,7 @@ set(emulator-libui-headless_src
     ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
 
 android_add_library(emulator-libui-headless)
-android_target_link_libraries(emulator-libui-headless windows_msvc-x86_64 PUBLIC
-        msvc-posix-compat
-        dirent-win32)
+android_target_link_libraries(emulator-libui-headless windows_msvc-x86_64 PUBLIC dirent-win32)
 
 target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
 

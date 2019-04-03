@@ -360,9 +360,6 @@ android_target_link_libraries(android-emu
                               # GetNetworkParams() for android/utils/dns.c
                               iphlpapi::iphlpapi)
 
-
-android_target_link_libraries(android-emu windows_msvc-x86_64 PUBLIC msvc-posix-compat)
-
 # These are the libs needed for android-emu on linux.
 android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lc++)
 
@@ -495,7 +492,6 @@ android_target_link_libraries(android-emu-shared
                               iphlpapi::iphlpapi
 )
 
-android_target_link_libraries(android-emu-shared windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 # These are the libs needed for android-emu-shared on linux.
 android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
