@@ -509,8 +509,14 @@ endfunction()
 function(android_complete_archive LIBCMD LIBNAME)
   if(DARWIN_X86_64)
     set(${LIBCMD} "-Wl,-force_load,$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
-  elseif(MSVC)
-    set(${LIBCMD} "")
+  elseif(WINDOWS_MSVC_X86_64)
+    if (MSVC)
+      # The native build calls the linker directly
+      set(${LIBCMD} "-wholearchive:$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
+    else()
+      # The cross compiler calls the linker through clang.
+      set(${LIBCMD} "-Wl,-wholearchive:$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
+    endif()
   else()
     set(${LIBCMD} "-Wl,-whole-archive" ${LIBNAME} "-Wl,-no-whole-archive" PARENT_SCOPE)
   endif()
@@ -554,9 +560,7 @@ function(android_build_qemu_variant)
   endif()
 
   # Workaround b/121393952, older cmake does not have proper object archives
-  if(NOT MSVC)
-    android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
-  endif()
+  android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
   set(${qemu_build_EXE}_src ${qemu_build_SOURCES}
       ${qemu-system-${QEMU_AARCH}_sources}
       ${qemu-system-${QEMU_AARCH}_generated_sources}
@@ -568,12 +572,6 @@ function(android_build_qemu_variant)
   target_link_libraries(${qemu_build_EXE}
                         PRIVATE ${QEMU_COMPLETE_LIB} ${qemu_build_LIBRARIES})
 
-  if(MSVC)
-    # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
-    # supported by newer cmake versions
-    target_link_libraries(${qemu_build_EXE} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
-    set_target_properties(${qemu_build_EXE} PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
-  endif()
   # Make the common dependency explicit, as some generators might not detect it properly (Xcode/MSVC native)
   add_dependencies(${qemu_build_EXE} qemu2-common)
   # XCode bin places this not where we want this...

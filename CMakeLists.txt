@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.5)
-
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
     WARNING
@@ -423,13 +422,10 @@ set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
+
+# Once we have a newer version of cmake we can generate the object library in a platform independent way b/121393952
 set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
-if(MSVC)
-  # Once we have a newer version of cmake we can generate the object library in a platform independent way b/121393952
-  android_add_object_library(qemu2-common)
-else()
-  android_add_library(qemu2-common)
-endif()
+android_add_library(qemu2-common)
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 android_target_link_libraries(qemu2-common windows_msvc-x86_64 PUBLIC msvc-posix-compat)
@@ -446,14 +442,6 @@ android_add_interface(android-qemu-deps-headless)
 android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE headless-paaudio)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
-if(WINDOWS_MSVC_X86_64)
-  # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections
-  # which the MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown reasons.
-  # The workaround is to compile mail-loop.c with all optimizations enabled.
-  set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_FLAGS "-O2")
-  set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_DEFINITIONS "NDEBUG=1")
-endif()
-
 android_add_library(libqemu2-util)
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
 android_target_link_libraries(libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
