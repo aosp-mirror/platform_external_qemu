@@ -221,10 +221,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setLogger(logfuncs);
     sRenderLib->setGLObjectCounter(android::base::GLObjectCounter::get());
     emugl_dma_ops dma_ops;
-    dma_ops.add_buffer = android_goldfish_dma_ops.add_buffer;
-    dma_ops.remove_buffer = android_goldfish_dma_ops.remove_buffer;
     dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
-    dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);

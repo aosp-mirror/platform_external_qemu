@@ -76,10 +76,7 @@ void RenderLibImpl::setSyncDevice
 }
 
 void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
-    set_emugl_dma_add_buffer(ops.add_buffer);
-    set_emugl_dma_remove_buffer(ops.remove_buffer);
     set_emugl_dma_get_host_addr(ops.get_host_addr);
-    set_emugl_dma_invalidate_host_mappings(ops.invalidate_host_mappings);
     set_emugl_dma_unlock(ops.unlock);
 }
 
