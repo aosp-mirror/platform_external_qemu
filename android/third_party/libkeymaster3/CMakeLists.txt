@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-add_library(emulator-libkeymaster3
+set(emulator-libkeymaster3_src
         aes_key.cpp
         aes_operation.cpp
         android_keymaster.cpp
@@ -52,6 +52,7 @@ add_library(emulator-libkeymaster3
         trusty_keymaster_enforcement.cpp
         trusty_rng.c
         )
+android_add_library(emulator-libkeymaster3)
 
 target_include_directories(emulator-libkeymaster3 PUBLIC .)
 target_include_directories(emulator-libkeymaster3 PRIVATE src include)
@@ -63,7 +64,6 @@ if (WINDOWS_X86_64)
 endif()
 
 if (WINDOWS_MSVC_X86_64)
-    target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
     target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3")
 endif()
 

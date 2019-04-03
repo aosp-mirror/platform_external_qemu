@@ -33,7 +33,8 @@ endfunction()
 # Creates the library by generating the sources.
 function(generate_emugen_lib LIBNAME LOCATION NAME SOURCES)
   generate_emugen(${LOCATION} ${NAME})
-  add_library(${LIBNAME} ${${NAME}-SOURCES} ${SOURCES})
+  set(${LIBNAME}_src ${${NAME}-SOURCES} ${SOURCES})
+  android_add_library(${LIBNAME})
   target_include_directories(${LIBNAME}
                              PUBLIC ${LOCATION}
                                     host/include/OpenGLESDispatch

@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 3.5)
 
-add_library(emulator-libsparse
+set(emulator-libsparse_src
         src/backed_block.c
         src/output_file.c
         src/sparse.c
         src/sparse_crc32.c
         src/sparse_err.c
-        src/sparse_read.c
-        )
+        src/sparse_read.c)
+android_add_library(emulator-libsparse)
 
 target_include_directories(emulator-libsparse PUBLIC include)
 target_include_directories(emulator-libsparse PRIVATE src)
 target_link_libraries(emulator-libsparse PRIVATE zlib)
 android_target_link_libraries(emulator-libsparse windows PRIVATE emulator-libmman-win32)
-android_target_link_libraries(emulator-libsparse windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 if (WINDOWS)
     # Work around some gcc/mingw issues
@@ -24,8 +23,10 @@ endif ()
 
 target_compile_options(emulator-libsparse PRIVATE -Wno-error)
 
-add_executable(emulator_img2simg src/img2simg.c)
+set(emulator_img2simg_src src/img2simg.c)
+android_add_executable(emulator_img2simg)
 target_link_libraries(emulator_img2simg PRIVATE emulator-libsparse)
 
-add_executable(emulator_simg2img src/simg2img.c)
+set(emulator_simg2img_src src/simg2img.c)
+android_add_executable(emulator_simg2img)
 target_link_libraries(emulator_simg2img PRIVATE emulator-libsparse)

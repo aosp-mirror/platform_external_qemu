@@ -40,8 +40,13 @@ FILE* android_popen(const char* path, const char* mode);
 int android_open_without_mode(const char* path, int flags);
 int android_open_with_mode(const char* path, int flags, mode_t mode);
 
+#ifdef _WIN32
+  #define android_lstat(path, buf) android_stat((path), (buf))
+  int android_stat(const char* path, struct _stati64* buf);
+#else
 int android_stat(const char* path, struct stat* buf);
 int android_lstat(const char* path, struct stat* buf);
+#endif
 
 int android_access(const char* path, int mode);
 int android_mkdir(const char* path, mode_t mode);

@@ -59,9 +59,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/debug_info)
 
-# We want to make sure all the cross targets end up in a unique location
-set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
-
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
 
@@ -416,7 +413,7 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-unused-variable")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
-android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE msvc-posix-compat)
+android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE android-emu-base)
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
@@ -428,7 +425,6 @@ set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 android_add_library(qemu2-common)
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
-android_target_link_libraries(qemu2-common windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 # Not allowed to have libraries without source files.
 set(headless-paaudio_src audio/paaudio-headless-impl-placeholder.c)
@@ -445,13 +441,11 @@ set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemu2-util)
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
 android_target_link_libraries(libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
-android_target_link_libraries(libqemu2-util windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 set(libqemustub_src ${libqemustub_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemustub)
 target_link_libraries(libqemustub PRIVATE android-qemu-deps)
-android_target_link_libraries(libqemustub windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 # Qemu-img
 set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
