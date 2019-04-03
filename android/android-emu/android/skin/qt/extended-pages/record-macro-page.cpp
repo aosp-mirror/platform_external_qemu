@@ -89,6 +89,10 @@ void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
 
 // For dragging and clicking outside the items in the item list.
 void RecordMacroPage::on_macroList_itemSelectionChanged() {
+    if (mVideoPlayer && mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
+
     setMacroUiState(MacroUiState::Waiting);
 }
 
