@@ -332,12 +332,10 @@ endforeach()
 set(minidump_dump_src ${BREAKPAD_SRC}/processor/minidump_dump.cc)
 android_add_executable(minidump_dump)
 target_link_libraries(minidump_dump PRIVATE breakpad_processor)
-android_target_link_libraries(minidump_dump windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 set(minidump_stackwalk_src  ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
 android_add_executable(minidump_stackwalk)
 target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor breakpad_common)
-android_target_link_libraries(minidump_stackwalk windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 #
 # breakpad_server

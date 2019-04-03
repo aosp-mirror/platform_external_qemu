@@ -7,7 +7,6 @@ if(NOT ANDROID_QEMU2_TOP_DIR AND MSVC)
   list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
   include(visual-studio)
   include(android)
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/msvc-posix-compat posix)
 endif()
 
 include(android)
@@ -26,13 +25,11 @@ endif()
 set(emugen_src ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp TypeFactory.cpp)
 android_add_executable(emugen)
 target_include_directories(emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
-android_target_link_libraries(emugen windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 # The unit tests
 set(emugen_unittests_src Parser.cpp Parser_unittest.cpp)
 android_add_test(emugen_unittests)
 target_link_libraries(emugen_unittests PRIVATE gmock_main)
-android_target_link_libraries(emugen windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 # Shell based tests, only possible if we have a shell runner
 find_program(BASH_PROGRAM bash)
