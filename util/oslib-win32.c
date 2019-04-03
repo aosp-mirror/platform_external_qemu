@@ -30,10 +30,6 @@
  * see the license comment there.
  */
 
-#ifdef _MSC_VER
-#define USE_QEMU_GETOPT
-#endif
-
 #include "qemu/osdep.h"
 #include <windows.h>
 #include "qapi/error.h"
@@ -1275,6 +1271,7 @@ start:
  *
  * [eventually this will replace the BSD getopt]
  */
+#ifndef _MSC_VER
 int getopt(int nargc, char* const* nargv, const char* options) {
     /*
      * We don't pass FLAG_PERMUTE to getopt_internal() since
@@ -1286,6 +1283,7 @@ int getopt(int nargc, char* const* nargv, const char* options) {
      */
     return (getopt_internal(nargc, nargv, options, NULL, NULL, 0));
 }
+#endif
 
 /*
  * getopt_long --

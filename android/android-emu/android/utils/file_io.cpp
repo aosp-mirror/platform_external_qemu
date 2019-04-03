@@ -85,26 +85,21 @@ int android_open_with_mode(const char* path, int flags, mode_t mode) {
     return res;
 }
 
+#ifdef _WIN32
+int android_stat(const char* path, struct _stati64* buf) {
+  return _wstati64(Win32UnicodeString(path).c_str(),buf);
+}
+#else
 int android_stat(const char* path, struct stat* buf) {
-#ifdef _WIN32
-    // Make sure we use the stat call that matches the type of stat struct we
-    // are getting. The incoming struct is a "struct _stati64" and this is the
-    // matching call for that struct. Unfortunately the macro doesn't take care
-    // of that.
-    return _wstati64(Win32UnicodeString(path).c_str(), reinterpret_cast<struct _stati64*>(buf));
-#else
     return stat(path, buf);
-#endif
 }
+#endif
 
+#ifndef _WIN32
 int android_lstat(const char* path, struct stat* buf) {
-#ifdef _WIN32
-    // Windows doesn't seem to have an lstat function so just use regular stat
-    return android_stat(path, buf);
-#else
     return lstat(path, buf);
-#endif
 }
+#endif
 
 int android_access(const char* path, int mode) {
     return WIDEN_CALL_1(access, path, mode);

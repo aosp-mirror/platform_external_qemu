@@ -11,6 +11,7 @@
 
 #pragma once
 
+#define MSVC_POSIX
 // windows.h must come before any of these files, or bad things will happen
 #include <windows.h>
 
@@ -48,9 +49,7 @@ typedef int pid_t;
 #define W_OK 2 /* Check for write permission */
 #define R_OK 4 /* Check for read permission */
 
-// From <sys/stat.h>
-#define S_IRUSR _S_IREAD
-#define S_IWUSR _S_IWRITE
+
 // These functions were deprecated and replaced with ISO C++ conformant ones
 // in MSVC 2017.
 /*
@@ -65,8 +64,6 @@ typedef int pid_t;
 #define write _write
 #define creat _creat
 */
-#define fstat64 _fstat64
-#define stat _stati64
 
 // From <fcntl.h>
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
