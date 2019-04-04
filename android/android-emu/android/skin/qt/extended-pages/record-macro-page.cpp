@@ -144,8 +144,8 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewLabel->setText(tr("Macro playing on the Emulator"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
-            mUi->playStopButton->setIcon(getIconForCurrentTheme("stop"));
-            mUi->playStopButton->setProperty("themeIconName", "stop");
+            mUi->playStopButton->setIcon(getIconForCurrentTheme("stop_red"));
+            mUi->playStopButton->setProperty("themeIconName", "stop_red");
             mUi->playStopButton->setText(tr("STOP "));
             mUi->playStopButton->setEnabled(true);
             break;
