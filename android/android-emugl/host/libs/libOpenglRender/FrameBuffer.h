@@ -171,9 +171,9 @@ public:
     void getGLStrings(const char** vendor,
                       const char** renderer,
                       const char** version) const {
-        *vendor = m_glVendor;
-        *renderer = m_glRenderer;
-        *version = m_glVersion;
+        *vendor = m_glVendor.c_str();
+        *renderer = m_glRenderer.c_str();
+        *version = m_glVersion.c_str();
     }
 
     // Create a new RenderContext instance for this display instance.
@@ -576,9 +576,9 @@ private:
     void* m_onPostContext = nullptr;
     unsigned char* m_fbImage = nullptr;
 
-    const char* m_glVendor = nullptr;
-    const char* m_glRenderer = nullptr;
-    const char* m_glVersion = nullptr;
+    std::string m_glVendor;
+    std::string m_glRenderer;
+    std::string m_glVersion;
 
     // The host associates color buffers with guest processes for memory
     // cleanup. Guest processes are identified with a host generated unique ID.
