@@ -13,6 +13,10 @@
 #
 include(prebuilts)
 
+# We want to make sure all the cross targets end up in a unique location
+set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
+
+
 # Checks to make sure the TAG is valid.
 function(_check_target_tag TAG)
   set(VALID_TARGETS windows windows-x86_64 windows_msvc-x86_64 linux-x86_64 darwin-x86_64 all)
@@ -167,6 +171,8 @@ endfunction()
 #
 # For example: set(foo_src a.c b.c)  <-- sources for foo target set(foo_windows_src d.c) <-- sources only for the
 # windows target set(foo_darwin-x86_64_src d.c) <-- sources only for the darwin-x86_64 target
+#
+# For the PRIVATE msvc-posix-compat layer will always be made available for windows_msvc builds.
 function(android_add_library name)
   if((WINDOWS_MSVC_X86_64) AND (DEFINED ${name}_windows_msvc_src))
     list(APPEND ${name}_src ${${name}_windows_msvc_src})
@@ -178,6 +184,9 @@ function(android_add_library name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_library(${name} ${${name}_src})
+  if (WINDOWS_MSVC_X86_64)
+    target_link_libraries(${name} PRIVATE msvc-posix-compat)
+  endif()
 endfunction()
 
 # Adds an object library with the given name. The source files for this target will be resolved as follows: The variable
@@ -246,6 +255,9 @@ function(android_add_shared_library name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_library(${name} SHARED ${${name}_src})
+  if (WINDOWS_MSVC_X86_64)
+    target_link_libraries(${name} PRIVATE msvc-posix-compat)
+  endif()
   # We don't want cmake to binplace the shared libraries into the bin directory As this can make them show up in
   # unexpected places!
   if(ANDROID_TARGET_TAG MATCHES "windows.*")
@@ -272,7 +284,9 @@ function(android_add_shared_library name)
                        COMMAND ${CMAKE_COMMAND} -E remove $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
                        COMMENT "Removing $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>")
   endif()
-
+  if (WINDOWS_MSVC_X86_64)
+    target_link_libraries(${name} PRIVATE msvc-posix-compat)
+  endif()
 endfunction()
 
 # Adds an interface library with the given name. The source files for this target will be resolved as follows: The
@@ -349,6 +363,9 @@ function(android_add_executable name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_executable(${name} ${${name}_src})
+  if (WINDOWS_MSVC_X86_64)
+    target_link_libraries(${name} PRIVATE msvc-posix-compat)
+  endif()
   android_target_dependency(${name} all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(${name} all "${RUNTIME_OS_PROPERTIES}")
 
@@ -766,3 +783,9 @@ function(android_extract_symbols TGT)
                      COMMENT "Extracting symbols for ${TGT}"
                      VERBATIM)
 endfunction()
+
+# Make the compatibility layer available for every target
+if (WINDOWS_MSVC_X86_64)
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/msvc-posix-compat/ msvc-posix-compat)
+endif()
+

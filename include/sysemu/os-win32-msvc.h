@@ -40,6 +40,7 @@
 #include <windows.h>
 #include <ws2tcpip.h>
 #include <ehstorioctl.h>
+#include <sys/stat.h>
 
 #define MAP_FAILED ((void*)(-1))
 
@@ -288,8 +289,8 @@ DWORD win32GetModuleFileName(
         LPTSTR  lpFilename,
         DWORD   nSize);
 
-int win32_stat(const char* filepath, struct stat* st);
-int win32_lstat(const char* filepath, struct stat* st);
+int win32_stat(const char* filepath, struct _stati64* st);
+int win32_lstat(const char* filepath, struct _stati64* st);
 
 // ANDROID_END
 

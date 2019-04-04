@@ -5,8 +5,8 @@ prebuilt(E2FSPROGS)
 prebuilt(LIBUNWIND)
 prebuilt(MACROS)
 set(WINDOWS_ICON ../images/emulator_icon.rc)
-
-add_executable(emulator main-emulator.cpp ${WINDOWS_ICON})
+set(emulator_src main-emulator.cpp ${WINDOWS_ICON})
+android_add_executable(emulator)
 target_link_libraries(emulator PRIVATE android-emu)
 target_compile_definitions(emulator
                            PRIVATE

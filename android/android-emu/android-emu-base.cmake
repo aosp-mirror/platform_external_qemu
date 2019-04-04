@@ -126,9 +126,7 @@ set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
 android_add_library(android-emu-base)
 
 # Windows-msvc specific dependencies. Need these for posix support.
-android_target_link_libraries(android-emu-base windows_msvc-x86_64 PUBLIC
-        msvc-posix-compat
-        dirent-win32)
+android_target_link_libraries(android-emu-base windows_msvc-x86_64 PUBLIC dirent-win32)
 
 # Anyone who takes a dependency gets to use our header files.
 target_include_directories(android-emu-base PUBLIC .)
