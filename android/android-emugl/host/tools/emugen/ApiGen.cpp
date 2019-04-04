@@ -1374,22 +1374,6 @@ R"(        // Do this on every iteration, as some commands may change the checks
             if (pass == PASS_FunctionCall ||
                 pass == PASS_DebugPrint) {
                 fprintf(fp, ");\n");
-
-                if (pass == PASS_FunctionCall) {
-                    // unlock all dma buffers that have been passed
-                    for (size_t j = 0; j < evars.size(); j++) {
-                        Var *v = & evars[j];
-                        if (v->isVoid()) {
-                            continue;
-                        }
-                        const char* var_name = v->name().c_str();
-                        if (v->isDMA()) {
-                            fprintf(fp,
-                                    "\t\t\tstream->unlockDma(var_%s_guest_paddr);\n",
-                                    var_name);
-                        }
-                    }
-                }
             }
 
             if (pass == PASS_TmpBuffAlloc) {

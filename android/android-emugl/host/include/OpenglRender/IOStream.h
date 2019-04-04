@@ -99,7 +99,6 @@ public:
     }
 
     virtual void* getDmaForReading(uint64_t guest_paddr) = 0;
-    virtual void unlockDma(uint64_t guest_paddr) = 0;
 
 protected:
     virtual const unsigned char *readRaw(void *buf, size_t *inout_len) = 0;

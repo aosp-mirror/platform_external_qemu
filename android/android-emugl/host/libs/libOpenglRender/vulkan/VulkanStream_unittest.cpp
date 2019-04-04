@@ -37,7 +37,6 @@ public:
 protected:
 
     void* getDmaForReading(uint64_t guest_paddr) override { return nullptr; }
-    void unlockDma(uint64_t guest_paddr) override { }
 
     // VulkanStream should never use these functions.
     void* allocBuffer(size_t minSize) override {

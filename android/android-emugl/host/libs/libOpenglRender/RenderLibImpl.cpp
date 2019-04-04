@@ -77,7 +77,6 @@ void RenderLibImpl::setSyncDevice
 
 void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_get_host_addr(ops.get_host_addr);
-    set_emugl_dma_unlock(ops.unlock);
 }
 
 void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {

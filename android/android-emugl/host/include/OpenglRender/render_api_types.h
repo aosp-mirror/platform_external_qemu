@@ -46,9 +46,7 @@ typedef struct {
 // Function type that describes functions for
 // accessing Goldfish DMA regions at a specified offset.
 typedef void* (*emugl_dma_get_host_addr_t)(uint64_t);
-typedef void (*emugl_dma_unlock_t)(uint64_t);
 
 typedef struct {
     emugl_dma_get_host_addr_t get_host_addr;
-    emugl_dma_unlock_t unlock;
 } emugl_dma_ops;

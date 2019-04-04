@@ -90,10 +90,6 @@ void* ChannelStream::getDmaForReading(uint64_t guest_paddr) {
     return g_emugl_dma_get_host_addr(guest_paddr);
 }
 
-void ChannelStream::unlockDma(uint64_t guest_paddr) {
-    g_emugl_dma_unlock(guest_paddr);
-}
-
 void ChannelStream::forceStop() {
     mChannel->stopFromHost();
 }

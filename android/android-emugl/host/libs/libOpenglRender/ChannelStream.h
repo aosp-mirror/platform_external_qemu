@@ -36,7 +36,6 @@ protected:
     virtual const unsigned char* readRaw(void* buf, size_t* inout_len)
             override final;
     virtual void* getDmaForReading(uint64_t guest_paddr) override final;
-    virtual void unlockDma(uint64_t guest_paddr) override final;
 
     void onSave(android::base::Stream* stream) override;
     unsigned char* onLoad(android::base::Stream* stream) override;

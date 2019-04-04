@@ -31,9 +31,7 @@
 namespace emugl {
 
 EMUGL_COMMON_API extern emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr;
-EMUGL_COMMON_API extern emugl_dma_unlock_t g_emugl_dma_unlock;
 
 EMUGL_COMMON_API void set_emugl_dma_get_host_addr(emugl_dma_get_host_addr_t);
-EMUGL_COMMON_API void set_emugl_dma_unlock(emugl_dma_unlock_t);
 
 }  // namespace emugl
