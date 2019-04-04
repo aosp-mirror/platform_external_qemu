@@ -220,6 +220,12 @@ public:
         VkImage image,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkBindImageMemory(android::base::Pool* pool,
+                                  VkDevice device,
+                                  VkImage image,
+                                  VkDeviceMemory memory,
+                                  VkDeviceSize memoryOffset);
+
     VkResult on_vkCreateImageView(
         android::base::Pool* pool,
         VkDevice device,
@@ -262,6 +268,19 @@ public:
         VkImageLayout dstImageLayout,
         uint32_t regionCount,
         const VkBufferImageCopy* pRegions);
+
+    void on_vkCmdPipelineBarrier(
+            android::base::Pool* pool,
+            VkCommandBuffer commandBuffer,
+            VkPipelineStageFlags srcStageMask,
+            VkPipelineStageFlags dstStageMask,
+            VkDependencyFlags dependencyFlags,
+            uint32_t memoryBarrierCount,
+            const VkMemoryBarrier* pMemoryBarriers,
+            uint32_t bufferMemoryBarrierCount,
+            const VkBufferMemoryBarrier* pBufferMemoryBarriers,
+            uint32_t imageMemoryBarrierCount,
+            const VkImageMemoryBarrier* pImageMemoryBarriers);
 
     // Do we need to wrap vk(Create|Destroy)Instance to
     // update our maps of VkDevices? Spec suggests no:
@@ -486,6 +505,10 @@ public:
         const VkDescriptorBufferInfo* pBufferInfos,
         const VkBufferView* pBufferViews);
 
+    VkResult on_vkBeginCommandBuffer(
+            android::base::Pool* pool,
+            VkCommandBuffer commandBuffer,
+            const VkCommandBufferBeginInfo* pBeginInfo);
     void on_vkBeginCommandBufferAsyncGOOGLE(
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
