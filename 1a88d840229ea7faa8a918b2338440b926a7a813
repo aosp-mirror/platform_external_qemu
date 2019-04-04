@@ -16,6 +16,24 @@
       "revId": "1a88d840229ea7faa8a918b2338440b926a7a813",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8441ad7_4eaeea70",
+        "filename": "android/android-emu/android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-04T20:20:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90e1c6a3_2fbdda66",
+      "revId": "1a88d840229ea7faa8a918b2338440b926a7a813",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
