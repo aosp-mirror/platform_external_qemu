@@ -636,7 +636,7 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
                                          -DCONFIG_ANDROID
                                          -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
                                          -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}
-                             LIBRARIES   libqemu2-glue
+                             LIBRARIES   libqemu2-glue libqemu2-glue-vm-operations
                                          libqemu2-util
                                          emulator-libui
                                          android-emu
@@ -660,7 +660,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
                                          -DCONFIG_HEADLESS
                                          -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
                                          -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}
-                             LIBRARIES  libqemu2-glue
+                             LIBRARIES  libqemu2-glue libqemu2-glue-vm-operations
                                         libqemu2-util
                                         android-emu
                                         emulator-libui-headless
@@ -681,9 +681,8 @@ function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
                              SOURCES vl.c ${STUBS}
                              DEFINITIONS -DNEED_CPU_H
                              LIBRARIES   android-emu
-                                         libqemu2-glue
+                                         libqemu2-glue libqemu2-glue-vm-operations
                                          libqemu2-util
-                                         android-emu
                                          SDL2::SDL2
                                          android-qemu-deps
                                          android-qemu-deps-headful)

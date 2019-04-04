@@ -74,6 +74,8 @@ set(android-emu-common
     android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp
     android/emulation/GoldfishDma.cpp
+    android/emulation/address_space_device.cpp
+    android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/goldfish_sync.cpp
     android/emulation/hostpipe/HostGoldfishPipe.cpp
@@ -241,8 +243,6 @@ set(android_emu_dependent_src
     android/camera/camera-videoplayback-video-renderer.cpp
     android/camera/camera-virtualscene.cpp
     android/camera/camera-virtualscene-utils.cpp
-    android/emulation/address_space_device.cpp
-    android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
