@@ -180,6 +180,11 @@ public:
         VkImage image,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkBindImageMemory(VkDevice device,
+                                  VkImage image,
+                                  VkDeviceMemory memory,
+                                  VkDeviceSize memoryOffset);
+
     VkResult on_vkCreateImageView(
         VkDevice device,
         const VkImageViewCreateInfo* pCreateInfo,

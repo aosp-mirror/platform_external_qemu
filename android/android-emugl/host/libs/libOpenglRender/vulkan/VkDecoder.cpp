@@ -1450,6 +1450,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkBindImageMemory\n");;
+                }
                 VkDevice device;
                 VkImage image;
                 VkDeviceMemory memory;
@@ -1470,12 +1474,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_77, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_77, (VkDeviceMemory*)&memory, 1);
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindImageMemory\n");;
-                }
                 VkResult vkBindImageMemory_VkResult_return = (VkResult)0;
-                vkBindImageMemory_VkResult_return = vk->vkBindImageMemory(unboxed_device, image, memory, memoryOffset);
+                vkBindImageMemory_VkResult_return = m_state->on_vkBindImageMemory(device, image, memory, memoryOffset);
                 vkStream->write(&vkBindImageMemory_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
