@@ -110,7 +110,7 @@ color: #f0f0f0</string>
     </size>
    </property>
    <property name="toolTip">
-    <string>Fold horiz</string>
+    <string>Fold</string>
    </property>
    <property name="text">
     <string notr="true"/>
