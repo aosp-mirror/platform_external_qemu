@@ -220,6 +220,12 @@ public:
         VkImage image,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkBindImageMemory(android::base::Pool* pool,
+                                  VkDevice device,
+                                  VkImage image,
+                                  VkDeviceMemory memory,
+                                  VkDeviceSize memoryOffset);
+
     VkResult on_vkCreateImageView(
         android::base::Pool* pool,
         VkDevice device,
