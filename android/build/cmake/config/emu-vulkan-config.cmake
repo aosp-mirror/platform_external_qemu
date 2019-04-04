@@ -13,21 +13,24 @@ get_filename_component(
   PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
+set(VULKAN_FOUND TRUE)
+
 if(LINUX_X86_64)
-  set(VULKAN_TEST_DEPENDENCIES
-      # Loader (for testing)
-      "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
+  set(VULKAN_DEPENDENCIES
       # Loader (for real)
       "${PREBUILT_ROOT}/libvulkan.so>lib64/vulkan/libvulkan.so"
       "${PREBUILT_ROOT}/libvulkan.so>lib64/vulkan/libvulkan.so.1"
       # Swiftshader
       "${PREBUILT_ROOT}/icds/libvk_swiftshader.so>lib64/vulkan/libvk_swiftshader.so"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
+      # for translating shaders to SPIRV
+      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator")
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
       # Mock ICD
       "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.so>testlib64/libVkICD_mock_icd.so"
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
-      # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/libVkLayer_api_dump.so>testlib64/layers/libVkLayer_api_dump.so"
       "${PREBUILT_ROOT}/layers/libVkLayer_assistant_layer.so>testlib64/layers/libVkLayer_assistant_layer.so"
@@ -50,15 +53,10 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_threading.json>testlib64/layers/VkLayer_threading.json"
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json")
 elseif(DARWIN_X86_64)
-  set(VULKAN_TEST_DEPENDENCIES
-      # Loader (for testing)
-      "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
+  set(VULKAN_DEPENDENCIES
       # Swiftshader
       "${PREBUILT_ROOT}/icds/libvk_swiftshader.dylib>lib64/vulkan/libvk_swiftshader.dylib"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
-      # Mock ICD
-      "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.dylib>testlib64/libVkICD_mock_icd.dylib"
-      "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # for translating shaders to SPIRV
       "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
       # On mac we need these on our load path
@@ -70,7 +68,13 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/icds/portability-macos.json>lib64/vulkan/portability-macos.json"
       "${PREBUILT_ROOT}/icds/portability-macos-debug.json>lib64/vulkan/portability-macos-debug.json"
       "${PREBUILT_ROOT}/icds/libportability_icd-debug.dylib>lib64/vulkan/libportability_icd-debug.dylib"
-      "${PREBUILT_ROOT}/icds/libportability_icd.dylib>lib64/vulkan/libportability_icd.dylib"
+      "${PREBUILT_ROOT}/icds/libportability_icd.dylib>lib64/vulkan/libportability_icd.dylib")
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
+      # Mock ICD
+      "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.dylib>testlib64/libVkICD_mock_icd.dylib"
+      "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/libVkLayer_core_validation.dylib>testlib64/layers/libVkLayer_core_validation.dylib"
       "${PREBUILT_ROOT}/layers/libVkLayer_object_tracker.dylib>testlib64/layers/libVkLayer_object_tracker.dylib"
@@ -87,17 +91,18 @@ elseif(WINDOWS)
   get_filename_component(PREBUILT_ROOT
                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
                          ABSOLUTE)
-  set(VULKAN_TEST_DEPENDENCIES
-      # Loader (for testing)
-      "${PREBUILT_ROOT}/vulkan-1.dll>testlib64/vulkan-1.dll"
+  set(VULKAN_DEPENDENCIES
       # Swiftshader
       "${PREBUILT_ROOT}/icds/vk_swiftshader.dll>lib64/vulkan/vk_swiftshader.dll"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
+      # for translating shaders to SPIRV
+      "${PREBUILT_ROOT}/glslangValidator.exe>lib64/vulkan/glslangValidator.exe")
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/vulkan-1.dll>testlib64/vulkan-1.dll"
       # Mock ICD
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.dll>testlib64/VkICD_mock_icd.dll"
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
-      # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator.exe>lib64/vulkan/glslangValidator.exe"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.dll>testlib64/layers/VkLayer_api_dump.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.json>testlib64/layers/VkLayer_api_dump.json"
@@ -128,4 +133,4 @@ elseif(WINDOWS)
       "${PREBUILT_ROOT}/layers/VkLayer_vktrace_layer.dll>testlib64/layers/VkLayer_vktrace_layer.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_vktrace_layer.json>testlib64/layers/VkLayer_vktrace_layer.json")
 endif()
-set(PACKAGE_EXPORT "VULKAN_TEST_DEPENDENCIES")
+set(PACKAGE_EXPORT "VULKAN_DEPENDENCIES;VULKAN_TEST_DEPENDENCIES;VULKAN_FOUND")
