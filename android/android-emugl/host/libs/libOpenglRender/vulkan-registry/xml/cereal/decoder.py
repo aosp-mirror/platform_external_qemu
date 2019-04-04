@@ -354,6 +354,7 @@ custom_decodes = {
     "vkGetDeviceQueue" : emit_global_state_wrapped_decoding,
     "vkDestroyDevice" : emit_global_state_wrapped_decoding,
 
+    "vkBindImageMemory" : emit_global_state_wrapped_decoding,
     "vkCreateImage" : emit_global_state_wrapped_decoding,
     "vkCreateImageView" : emit_global_state_wrapped_decoding,
     "vkCreateSampler" : emit_global_state_wrapped_decoding,
@@ -374,11 +375,13 @@ custom_decodes = {
     "vkAllocateCommandBuffers" : emit_global_state_wrapped_decoding,
     "vkCmdExecuteCommands" : emit_global_state_wrapped_decoding,
     "vkQueueSubmit" : emit_global_state_wrapped_decoding,
+    "vkBeginCommandBuffer" : emit_global_state_wrapped_decoding,
     "vkResetCommandBuffer" : emit_global_state_wrapped_decoding,
     "vkFreeCommandBuffers" : emit_global_state_wrapped_decoding,
     "vkCreateCommandPool" : emit_global_state_wrapped_decoding,
     "vkDestroyCommandPool" : emit_global_state_wrapped_decoding,
     "vkResetCommandPool" : emit_global_state_wrapped_decoding,
+    "vkCmdPipelineBarrier" : emit_global_state_wrapped_decoding,
 
     # VK_ANDROID_native_buffer
     "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,
