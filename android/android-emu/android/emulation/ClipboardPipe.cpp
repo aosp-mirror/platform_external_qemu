@@ -152,6 +152,7 @@ void ClipboardPipe::setGuestClipboardCallback(
 }
 
 void ClipboardPipe::wakeGuestIfNeeded() {
+    android::base::AutoLock lock(mLock);
     if (sEnabled && mWakeOnRead && mGuestWriteState.hasData()) {
         signalWake(PIPE_WAKE_READ);
         mWakeOnRead = false;

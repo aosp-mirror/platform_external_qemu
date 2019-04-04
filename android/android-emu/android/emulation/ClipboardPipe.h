@@ -44,7 +44,9 @@ public:
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override;
     int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override;
     void onGuestWantWakeOn(int flags) override {
+        android::base::AutoLock lock(mLock);
         mWakeOnRead = (flags & PIPE_WAKE_READ) != 0;
+        lock.unlock();
         wakeGuestIfNeeded();
     }
 
@@ -120,6 +122,8 @@ private:
 
     WritingState mGuestWriteState;
     ReadWriteState mGuestReadState;
+
+    mutable android::base::Lock mLock; // protects mWakeOnRead
     bool mWakeOnRead = false;
 
     static bool sEnabled;
