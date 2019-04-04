@@ -139,6 +139,7 @@
         <file alias="signal_cellular_3_bar">images/light/ic_signal_cellular_3_bar_678_48dp.svg</file>
         <file alias="stop">images/light/ic_stop_0BA_48dp.svg</file>
         <file alias="stop_disabled">images/light/ic_stop_BEE_48dp.svg</file>
+        <file alias="stop_red">images/light/stop.svg</file>
         <file alias="toggle_off">images/light/toggle_off_light.png</file>
         <file alias="toggle_off_disabled">images/light/toggle_off_disabled_light.png</file>
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
@@ -261,6 +262,7 @@
         <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_677_48dp.svg</file>
         <file alias="stop">images/dark/ic_stop_0BA_48dp.svg</file>
         <file alias="stop_disabled">images/dark/ic_stop_155_48dp.svg</file>
+        <file alias="stop_red">images/dark/stop_dark.svg</file>
         <file alias="toggle_off">images/dark/toggle_off_dark.png</file>
         <file alias="toggle_off_disabled">images/dark/toggle_off_disabled_dark.png</file>
         <file alias="toggle_on">images/dark/toggle_on_dark.png</file>
