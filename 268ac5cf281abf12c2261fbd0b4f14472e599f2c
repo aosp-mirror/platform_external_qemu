@@ -22,6 +22,30 @@
       "revId": "268ac5cf281abf12c2261fbd0b4f14472e599f2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "822586cf_d6eee11f",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5351,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-04-04T04:51:34Z",
+      "side": 1,
+      "message": "For API 22+, multi-touch is enabled by default. For API \u003c\u003d 21, \"single\" touch screen is supported. Because we add feature flag for API Q, we won\u0027t run into the case where virtio input is enabled but only single touch screen is supported. \n Reference: https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/avd/info.c#1534",
+      "parentUuid": "11e9195a_e41ee313",
+      "range": {
+        "startLine": 5351,
+        "startChar": 40,
+        "endLine": 5351,
+        "endChar": 87
+      },
+      "revId": "268ac5cf281abf12c2261fbd0b4f14472e599f2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
