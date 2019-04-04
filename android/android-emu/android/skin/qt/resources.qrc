@@ -129,6 +129,7 @@
         <file alias="radio_on_disabled">images/light/ic_radio_button_checked_BEE_24dp.svg</file>
         <file alias="recordCircle">images/light/ic_record_circle_F43_24dp.svg</file>
         <file alias="record_screen">images/light/ic_videocam_678_48dp.svg</file>
+        <file alias="refresh">images/light/refresh.svg</file>
         <file alias="remove">images/light/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/light/ic_remove_BEE_48dp.svg</file>
         <file alias="rotary_input">images/light/ic_rotary_input.svg</file>
@@ -253,6 +254,7 @@
         <file alias="radio_on">images/dark/ic_radio_button_checked_0BA_24dp.svg</file>
         <file alias="radio_on_disabled">images/dark/ic_radio_button_checked_155_24dp.svg</file>
         <file alias="record_screen">images/dark/ic_videocam_677_48dp.svg</file>
+        <file alias="refresh">images/dark/refresh_dark.svg</file>
         <file alias="remove">images/dark/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
         <file alias="rotary_input">images/dark/ic_rotary_input.svg</file>

@@ -45,7 +45,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Quick peek of the macro</string>
+        <string>Macro preview</string>
        </property>
       </widget>
      </item>
@@ -94,9 +94,9 @@
           <property name="ColorGroup" stdset="0">
            <string>Overlay</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
+          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
            <property name="spacing">
-            <number>0</number>
+            <number>10</number>
            </property>
            <property name="sizeConstraint">
             <enum>QLayout::SetDefaultConstraint</enum>
@@ -113,12 +113,48 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="replayIcon">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
            <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
             <widget class="QLabel" name="previewLabel">
              <property name="text">
               <string>Select a macro to preview</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
