@@ -525,16 +525,16 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Cache the GL strings so we don't have to think about threading or
     // current-context when asked for them.
     //
-    fb->m_glVendor = (const char*)s_gles2.glGetString(GL_VENDOR);
-    fb->m_glRenderer = (const char*)s_gles2.glGetString(GL_RENDERER);
-    fb->m_glVersion = (const char*)s_gles2.glGetString(GL_VERSION);
+    fb->m_glVendor = std::string((const char*)s_gles2.glGetString(GL_VENDOR));
+    fb->m_glRenderer = std::string((const char*)s_gles2.glGetString(GL_RENDERER));
+    fb->m_glVersion = std::string((const char*)s_gles2.glGetString(GL_VERSION));
 
-    DBG("GL Vendor %s\n", fb->m_glVendor);
-    DBG("GL Renderer %s\n", fb->m_glRenderer);
-    DBG("GL Extensions %s\n", fb->m_glVersion);
-    GL_LOG("GL Vendor %s", fb->m_glVendor);
-    GL_LOG("GL Renderer %s", fb->m_glRenderer);
-    GL_LOG("GL Extensions %s", fb->m_glVersion);
+    DBG("GL Vendor %s\n", fb->m_glVendor.c_str());
+    DBG("GL Renderer %s\n", fb->m_glRenderer.c_str());
+    DBG("GL Extensions %s\n", fb->m_glVersion.c_str());
+    GL_LOG("GL Vendor %s", fb->m_glVendor.c_str());
+    GL_LOG("GL Renderer %s", fb->m_glRenderer.c_str());
+    GL_LOG("GL Extensions %s", fb->m_glVersion.c_str());
 
     fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
