@@ -1,7 +1,11 @@
 extern "C" {
 #include "compiler_tests.h"
+#include <glib.h>
+#include <glib/gprintf.h>
 }
 #include "gtest/gtest.h"
+#include <inttypes.h>
+#include <cstdint>
 
 // This test makes sure that the definitions in tcg are correct.
 // Note, calling gtest from C doesn't work well, and using qemu from C++ doesn't
@@ -41,4 +45,11 @@ TEST(CompilerTest, long_jump_preserve_float_params) {
 
 TEST(CompilerTest, setjmp_sets_fields) {
      EXPECT_TRUE(setjmp_sets_fields());
+}
+
+TEST(CompilerTest, g_strdup_printf_incorrect_b129781540) {
+    int64_t val = 6442450944;
+    char* str = g_strdup_printf("%" PRId64, val);
+    EXPECT_STREQ("6442450944", str);
+    free(str);
 }
