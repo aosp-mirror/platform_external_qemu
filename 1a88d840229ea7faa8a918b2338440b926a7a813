@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90e1c6a3_2fbdda66",
+        "filename": "android/android-emu/android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-04-04T19:32:16Z",
+      "side": 1,
+      "message": "is it better to imnplement a wakeGuestIfNeededLocked()?",
+      "revId": "1a88d840229ea7faa8a918b2338440b926a7a813",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
