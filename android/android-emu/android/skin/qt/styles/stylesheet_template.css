@@ -60,7 +60,7 @@
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
 }
-QListWidget QLabel {
+QListWidget QLabel, QWidget QLabel {
     background-color: transparent;
 }
 QListWidget QLabel:disabled {
