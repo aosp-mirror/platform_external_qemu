@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6791b2a4_5a11d685",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-04-04T20:14:38Z",
+      "side": 1,
+      "message": "FAILED: emulator64_test_crasher \n../android-qemu2-glue/qemu-vm-operations-impl.cpp:357: error: undefined reference to \u0027qemu_put_be64\u0027\n../android-qemu2-glue/qemu-vm-operations-impl.cpp:360: error: undefined reference to \u0027qemu_ram_foreach_migrate_block_with_file_info\u0027\n../android-qemu2-glue/qemu-vm-operations-impl.cpp:378: error: undefined reference to \u0027qemu_ram_block_by_name\u0027\n../android-qemu2-glue/qemu-vm-operations-impl.cpp:377: error: undefined reference to \u0027qemu_ram_pagesize\u0027\n../android-qemu2-glue/qemu-vm-operations-impl.cpp:426: error: undefined reference to \u0027qemu_ram_foreach_migrate_block_with_file_info\u0027\n../android-qemu2-glue/qemu-vm-operations-impl.cpp:454: error: undefined reference to \u0027qemu_ram_block_by_name\u0027\n../android-qemu2-glue/qemu-vm-operations-impl.cpp:455: error: undefined reference to \u0027qemu_ram_pagesize\u0027",
+      "revId": "c068935d3b56178b255aef80c891cf864e149d83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
