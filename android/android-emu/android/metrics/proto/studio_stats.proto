@@ -1802,6 +1802,29 @@ message EmulatorVirtualSceneSession {
   optional double total_translation_meters = 11;
 }
 
+// Per-session metrics for automation/macros.
+message EmulatorAutomation {
+  // List of possible preset macros played.
+  enum EmulatorAutomationPresetMacro {
+    // Reset position.
+    EMULATOR_AUTOMATION_PRESET_MACRO_RESET = 0;
+    // Track horizontal plane.
+    EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_HORIZONTAL = 1;
+    // Track vertical plane.
+    EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_VERTICAL = 2;
+    // Walk to image room.
+    EMULATOR_AUTOMATION_PRESET_MACRO_IMAGE_ROOM = 3;
+  }
+  // Total sum of time of macros playing -> Sum(Stop-Play).
+  optional uint64 total_duration_ms = 1;
+  // Total amount of times macros played.
+  optional uint64 macro_playback_count = 2;
+  // Total amount of times previews replayed.
+  optional uint64 preview_replay_count = 3;
+  // Played preset-macros.
+  repeated EmulatorAutomationPresetMacro played_preset_macro = 4;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1858,7 +1881,9 @@ message EmulatorDetails {
   optional EmulatorVirtualSceneSession virtual_scene = 28;
   // Metrics for emulator boot status and time.
   optional EmulatorBootInfo boot_info = 29;
-  // Next tag: 30
+  // Metrics for automation/macros.
+  optional EmulatorAutomation automation = 30;
+  // Next tag: 31
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
