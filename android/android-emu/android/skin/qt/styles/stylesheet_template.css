@@ -60,6 +60,12 @@
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
 }
+QListWidget {
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+}
+QListWidget::item {
+    border-bottom: 1px solid %%LIST_WIDGET_BORDER%%;
+}
 QListWidget QLabel {
     background-color: transparent;
 }
