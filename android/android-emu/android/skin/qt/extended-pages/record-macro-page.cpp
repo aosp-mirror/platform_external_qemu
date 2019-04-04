@@ -116,7 +116,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewOverlay->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("Play "));
+            mUi->playStopButton->setText(tr("PLAY "));
             mUi->playStopButton->setEnabled(false);
             break;
         }
@@ -125,7 +125,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewOverlay->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("Play "));
+            mUi->playStopButton->setText(tr("PLAY "));
             mUi->playStopButton->setEnabled(true);
             break;
         }
@@ -141,7 +141,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewOverlay->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->playStopButton->setProperty("themeIconName", "stop");
-            mUi->playStopButton->setText(tr("Stop "));
+            mUi->playStopButton->setText(tr("STOP "));
             mUi->playStopButton->setEnabled(true);
             break;
         }

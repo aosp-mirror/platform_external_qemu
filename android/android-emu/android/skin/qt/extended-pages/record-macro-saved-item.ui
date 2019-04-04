@@ -2,12 +2,6 @@
 <ui version="4.0">
  <class>RecordMacroSavedItem</class>
  <widget class="QWidget" name="RecordMacroSavedItem">
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -23,18 +17,10 @@
    </property>
    <item>
     <widget class="QLabel" name="name">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="font">
       <font>
-       <family>DejaVu Sans</family>
-       <pointsize>11</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="lineWidth">
@@ -42,6 +28,9 @@
      </property>
      <property name="text">
       <string>Macro Name</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>ListItem</string>
      </property>
     </widget>
    </item>
@@ -55,7 +44,7 @@
      </property>
      <property name="font">
       <font>
-       <italic>true</italic>
+       <family>Roboto</family>
        <kerning>true</kerning>
       </font>
      </property>
@@ -64,6 +53,9 @@
      </property>
      <property name="wordWrap">
       <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>ListSubitem</string>
      </property>
     </widget>
    </item>
