@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11e9195a_e41ee313",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5351,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-04T03:32:15Z",
+      "side": 1,
+      "message": "what about if the screen isnt multi touch or not specified in config file",
+      "range": {
+        "startLine": 5351,
+        "startChar": 40,
+        "endLine": 5351,
+        "endChar": 87
+      },
+      "revId": "268ac5cf281abf12c2261fbd0b4f14472e599f2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
