@@ -48,10 +48,8 @@ set(libqemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
-if (NOT WINDOWS_MSVC_X86_64)
-  set(libqemu2-glue_windows_src
-      stubs/win32-stubs.c)
-endif()
+set(libqemu2-glue_windows-x86_64_src
+    stubs/win32-stubs.c)
 
 android_add_library(libqemu2-glue)
 android_target_include_directories(libqemu2-glue
