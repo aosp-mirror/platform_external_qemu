@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <mutex>
+
 #include "android/emulation/address_space_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/base/AlignedBuf.h"
@@ -24,6 +26,9 @@ enum class HostMemoryAllocatorCommand {
     Allocate = 1,
     Unallocate = 2
 };
+
+std::unordered_map<uint64_t, std::pair<void *, size_t>> s_paddr2ptr;
+std::mutex s_paddr2ptr_mutex;
 
 }  // namespace
 
@@ -60,9 +65,12 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePing
 
     void* host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
+        std::lock_guard<std::mutex> lock(s_paddr2ptr_mutex);
+
         const uint64_t phys_addr = info->phys_addr;
 
-        if (m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
+        if (s_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
+            m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}});
             gQAndroidVmOperations->mapUserBackedRam(phys_addr, host_ptr, aligned_size);
 
             return 0;
@@ -76,19 +84,33 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePing
 }
 
 uint64_t AddressSpaceHostMemoryAllocatorContext::unallocate(AddressSpaceDevicePingInfo *info) {
+    std::lock_guard<std::mutex> lock(s_paddr2ptr_mutex);
+
     const uint64_t phys_addr = info->phys_addr;
-    const auto i = m_paddr2ptr.find(phys_addr);
-    if (i != m_paddr2ptr.end()) {
+    const auto i = s_paddr2ptr.find(phys_addr);
+    if (i != s_paddr2ptr.end()) {
         void* host_ptr = i->second.first;
         const uint64_t aligned_size = i->second.second;
 
         gQAndroidVmOperations->unmapUserBackedRam(phys_addr, aligned_size);
         android::aligned_buf_free(host_ptr);
-        m_paddr2ptr.erase(i);
+        s_paddr2ptr.erase(i);
+        m_paddr2ptr.erase(phys_addr);
 
         return 0;
     } else {
         return -1;
+    }
+}
+
+void* AddressSpaceHostMemoryAllocatorContext::getHostAddr(uint64_t phys_addr) {
+    std::lock_guard<std::mutex> lock(s_paddr2ptr_mutex);
+
+    const auto i = s_paddr2ptr.find(phys_addr);
+    if (i != s_paddr2ptr.end()) {
+        return i->second.first;
+    } else {
+        return NULL;
     }
 }
 
