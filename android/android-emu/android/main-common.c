@@ -1158,7 +1158,12 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     // enforce CDD minimums
     int minRam = 32;
-    if (avdInfo_getApiLevel(avd) >= 26) {
+    if (avdInfo_getApiLevel(avd) >= 29) {
+        // bug: 129958266
+        // Q preview where API level is not 29 yet,
+        // it becomes 1000 so we still get the effect we want.
+        minRam = 2048;
+    } else if (avdInfo_getApiLevel(avd) >= 26) {
         // bug: 112664026
         // This isn't a CDD minimum, but could be a source of why
         // people think the emulator is slow recently.
