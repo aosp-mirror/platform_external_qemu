@@ -1,0 +1,9 @@
+Verified+1: Lingfeng Yang <lfy@google.com>
+Code-Review+1: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Yahan Zhou <yahan@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Thu, 04 Apr 2019 17:41:59 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/940336
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
