@@ -4614,7 +4614,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     if (android_qemu_mode || min_config_qemu_mode) {
         // setup device-tree callback
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
-        qemu_device_tree_setup_callback(ranchu_device_tree_setup);
+        if (!feature_is_enabled(kFeature_DynamicPartition)) {
+            qemu_device_tree_setup_callback(ranchu_device_tree_setup);
+        }
 #endif
         qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);
         if (!qemu_android_emulation_early_setup()) {

@@ -241,7 +241,7 @@ TEST(VerifiedBootLoadConfigTest, MissingVersion) {
 // Pass in an unsupported version.
 TEST(VerifiedBootLoadConfigTest, UnsupportedVersion) {
     const std::string textproto =
-            "major_version: 2\n"
+            "major_version: 3\n"
             "dm_param: \"foo\"\n"
             "param: \"foo\"";
     std::vector<std::string> params;
