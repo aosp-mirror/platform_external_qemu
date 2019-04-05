@@ -387,11 +387,26 @@ bool ToolWindow2::shouldHide() {
 
 //static
 bool ToolWindow2::getFoldEnabled() {
+
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+
+    bool enableFoldableByDefault =
+        !(xOffset < 0 || xOffset > 9999 ||
+          yOffset < 0 || yOffset > 9999 ||
+          width   < 1 || width   > 9999 ||
+          height  < 1 || height  > 9999 ||
+          // TODO: 29 needed
+          avdInfo_getApiLevel(android_avdInfo) < 28);
+
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
         QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return avdSpecificSettings.value(Ui::Settings::PER_AVD_FOLDABLE_ENABLE, false).toBool();
+        return avdSpecificSettings.value(Ui::Settings::PER_AVD_FOLDABLE_ENABLE,
+                                         enableFoldableByDefault).toBool();
     }
     QSettings settings;
     return settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
