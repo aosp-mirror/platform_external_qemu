@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f2a82413_9110a40c",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-05T17:58:49Z",
+      "side": 1,
+      "message": "This won\u0027t work on Windows.  Use the tempfile functionality here: #include \"android/utils/tempfile.h\"",
+      "range": {
+        "startLine": 176,
+        "startChar": 4,
+        "endLine": 176,
+        "endChar": 64
+      },
+      "revId": "363d7abec37c7e5534067188afb776fa549a04d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e8b292e_92cfa349",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-05T17:58:49Z",
+      "side": 1,
+      "message": "This can be replaced with writeStringToFile",
+      "range": {
+        "startLine": 178,
+        "startChar": 4,
+        "endLine": 181,
+        "endChar": 14
+      },
+      "revId": "363d7abec37c7e5534067188afb776fa549a04d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
