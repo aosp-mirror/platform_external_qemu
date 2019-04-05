@@ -3,7 +3,7 @@
 #
 # For example: bit fields behave differently accross windows/posix.
 # Tests here will make sure that if we change compilers again that we catch failures early.
-
+prebuilt(GLIB2)
 set(win_clang_unittests_src enum_bit_fields.c
                             longjump_test.c
                             compiler_tests.cpp)
@@ -16,5 +16,5 @@ target_include_directories(win_clang_unittests
                                    ${ANDROID_QEMU2_TOP_DIR}/target/i386 ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
                                    ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated/tcg)
 
-target_link_libraries(win_clang_unittests PRIVATE android-qemu-deps gmock_main)
+target_link_libraries(win_clang_unittests PRIVATE android-qemu-deps gmock_main GLIB2::GLIB2)
 target_compile_definitions(win_clang_unittests PRIVATE -DNEED_CPU_H)
