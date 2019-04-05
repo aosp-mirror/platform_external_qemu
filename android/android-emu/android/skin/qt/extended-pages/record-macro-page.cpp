@@ -81,6 +81,7 @@ void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
 
     if (mMacroPlaying && mCurrentMacroName == macroName) {
         setMacroUiState(MacroUiState::Playing);
+        showPreviewFrame(macroName);
     } else {
         setMacroUiState(MacroUiState::Selected);
         showPreview(macroName);
@@ -182,6 +183,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     mCurrentMacroName = macroName;
     mMacroPlaying = true;
     setMacroUiState(MacroUiState::Playing);
+    showPreviewFrame(macroName);
 }
 
 void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
@@ -192,6 +194,10 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
 
     mMacroPlaying = false;
     setMacroUiState(MacroUiState::PreviewFinished);
+
+    std::string macroName = macroSavedItem->getName();
+    std::replace(macroName.begin(), macroName.end(), ' ', '_');
+    showPreviewFrame(macroName);
 }
 
 void RecordMacroPage::showPreview(const std::string& previewName) {
@@ -224,6 +230,11 @@ void RecordMacroPage::updatePreviewVideoView() {
 
 void RecordMacroPage::previewVideoPlayingFinished() {
     setMacroUiState(MacroUiState::PreviewFinished);
+
+    QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
+    std::string macroName = getItemWidget(listItem)->getName();
+    std::replace(macroName.begin(), macroName.end(), ' ', '_');
+    showPreviewFrame(macroName);
 }
 
 void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
@@ -254,4 +265,16 @@ void RecordMacroPage::enableMacroItems() {
         RecordMacroSavedItem* macroItem = getItemWidget(item);
         macroItem->setEnabled(true);
     }
+}
+
+void RecordMacroPage::showPreviewFrame(const std::string& previewName) {
+    const std::string previewPath =
+            PathUtils::join(getMacroPreviewsDirectory(), previewName + ".mp4");
+
+    mVideoInfo.reset(
+            new android::videoplayer::VideoInfo(mUi->videoWidget, previewPath));
+    connect(mVideoInfo.get(), SIGNAL(updateWidget()), this,
+            SLOT(updatePreviewVideoView()));
+
+    mVideoInfo->show();
 }

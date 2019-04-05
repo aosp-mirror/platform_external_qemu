@@ -15,6 +15,7 @@
 
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
+#include "android/skin/qt/video-player/VideoInfo.h"
 
 #include <QWidget>
 #include <memory>
@@ -52,10 +53,12 @@ private:
     RecordMacroSavedItem* getItemWidget(QListWidgetItem* listItem);
     void disableMacroItemsExcept(QListWidgetItem* listItem);
     void enableMacroItems();
+    void showPreviewFrame(const std::string& previewName);
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
+    std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
     std::unique_ptr<Ui::RecordMacroPage> mUi;
     MacroUiState mState = MacroUiState::Waiting;
 
