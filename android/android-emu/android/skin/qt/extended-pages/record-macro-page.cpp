@@ -133,6 +133,10 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewLabel->setText(tr("Click anywhere to replay preview"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
+            mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+            mUi->playStopButton->setProperty("themeIconName", "play_arrow");
+            mUi->playStopButton->setText(tr("PLAY "));
+            mUi->playStopButton->setEnabled(true);
             break;
         }
         case MacroUiState::Playing: {
@@ -173,15 +177,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
         return;
     }
 
-    // Disable all other macro items.
-    for (int i = 0; i < mUi->macroList->count(); ++i) {
-        QListWidgetItem* item = mUi->macroList->item(i);
-        if (item != listItem) {
-            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-            RecordMacroSavedItem* macroItem = getItemWidget(item);
-            macroItem->setEnabled(false);
-        }
-    }
+    disableMacroItemsExcept(listItem);
 
     mCurrentMacroName = macroName;
     mMacroPlaying = true;
@@ -192,16 +188,10 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
     RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
     macroSavedItem->setDisplayInfo(tr("Preset macro"));
 
-    // Enable all macro items.
-    for (int i = 0; i < mUi->macroList->count(); ++i) {
-        QListWidgetItem* item = mUi->macroList->item(i);
-        item->setFlags(item->flags() | Qt::ItemIsEnabled);
-        RecordMacroSavedItem* macroItem = getItemWidget(item);
-        macroItem->setEnabled(true);
-    }
+    enableMacroItems();
 
     mMacroPlaying = false;
-    setMacroUiState(MacroUiState::Waiting);
+    setMacroUiState(MacroUiState::PreviewFinished);
 }
 
 void RecordMacroPage::showPreview(const std::string& previewName) {
@@ -243,5 +233,25 @@ void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
         std::replace(macroName.begin(), macroName.end(), ' ', '_');
         showPreview(macroName);
         setMacroUiState(MacroUiState::Selected);
+    }
+}
+
+void RecordMacroPage::disableMacroItemsExcept(QListWidgetItem* listItem) {
+    for (int i = 0; i < mUi->macroList->count(); ++i) {
+        QListWidgetItem* item = mUi->macroList->item(i);
+        if (item != listItem) {
+            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+            RecordMacroSavedItem* macroItem = getItemWidget(item);
+            macroItem->setEnabled(false);
+        }
+    }
+}
+
+void RecordMacroPage::enableMacroItems() {
+    for (int i = 0; i < mUi->macroList->count(); ++i) {
+        QListWidgetItem* item = mUi->macroList->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsEnabled);
+        RecordMacroSavedItem* macroItem = getItemWidget(item);
+        macroItem->setEnabled(true);
     }
 }

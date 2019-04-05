@@ -50,6 +50,8 @@ private:
     void stopButtonClicked(QListWidgetItem* listItem);
     void showPreview(const std::string& previewName);
     RecordMacroSavedItem* getItemWidget(QListWidgetItem* listItem);
+    void disableMacroItemsExcept(QListWidgetItem* listItem);
+    void enableMacroItems();
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
