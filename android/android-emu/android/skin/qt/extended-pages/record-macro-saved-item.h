@@ -31,5 +31,7 @@ public:
     void setDisplayInfo(QString displayInfo);
 
 private:
+    void setDisplayInfoOpacity(double opacity);
+
     std::unique_ptr<Ui::RecordMacroSavedItem> mUi;
 };
