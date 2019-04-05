@@ -56,6 +56,8 @@ enum class QtUICommand {
     VIRTUAL_SCENE_MOVE_DOWN,
     VIRTUAL_SCENE_MOVE_UP,
     VIRTUAL_SCENE_CONTROL,
+    FOLD,
+    UNFOLD,
 };
 
 enum class QtKeyEventSource {

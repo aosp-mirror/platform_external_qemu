@@ -128,6 +128,11 @@ public:
     void showRotateButton();
     void hideRotateButton();
     void touchExtendedWindow();
+    // Handle a full key press (down + up) in a single call.
+    void handleUICommand(QtUICommand cmd) {
+        handleUICommand(cmd, true);
+        handleUICommand(cmd, false);
+    }
 
 signals:
     void guestClipboardChanged(QString text);
@@ -137,12 +142,6 @@ private:
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardGenericEventToEmulator(int type, int code, int value);
     void ensureExtendedWindowExists();
-
-    // Handle a full key press (down + up) in a single call.
-    void handleUICommand(QtUICommand cmd) {
-        handleUICommand(cmd, true);
-        handleUICommand(cmd, false);
-    }
 
     void stopExtendedWindowCreation();
 

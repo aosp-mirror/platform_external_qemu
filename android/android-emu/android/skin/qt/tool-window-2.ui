@@ -82,7 +82,7 @@ color: #f0f0f0</string>
     <string notr="true">expand_horiz</string>
    </property>
    <property name="uiCommand" stdset="0">
-    <string>ROTATE_LEFT</string>
+    <string>UNFOLD</string>
    </property>
    <property name="ToolWindowButton" stdset="0">
     <bool>true</bool>
@@ -135,7 +135,7 @@ color: #f0f0f0</string>
     <string notr="true">compress_horiz</string>
    </property>
    <property name="uiCommand" stdset="0">
-    <string>ROTATE_RIGHT</string>
+    <string>FOLD</string>
    </property>
    <property name="ToolWindowButton" stdset="0">
     <bool>true</bool>
@@ -263,7 +263,7 @@ color: #f0f0f0</string>
     <string notr="true">screen_rotation_right</string>
    </property>
    <property name="uiCommand" stdset="0">
-    <string>ROTATE_LEFT</string>
+    <string>ROTATE_RIGHT</string>
    </property>
    <property name="ToolWindowButton" stdset="0">
     <bool>true</bool>

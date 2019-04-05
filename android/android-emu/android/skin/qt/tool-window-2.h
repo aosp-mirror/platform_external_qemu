@@ -95,6 +95,7 @@ signals:
 private:
     static void forwardGenericEventToEmulator(int type, int code, int value);
     static void sendFoldedArea();
+    void addShortcutKeysToKeyStore();
     void handleUICommand(QtUICommand cmd, bool down);
     void ensureExtendedWindowExists();
 

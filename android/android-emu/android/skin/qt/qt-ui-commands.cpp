@@ -73,6 +73,8 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(VIRTUAL_SCENE_MOVE_DOWN, "Move virtual scene camera down"),
         INIT_COMMAND(VIRTUAL_SCENE_MOVE_UP, "Move virtual scene camera up"),
         INIT_COMMAND(VIRTUAL_SCENE_CONTROL, "Enable virtual scene camera controls"),
+        INIT_COMMAND(FOLD, "Fold"),
+        INIT_COMMAND(UNFOLD, "Unfold"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {
