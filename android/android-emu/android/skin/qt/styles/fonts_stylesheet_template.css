@@ -27,6 +27,14 @@ QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBo
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
 }
+*[ColorGroup="ListItem"] {
+    font-weight: regular;
+    font-size: %%FONT_LARGE%%;
+}
+*[ColorGroup="ListSubitem"] {
+    font-weight: regular;
+    font-size: %%FONT_MEDIUM%%;
+}
 * {
     font-size: %%FONT_MEDIUM%%;
 }
