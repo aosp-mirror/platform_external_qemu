@@ -721,8 +721,8 @@ int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
         vp->height != src_frame->height) {
         vp->allocated = false;
         vp->reallocate = false;
-        vp->width = src_frame->width;
-        vp->height = src_frame->height;
+        vp->width = mWindowWidth;
+        vp->height = mWindowHeight;
 
         if (vp->buf != nullptr) {
             delete[] vp->buf;
