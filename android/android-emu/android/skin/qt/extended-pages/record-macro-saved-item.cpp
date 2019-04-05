@@ -11,9 +11,15 @@
 
 #include "record-macro-saved-item.h"
 
+#include <QGraphicsOpacityEffect>
+
+const double kDisplayInfoOpacity = 0.66f;
+
 RecordMacroSavedItem::RecordMacroSavedItem(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordMacroSavedItem()) {
     mUi->setupUi(this);
+
+    setDisplayInfoOpacity(kDisplayInfoOpacity);
 }
 
 void RecordMacroSavedItem::setName(QString name) {
@@ -26,4 +32,10 @@ std::string RecordMacroSavedItem::getName() const {
 
 void RecordMacroSavedItem::setDisplayInfo(QString displayInfo) {
     mUi->displayInfo->setText(displayInfo);
+}
+
+void RecordMacroSavedItem::setDisplayInfoOpacity(double opacity) {
+    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(mUi->displayInfo);
+    effect->setOpacity(opacity);
+    mUi->displayInfo->setGraphicsEffect(effect);
 }
