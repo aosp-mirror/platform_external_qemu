@@ -106,10 +106,43 @@ ToolWindow2::ToolWindow2(EmulatorQtWindow* window,
     // Always assume unfolded starting status
     mTools2Ui->compressHoriz->setVisible(true);
     mTools2Ui->expandHoriz  ->setVisible(false);
+
+    addShortcutKeysToKeyStore();
+    // Update tool tips on all push buttons.
+    const QList<QPushButton*> childButtons =
+            findChildren<QPushButton*>(QString(), Qt::FindDirectChildrenOnly);
+    for (auto button : childButtons) {
+        QVariant uiCommand = button->property("uiCommand");
+        if (uiCommand.isValid()) {
+            QtUICommand cmd;
+            if (parseQtUICommand(uiCommand.toString(), &cmd)) {
+                QVector<QKeySequence>* shortcuts =
+                        mShortcutKeyStore.reverseLookup(cmd);
+                if (shortcuts && shortcuts->length() > 0) {
+                    button->setToolTip(getQtUICommandDescription(cmd) + " (" +
+                                       shortcuts->at(0).toString(
+                                               QKeySequence::NativeText) +
+                                       ")");
+                }
+            }
+        }
+    }
 }
 
 ToolWindow2::~ToolWindow2() {
 }
+
+void ToolWindow2::addShortcutKeysToKeyStore() {
+    QString shortcuts =
+            "Ctrl+Left ROTATE_LEFT\n"
+            "Ctrl+Right ROTATE_RIGHT\n"
+            "Ctrl+F FOLD\n"
+            "Ctrl+U UNFOLD\n";
+
+    QTextStream stream(&shortcuts);
+    mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
+}
+
 
 void ToolWindow2::closeEvent(QCloseEvent* ce) {
     mIsExiting = true;
@@ -138,7 +171,35 @@ void ToolWindow2::forceHide() {
 }
 
 void ToolWindow2::handleUICommand(QtUICommand cmd, bool down) {
-    // TODO: Remove this?
+    // Many UI commands require the extended window
+    ensureExtendedWindowExists();
+
+    switch(cmd) {
+        case QtUICommand::FOLD:
+            if (isVisible() && mTools2Ui->compressHoriz->isVisible() && down) {
+                mTools2Ui->compressHoriz->setVisible(false);
+                mTools2Ui->expandHoriz  ->setVisible(true);
+                mIsFolded = true;
+                mEmulatorWindow->resizeAndChangeAspectRatio(true);
+                sendFoldedArea();
+                D("sending SW_LID true\n");
+                forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
+        case QtUICommand::UNFOLD:
+            if (isVisible() && mTools2Ui->expandHoriz->isVisible() && down) {
+                mTools2Ui->compressHoriz->setVisible(true);
+                mTools2Ui->expandHoriz  ->setVisible(false);
+                mIsFolded = false;
+                mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                D("sending SW_LID false\n");
+                forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
+        default:;
+    }
 }
 
 //static
@@ -160,8 +221,6 @@ void ToolWindow2::forwardGenericEventToEmulator(int type, int code, int value) {
 }
 
 bool ToolWindow2::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
-    // We don't care about the keypad modifier for anything, and it gets added
-    // to the arrow keys of OSX by default, so remove it.
     QKeySequence event_key_sequence(event->key() +
                                     (event->modifiers() & ~Qt::KeypadModifier));
     bool down = event->type() == QEvent::KeyPress;
@@ -217,45 +276,23 @@ void ToolWindow2::onMainLoopStart() {
 }
 
 void ToolWindow2::on_expandHoriz_clicked() {
-    mTools2Ui->compressHoriz->setVisible(true);
-    mTools2Ui->expandHoriz  ->setVisible(false);
-    mIsFolded = false;
-
-    mEmulatorWindow->resizeAndChangeAspectRatio(false);
-
-    D("sending SW_LID false\n");
-    forwardGenericEventToEmulator(EV_SW, SW_LID, false);
-    forwardGenericEventToEmulator(EV_SYN, 0, 0);
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::UNFOLD);
 }
 
 void ToolWindow2::on_compressHoriz_clicked() {
-    mTools2Ui->compressHoriz->setVisible(false);
-    mTools2Ui->expandHoriz  ->setVisible(true);
-    mIsFolded = true;
-
-    mEmulatorWindow->resizeAndChangeAspectRatio(true);
-
-    sendFoldedArea();
-
-    D("sending SW_LID true\n");
-    forwardGenericEventToEmulator(EV_SW, SW_LID, true);
-    forwardGenericEventToEmulator(EV_SYN, 0, 0);
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::FOLD);
 }
 
 void ToolWindow2::on_rotateLeft_clicked() {
-    ensureExtendedWindowExists();
-    emulator_window_rotate_90(false); // False = left
-    if (mIsFolded) {
-        mEmulatorWindow->resizeAndChangeAspectRatio(true);
-    }
+    mEmulatorWindow->activateWindow();
+    mToolWindow->handleUICommand(QtUICommand::ROTATE_LEFT);
 }
 
 void ToolWindow2::on_rotateRight_clicked() {
-    ensureExtendedWindowExists();
-    emulator_window_rotate_90(true); // True = right
-    if (mIsFolded) {
-        mEmulatorWindow->resizeAndChangeAspectRatio(true);
-    }
+    mEmulatorWindow->activateWindow();
+    mToolWindow->handleUICommand(QtUICommand::ROTATE_RIGHT);
 }
 
 void ToolWindow2::paintEvent(QPaintEvent*) {

@@ -603,6 +603,8 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
         }
     }
 
+    mToolWindow2->handleQtKeyEvent(event, source);
+
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
     QKeySequence event_key_sequence(event->key() +
