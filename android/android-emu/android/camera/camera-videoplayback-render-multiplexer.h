@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/utils/compiler.h"
@@ -44,13 +46,15 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
   void uninitialize() override;
   int64_t render() override;
  private:
-  void loadVideo(const char* video_data);
+  void loadVideo(const std::string& video_data);
+  void SwitchRenderer(virtualscene::CameraRenderer* renderer);
 
   std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
   std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
   std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
   virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
   bool mInitialized = false;
+  size_t mCounter = 0;
 };
 
 }  // namespace videoplayback

@@ -16,8 +16,11 @@
 
 #include "android/camera/camera-videoplayback-render-multiplexer.h"
 
+#include <string>
+
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
+#include "android/base/files/FileShareOpen.h"
 #include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/utils/looper.h"
@@ -93,13 +96,18 @@ bool RenderMultiplexer::initialize(const GLESv2Dispatch* gles2,
         return false;
     }
 
-    loadVideo(nullptr);
-    mCurrentRenderer = mVideoRenderer.get();
+    mCurrentRenderer = mDefaultRenderer.get();
     mInitialized = true;
     return true;
 }
 
 void RenderMultiplexer::uninitialize() {
+    if (mPlayer) {
+      if (mPlayer->isRunning()) {
+        mPlayer->stop();
+      }
+      mPlayer.reset();
+    }
     mCurrentRenderer = nullptr;
     if (mDefaultRenderer) {
         mDefaultRenderer->uninitialize();
@@ -126,14 +134,17 @@ int64_t RenderMultiplexer::render() {
     if (maybe_next_request) {
         switch (maybe_next_request->function_case()) {
             case ::offworld::VideoInjectionRequest::kDisplayDefaultFrame:
-                mCurrentRenderer = mDefaultRenderer.get();
+                if (mPlayer && mPlayer->isRunning()) {
+                  mPlayer->stop();
+                }
+                SwitchRenderer(mDefaultRenderer.get());
                 break;
             case ::offworld::VideoInjectionRequest::kPlay:
                 if (mPlayer == nullptr) {
                     LOG(ERROR) << "No video loaded.";
                     return -1;
                 }
-                mCurrentRenderer = mVideoRenderer.get();
+                SwitchRenderer(mVideoRenderer.get());
                 mPlayer->start();
                 break;
             case ::offworld::VideoInjectionRequest::kStop:
@@ -141,34 +152,63 @@ int64_t RenderMultiplexer::render() {
                     LOG(ERROR) << "No video loaded.";
                     return -1;
                 }
-                mCurrentRenderer = mVideoRenderer.get();
+                SwitchRenderer(mVideoRenderer.get());
                 mPlayer->stop();
                 break;
             case ::offworld::VideoInjectionRequest::kLoad:
-                mCurrentRenderer = mVideoRenderer.get();
-                loadVideo(maybe_next_request->load().video_data().c_str());
+                SwitchRenderer(mVideoRenderer.get());
+                loadVideo(maybe_next_request->load().video_data());
+                // Force the video player to be in a known stable state.
+                mPlayer->stop();
                 break;
             default:
-                mCurrentRenderer = mDefaultRenderer.get();
+                SwitchRenderer(mDefaultRenderer.get());
                 break;
         }
-    } else {
-        if (!mPlayer->isRunning()) {
-            mPlayer->start();
-        }
-        if (mCurrentRenderer == mVideoRenderer.get() && mPlayer->isRunning()) {
-            mPlayer->videoRefresh();
-        }
+    }
+    if (mCurrentRenderer == mVideoRenderer.get() && mPlayer) {
+      mPlayer->videoRefresh();
     }
     return mCurrentRenderer->render();
 }
 
-void RenderMultiplexer::loadVideo(const char* video_data) {
+void RenderMultiplexer::loadVideo(const std::string& video_data) {
+    const char* kVideoFilePath = "/tmp/videoplayback_input.mp4";
+
+    // Write sent video data to a temporary file on host machine.
+    FILE *f = fopen(kVideoFilePath, "wb");
+    fwrite(video_data.c_str(), sizeof(char), video_data.size(), f);
+    fclose(f);
+
     mPlayer = videoplayer::VideoPlayer::create(
-            "/tmp/coke_barcode.mp4", mVideoRenderer->renderTarget(),
+            kVideoFilePath, mVideoRenderer->renderTarget(),
             std::unique_ptr<videoplayer::VideoPlayerNotifier>(
                     new VideoplaybackNotifier()));
-    mPlayer->stop();
+}
+
+// SwitchRenderer cleans up any previous renderer state or sets up any new
+// renderer state that is necessary to make the switch work.
+void RenderMultiplexer::SwitchRenderer(virtualscene::CameraRenderer* nextRenderer) {
+  if (mCurrentRenderer == nextRenderer) {
+    return;
+  }
+
+  // If we are changing out of the video renderer, we need to cleanup all
+  // the openGL work that we had allocated for video playing.
+  if (mCurrentRenderer == mVideoRenderer.get()) {
+    if (mPlayer && mPlayer->isRunning()) {
+      mPlayer->stop();
+    }
+  }
+  mVideoRenderer->renderTarget()->uninitialize();
+
+  // We need to make sure that we properly set up the openGL environment
+  // for video playing if we are switching to the video renderer.
+  if (nextRenderer == mVideoRenderer.get()) {
+    mVideoRenderer->renderTarget()->initialize();
+  }
+
+  mCurrentRenderer = nextRenderer;
 }
 
 }  // namespace videoplayback
