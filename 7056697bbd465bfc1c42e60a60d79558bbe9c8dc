@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2510e6_0e1b90f1",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-05T17:52:23Z",
+      "side": 1,
+      "message": "There\u0027s a better version of the looper API available, through\n#include \"android/base/async/ThreadLooper.h\"\n\nusing android::base::ThreadLooper;\nusing android::base::Looper;\nusing android::base::Timer;\n\nmLooper \u003d android::base::ThreadLooper::get();\n\nstd::unique_ptr\u003cTimer\u003e mTimer;\n\nmTimer \u003d std::unique_ptr\u003cTimer\u003e(mLooper-\u003ecreateTimer(_on_videoplayback_time_out, this));\n\n// etc...",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 33
+      },
+      "revId": "7056697bbd465bfc1c42e60a60d79558bbe9c8dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5807ce88_12a8b33b",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-05T17:52:23Z",
+      "side": 1,
+      "message": "Prefer C++ casts vs C casts, they are more explicit.  I think this can be static_cast",
+      "range": {
+        "startLine": 58,
+        "startChar": 44,
+        "endLine": 58,
+        "endChar": 74
+      },
+      "revId": "7056697bbd465bfc1c42e60a60d79558bbe9c8dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b9ff615_caf6d16a",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-05T17:52:23Z",
+      "side": 1,
+      "message": "Why a hardcoded name?  Maybe this should be something other than code_barcode",
+      "range": {
+        "startLine": 168,
+        "startChar": 12,
+        "endLine": 168,
+        "endChar": 35
+      },
+      "revId": "7056697bbd465bfc1c42e60a60d79558bbe9c8dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
