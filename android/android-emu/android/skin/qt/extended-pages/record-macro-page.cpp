@@ -115,6 +115,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewLabel->setText(tr("Select a macro to preview"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
+            mUi->replayIcon->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
             mUi->playStopButton->setText(tr("PLAY "));
@@ -124,6 +125,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
         case MacroUiState::Selected: {
             mUi->previewLabel->hide();
             mUi->previewOverlay->hide();
+            mUi->replayIcon->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
             mUi->playStopButton->setText(tr("PLAY "));
@@ -134,6 +136,8 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewLabel->setText(tr("Click anywhere to replay preview"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
+            mUi->replayIcon->setPixmap(getIconForCurrentTheme("refresh").pixmap(QSize(36, 36)));
+            mUi->replayIcon->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
             mUi->playStopButton->setText(tr("PLAY "));
@@ -144,8 +148,9 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewLabel->setText(tr("Macro playing on the Emulator"));
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
-            mUi->playStopButton->setIcon(getIconForCurrentTheme("stop"));
-            mUi->playStopButton->setProperty("themeIconName", "stop");
+            mUi->replayIcon->hide();
+            mUi->playStopButton->setIcon(getIconForCurrentTheme("stop_red"));
+            mUi->playStopButton->setProperty("themeIconName", "stop_red");
             mUi->playStopButton->setText(tr("STOP "));
             mUi->playStopButton->setEnabled(true);
             break;
