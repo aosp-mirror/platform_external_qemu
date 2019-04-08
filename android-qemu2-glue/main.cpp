@@ -1641,6 +1641,11 @@ extern "C" int main(int argc, char** argv) {
 #endif
     args.add("-show-cursor");
 
+    if (fc::isEnabled(fc::VirtioInput)) {
+        args.add("-device");
+        args.add("virtio-input-multi-touch-pci");
+    }
+
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",

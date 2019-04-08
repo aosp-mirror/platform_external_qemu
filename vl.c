@@ -5344,8 +5344,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
         /* Configure goldfish events device */
         {
-            bool have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
-
+            /*
+             * if feature VirtioInput is enabled, emulator will use virtio input device to
+             * forward multi-touch events to guest. Thus, it should set have_multitouch properties
+             *  to false for goldfish_events.
+             */
+            bool have_multitouch = !feature_is_enabled(kFeature_VirtioInput) &&
+                                        androidHwConfig_isScreenMultiTouch(android_hw);
             /* TODO(digit): Should we set this up as command-line parameters
              * in android-qemu2-glue/main.cpp:main() instead? as in:
              *
