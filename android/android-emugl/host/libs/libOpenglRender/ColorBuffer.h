@@ -246,6 +246,7 @@ public:
         bool linearTiling);
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
+
     void setSync(bool debug = false);
     void waitSync(bool debug = false);
 
