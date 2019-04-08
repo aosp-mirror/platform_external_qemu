@@ -66,6 +66,9 @@ QListWidget {
 QListWidget::item {
     border-bottom: 1px solid %%LIST_WIDGET_BORDER%%;
 }
+QListWidget::item:focus {
+    background-color: #4285F4;
+}
 QListWidget QLabel, QWidget QLabel {
     background-color: transparent;
 }
