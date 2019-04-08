@@ -28,7 +28,6 @@ if (OPTION_ASTC_TESTS)
   endforeach()
 endif()
 
-
 add_subdirectory(zlib)
 add_subdirectory(protobuf)
 add_subdirectory(libpng)
@@ -74,3 +73,4 @@ if(WINDOWS)
     add_subdirectory(dirent-win32)
  endif()
 endif()
+

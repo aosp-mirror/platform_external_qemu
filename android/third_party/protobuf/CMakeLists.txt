@@ -181,7 +181,7 @@ if(NOT CROSSCOMPILE)
   target_compile_definitions(libprotoc PRIVATE ${protobuf_PRIVATE_COMPILE_DEFS})
   target_compile_options(libprotoc PRIVATE ${protobuf_PRIVATE_COMPILE_OPTS})
   target_include_directories(libprotoc
-                             PUBLIC ${protobuf_source_dir}/src ${protobuf_BINARY_DIR} ${protobuf_source_dir}/config)
+                             PUBLIC ${protobuf_source_dir}/src ${protobuf_BINARY_DIR} ${protobuf_source_dir}/config ${protobuf_source_dir})
   # Let's not name things liblibxx etc
   set_target_properties(libprotoc PROPERTIES PREFIX "")
 

@@ -49,6 +49,10 @@
 
 #include <random>
 
+#ifdef ANDROID_GRPC
+#include "android/emulation/control/GrpcServices.h"
+#endif
+
 extern "C" {
 
 #include "qemu/osdep.h"
@@ -60,6 +64,7 @@ extern "C" {
 #include "sysemu/ranchu.h"
 #include "sysemu/rng-random-generic.h"
 #include "sysemu/sysemu.h"
+
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -226,6 +231,9 @@ bool qemu_android_emulation_setup() {
                         },
                         "The goldfish event queue is overflowing, the system is no longer responding.");
     }
+    #ifdef ANDROID_GRPC
+       android::emulation::control::GrpcServices::setup(android_cmdLineOptions->grpc, getConsoleAgents());
+    #endif
     return true;
 }
 
@@ -233,4 +241,8 @@ void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
     androidSnapshot_finalize();
     android_emulation_teardown();
+
+    #ifdef ANDROID_GRPC
+        android::emulation::control::GrpcServices::teardown();
+    #endif
 }
