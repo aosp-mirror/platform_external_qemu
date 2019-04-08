@@ -1599,6 +1599,24 @@ VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBuffer) {
     return infoPtr->memory.exportedHandle;
 }
 
+bool setColorBufferVulkanMode(uint32_t colorBuffer, uint32_t vulkanMode) {
+    if (!sVkEmulation || !sVkEmulation->live) return VK_EXT_MEMORY_HANDLE_INVALID;
+
+    auto vk = sVkEmulation->dvk;
+
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBuffer);
+
+    if (!infoPtr) {
+        return false;
+    }
+
+    infoPtr->vulkanMode = static_cast<VkEmulation::ColorBufferInfo::VulkanMode>(vulkanMode);
+
+    return true;
+}
+
 VkExternalMemoryHandleTypeFlags
 transformExternalMemoryHandleTypeFlags_tohost(
     VkExternalMemoryHandleTypeFlags bits) {
