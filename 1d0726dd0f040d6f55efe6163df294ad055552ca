@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b9d581c_691a526d",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-04-08T18:10:31Z",
+      "side": 1,
+      "message": "I think we should remove this. Because the stop() will be called in the switchRenderer method instead of here.\n\nWe should make sure this is always true:\nif currentRenderer !\u003d VideoRenderer, the player is definitely NOT running.\n\nYou may add assertions to the switchRenderer method.",
+      "range": {
+        "startLine": 139,
+        "startChar": 16,
+        "endLine": 141,
+        "endChar": 17
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a48458ce_b1a0fa50",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-04-08T18:10:31Z",
+      "side": 1,
+      "message": "I think this line should be put in the loadVideo method, since it\u0027s a clean-up/set-up step for loading video.",
+      "range": {
+        "startLine": 163,
+        "startChar": 16,
+        "endLine": 164,
+        "endChar": 32
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f621e372_7540f73f",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-04-08T18:10:31Z",
+      "side": 1,
+      "message": "I saw some source source files use \"ScopedFd\". Is it a good fit here?",
+      "range": {
+        "startLine": 185,
+        "startChar": 4,
+        "endLine": 185,
+        "endChar": 15
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f92a223a_bc26a925",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-04-08T18:10:31Z",
+      "side": 1,
+      "message": "Not very sure about the unique_ptr behavior. What if you got multiple load requests in a row, are you going to have memory leak?",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 190,
+        "endChar": 50
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c0628f0_525e10b3",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-04-08T18:10:31Z",
+      "side": 1,
+      "message": "Why this one is uppercase?",
+      "range": {
+        "startLine": 195,
+        "startChar": 24,
+        "endLine": 195,
+        "endChar": 25
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
