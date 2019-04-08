@@ -14,6 +14,6 @@ set(android-grpc_src ${EMULATOR_GRPC_SRC} android/emulation/control/EmulatorServ
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE grpc++ libprotobuf android-emu-base)
+target_link_libraries(android-grpc PRIVATE grpc++ libprotobuf android-emu-base OpenglRender)
 target_include_directories(android-grpc PRIVATE ${CMAKE_CURRENT_BINARY_DIR} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)

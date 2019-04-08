@@ -18,13 +18,41 @@
 #include "android/skin/rect.h"
 
 #include <functional>
+#include <vector>
 
 namespace emugl {
-    class Renderer;
+class Renderer;
 }
 
 namespace android {
 namespace emulation {
+
+class Image {
+public:
+    Image(uint16_t w, uint16_t h, uint8_t channels, std::vector<uint8_t> pixels)
+        : m_Width(w), m_Height(h), m_NChannels(channels), m_Pixels(std::move(pixels)) {}
+
+    uint8_t* getPixelBuf() { return m_Pixels.data();}
+    uint32_t getPixelCount() { return m_Pixels.size(); }
+    uint16_t getWidth() { return m_Width; }
+    uint16_t getHeight() { return m_Height; }
+    uint8_t getChannels() { return m_NChannels; }
+
+private:
+    uint16_t m_Width;
+    uint16_t m_Height;
+    uint8_t m_NChannels;
+    std::vector<uint8_t> m_Pixels;
+};
+
+// Capture a screenshot using the Render (if set) or framebuffer callback.
+Image takeScreenshot(
+        emugl::Renderer* renderer,
+        std::function<void(int* w,
+                           int* h,
+                           int* lineSize,
+                           int* bytesPerPixel,
+                           uint8_t** frameBufferData)> getFrameBuffer);
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
@@ -32,13 +60,16 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
 // It loads texture from renderer if renderer is not null.
 // (-gpu host, swiftshader_indirect, angle_indirect)
 // Otherwise loads texture from getFrameBuffer function. (-gpu guest)
-bool captureScreenshot(emugl::Renderer* renderer,
-                       std::function<void(int* w, int* h, int* lineSize,
-                            int* bytesPerPixel, uint8_t** frameBufferData)>
-                            getFrameBuffer,
-                       SkinRotation rotation,
-                       android::base::StringView outputDirectoryPath,
-                       std::string* outputFilepath = NULL);
+bool captureScreenshot(
+        emugl::Renderer* renderer,
+        std::function<void(int* w,
+                           int* h,
+                           int* lineSize,
+                           int* bytesPerPixel,
+                           uint8_t** frameBufferData)> getFrameBuffer,
+        SkinRotation rotation,
+        android::base::StringView outputDirectoryPath,
+        std::string* outputFilepath = NULL);
 
 }  // namespace emulation
 }  // namespace android

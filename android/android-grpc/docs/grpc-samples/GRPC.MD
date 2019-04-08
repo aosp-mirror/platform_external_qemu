@@ -55,7 +55,7 @@ Your best bet is to use [homebrew](https://brew.sh/) and use the following
 
 ### I'm using linux
 
-If you have
+You must make sure you have a recent version of protobuf available:
 
 ```sh
 $ mkdir tmp && cd tmp
@@ -92,8 +92,10 @@ curl -H "Accept: application/json" -X POST -d '{"key": "30"}' http://localhost:8
 
 For more details on the endpoints look at $AOSP/android/android-grpc/android/emulation/control/api_config.yaml
 
+# Controlling the emulator from JavaScript (TODO)
 
- # Controlling the emulator from Python (TODO)
+
+# Controlling the emulator from Python (TODO)
 
 gRPC Python is supported for use with Python 2.7 or Python 3.4 or higher. First we will need some required packages to work with gRPC:
 

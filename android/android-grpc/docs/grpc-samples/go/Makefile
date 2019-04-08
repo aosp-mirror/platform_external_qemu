@@ -6,6 +6,7 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME=httpbridge
 BINARY_UNIX=$(BINARY_NAME)_unix
+GOPATH = $(shell $(GOCMD) env GOPATH)
 export PATH :=$(GOPATH)/bin:$(PATH)
 PROTOC=protoc
 GRPC_GO_PLUGIN = grpc
@@ -26,6 +27,7 @@ endif
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
+
 
 all: build
 
@@ -54,7 +56,7 @@ clean:
 		$(GOCLEAN)
 		rm -f $(BINARY_NAME)
 		rm -f $(BINARY_UNIX)
-run:
+run: build
 		$(GOBUILD) -o $(BINARY_NAME) -v ./...
 		./$(BINARY_NAME)
 deps:

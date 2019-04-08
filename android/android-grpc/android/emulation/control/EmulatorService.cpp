@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/emulation/control/EmulatorService.h"
+
 #include <grpcpp/grpcpp.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
 
 #include "android/base/Log.h"
 #include "android/console.h"
-#include "android/emulation/control/EmulatorService.h"
+#include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/emulator_controller.grpc.pb.h"
+#include "android/opengles.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -53,7 +57,7 @@ public:
     Status setRotation(ServerContext* context,
                        const Rotation* request,
                        Rotation* reply) override {
-        LOG(VERBOSE) << request->DebugString().c_str();;
+        LOG(VERBOSE) << request->DebugString().c_str();
         mAgents->emu->rotate((SkinRotation)request->rotation());
         return getRotation(context, nullptr, reply);
         return Status::OK;
@@ -63,62 +67,61 @@ public:
                        const ::google::protobuf::Empty* request,
                        Rotation* reply) override {
         reply->set_rotation((Rotation_SkinRotation)mAgents->emu->getRotation());
-        LOG(VERBOSE) << reply->DebugString().c_str();;
+        LOG(VERBOSE) << reply->DebugString().c_str();
         return Status::OK;
     }
 
     Status setBattery(ServerContext* context,
-                       const BatteryState* request,
-                       BatteryState* reply) override {
+                      const BatteryState* request,
+                      BatteryState* reply) override {
         LOG(VERBOSE) << reply->DebugString().c_str();
         auto battery = mAgents->battery;
         battery->setHasBattery(request->hasbattery());
         battery->setIsBatteryPresent(request->ispresent());
-        battery->setIsCharging(request->status() == BatteryState_BatteryStatus_BATTERY_STATUS_CHARGING);
-        battery->setCharger((BatteryCharger) request->charger());
+        battery->setIsCharging(
+                request->status() ==
+                BatteryState_BatteryStatus_BATTERY_STATUS_CHARGING);
+        battery->setCharger((BatteryCharger)request->charger());
         battery->setChargeLevel(request->chargelevel());
-        battery->setHealth((BatteryHealth) request->health());
-        battery->setStatus((BatteryStatus) request->status());
+        battery->setHealth((BatteryHealth)request->health());
+        battery->setStatus((BatteryStatus)request->status());
         return getBattery(context, nullptr, reply);
     }
 
     Status getBattery(ServerContext* context,
-                       const ::google::protobuf::Empty* request,
-                       BatteryState* reply) override {
+                      const ::google::protobuf::Empty* request,
+                      BatteryState* reply) override {
         auto battery = mAgents->battery;
         reply->set_hasbattery(battery->hasBattery());
         reply->set_ispresent(battery->present());
-        reply->set_charger((BatteryState_BatteryCharger) battery->charger());
+        reply->set_charger((BatteryState_BatteryCharger)battery->charger());
         reply->set_chargelevel(battery->chargeLevel());
-        reply->set_health((BatteryState_BatteryHealth) battery->health());
-        reply->set_status((BatteryState_BatteryStatus) battery->status());
-        LOG(VERBOSE) << reply->DebugString().c_str();;
+        reply->set_health((BatteryState_BatteryHealth)battery->health());
+        reply->set_status((BatteryState_BatteryStatus)battery->status());
+        LOG(VERBOSE) << reply->DebugString().c_str();
         return Status::OK;
     }
 
     Status setGps(ServerContext* context,
-                       const GpsState* request,
-                       GpsState* reply) override {
+                  const GpsState* request,
+                  GpsState* reply) override {
         auto location = mAgents->location;
-        struct  timeval tVal;
+        struct timeval tVal;
         memset(&tVal, 0, sizeof(tVal));
         gettimeofday(&tVal, NULL);
 
         location->gpsSetPassiveUpdate(request->passiveupdate());
         location->gpsSendLoc(request->latitude(), request->longitude(),
-                             request->elevation(),
-                             request->speed(),
-                             request->heading(),
-                             request->satellites(), &tVal);
+                             request->elevation(), request->speed(),
+                             request->heading(), request->satellites(), &tVal);
 
-        LOG(VERBOSE) << request->DebugString().c_str();;
+        LOG(VERBOSE) << request->DebugString().c_str();
         return getGps(context, nullptr, reply);
     }
 
     Status getGps(ServerContext* context,
-                       const ::google::protobuf::Empty* request,
-                       GpsState* reply) override {
-
+                  const ::google::protobuf::Empty* request,
+                  GpsState* reply) override {
         auto location = mAgents->location;
         double lat, lon, speed, heading, elevation;
         int32_t count;
@@ -134,7 +137,7 @@ public:
         reply->set_elevation(elevation);
         reply->set_satellites(count);
 
-        LOG(VERBOSE) << reply->DebugString().c_str();;
+        LOG(VERBOSE) << reply->DebugString().c_str();
         return Status::OK;
     }
 
@@ -147,46 +150,103 @@ public:
     }
 
     Status sendKey(ServerContext* context,
-                     const KeyEvent* request,
-                     ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << request->DebugString().c_str();;
-        mAgents->user_event->sendKeyCode(request->key());
+                   const KeyEvent* request,
+                   ::google::protobuf::Empty* reply) override {
+        if (request->text().size() > 0) {
+            LOG(VERBOSE) << "sending text: " << request->DebugString().c_str();
+            mAgents->libui->convertUtf8ToKeyCodeEvents(
+                    (const unsigned char*)request->text().c_str(),
+                    request->text().size(),
+                    (LibuiKeyCodeSendFunc)mAgents->user_event->sendKeyCodes);
+
+        } else {
+            LOG(VERBOSE) << "sending code: " << request->DebugString().c_str();
+            mAgents->user_event->sendKeyCode(request->key());
+        }
         return Status::OK;
     }
 
     Status sendMouse(ServerContext* context,
                      const MouseEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << request->DebugString().c_str();;
+        LOG(VERBOSE) << request->DebugString().c_str();
         mAgents->user_event->sendMouseEvent(request->x(), request->y(),
                                             request->z(), request->buttons());
         return Status::OK;
     }
 
     Status sendRotary(ServerContext* context,
-                     const RotaryEvent* request,
-                     ::google::protobuf::Empty* reply) override {
+                      const RotaryEvent* request,
+                      ::google::protobuf::Empty* reply) override {
         mAgents->user_event->sendRotaryEvent(request->delta());
-        LOG(VERBOSE) << request->DebugString().c_str();;
+        LOG(VERBOSE) << request->DebugString().c_str();
         return Status::OK;
     }
 
     Status getVmConfiguration(ServerContext* context,
                               const ::google::protobuf::Empty* request,
                               VmConfiguration* reply) override {
-
         ::VmConfiguration config;
         mAgents->vm->getVmConfiguration(&config);
-        reply->set_hypervisortype( (VmConfiguration_VmHypervisorType) (config.hypervisorType));
+        reply->set_hypervisortype(
+                (VmConfiguration_VmHypervisorType)(config.hypervisorType));
         reply->set_numberofcpucores(config.numberOfCpuCores);
         reply->set_ramsizebytes(config.ramSizeBytes);
-        LOG(VERBOSE) << reply->DebugString().c_str();;
+        LOG(VERBOSE) << reply->DebugString().c_str();
         return Status::OK;
     }
 
-    private:
-        const AndroidConsoleAgents* mAgents;
-    };
+    Status getScreenshot(ServerContext* context,
+                         const ::google::protobuf::Empty* request,
+                         Image* reply) override {
+        LOG(VERBOSE) << "Taking screenshot";
+
+        // Screenshots can come from either the gl renderer, or the guest.
+        const auto& renderer = android_getOpenglesRenderer();
+        android::emulation::Image img = android::emulation::takeScreenshot(
+                renderer.get(), mAgents->display->getFrameBuffer);
+        std::string typeStr = "Unknown format";
+
+        switch (img.getChannels()) {
+            case 2:
+                reply->set_format(Image_ImageFormat_RGB565);
+                typeStr = "RGB565";
+                break;
+            case 3:
+                reply->set_format(Image_ImageFormat_RGB888);
+                typeStr = "RGB888";
+                break;
+            case 4:
+                reply->set_format(Image_ImageFormat_RBGA8888);
+                typeStr = "RGBA8888";
+                break;
+        }
+
+        reply->set_height(img.getHeight());
+        reply->set_width(img.getWidth());
+        reply->set_image(img.getPixelBuf(), img.getPixelCount());
+        LOG(VERBOSE) << "Screenshot: " << img.getWidth() << "x"
+                     << img.getHeight() << ", type: " << typeStr;
+        return Status::OK;
+    }
+
+    Status usePhone(ServerContext* context,
+                    const TelephoneOperation* request,
+                    TelephoneResponse* reply) override {
+        // We assume that the int mappings are consistent..
+        TelephonyOperation operation = (TelephonyOperation)request->operation();
+        std::string phoneNr = request->number();
+        TelephonyResponse response =
+                mAgents->telephony->telephonyCmd(operation, phoneNr.c_str());
+        reply->set_response(
+                (::android::emulation::control::TelephoneResponse_Response)
+                        response);
+        return Status::OK;
+    }
+
+private:
+    const AndroidConsoleAgents* mAgents;
+};
 
 using Builder = EmulatorControllerService::Builder;
 
@@ -228,6 +288,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     if (!service)
         return nullptr;
 
+    fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(controller.release(),
                                               service.release()));
