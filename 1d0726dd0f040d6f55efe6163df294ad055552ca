@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa94c550_23530679",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-04-08T18:36:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b9d581c_691a526d",
+      "range": {
+        "startLine": 139,
+        "startChar": 16,
+        "endLine": 141,
+        "endChar": 17
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a48458ce_b1a0fa50",
         "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
         "patchSetId": 5
@@ -45,6 +69,30 @@
       "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a5691a4_e29be610",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-04-08T18:36:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a48458ce_b1a0fa50",
+      "range": {
+        "startLine": 163,
+        "startChar": 16,
+        "endLine": 164,
+        "endChar": 32
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "57faa786_00d36c78",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-04-08T18:36:50Z",
+      "side": 1,
+      "message": "I think it\u0027s better than having to call close on the file :)",
+      "parentUuid": "f621e372_7540f73f",
+      "range": {
+        "startLine": 185,
+        "startChar": 4,
+        "endLine": 185,
+        "endChar": 15
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f92a223a_bc26a925",
         "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
         "patchSetId": 5
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "97f90bcd_01ef1e05",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-04-08T18:36:50Z",
+      "side": 1,
+      "message": "Since it\u0027s a unique_ptr, the assignment operator will destroy the current content before transferring ownership of the new unique_ptr\u003cVideoPlayer\u003e created.",
+      "parentUuid": "f92a223a_bc26a925",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 190,
+        "endChar": 50
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c0628f0_525e10b3",
         "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
         "patchSetId": 5
@@ -114,6 +210,30 @@
       "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fd539ee_b66f4fed",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-04-08T18:36:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c0628f0_525e10b3",
+      "range": {
+        "startLine": 195,
+        "startChar": 24,
+        "endLine": 195,
+        "endChar": 25
+      },
+      "revId": "1d0726dd0f040d6f55efe6163df294ad055552ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
