@@ -1096,6 +1096,34 @@ static int rcSetDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t
     (void)h;
 }
 
+static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
+    if (!goldfish_vk::isColorBufferVulkanCompatible(colorBuffer)) {
+        fprintf(
+            stderr,
+            "%s: error: colorBuffer 0x%x is not Vulkan compatible\n",
+            __func__, colorBuffer);
+        return -1;
+    }
+
+    if (!goldfish_vk::setupVkColorBuffer(colorBuffer)) {
+        fprintf(
+            stderr,
+            "%s: error: failed to create VkImage for colorBuffer 0x%x\n",
+            __func__, colorBuffer);
+        return -1;
+    }
+
+    if (!goldfish_vk::setColorBufferVulkanMode(colorBuffer, mode)) {
+        fprintf(
+            stderr,
+            "%s: error: failed to set Vulkan mode for colorBuffer 0x%x\n",
+            __func__, colorBuffer);
+        return -1;
+    }
+
+    return 0;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1136,4 +1164,12 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcCreateDisplay = rcCreateDisplay;
+    dec->rcDestroyDisplay = rcDestroyDisplay;
+    dec->rcSetDisplayColorBuffer = rcSetDisplayColorBuffer;
+    dec->rcGetDisplayColorBuffer = rcGetDisplayColorBuffer;
+    dec->rcGetColorBufferDisplay = rcGetColorBufferDisplay;
+    dec->rcGetDisplayPose = rcGetDisplayPose;
+    dec->rcSetDisplayPose = rcSetDisplayPose;
+    dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
 }
