@@ -690,6 +690,11 @@ GLuint ColorBuffer::scale() {
     return m_resizer->update(m_tex);
 }
 
+int ColorBuffer::setVulkanMode(ColorBuffer::VulkanMode mode) {
+    (void)mode;
+    return 0;
+}
+
 void ColorBuffer::setSync(bool debug) {
     m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     if (debug) fprintf(stderr, "%s: %u to %p\n", __func__, getHndl(), m_sync);

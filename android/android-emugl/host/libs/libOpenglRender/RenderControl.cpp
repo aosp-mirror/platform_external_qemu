@@ -1096,6 +1096,16 @@ static int rcSetDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t
     (void)h;
 }
 
+static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->setColorBufferVulkanMode(colorBuffer, mode);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1136,4 +1146,12 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcCreateDisplay = rcCreateDisplay;
+    dec->rcDestroyDisplay = rcDestroyDisplay;
+    dec->rcSetDisplayColorBuffer = rcSetDisplayColorBuffer;
+    dec->rcGetDisplayColorBuffer = rcGetDisplayColorBuffer;
+    dec->rcGetColorBufferDisplay = rcGetColorBufferDisplay;
+    dec->rcGetDisplayPose = rcGetDisplayPose;
+    dec->rcSetDisplayPose = rcSetDisplayPose;
+    dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
 }

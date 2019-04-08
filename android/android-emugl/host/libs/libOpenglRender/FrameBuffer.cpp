@@ -614,6 +614,21 @@ void FrameBuffer::setColorBufferInUse(
     (*c).second.cb->setInUse(inUse);
 }
 
+int FrameBuffer::setColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
+
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        ERR("FB: setColorBufferInUse cb handle %#x not found\n", colorBuffer);
+        return -ENOENT;
+    }
+
+    return (*c).second.cb->setVulkanMode(
+        static_cast<ColorBuffer::VulkanMode>(mode));
+}
+
 void FrameBuffer::disableFastBlit() {
     m_fastBlitSupported = false;
 }
