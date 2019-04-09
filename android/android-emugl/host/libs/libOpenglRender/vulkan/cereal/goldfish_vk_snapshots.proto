@@ -1,0 +1,2950 @@
+// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2018 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto2";
+package goldfish_vk_snapshots;
+message VkApplicationInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkInstanceCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkInstanceCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkApplicationInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 1 string? 0 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 1 string? 0 hasLenInfo? 1 protoType uint8
+}
+message VkAllocationCallbacks
+{
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // PFN_vkAllocationFunction msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // PFN_vkReallocationFunction msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // PFN_vkFreeFunction msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // PFN_vkInternalAllocationNotification msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // PFN_vkInternalFreeNotification msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPhysicalDeviceFeatures
+{
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkFormatProperties
+{
+    // VkFormatFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormatFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormatFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExtent3D
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImageFormatProperties
+{
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPhysicalDeviceLimits
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPhysicalDeviceSparseProperties
+{
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceProperties
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPhysicalDeviceType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // uint8_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // VkPhysicalDeviceLimits msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPhysicalDeviceSparseProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkQueueFamilyProperties
+{
+    // VkQueueFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkMemoryType
+{
+    // VkMemoryPropertyFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMemoryHeap
+{
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkMemoryHeapFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceMemoryProperties
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkMemoryType msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkMemoryHeap msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDeviceQueueCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceQueueCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDeviceCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceQueueCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 1 string? 0 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 1 string? 0 hasLenInfo? 1 protoType uint8
+    // VkPhysicalDeviceFeatures msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkExtensionProperties
+{
+    // char msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkLayerProperties
+{
+    // char msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+}
+message VkSubmitInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // VkPipelineStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCommandBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkMemoryAllocateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMappedMemoryRange
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkMemoryRequirements
+{
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSparseImageFormatProperties
+{
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkSparseImageFormatFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSparseImageMemoryRequirements
+{
+    // VkSparseImageFormatProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkSparseMemoryBind
+{
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkSparseMemoryBindFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSparseBufferMemoryBindInfo
+{
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSparseMemoryBind msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkSparseImageOpaqueMemoryBindInfo
+{
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSparseMemoryBind msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkImageSubresource
+{
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkOffset3D
+{
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+}
+message VkSparseImageMemoryBind
+{
+    // VkImageSubresource msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkSparseMemoryBindFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSparseImageMemoryBindInfo
+{
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSparseImageMemoryBind msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkBindSparseInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSparseBufferMemoryBindInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSparseImageOpaqueMemoryBindInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSparseImageMemoryBindInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkFenceCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFenceCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSemaphoreCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSemaphoreCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkEventCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkEventCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkQueryPoolCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkQueryPoolCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkQueryType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkQueryPipelineStatisticFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkBufferCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBufferCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkBufferUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSharingMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkBufferViewCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBufferViewCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkImageCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageTiling msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSharingMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSubresourceLayout
+{
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkComponentMapping
+{
+    // VkComponentSwizzle msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkComponentSwizzle msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkComponentSwizzle msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkComponentSwizzle msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImageSubresourceRange
+{
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImageViewCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageViewCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkImageViewType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkComponentMapping msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkImageSubresourceRange msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkShaderModuleCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkShaderModuleCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkPipelineCacheCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineCacheCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType string
+}
+message VkSpecializationMapEntry
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkSpecializationInfo
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSpecializationMapEntry msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType string
+}
+message VkPipelineShaderStageCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineShaderStageCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkShaderStageFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkShaderModule msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // VkSpecializationInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkVertexInputBindingDescription
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkVertexInputRate msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkVertexInputAttributeDescription
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineVertexInputStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineVertexInputStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkVertexInputBindingDescription msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkVertexInputAttributeDescription msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPipelineInputAssemblyStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineInputAssemblyStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPrimitiveTopology msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineTessellationStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineTessellationStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkViewport
+{
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkOffset2D
+{
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+}
+message VkExtent2D
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkRect2D
+{
+    // VkOffset2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPipelineViewportStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineViewportStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkViewport msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPipelineRasterizationStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineRasterizationStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPolygonMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCullModeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFrontFace msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPipelineMultisampleStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineMultisampleStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkSampleMask msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkStencilOpState
+{
+    // VkStencilOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkStencilOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkStencilOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCompareOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineDepthStencilStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineDepthStencilStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCompareOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkStencilOpState msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkStencilOpState msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPipelineColorBlendAttachmentState
+{
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendFactor msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendFactor msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendFactor msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendFactor msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkColorComponentFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineColorBlendStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineColorBlendStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkLogicOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineColorBlendAttachmentState msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPipelineDynamicStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineDynamicStateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDynamicState msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkGraphicsPipelineCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineShaderStageCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkPipelineVertexInputStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineInputAssemblyStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineTessellationStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineViewportStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineRasterizationStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineMultisampleStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineDepthStencilStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineColorBlendStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineDynamicStateCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkRenderPass msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipeline msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+}
+message VkComputePipelineCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineShaderStageCreateInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkPipelineLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkPipeline msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+}
+message VkPushConstantRange
+{
+    // VkShaderStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineLayoutCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineLayoutCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorSetLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPushConstantRange msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkSamplerCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSamplerCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFilter msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFilter msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerMipmapMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerAddressMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerAddressMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerAddressMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCompareOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkBorderColor msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDescriptorSetLayoutBinding
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkShaderStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampler msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkDescriptorSetLayoutCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDescriptorSetLayoutCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorSetLayoutBinding msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDescriptorPoolSize
+{
+    // VkDescriptorType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDescriptorPoolCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDescriptorPoolCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorPoolSize msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDescriptorSetAllocateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDescriptorPool msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorSetLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkDescriptorImageInfo
+{
+    // VkSampler msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkImageView msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDescriptorBufferInfo
+{
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkWriteDescriptorSet
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDescriptorSet msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorImageInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkDescriptorBufferInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkBufferView msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkCopyDescriptorSet
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDescriptorSet msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorSet msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkFramebufferCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFramebufferCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkRenderPass msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageView msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkAttachmentDescription
+{
+    // VkAttachmentDescriptionFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentLoadOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentStoreOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentLoadOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentStoreOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkAttachmentReference
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSubpassDescription
+{
+    // VkSubpassDescriptionFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineBindPoint msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentReference msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentReference msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkAttachmentReference msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkAttachmentReference msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkSubpassDependency
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDependencyFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkRenderPassCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkRenderPassCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentDescription msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSubpassDescription msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSubpassDependency msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkCommandPoolCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkCommandPoolCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkCommandBufferAllocateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkCommandPool msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkCommandBufferLevel msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkCommandBufferInheritanceInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkRenderPass msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFramebuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkQueryControlFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkQueryPipelineStatisticFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkCommandBufferBeginInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkCommandBufferUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCommandBufferInheritanceInfo msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkBufferCopy
+{
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkImageSubresourceLayers
+{
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImageCopy
+{
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkImageBlit
+{
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkBufferImageCopy
+{
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkClearColorValue
+{
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType int32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkClearDepthStencilValue
+{
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkClearValue
+{
+    // VkClearColorValue msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkClearDepthStencilValue msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkClearAttachment
+{
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkClearValue msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkClearRect
+{
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImageResolve
+{
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkImageSubresourceLayers msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent3D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkMemoryBarrier
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkBufferMemoryBarrier
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkImageMemoryBarrier
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkImageSubresourceRange msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkRenderPassBeginInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkRenderPass msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFramebuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkClearValue msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDispatchIndirectCommand
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDrawIndexedIndirectCommand
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDrawIndirectCommand
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkBaseOutStructure
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBaseOutStructure msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkBaseInStructure
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBaseInStructure msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceSubgroupProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkShaderStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSubgroupFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkBindBufferMemoryInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkBindImageMemoryInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPhysicalDevice16BitStorageFeatures
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMemoryDedicatedRequirements
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMemoryDedicatedAllocateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkMemoryAllocateFlagsInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkMemoryAllocateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGroupRenderPassBeginInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDeviceGroupCommandBufferBeginInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGroupSubmitInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkDeviceGroupBindSparseInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkBindBufferMemoryDeviceGroupInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkBindImageMemoryDeviceGroupInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPhysicalDeviceGroupProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPhysicalDevice msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGroupDeviceCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPhysicalDevice msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkBufferMemoryRequirementsInfo2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkImageMemoryRequirementsInfo2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkImageSparseMemoryRequirementsInfo2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkMemoryRequirements2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkMemoryRequirements msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkSparseImageMemoryRequirements2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSparseImageMemoryRequirements msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceFeatures2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPhysicalDeviceFeatures msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceProperties2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPhysicalDeviceProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkFormatProperties2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFormatProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkImageFormatProperties2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageFormatProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceImageFormatInfo2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageTiling msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkQueueFamilyProperties2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkQueueFamilyProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceMemoryProperties2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPhysicalDeviceMemoryProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkSparseImageFormatProperties2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSparseImageFormatProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceSparseImageFormatInfo2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageTiling msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDevicePointClippingProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPointClippingBehavior msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkInputAttachmentAspectReference
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkRenderPassInputAttachmentAspectCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkInputAttachmentAspectReference msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkImageViewUsageCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineTessellationDomainOriginStateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkTessellationDomainOrigin msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkRenderPassMultiviewCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType int32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkPhysicalDeviceMultiviewFeatures
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceMultiviewProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceVariablePointerFeatures
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceProtectedMemoryFeatures
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceProtectedMemoryProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceQueueInfo2
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceQueueCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkProtectedSubmitInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSamplerYcbcrConversionCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerYcbcrModelConversion msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerYcbcrRange msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkComponentMapping msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkChromaLocation msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkChromaLocation msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFilter msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSamplerYcbcrConversionInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSamplerYcbcrConversion msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkBindImagePlaneMemoryInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageAspectFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImagePlaneMemoryRequirementsInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageAspectFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceSamplerYcbcrConversionFeatures
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSamplerYcbcrConversionImageFormatProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDescriptorUpdateTemplateEntry
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkDescriptorUpdateTemplateCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDescriptorUpdateTemplateCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorUpdateTemplateEntry msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkDescriptorUpdateTemplateType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorSetLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkPipelineBindPoint msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalMemoryProperties
+{
+    // VkExternalMemoryFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalMemoryHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalMemoryHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceExternalImageFormatInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalImageFormatProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceExternalBufferInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBufferCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBufferUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalBufferProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceIDProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint8_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // uint8_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // uint8_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalMemoryImageCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalMemoryBufferCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExportMemoryAllocateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceExternalFenceInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalFenceHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalFenceProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalFenceHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalFenceHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalFenceFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExportFenceCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalFenceHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExportSemaphoreCreateInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalSemaphoreHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceExternalSemaphoreInfo
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalSemaphoreHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalSemaphoreProperties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalSemaphoreHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalSemaphoreHandleTypeFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalSemaphoreFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceMaintenance3Properties
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkDescriptorSetLayoutSupport
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceShaderDrawParameterFeatures
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSurfaceCapabilitiesKHR
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceTransformFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceTransformFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCompositeAlphaFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSurfaceFormatKHR
+{
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkColorSpaceKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSwapchainCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSwapchainCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkColorSpaceKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSharingMode msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkSurfaceTransformFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCompositeAlphaFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPresentModeKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSwapchainKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPresentInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSwapchainKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkResult msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkImageSwapchainCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSwapchainKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkBindImageMemorySwapchainInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSwapchainKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkAcquireNextImageInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSwapchainKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFence msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGroupPresentCapabilitiesKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkDeviceGroupPresentModeFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGroupPresentInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkDeviceGroupPresentModeFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGroupSwapchainCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceGroupPresentModeFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplayPropertiesKHR
+{
+    // VkDisplayKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkSurfaceTransformFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplayModeParametersKHR
+{
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplayModePropertiesKHR
+{
+    // VkDisplayModeKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDisplayModeParametersKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayModeCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayModeCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDisplayModeParametersKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayPlaneCapabilitiesKHR
+{
+    // VkDisplayPlaneAlphaFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkOffset2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkOffset2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayPlanePropertiesKHR
+{
+    // VkDisplayKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplaySurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplaySurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDisplayModeKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceTransformFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkDisplayPlaneAlphaFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayPresentInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkXlibSurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkXlibSurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // Display msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // Window msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkXcbSurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkXcbSurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // xcb_connection_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // xcb_window_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkWaylandSurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkWaylandSurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // wl_display msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // wl_surface msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkMirSurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkMirSurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // MirConnection msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // MirSurface msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkAndroidSurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkAndroidSurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // ANativeWindow msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkWin32SurfaceCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkWin32SurfaceCreateFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // HINSTANCE msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // HWND msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkImportMemoryWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // HANDLE msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // LPCWSTR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkExportMemoryWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // SECURITY_ATTRIBUTES msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // DWORD msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // LPCWSTR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkMemoryWin32HandlePropertiesKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMemoryGetWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportMemoryFdInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkMemoryFdPropertiesKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMemoryGetFdInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkWin32KeyedMutexAcquireReleaseInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkImportSemaphoreWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkSemaphoreImportFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalSemaphoreHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // HANDLE msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // LPCWSTR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkExportSemaphoreWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // SECURITY_ATTRIBUTES msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // DWORD msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // LPCWSTR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkD3D12FenceSubmitInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkSemaphoreGetWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkExternalSemaphoreHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportSemaphoreFdInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkSemaphoreImportFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalSemaphoreHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkSemaphoreGetFdInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSemaphore msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkExternalSemaphoreHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDevicePushDescriptorPropertiesKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkRectLayerKHR
+{
+    // VkOffset2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPresentRegionKHR
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkRectLayerKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPresentRegionsKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPresentRegionKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkAttachmentDescription2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkAttachmentDescriptionFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleCountFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentLoadOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentStoreOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentLoadOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentStoreOp msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkAttachmentReference2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageAspectFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSubpassDescription2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSubpassDescriptionFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineBindPoint msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentReference2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentReference2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkAttachmentReference2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // VkAttachmentReference2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkSubpassDependency2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAccessFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDependencyFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+}
+message VkRenderPassCreateInfo2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkRenderPassCreateFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentDescription2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSubpassDescription2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSubpassDependency2KHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkSubpassBeginInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSubpassContents msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSubpassEndInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkSharedPresentSurfaceCapabilitiesKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportFenceWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFence msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFenceImportFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalFenceHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // HANDLE msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // LPCWSTR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkExportFenceWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // SECURITY_ATTRIBUTES msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // DWORD msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // LPCWSTR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkFenceGetWin32HandleInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFence msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkExternalFenceHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportFenceFdInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFence msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFenceImportFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalFenceHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkFenceGetFdInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFence msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkExternalFenceHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceSurfaceInfo2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSurfaceKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkSurfaceCapabilities2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSurfaceCapabilitiesKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkSurfaceFormat2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSurfaceFormatKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayProperties2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayPropertiesKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayPlaneProperties2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayPlanePropertiesKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayModeProperties2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayModePropertiesKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkDisplayPlaneInfo2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayModeKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplayPlaneCapabilities2KHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayPlaneCapabilitiesKHR msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkImageFormatListCreateInfoKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkPhysicalDevice8BitStorageFeaturesKHR
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkNativeBufferANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // int msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // int msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // int msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkDebugReportCallbackCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDebugReportFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // PFN_vkDebugReportCallbackEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkPipelineRasterizationStateRasterizationOrderAMD
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkRasterizationOrderAMD msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDebugMarkerObjectNameInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDebugReportObjectTypeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+}
+message VkDebugMarkerObjectTagInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDebugReportObjectTypeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType string
+}
+message VkDebugMarkerMarkerInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDedicatedAllocationImageCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDedicatedAllocationBufferCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDedicatedAllocationMemoryAllocateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkImage msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkTextureLODGatherFormatPropertiesAMD
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkShaderResourceUsageAMD
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkShaderStatisticsInfoAMD
+{
+    // VkShaderStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkShaderResourceUsageAMD msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkExternalImageFormatPropertiesNV
+{
+    // VkImageFormatProperties msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExternalMemoryFeatureFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalMemoryHandleTypeFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExternalMemoryHandleTypeFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExternalMemoryImageCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkExportMemoryAllocateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportMemoryWin32HandleInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // HANDLE msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkExportMemoryWin32HandleInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // SECURITY_ATTRIBUTES msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // DWORD msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkWin32KeyedMutexAcquireReleaseInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint64
+}
+message VkValidationFlagsEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkValidationCheckEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkViSurfaceCreateInfoNN
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkViSurfaceCreateFlagsNN msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkConditionalRenderingBeginInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkConditionalRenderingFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceConditionalRenderingFeaturesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkCommandBufferInheritanceConditionalRenderingInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGeneratedCommandsFeaturesNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceGeneratedCommandsLimitsNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkIndirectCommandsTokenNVX
+{
+    // VkIndirectCommandsTokenTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkIndirectCommandsLayoutTokenNVX
+{
+    // VkIndirectCommandsTokenTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkIndirectCommandsLayoutCreateInfoNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineBindPoint msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkIndirectCommandsLayoutUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkIndirectCommandsLayoutTokenNVX msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkCmdProcessCommandsInfoNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkObjectTableNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkIndirectCommandsLayoutNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkIndirectCommandsTokenNVX msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCommandBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkCmdReserveSpaceForCommandsInfoNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkObjectTableNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkIndirectCommandsLayoutNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkObjectTableCreateInfoNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkObjectTableEntryNVX
+{
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkObjectTablePipelineEntryNVX
+{
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipeline msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkObjectTableDescriptorSetEntryNVX
+{
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDescriptorSet msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkObjectTableVertexBufferEntryNVX
+{
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkObjectTableIndexBufferEntryNVX
+{
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkIndexType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkObjectTablePushConstantEntryNVX
+{
+    // VkObjectEntryTypeNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkObjectEntryUsageFlagsNVX msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPipelineLayout msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkShaderStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkViewportWScalingNV
+{
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPipelineViewportWScalingStateCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkViewportWScalingNV msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkSurfaceCapabilities2EXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceTransformFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceTransformFlagBitsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCompositeAlphaFlagsKHR msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageUsageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSurfaceCounterFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplayPowerInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayPowerStateEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceEventInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceEventTypeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDisplayEventInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDisplayEventTypeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSwapchainCounterCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSurfaceCounterFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkRefreshCycleDurationGOOGLE
+{
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPastPresentationTimingGOOGLE
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPresentTimeGOOGLE
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPresentTimesInfoGOOGLE
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkPresentTimeGOOGLE msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkViewportSwizzleNV
+{
+    // VkViewportCoordinateSwizzleNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkViewportCoordinateSwizzleNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkViewportCoordinateSwizzleNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkViewportCoordinateSwizzleNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineViewportSwizzleStateCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineViewportSwizzleStateCreateFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkViewportSwizzleNV msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPhysicalDeviceDiscardRectanglePropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineDiscardRectangleStateCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineDiscardRectangleStateCreateFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDiscardRectangleModeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkRect2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPhysicalDeviceConservativeRasterizationPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineRasterizationConservativeStateCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineRasterizationConservativeStateCreateFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkConservativeRasterizationModeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkXYColorEXT
+{
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkHdrMetadataEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkXYColorEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkXYColorEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkXYColorEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkXYColorEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkIOSSurfaceCreateInfoMVK
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkIOSSurfaceCreateFlagsMVK msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkMacOSSurfaceCreateInfoMVK
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkMacOSSurfaceCreateFlagsMVK msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkDebugUtilsObjectNameInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkObjectType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+}
+message VkDebugUtilsObjectTagInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkObjectType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType string
+}
+message VkDebugUtilsLabelEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDebugUtilsMessengerCallbackDataEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDebugUtilsMessengerCallbackDataFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // int32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType int32
+    // char msg? 0 stringarray? 0 string? 1 hasLenInfo? 1 protoType uint8
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDebugUtilsLabelEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDebugUtilsLabelEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDebugUtilsObjectNameInfoEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkDebugUtilsMessengerCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDebugUtilsMessengerCreateFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDebugUtilsMessageSeverityFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDebugUtilsMessageTypeFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // PFN_vkDebugUtilsMessengerCallbackEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkAndroidHardwareBufferUsageANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkAndroidHardwareBufferPropertiesANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkAndroidHardwareBufferFormatPropertiesANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFormatFeatureFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkComponentMapping msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // VkSamplerYcbcrModelConversion msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSamplerYcbcrRange msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkChromaLocation msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkChromaLocation msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportAndroidHardwareBufferInfoANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // AHardwareBuffer msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkMemoryGetAndroidHardwareBufferInfoANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceMemory msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkExternalFormatANDROID
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkSamplerReductionModeCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSamplerReductionModeEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkSampleLocationEXT
+{
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkSampleLocationsInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSampleCountFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleLocationEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkAttachmentSampleLocationsEXT
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleLocationsInfoEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkSubpassSampleLocationsEXT
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleLocationsInfoEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkRenderPassSampleLocationsBeginInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkAttachmentSampleLocationsEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSubpassSampleLocationsEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkPipelineSampleLocationsStateCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkSampleLocationsInfoEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceSampleLocationsPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkSampleCountFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkMultisamplePropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExtent2D msg? 1 stringarray? 0 string? 0 hasLenInfo? 0 protoType None
+}
+message VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineColorBlendAdvancedStateCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBlendOverlapEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineCoverageToColorStateCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineCoverageToColorStateCreateFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineCoverageModulationStateCreateInfoNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineCoverageModulationStateCreateFlagsNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkCoverageModulationModeNV msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // float msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkValidationCacheCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkValidationCacheCreateFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // size_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType string
+}
+message VkShaderModuleValidationCacheCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkValidationCacheEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkDescriptorSetLayoutBindingFlagsCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkDescriptorBindingFlagsEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkPhysicalDeviceDescriptorIndexingFeaturesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceDescriptorIndexingPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkBool32 msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDescriptorSetVariableDescriptorCountAllocateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 1 protoType uint32
+}
+message VkDescriptorSetVariableDescriptorCountLayoutSupportEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkDeviceQueueGlobalPriorityCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkQueueGlobalPriorityEXT msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportMemoryHostPointerInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkExternalMemoryHandleTypeFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkMemoryHostPointerPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceExternalMemoryHostPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+}
+message VkPhysicalDeviceShaderCorePropertiesAMD
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkVertexInputBindingDivisorDescriptionEXT
+{
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkPipelineVertexInputDivisorStateCreateInfoEXT
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkVertexInputBindingDivisorDescriptionEXT msg? 1 stringarray? 0 string? 0 hasLenInfo? 1 protoType None
+}
+message VkQueueFamilyCheckpointPropertiesNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineStageFlags msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkCheckpointDataNV
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // VkPipelineStageFlagBits msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+}
+message VkImportColorBufferGOOGLE
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}
+message VkImportPhysicalAddressGOOGLE
+{
+    // VkStructureType msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // void msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType string
+    // uint64_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkDeviceSize msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint64
+    // VkFormat msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // VkImageTiling msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+    // uint32_t msg? 0 stringarray? 0 string? 0 hasLenInfo? 0 protoType uint32
+}

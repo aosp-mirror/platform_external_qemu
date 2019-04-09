@@ -1,0 +1,71 @@
+# Copyright (c) 2018 The Android Open Source Project
+# Copyright (c) 2018 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from .common.codegen import CodeGen
+from .common.vulkantypes import \
+        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType, TRANSFORMED_TYPES, VulkanTypeProtobufInfo
+
+from .wrapperdefs import VulkanWrapperGenerator
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
+
+class VulkanSnapshots(VulkanWrapperGenerator):
+    def __init__(self, module, typeInfo):
+        VulkanWrapperGenerator.__init__(self, module, typeInfo)
+
+        self.codegen = CodeGen()
+
+        self.knownStructs = {}
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+
+    def onGenType(self, typeXml, name, alias):
+        VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
+
+        if name in self.knownStructs:
+            return
+
+        category = self.typeInfo.categoryOf(name)
+
+        if category in ["struct", "union"] and not alias:
+            self.knownStructs[name] = 1
+
+            structInfo = self.typeInfo.structs[name]
+
+            def messageGenerator(cgen):
+                #def generateProtoField(i, member, cgen):
+                #    protoFieldInfo = getVulkanTypeProtobufInfo(structInfo, member)
+                #    cgen.stmt("%s %s = %d" % (
+                #        vulkanTypeToProtobufType(member),
+                #        member.paramName, i))
+
+                cgen.line("message %s" % name)
+                cgen.beginBlock()
+                for (i, member) in enumerate(structInfo.members):
+                    protoInfo = VulkanTypeProtobufInfo(self.typeInfo, structInfo, member)
+                    self.codegen.line("// %s msg? %d stringarray? %d string? %d hasLenInfo? %d protoType %s" % \
+                        (member.typeName, protoInfo.needsMessage, protoInfo.isRepeatedString, protoInfo.isString, protoInfo.lengthInfo != None, protoInfo.protobufType))
+                    # generateProtoField(i, member, cgen)
+
+                cgen.endBlock()
+                return cgen.swapCode()
+
+            self.module.append(messageGenerator(self.codegen))
+
+    def onGenCmd(self, cmdinfo, name, alias):
+        VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
+
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
