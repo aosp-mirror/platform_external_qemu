@@ -47,12 +47,17 @@ void RecordMacroPage::loadUi() {
 
     // For every macro, create a macroSavedItem with its name.
     for (auto& macroName : macroFileNames) {
-        std::replace(macroName.begin(), macroName.end(), '_', ' ');
+        // Set the real macro name as the object's data.
+        QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
+        QVariant macroNameData(QString::fromStdString(macroName));
+        listItem->setData(Qt::UserRole, macroNameData);
+
         RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
+        std::replace(macroName.begin(), macroName.end(), '_', ' ');
+        macroName.append(" (Preset macro)");
         macroSavedItem->setName(macroName.c_str());
         macroSavedItem->setDisplayInfo(tr("Preset macro"));
 
-        QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
         listItem->setSizeHint(macroSavedItem->sizeHint());
 
         mUi->macroList->addItem(listItem);
@@ -75,9 +80,7 @@ void RecordMacroPage::on_playStopButton_clicked() {
 }
 
 void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
-    RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
-    std::string macroName = macroSavedItem->getName();
-    std::replace(macroName.begin(), macroName.end(), ' ', '_');
+    const std::string macroName = getMacroNameFromItem(listItem);
 
     if (mMacroPlaying && mCurrentMacroName == macroName) {
         setMacroUiState(MacroUiState::Playing);
@@ -163,8 +166,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     macroSavedItem->setDisplayInfo(tr("Now playing..."));
     mVideoPlayer->stop();
 
-    std::string macroName = macroSavedItem->getName();
-    std::replace(macroName.begin(), macroName.end(), ' ', '_');
+    const std::string macroName = getMacroNameFromItem(listItem);
     const std::string macroAbsolutePath =
             PathUtils::join(getMacrosDirectory(), macroName);
 
@@ -200,8 +202,7 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
     mMacroPlaying = false;
     setMacroUiState(MacroUiState::PreviewFinished);
 
-    std::string macroName = macroSavedItem->getName();
-    std::replace(macroName.begin(), macroName.end(), ' ', '_');
+    const std::string macroName = getMacroNameFromItem(listItem);
     showPreviewFrame(macroName);
 }
 
@@ -237,16 +238,14 @@ void RecordMacroPage::previewVideoPlayingFinished() {
     setMacroUiState(MacroUiState::PreviewFinished);
 
     QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
-    std::string macroName = getItemWidget(listItem)->getName();
-    std::replace(macroName.begin(), macroName.end(), ' ', '_');
+    const std::string macroName = getMacroNameFromItem(listItem);
     showPreviewFrame(macroName);
 }
 
 void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
     if (mState == MacroUiState::PreviewFinished) {
         QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
-        std::string macroName = getItemWidget(listItem)->getName();
-        std::replace(macroName.begin(), macroName.end(), ' ', '_');
+        const std::string macroName = getMacroNameFromItem(listItem);
         showPreview(macroName);
         setMacroUiState(MacroUiState::Selected);
     }
@@ -282,4 +281,10 @@ void RecordMacroPage::showPreviewFrame(const std::string& previewName) {
             SLOT(updatePreviewVideoView()));
 
     mVideoInfo->show();
+}
+
+std::string RecordMacroPage::getMacroNameFromItem(QListWidgetItem* listItem) {
+    QVariant data = listItem->data(Qt::UserRole);
+    QString macroName = data.toString();
+    return macroName.toUtf8().constData();
 }

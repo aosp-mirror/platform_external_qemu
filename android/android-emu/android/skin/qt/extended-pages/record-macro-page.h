@@ -54,6 +54,7 @@ private:
     void disableMacroItemsExcept(QListWidgetItem* listItem);
     void enableMacroItems();
     void showPreviewFrame(const std::string& previewName);
+    std::string getMacroNameFromItem(QListWidgetItem* listItem);
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
