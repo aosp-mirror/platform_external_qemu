@@ -11,3 +11,4 @@ from .deepcopy import *
 from .handlemap import *
 from .dispatch import *
 from .unbox import *
+from .baseprotodefs import *
