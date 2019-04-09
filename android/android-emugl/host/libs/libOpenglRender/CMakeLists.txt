@@ -1,6 +1,8 @@
 prebuilt(ANGLE)
 prebuilt(VULKAN)
 
+add_subdirectory(vulkan/cereal/proto)
+
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
   # And setup the depedencies
@@ -199,9 +201,11 @@ android_target_compile_definitions(OpenglRender_unittests windows PRIVATE -DVK_U
 add_opengl_dependencies(OpenglRender_unittests)
 
 # Unit tests
-set(OpenglRender_vulkan_unittests_src vulkan/VulkanStream_unittest.cpp)
+set(OpenglRender_vulkan_unittests_src
+    vulkan/VulkanStream_unittest.cpp
+    vulkan/VulkanProtobuf_unittest.cpp)
 android_add_test(OpenglRender_vulkan_unittests)
-target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base)
+target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base OpenglRender_vulkan_cereal_proto)
 target_link_libraries(OpenglRender_vulkan_unittests
                               PUBLIC
                               OpenglRender_standalone_common
