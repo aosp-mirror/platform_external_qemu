@@ -9,21 +9,21 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android-qemu2-glue/qemu-control-impl.h"
+#include <stdbool.h>
+#include <stdio.h>
 
+#include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/multitouch-screen.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
-
-#include "qemu/osdep.h"
 #include "hw/input/goldfish_events.h"
 #include "hw/input/goldfish_events_common.h"
 #include "hw/input/goldfish_rotary.h"
+#include "qemu/osdep.h"
 #include "ui/console.h"
 #include "ui/input.h"
-
-#include <stdbool.h>
-#include <stdio.h>
 
 static void user_event_key(unsigned code, bool down) {
     if (code == 0) {
@@ -67,24 +67,38 @@ static void user_event_keycodes(int* kcodes, int count) {
     }
 }
 
+/*
+ * Both goldfish_events and virtio_input_multi_touch are maintained in order to
+ * be backward compatible. When feature Virtio is enabled, makes sure
+ * multi-touch events (type == EV_ABS or type == EV_SYN) are sent to virtio
+ * input multi touch device. For qemu2 and API 10+, multi-touch is always
+ * supported by default.
+ */
 static void user_event_generic(int type, int code, int value) {
-    goldfish_event_send(type, code, value);
+    bool sent = false;
+    if (feature_is_enabled(kFeature_VirtioInput)) {
+        sent = android_virtio_input_send(type, code, value);
+    }
+
+    if (!sent) {
+        goldfish_event_send(type, code, value);
+    }
 }
 
 static void user_event_generic_events(SkinGenericEventCode* events, int count) {
     int i;
     for (i = 0; i < count; i++) {
-        goldfish_event_send(events[i].type, events[i].code,
-                            events[i].value);
+        user_event_generic(events[i].type, events[i].code, events[i].value);
     }
 }
 
 static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
-    if (VERBOSE_CHECK(keys)) {
+    if (VERBOSE_CHECK(keys))
         printf(">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
-    }
-
-    kbd_mouse_event(dx, dy, dz, buttonsState);
+    if (feature_is_enabled(kFeature_VirtioInput))
+        android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState);
+    else
+        kbd_mouse_event(dx, dy, dz, buttonsState);
 }
 
 static void user_event_rotary(int delta) {
