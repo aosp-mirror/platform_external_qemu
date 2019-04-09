@@ -236,6 +236,7 @@ set(android_emu_dependent_src
     android/camera/camera-videoplayback.cpp
     android/camera/camera-videoplayback-default-renderer.cpp
     android/camera/camera-videoplayback-render-multiplexer.cpp
+    android/camera/camera-videoplayback-video-renderer.cpp
     android/camera/camera-virtualscene.cpp
     android/camera/camera-virtualscene-utils.cpp
     android/emulation/address_space_device.cpp

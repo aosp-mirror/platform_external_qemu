@@ -49,6 +49,7 @@ private:
     const GLESv2Dispatch* const mGles2;
     size_t mRenderWidth;
     size_t mRenderHeight;
+    bool mInitialized = false;
 
     GLuint mVertexBuffer;
     GLuint mElementBuffer;
