@@ -26,9 +26,13 @@
 #endif
 
 extern bool skin_event_poll(SkinEvent* event) {
-    (void)event;
-    return false;
+    EmulatorNoQtNoWindow *window = EmulatorNoQtNoWindow::getInstance();
+    if (!window) return false;
+    bool retval;
+    window->pollEvent(event, &retval);
+    return retval;
 }
+
 
 extern void skin_enable_mouse_tracking(bool enable) {
     (void)enable;

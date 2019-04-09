@@ -56,6 +56,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     printer("%s", message);
                     // Don't necessarily perform the func since the
                     // user doesn't get a chance to dismiss.
+                },
+        .fold =
+                [](bool is_fold) {
+                   if (const auto win = EmulatorNoQtNoWindow::getInstance()) {
+                      if (is_fold)
+                          win->fold();
+                      else
+                          win->unFold();
+                   }
                 }
 };
 

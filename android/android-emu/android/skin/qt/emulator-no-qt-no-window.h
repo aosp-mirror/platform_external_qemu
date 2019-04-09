@@ -14,8 +14,11 @@
 
 #include "android/base/async/Looper.h"
 #include "android/emulation/control/AdbInterface.h"
+#include "android/skin/event.h"
 #include "android/skin/surface.h"
+#include "android/ui-emu-agent.h"
 
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -90,16 +93,28 @@ public:
     static void create();
     static EmulatorNoQtNoWindow* getInstance();
     static Ptr getInstancePtr();
+    static void earlyInitialization(const UiEmuAgent* agent);
 
-    void startThread(std::function<void()> looperFunction);
+    void fold();
+    void unFold();
+    void pollEvent(SkinEvent* event, bool* hasEvent);
     void requestClose();
+    void startThread(std::function<void()> looperFunction);
     void waitThread();
 
 private:
     explicit EmulatorNoQtNoWindow();
+    void forwardGenericEventToEmulator(int type, int code, int value);
+    bool notSupoortFold();
+    void sendFoldedArea();
+    void queueSkinEvent(SkinEvent* event);
+
+    static const UiEmuAgent* sUiEmuAgent;
 
     android::base::Looper* mLooper;
     android::emulation::AdbInterface* mAdbInterface;
+    android::base::Lock mSkinEventQueueLock;
+    std::queue<SkinEvent*> mSkinEventQueue;
 };
 
 #ifdef CONFIG_HEADLESS
