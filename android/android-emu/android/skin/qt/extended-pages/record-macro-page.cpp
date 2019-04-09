@@ -15,7 +15,9 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
 #include <QMessageBox>
@@ -258,6 +260,13 @@ void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
 }
 
 void RecordMacroPage::disableMacroItemsExcept(QListWidgetItem* listItem) {
+    // Make selection show that macro is playing.
+    SettingsTheme theme = getSelectedTheme();
+    mUi->macroList->setStyleSheet(
+            "QListWidget::item:focus, QListView::item:selected { "
+            "background-color: " +
+            Ui::stylesheetValues(theme)[Ui::MACRO_BKG_COLOR_VAR] + "}");
+
     for (int i = 0; i < mUi->macroList->count(); ++i) {
         QListWidgetItem* item = mUi->macroList->item(i);
         if (item != listItem) {
@@ -269,6 +278,9 @@ void RecordMacroPage::disableMacroItemsExcept(QListWidgetItem* listItem) {
 }
 
 void RecordMacroPage::enableMacroItems() {
+    // Return selection to normal.
+    mUi->macroList->setStyleSheet("");
+
     for (int i = 0; i < mUi->macroList->count(); ++i) {
         QListWidgetItem* item = mUi->macroList->item(i);
         item->setFlags(item->flags() | Qt::ItemIsEnabled);

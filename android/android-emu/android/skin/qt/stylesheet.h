@@ -45,4 +45,5 @@ extern const char MAJOR_TAB_COLOR_VAR[];
 extern const char TAB_BKG_COLOR_VAR[];
 extern const char TAB_SELECTED_COLOR_VAR[];
 extern const char TABLE_SELECTED_VAR[];
+extern const char MACRO_BKG_COLOR_VAR[];
 }
