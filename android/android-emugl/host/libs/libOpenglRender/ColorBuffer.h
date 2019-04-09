@@ -247,48 +247,6 @@ public:
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
 
-    enum class VulkanMode {
-
-        // Default: ColorBuffers can still be used with the existing GL-based
-        // API.  Synchronization with (if it exists) Vulkan images happens on
-        // every one of the GL-based API calls:
-        //
-        // rcReadColorBuffer
-        // rcUpdateColorBuffer
-        // rcBindTexture
-        // rcBindRenderbuffer
-        // rcFlushWindowColorBuffer
-        //
-        // either through explicit CPU copies or implicit in the host driver
-        // if OpenGL interop is supported.
-        //
-        // When images are posted (rcFBPost),
-        // eglSwapBuffers is used, even if that requires a CPU readback.
-
-        Default = 0,
-
-        // VulkanOnly: It is assumed that the guest interacts entirely with
-        // the underlying Vulkan image in the guest and does not use the
-        // GL-based API.  This means we can assume those APIs are not called:
-        //
-        // rcReadColorBuffer
-        // rcUpdateColorBuffer
-        // rcBindTexture
-        // rcBindRenderbuffer
-        // rcFlushWindowColorBuffer
-        //
-        // and thus we skip a lot of GL/Vk synchronization.
-        //
-        // When images are posted, eglSwapBuffers is only used if OpenGL
-        // interop is supported. If OpenGL interop is not supported, then we
-        // use a host platform-specific Vulkan swapchain to display the
-        // results.
-
-        VulkanOnly = 1,
-    };
-
-    int setVulkanMode(VulkanMode mode);
-
     void setSync(bool debug = false);
     void waitSync(bool debug = false);
 
@@ -340,8 +298,6 @@ private:
     bool m_inUse = false;
     bool m_isBuffer = false;
     GLuint m_buf = 0;
-
-    VulkanMode m_vulkanMode = VulkanMode::Default;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

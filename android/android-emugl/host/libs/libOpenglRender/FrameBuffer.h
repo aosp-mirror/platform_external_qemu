@@ -462,7 +462,6 @@ public:
         bool linearTiling,
         uint32_t colorBufferHandle);
     void setColorBufferInUse(uint32_t colorBufferHandle, bool inUse);
-    int setColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode);
 
     // Used during tests to disable fast blit.
     void disableFastBlit();
