@@ -318,7 +318,7 @@ class VulkanType(object):
                 return True
             if len(api.name) > 3 and "KHR" == api.name[-3:]:
                 return HANDLE_INFO[self.typeName].isDestroyApi(api.name[:-3])
-            
+
         return False
 
     def isSimpleValueType(self, typeInfo):
@@ -804,3 +804,115 @@ class VulkanTypeIterator(object):
 
     def registerTypeInfo(self, typeInfo):
         self.typeInfo = typeInfo
+
+def vulkanTypeGetStructFieldLengthInfo(structInfo, vulkanType):
+    def getSpecialCaseVulkanStructFieldLength(structInfo, vulkanType):
+        cases = [
+            {
+                "structName": "VkShaderModuleCreateInfo",
+                "field": "pCode",
+                "lenExpr": "codeSize",
+                "postprocess": lambda expr: "(%s / 4)" % expr
+            },
+            {
+                "structName": "VkPipelineMultisampleStateCreateInfo",
+                "field": "pSampleMask",
+                "lenExpr": "rasterizationSamples",
+                "postprocess": lambda expr: "(((%s) + 31) / 32)" % expr
+            },
+        ]
+
+        for c in cases:
+            if (structInfo.name, vulkanType.paramName) == (c["structName"],
+                                                           c["field"]):
+                return c
+
+        return None
+
+    specialCaseAccess = \
+        getSpecialCaseVulkanStructFieldLength( \
+            structInfo, vulkanType)
+
+    if specialCaseAccess is not None:
+        return specialCaseAccess
+
+    lenExpr = vulkanType.getLengthExpression()
+
+    if lenExpr is None:
+        return lenExpr
+
+    return {
+        "structName" : structInfo.name,
+        "field": vulkanType.typeName,
+        "lenExpr": lenExpr,
+        "postprocess": lambda expr: expr }
+
+class VulkanTypeProtobufInfo(object):
+    def __init__(self, typeInfo, structInfo, vulkanType):
+
+        self.needsMessage = typeInfo.isCompoundType(vulkanType.typeName)
+        self.isRepeatedString = vulkanType.isArrayOfStrings()
+        self.isString = vulkanType.isString() or (vulkanType.typeName == "char" and (vulkanType.staticArrExpr != None))
+
+        self.lengthInfo = vulkanTypeGetStructFieldLengthInfo(
+            structInfo, vulkanType)
+
+        self.protobufType = None
+        self.origTypeCategory = typeInfo.categoryOf(vulkanType.typeName)
+
+        self.isExtensionStruct = \
+            vulkanType.typeName == "void" and \
+            vulkanType.pointerIndirectionLevels > 0 and \
+            vulkanType.paramName == "pNext"
+
+        if self.needsMessage:
+            return
+
+        if typeInfo.categoryOf(vulkanType.typeName) in ["enum", "bitmask"]:
+            self.protobufType = "uint32"
+
+        if typeInfo.categoryOf(vulkanType.typeName) in ["funcpointer", "handle", "define"]:
+            self.protobufType = "uint64"
+
+        if typeInfo.categoryOf(vulkanType.typeName) in ["basetype"]:
+            baseTypeMapping = {
+                "VkFlags" : "uint32",
+                "VkBool32" : "uint32",
+                "VkDeviceSize" : "uint64",
+                "VkSampleMask" : "uint32",
+            }
+            self.protobufType = baseTypeMapping[vulkanType.typeName]
+
+        if typeInfo.categoryOf(vulkanType.typeName) == None:
+
+            otherTypeMapping = {
+                "void" : "uint64",
+                "char" : "uint8",
+                "size_t" : "uint64",
+                "float" : "float",
+                "uint8_t" : "uint32",
+                "uint16_t" : "uint32",
+                "int32_t" : "int32",
+                "uint32_t" : "uint32",
+                "uint64_t" : "uint64",
+                "VkDeviceSize" : "uint64",
+                "VkSampleMask" : "uint32",
+            }
+
+            if vulkanType.typeName in otherTypeMapping:
+                self.protobufType = otherTypeMapping[vulkanType.typeName]
+            else:
+                self.protobufType = "uint64"
+
+
+        protobufCTypeMapping = {
+            "uint8" : "uint8_t",
+            "uint32" : "uint32_t",
+            "int32" : "int32_t",
+            "uint64" : "uint64_t",
+            "float" : "float",
+            "string" : "const char*",
+        }
+
+        self.protobufCType = protobufCTypeMapping[self.protobufType]
+

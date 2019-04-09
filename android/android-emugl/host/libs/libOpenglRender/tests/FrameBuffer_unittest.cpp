@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
+#include "android/base/GLObjectCounter.h"
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
@@ -53,6 +53,7 @@ protected:
 
     virtual void SetUp() override {
         setupStandaloneLibrarySearchPaths();
+        emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
 
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         ASSERT_NE(nullptr, egl);
