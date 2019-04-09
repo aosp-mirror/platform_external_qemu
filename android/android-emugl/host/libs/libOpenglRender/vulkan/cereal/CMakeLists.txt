@@ -23,4 +23,5 @@ target_include_directories(OpenglRender_vulkan_cereal
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan
                            ${ANDROID_EMUGL_DIR}/host/include/vulkan)
+android_add_protobuf(OpenglRender_vulkan_cereal_proto     ./goldfish_vk_baseprotodefs.proto )
 
