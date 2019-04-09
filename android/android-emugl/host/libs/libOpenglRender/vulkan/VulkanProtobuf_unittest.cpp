@@ -1,0 +1,62 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#include "VulkanStream.h"
+
+#include "IOStream.h"
+
+#include "goldfish_vk_baseprotodefs.pb.h"
+
+#include <gtest/gtest.h>
+#include <string.h>
+#include <vulkan.h>
+
+namespace goldfish_vk {
+
+// Tests that a simple Vulkan struct works through protobuf API.
+TEST(VulkanProtobuf, Basic) {
+
+    VkExtent2D testStruct = {
+        1, 2,
+    };
+
+    goldfish_vk_proto::VkExtent2D testProto;
+
+    testProto.set_width(testStruct.width);
+    testProto.set_height(testStruct.height);
+
+    EXPECT_EQ(testStruct.width, testProto.width());
+    EXPECT_EQ(testStruct.height, testProto.height());
+}
+
+// Tests that a Vulkan struct with strings works through protobuf API.
+TEST(VulkanProtobuf, String) {
+    constexpr char testAppName[] = "testAppName";
+    constexpr char testEngineName[] = "testEngineName";
+
+    VkApplicationInfo appInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
+        testAppName, 1,
+        testEngineName, 2,
+        3,
+    };
+
+    goldfish_vk_proto::VkApplicationInfo appInfoProto;
+    appInfoProto.set_papplicationname(appInfo.pApplicationName);
+    appInfoProto.set_penginename(appInfo.pEngineName);
+
+    EXPECT_STREQ(appInfoProto.papplicationname().c_str(), appInfo.pApplicationName);
+    EXPECT_STREQ(appInfoProto.penginename().c_str(), appInfo.pEngineName);
+}
+
+} // namespace goldfish_vk
