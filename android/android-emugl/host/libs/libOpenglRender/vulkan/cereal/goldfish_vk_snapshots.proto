@@ -1,0 +1,2950 @@
+// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2018 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto2";
+package goldfish_vk_snapshots;
+message VkApplicationInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for char: pApplicationName
+    // gen something for uint32_t: applicationVersion
+    // gen something for char: pEngineName
+    // gen something for uint32_t: engineVersion
+    // gen something for uint32_t: apiVersion
+}
+message VkInstanceCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkInstanceCreateFlags: flags
+    // gen something for VkApplicationInfo: pApplicationInfo
+    // gen something for uint32_t: enabledLayerCount
+    // gen something for char: ppEnabledLayerNames
+    // gen something for uint32_t: enabledExtensionCount
+    // gen something for char: ppEnabledExtensionNames
+}
+message VkAllocationCallbacks
+{
+    // gen something for void: pUserData
+    // gen something for PFN_vkAllocationFunction: pfnAllocation
+    // gen something for PFN_vkReallocationFunction: pfnReallocation
+    // gen something for PFN_vkFreeFunction: pfnFree
+    // gen something for PFN_vkInternalAllocationNotification: pfnInternalAllocation
+    // gen something for PFN_vkInternalFreeNotification: pfnInternalFree
+}
+message VkPhysicalDeviceFeatures
+{
+    // gen something for VkBool32: robustBufferAccess
+    // gen something for VkBool32: fullDrawIndexUint32
+    // gen something for VkBool32: imageCubeArray
+    // gen something for VkBool32: independentBlend
+    // gen something for VkBool32: geometryShader
+    // gen something for VkBool32: tessellationShader
+    // gen something for VkBool32: sampleRateShading
+    // gen something for VkBool32: dualSrcBlend
+    // gen something for VkBool32: logicOp
+    // gen something for VkBool32: multiDrawIndirect
+    // gen something for VkBool32: drawIndirectFirstInstance
+    // gen something for VkBool32: depthClamp
+    // gen something for VkBool32: depthBiasClamp
+    // gen something for VkBool32: fillModeNonSolid
+    // gen something for VkBool32: depthBounds
+    // gen something for VkBool32: wideLines
+    // gen something for VkBool32: largePoints
+    // gen something for VkBool32: alphaToOne
+    // gen something for VkBool32: multiViewport
+    // gen something for VkBool32: samplerAnisotropy
+    // gen something for VkBool32: textureCompressionETC2
+    // gen something for VkBool32: textureCompressionASTC_LDR
+    // gen something for VkBool32: textureCompressionBC
+    // gen something for VkBool32: occlusionQueryPrecise
+    // gen something for VkBool32: pipelineStatisticsQuery
+    // gen something for VkBool32: vertexPipelineStoresAndAtomics
+    // gen something for VkBool32: fragmentStoresAndAtomics
+    // gen something for VkBool32: shaderTessellationAndGeometryPointSize
+    // gen something for VkBool32: shaderImageGatherExtended
+    // gen something for VkBool32: shaderStorageImageExtendedFormats
+    // gen something for VkBool32: shaderStorageImageMultisample
+    // gen something for VkBool32: shaderStorageImageReadWithoutFormat
+    // gen something for VkBool32: shaderStorageImageWriteWithoutFormat
+    // gen something for VkBool32: shaderUniformBufferArrayDynamicIndexing
+    // gen something for VkBool32: shaderSampledImageArrayDynamicIndexing
+    // gen something for VkBool32: shaderStorageBufferArrayDynamicIndexing
+    // gen something for VkBool32: shaderStorageImageArrayDynamicIndexing
+    // gen something for VkBool32: shaderClipDistance
+    // gen something for VkBool32: shaderCullDistance
+    // gen something for VkBool32: shaderFloat64
+    // gen something for VkBool32: shaderInt64
+    // gen something for VkBool32: shaderInt16
+    // gen something for VkBool32: shaderResourceResidency
+    // gen something for VkBool32: shaderResourceMinLod
+    // gen something for VkBool32: sparseBinding
+    // gen something for VkBool32: sparseResidencyBuffer
+    // gen something for VkBool32: sparseResidencyImage2D
+    // gen something for VkBool32: sparseResidencyImage3D
+    // gen something for VkBool32: sparseResidency2Samples
+    // gen something for VkBool32: sparseResidency4Samples
+    // gen something for VkBool32: sparseResidency8Samples
+    // gen something for VkBool32: sparseResidency16Samples
+    // gen something for VkBool32: sparseResidencyAliased
+    // gen something for VkBool32: variableMultisampleRate
+    // gen something for VkBool32: inheritedQueries
+}
+message VkFormatProperties
+{
+    // gen something for VkFormatFeatureFlags: linearTilingFeatures
+    // gen something for VkFormatFeatureFlags: optimalTilingFeatures
+    // gen something for VkFormatFeatureFlags: bufferFeatures
+}
+message VkExtent3D
+{
+    // gen something for uint32_t: width
+    // gen something for uint32_t: height
+    // gen something for uint32_t: depth
+}
+message VkImageFormatProperties
+{
+    // gen something for VkExtent3D: maxExtent
+    // gen something for uint32_t: maxMipLevels
+    // gen something for uint32_t: maxArrayLayers
+    // gen something for VkSampleCountFlags: sampleCounts
+    // gen something for VkDeviceSize: maxResourceSize
+}
+message VkPhysicalDeviceLimits
+{
+    // gen something for uint32_t: maxImageDimension1D
+    // gen something for uint32_t: maxImageDimension2D
+    // gen something for uint32_t: maxImageDimension3D
+    // gen something for uint32_t: maxImageDimensionCube
+    // gen something for uint32_t: maxImageArrayLayers
+    // gen something for uint32_t: maxTexelBufferElements
+    // gen something for uint32_t: maxUniformBufferRange
+    // gen something for uint32_t: maxStorageBufferRange
+    // gen something for uint32_t: maxPushConstantsSize
+    // gen something for uint32_t: maxMemoryAllocationCount
+    // gen something for uint32_t: maxSamplerAllocationCount
+    // gen something for VkDeviceSize: bufferImageGranularity
+    // gen something for VkDeviceSize: sparseAddressSpaceSize
+    // gen something for uint32_t: maxBoundDescriptorSets
+    // gen something for uint32_t: maxPerStageDescriptorSamplers
+    // gen something for uint32_t: maxPerStageDescriptorUniformBuffers
+    // gen something for uint32_t: maxPerStageDescriptorStorageBuffers
+    // gen something for uint32_t: maxPerStageDescriptorSampledImages
+    // gen something for uint32_t: maxPerStageDescriptorStorageImages
+    // gen something for uint32_t: maxPerStageDescriptorInputAttachments
+    // gen something for uint32_t: maxPerStageResources
+    // gen something for uint32_t: maxDescriptorSetSamplers
+    // gen something for uint32_t: maxDescriptorSetUniformBuffers
+    // gen something for uint32_t: maxDescriptorSetUniformBuffersDynamic
+    // gen something for uint32_t: maxDescriptorSetStorageBuffers
+    // gen something for uint32_t: maxDescriptorSetStorageBuffersDynamic
+    // gen something for uint32_t: maxDescriptorSetSampledImages
+    // gen something for uint32_t: maxDescriptorSetStorageImages
+    // gen something for uint32_t: maxDescriptorSetInputAttachments
+    // gen something for uint32_t: maxVertexInputAttributes
+    // gen something for uint32_t: maxVertexInputBindings
+    // gen something for uint32_t: maxVertexInputAttributeOffset
+    // gen something for uint32_t: maxVertexInputBindingStride
+    // gen something for uint32_t: maxVertexOutputComponents
+    // gen something for uint32_t: maxTessellationGenerationLevel
+    // gen something for uint32_t: maxTessellationPatchSize
+    // gen something for uint32_t: maxTessellationControlPerVertexInputComponents
+    // gen something for uint32_t: maxTessellationControlPerVertexOutputComponents
+    // gen something for uint32_t: maxTessellationControlPerPatchOutputComponents
+    // gen something for uint32_t: maxTessellationControlTotalOutputComponents
+    // gen something for uint32_t: maxTessellationEvaluationInputComponents
+    // gen something for uint32_t: maxTessellationEvaluationOutputComponents
+    // gen something for uint32_t: maxGeometryShaderInvocations
+    // gen something for uint32_t: maxGeometryInputComponents
+    // gen something for uint32_t: maxGeometryOutputComponents
+    // gen something for uint32_t: maxGeometryOutputVertices
+    // gen something for uint32_t: maxGeometryTotalOutputComponents
+    // gen something for uint32_t: maxFragmentInputComponents
+    // gen something for uint32_t: maxFragmentOutputAttachments
+    // gen something for uint32_t: maxFragmentDualSrcAttachments
+    // gen something for uint32_t: maxFragmentCombinedOutputResources
+    // gen something for uint32_t: maxComputeSharedMemorySize
+    // gen something for uint32_t: maxComputeWorkGroupCount
+    // gen something for uint32_t: maxComputeWorkGroupInvocations
+    // gen something for uint32_t: maxComputeWorkGroupSize
+    // gen something for uint32_t: subPixelPrecisionBits
+    // gen something for uint32_t: subTexelPrecisionBits
+    // gen something for uint32_t: mipmapPrecisionBits
+    // gen something for uint32_t: maxDrawIndexedIndexValue
+    // gen something for uint32_t: maxDrawIndirectCount
+    // gen something for float: maxSamplerLodBias
+    // gen something for float: maxSamplerAnisotropy
+    // gen something for uint32_t: maxViewports
+    // gen something for uint32_t: maxViewportDimensions
+    // gen something for float: viewportBoundsRange
+    // gen something for uint32_t: viewportSubPixelBits
+    // gen something for size_t: minMemoryMapAlignment
+    // gen something for VkDeviceSize: minTexelBufferOffsetAlignment
+    // gen something for VkDeviceSize: minUniformBufferOffsetAlignment
+    // gen something for VkDeviceSize: minStorageBufferOffsetAlignment
+    // gen something for int32_t: minTexelOffset
+    // gen something for uint32_t: maxTexelOffset
+    // gen something for int32_t: minTexelGatherOffset
+    // gen something for uint32_t: maxTexelGatherOffset
+    // gen something for float: minInterpolationOffset
+    // gen something for float: maxInterpolationOffset
+    // gen something for uint32_t: subPixelInterpolationOffsetBits
+    // gen something for uint32_t: maxFramebufferWidth
+    // gen something for uint32_t: maxFramebufferHeight
+    // gen something for uint32_t: maxFramebufferLayers
+    // gen something for VkSampleCountFlags: framebufferColorSampleCounts
+    // gen something for VkSampleCountFlags: framebufferDepthSampleCounts
+    // gen something for VkSampleCountFlags: framebufferStencilSampleCounts
+    // gen something for VkSampleCountFlags: framebufferNoAttachmentsSampleCounts
+    // gen something for uint32_t: maxColorAttachments
+    // gen something for VkSampleCountFlags: sampledImageColorSampleCounts
+    // gen something for VkSampleCountFlags: sampledImageIntegerSampleCounts
+    // gen something for VkSampleCountFlags: sampledImageDepthSampleCounts
+    // gen something for VkSampleCountFlags: sampledImageStencilSampleCounts
+    // gen something for VkSampleCountFlags: storageImageSampleCounts
+    // gen something for uint32_t: maxSampleMaskWords
+    // gen something for VkBool32: timestampComputeAndGraphics
+    // gen something for float: timestampPeriod
+    // gen something for uint32_t: maxClipDistances
+    // gen something for uint32_t: maxCullDistances
+    // gen something for uint32_t: maxCombinedClipAndCullDistances
+    // gen something for uint32_t: discreteQueuePriorities
+    // gen something for float: pointSizeRange
+    // gen something for float: lineWidthRange
+    // gen something for float: pointSizeGranularity
+    // gen something for float: lineWidthGranularity
+    // gen something for VkBool32: strictLines
+    // gen something for VkBool32: standardSampleLocations
+    // gen something for VkDeviceSize: optimalBufferCopyOffsetAlignment
+    // gen something for VkDeviceSize: optimalBufferCopyRowPitchAlignment
+    // gen something for VkDeviceSize: nonCoherentAtomSize
+}
+message VkPhysicalDeviceSparseProperties
+{
+    // gen something for VkBool32: residencyStandard2DBlockShape
+    // gen something for VkBool32: residencyStandard2DMultisampleBlockShape
+    // gen something for VkBool32: residencyStandard3DBlockShape
+    // gen something for VkBool32: residencyAlignedMipSize
+    // gen something for VkBool32: residencyNonResidentStrict
+}
+message VkPhysicalDeviceProperties
+{
+    // gen something for uint32_t: apiVersion
+    // gen something for uint32_t: driverVersion
+    // gen something for uint32_t: vendorID
+    // gen something for uint32_t: deviceID
+    // gen something for VkPhysicalDeviceType: deviceType
+    // gen something for char: deviceName
+    // gen something for uint8_t: pipelineCacheUUID
+    // gen something for VkPhysicalDeviceLimits: limits
+    // gen something for VkPhysicalDeviceSparseProperties: sparseProperties
+}
+message VkQueueFamilyProperties
+{
+    // gen something for VkQueueFlags: queueFlags
+    // gen something for uint32_t: queueCount
+    // gen something for uint32_t: timestampValidBits
+    // gen something for VkExtent3D: minImageTransferGranularity
+}
+message VkMemoryType
+{
+    // gen something for VkMemoryPropertyFlags: propertyFlags
+    // gen something for uint32_t: heapIndex
+}
+message VkMemoryHeap
+{
+    // gen something for VkDeviceSize: size
+    // gen something for VkMemoryHeapFlags: flags
+}
+message VkPhysicalDeviceMemoryProperties
+{
+    // gen something for uint32_t: memoryTypeCount
+    // gen something for VkMemoryType: memoryTypes
+    // gen something for uint32_t: memoryHeapCount
+    // gen something for VkMemoryHeap: memoryHeaps
+}
+message VkDeviceQueueCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceQueueCreateFlags: flags
+    // gen something for uint32_t: queueFamilyIndex
+    // gen something for uint32_t: queueCount
+    // gen something for float: pQueuePriorities
+}
+message VkDeviceCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceCreateFlags: flags
+    // gen something for uint32_t: queueCreateInfoCount
+    // gen something for VkDeviceQueueCreateInfo: pQueueCreateInfos
+    // gen something for uint32_t: enabledLayerCount
+    // gen something for char: ppEnabledLayerNames
+    // gen something for uint32_t: enabledExtensionCount
+    // gen something for char: ppEnabledExtensionNames
+    // gen something for VkPhysicalDeviceFeatures: pEnabledFeatures
+}
+message VkExtensionProperties
+{
+    // gen something for char: extensionName
+    // gen something for uint32_t: specVersion
+}
+message VkLayerProperties
+{
+    // gen something for char: layerName
+    // gen something for uint32_t: specVersion
+    // gen something for uint32_t: implementationVersion
+    // gen something for char: description
+}
+message VkSubmitInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: waitSemaphoreCount
+    // gen something for VkSemaphore: pWaitSemaphores
+    // gen something for VkPipelineStageFlags: pWaitDstStageMask
+    // gen something for uint32_t: commandBufferCount
+    // gen something for VkCommandBuffer: pCommandBuffers
+    // gen something for uint32_t: signalSemaphoreCount
+    // gen something for VkSemaphore: pSignalSemaphores
+}
+message VkMemoryAllocateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceSize: allocationSize
+    // gen something for uint32_t: memoryTypeIndex
+}
+message VkMappedMemoryRange
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkDeviceSize: offset
+    // gen something for VkDeviceSize: size
+}
+message VkMemoryRequirements
+{
+    // gen something for VkDeviceSize: size
+    // gen something for VkDeviceSize: alignment
+    // gen something for uint32_t: memoryTypeBits
+}
+message VkSparseImageFormatProperties
+{
+    // gen something for VkImageAspectFlags: aspectMask
+    // gen something for VkExtent3D: imageGranularity
+    // gen something for VkSparseImageFormatFlags: flags
+}
+message VkSparseImageMemoryRequirements
+{
+    // gen something for VkSparseImageFormatProperties: formatProperties
+    // gen something for uint32_t: imageMipTailFirstLod
+    // gen something for VkDeviceSize: imageMipTailSize
+    // gen something for VkDeviceSize: imageMipTailOffset
+    // gen something for VkDeviceSize: imageMipTailStride
+}
+message VkSparseMemoryBind
+{
+    // gen something for VkDeviceSize: resourceOffset
+    // gen something for VkDeviceSize: size
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkDeviceSize: memoryOffset
+    // gen something for VkSparseMemoryBindFlags: flags
+}
+message VkSparseBufferMemoryBindInfo
+{
+    // gen something for VkBuffer: buffer
+    // gen something for uint32_t: bindCount
+    // gen something for VkSparseMemoryBind: pBinds
+}
+message VkSparseImageOpaqueMemoryBindInfo
+{
+    // gen something for VkImage: image
+    // gen something for uint32_t: bindCount
+    // gen something for VkSparseMemoryBind: pBinds
+}
+message VkImageSubresource
+{
+    // gen something for VkImageAspectFlags: aspectMask
+    // gen something for uint32_t: mipLevel
+    // gen something for uint32_t: arrayLayer
+}
+message VkOffset3D
+{
+    // gen something for int32_t: x
+    // gen something for int32_t: y
+    // gen something for int32_t: z
+}
+message VkSparseImageMemoryBind
+{
+    // gen something for VkImageSubresource: subresource
+    // gen something for VkOffset3D: offset
+    // gen something for VkExtent3D: extent
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkDeviceSize: memoryOffset
+    // gen something for VkSparseMemoryBindFlags: flags
+}
+message VkSparseImageMemoryBindInfo
+{
+    // gen something for VkImage: image
+    // gen something for uint32_t: bindCount
+    // gen something for VkSparseImageMemoryBind: pBinds
+}
+message VkBindSparseInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: waitSemaphoreCount
+    // gen something for VkSemaphore: pWaitSemaphores
+    // gen something for uint32_t: bufferBindCount
+    // gen something for VkSparseBufferMemoryBindInfo: pBufferBinds
+    // gen something for uint32_t: imageOpaqueBindCount
+    // gen something for VkSparseImageOpaqueMemoryBindInfo: pImageOpaqueBinds
+    // gen something for uint32_t: imageBindCount
+    // gen something for VkSparseImageMemoryBindInfo: pImageBinds
+    // gen something for uint32_t: signalSemaphoreCount
+    // gen something for VkSemaphore: pSignalSemaphores
+}
+message VkFenceCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFenceCreateFlags: flags
+}
+message VkSemaphoreCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSemaphoreCreateFlags: flags
+}
+message VkEventCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkEventCreateFlags: flags
+}
+message VkQueryPoolCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkQueryPoolCreateFlags: flags
+    // gen something for VkQueryType: queryType
+    // gen something for uint32_t: queryCount
+    // gen something for VkQueryPipelineStatisticFlags: pipelineStatistics
+}
+message VkBufferCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBufferCreateFlags: flags
+    // gen something for VkDeviceSize: size
+    // gen something for VkBufferUsageFlags: usage
+    // gen something for VkSharingMode: sharingMode
+    // gen something for uint32_t: queueFamilyIndexCount
+    // gen something for uint32_t: pQueueFamilyIndices
+}
+message VkBufferViewCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBufferViewCreateFlags: flags
+    // gen something for VkBuffer: buffer
+    // gen something for VkFormat: format
+    // gen something for VkDeviceSize: offset
+    // gen something for VkDeviceSize: range
+}
+message VkImageCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageCreateFlags: flags
+    // gen something for VkImageType: imageType
+    // gen something for VkFormat: format
+    // gen something for VkExtent3D: extent
+    // gen something for uint32_t: mipLevels
+    // gen something for uint32_t: arrayLayers
+    // gen something for VkSampleCountFlagBits: samples
+    // gen something for VkImageTiling: tiling
+    // gen something for VkImageUsageFlags: usage
+    // gen something for VkSharingMode: sharingMode
+    // gen something for uint32_t: queueFamilyIndexCount
+    // gen something for uint32_t: pQueueFamilyIndices
+    // gen something for VkImageLayout: initialLayout
+}
+message VkSubresourceLayout
+{
+    // gen something for VkDeviceSize: offset
+    // gen something for VkDeviceSize: size
+    // gen something for VkDeviceSize: rowPitch
+    // gen something for VkDeviceSize: arrayPitch
+    // gen something for VkDeviceSize: depthPitch
+}
+message VkComponentMapping
+{
+    // gen something for VkComponentSwizzle: r
+    // gen something for VkComponentSwizzle: g
+    // gen something for VkComponentSwizzle: b
+    // gen something for VkComponentSwizzle: a
+}
+message VkImageSubresourceRange
+{
+    // gen something for VkImageAspectFlags: aspectMask
+    // gen something for uint32_t: baseMipLevel
+    // gen something for uint32_t: levelCount
+    // gen something for uint32_t: baseArrayLayer
+    // gen something for uint32_t: layerCount
+}
+message VkImageViewCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageViewCreateFlags: flags
+    // gen something for VkImage: image
+    // gen something for VkImageViewType: viewType
+    // gen something for VkFormat: format
+    // gen something for VkComponentMapping: components
+    // gen something for VkImageSubresourceRange: subresourceRange
+}
+message VkShaderModuleCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkShaderModuleCreateFlags: flags
+    // gen something for size_t: codeSize
+    // gen something for uint32_t: pCode
+}
+message VkPipelineCacheCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineCacheCreateFlags: flags
+    // gen something for size_t: initialDataSize
+    // gen something for void: pInitialData
+}
+message VkSpecializationMapEntry
+{
+    // gen something for uint32_t: constantID
+    // gen something for uint32_t: offset
+    // gen something for size_t: size
+}
+message VkSpecializationInfo
+{
+    // gen something for uint32_t: mapEntryCount
+    // gen something for VkSpecializationMapEntry: pMapEntries
+    // gen something for size_t: dataSize
+    // gen something for void: pData
+}
+message VkPipelineShaderStageCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineShaderStageCreateFlags: flags
+    // gen something for VkShaderStageFlagBits: stage
+    // gen something for VkShaderModule: module
+    // gen something for char: pName
+    // gen something for VkSpecializationInfo: pSpecializationInfo
+}
+message VkVertexInputBindingDescription
+{
+    // gen something for uint32_t: binding
+    // gen something for uint32_t: stride
+    // gen something for VkVertexInputRate: inputRate
+}
+message VkVertexInputAttributeDescription
+{
+    // gen something for uint32_t: location
+    // gen something for uint32_t: binding
+    // gen something for VkFormat: format
+    // gen something for uint32_t: offset
+}
+message VkPipelineVertexInputStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineVertexInputStateCreateFlags: flags
+    // gen something for uint32_t: vertexBindingDescriptionCount
+    // gen something for VkVertexInputBindingDescription: pVertexBindingDescriptions
+    // gen something for uint32_t: vertexAttributeDescriptionCount
+    // gen something for VkVertexInputAttributeDescription: pVertexAttributeDescriptions
+}
+message VkPipelineInputAssemblyStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineInputAssemblyStateCreateFlags: flags
+    // gen something for VkPrimitiveTopology: topology
+    // gen something for VkBool32: primitiveRestartEnable
+}
+message VkPipelineTessellationStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineTessellationStateCreateFlags: flags
+    // gen something for uint32_t: patchControlPoints
+}
+message VkViewport
+{
+    // gen something for float: x
+    // gen something for float: y
+    // gen something for float: width
+    // gen something for float: height
+    // gen something for float: minDepth
+    // gen something for float: maxDepth
+}
+message VkOffset2D
+{
+    // gen something for int32_t: x
+    // gen something for int32_t: y
+}
+message VkExtent2D
+{
+    // gen something for uint32_t: width
+    // gen something for uint32_t: height
+}
+message VkRect2D
+{
+    // gen something for VkOffset2D: offset
+    // gen something for VkExtent2D: extent
+}
+message VkPipelineViewportStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineViewportStateCreateFlags: flags
+    // gen something for uint32_t: viewportCount
+    // gen something for VkViewport: pViewports
+    // gen something for uint32_t: scissorCount
+    // gen something for VkRect2D: pScissors
+}
+message VkPipelineRasterizationStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineRasterizationStateCreateFlags: flags
+    // gen something for VkBool32: depthClampEnable
+    // gen something for VkBool32: rasterizerDiscardEnable
+    // gen something for VkPolygonMode: polygonMode
+    // gen something for VkCullModeFlags: cullMode
+    // gen something for VkFrontFace: frontFace
+    // gen something for VkBool32: depthBiasEnable
+    // gen something for float: depthBiasConstantFactor
+    // gen something for float: depthBiasClamp
+    // gen something for float: depthBiasSlopeFactor
+    // gen something for float: lineWidth
+}
+message VkPipelineMultisampleStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineMultisampleStateCreateFlags: flags
+    // gen something for VkSampleCountFlagBits: rasterizationSamples
+    // gen something for VkBool32: sampleShadingEnable
+    // gen something for float: minSampleShading
+    // gen something for VkSampleMask: pSampleMask
+    // gen something for VkBool32: alphaToCoverageEnable
+    // gen something for VkBool32: alphaToOneEnable
+}
+message VkStencilOpState
+{
+    // gen something for VkStencilOp: failOp
+    // gen something for VkStencilOp: passOp
+    // gen something for VkStencilOp: depthFailOp
+    // gen something for VkCompareOp: compareOp
+    // gen something for uint32_t: compareMask
+    // gen something for uint32_t: writeMask
+    // gen something for uint32_t: reference
+}
+message VkPipelineDepthStencilStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineDepthStencilStateCreateFlags: flags
+    // gen something for VkBool32: depthTestEnable
+    // gen something for VkBool32: depthWriteEnable
+    // gen something for VkCompareOp: depthCompareOp
+    // gen something for VkBool32: depthBoundsTestEnable
+    // gen something for VkBool32: stencilTestEnable
+    // gen something for VkStencilOpState: front
+    // gen something for VkStencilOpState: back
+    // gen something for float: minDepthBounds
+    // gen something for float: maxDepthBounds
+}
+message VkPipelineColorBlendAttachmentState
+{
+    // gen something for VkBool32: blendEnable
+    // gen something for VkBlendFactor: srcColorBlendFactor
+    // gen something for VkBlendFactor: dstColorBlendFactor
+    // gen something for VkBlendOp: colorBlendOp
+    // gen something for VkBlendFactor: srcAlphaBlendFactor
+    // gen something for VkBlendFactor: dstAlphaBlendFactor
+    // gen something for VkBlendOp: alphaBlendOp
+    // gen something for VkColorComponentFlags: colorWriteMask
+}
+message VkPipelineColorBlendStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineColorBlendStateCreateFlags: flags
+    // gen something for VkBool32: logicOpEnable
+    // gen something for VkLogicOp: logicOp
+    // gen something for uint32_t: attachmentCount
+    // gen something for VkPipelineColorBlendAttachmentState: pAttachments
+    // gen something for float: blendConstants
+}
+message VkPipelineDynamicStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineDynamicStateCreateFlags: flags
+    // gen something for uint32_t: dynamicStateCount
+    // gen something for VkDynamicState: pDynamicStates
+}
+message VkGraphicsPipelineCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineCreateFlags: flags
+    // gen something for uint32_t: stageCount
+    // gen something for VkPipelineShaderStageCreateInfo: pStages
+    // gen something for VkPipelineVertexInputStateCreateInfo: pVertexInputState
+    // gen something for VkPipelineInputAssemblyStateCreateInfo: pInputAssemblyState
+    // gen something for VkPipelineTessellationStateCreateInfo: pTessellationState
+    // gen something for VkPipelineViewportStateCreateInfo: pViewportState
+    // gen something for VkPipelineRasterizationStateCreateInfo: pRasterizationState
+    // gen something for VkPipelineMultisampleStateCreateInfo: pMultisampleState
+    // gen something for VkPipelineDepthStencilStateCreateInfo: pDepthStencilState
+    // gen something for VkPipelineColorBlendStateCreateInfo: pColorBlendState
+    // gen something for VkPipelineDynamicStateCreateInfo: pDynamicState
+    // gen something for VkPipelineLayout: layout
+    // gen something for VkRenderPass: renderPass
+    // gen something for uint32_t: subpass
+    // gen something for VkPipeline: basePipelineHandle
+    // gen something for int32_t: basePipelineIndex
+}
+message VkComputePipelineCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineCreateFlags: flags
+    // gen something for VkPipelineShaderStageCreateInfo: stage
+    // gen something for VkPipelineLayout: layout
+    // gen something for VkPipeline: basePipelineHandle
+    // gen something for int32_t: basePipelineIndex
+}
+message VkPushConstantRange
+{
+    // gen something for VkShaderStageFlags: stageFlags
+    // gen something for uint32_t: offset
+    // gen something for uint32_t: size
+}
+message VkPipelineLayoutCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineLayoutCreateFlags: flags
+    // gen something for uint32_t: setLayoutCount
+    // gen something for VkDescriptorSetLayout: pSetLayouts
+    // gen something for uint32_t: pushConstantRangeCount
+    // gen something for VkPushConstantRange: pPushConstantRanges
+}
+message VkSamplerCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSamplerCreateFlags: flags
+    // gen something for VkFilter: magFilter
+    // gen something for VkFilter: minFilter
+    // gen something for VkSamplerMipmapMode: mipmapMode
+    // gen something for VkSamplerAddressMode: addressModeU
+    // gen something for VkSamplerAddressMode: addressModeV
+    // gen something for VkSamplerAddressMode: addressModeW
+    // gen something for float: mipLodBias
+    // gen something for VkBool32: anisotropyEnable
+    // gen something for float: maxAnisotropy
+    // gen something for VkBool32: compareEnable
+    // gen something for VkCompareOp: compareOp
+    // gen something for float: minLod
+    // gen something for float: maxLod
+    // gen something for VkBorderColor: borderColor
+    // gen something for VkBool32: unnormalizedCoordinates
+}
+message VkDescriptorSetLayoutBinding
+{
+    // gen something for uint32_t: binding
+    // gen something for VkDescriptorType: descriptorType
+    // gen something for uint32_t: descriptorCount
+    // gen something for VkShaderStageFlags: stageFlags
+    // gen something for VkSampler: pImmutableSamplers
+}
+message VkDescriptorSetLayoutCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDescriptorSetLayoutCreateFlags: flags
+    // gen something for uint32_t: bindingCount
+    // gen something for VkDescriptorSetLayoutBinding: pBindings
+}
+message VkDescriptorPoolSize
+{
+    // gen something for VkDescriptorType: type
+    // gen something for uint32_t: descriptorCount
+}
+message VkDescriptorPoolCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDescriptorPoolCreateFlags: flags
+    // gen something for uint32_t: maxSets
+    // gen something for uint32_t: poolSizeCount
+    // gen something for VkDescriptorPoolSize: pPoolSizes
+}
+message VkDescriptorSetAllocateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDescriptorPool: descriptorPool
+    // gen something for uint32_t: descriptorSetCount
+    // gen something for VkDescriptorSetLayout: pSetLayouts
+}
+message VkDescriptorImageInfo
+{
+    // gen something for VkSampler: sampler
+    // gen something for VkImageView: imageView
+    // gen something for VkImageLayout: imageLayout
+}
+message VkDescriptorBufferInfo
+{
+    // gen something for VkBuffer: buffer
+    // gen something for VkDeviceSize: offset
+    // gen something for VkDeviceSize: range
+}
+message VkWriteDescriptorSet
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDescriptorSet: dstSet
+    // gen something for uint32_t: dstBinding
+    // gen something for uint32_t: dstArrayElement
+    // gen something for uint32_t: descriptorCount
+    // gen something for VkDescriptorType: descriptorType
+    // gen something for VkDescriptorImageInfo: pImageInfo
+    // gen something for VkDescriptorBufferInfo: pBufferInfo
+    // gen something for VkBufferView: pTexelBufferView
+}
+message VkCopyDescriptorSet
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDescriptorSet: srcSet
+    // gen something for uint32_t: srcBinding
+    // gen something for uint32_t: srcArrayElement
+    // gen something for VkDescriptorSet: dstSet
+    // gen something for uint32_t: dstBinding
+    // gen something for uint32_t: dstArrayElement
+    // gen something for uint32_t: descriptorCount
+}
+message VkFramebufferCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFramebufferCreateFlags: flags
+    // gen something for VkRenderPass: renderPass
+    // gen something for uint32_t: attachmentCount
+    // gen something for VkImageView: pAttachments
+    // gen something for uint32_t: width
+    // gen something for uint32_t: height
+    // gen something for uint32_t: layers
+}
+message VkAttachmentDescription
+{
+    // gen something for VkAttachmentDescriptionFlags: flags
+    // gen something for VkFormat: format
+    // gen something for VkSampleCountFlagBits: samples
+    // gen something for VkAttachmentLoadOp: loadOp
+    // gen something for VkAttachmentStoreOp: storeOp
+    // gen something for VkAttachmentLoadOp: stencilLoadOp
+    // gen something for VkAttachmentStoreOp: stencilStoreOp
+    // gen something for VkImageLayout: initialLayout
+    // gen something for VkImageLayout: finalLayout
+}
+message VkAttachmentReference
+{
+    // gen something for uint32_t: attachment
+    // gen something for VkImageLayout: layout
+}
+message VkSubpassDescription
+{
+    // gen something for VkSubpassDescriptionFlags: flags
+    // gen something for VkPipelineBindPoint: pipelineBindPoint
+    // gen something for uint32_t: inputAttachmentCount
+    // gen something for VkAttachmentReference: pInputAttachments
+    // gen something for uint32_t: colorAttachmentCount
+    // gen something for VkAttachmentReference: pColorAttachments
+    // gen something for VkAttachmentReference: pResolveAttachments
+    // gen something for VkAttachmentReference: pDepthStencilAttachment
+    // gen something for uint32_t: preserveAttachmentCount
+    // gen something for uint32_t: pPreserveAttachments
+}
+message VkSubpassDependency
+{
+    // gen something for uint32_t: srcSubpass
+    // gen something for uint32_t: dstSubpass
+    // gen something for VkPipelineStageFlags: srcStageMask
+    // gen something for VkPipelineStageFlags: dstStageMask
+    // gen something for VkAccessFlags: srcAccessMask
+    // gen something for VkAccessFlags: dstAccessMask
+    // gen something for VkDependencyFlags: dependencyFlags
+}
+message VkRenderPassCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkRenderPassCreateFlags: flags
+    // gen something for uint32_t: attachmentCount
+    // gen something for VkAttachmentDescription: pAttachments
+    // gen something for uint32_t: subpassCount
+    // gen something for VkSubpassDescription: pSubpasses
+    // gen something for uint32_t: dependencyCount
+    // gen something for VkSubpassDependency: pDependencies
+}
+message VkCommandPoolCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkCommandPoolCreateFlags: flags
+    // gen something for uint32_t: queueFamilyIndex
+}
+message VkCommandBufferAllocateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkCommandPool: commandPool
+    // gen something for VkCommandBufferLevel: level
+    // gen something for uint32_t: commandBufferCount
+}
+message VkCommandBufferInheritanceInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkRenderPass: renderPass
+    // gen something for uint32_t: subpass
+    // gen something for VkFramebuffer: framebuffer
+    // gen something for VkBool32: occlusionQueryEnable
+    // gen something for VkQueryControlFlags: queryFlags
+    // gen something for VkQueryPipelineStatisticFlags: pipelineStatistics
+}
+message VkCommandBufferBeginInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkCommandBufferUsageFlags: flags
+    // gen something for VkCommandBufferInheritanceInfo: pInheritanceInfo
+}
+message VkBufferCopy
+{
+    // gen something for VkDeviceSize: srcOffset
+    // gen something for VkDeviceSize: dstOffset
+    // gen something for VkDeviceSize: size
+}
+message VkImageSubresourceLayers
+{
+    // gen something for VkImageAspectFlags: aspectMask
+    // gen something for uint32_t: mipLevel
+    // gen something for uint32_t: baseArrayLayer
+    // gen something for uint32_t: layerCount
+}
+message VkImageCopy
+{
+    // gen something for VkImageSubresourceLayers: srcSubresource
+    // gen something for VkOffset3D: srcOffset
+    // gen something for VkImageSubresourceLayers: dstSubresource
+    // gen something for VkOffset3D: dstOffset
+    // gen something for VkExtent3D: extent
+}
+message VkImageBlit
+{
+    // gen something for VkImageSubresourceLayers: srcSubresource
+    // gen something for VkOffset3D: srcOffsets
+    // gen something for VkImageSubresourceLayers: dstSubresource
+    // gen something for VkOffset3D: dstOffsets
+}
+message VkBufferImageCopy
+{
+    // gen something for VkDeviceSize: bufferOffset
+    // gen something for uint32_t: bufferRowLength
+    // gen something for uint32_t: bufferImageHeight
+    // gen something for VkImageSubresourceLayers: imageSubresource
+    // gen something for VkOffset3D: imageOffset
+    // gen something for VkExtent3D: imageExtent
+}
+message VkClearColorValue
+{
+    // gen something for float: float32
+    // gen something for int32_t: int32
+    // gen something for uint32_t: uint32
+}
+message VkClearDepthStencilValue
+{
+    // gen something for float: depth
+    // gen something for uint32_t: stencil
+}
+message VkClearValue
+{
+    // gen something for VkClearColorValue: color
+    // gen something for VkClearDepthStencilValue: depthStencil
+}
+message VkClearAttachment
+{
+    // gen something for VkImageAspectFlags: aspectMask
+    // gen something for uint32_t: colorAttachment
+    // gen something for VkClearValue: clearValue
+}
+message VkClearRect
+{
+    // gen something for VkRect2D: rect
+    // gen something for uint32_t: baseArrayLayer
+    // gen something for uint32_t: layerCount
+}
+message VkImageResolve
+{
+    // gen something for VkImageSubresourceLayers: srcSubresource
+    // gen something for VkOffset3D: srcOffset
+    // gen something for VkImageSubresourceLayers: dstSubresource
+    // gen something for VkOffset3D: dstOffset
+    // gen something for VkExtent3D: extent
+}
+message VkMemoryBarrier
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkAccessFlags: srcAccessMask
+    // gen something for VkAccessFlags: dstAccessMask
+}
+message VkBufferMemoryBarrier
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkAccessFlags: srcAccessMask
+    // gen something for VkAccessFlags: dstAccessMask
+    // gen something for uint32_t: srcQueueFamilyIndex
+    // gen something for uint32_t: dstQueueFamilyIndex
+    // gen something for VkBuffer: buffer
+    // gen something for VkDeviceSize: offset
+    // gen something for VkDeviceSize: size
+}
+message VkImageMemoryBarrier
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkAccessFlags: srcAccessMask
+    // gen something for VkAccessFlags: dstAccessMask
+    // gen something for VkImageLayout: oldLayout
+    // gen something for VkImageLayout: newLayout
+    // gen something for uint32_t: srcQueueFamilyIndex
+    // gen something for uint32_t: dstQueueFamilyIndex
+    // gen something for VkImage: image
+    // gen something for VkImageSubresourceRange: subresourceRange
+}
+message VkRenderPassBeginInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkRenderPass: renderPass
+    // gen something for VkFramebuffer: framebuffer
+    // gen something for VkRect2D: renderArea
+    // gen something for uint32_t: clearValueCount
+    // gen something for VkClearValue: pClearValues
+}
+message VkDispatchIndirectCommand
+{
+    // gen something for uint32_t: x
+    // gen something for uint32_t: y
+    // gen something for uint32_t: z
+}
+message VkDrawIndexedIndirectCommand
+{
+    // gen something for uint32_t: indexCount
+    // gen something for uint32_t: instanceCount
+    // gen something for uint32_t: firstIndex
+    // gen something for int32_t: vertexOffset
+    // gen something for uint32_t: firstInstance
+}
+message VkDrawIndirectCommand
+{
+    // gen something for uint32_t: vertexCount
+    // gen something for uint32_t: instanceCount
+    // gen something for uint32_t: firstVertex
+    // gen something for uint32_t: firstInstance
+}
+message VkBaseOutStructure
+{
+    // gen something for VkStructureType: sType
+    // gen something for VkBaseOutStructure: pNext
+}
+message VkBaseInStructure
+{
+    // gen something for VkStructureType: sType
+    // gen something for VkBaseInStructure: pNext
+}
+message VkPhysicalDeviceSubgroupProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: subgroupSize
+    // gen something for VkShaderStageFlags: supportedStages
+    // gen something for VkSubgroupFeatureFlags: supportedOperations
+    // gen something for VkBool32: quadOperationsInAllStages
+}
+message VkBindBufferMemoryInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBuffer: buffer
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkDeviceSize: memoryOffset
+}
+message VkBindImageMemoryInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImage: image
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkDeviceSize: memoryOffset
+}
+message VkPhysicalDevice16BitStorageFeatures
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: storageBuffer16BitAccess
+    // gen something for VkBool32: uniformAndStorageBuffer16BitAccess
+    // gen something for VkBool32: storagePushConstant16
+    // gen something for VkBool32: storageInputOutput16
+}
+message VkMemoryDedicatedRequirements
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: prefersDedicatedAllocation
+    // gen something for VkBool32: requiresDedicatedAllocation
+}
+message VkMemoryDedicatedAllocateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImage: image
+    // gen something for VkBuffer: buffer
+}
+message VkMemoryAllocateFlagsInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkMemoryAllocateFlags: flags
+    // gen something for uint32_t: deviceMask
+}
+message VkDeviceGroupRenderPassBeginInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: deviceMask
+    // gen something for uint32_t: deviceRenderAreaCount
+    // gen something for VkRect2D: pDeviceRenderAreas
+}
+message VkDeviceGroupCommandBufferBeginInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: deviceMask
+}
+message VkDeviceGroupSubmitInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: waitSemaphoreCount
+    // gen something for uint32_t: pWaitSemaphoreDeviceIndices
+    // gen something for uint32_t: commandBufferCount
+    // gen something for uint32_t: pCommandBufferDeviceMasks
+    // gen something for uint32_t: signalSemaphoreCount
+    // gen something for uint32_t: pSignalSemaphoreDeviceIndices
+}
+message VkDeviceGroupBindSparseInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: resourceDeviceIndex
+    // gen something for uint32_t: memoryDeviceIndex
+}
+message VkBindBufferMemoryDeviceGroupInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: deviceIndexCount
+    // gen something for uint32_t: pDeviceIndices
+}
+message VkBindImageMemoryDeviceGroupInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: deviceIndexCount
+    // gen something for uint32_t: pDeviceIndices
+    // gen something for uint32_t: splitInstanceBindRegionCount
+    // gen something for VkRect2D: pSplitInstanceBindRegions
+}
+message VkPhysicalDeviceGroupProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: physicalDeviceCount
+    // gen something for VkPhysicalDevice: physicalDevices
+    // gen something for VkBool32: subsetAllocation
+}
+message VkDeviceGroupDeviceCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: physicalDeviceCount
+    // gen something for VkPhysicalDevice: pPhysicalDevices
+}
+message VkBufferMemoryRequirementsInfo2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBuffer: buffer
+}
+message VkImageMemoryRequirementsInfo2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImage: image
+}
+message VkImageSparseMemoryRequirementsInfo2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImage: image
+}
+message VkMemoryRequirements2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkMemoryRequirements: memoryRequirements
+}
+message VkSparseImageMemoryRequirements2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSparseImageMemoryRequirements: memoryRequirements
+}
+message VkPhysicalDeviceFeatures2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPhysicalDeviceFeatures: features
+}
+message VkPhysicalDeviceProperties2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPhysicalDeviceProperties: properties
+}
+message VkFormatProperties2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFormatProperties: formatProperties
+}
+message VkImageFormatProperties2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageFormatProperties: imageFormatProperties
+}
+message VkPhysicalDeviceImageFormatInfo2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFormat: format
+    // gen something for VkImageType: type
+    // gen something for VkImageTiling: tiling
+    // gen something for VkImageUsageFlags: usage
+    // gen something for VkImageCreateFlags: flags
+}
+message VkQueueFamilyProperties2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkQueueFamilyProperties: queueFamilyProperties
+}
+message VkPhysicalDeviceMemoryProperties2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPhysicalDeviceMemoryProperties: memoryProperties
+}
+message VkSparseImageFormatProperties2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSparseImageFormatProperties: properties
+}
+message VkPhysicalDeviceSparseImageFormatInfo2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFormat: format
+    // gen something for VkImageType: type
+    // gen something for VkSampleCountFlagBits: samples
+    // gen something for VkImageUsageFlags: usage
+    // gen something for VkImageTiling: tiling
+}
+message VkPhysicalDevicePointClippingProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPointClippingBehavior: pointClippingBehavior
+}
+message VkInputAttachmentAspectReference
+{
+    // gen something for uint32_t: subpass
+    // gen something for uint32_t: inputAttachmentIndex
+    // gen something for VkImageAspectFlags: aspectMask
+}
+message VkRenderPassInputAttachmentAspectCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: aspectReferenceCount
+    // gen something for VkInputAttachmentAspectReference: pAspectReferences
+}
+message VkImageViewUsageCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageUsageFlags: usage
+}
+message VkPipelineTessellationDomainOriginStateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkTessellationDomainOrigin: domainOrigin
+}
+message VkRenderPassMultiviewCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: subpassCount
+    // gen something for uint32_t: pViewMasks
+    // gen something for uint32_t: dependencyCount
+    // gen something for int32_t: pViewOffsets
+    // gen something for uint32_t: correlationMaskCount
+    // gen something for uint32_t: pCorrelationMasks
+}
+message VkPhysicalDeviceMultiviewFeatures
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: multiview
+    // gen something for VkBool32: multiviewGeometryShader
+    // gen something for VkBool32: multiviewTessellationShader
+}
+message VkPhysicalDeviceMultiviewProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxMultiviewViewCount
+    // gen something for uint32_t: maxMultiviewInstanceIndex
+}
+message VkPhysicalDeviceVariablePointerFeatures
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: variablePointersStorageBuffer
+    // gen something for VkBool32: variablePointers
+}
+message VkPhysicalDeviceProtectedMemoryFeatures
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: protectedMemory
+}
+message VkPhysicalDeviceProtectedMemoryProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: protectedNoFault
+}
+message VkDeviceQueueInfo2
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceQueueCreateFlags: flags
+    // gen something for uint32_t: queueFamilyIndex
+    // gen something for uint32_t: queueIndex
+}
+message VkProtectedSubmitInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: protectedSubmit
+}
+message VkSamplerYcbcrConversionCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFormat: format
+    // gen something for VkSamplerYcbcrModelConversion: ycbcrModel
+    // gen something for VkSamplerYcbcrRange: ycbcrRange
+    // gen something for VkComponentMapping: components
+    // gen something for VkChromaLocation: xChromaOffset
+    // gen something for VkChromaLocation: yChromaOffset
+    // gen something for VkFilter: chromaFilter
+    // gen something for VkBool32: forceExplicitReconstruction
+}
+message VkSamplerYcbcrConversionInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSamplerYcbcrConversion: conversion
+}
+message VkBindImagePlaneMemoryInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageAspectFlagBits: planeAspect
+}
+message VkImagePlaneMemoryRequirementsInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageAspectFlagBits: planeAspect
+}
+message VkPhysicalDeviceSamplerYcbcrConversionFeatures
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: samplerYcbcrConversion
+}
+message VkSamplerYcbcrConversionImageFormatProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: combinedImageSamplerDescriptorCount
+}
+message VkDescriptorUpdateTemplateEntry
+{
+    // gen something for uint32_t: dstBinding
+    // gen something for uint32_t: dstArrayElement
+    // gen something for uint32_t: descriptorCount
+    // gen something for VkDescriptorType: descriptorType
+    // gen something for size_t: offset
+    // gen something for size_t: stride
+}
+message VkDescriptorUpdateTemplateCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDescriptorUpdateTemplateCreateFlags: flags
+    // gen something for uint32_t: descriptorUpdateEntryCount
+    // gen something for VkDescriptorUpdateTemplateEntry: pDescriptorUpdateEntries
+    // gen something for VkDescriptorUpdateTemplateType: templateType
+    // gen something for VkDescriptorSetLayout: descriptorSetLayout
+    // gen something for VkPipelineBindPoint: pipelineBindPoint
+    // gen something for VkPipelineLayout: pipelineLayout
+    // gen something for uint32_t: set
+}
+message VkExternalMemoryProperties
+{
+    // gen something for VkExternalMemoryFeatureFlags: externalMemoryFeatures
+    // gen something for VkExternalMemoryHandleTypeFlags: exportFromImportedHandleTypes
+    // gen something for VkExternalMemoryHandleTypeFlags: compatibleHandleTypes
+}
+message VkPhysicalDeviceExternalImageFormatInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+}
+message VkExternalImageFormatProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryProperties: externalMemoryProperties
+}
+message VkPhysicalDeviceExternalBufferInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBufferCreateFlags: flags
+    // gen something for VkBufferUsageFlags: usage
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+}
+message VkExternalBufferProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryProperties: externalMemoryProperties
+}
+message VkPhysicalDeviceIDProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint8_t: deviceUUID
+    // gen something for uint8_t: driverUUID
+    // gen something for uint8_t: deviceLUID
+    // gen something for uint32_t: deviceNodeMask
+    // gen something for VkBool32: deviceLUIDValid
+}
+message VkExternalMemoryImageCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlags: handleTypes
+}
+message VkExternalMemoryBufferCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlags: handleTypes
+}
+message VkExportMemoryAllocateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlags: handleTypes
+}
+message VkPhysicalDeviceExternalFenceInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalFenceHandleTypeFlagBits: handleType
+}
+message VkExternalFenceProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalFenceHandleTypeFlags: exportFromImportedHandleTypes
+    // gen something for VkExternalFenceHandleTypeFlags: compatibleHandleTypes
+    // gen something for VkExternalFenceFeatureFlags: externalFenceFeatures
+}
+message VkExportFenceCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalFenceHandleTypeFlags: handleTypes
+}
+message VkExportSemaphoreCreateInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalSemaphoreHandleTypeFlags: handleTypes
+}
+message VkPhysicalDeviceExternalSemaphoreInfo
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalSemaphoreHandleTypeFlagBits: handleType
+}
+message VkExternalSemaphoreProperties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalSemaphoreHandleTypeFlags: exportFromImportedHandleTypes
+    // gen something for VkExternalSemaphoreHandleTypeFlags: compatibleHandleTypes
+    // gen something for VkExternalSemaphoreFeatureFlags: externalSemaphoreFeatures
+}
+message VkPhysicalDeviceMaintenance3Properties
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxPerSetDescriptors
+    // gen something for VkDeviceSize: maxMemoryAllocationSize
+}
+message VkDescriptorSetLayoutSupport
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: supported
+}
+message VkPhysicalDeviceShaderDrawParameterFeatures
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: shaderDrawParameters
+}
+message VkSurfaceCapabilitiesKHR
+{
+    // gen something for uint32_t: minImageCount
+    // gen something for uint32_t: maxImageCount
+    // gen something for VkExtent2D: currentExtent
+    // gen something for VkExtent2D: minImageExtent
+    // gen something for VkExtent2D: maxImageExtent
+    // gen something for uint32_t: maxImageArrayLayers
+    // gen something for VkSurfaceTransformFlagsKHR: supportedTransforms
+    // gen something for VkSurfaceTransformFlagBitsKHR: currentTransform
+    // gen something for VkCompositeAlphaFlagsKHR: supportedCompositeAlpha
+    // gen something for VkImageUsageFlags: supportedUsageFlags
+}
+message VkSurfaceFormatKHR
+{
+    // gen something for VkFormat: format
+    // gen something for VkColorSpaceKHR: colorSpace
+}
+message VkSwapchainCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSwapchainCreateFlagsKHR: flags
+    // gen something for VkSurfaceKHR: surface
+    // gen something for uint32_t: minImageCount
+    // gen something for VkFormat: imageFormat
+    // gen something for VkColorSpaceKHR: imageColorSpace
+    // gen something for VkExtent2D: imageExtent
+    // gen something for uint32_t: imageArrayLayers
+    // gen something for VkImageUsageFlags: imageUsage
+    // gen something for VkSharingMode: imageSharingMode
+    // gen something for uint32_t: queueFamilyIndexCount
+    // gen something for uint32_t: pQueueFamilyIndices
+    // gen something for VkSurfaceTransformFlagBitsKHR: preTransform
+    // gen something for VkCompositeAlphaFlagBitsKHR: compositeAlpha
+    // gen something for VkPresentModeKHR: presentMode
+    // gen something for VkBool32: clipped
+    // gen something for VkSwapchainKHR: oldSwapchain
+}
+message VkPresentInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: waitSemaphoreCount
+    // gen something for VkSemaphore: pWaitSemaphores
+    // gen something for uint32_t: swapchainCount
+    // gen something for VkSwapchainKHR: pSwapchains
+    // gen something for uint32_t: pImageIndices
+    // gen something for VkResult: pResults
+}
+message VkImageSwapchainCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSwapchainKHR: swapchain
+}
+message VkBindImageMemorySwapchainInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSwapchainKHR: swapchain
+    // gen something for uint32_t: imageIndex
+}
+message VkAcquireNextImageInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSwapchainKHR: swapchain
+    // gen something for uint64_t: timeout
+    // gen something for VkSemaphore: semaphore
+    // gen something for VkFence: fence
+    // gen something for uint32_t: deviceMask
+}
+message VkDeviceGroupPresentCapabilitiesKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: presentMask
+    // gen something for VkDeviceGroupPresentModeFlagsKHR: modes
+}
+message VkDeviceGroupPresentInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: swapchainCount
+    // gen something for uint32_t: pDeviceMasks
+    // gen something for VkDeviceGroupPresentModeFlagBitsKHR: mode
+}
+message VkDeviceGroupSwapchainCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceGroupPresentModeFlagsKHR: modes
+}
+message VkDisplayPropertiesKHR
+{
+    // gen something for VkDisplayKHR: display
+    // gen something for char: displayName
+    // gen something for VkExtent2D: physicalDimensions
+    // gen something for VkExtent2D: physicalResolution
+    // gen something for VkSurfaceTransformFlagsKHR: supportedTransforms
+    // gen something for VkBool32: planeReorderPossible
+    // gen something for VkBool32: persistentContent
+}
+message VkDisplayModeParametersKHR
+{
+    // gen something for VkExtent2D: visibleRegion
+    // gen something for uint32_t: refreshRate
+}
+message VkDisplayModePropertiesKHR
+{
+    // gen something for VkDisplayModeKHR: displayMode
+    // gen something for VkDisplayModeParametersKHR: parameters
+}
+message VkDisplayModeCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayModeCreateFlagsKHR: flags
+    // gen something for VkDisplayModeParametersKHR: parameters
+}
+message VkDisplayPlaneCapabilitiesKHR
+{
+    // gen something for VkDisplayPlaneAlphaFlagsKHR: supportedAlpha
+    // gen something for VkOffset2D: minSrcPosition
+    // gen something for VkOffset2D: maxSrcPosition
+    // gen something for VkExtent2D: minSrcExtent
+    // gen something for VkExtent2D: maxSrcExtent
+    // gen something for VkOffset2D: minDstPosition
+    // gen something for VkOffset2D: maxDstPosition
+    // gen something for VkExtent2D: minDstExtent
+    // gen something for VkExtent2D: maxDstExtent
+}
+message VkDisplayPlanePropertiesKHR
+{
+    // gen something for VkDisplayKHR: currentDisplay
+    // gen something for uint32_t: currentStackIndex
+}
+message VkDisplaySurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplaySurfaceCreateFlagsKHR: flags
+    // gen something for VkDisplayModeKHR: displayMode
+    // gen something for uint32_t: planeIndex
+    // gen something for uint32_t: planeStackIndex
+    // gen something for VkSurfaceTransformFlagBitsKHR: transform
+    // gen something for float: globalAlpha
+    // gen something for VkDisplayPlaneAlphaFlagBitsKHR: alphaMode
+    // gen something for VkExtent2D: imageExtent
+}
+message VkDisplayPresentInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkRect2D: srcRect
+    // gen something for VkRect2D: dstRect
+    // gen something for VkBool32: persistent
+}
+message VkXlibSurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkXlibSurfaceCreateFlagsKHR: flags
+    // gen something for Display: dpy
+    // gen something for Window: window
+}
+message VkXcbSurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkXcbSurfaceCreateFlagsKHR: flags
+    // gen something for xcb_connection_t: connection
+    // gen something for xcb_window_t: window
+}
+message VkWaylandSurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkWaylandSurfaceCreateFlagsKHR: flags
+    // gen something for wl_display: display
+    // gen something for wl_surface: surface
+}
+message VkMirSurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkMirSurfaceCreateFlagsKHR: flags
+    // gen something for MirConnection: connection
+    // gen something for MirSurface: mirSurface
+}
+message VkAndroidSurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkAndroidSurfaceCreateFlagsKHR: flags
+    // gen something for ANativeWindow: window
+}
+message VkWin32SurfaceCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkWin32SurfaceCreateFlagsKHR: flags
+    // gen something for HINSTANCE: hinstance
+    // gen something for HWND: hwnd
+}
+message VkImportMemoryWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+    // gen something for HANDLE: handle
+    // gen something for LPCWSTR: name
+}
+message VkExportMemoryWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for SECURITY_ATTRIBUTES: pAttributes
+    // gen something for DWORD: dwAccess
+    // gen something for LPCWSTR: name
+}
+message VkMemoryWin32HandlePropertiesKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: memoryTypeBits
+}
+message VkMemoryGetWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+}
+message VkImportMemoryFdInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+    // gen something for int: fd
+}
+message VkMemoryFdPropertiesKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: memoryTypeBits
+}
+message VkMemoryGetFdInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceMemory: memory
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+}
+message VkWin32KeyedMutexAcquireReleaseInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: acquireCount
+    // gen something for VkDeviceMemory: pAcquireSyncs
+    // gen something for uint64_t: pAcquireKeys
+    // gen something for uint32_t: pAcquireTimeouts
+    // gen something for uint32_t: releaseCount
+    // gen something for VkDeviceMemory: pReleaseSyncs
+    // gen something for uint64_t: pReleaseKeys
+}
+message VkImportSemaphoreWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSemaphore: semaphore
+    // gen something for VkSemaphoreImportFlags: flags
+    // gen something for VkExternalSemaphoreHandleTypeFlagBits: handleType
+    // gen something for HANDLE: handle
+    // gen something for LPCWSTR: name
+}
+message VkExportSemaphoreWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for SECURITY_ATTRIBUTES: pAttributes
+    // gen something for DWORD: dwAccess
+    // gen something for LPCWSTR: name
+}
+message VkD3D12FenceSubmitInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: waitSemaphoreValuesCount
+    // gen something for uint64_t: pWaitSemaphoreValues
+    // gen something for uint32_t: signalSemaphoreValuesCount
+    // gen something for uint64_t: pSignalSemaphoreValues
+}
+message VkSemaphoreGetWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSemaphore: semaphore
+    // gen something for VkExternalSemaphoreHandleTypeFlagBits: handleType
+}
+message VkImportSemaphoreFdInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSemaphore: semaphore
+    // gen something for VkSemaphoreImportFlags: flags
+    // gen something for VkExternalSemaphoreHandleTypeFlagBits: handleType
+    // gen something for int: fd
+}
+message VkSemaphoreGetFdInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSemaphore: semaphore
+    // gen something for VkExternalSemaphoreHandleTypeFlagBits: handleType
+}
+message VkPhysicalDevicePushDescriptorPropertiesKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxPushDescriptors
+}
+message VkRectLayerKHR
+{
+    // gen something for VkOffset2D: offset
+    // gen something for VkExtent2D: extent
+    // gen something for uint32_t: layer
+}
+message VkPresentRegionKHR
+{
+    // gen something for uint32_t: rectangleCount
+    // gen something for VkRectLayerKHR: pRectangles
+}
+message VkPresentRegionsKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: swapchainCount
+    // gen something for VkPresentRegionKHR: pRegions
+}
+message VkAttachmentDescription2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkAttachmentDescriptionFlags: flags
+    // gen something for VkFormat: format
+    // gen something for VkSampleCountFlagBits: samples
+    // gen something for VkAttachmentLoadOp: loadOp
+    // gen something for VkAttachmentStoreOp: storeOp
+    // gen something for VkAttachmentLoadOp: stencilLoadOp
+    // gen something for VkAttachmentStoreOp: stencilStoreOp
+    // gen something for VkImageLayout: initialLayout
+    // gen something for VkImageLayout: finalLayout
+}
+message VkAttachmentReference2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: attachment
+    // gen something for VkImageLayout: layout
+    // gen something for VkImageAspectFlags: aspectMask
+}
+message VkSubpassDescription2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSubpassDescriptionFlags: flags
+    // gen something for VkPipelineBindPoint: pipelineBindPoint
+    // gen something for uint32_t: viewMask
+    // gen something for uint32_t: inputAttachmentCount
+    // gen something for VkAttachmentReference2KHR: pInputAttachments
+    // gen something for uint32_t: colorAttachmentCount
+    // gen something for VkAttachmentReference2KHR: pColorAttachments
+    // gen something for VkAttachmentReference2KHR: pResolveAttachments
+    // gen something for VkAttachmentReference2KHR: pDepthStencilAttachment
+    // gen something for uint32_t: preserveAttachmentCount
+    // gen something for uint32_t: pPreserveAttachments
+}
+message VkSubpassDependency2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: srcSubpass
+    // gen something for uint32_t: dstSubpass
+    // gen something for VkPipelineStageFlags: srcStageMask
+    // gen something for VkPipelineStageFlags: dstStageMask
+    // gen something for VkAccessFlags: srcAccessMask
+    // gen something for VkAccessFlags: dstAccessMask
+    // gen something for VkDependencyFlags: dependencyFlags
+    // gen something for int32_t: viewOffset
+}
+message VkRenderPassCreateInfo2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkRenderPassCreateFlags: flags
+    // gen something for uint32_t: attachmentCount
+    // gen something for VkAttachmentDescription2KHR: pAttachments
+    // gen something for uint32_t: subpassCount
+    // gen something for VkSubpassDescription2KHR: pSubpasses
+    // gen something for uint32_t: dependencyCount
+    // gen something for VkSubpassDependency2KHR: pDependencies
+    // gen something for uint32_t: correlatedViewMaskCount
+    // gen something for uint32_t: pCorrelatedViewMasks
+}
+message VkSubpassBeginInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSubpassContents: contents
+}
+message VkSubpassEndInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+}
+message VkSharedPresentSurfaceCapabilitiesKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImageUsageFlags: sharedPresentSupportedUsageFlags
+}
+message VkImportFenceWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFence: fence
+    // gen something for VkFenceImportFlags: flags
+    // gen something for VkExternalFenceHandleTypeFlagBits: handleType
+    // gen something for HANDLE: handle
+    // gen something for LPCWSTR: name
+}
+message VkExportFenceWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for SECURITY_ATTRIBUTES: pAttributes
+    // gen something for DWORD: dwAccess
+    // gen something for LPCWSTR: name
+}
+message VkFenceGetWin32HandleInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFence: fence
+    // gen something for VkExternalFenceHandleTypeFlagBits: handleType
+}
+message VkImportFenceFdInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFence: fence
+    // gen something for VkFenceImportFlags: flags
+    // gen something for VkExternalFenceHandleTypeFlagBits: handleType
+    // gen something for int: fd
+}
+message VkFenceGetFdInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFence: fence
+    // gen something for VkExternalFenceHandleTypeFlagBits: handleType
+}
+message VkPhysicalDeviceSurfaceInfo2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSurfaceKHR: surface
+}
+message VkSurfaceCapabilities2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSurfaceCapabilitiesKHR: surfaceCapabilities
+}
+message VkSurfaceFormat2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSurfaceFormatKHR: surfaceFormat
+}
+message VkDisplayProperties2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayPropertiesKHR: displayProperties
+}
+message VkDisplayPlaneProperties2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayPlanePropertiesKHR: displayPlaneProperties
+}
+message VkDisplayModeProperties2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayModePropertiesKHR: displayModeProperties
+}
+message VkDisplayPlaneInfo2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayModeKHR: mode
+    // gen something for uint32_t: planeIndex
+}
+message VkDisplayPlaneCapabilities2KHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayPlaneCapabilitiesKHR: capabilities
+}
+message VkImageFormatListCreateInfoKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: viewFormatCount
+    // gen something for VkFormat: pViewFormats
+}
+message VkPhysicalDevice8BitStorageFeaturesKHR
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: storageBuffer8BitAccess
+    // gen something for VkBool32: uniformAndStorageBuffer8BitAccess
+    // gen something for VkBool32: storagePushConstant8
+}
+message VkNativeBufferANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: handle
+    // gen something for int: stride
+    // gen something for int: format
+    // gen something for int: usage
+    // gen something for uint64_t: consumer
+    // gen something for uint64_t: producer
+}
+message VkDebugReportCallbackCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDebugReportFlagsEXT: flags
+    // gen something for PFN_vkDebugReportCallbackEXT: pfnCallback
+    // gen something for void: pUserData
+}
+message VkPipelineRasterizationStateRasterizationOrderAMD
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkRasterizationOrderAMD: rasterizationOrder
+}
+message VkDebugMarkerObjectNameInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDebugReportObjectTypeEXT: objectType
+    // gen something for uint64_t: object
+    // gen something for char: pObjectName
+}
+message VkDebugMarkerObjectTagInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDebugReportObjectTypeEXT: objectType
+    // gen something for uint64_t: object
+    // gen something for uint64_t: tagName
+    // gen something for size_t: tagSize
+    // gen something for void: pTag
+}
+message VkDebugMarkerMarkerInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for char: pMarkerName
+    // gen something for float: color
+}
+message VkDedicatedAllocationImageCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: dedicatedAllocation
+}
+message VkDedicatedAllocationBufferCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: dedicatedAllocation
+}
+message VkDedicatedAllocationMemoryAllocateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkImage: image
+    // gen something for VkBuffer: buffer
+}
+message VkTextureLODGatherFormatPropertiesAMD
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: supportsTextureGatherLODBiasAMD
+}
+message VkShaderResourceUsageAMD
+{
+    // gen something for uint32_t: numUsedVgprs
+    // gen something for uint32_t: numUsedSgprs
+    // gen something for uint32_t: ldsSizePerLocalWorkGroup
+    // gen something for size_t: ldsUsageSizeInBytes
+    // gen something for size_t: scratchMemUsageInBytes
+}
+message VkShaderStatisticsInfoAMD
+{
+    // gen something for VkShaderStageFlags: shaderStageMask
+    // gen something for VkShaderResourceUsageAMD: resourceUsage
+    // gen something for uint32_t: numPhysicalVgprs
+    // gen something for uint32_t: numPhysicalSgprs
+    // gen something for uint32_t: numAvailableVgprs
+    // gen something for uint32_t: numAvailableSgprs
+    // gen something for uint32_t: computeWorkGroupSize
+}
+message VkExternalImageFormatPropertiesNV
+{
+    // gen something for VkImageFormatProperties: imageFormatProperties
+    // gen something for VkExternalMemoryFeatureFlagsNV: externalMemoryFeatures
+    // gen something for VkExternalMemoryHandleTypeFlagsNV: exportFromImportedHandleTypes
+    // gen something for VkExternalMemoryHandleTypeFlagsNV: compatibleHandleTypes
+}
+message VkExternalMemoryImageCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagsNV: handleTypes
+}
+message VkExportMemoryAllocateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagsNV: handleTypes
+}
+message VkImportMemoryWin32HandleInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagsNV: handleType
+    // gen something for HANDLE: handle
+}
+message VkExportMemoryWin32HandleInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for SECURITY_ATTRIBUTES: pAttributes
+    // gen something for DWORD: dwAccess
+}
+message VkWin32KeyedMutexAcquireReleaseInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: acquireCount
+    // gen something for VkDeviceMemory: pAcquireSyncs
+    // gen something for uint64_t: pAcquireKeys
+    // gen something for uint32_t: pAcquireTimeoutMilliseconds
+    // gen something for uint32_t: releaseCount
+    // gen something for VkDeviceMemory: pReleaseSyncs
+    // gen something for uint64_t: pReleaseKeys
+}
+message VkValidationFlagsEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: disabledValidationCheckCount
+    // gen something for VkValidationCheckEXT: pDisabledValidationChecks
+}
+message VkViSurfaceCreateInfoNN
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkViSurfaceCreateFlagsNN: flags
+    // gen something for void: window
+}
+message VkConditionalRenderingBeginInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBuffer: buffer
+    // gen something for VkDeviceSize: offset
+    // gen something for VkConditionalRenderingFlagsEXT: flags
+}
+message VkPhysicalDeviceConditionalRenderingFeaturesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: conditionalRendering
+    // gen something for VkBool32: inheritedConditionalRendering
+}
+message VkCommandBufferInheritanceConditionalRenderingInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: conditionalRenderingEnable
+}
+message VkDeviceGeneratedCommandsFeaturesNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: computeBindingPointSupport
+}
+message VkDeviceGeneratedCommandsLimitsNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxIndirectCommandsLayoutTokenCount
+    // gen something for uint32_t: maxObjectEntryCounts
+    // gen something for uint32_t: minSequenceCountBufferOffsetAlignment
+    // gen something for uint32_t: minSequenceIndexBufferOffsetAlignment
+    // gen something for uint32_t: minCommandsTokenBufferOffsetAlignment
+}
+message VkIndirectCommandsTokenNVX
+{
+    // gen something for VkIndirectCommandsTokenTypeNVX: tokenType
+    // gen something for VkBuffer: buffer
+    // gen something for VkDeviceSize: offset
+}
+message VkIndirectCommandsLayoutTokenNVX
+{
+    // gen something for VkIndirectCommandsTokenTypeNVX: tokenType
+    // gen something for uint32_t: bindingUnit
+    // gen something for uint32_t: dynamicCount
+    // gen something for uint32_t: divisor
+}
+message VkIndirectCommandsLayoutCreateInfoNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineBindPoint: pipelineBindPoint
+    // gen something for VkIndirectCommandsLayoutUsageFlagsNVX: flags
+    // gen something for uint32_t: tokenCount
+    // gen something for VkIndirectCommandsLayoutTokenNVX: pTokens
+}
+message VkCmdProcessCommandsInfoNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkObjectTableNVX: objectTable
+    // gen something for VkIndirectCommandsLayoutNVX: indirectCommandsLayout
+    // gen something for uint32_t: indirectCommandsTokenCount
+    // gen something for VkIndirectCommandsTokenNVX: pIndirectCommandsTokens
+    // gen something for uint32_t: maxSequencesCount
+    // gen something for VkCommandBuffer: targetCommandBuffer
+    // gen something for VkBuffer: sequencesCountBuffer
+    // gen something for VkDeviceSize: sequencesCountOffset
+    // gen something for VkBuffer: sequencesIndexBuffer
+    // gen something for VkDeviceSize: sequencesIndexOffset
+}
+message VkCmdReserveSpaceForCommandsInfoNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkObjectTableNVX: objectTable
+    // gen something for VkIndirectCommandsLayoutNVX: indirectCommandsLayout
+    // gen something for uint32_t: maxSequencesCount
+}
+message VkObjectTableCreateInfoNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: objectCount
+    // gen something for VkObjectEntryTypeNVX: pObjectEntryTypes
+    // gen something for uint32_t: pObjectEntryCounts
+    // gen something for VkObjectEntryUsageFlagsNVX: pObjectEntryUsageFlags
+    // gen something for uint32_t: maxUniformBuffersPerDescriptor
+    // gen something for uint32_t: maxStorageBuffersPerDescriptor
+    // gen something for uint32_t: maxStorageImagesPerDescriptor
+    // gen something for uint32_t: maxSampledImagesPerDescriptor
+    // gen something for uint32_t: maxPipelineLayouts
+}
+message VkObjectTableEntryNVX
+{
+    // gen something for VkObjectEntryTypeNVX: type
+    // gen something for VkObjectEntryUsageFlagsNVX: flags
+}
+message VkObjectTablePipelineEntryNVX
+{
+    // gen something for VkObjectEntryTypeNVX: type
+    // gen something for VkObjectEntryUsageFlagsNVX: flags
+    // gen something for VkPipeline: pipeline
+}
+message VkObjectTableDescriptorSetEntryNVX
+{
+    // gen something for VkObjectEntryTypeNVX: type
+    // gen something for VkObjectEntryUsageFlagsNVX: flags
+    // gen something for VkPipelineLayout: pipelineLayout
+    // gen something for VkDescriptorSet: descriptorSet
+}
+message VkObjectTableVertexBufferEntryNVX
+{
+    // gen something for VkObjectEntryTypeNVX: type
+    // gen something for VkObjectEntryUsageFlagsNVX: flags
+    // gen something for VkBuffer: buffer
+}
+message VkObjectTableIndexBufferEntryNVX
+{
+    // gen something for VkObjectEntryTypeNVX: type
+    // gen something for VkObjectEntryUsageFlagsNVX: flags
+    // gen something for VkBuffer: buffer
+    // gen something for VkIndexType: indexType
+}
+message VkObjectTablePushConstantEntryNVX
+{
+    // gen something for VkObjectEntryTypeNVX: type
+    // gen something for VkObjectEntryUsageFlagsNVX: flags
+    // gen something for VkPipelineLayout: pipelineLayout
+    // gen something for VkShaderStageFlags: stageFlags
+}
+message VkViewportWScalingNV
+{
+    // gen something for float: xcoeff
+    // gen something for float: ycoeff
+}
+message VkPipelineViewportWScalingStateCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: viewportWScalingEnable
+    // gen something for uint32_t: viewportCount
+    // gen something for VkViewportWScalingNV: pViewportWScalings
+}
+message VkSurfaceCapabilities2EXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: minImageCount
+    // gen something for uint32_t: maxImageCount
+    // gen something for VkExtent2D: currentExtent
+    // gen something for VkExtent2D: minImageExtent
+    // gen something for VkExtent2D: maxImageExtent
+    // gen something for uint32_t: maxImageArrayLayers
+    // gen something for VkSurfaceTransformFlagsKHR: supportedTransforms
+    // gen something for VkSurfaceTransformFlagBitsKHR: currentTransform
+    // gen something for VkCompositeAlphaFlagsKHR: supportedCompositeAlpha
+    // gen something for VkImageUsageFlags: supportedUsageFlags
+    // gen something for VkSurfaceCounterFlagsEXT: supportedSurfaceCounters
+}
+message VkDisplayPowerInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayPowerStateEXT: powerState
+}
+message VkDeviceEventInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceEventTypeEXT: deviceEvent
+}
+message VkDisplayEventInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDisplayEventTypeEXT: displayEvent
+}
+message VkSwapchainCounterCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSurfaceCounterFlagsEXT: surfaceCounters
+}
+message VkRefreshCycleDurationGOOGLE
+{
+    // gen something for uint64_t: refreshDuration
+}
+message VkPastPresentationTimingGOOGLE
+{
+    // gen something for uint32_t: presentID
+    // gen something for uint64_t: desiredPresentTime
+    // gen something for uint64_t: actualPresentTime
+    // gen something for uint64_t: earliestPresentTime
+    // gen something for uint64_t: presentMargin
+}
+message VkPresentTimeGOOGLE
+{
+    // gen something for uint32_t: presentID
+    // gen something for uint64_t: desiredPresentTime
+}
+message VkPresentTimesInfoGOOGLE
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: swapchainCount
+    // gen something for VkPresentTimeGOOGLE: pTimes
+}
+message VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: perViewPositionAllComponents
+}
+message VkViewportSwizzleNV
+{
+    // gen something for VkViewportCoordinateSwizzleNV: x
+    // gen something for VkViewportCoordinateSwizzleNV: y
+    // gen something for VkViewportCoordinateSwizzleNV: z
+    // gen something for VkViewportCoordinateSwizzleNV: w
+}
+message VkPipelineViewportSwizzleStateCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineViewportSwizzleStateCreateFlagsNV: flags
+    // gen something for uint32_t: viewportCount
+    // gen something for VkViewportSwizzleNV: pViewportSwizzles
+}
+message VkPhysicalDeviceDiscardRectanglePropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxDiscardRectangles
+}
+message VkPipelineDiscardRectangleStateCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineDiscardRectangleStateCreateFlagsEXT: flags
+    // gen something for VkDiscardRectangleModeEXT: discardRectangleMode
+    // gen something for uint32_t: discardRectangleCount
+    // gen something for VkRect2D: pDiscardRectangles
+}
+message VkPhysicalDeviceConservativeRasterizationPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for float: primitiveOverestimationSize
+    // gen something for float: maxExtraPrimitiveOverestimationSize
+    // gen something for float: extraPrimitiveOverestimationSizeGranularity
+    // gen something for VkBool32: primitiveUnderestimation
+    // gen something for VkBool32: conservativePointAndLineRasterization
+    // gen something for VkBool32: degenerateTrianglesRasterized
+    // gen something for VkBool32: degenerateLinesRasterized
+    // gen something for VkBool32: fullyCoveredFragmentShaderInputVariable
+    // gen something for VkBool32: conservativeRasterizationPostDepthCoverage
+}
+message VkPipelineRasterizationConservativeStateCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineRasterizationConservativeStateCreateFlagsEXT: flags
+    // gen something for VkConservativeRasterizationModeEXT: conservativeRasterizationMode
+    // gen something for float: extraPrimitiveOverestimationSize
+}
+message VkXYColorEXT
+{
+    // gen something for float: x
+    // gen something for float: y
+}
+message VkHdrMetadataEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkXYColorEXT: displayPrimaryRed
+    // gen something for VkXYColorEXT: displayPrimaryGreen
+    // gen something for VkXYColorEXT: displayPrimaryBlue
+    // gen something for VkXYColorEXT: whitePoint
+    // gen something for float: maxLuminance
+    // gen something for float: minLuminance
+    // gen something for float: maxContentLightLevel
+    // gen something for float: maxFrameAverageLightLevel
+}
+message VkIOSSurfaceCreateInfoMVK
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkIOSSurfaceCreateFlagsMVK: flags
+    // gen something for void: pView
+}
+message VkMacOSSurfaceCreateInfoMVK
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkMacOSSurfaceCreateFlagsMVK: flags
+    // gen something for void: pView
+}
+message VkDebugUtilsObjectNameInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkObjectType: objectType
+    // gen something for uint64_t: objectHandle
+    // gen something for char: pObjectName
+}
+message VkDebugUtilsObjectTagInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkObjectType: objectType
+    // gen something for uint64_t: objectHandle
+    // gen something for uint64_t: tagName
+    // gen something for size_t: tagSize
+    // gen something for void: pTag
+}
+message VkDebugUtilsLabelEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for char: pLabelName
+    // gen something for float: color
+}
+message VkDebugUtilsMessengerCallbackDataEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDebugUtilsMessengerCallbackDataFlagsEXT: flags
+    // gen something for char: pMessageIdName
+    // gen something for int32_t: messageIdNumber
+    // gen something for char: pMessage
+    // gen something for uint32_t: queueLabelCount
+    // gen something for VkDebugUtilsLabelEXT: pQueueLabels
+    // gen something for uint32_t: cmdBufLabelCount
+    // gen something for VkDebugUtilsLabelEXT: pCmdBufLabels
+    // gen something for uint32_t: objectCount
+    // gen something for VkDebugUtilsObjectNameInfoEXT: pObjects
+}
+message VkDebugUtilsMessengerCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDebugUtilsMessengerCreateFlagsEXT: flags
+    // gen something for VkDebugUtilsMessageSeverityFlagsEXT: messageSeverity
+    // gen something for VkDebugUtilsMessageTypeFlagsEXT: messageType
+    // gen something for PFN_vkDebugUtilsMessengerCallbackEXT: pfnUserCallback
+    // gen something for void: pUserData
+}
+message VkAndroidHardwareBufferUsageANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint64_t: androidHardwareBufferUsage
+}
+message VkAndroidHardwareBufferPropertiesANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceSize: allocationSize
+    // gen something for uint32_t: memoryTypeBits
+}
+message VkAndroidHardwareBufferFormatPropertiesANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkFormat: format
+    // gen something for uint64_t: externalFormat
+    // gen something for VkFormatFeatureFlags: formatFeatures
+    // gen something for VkComponentMapping: samplerYcbcrConversionComponents
+    // gen something for VkSamplerYcbcrModelConversion: suggestedYcbcrModel
+    // gen something for VkSamplerYcbcrRange: suggestedYcbcrRange
+    // gen something for VkChromaLocation: suggestedXChromaOffset
+    // gen something for VkChromaLocation: suggestedYChromaOffset
+}
+message VkImportAndroidHardwareBufferInfoANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for AHardwareBuffer: buffer
+}
+message VkMemoryGetAndroidHardwareBufferInfoANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceMemory: memory
+}
+message VkExternalFormatANDROID
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint64_t: externalFormat
+}
+message VkSamplerReductionModeCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSamplerReductionModeEXT: reductionMode
+}
+message VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: filterMinmaxSingleComponentFormats
+    // gen something for VkBool32: filterMinmaxImageComponentMapping
+}
+message VkSampleLocationEXT
+{
+    // gen something for float: x
+    // gen something for float: y
+}
+message VkSampleLocationsInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSampleCountFlagBits: sampleLocationsPerPixel
+    // gen something for VkExtent2D: sampleLocationGridSize
+    // gen something for uint32_t: sampleLocationsCount
+    // gen something for VkSampleLocationEXT: pSampleLocations
+}
+message VkAttachmentSampleLocationsEXT
+{
+    // gen something for uint32_t: attachmentIndex
+    // gen something for VkSampleLocationsInfoEXT: sampleLocationsInfo
+}
+message VkSubpassSampleLocationsEXT
+{
+    // gen something for uint32_t: subpassIndex
+    // gen something for VkSampleLocationsInfoEXT: sampleLocationsInfo
+}
+message VkRenderPassSampleLocationsBeginInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: attachmentInitialSampleLocationsCount
+    // gen something for VkAttachmentSampleLocationsEXT: pAttachmentInitialSampleLocations
+    // gen something for uint32_t: postSubpassSampleLocationsCount
+    // gen something for VkSubpassSampleLocationsEXT: pPostSubpassSampleLocations
+}
+message VkPipelineSampleLocationsStateCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: sampleLocationsEnable
+    // gen something for VkSampleLocationsInfoEXT: sampleLocationsInfo
+}
+message VkPhysicalDeviceSampleLocationsPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkSampleCountFlags: sampleLocationSampleCounts
+    // gen something for VkExtent2D: maxSampleLocationGridSize
+    // gen something for float: sampleLocationCoordinateRange
+    // gen something for uint32_t: sampleLocationSubPixelBits
+    // gen something for VkBool32: variableSampleLocations
+}
+message VkMultisamplePropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExtent2D: maxSampleLocationGridSize
+}
+message VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: advancedBlendCoherentOperations
+}
+message VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: advancedBlendMaxColorAttachments
+    // gen something for VkBool32: advancedBlendIndependentBlend
+    // gen something for VkBool32: advancedBlendNonPremultipliedSrcColor
+    // gen something for VkBool32: advancedBlendNonPremultipliedDstColor
+    // gen something for VkBool32: advancedBlendCorrelatedOverlap
+    // gen something for VkBool32: advancedBlendAllOperations
+}
+message VkPipelineColorBlendAdvancedStateCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: srcPremultiplied
+    // gen something for VkBool32: dstPremultiplied
+    // gen something for VkBlendOverlapEXT: blendOverlap
+}
+message VkPipelineCoverageToColorStateCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineCoverageToColorStateCreateFlagsNV: flags
+    // gen something for VkBool32: coverageToColorEnable
+    // gen something for uint32_t: coverageToColorLocation
+}
+message VkPipelineCoverageModulationStateCreateInfoNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineCoverageModulationStateCreateFlagsNV: flags
+    // gen something for VkCoverageModulationModeNV: coverageModulationMode
+    // gen something for VkBool32: coverageModulationTableEnable
+    // gen something for uint32_t: coverageModulationTableCount
+    // gen something for float: pCoverageModulationTable
+}
+message VkValidationCacheCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkValidationCacheCreateFlagsEXT: flags
+    // gen something for size_t: initialDataSize
+    // gen something for void: pInitialData
+}
+message VkShaderModuleValidationCacheCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkValidationCacheEXT: validationCache
+}
+message VkDescriptorSetLayoutBindingFlagsCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: bindingCount
+    // gen something for VkDescriptorBindingFlagsEXT: pBindingFlags
+}
+message VkPhysicalDeviceDescriptorIndexingFeaturesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkBool32: shaderInputAttachmentArrayDynamicIndexing
+    // gen something for VkBool32: shaderUniformTexelBufferArrayDynamicIndexing
+    // gen something for VkBool32: shaderStorageTexelBufferArrayDynamicIndexing
+    // gen something for VkBool32: shaderUniformBufferArrayNonUniformIndexing
+    // gen something for VkBool32: shaderSampledImageArrayNonUniformIndexing
+    // gen something for VkBool32: shaderStorageBufferArrayNonUniformIndexing
+    // gen something for VkBool32: shaderStorageImageArrayNonUniformIndexing
+    // gen something for VkBool32: shaderInputAttachmentArrayNonUniformIndexing
+    // gen something for VkBool32: shaderUniformTexelBufferArrayNonUniformIndexing
+    // gen something for VkBool32: shaderStorageTexelBufferArrayNonUniformIndexing
+    // gen something for VkBool32: descriptorBindingUniformBufferUpdateAfterBind
+    // gen something for VkBool32: descriptorBindingSampledImageUpdateAfterBind
+    // gen something for VkBool32: descriptorBindingStorageImageUpdateAfterBind
+    // gen something for VkBool32: descriptorBindingStorageBufferUpdateAfterBind
+    // gen something for VkBool32: descriptorBindingUniformTexelBufferUpdateAfterBind
+    // gen something for VkBool32: descriptorBindingStorageTexelBufferUpdateAfterBind
+    // gen something for VkBool32: descriptorBindingUpdateUnusedWhilePending
+    // gen something for VkBool32: descriptorBindingPartiallyBound
+    // gen something for VkBool32: descriptorBindingVariableDescriptorCount
+    // gen something for VkBool32: runtimeDescriptorArray
+}
+message VkPhysicalDeviceDescriptorIndexingPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxUpdateAfterBindDescriptorsInAllPools
+    // gen something for VkBool32: shaderUniformBufferArrayNonUniformIndexingNative
+    // gen something for VkBool32: shaderSampledImageArrayNonUniformIndexingNative
+    // gen something for VkBool32: shaderStorageBufferArrayNonUniformIndexingNative
+    // gen something for VkBool32: shaderStorageImageArrayNonUniformIndexingNative
+    // gen something for VkBool32: shaderInputAttachmentArrayNonUniformIndexingNative
+    // gen something for VkBool32: robustBufferAccessUpdateAfterBind
+    // gen something for VkBool32: quadDivergentImplicitLod
+    // gen something for uint32_t: maxPerStageDescriptorUpdateAfterBindSamplers
+    // gen something for uint32_t: maxPerStageDescriptorUpdateAfterBindUniformBuffers
+    // gen something for uint32_t: maxPerStageDescriptorUpdateAfterBindStorageBuffers
+    // gen something for uint32_t: maxPerStageDescriptorUpdateAfterBindSampledImages
+    // gen something for uint32_t: maxPerStageDescriptorUpdateAfterBindStorageImages
+    // gen something for uint32_t: maxPerStageDescriptorUpdateAfterBindInputAttachments
+    // gen something for uint32_t: maxPerStageUpdateAfterBindResources
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindSamplers
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindUniformBuffers
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindUniformBuffersDynamic
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindStorageBuffers
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindStorageBuffersDynamic
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindSampledImages
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindStorageImages
+    // gen something for uint32_t: maxDescriptorSetUpdateAfterBindInputAttachments
+}
+message VkDescriptorSetVariableDescriptorCountAllocateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: descriptorSetCount
+    // gen something for uint32_t: pDescriptorCounts
+}
+message VkDescriptorSetVariableDescriptorCountLayoutSupportEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxVariableDescriptorCount
+}
+message VkDeviceQueueGlobalPriorityCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkQueueGlobalPriorityEXT: globalPriority
+}
+message VkImportMemoryHostPointerInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkExternalMemoryHandleTypeFlagBits: handleType
+    // gen something for void: pHostPointer
+}
+message VkMemoryHostPointerPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: memoryTypeBits
+}
+message VkPhysicalDeviceExternalMemoryHostPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkDeviceSize: minImportedHostPointerAlignment
+}
+message VkPhysicalDeviceShaderCorePropertiesAMD
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: shaderEngineCount
+    // gen something for uint32_t: shaderArraysPerEngineCount
+    // gen something for uint32_t: computeUnitsPerShaderArray
+    // gen something for uint32_t: simdPerComputeUnit
+    // gen something for uint32_t: wavefrontsPerSimd
+    // gen something for uint32_t: wavefrontSize
+    // gen something for uint32_t: sgprsPerSimd
+    // gen something for uint32_t: minSgprAllocation
+    // gen something for uint32_t: maxSgprAllocation
+    // gen something for uint32_t: sgprAllocationGranularity
+    // gen something for uint32_t: vgprsPerSimd
+    // gen something for uint32_t: minVgprAllocation
+    // gen something for uint32_t: maxVgprAllocation
+    // gen something for uint32_t: vgprAllocationGranularity
+}
+message VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: maxVertexAttribDivisor
+}
+message VkVertexInputBindingDivisorDescriptionEXT
+{
+    // gen something for uint32_t: binding
+    // gen something for uint32_t: divisor
+}
+message VkPipelineVertexInputDivisorStateCreateInfoEXT
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: vertexBindingDivisorCount
+    // gen something for VkVertexInputBindingDivisorDescriptionEXT: pVertexBindingDivisors
+}
+message VkQueueFamilyCheckpointPropertiesNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineStageFlags: checkpointExecutionStageMask
+}
+message VkCheckpointDataNV
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for VkPipelineStageFlagBits: stage
+    // gen something for void: pCheckpointMarker
+}
+message VkImportColorBufferGOOGLE
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint32_t: colorBuffer
+}
+message VkImportPhysicalAddressGOOGLE
+{
+    // gen something for VkStructureType: sType
+    // gen something for void: pNext
+    // gen something for uint64_t: physicalAddress
+    // gen something for VkDeviceSize: size
+    // gen something for VkFormat: format
+    // gen something for VkImageTiling: tiling
+    // gen something for uint32_t: tilingParameter
+}
