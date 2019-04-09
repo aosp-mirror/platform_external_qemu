@@ -41,6 +41,14 @@ void RecordMacroPage::loadUi() {
     // Clear all items. Might need to optimize this and keep track of existing.
     mUi->macroList->clear();
 
+    // Descriptions as QStrings have to be initialized here to use tr().
+    mDescriptions = {{"Reset_position", tr("Set all sensor values to zero.")},
+                     {"Track_horizontal_plane",
+                      tr("Circle around the carpet while looking at it.")},
+                     {"Track_vertical_plane",
+                      tr("Look at the wall next to the tv and move.")},
+                     {"Walk_to_image_room", tr("Move to the adjacent room.")}};
+
     const std::string macrosPath = getMacrosDirectory();
     std::vector<std::string> macroFileNames =
             System::get()->scanDirEntries(macrosPath);
@@ -53,12 +61,12 @@ void RecordMacroPage::loadUi() {
         listItem->setData(Qt::UserRole, macroNameData);
 
         RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
+        macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         std::replace(macroName.begin(), macroName.end(), '_', ' ');
         macroName.append(" (Preset macro)");
         macroSavedItem->setName(macroName.c_str());
-        macroSavedItem->setDisplayInfo(tr("Preset macro"));
 
-        listItem->setSizeHint(macroSavedItem->sizeHint());
+        listItem->setSizeHint(QSize(macroSavedItem->sizeHint().width(), 50));
 
         mUi->macroList->addItem(listItem);
         mUi->macroList->setItemWidget(listItem, macroSavedItem);
@@ -194,15 +202,14 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
 }
 
 void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
+    const std::string macroName = getMacroNameFromItem(listItem);
     RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
-    macroSavedItem->setDisplayInfo(tr("Preset macro"));
+    macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
 
     enableMacroItems();
 
     mMacroPlaying = false;
     setMacroUiState(MacroUiState::PreviewFinished);
-
-    const std::string macroName = getMacroNameFromItem(listItem);
     showPreviewFrame(macroName);
 }
 
