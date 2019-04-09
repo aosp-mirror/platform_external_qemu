@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea8f460a_09abd89b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-09T19:24:01Z",
+      "side": 1,
+      "message": "Resets sensors to default.",
+      "range": {
+        "startLine": 45,
+        "startChar": 66,
+        "endLine": 45,
+        "endChar": 73
+      },
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05f180b8_303302d9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-09T19:24:01Z",
+      "side": 1,
+      "message": "Circles around the rug.",
+      "range": {
+        "startLine": 47,
+        "startChar": 26,
+        "endLine": 47,
+        "endChar": 71
+      },
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25ddad0c_ceea8c1b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-09T19:24:01Z",
+      "side": 1,
+      "message": "Moves to the dining room.",
+      "range": {
+        "startLine": 50,
+        "startChar": 48,
+        "endLine": 50,
+        "endChar": 74
+      },
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bcc84dd_7d0cbc15",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-09T19:24:01Z",
+      "side": 1,
+      "message": "I think these might be a case for future-tense:\nLooks at the wall next to the TV",
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
