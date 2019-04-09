@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d4aa30a0_95d56c45",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-09T19:37:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea8f460a_09abd89b",
+      "range": {
+        "startLine": 45,
+        "startChar": 66,
+        "endLine": 45,
+        "endChar": 73
+      },
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05f180b8_303302d9",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "e811df5034f3dee424ed812d1970c260531544fa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a71d6ae_7b240747",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-09T19:37:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05f180b8_303302d9",
+      "range": {
+        "startLine": 47,
+        "startChar": 26,
+        "endLine": 47,
+        "endChar": 71
+      },
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -85,6 +133,48 @@
       "revId": "e811df5034f3dee424ed812d1970c260531544fa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "221972bb_b2ebea26",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-09T19:37:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2bcc84dd_7d0cbc15",
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "723452f1_5350c2ee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-09T19:37:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25ddad0c_ceea8c1b",
+      "range": {
+        "startLine": 50,
+        "startChar": 48,
+        "endLine": 50,
+        "endChar": 74
+      },
+      "revId": "e811df5034f3dee424ed812d1970c260531544fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
