@@ -14,13 +14,14 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-events.h"
 #include "android/metrics/metrics.h"
 #include "android/test/checkboot.h"
 #include "android/utils/filelock.h"
-
 #define DEBUG 0
 
 #if DEBUG
@@ -39,6 +40,8 @@ static android::base::LazyInstance<EmulatorNoQtNoWindow::Ptr> sNoWindowInstance 
 void EmulatorNoQtNoWindow::create() {
     sNoWindowInstance.get() = Ptr(new EmulatorNoQtNoWindow());
 }
+
+const UiEmuAgent* EmulatorNoQtNoWindow::sUiEmuAgent = nullptr;
 
 EmulatorNoQtNoWindow::EmulatorNoQtNoWindow()
     : mLooper(android::base::Looper::create()),
@@ -116,6 +119,107 @@ void EmulatorNoQtNoWindow::waitThread() {
 #else
     pthread_join(eventThread, nullptr);
 #endif
+}
+
+void EmulatorNoQtNoWindow::fold() {
+    sendFoldedArea();
+    forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+    forwardGenericEventToEmulator(EV_SYN, 0, 0);
+}
+
+void EmulatorNoQtNoWindow::unFold() {
+    forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+    forwardGenericEventToEmulator(EV_SYN, 0, 0);
+}
+
+void EmulatorNoQtNoWindow::sendFoldedArea() {
+    if (notSupoortFold()) {
+        return;
+    }
+    int xOffset = 0;
+    int yOffset = 0;
+//  TODO: support none-0 offset
+//    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+//    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+    char foldedArea[64];
+    sprintf(foldedArea, "folded-area %d,%d,%d,%d",
+            xOffset,
+            yOffset,
+            xOffset + width,
+            yOffset + height);
+    mAdbInterface->enqueueCommand(
+            {"shell", "wm", foldedArea},
+            [](const android::emulation::OptionalAdbCommandResult& result) {
+                if (result && result->exit_code == 0) {
+                    D("'fold-area' command succeeded\n");
+                }});
+}
+
+bool EmulatorNoQtNoWindow::notSupoortFold() {
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+
+    if (xOffset < 0 || xOffset > 9999 ||
+        yOffset < 0 || yOffset > 9999 ||
+        width   < 1 || width   > 9999 ||
+        height  < 1 || height  > 9999 ||
+        //TODO: need 29
+        avdInfo_getApiLevel(android_avdInfo) < 28) {
+        return true;
+    }
+    return false;
+}
+
+void EmulatorNoQtNoWindow::forwardGenericEventToEmulator(int type, int code, int value) {
+    SkinEvent* skin_event = new SkinEvent();
+    skin_event->type = kEventGeneric;
+    SkinEventGenericData& genericData = skin_event->u.generic_event;
+    genericData.type = type;
+    genericData.code = code;
+    genericData.value = value;
+
+    queueSkinEvent(skin_event);
+}
+
+void EmulatorNoQtNoWindow::queueSkinEvent(SkinEvent* event) {
+    android::base::AutoLock lock(mSkinEventQueueLock);
+    const bool firstEvent = mSkinEventQueue.empty();
+    mSkinEventQueue.push(event);
+    lock.unlock();
+
+    const auto uiAgent = sUiEmuAgent;
+    if (firstEvent && uiAgent && uiAgent->userEvents &&
+        uiAgent->userEvents->onNewUserEvent) {
+        // We know that as soon as emulator starts processing user events
+        // it processes them until there are none. So we should only notify it
+        // if this event is the first one.
+        uiAgent->userEvents->onNewUserEvent();
+    }
+}
+
+void EmulatorNoQtNoWindow::pollEvent(SkinEvent* event, bool* hasEvent) {
+    android::base::AutoLock lock(mSkinEventQueueLock);
+    if (mSkinEventQueue.empty()) {
+        lock.unlock();
+        *hasEvent = false;
+    } else {
+        SkinEvent* newEvent = mSkinEventQueue.front();
+        mSkinEventQueue.pop();
+        lock.unlock();
+        *hasEvent = true;
+
+        memcpy(event, newEvent, sizeof(SkinEvent));
+        delete newEvent;
+    }
+}
+
+//static
+void EmulatorNoQtNoWindow::earlyInitialization(const UiEmuAgent* agent) {
+    sUiEmuAgent = agent;
 }
 
 extern "C" void qemu_system_shutdown_request(QemuShutdownCause cause);

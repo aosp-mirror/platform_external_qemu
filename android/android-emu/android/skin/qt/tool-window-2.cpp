@@ -185,7 +185,10 @@ void ToolWindow2::handleUICommand(QtUICommand cmd, bool down) {
                 D("sending SW_LID true\n");
                 forwardGenericEventToEmulator(EV_SW, SW_LID, true);
                 forwardGenericEventToEmulator(EV_SYN, 0, 0);
-            }
+//    mEmulatorWindow->showMessage(QString("Folded momde, press Ctrl+U to unfold"),
+  //                               Ui::OverlayMessageType::Info,
+    //                             1000);
+           }
             break;
         case QtUICommand::UNFOLD:
             if (isVisible() && mTools2Ui->expandHoriz->isVisible() && down) {
@@ -196,6 +199,9 @@ void ToolWindow2::handleUICommand(QtUICommand cmd, bool down) {
                 D("sending SW_LID false\n");
                 forwardGenericEventToEmulator(EV_SW, SW_LID, false);
                 forwardGenericEventToEmulator(EV_SYN, 0, 0);
+//    mEmulatorWindow->showMessage(QString("Unfolded momde, press Ctrl+F to fold"),
+  //                               Ui::OverlayMessageType::Info,
+    //                             1000);
             }
             break;
         default:;

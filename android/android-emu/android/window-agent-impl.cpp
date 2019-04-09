@@ -84,7 +84,19 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         // Don't necessarily perform the func since the
                         // user doesn't get a chance to dismiss.
                     }
-                }
+                },
+        .fold =
+              [](bool is_fold) {
+                  if (const auto win = EmulatorQtWindow::getInstance()) {
+                      QtUICommand cmd = is_fold ? QtUICommand::FOLD : QtUICommand::UNFOLD;
+                      win->runOnUiThread([win, cmd]() {
+                          if (!ToolWindow2::shouldHide()) {
+                              win->toolWindow2()->handleUICommand(cmd, true);
+                          }
+                      });
+                  }
+              }
+
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

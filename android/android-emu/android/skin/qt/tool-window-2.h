@@ -87,6 +87,7 @@ public:
     static const int TOOL_GAP_FRAMELESS = 4;
 
     bool shouldClose();
+    void handleUICommand(QtUICommand cmd, bool down);
 
 signals:
     void guestClipboardChanged(QString text);
@@ -96,7 +97,6 @@ private:
     static void forwardGenericEventToEmulator(int type, int code, int value);
     static void sendFoldedArea();
     void addShortcutKeysToKeyStore();
-    void handleUICommand(QtUICommand cmd, bool down);
     void ensureExtendedWindowExists();
 
     // Handle a full key press (down + up) in a single call.
