@@ -19,6 +19,7 @@
 
 #include <QWidget>
 #include <memory>
+#include <unordered_map>
 
 struct QAndroidAutomationAgent;
 
@@ -54,12 +55,14 @@ private:
     void disableMacroItemsExcept(QListWidgetItem* listItem);
     void enableMacroItems();
     void showPreviewFrame(const std::string& previewName);
+    std::string getMacroNameFromItem(QListWidgetItem* listItem);
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
     std::unique_ptr<Ui::RecordMacroPage> mUi;
+    std::unordered_map<std::string, QString> mDescriptions;
     MacroUiState mState = MacroUiState::Waiting;
 
     static const QAndroidAutomationAgent* sAutomationAgent;
