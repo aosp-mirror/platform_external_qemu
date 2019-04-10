@@ -70,8 +70,6 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
 
     png_get_IHDR(p, pi, &width, &height, &bitdepth, &colortype,
                  &imethod, &cmethod, &fmethod);
-//    printf("PNG: %d x %d (d=%d, c=%d)\n",
-//           width, height, bitdepth, colortype);
 
     switch(colortype){
     case PNG_COLOR_TYPE_PALETTE:
@@ -127,36 +125,41 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
     return (void*) data;
 }
 
-void savepng(const char* fn, unsigned int nChannels, unsigned int width,
-        unsigned int height, SkinRotation rotation, void* pixels) {
+int write_png_user_function(png_structp p,
+                            png_infop pi,
+                             unsigned int nChannels,
+                             unsigned int width,
+                             unsigned int height,
+                             SkinRotation rotation,
+                             void* pixels) {
     if (nChannels != 3 && nChannels != 4) {
-        fprintf(stderr, "savepng only support 3 or 4 channel images\n");
-        return;
+        fprintf(stderr, "write_png only support 3 or 4 channel images\n");
+        return 0;
     }
-    bool isPortrait = rotation == SKIN_ROTATION_0 ||
-            rotation == SKIN_ROTATION_180;
+    if (!pixels) {
+        fprintf(stderr, "Pixels are null.\n");
+        return 0;
+    }
+
+    bool isPortrait =
+            rotation == SKIN_ROTATION_0 || rotation == SKIN_ROTATION_180;
     unsigned int rows = isPortrait ? height : width;
     unsigned int cols = isPortrait ? width : height;
-    FILE *fp = android_fopen(fn, "wb");
-    if (!fp) {
-        LOG("Unable to write to file %s.\n", fn);
-        return;
+
+    if (setjmp(png_jmpbuf(p))) {
+        LOG("Failed to set IHDR header\n");
+        return 0;
     }
-    png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL,
-            NULL);
-    png_infop pi = png_create_info_struct(p);
-
-    setjmp(png_jmpbuf(p));
-    png_init_io(p, fp);
-
-    setjmp(png_jmpbuf(p));
     png_set_IHDR(p, pi, cols, rows, 8,
-            nChannels == 3 ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,
-            PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-            PNG_FILTER_TYPE_DEFAULT);
+                 nChannels == 3 ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,
+                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
     png_write_info(p, pi);
 
-    setjmp(png_jmpbuf(p));
+    if (setjmp(png_jmpbuf(p))) {
+        LOG("Failed to write a row.\n");
+        return 0;
+    }
     if (rotation == SKIN_ROTATION_0) {
         unsigned int i = 0;
         for (i = 0; i < height; i++) {
@@ -175,18 +178,18 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
                 src = pixels;
                 break;
             case SKIN_ROTATION_90:
-                srcDelta0 = - nChannels - nChannels * width;
+                srcDelta0 = -nChannels - nChannels * width;
                 srcDelta1 = nChannels + nChannels * width * height;
                 src = pixels + nChannels * width * (height - 1);
                 break;
             case SKIN_ROTATION_180:
-                srcDelta0 = - nChannels * 2;
+                srcDelta0 = -nChannels * 2;
                 srcDelta1 = 0;
                 src = pixels + nChannels * (width * height - 1);
                 break;
             case SKIN_ROTATION_270:
-                srcDelta0 = - nChannels + nChannels * width;
-                srcDelta1 = - nChannels - nChannels * width * height;
+                srcDelta0 = -nChannels + nChannels * width;
+                srcDelta1 = -nChannels - nChannels * width * height;
                 src = pixels + nChannels * (width - 1);
                 break;
         }
@@ -197,7 +200,7 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
             char* dst = rowBuffer;
             for (j = 0; j < cols; j++) {
                 for (c = 0; c < nChannels; c++) {
-                    *(dst ++) = *(src ++);
+                    *(dst++) = *(src++);
                 }
                 src += srcDelta0;
             }
@@ -206,8 +209,43 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
         }
         free(rowBuffer);
     }
-    setjmp(png_jmpbuf(p));
+    if (setjmp(png_jmpbuf(p))) {
+        LOG("Failed to write end header\n");
+        return 0;
+    }
     png_write_end(p, NULL);
+    return 1;
+}
+
+void savepng(const char* fn,
+             unsigned int nChannels,
+             unsigned int width,
+             unsigned int height,
+             SkinRotation rotation,
+             void* pixels) {
+    if (nChannels != 3 && nChannels != 4) {
+        fprintf(stderr, "savepng only support 3 or 4 channel images\n");
+    }
+
+    FILE* fp = android_fopen(fn, "wb");
+    if (!fp) {
+        LOG("Unable to write to file %s.\n", fn);
+        return;
+    }
+    png_structp p =
+            png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+    png_set_write_fn(p, 0, 0, 0);
+    if (setjmp(png_jmpbuf(p))) {
+        LOG("Unable to initialize png lib.\n");
+        return;
+    }
+    png_init_io(p, fp);
+
+
+    png_infop pi = png_create_info_struct(p);
+    write_png_user_function(p, pi, nChannels, width, height, rotation, pixels);
+    png_destroy_write_struct(&p, &pi);
 
     fclose(fp);
 }
@@ -368,8 +406,6 @@ void *readpng(const unsigned char *base, size_t   size, unsigned *_width, unsign
 
     png_get_IHDR(p, pi, &width, &height, &bitdepth, &colortype,
                  &imethod, &cmethod, &fmethod);
-//    printf("PNG: %d x %d (d=%d, c=%d)\n",
-//           width, height, bitdepth, colortype);
 
     switch(colortype){
     case PNG_COLOR_TYPE_PALETTE:
