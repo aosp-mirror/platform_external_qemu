@@ -1,0 +1,422 @@
+#version 450
+
+precision highp int;
+
+const uint VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK = 147;
+const uint VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK = 148;
+const uint VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK = 149;
+const uint VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK = 150;
+const uint VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK = 151;
+const uint VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK = 152;
+const uint VK_FORMAT_EAC_R11_UNORM_BLOCK = 153;
+const uint VK_FORMAT_EAC_R11_SNORM_BLOCK = 154;
+const uint VK_FORMAT_EAC_R11G11_UNORM_BLOCK = 155;
+const uint VK_FORMAT_EAC_R11G11_SNORM_BLOCK = 156;
+
+const int kLookup[8] = { 0, 1, 2, 3, -4, -3, -2, -1 };
+
+const ivec4 kRGBModifierTable[] = {
+/* 0 */{2, 8, -2, -8},
+/* 1 */{5, 17, -5, -17},
+/* 2 */{9, 29, -9, -29},
+/* 3 */{13, 42, -13, -42},
+/* 4 */{18, 60, -18, -60},
+/* 5 */{24, 80, -24, -80},
+/* 6 */{33, 106, -33, -106},
+/* 7 */{47, 183, -47, -183 }};
+
+const ivec4 kRGBOpaqueModifierTable[] = {
+/* 0 */{0, 8, 0, -8},
+/* 1 */{0, 17, 0, -17},
+/* 2 */{0, 29, 0, -29},
+/* 3 */{0, 42, 0, -42},
+/* 4 */{0, 60, 0, -60},
+/* 5 */{0, 80, 0, -80},
+/* 6 */{0, 106, 0, -106},
+/* 7 */{0, 183, 0, -183} };
+
+const ivec4 kAlphaModifierTable[] = {
+/* 0 */ {-3, -6, -9, -15}, {2, 5, 8, 14},
+/* 1 */ {-3, -7, -10, -13}, {2, 6, 9, 12},
+/* 2 */ {-2, -5, -8, -13}, {1, 4, 7, 12},
+/* 3 */ {-2, -4, -6, -13}, {1, 3, 5, 12},
+/* 4 */ {-3, -6, -8, -12}, {2, 5, 7, 11},
+/* 5 */ {-3, -7, -9, -11}, {2, 6, 8, 10},
+/* 6 */ {-4, -7, -8, -11}, {3, 6, 7, 10},
+/* 7 */ {-3, -5, -8, -11}, {2, 4, 7, 10},
+/* 8 */ {-2, -6, -8, -10}, {1, 5, 7, 9},
+/* 9 */ {-2, -5, -8, -10}, {1, 4, 7, 9},
+/* 10 */ {-2, -4, -8, -10}, {1, 3, 7, 9},
+/* 11 */ {-2, -5, -7, -10}, {1, 4, 6, 9},
+/* 12 */ {-3, -4, -7, -10}, {2, 3, 6, 9},
+/* 13 */ {-1, -2, -3, -10}, {0, 1, 2, 9},
+/* 14 */ {-4, -6, -8, -9}, {3, 5, 7, 8},
+/* 15 */ {-3, -5, -7, -9}, {2, 4, 6, 8}
+};
+
+bool isOverflowed(int base, int diff) {
+    int val = int(0x1f & base) + kLookup[0x7 & diff];
+    return (val < 0) || (val >= 32);
+}
+
+int convert4To8(int b) {
+    int c = b & 0xf;
+    return (c << 4) | c;
+}
+
+int convert5To8(int b) {
+    int c = b & 0x1f;
+    return (c << 3) | (c >> 2);
+}
+
+int convert6To8(int b) {
+    int c = b & 0x3f;
+    return (c << 2) | (c >> 4);
+}
+
+int convert7To8(int b) {
+    int c = b & 0x7f;
+    return (c << 1) | (c >> 6);
+}
+
+int convertDiff(int base, int diff) {
+    return convert5To8(int(int(0x1f & base) + kLookup[0x7 & diff]));
+}
+
+int _clamp(int x) {
+    //return int(clamp(x, 0, 255));
+    return (x >= 0 ? (x < 255 ? x : 255) : 0);
+}
+
+ivec3 _clamp(ivec3 x) {
+    //return ivec3(clamp(x, 0, 255));
+    return ivec3(_clamp(x.r), _clamp(x.g), _clamp(x.b));
+}
+
+ivec4[16] etc2_T_H_index(ivec3[4] clrTable, int low,
+                           bool isPunchthroughAlpha, bool opaque) {
+    ivec4 ret[16];
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            int k = y + x * 4;
+            int msb = (low >> (k + 15)) & 2;
+            int lsb = (low >> k) & 1;
+            if (isPunchthroughAlpha && (!opaque) && (msb != 0) && (lsb == 0)) {
+                // rgba all 0
+                ret[y * 4 + x] = ivec4(0, 0, 0, 0);
+            } else {
+                int offset = lsb | msb;
+                ret[y * 4 + x] = ivec4(clrTable[offset], 255);
+            }
+        }
+    }
+    return ret;
+}
+
+ivec4[16] etc2_decode_block_T(int high, int low,
+        bool isPunchthroughAlpha, bool opaque) {
+    const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
+    int r1, r2, g1, g2, b1, b2;
+    r1 = convert4To8((((high >> 27) & 3) << 2) | ((high >> 24) & 3));
+    g1 = convert4To8(high >> 20);
+    b1 = convert4To8(high >> 16);
+    r2 = convert4To8(high >> 12);
+    g2 = convert4To8(high >> 8);
+    b2 = convert4To8(high >> 4);
+    // 3 bits intense modifier
+    int intenseIdx = int((((high >> 2) & 3) << 1) | (high & 1));
+    int intenseMod = LUT[intenseIdx];
+    ivec3 clrTable[4];
+    clrTable[0] = ivec3(r1, g1, b1);
+    clrTable[1] = ivec3(_clamp(int(r2) + intenseMod), _clamp(int(g2) + intenseMod), _clamp(int(b2) + intenseMod));
+    clrTable[2] = ivec3(r2, g2, b2);
+    clrTable[3] = ivec3(_clamp(int(r2) - intenseMod), _clamp(int(g2) - intenseMod), _clamp(int(b2) - intenseMod));
+    return etc2_T_H_index(clrTable, low, isPunchthroughAlpha, opaque);
+}
+
+ivec4[16] etc2_decode_block_H(int high, int low,
+        bool isPunchthroughAlpha, bool opaque) {
+    const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
+    ivec3 rgb1, rgb2;
+    rgb1.r = convert4To8(high >> 27);
+    rgb1.g = convert4To8(((high >> 24) << 1) | ((high >> 20) & 1));
+    rgb1.b = convert4To8(((high >> 19) << 3) | ((high >> 15) & 7));
+    rgb2.r = convert4To8(high >> 11);
+    rgb2.g = convert4To8(high >> 7);
+    rgb2.b = convert4To8(high >> 3);
+    // 3 bits intense modifier
+    int intenseIdx = high & 4;
+    intenseIdx |= (high & 1) << 1;
+    intenseIdx |= int(((rgb1.r << 16) | (rgb1.g << 8) | rgb1.b) >= ((rgb2.r << 16) | (rgb2.g << 8) | rgb2.b));
+    int intenseMod = LUT[intenseIdx];
+    ivec3 clrTable[4];
+    clrTable[0] = _clamp(ivec3(rgb1) + intenseMod);
+    clrTable[1] = _clamp(ivec3(rgb1) - intenseMod);
+    clrTable[2] = _clamp(ivec3(rgb2) + intenseMod);
+    clrTable[3] = _clamp(ivec3(rgb2) - intenseMod);
+    return etc2_T_H_index(clrTable, low, isPunchthroughAlpha, opaque);
+}
+
+ivec4[16] etc2_decode_block_P(int high, int low,
+        bool isPunchthroughAlpha) {
+    //int ro, go, bo, rh, gh, bh, rv, gv, bv;
+    ivec3 rgbo, rgbh, rgbv;
+    rgbo.r = int(convert6To8(high >> 25));
+    rgbo.g = int(convert7To8(((high >> 24) << 6) | ((high >> 17) & 63)));
+    rgbo.b = int(convert6To8(((high >> 16) << 5)
+            | (((high >> 11) & 3 ) << 3)
+            | ((high >> 7) & 7)));
+    rgbh.r = int(convert6To8(((high >> 2) << 1) | (high & 1)));
+    rgbh.g = int(convert7To8(low >> 25));
+    rgbh.b = int(convert6To8(low >> 19));
+    rgbv.r = int(convert6To8(low >> 13));
+    rgbv.g = int(convert7To8(low >> 6));
+    rgbv.b = int(convert6To8(low));
+    ivec4 ret[16];
+    for (int i = 0; i < 16; i++) {
+        int y = i >> 2;
+        int x = i & 3;
+        //ret[i] = ivec4(_clamp((x * (rgbh - rgbo) + y * (rgbv - rgbo) + 4 * rgbo + 2) >> 2), 255);
+        ret[i].r = _clamp((x * (rgbh.r - rgbo.r) + y * (rgbv.r - rgbo.r) + 4 * rgbo.r + 2) >> 2);
+        ret[i].g = _clamp((x * (rgbh.g - rgbo.g) + y * (rgbv.g - rgbo.g) + 4 * rgbo.g + 2) >> 2);
+        ret[i].b = _clamp((x * (rgbh.b - rgbo.b) + y * (rgbv.b - rgbo.b) + 4 * rgbo.b + 2) >> 2);
+        ret[i].a = 255;
+    }
+    return ret;
+}
+
+void decode_subblock(inout ivec4 pOut[16], int r, int g, int b, ivec4 table,
+        int low, bool second, bool flipped, bool isPunchthroughAlpha,
+        bool opaque) {
+    int baseX = 0;
+    int baseY = 0;
+    if (second) {
+        if (flipped) {
+            baseY = 2;
+        } else {
+            baseX = 2;
+        }
+    }
+    for (int i = 0; i < 8; i++) {
+        int x, y;
+        if (flipped) {
+            x = baseX + (i >> 1);
+            y = baseY + (i & 1);
+        } else {
+            x = baseX + (i >> 2);
+            y = baseY + (i & 3);
+        }
+        int k = y + (x * 4);
+        int msb = ((low >> (k + 15)) & 2);
+        int lsb = ((low >> k) & 1);
+        int q = x + 4 * y;
+        if (isPunchthroughAlpha && (!opaque) && (msb != 0) && (lsb == 0)) {
+            // rgba all 0
+            pOut[q] = ivec4(0, 0, 0, 0);
+        } else {
+            int offset = lsb | msb;
+            int delta = table[offset];
+            pOut[q] = ivec4(_clamp(int(r) + delta),
+                _clamp(int(g) + delta),
+                _clamp(int(b) + delta),
+                255);
+        }
+    }
+}
+
+ivec4[16] allZeros() {
+    ivec4[16] ret;
+    for (int i = 0; i < 16; i++) {
+        ret[i] = ivec4(0);
+    }
+    return ret;
+}
+
+ivec4[16] etc2_decode_rgb_block(int high, int low, bool isPunchthroughAlpha) {
+    bool opaque = (((high >> 1) & 1) != 0);
+    int r1, r2, g1, g2, b1, b2;
+    if (isPunchthroughAlpha || ((high & 2) != 0)) {
+        // differntial
+        int rBase = high >> 27;
+        int gBase = high >> 19;
+        int bBase = high >> 11;
+        if (isOverflowed(rBase, high >> 24)) {
+            //return allZeros();
+            return etc2_decode_block_T(high, low, isPunchthroughAlpha, opaque);
+        }
+        if (isOverflowed(gBase, high >> 16)) {
+            //return allZeros();
+            return etc2_decode_block_H(high, low, isPunchthroughAlpha, opaque);
+        }
+        if (isOverflowed(bBase, high >> 8)) {
+            //return allZeros();
+            return etc2_decode_block_P(high, low, isPunchthroughAlpha);
+        }
+        r1 = convert5To8(rBase);
+        r2 = convertDiff(rBase, high >> 24);
+        g1 = convert5To8(gBase);
+        g2 = convertDiff(gBase, high >> 16);
+        b1 = convert5To8(bBase);
+        b2 = convertDiff(bBase, high >> 8);
+        //return allZeros();
+
+    } else {
+        // not differential
+        r1 = convert4To8(high >> 28);
+        r2 = convert4To8(high >> 24);
+        g1 = convert4To8(high >> 20);
+        g2 = convert4To8(high >> 16);
+        b1 = convert4To8(high >> 12);
+        b2 = convert4To8(high >> 8);
+        //return allZeros();
+    }
+    int tableIndexA = 7 & (high >> 5);
+    int tableIndexB = 7 & (high >> 2);
+    ivec4 tableA;
+    ivec4 tableB;
+    if (opaque || !isPunchthroughAlpha) {
+        tableA = kRGBModifierTable[tableIndexA];
+        tableB = kRGBModifierTable[tableIndexB];
+    } else {
+        tableA = kRGBOpaqueModifierTable[tableIndexA];
+        tableB = kRGBOpaqueModifierTable[tableIndexB];
+    }
+    //const ivec4 rgbModifierTable[8] = opaque || !isPunchthroughAlpha ?
+    //                              kRGBModifierTable : kRGBOpaqueModifierTable;
+    //const ivec4 tableA = rgbModifierTable[tableIndexA];
+    //const ivec4 tableB = rgbModifierTable[tableIndexB];
+    bool flipped = ((high & 1) != 0);
+    ivec4[16] ret;
+    decode_subblock(ret, r1, g1, b1, tableA, low, false, flipped,
+                    isPunchthroughAlpha, opaque);
+    decode_subblock(ret, r2, g2, b2, tableB, low, true, flipped,
+                    isPunchthroughAlpha, opaque);
+    return ret;
+}
+
+int[16] eac_decode_single_channel_block(int high, int low,
+                                     int decodedElementBytes, bool isSigned) {
+    int base_codeword = high >> 24;
+    if (isSigned) {
+        base_codeword &= 0xff;
+    }
+    if (base_codeword == -128) base_codeword = -127;
+    int multiplier = high >> 16 >> 4;
+    multiplier &= 7;
+    int tblIdx = (high >> 16) & 15;
+    const ivec4 table0 = kAlphaModifierTable[tblIdx * 2];
+    const ivec4 table1 = kAlphaModifierTable[tblIdx * 2 + 1];
+    const int p[16] = {
+        high >> 13,
+        high >> 10,
+        high >> 7,
+        high >> 4,
+        high >> 1,
+        (high << 2) | (low >> 30),
+        low >> 27,
+        low >> 24,
+        low >> 21,
+        low >> 18,
+        low >> 15,
+        low >> 12,
+        low >> 9,
+        low >> 6,
+        low >> 3,
+        low
+    };
+    int result[16];
+    // position in a byte of the next 3-bit index:
+    // | a a a | b b b | c c c | d d d ...
+    // | byte               | byte...
+    for (int i = 0; i < 16; i ++) {
+        // flip x, y in output
+        int outIdx = (i % 4) * 4 + i / 4;
+        //etc1_byte* q = pOut + outIdx * decodedElementBytes;
+
+        int modifier = (p[i] & 7);
+        int modifierValue = modifier >= 4 ? table1[modifier - 4]
+                                          : table0[modifier];
+        int decoded = base_codeword + modifierValue * multiplier;
+        //if (decodedElementBytes == 1) {
+            result[outIdx] = _clamp(decoded);
+        //} 
+        /*else { // decodedElementBytes == 4
+            decoded *= 8;
+            if (multiplier == 0) {
+                decoded += modifierValue;
+            }
+            if (isSigned) {
+                decoded = clampSigned1023(decoded);
+                reinterpret_cast<float*>(q)[0] = (float)decoded / 1023.0;
+            } else {
+                decoded += 4;
+                decoded = clamp2047(decoded);
+                reinterpret_cast<float*>(q)[0] = (float)decoded / 2047.0;
+            }
+        }*/
+    }
+    return result;
+}
+
+int constructInt32(int a16, int b16) {
+    int a2 = (a16 & 0xff) << 8;
+    a2 |= (a16 >> 8) & 0xff;
+    int b2 = (b16 & 0xff) << 8;
+    b2 |= (b16 >> 8) & 0xff;
+    return (a2 << 16) | b2;
+}
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout (push_constant) uniform ImageFormatBlock {
+    uint compFormat;
+} u_pushConstant;
+
+layout (binding = 0, rgba16i) readonly uniform iimage2D u_image0;
+layout (binding = 1, rgba8ui) writeonly uniform uimage2D u_image1;
+
+void main(void) {
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    ivec4 srcBlock = ivec4(imageLoad(u_image0, pos));
+    //int[16] decompressedAlpha = eac_decode_single_channel_block(srcBlock.r,
+    //    srcBlock.g, 1, false);
+    //ivec4[16] decompressed = etc2_decode_rgb_block(srcBlock.b, srcBlock.a);
+
+    //ivec4[16] decompressed = etc2_decode_rgb_block((srcBlock[0] << 16) | (srcBlock[1] & 0xffff),
+    //        (srcBlock[2] << 16) | (srcBlock[3] & 0xffff));
+
+    bool isPunchthroughAlpha =
+        (u_pushConstant.compFormat == VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK
+        || u_pushConstant.compFormat == VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK);
+
+    ivec4[16] decompressed = etc2_decode_rgb_block(constructInt32(srcBlock[0], srcBlock[1]),
+            constructInt32(srcBlock[2], srcBlock[3]), isPunchthroughAlpha);
+
+    /*ivec2 decompSize = imageSize(u_image1);
+    ivec2 decompIdxBeg = pos * 4;
+    ivec2 decompIdxEnd = min(decompSize, decompIdxBeg+ 4);
+    for (int y = decompIdxBeg.y; y < decompIdxEnd.y; y++) {
+        for (int x = decompIdxBeg.x; x < decompIdxEnd.x; x++) {
+            imageStore(u_image1, ivec2(x, y), decompressed[(y - decompIdxBeg.y) * 4 + x - decompIdxBeg.x]);
+        }
+    }*/
+
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            imageStore(u_image1, pos * 4 + ivec2(x, y), decompressed[y * 4 + x]);
+        }
+    }
+
+
+    /*ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    ivec4 srcBlock = ivec4(imageLoad(u_image0, pos));
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            uint value = srcBlock[y];
+            value = (value >> ((x / 2) * 8)) & 255;
+            imageStore(u_image1, pos * 4 + ivec2(x, y), uvec4(value, value, value, 255));
+            //imageStore(u_image1, pos * 4 + ivec2(x, y), uvec4(255, 0, 255, 255));
+            //imageStore(u_image1, pos * 4 + ivec2(x, y), uvec4(pos* 4 + ivec2(x, y), 0, 255));
+        }
+    }*/
+}
