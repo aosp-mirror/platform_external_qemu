@@ -521,6 +521,11 @@ public:
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
 
+    void on_vkCmdBindPipeline(android::base::Pool* pool,
+                              VkCommandBuffer commandBuffer,
+                              VkPipelineBindPoint pipelineBindPoint,
+                              VkPipeline pipeline);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
