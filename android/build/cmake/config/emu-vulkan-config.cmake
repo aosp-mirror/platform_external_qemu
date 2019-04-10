@@ -15,6 +15,23 @@ get_filename_component(
 
 set(VULKAN_FOUND TRUE)
 
+set(VULKAN_SHADER_SRC_PATH "${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/libs/libOpenglRender/vulkan/")
+set(VULKAN_SHADER_DST_PATH "lib64/vulkan/shaders/")
+
+set(VULKAN_COMMON_DEPENDENCIES
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGB8_2DArray.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGB8_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGBA8_2DArray.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGBA8_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Unorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacR11Unorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Snorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacR11Snorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Unorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Unorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Snorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Snorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGB8_3D.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGB8_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGBA8_3D.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGBA8_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Unorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacR11Unorm_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Snorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacR11Snorm_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Unorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Unorm_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Snorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Snorm_3D.spv")
+
 if(LINUX_X86_64)
   set(VULKAN_DEPENDENCIES
       # Loader (for real)
@@ -24,7 +41,8 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/icds/libvk_swiftshader.so>lib64/vulkan/libvk_swiftshader.so"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
       # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator")
+      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
+      ${VULKAN_COMMON_DEPENDENCIES})
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
@@ -51,7 +69,9 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_parameter_validation.json>testlib64/layers/VkLayer_parameter_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_standard_validation.json>testlib64/layers/VkLayer_standard_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_threading.json>testlib64/layers/VkLayer_threading.json"
-      "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json")
+      "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json"
+      # Shaders
+      ${VULKAN_COMMON_DEPENDENCIES})
 elseif(DARWIN_X86_64)
   set(VULKAN_DEPENDENCIES
       # Swiftshader
@@ -68,7 +88,9 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/icds/portability-macos.json>lib64/vulkan/portability-macos.json"
       "${PREBUILT_ROOT}/icds/portability-macos-debug.json>lib64/vulkan/portability-macos-debug.json"
       "${PREBUILT_ROOT}/icds/libportability_icd-debug.dylib>lib64/vulkan/libportability_icd-debug.dylib"
-      "${PREBUILT_ROOT}/icds/libportability_icd.dylib>lib64/vulkan/libportability_icd.dylib")
+      "${PREBUILT_ROOT}/icds/libportability_icd.dylib>lib64/vulkan/libportability_icd.dylib"
+      # Shaders
+      ${VULKAN_COMMON_DEPENDENCIES})
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
@@ -86,7 +108,9 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_parameter_validation.json>testlib64/layers/VkLayer_parameter_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_standard_validation.json>testlib64/layers/VkLayer_standard_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_threading.json>testlib64/layers/VkLayer_threading.json"
-      "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json")
+      "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json"
+      # shaders
+      ${VULKAN_COMMON_DEPENDENCIES})
 elseif(WINDOWS)
   get_filename_component(PREBUILT_ROOT
                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
@@ -96,7 +120,8 @@ elseif(WINDOWS)
       "${PREBUILT_ROOT}/icds/vk_swiftshader.dll>lib64/vulkan/vk_swiftshader.dll"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
       # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator.exe>lib64/vulkan/glslangValidator.exe")
+      "${PREBUILT_ROOT}/glslangValidator.exe>lib64/vulkan/glslangValidator.exe"
+      ${VULKAN_COMMON_DEPENDENCIES})
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/vulkan-1.dll>testlib64/vulkan-1.dll"
@@ -131,6 +156,8 @@ elseif(WINDOWS)
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json"
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.pdb>testlib64/layers/VkLayer_unique_objects.pdb"
       "${PREBUILT_ROOT}/layers/VkLayer_vktrace_layer.dll>testlib64/layers/VkLayer_vktrace_layer.dll"
-      "${PREBUILT_ROOT}/layers/VkLayer_vktrace_layer.json>testlib64/layers/VkLayer_vktrace_layer.json")
+      "${PREBUILT_ROOT}/layers/VkLayer_vktrace_layer.json>testlib64/layers/VkLayer_vktrace_layer.json"
+      # Shaders
+      ${VULKAN_COMMON_DEPENDENCIES})
 endif()
 set(PACKAGE_EXPORT "VULKAN_DEPENDENCIES;VULKAN_TEST_DEPENDENCIES;VULKAN_FOUND")
