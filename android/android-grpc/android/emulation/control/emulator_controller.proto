@@ -40,23 +40,28 @@ service EmulatorController {
 
     rpc getVmConfiguration(google.protobuf.Empty) returns (VmConfiguration) {}
 
+    rpc getScreenshot(ImageFormat) returns (Image) {}
+
+    // TODO(jansene): Stream a series of images at the given framerate.
+    // rpc getRecording(ImageStream) returns (stream Image) {}
+
+    rpc usePhone(TelephoneOperation) returns (TelephoneResponse) {}
 }
 
 message VmConfiguration {
     enum VmHypervisorType {
-    HV_UNKNOWN = 0;
-    HV_NONE = 1;
-    HV_KVM = 2;
-    HV_HAXM = 3;
-    HV_HVF = 4;
-    HV_WHPX =5;
+        HV_UNKNOWN = 0;
+        HV_NONE = 1;
+        HV_KVM = 2;
+        HV_HAXM = 3;
+        HV_HVF = 4;
+        HV_WHPX = 5;
     };
 
     VmHypervisorType hypervisorType = 1;
-    int32 numberOfCpuCores =2 ;
+    int32 numberOfCpuCores = 2;
     int64 ramSizeBytes = 3;
 }
-
 
 message RotaryEvent {
     int32 delta = 1;
@@ -65,12 +70,12 @@ message RotaryEvent {
 message MouseEvent {
     int32 x = 1;
     int32 y = 2;
-    int32 z = 3;
-    int32 buttons = 4;
+    int32 buttons = 3;
 }
 
 message KeyEvent {
     uint32 key = 1;
+    string text = 2;
 }
 
 message TouchEvent {
@@ -118,6 +123,32 @@ message BatteryState {
     BatteryStatus status = 6;
 }
 
+message ImageStream {
+    uint32 framerate = 1;
+    ImageFormat format = 2;
+}
+
+message ImageFormat {
+    enum ImgFormat {
+        PNG = 0;
+        RAW = 1;
+        RGB888 = 2;
+        RGBA8888 = 3;
+    }
+    ImgFormat format = 1;
+    Rotation rotation = 2;
+}
+
+message Image {
+    ImageFormat format = 1;
+    uint32 width = 2;
+    uint32 height = 3;
+
+    // The organization of the pixels in the image buffer is from left to
+    // right and bottom up.
+    bytes image = 4;
+}
+
 message Rotation {
     enum SkinRotation {
         SKIN_ROTATION_0 = 0;
@@ -126,4 +157,30 @@ message Rotation {
         SKIN_ROTATION_270 = 3;
     }
     SkinRotation rotation = 1;
+}
+
+message TelephoneOperation {
+    enum Operation {
+        InitCall = 0;
+        AcceptCall = 1;
+        RejectCallExplicit = 2;
+        RejectCallBusy = 3;
+        DisconnectCall = 4;
+        PlaceCallOnHold = 5;
+        TakeCallOffHold = 6;
+    }
+    Operation operation = 1;
+    string number = 2;
+}
+
+message TelephoneResponse {
+    enum Response {
+        OK = 0;
+        BadOperation = 1;   // Enum out of range
+        BadNumber = 2;      // Mal-formed telephone number
+        InvalidAction = 3;  // E.g., disconnect when no call is in progress
+        ActionFailed = 4;   // Internal error
+        RadioOff = 5;       // Radio power off
+    }
+    Response response = 1;
 }

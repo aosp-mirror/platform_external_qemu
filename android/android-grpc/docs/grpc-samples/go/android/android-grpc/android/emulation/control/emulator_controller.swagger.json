@@ -1,0 +1,232 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "android/android-grpc/android/emulation/control/emulator_controller.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "BatteryStateBatteryCharger": {
+      "type": "string",
+      "enum": [
+        "BATTERY_CHARGER_NONE",
+        "BATTERY_CHARGER_AC",
+        "BATTERY_CHARGER_USB",
+        "BATTERY_CHARGER_WIRELESS"
+      ],
+      "default": "BATTERY_CHARGER_NONE"
+    },
+    "BatteryStateBatteryHealth": {
+      "type": "string",
+      "enum": [
+        "BATTERY_HEALTH_GOOD",
+        "BATTERY_HEALTH_FAILED",
+        "BATTERY_HEALTH_DEAD",
+        "BATTERY_HEALTH_OVERVOLTAGE",
+        "BATTERY_HEALTH_OVERHEATED"
+      ],
+      "default": "BATTERY_HEALTH_GOOD"
+    },
+    "BatteryStateBatteryStatus": {
+      "type": "string",
+      "enum": [
+        "BATTERY_STATUS_UNKNOWN",
+        "BATTERY_STATUS_CHARGING",
+        "BATTERY_STATUS_DISCHARGING",
+        "BATTERY_STATUS_NOT_CHARGING",
+        "BATTERY_STATUS_FULL"
+      ],
+      "default": "BATTERY_STATUS_UNKNOWN"
+    },
+    "ImageFormatImgFormat": {
+      "type": "string",
+      "enum": [
+        "PNG",
+        "RAW",
+        "RGB888",
+        "RGBA8888"
+      ],
+      "default": "PNG"
+    },
+    "RotationSkinRotation": {
+      "type": "string",
+      "enum": [
+        "SKIN_ROTATION_0",
+        "SKIN_ROTATION_90",
+        "SKIN_ROTATION_180",
+        "SKIN_ROTATION_270"
+      ],
+      "default": "SKIN_ROTATION_0"
+    },
+    "TelephoneOperationOperation": {
+      "type": "string",
+      "enum": [
+        "InitCall",
+        "AcceptCall",
+        "RejectCallExplicit",
+        "RejectCallBusy",
+        "DisconnectCall",
+        "PlaceCallOnHold",
+        "TakeCallOffHold"
+      ],
+      "default": "InitCall"
+    },
+    "TelephoneResponseResponse": {
+      "type": "string",
+      "enum": [
+        "OK",
+        "BadOperation",
+        "BadNumber",
+        "InvalidAction",
+        "ActionFailed",
+        "RadioOff"
+      ],
+      "default": "OK"
+    },
+    "VmConfigurationVmHypervisorType": {
+      "type": "string",
+      "enum": [
+        "HV_UNKNOWN",
+        "HV_NONE",
+        "HV_KVM",
+        "HV_HAXM",
+        "HV_HVF",
+        "HV_WHPX"
+      ],
+      "default": "HV_UNKNOWN"
+    },
+    "controlBatteryState": {
+      "type": "object",
+      "properties": {
+        "hasBattery": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "isPresent": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "charger": {
+          "$ref": "#/definitions/BatteryStateBatteryCharger"
+        },
+        "chargeLevel": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "health": {
+          "$ref": "#/definitions/BatteryStateBatteryHealth"
+        },
+        "status": {
+          "$ref": "#/definitions/BatteryStateBatteryStatus"
+        }
+      }
+    },
+    "controlGpsState": {
+      "type": "object",
+      "properties": {
+        "passiveUpdate": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "speed": {
+          "type": "number",
+          "format": "double"
+        },
+        "heading": {
+          "type": "number",
+          "format": "double"
+        },
+        "elevation": {
+          "type": "number",
+          "format": "double"
+        },
+        "satellites": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "controlImage": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "$ref": "#/definitions/controlImageFormat"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte",
+          "description": "The organization of the pixels in the image buffer is from left to\nright and bottom up."
+        }
+      }
+    },
+    "controlImageFormat": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "$ref": "#/definitions/ImageFormatImgFormat"
+        },
+        "rotation": {
+          "$ref": "#/definitions/controlRotation"
+        }
+      }
+    },
+    "controlRotation": {
+      "type": "object",
+      "properties": {
+        "rotation": {
+          "$ref": "#/definitions/RotationSkinRotation"
+        }
+      }
+    },
+    "controlTelephoneResponse": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/TelephoneResponseResponse"
+        }
+      }
+    },
+    "controlVmConfiguration": {
+      "type": "object",
+      "properties": {
+        "hypervisorType": {
+          "$ref": "#/definitions/VmConfigurationVmHypervisorType"
+        },
+        "numberOfCpuCores": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ramSizeBytes": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

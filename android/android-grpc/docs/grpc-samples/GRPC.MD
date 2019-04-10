@@ -92,6 +92,19 @@ curl -H "Accept: application/json" -X POST -d '{"key": "30"}' http://localhost:8
 
 For more details on the endpoints look at $AOSP/android/android-grpc/android/emulation/control/api_config.yaml
 
+### Troubleshooting:
+
+- I see the following json:
+
+  ```json
+    {"error":"all SubConns are in TransientFailure, latest connection error: connection error: desc = \"transport: Error while dialing dial tcp [::1]:5556: connect: connection refused\"","message":"all SubConns are in TransientFailure, latest connection error: connection error: desc = \"transport: Error while dialing dial tcp [::1]:5556: connect: connection refused\"","code":14}
+  ```
+
+  You likely restarted the emulator, restart the httpbridge.
+
+- Why are screenshots slow in debug builds?
+
+  The emulator enables a lot of checks (address sanitizers, code coverage) that take up a lot of resources. You might be better of using a release build.
 
  # Controlling the emulator from Python (TODO)
 

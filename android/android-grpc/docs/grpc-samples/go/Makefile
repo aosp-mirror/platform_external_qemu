@@ -4,6 +4,7 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
+GOPATH=$(shell go env GOPATH)
 BINARY_NAME=httpbridge
 BINARY_UNIX=$(BINARY_NAME)_unix
 export PATH :=$(GOPATH)/bin:$(PATH)
