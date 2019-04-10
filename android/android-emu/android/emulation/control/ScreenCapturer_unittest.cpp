@@ -33,6 +33,9 @@
 
 using android::base::System;
 using android::emulation::captureScreenshot;
+using android::emulation::takeScreenshot;
+using android::emulation::ImageFormat;
+using android::emulation::Image;
 using ::testing::Gt;
 
 extern "C" EmulatorWindow* emulator_window_get(void) {
@@ -289,6 +292,28 @@ TEST_F(ScreenCapturerTest, guestPostedAFrame) {
     EXPECT_FALSE(renderer.hasGuestPostedAFrame());
 }
 
+TEST_F(ScreenCapturerTest, takePngScreenShotRotations) {
+    // Make sure that taking a screenshot that gets converted in place
+    // to a png actually works.
+    const SkinRotation rotations[] = {SKIN_ROTATION_0, SKIN_ROTATION_90,
+                                      SKIN_ROTATION_180, SKIN_ROTATION_270};
+
+    std::string screenShot = mScreenshotPath + PATH_SEP  + "png_capture.png";
+    for (SkinRotation rotation : rotations) {
+        Image img = takeScreenshot(ImageFormat::PNG, rotation, nullptr,
+                                   framebuffer4Pixels);
+
+        // Let's convert this image into a set of pixels.
+        std::ofstream ofile(screenShot, std::ofstream::binary | std::ofstream::trunc);
+        ofile.write((char*) img.getPixelBuf(), img.getPixelCount());
+        ofile.flush();
+        uint8_t* pixels = (uint8_t*)loadScreenshot(screenShot.c_str(), 2, 2);
+
+        verifyframebuffer4Pixels(rotation, pixels);
+        free(pixels);
+    }
+}
+
 TEST_F(ScreenCapturerTest, saveAndLoadRotation0) {
     std::string screenshotName;
     EXPECT_TRUE(captureScreenshot(nullptr,
@@ -312,6 +337,7 @@ TEST_F(ScreenCapturerTest, saveAndLoadRotation90) {
     verifyframebuffer4Pixels(SKIN_ROTATION_90, pixels);
     free(pixels);
 }
+
 
 TEST_F(ScreenCapturerTest, saveAndLoadRotation180) {
     std::string screenshotName;
