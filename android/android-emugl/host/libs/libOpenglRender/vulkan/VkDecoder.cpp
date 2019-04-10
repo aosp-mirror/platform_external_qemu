@@ -4431,6 +4431,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindPipeline:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCmdBindPipeline\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipeline pipeline;
@@ -4447,7 +4451,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_280;
                 vkReadStream->read((uint64_t*)&cgen_var_280, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_280, (VkPipeline*)&pipeline, 1);
-                vk->vkCmdBindPipeline(unboxed_commandBuffer, pipelineBindPoint, pipeline);
+                m_state->on_vkCmdBindPipeline(&m_pool, commandBuffer,
+                                              pipelineBindPoint, pipeline);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
