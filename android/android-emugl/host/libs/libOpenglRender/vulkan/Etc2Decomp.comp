@@ -1,0 +1,15 @@
+#version 450
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout (binding = 0, rgba16) readonly uniform image2D u_image0;
+layout (binding = 1, rgba8) writeonly uniform image2D u_image1;
+
+void main (void)
+{
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    
+    imageStore(u_image1, pos * 2, imageLoad(u_image0, pos));
+    imageStore(u_image1, pos * 2 + ivec2(0, 1), imageLoad(u_image0, pos));
+    imageStore(u_image1, pos * 2 + ivec2(1, 0), imageLoad(u_image0, pos));
+    imageStore(u_image1, pos * 2 + ivec2(1, 1), imageLoad(u_image0, pos));
+}
