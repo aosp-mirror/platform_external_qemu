@@ -28,7 +28,6 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
-#include "android/skin/qt/tool-window-2.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
@@ -210,8 +209,7 @@ public:
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
-    ToolWindow*  toolWindow () const;
-    ToolWindow2* toolWindow2() const;
+    ToolWindow*  toolWindow() const;
     CarClusterWindow* carClusterWindow() const;
     CarClusterConnector* carClusterConnector() const;
 
@@ -222,7 +220,6 @@ public:
 
     void doResize(const QSize& size,
                   bool isKbdShortcut = false);
-    void exposeMaskWindowFrame();
     void resizeAndChangeAspectRatio(bool isFolded);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
@@ -408,7 +405,6 @@ private:
     android::base::Lock mSnapshotStateLock;
 
     ToolWindow*  mToolWindow;
-    ToolWindow2* mToolWindow2;
     CarClusterWindow* mCarClusterWindow;
     CarClusterConnector* mCarClusterConnector;
 

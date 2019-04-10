@@ -271,7 +271,6 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
     QScrollArea::moveEvent(event);
     mEmulatorWindow->simulateWindowMoved(event->pos());
     mEmulatorWindow->toolWindow()->dockMainWindow();
-    mEmulatorWindow->toolWindow2()->dockMainWindow();
     adjustModalOverlayGeometry();
     adjustVirtualSceneDialogGeometry();
     adjustMessagesOverlayGeometry();
@@ -349,9 +348,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         }
 #endif  // __linux__
         mEmulatorWindow->toolWindow()->show();
-        mEmulatorWindow->toolWindow2()->show();
         mEmulatorWindow->toolWindow()->dockMainWindow();
-        mEmulatorWindow->toolWindow2()->dockMainWindow();
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }
