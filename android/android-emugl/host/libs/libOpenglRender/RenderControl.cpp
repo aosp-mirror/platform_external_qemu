@@ -1105,7 +1105,11 @@ static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
         return -1;
     }
 
-    if (!goldfish_vk::setupVkColorBuffer(colorBuffer)) {
+#define VULKAN_MODE_VULKAN_ONLY 1
+
+    bool modeIsVulkanOnly = mode == VULKAN_MODE_VULKAN_ONLY;
+
+    if (!goldfish_vk::setupVkColorBuffer(colorBuffer, modeIsVulkanOnly)) {
         fprintf(
             stderr,
             "%s: error: failed to create VkImage for colorBuffer 0x%x\n",

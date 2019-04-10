@@ -460,6 +460,7 @@ public:
         uint64_t size,
         bool dedicated,
         bool linearTiling,
+        bool vulkanOnly,
         uint32_t colorBufferHandle);
     void setColorBufferInUse(uint32_t colorBufferHandle, bool inUse);
 

@@ -243,7 +243,8 @@ public:
 #endif
         uint64_t size,
         bool dedicated,
-        bool linearTiling);
+        bool linearTiling,
+        bool vulkanOnly);
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
 

@@ -289,7 +289,7 @@ bool importExternalMemoryDedicatedImage(
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported = nullptr, VkDeviceSize* allocSize = nullptr);
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly = false, bool* exported = nullptr, VkDeviceSize* allocSize = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);

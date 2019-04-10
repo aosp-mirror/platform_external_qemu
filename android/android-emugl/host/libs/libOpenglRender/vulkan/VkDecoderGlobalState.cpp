@@ -1604,6 +1604,7 @@ public:
             // Ensure color buffer has Vulkan backing.
             setupVkColorBuffer(
                 importCbInfoPtr->colorBuffer,
+                false /* not vulkan only */,
                 nullptr,
                 // Modify the allocation size to suit the resulting image memory size.
                 &allocInfo.allocationSize);
