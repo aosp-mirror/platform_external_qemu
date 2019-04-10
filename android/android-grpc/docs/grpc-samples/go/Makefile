@@ -7,6 +7,7 @@ GOGET=$(GOCMD) get
 GOPATH=$(shell go env GOPATH)
 BINARY_NAME=httpbridge
 BINARY_UNIX=$(BINARY_NAME)_unix
+GOPATH = $(shell $(GOCMD) env GOPATH)
 export PATH :=$(GOPATH)/bin:$(PATH)
 PROTOC=protoc
 GRPC_GO_PLUGIN = grpc
@@ -28,9 +29,10 @@ MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
 
+
 all: build
 
-protoc: deps system-check
+protoc: deps system-check $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
 		mkdir -p $(GOPATH)/src/android_emulation_control
 		$(PROTOC)  -I/usr/local/include -I$(QEMU_ROOT) \
 				-I$(GOPATH)/src \
@@ -55,7 +57,7 @@ clean:
 		$(GOCLEAN)
 		rm -f $(BINARY_NAME)
 		rm -f $(BINARY_UNIX)
-run:
+run: build
 		$(GOBUILD) -o $(BINARY_NAME) -v ./...
 		./$(BINARY_NAME)
 deps:
