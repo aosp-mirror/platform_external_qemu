@@ -88,6 +88,19 @@ void RecordMacroPage::on_playStopButton_clicked() {
     }
 }
 
+void RecordMacroPage::on_macroList_currentItemChanged(
+        QListWidgetItem* current,
+        QListWidgetItem* previous) {
+    if (current && previous) {
+        RecordMacroSavedItem* macroSavedItem = getItemWidget(previous);
+        macroSavedItem->macroSelected(false);
+    }
+    if (current) {
+        RecordMacroSavedItem* macroSavedItem = getItemWidget(current);
+        macroSavedItem->macroSelected(true);
+    }
+}
+
 void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
     const std::string macroName = getMacroNameFromItem(listItem);
 
