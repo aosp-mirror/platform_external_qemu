@@ -892,8 +892,12 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
             }
             switch (format) {
                 case EtcRGBA8:
+                break;
                     eac_decode_single_channel_block(pIn, 1, false, alphaBlock);
                     pIn += EAC_ENCODE_ALPHA_BLOCK_SIZE;
+                    etc2_decode_rgb_block(pIn, false, block);
+                    pIn += ETC1_ENCODED_BLOCK_SIZE;
+                    break;
                     // Do not break
                     // Fall through to EtcRGB8 to decode the RGB part
                 case EtcRGB8:
@@ -901,16 +905,19 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                     pIn += ETC1_ENCODED_BLOCK_SIZE;
                     break;
                 case EtcRGB8A1:
+                    break;
                     etc2_decode_rgb_block(pIn, true, block);
                     pIn += ETC1_ENCODED_BLOCK_SIZE;
                     break;
                 case EtcR11:
                 case EtcSignedR11:
+                break;
                     eac_decode_single_channel_block(pIn, 4, isSigned, block);
                     pIn += EAC_ENCODE_R11_BLOCK_SIZE;
                     break;
                 case EtcRG11:
                 case EtcSignedRG11:
+                break;
                     // r channel
                     eac_decode_single_channel_block(pIn, 4, isSigned, block);
                     pIn += EAC_ENCODE_R11_BLOCK_SIZE;
@@ -929,8 +936,14 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                     case EtcRGB8A1:
                     case EtcR11:
                     case EtcSignedR11: {
-                            const etc1_byte* q = block + (cy * 4) * pixelSize;
-                            memcpy(p, q, xEnd * pixelSize);
+                            //const etc1_byte* q = block + (cy * 4) * pixelSize;
+                            //memcpy(p, q, xEnd * pixelSize);
+                            for (int cx = 0; cx < xEnd; cx ++) {
+                                const etc1_byte* q = pIn - ETC1_ENCODED_BLOCK_SIZE + cy * 2 + cx / 2;
+                                p[0 + cx * 3] = *q;
+                                p[1 + cx * 3] = *q;
+                                p[2 + cx * 3] = *q;
+                            }
                         }
                         break;
                     case EtcRG11:
