@@ -47,7 +47,6 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
-#include "android/skin/qt/tool-window-2.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
@@ -88,43 +87,21 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
     mWindow->deleteLater();
 }
 
-template <typename T>
-ToolWindow::DualWindowHolder<T>::DualWindowHolder(ToolWindow*   tw,
-                                                  ToolWindow2*  tw2,
-                                                  OnCreatedCallback onCreated)
-    : mWindow(new T(tw->mEmulatorWindow, tw, tw2)) {
-    (tw ->*onCreated)(mWindow);
-}
-
-template <typename T>
-ToolWindow::DualWindowHolder<T>::~DualWindowHolder() {
-    // The window may have slots with subscribers, so use deleteLater() instead
-    // of a regular delete for it.
-    mWindow->deleteLater();
-}
-
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
-static bool sDualWindow = false;
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder,
-                       ToolWindow::UserActionsCounterPtr user_actions_counter,
-                       ToolWindow2* tw2)
+                       ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(this, tw2, &ToolWindow ::onExtendedWindowCreated),
+      mExtendedWindow(this, &ToolWindow ::onExtendedWindowCreated),
       mVirtualSceneControlWindow(this,
                                  &ToolWindow::onVirtualSceneWindowCreated),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
-      mUserActionsCounter(user_actions_counter),
-      mToolWindow2(tw2) {
-
-      if (mToolWindow2 && !ToolWindow2::shouldHide()) {
-          sDualWindow = true;
-      }
+      mUserActionsCounter(user_actions_counter) {
 
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
@@ -141,10 +118,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-
-    if (!ToolWindow2::shouldHide()) {
-        hideRotateButton();
-    }
 
     // Get the latest user selections from the user-config code.
     SettingsTheme theme = getSelectedTheme();
@@ -269,7 +242,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     // How big is the toolbar naturally? This is just tall enough
     // to show all the buttons, so we should never shrink it
     // smaller than this.
-    mMinimumToolBarHeight = this->size().height();
 
     sToolWindow = this;
 }
@@ -286,10 +258,8 @@ void ToolWindow::raise() {
     if (mTopSwitched) {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
-        mToolWindow2->raise();
         mTopSwitched = false;
     }
-    mToolWindow2->raise();
 }
 
 void ToolWindow::allowExtWindowCreation() {
@@ -375,10 +345,7 @@ void ToolWindow::hideEvent(QHideEvent*) {
 
 void ToolWindow::show() {
     QFrame::show();
-
-    // Ensure that Qt does not treat the tool bar
-    // as fixed size
-    setMaximumSize(62, 99999);
+    setFixedSize(size());
 
     if (mIsVirtualSceneWindowVisibleOnShow) {
         mVirtualSceneControlWindow.get()->show();
@@ -603,8 +570,6 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
         }
     }
 
-    mToolWindow2->handleQtKeyEvent(event, source);
-
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
     QKeySequence event_key_sequence(event->key() +
@@ -654,18 +619,6 @@ void ToolWindow::dockMainWindow() {
              + toolGap - mEmulatorWindow->getRightTransparency() + 1,
          parentWidget()->geometry().top()
              + mEmulatorWindow->getTopTransparency());
-
-    // Set the height to match the main window
-    if (sDualWindow) {
-        QSize size = this->size();
-        int newHeight = parentWidget()->geometry().height()
-                        - mEmulatorWindow->getTopTransparency()
-                        - mEmulatorWindow->getBottomTransparency() + 1;
-        if (newHeight < mMinimumToolBarHeight) newHeight = mMinimumToolBarHeight;
-
-        size.setHeight(newHeight);
-        resize(size);
-    }
 
     mVirtualSceneControlWindow.ifExists(
             [&] { mVirtualSceneControlWindow.get()->dockMainWindow(); });
@@ -913,10 +866,6 @@ void ToolWindow::on_minimize_button_clicked() {
 #else
     this->showMinimized();
 #endif
-
-    if (!ToolWindow2::shouldHide()) {
-        mToolWindow2->forceHide();
-    }
     mEmulatorWindow->showMinimized();
 }
 
@@ -1049,16 +998,11 @@ void ToolWindow::notifySwitchOnTop() {
 #endif
 }
 
-void ToolWindow::hideRotateButton() {
-    mToolsUi->prev_layout_button->hide();
-    mToolsUi->next_layout_button->hide();
-}
-
-void ToolWindow::showRotateButton() {
-    mToolsUi->prev_layout_button->show();
-    mToolsUi->next_layout_button->show();
-}
-
 void ToolWindow::touchExtendedWindow() {
     mExtendedWindow.get();
+}
+
+//static
+bool ToolWindow::isFolded() {
+    return sToolWindow->mFolded;
 }
