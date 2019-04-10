@@ -35,6 +35,8 @@ public:
 
 private slots:
     void on_playStopButton_clicked();
+    void on_macroList_currentItemChanged(QListWidgetItem* current,
+                                         QListWidgetItem* previous);
     void on_macroList_itemPressed(QListWidgetItem* listItem);
     void on_macroList_itemSelectionChanged();
     void updatePreviewVideoView();
