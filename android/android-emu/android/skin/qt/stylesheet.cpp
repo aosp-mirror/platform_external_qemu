@@ -30,6 +30,7 @@ const char MAJOR_TAB_COLOR_VAR[] = "MAJOR_TAB_COLOR";
 const char TAB_BKG_COLOR_VAR[] = "TAB_BKG_COLOR";
 const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
 const char TABLE_SELECTED_VAR[] = "TABLE_SELECTED";
+const char MACRO_BKG_COLOR_VAR[] = "MACRO_BKG_COLOR";
 
 // As of now low density font stylesheet is exactly the same.
 // static QString loDensityFontStylesheet;
@@ -272,6 +273,7 @@ struct StylesheetValues {
         {"TREE_WIDGET_BKG",                 "#ffffff"},  // List of Snapshots
         {"TREE_WIDGET_BORDER",              "#e3e3e3"},
         {"LIST_WIDGET_BORDER",      "rgba(0,0,0,11%)"},
+        {MACRO_BKG_COLOR_VAR,       "rgba(234,67,53,88%)"},
         {"LINK_COLOR",                      "#0288D1"},  // Highlighted link
         {"PREVIEW_IMAGE_BKG",               "#e3e3e3"},  // Behind snapshot preview image
         {"RAISED_COLORED_BKG_COLOR",        "#459388"},  // Colored raised button background color.
@@ -311,7 +313,8 @@ struct StylesheetValues {
         {"TOOL_ON_COLOR",                "#586670"},
         {"TREE_WIDGET_BKG",              "#394249"},
         {"TREE_WIDGET_BORDER",           "#494949"},
-        {"LIST_WIDGET_BORDER",  "rgba(255,255,255,22%)"},
+        {"LIST_WIDGET_BORDER", "rgba(255,255,255,22%)"},
+        {MACRO_BKG_COLOR_VAR, "rgba(234,67,53,55%)"},
         {"LINK_COLOR",                   "#29B6F6"},
         {"PREVIEW_IMAGE_BKG",            "#343d43"},
         {"RAISED_COLORED_BKG_COLOR",     "#459388"},
