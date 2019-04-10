@@ -82,10 +82,6 @@ constexpr char GLESAPILEVEL_PREFERENCE[] ="set/glesApiLevelPreference";
 
 constexpr char CLIPBOARD_SHARING[] = "set/clipboardSharing";
 
-// Foldable Display
-// Huan: need it?
-constexpr char FOLDABLE_ENABLE[] = "set/foldable";
-
 constexpr char HTTP_PROXY_USE_STUDIO[] = "set/proxy/useStudio";
 constexpr char HTTP_PROXY_TYPE[] = "set/proxy/type";
 enum HTTP_PROXY_TYPE {
@@ -150,9 +146,5 @@ constexpr char PER_AVD_CELLULAR_NETWORK_TYPE[]    = "perAvd/cell/network_type";
 constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength";
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
-
-// Foldable Display
-// Huan: need it?
-constexpr char PER_AVD_FOLDABLE_ENABLE[] = "perAvd/set/foldable";
 }  // namespace Settings
 }  // namespace Ui
