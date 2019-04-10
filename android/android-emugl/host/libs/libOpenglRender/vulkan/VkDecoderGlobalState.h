@@ -521,6 +521,20 @@ public:
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
 
+    void on_vkCmdBindPipeline(android::base::Pool* pool,
+                              VkCommandBuffer commandBuffer,
+                              VkPipelineBindPoint pipelineBindPoint,
+                              VkPipeline pipeline);
+
+    void on_vkCmdBindDescriptorSets(android::base::Pool* pool,
+                                    VkCommandBuffer commandBuffer,
+                                    VkPipelineBindPoint pipelineBindPoint,
+                                    VkPipelineLayout layout,
+                                    uint32_t firstSet,
+                                    uint32_t descriptorSetCount,
+                                    const VkDescriptorSet* pDescriptorSets,
+                                    uint32_t dynamicOffsetCount,
+                                    const uint32_t* pDynamicOffsets);
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
