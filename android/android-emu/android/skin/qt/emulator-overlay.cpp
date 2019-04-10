@@ -461,7 +461,7 @@ void EmulatorOverlay::hide() {
         // Resize mode enlarged the overlay. Put it back to
         // the container size.
         setGeometry(mContainer->geometry());
-        mContainer->activateWindow();
+        mContainer->activateWindowAndFocus();
     }
 
     mMode = OverlayMode::Hidden;
@@ -494,7 +494,7 @@ void EmulatorOverlay::slot_animationValueChanged(const QVariant& value) {
 void EmulatorOverlay::hideAndFocusContainer() {
     hide();
     mContainer->setFocus();
-    mContainer->activateWindow();
+    mContainer->activateWindowAndFocus();
 }
 
 void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {

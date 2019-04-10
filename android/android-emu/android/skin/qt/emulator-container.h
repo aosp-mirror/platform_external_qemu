@@ -44,6 +44,7 @@ public:
     void moveEvent(QMoveEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
+    void activateWindowAndFocus();
 
     void showMinimized();
 

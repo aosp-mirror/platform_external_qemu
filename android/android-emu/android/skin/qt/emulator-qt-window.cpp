@@ -1041,6 +1041,7 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
+    mContainer.activateWindowAndFocus();
     handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
                      event->pos(), event->globalPos());
 }
@@ -2597,6 +2598,10 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
 
 void EmulatorQtWindow::wheelScrollTimeout() {
     handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
+}
+
+void EmulatorQtWindow::activateWindowAndFocus() {
+    mContainer.activateWindowAndFocus();
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {

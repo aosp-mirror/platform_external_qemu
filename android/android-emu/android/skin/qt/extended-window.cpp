@@ -290,6 +290,7 @@ void ExtendedWindow::closeEvent(QCloseEvent *e) {
     // Merely hide the window the widget is closed, do not destroy state.
     e->ignore();
     hide();
+    mEmulatorWindow->activateWindowAndFocus();
 }
 
 void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
