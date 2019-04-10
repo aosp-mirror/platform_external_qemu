@@ -361,8 +361,12 @@ void ToolWindow::closeEvent(QCloseEvent* ce) {
 }
 
 void ToolWindow::mousePressEvent(QMouseEvent* event) {
-    raiseMainWindow();
     QFrame::mousePressEvent(event);
+}
+
+void ToolWindow::mouseReleaseEvent(QMouseEvent* event) {
+    QFrame::mouseReleaseEvent(event);
+    raiseMainWindow();
 }
 
 void ToolWindow::hideEvent(QHideEvent*) {
@@ -671,7 +675,7 @@ void ToolWindow::dockMainWindow() {
 
 void ToolWindow::raiseMainWindow() {
     mEmulatorWindow->raise();
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
 }
 
 void ToolWindow::updateTheme(const QString& styleSheet) {
@@ -750,7 +754,7 @@ void ToolWindow::on_back_button_pressed() {
 }
 
 void ToolWindow::on_back_button_released() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::BACK, false);
 }
 
@@ -901,7 +905,7 @@ void ToolWindow::on_home_button_pressed() {
 }
 
 void ToolWindow::on_home_button_released() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::HOME, false);
 }
 
@@ -924,13 +928,13 @@ void ToolWindow::on_power_button_pressed() {
 }
 
 void ToolWindow::on_power_button_released() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::POWER, false);
 }
 
 void ToolWindow::on_tablet_mode_button_clicked() {
     static bool tablet_mode;
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     tablet_mode = !tablet_mode;
     ChangeIcon(mToolsUi->tablet_mode_button,
                tablet_mode ? "laptop_mode" : "tablet_mode",
@@ -943,7 +947,7 @@ void ToolWindow::on_volume_up_button_pressed() {
     handleUICommand(QtUICommand::VOLUME_UP, true);
 }
 void ToolWindow::on_volume_up_button_released() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::VOLUME_UP, false);
 }
 void ToolWindow::on_volume_down_button_pressed() {
@@ -951,7 +955,7 @@ void ToolWindow::on_volume_down_button_pressed() {
     handleUICommand(QtUICommand::VOLUME_DOWN, true);
 }
 void ToolWindow::on_volume_down_button_released() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 
@@ -961,17 +965,17 @@ void ToolWindow::on_overview_button_pressed() {
 }
 
 void ToolWindow::on_overview_button_released() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::OVERVIEW, false);
 }
 
 void ToolWindow::on_prev_layout_button_clicked() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::ROTATE_LEFT);
 }
 
 void ToolWindow::on_next_layout_button_clicked() {
-    mEmulatorWindow->activateWindow();
+    mEmulatorWindow->activateWindowAndFocus();
     handleUICommand(QtUICommand::ROTATE_RIGHT);
 }
 

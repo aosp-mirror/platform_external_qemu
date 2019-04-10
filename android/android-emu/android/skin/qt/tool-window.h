@@ -160,6 +160,7 @@ private:
 
     virtual void closeEvent(QCloseEvent* ce) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
 

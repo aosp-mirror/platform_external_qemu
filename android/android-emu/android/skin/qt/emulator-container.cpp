@@ -359,7 +359,14 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
             mVirtualSceneInfo->showNormal();
         }
         mMessages.ifExists([&] { mMessages->showNormal(); });
+        activateWindowAndFocus();
     }
+}
+
+void EmulatorContainer::activateWindowAndFocus() {
+    QScrollArea::activateWindow();
+    QScrollArea::setFocus(Qt::ActiveWindowFocusReason);
+    qDebug() << "activateWindowAndFocus() called";
 }
 
 void EmulatorContainer::showMinimized() {
