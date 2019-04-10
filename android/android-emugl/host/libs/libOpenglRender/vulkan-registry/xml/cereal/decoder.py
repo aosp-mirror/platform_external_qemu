@@ -383,6 +383,10 @@ custom_decodes = {
     "vkDestroyImageView" : emit_global_state_wrapped_decoding,
     "vkDestroySampler" : emit_global_state_wrapped_decoding,
     "vkCmdCopyBufferToImage" : emit_global_state_wrapped_decoding,
+    "vkCmdCopyImageToBuffer" : emit_global_state_wrapped_decoding,
+    "vkGetImageMemoryRequirements" : emit_global_state_wrapped_decoding,
+    "vkGetImageMemoryRequirements2" : emit_global_state_wrapped_decoding,
+    "vkGetImageMemoryRequirements2KHR" : emit_global_state_wrapped_decoding,
 
     "vkUpdateDescriptorSets" : emit_global_state_wrapped_decoding,
 
@@ -403,6 +407,8 @@ custom_decodes = {
     "vkDestroyCommandPool" : emit_global_state_wrapped_decoding,
     "vkResetCommandPool" : emit_global_state_wrapped_decoding,
     "vkCmdPipelineBarrier" : emit_global_state_wrapped_decoding,
+    "vkCmdBindPipeline" : emit_global_state_wrapped_decoding,
+    "vkCmdBindDescriptorSets" : emit_global_state_wrapped_decoding,
 
     # VK_ANDROID_native_buffer
     "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,

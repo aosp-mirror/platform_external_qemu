@@ -15,6 +15,23 @@ get_filename_component(
 
 set(VULKAN_FOUND TRUE)
 
+set(VULKAN_SHADER_SRC_PATH "${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/libs/libOpenglRender/vulkan/")
+set(VULKAN_SHADER_DST_PATH "lib64/vulkan/shaders/")
+
+set(VULKAN_COMMON_DEPENDENCIES
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGB8_2DArray.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGB8_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGBA8_2DArray.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGBA8_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Unorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacR11Unorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Snorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacR11Snorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Unorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Unorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Snorm_2DArray.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Snorm_2DArray.spv"
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGB8_3D.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGB8_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/Etc2RGBA8_3D.spv>${VULKAN_SHADER_DST_PATH}/Etc2RGBA8_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Unorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacR11Unorm_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacR11Snorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacR11Snorm_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Unorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Unorm_3D.spv"
+    "${VULKAN_SHADER_SRC_PATH}/EacRG11Snorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Snorm_3D.spv")
+
 if(LINUX_X86_64)
   set(VULKAN_DEPENDENCIES
       # Loader (for real)
@@ -24,7 +41,8 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/icds/libvk_swiftshader.so>lib64/vulkan/libvk_swiftshader.so"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
       # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator")
+      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
+      ${VULKAN_COMMON_DEPENDENCIES})
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
