@@ -1,0 +1,26 @@
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout (push_constant) uniform ImageFormatBlock {
+    uint compFormat;
+} u_pushConstant;
+
+layout (binding = 0, rgba16i) readonly uniform iimage2D u_image0;
+layout (binding = 1, rgba8ui) writeonly uniform uimage2D u_image1;
+
+void main(void) {
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    ivec4 srcBlock = ivec4(imageLoad(u_image0, pos));
+
+    bool isPunchthroughAlpha =
+        (u_pushConstant.compFormat == VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK
+        || u_pushConstant.compFormat == VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK);
+
+    ivec4[16] decompressed = etc2_decode_rgb_block(constructInt32(srcBlock[0], srcBlock[1]),
+            constructInt32(srcBlock[2], srcBlock[3]), isPunchthroughAlpha);
+
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            imageStore(u_image1, pos * 4 + ivec2(x, y), decompressed[y * 4 + x]);
+        }
+    }
+}
