@@ -4521,6 +4521,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindPipeline:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCmdBindPipeline\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipeline pipeline;
@@ -4537,7 +4541,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_280;
                 vkReadStream->read((uint64_t*)&cgen_var_280, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_280, (VkPipeline*)&pipeline, 1);
-                vk->vkCmdBindPipeline(unboxed_commandBuffer, pipelineBindPoint, pipeline);
+                m_state->on_vkCmdBindPipeline(&m_pool, commandBuffer,
+                                              pipelineBindPoint, pipeline);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
@@ -4787,6 +4792,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindDescriptorSets:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCmdBindDescriptorSets\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipelineLayout layout;
@@ -4821,7 +4830,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&dynamicOffsetCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
-                vk->vkCmdBindDescriptorSets(unboxed_commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
+                m_state->on_vkCmdBindDescriptorSets(
+                        &m_pool, commandBuffer, pipelineBindPoint, layout,
+                        firstSet, descriptorSetCount, pDescriptorSets,
+                        dynamicOffsetCount, pDynamicOffsets);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
@@ -5253,6 +5265,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdCopyImageToBuffer:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCmdCopyImageToBuffer\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 VkImage srcImage;
                 VkImageLayout srcImageLayout;
@@ -5288,7 +5304,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBufferImageCopy(m_state, (VkBufferImageCopy*)(pRegions + i));
                     }
                 }
-                vk->vkCmdCopyImageToBuffer(unboxed_commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
+                m_state->on_vkCmdCopyImageToBuffer(
+                        &m_pool, commandBuffer, srcImage, srcImageLayout,
+                        dstBuffer, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
