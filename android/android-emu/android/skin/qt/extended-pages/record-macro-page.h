@@ -17,6 +17,7 @@
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
 #include "android/skin/qt/video-player/VideoInfo.h"
 
+#include <QTimer>
 #include <QWidget>
 #include <memory>
 #include <unordered_map>
@@ -41,6 +42,7 @@ private slots:
     void on_macroList_itemSelectionChanged();
     void updatePreviewVideoView();
     void previewVideoPlayingFinished();
+    void updateElapsedTime();
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
@@ -58,14 +60,19 @@ private:
     void enableMacroItems();
     void showPreviewFrame(const std::string& previewName);
     std::string getMacroNameFromItem(QListWidgetItem* listItem);
+    QString getTimerString(int seconds);
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
     std::unique_ptr<Ui::RecordMacroPage> mUi;
+    RecordMacroSavedItem* mMacroItemPlaying;
+    std::unordered_map<std::string, QString> mLengths;
     std::unordered_map<std::string, QString> mDescriptions;
     MacroUiState mState = MacroUiState::Waiting;
+    int mSec = 0;
+    QTimer mTimer;
 
     static const QAndroidAutomationAgent* sAutomationAgent;
 };

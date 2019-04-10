@@ -34,13 +34,19 @@ void RecordMacroSavedItem::setDisplayInfo(QString displayInfo) {
     mUi->displayInfo->setText(displayInfo);
 }
 
+void RecordMacroSavedItem::setDisplayTime(QString displayTime) {
+    mUi->displayTime->setText(displayTime);
+}
+
 void RecordMacroSavedItem::macroSelected(bool state) {
     if (state) {
         mUi->name->setStyleSheet("color: white");
         mUi->displayInfo->setStyleSheet("color: white");
+        mUi->displayTime->setStyleSheet("color: white");
     } else {
         mUi->name->setStyleSheet("");
         mUi->displayInfo->setStyleSheet("");
+        mUi->displayTime->setStyleSheet("");
     }
 }
 

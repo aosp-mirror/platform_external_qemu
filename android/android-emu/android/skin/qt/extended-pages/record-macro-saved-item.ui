@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>93</width>
+    <width>171</width>
     <height>50</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -24,46 +24,72 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QLabel" name="name">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="name">
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
+       <property name="text">
+        <string>Macro Name</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>ListItem</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="displayInfo">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777214</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+         <kerning>true</kerning>
+        </font>
+       </property>
+       <property name="text">
+        <string>Display Info</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>ListSubitem</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="displayTime">
      <property name="font">
       <font>
        <family>Roboto</family>
        <pointsize>10</pointsize>
       </font>
      </property>
-     <property name="lineWidth">
-      <number>1</number>
-     </property>
      <property name="text">
-      <string>Macro Name</string>
+      <string>1:00</string>
      </property>
-     <property name="ColorGroup" stdset="0">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="GroupColor" stdset="0">
       <string>ListItem</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="displayInfo">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777214</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <kerning>true</kerning>
-      </font>
-     </property>
-     <property name="text">
-      <string>Display Info</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>ListSubitem</string>
      </property>
     </widget>
    </item>

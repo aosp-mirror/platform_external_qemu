@@ -43,6 +43,12 @@ void RecordMacroPage::loadUi() {
     // Clear all items. Might need to optimize this and keep track of existing.
     mUi->macroList->clear();
 
+    // Lengths as QStrings have to be initialized here to use tr().
+    mLengths = {{"Reset_position", tr("0:05")},
+                {"Track_horizontal_plane", tr("0:18")},
+                {"Track_vertical_plane", tr("0:14")},
+                {"Walk_to_image_room", tr("0:15")}};
+
     // Descriptions as QStrings have to be initialized here to use tr().
     mDescriptions = {
             {"Reset_position", tr("Resets sensors to default.")},
@@ -63,6 +69,7 @@ void RecordMacroPage::loadUi() {
 
         RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
+        macroSavedItem->setDisplayTime(mLengths[macroName]);
         std::replace(macroName.begin(), macroName.end(), '_', ' ');
         macroName.append(" (Preset macro)");
         macroSavedItem->setName(macroName.c_str());
@@ -72,6 +79,9 @@ void RecordMacroPage::loadUi() {
         mUi->macroList->addItem(listItem);
         mUi->macroList->setItemWidget(listItem, macroSavedItem);
     }
+
+    QObject::connect(&mTimer, &QTimer::timeout, this,
+                     &RecordMacroPage::updateElapsedTime);
 
     setMacroUiState(MacroUiState::Waiting);
 }
@@ -211,7 +221,14 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
 
     mCurrentMacroName = macroName;
     mMacroPlaying = true;
+    mMacroItemPlaying = macroSavedItem;
     setMacroUiState(MacroUiState::Playing);
+
+    // Update every second.
+    mSec = 0;
+    mMacroItemPlaying->setDisplayTime(getTimerString(0));
+    mTimer.start(1000);
+
     showPreviewFrame(macroName);
 }
 
@@ -224,6 +241,10 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
 
     mMacroPlaying = false;
     setMacroUiState(MacroUiState::PreviewFinished);
+
+    mTimer.stop();
+    mMacroItemPlaying->setDisplayTime(mLengths[mCurrentMacroName]);
+
     showPreviewFrame(macroName);
 }
 
@@ -318,4 +339,19 @@ std::string RecordMacroPage::getMacroNameFromItem(QListWidgetItem* listItem) {
     QVariant data = listItem->data(Qt::UserRole);
     QString macroName = data.toString();
     return macroName.toUtf8().constData();
+}
+
+void RecordMacroPage::updateElapsedTime() {
+    mSec++;
+    mMacroItemPlaying->setDisplayTime(getTimerString(mSec));
+    mTimer.start(1000);
+}
+
+QString RecordMacroPage::getTimerString(int seconds) {
+    QString qs = tr("%1:%2%3 / ")
+                         .arg(seconds / 60)
+                         .arg(seconds % 60 > 9 ? "" : "0")
+                         .arg(seconds % 60);
+    qs.append(mLengths[mCurrentMacroName]);
+    return qs;
 }
