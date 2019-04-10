@@ -121,8 +121,10 @@ signals:
     void haveClipboardSharingKnown(bool have);
 
 private:
+    static void forwardGenericEventToEmulator(int type, int code, int value);
+    static void sendFoldedArea();
+    static bool isFoldableConfigured();
     void handleUICommand(QtUICommand cmd, bool down);
-    void forwardGenericEventToEmulator(int type, int code, int value);
     void ensureExtendedWindowExists();
 
     void stopExtendedWindowCreation();
@@ -137,7 +139,9 @@ private:
     }
     bool askWhetherToSaveSnapshot();
 
+
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
+    void updateButtonUiCommand(QPushButton* button, const char* uiCommand);
 
     virtual void closeEvent(QCloseEvent* ce) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
@@ -198,6 +202,7 @@ private slots:
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
+    void on_fold_switch_clicked();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();

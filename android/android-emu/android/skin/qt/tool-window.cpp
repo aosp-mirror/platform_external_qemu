@@ -55,6 +55,7 @@
 #include <cassert>
 #include <string>
 
+
 namespace {
 
 void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
@@ -118,6 +119,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
+    if (!isFoldableConfigured()) {
+        mToolsUi->fold_switch->hide();
+        mToolsUi->fold_switch->setEnabled(false);
+    }
 
     // Get the latest user selections from the user-config code.
     SettingsTheme theme = getSelectedTheme();
@@ -163,7 +168,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+O     OVERVIEW\n"
             "Ctrl+Backspace BACK\n"
             "Ctrl+Left ROTATE_LEFT\n"
-            "Ctrl+Right ROTATE_RIGHT\n";
+            "Ctrl+Right ROTATE_RIGHT\n"
+            "Ctrl+F     FOLD\n"
+            "Ctrl+U     UNFOLD\n";
 
     if (fc::isEnabled(fc::PlayStoreImage)) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
@@ -247,6 +254,22 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 }
 
 ToolWindow::~ToolWindow() {
+}
+
+void ToolWindow::updateButtonUiCommand(QPushButton* button,
+                                       const char* uiCommand) {
+    button->setProperty("uiCommand", uiCommand);
+    QtUICommand cmd;
+    if (parseQtUICommand(QString(uiCommand), &cmd)) {
+        QVector<QKeySequence>* shortcuts =
+                mShortcutKeyStore.reverseLookup(cmd);
+        if (shortcuts && shortcuts->length() > 0) {
+            button->setToolTip(getQtUICommandDescription(cmd) + " (" +
+                               shortcuts->at(0).toString(
+                                       QKeySequence::NativeText) +
+                               ")");
+        }
+    }
 }
 
 void ToolWindow::raise() {
@@ -532,6 +555,27 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 mEmulatorWindow->queueSkinEvent(skin_event);
             }
             break;
+        case QtUICommand::FOLD:
+            if (down && isFoldableConfigured()) {
+                mFolded = true;
+                ChangeIcon(mToolsUi->fold_switch, "expand_horiz", "Unfold");
+                updateButtonUiCommand(mToolsUi->fold_switch, "UNFOLD");
+                mEmulatorWindow->resizeAndChangeAspectRatio(true);
+                sendFoldedArea();
+                forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
+        case QtUICommand::UNFOLD:
+            if (down && isFoldableConfigured()) {
+                mFolded = false;
+                ChangeIcon(mToolsUi->fold_switch, "compress_horiz", "Fold");
+                updateButtonUiCommand(mToolsUi->fold_switch, "FOLD");
+                mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
         case QtUICommand::SHOW_MULTITOUCH:
         // Multitouch is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
@@ -541,16 +585,23 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     }
 }
 
+//static
 void ToolWindow::forwardGenericEventToEmulator(int type,
                                                int code,
                                                int value) {
+    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+    if (emuQtWindow == nullptr) {
+        VLOG(foldable) << "Error send Event, null emulator qt window";
+        return;
+    }
+
     SkinEvent* skin_event = new SkinEvent();
     skin_event->type = kEventGeneric;
     SkinEventGenericData& genericData = skin_event->u.generic_event;
     genericData.type = type;
     genericData.code = code;
     genericData.value = value;
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    emuQtWindow->queueSkinEvent(skin_event);
 }
 
 void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
@@ -636,10 +687,34 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 }
 
 // static
+bool ToolWindow::isFoldableConfigured() {
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+
+    bool enableFoldableByDefault =
+        !(xOffset < 0 || xOffset > 9999 ||
+          yOffset < 0 || yOffset > 9999 ||
+          width   < 1 || width   > 9999 ||
+          height  < 1 || height  > 9999 ||
+          // TODO: 29 needed
+          avdInfo_getApiLevel(android_avdInfo) < 28);
+
+    return enableFoldableByDefault;
+}
+
+// static
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
+
+    if (isFoldableConfigured()) {
+        sendFoldedArea();
+        forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+        forwardGenericEventToEmulator(EV_SYN, 0, 0);
+    }
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
@@ -889,6 +964,11 @@ void ToolWindow::on_tablet_mode_button_clicked() {
     handleUICommand(QtUICommand::TABLET_MODE, tablet_mode);
 }
 
+void ToolWindow::on_fold_switch_clicked() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(mFolded ? QtUICommand::UNFOLD : QtUICommand::FOLD, true);
+}
+
 void ToolWindow::on_volume_up_button_pressed() {
     mEmulatorWindow->raise();
     handleUICommand(QtUICommand::VOLUME_UP, true);
@@ -1000,6 +1080,32 @@ void ToolWindow::notifySwitchOnTop() {
 
 void ToolWindow::touchExtendedWindow() {
     mExtendedWindow.get();
+}
+
+//static
+void ToolWindow::sendFoldedArea() {
+    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+    if (emuQtWindow == nullptr) return;
+
+    int xOffset = 0;
+    int yOffset = 0;
+//  TODO: support none-0 offset
+//    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+//    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+    char foldedArea[64];
+    sprintf(foldedArea, "folded-area %d,%d,%d,%d",
+            xOffset,
+            yOffset,
+            xOffset + width,
+            yOffset + height);
+    emuQtWindow->getAdbInterface()->enqueueCommand(
+            {"shell", "wm", foldedArea},
+            [](const android::emulation::OptionalAdbCommandResult& result) {
+                if (result && result->exit_code == 0) {
+                    VLOG(foldable) << "foldable-page: 'fold-area' command succeeded";
+                }});
 }
 
 //static
