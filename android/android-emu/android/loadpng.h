@@ -16,6 +16,7 @@
 #include "android/utils/compiler.h"
 
 #include <stddef.h>
+#include <png.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -26,5 +27,11 @@ extern void savepng(const char* fn, unsigned int nChannels, unsigned int width,
         unsigned int height, SkinRotation rotation, void* pixels);
 extern void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
         unsigned int height, void* pixels);
-
+extern int write_png_user_function(png_structp p,
+                                   png_infop pi,
+                                   unsigned int nChannels,
+                                   unsigned int width,
+                                   unsigned int height,
+                                   SkinRotation rotation,
+                                   void* pixels);
 ANDROID_END_HEADER
