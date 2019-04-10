@@ -134,8 +134,11 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
 
     // Currently, the camera page only contains options for the virtual scene
-    // camera.  Hide the button if the virtual scene camera is not enabled.
-    if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
+    // camera.  Hide the button if the virtual scene camera is not enabled, or if we are using an Android Auto image because that does not
+    // have camera support at the moment.
+    if (androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+        (!android_avdInfo ||
+         (avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO))) {
         mSidebarButtons.addButton(mExtendedUi->cameraButton);
         mExtendedUi->cameraButton->setVisible(true);
     } else {
