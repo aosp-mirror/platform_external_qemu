@@ -382,6 +382,8 @@ custom_decodes = {
     "vkDestroyCommandPool" : emit_global_state_wrapped_decoding,
     "vkResetCommandPool" : emit_global_state_wrapped_decoding,
     "vkCmdPipelineBarrier" : emit_global_state_wrapped_decoding,
+    "vkCmdBindPipeline" : emit_global_state_wrapped_decoding,
+    "vkCmdBindDescriptorSets" : emit_global_state_wrapped_decoding,
 
     # VK_ANDROID_native_buffer
     "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,
