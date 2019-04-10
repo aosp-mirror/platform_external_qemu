@@ -1473,9 +1473,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory:
             {
-                if (m_logCalls) {
-                    fprintf(stderr, "call vkBindImageMemory\n");
-                    ;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkBindImageMemory\n");;
                 }
                 VkDevice device;
                 VkImage image;
@@ -1498,9 +1498,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_77, (VkDeviceMemory*)&memory, 1);
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
                 VkResult vkBindImageMemory_VkResult_return = (VkResult)0;
-                vkBindImageMemory_VkResult_return =
-                        m_state->on_vkBindImageMemory(&m_pool, device, image,
-                                                      memory, memoryOffset);
+                vkBindImageMemory_VkResult_return = m_state->on_vkBindImageMemory(&m_pool, device, image, memory, memoryOffset);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindImageMemory_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -4349,9 +4347,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBeginCommandBuffer:
             {
-                if (m_logCalls) {
-                    fprintf(stderr, "call vkBeginCommandBuffer\n");
-                    ;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkBeginCommandBuffer\n");;
                 }
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
@@ -4371,9 +4369,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     transform_tohost_VkCommandBufferBeginInfo(m_state, (VkCommandBufferBeginInfo*)(pBeginInfo));
                 }
                 VkResult vkBeginCommandBuffer_VkResult_return = (VkResult)0;
-                vkBeginCommandBuffer_VkResult_return =
-                        m_state->on_vkBeginCommandBuffer(&m_pool, commandBuffer,
-                                                         pBeginInfo);
+                vkBeginCommandBuffer_VkResult_return = m_state->on_vkBeginCommandBuffer(&m_pool, commandBuffer, pBeginInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBeginCommandBuffer_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -4431,6 +4427,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindPipeline:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCmdBindPipeline\n");;
+                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipeline pipeline;
@@ -4447,7 +4447,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_280;
                 vkReadStream->read((uint64_t*)&cgen_var_280, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_280, (VkPipeline*)&pipeline, 1);
-                vk->vkCmdBindPipeline(unboxed_commandBuffer, pipelineBindPoint, pipeline);
+                m_state->on_vkCmdBindPipeline(&m_pool, commandBuffer, pipelineBindPoint, pipeline);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
@@ -4687,6 +4687,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindDescriptorSets:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCmdBindDescriptorSets\n");;
+                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipelineLayout layout;
@@ -4721,7 +4725,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&dynamicOffsetCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
-                vk->vkCmdBindDescriptorSets(unboxed_commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
+                m_state->on_vkCmdBindDescriptorSets(&m_pool, commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
@@ -5561,9 +5565,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdPipelineBarrier:
             {
-                if (m_logCalls) {
-                    fprintf(stderr, "call vkCmdPipelineBarrier\n");
-                    ;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCmdPipelineBarrier\n");;
                 }
                 VkCommandBuffer commandBuffer;
                 VkPipelineStageFlags srcStageMask;
@@ -5626,11 +5630,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageMemoryBarrier(m_state, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
                     }
                 }
-                m_state->on_vkCmdPipelineBarrier(
-                        &m_pool, commandBuffer, srcStageMask, dstStageMask,
-                        dependencyFlags, memoryBarrierCount, pMemoryBarriers,
-                        bufferMemoryBarrierCount, pBufferMemoryBarriers,
-                        imageMemoryBarrierCount, pImageMemoryBarriers);
+                m_state->on_vkCmdPipelineBarrier(&m_pool, commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
