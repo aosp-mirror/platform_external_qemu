@@ -894,6 +894,9 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                 case EtcRGBA8:
                     eac_decode_single_channel_block(pIn, 1, false, alphaBlock);
                     pIn += EAC_ENCODE_ALPHA_BLOCK_SIZE;
+                    etc2_decode_rgb_block(pIn, false, block);
+                    pIn += ETC1_ENCODED_BLOCK_SIZE;
+                    break;
                     // Do not break
                     // Fall through to EtcRGB8 to decode the RGB part
                 case EtcRGB8:
@@ -931,6 +934,15 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                     case EtcSignedR11: {
                             const etc1_byte* q = block + (cy * 4) * pixelSize;
                             memcpy(p, q, xEnd * pixelSize);
+                            /*for (int i = 0; i < xEnd * pixelSize; i++) {
+                                p[i] = q[i] + 1;
+                            }*/
+                            /*for (int cx = 0; cx < xEnd; cx ++) {
+                                const etc1_byte* q = pIn - ETC1_ENCODED_BLOCK_SIZE + cy * 2 + cx / 2;
+                                p[0 + cx * 3] = *q;
+                                p[1 + cx * 3] = *q;
+                                p[2 + cx * 3] = *q;
+                            }*/
                         }
                         break;
                     case EtcRG11:
@@ -953,10 +965,17 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                             const etc1_byte* qa = alphaBlock + cy * 4;
                             for (etc1_uint32 cx = 0; cx < xEnd; cx++) {
                                 // copy rgb data
-                                memcpy(p, q, 3);
+                                /*memcpy(p, q, 3);
                                 p += 3;
                                 q += 3;
-                                *p++ = *qa++;
+                                *p++ = *qa++;*/
+                               p[0] = *qa;
+                               p[1] = *qa;
+                               p[2] = *qa;
+                               p[3] = 255;
+                               p += 4;
+                               q += 3;
+                               qa ++;
                             }
                         }
                         break;
