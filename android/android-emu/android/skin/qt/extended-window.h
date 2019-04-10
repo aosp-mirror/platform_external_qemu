@@ -38,7 +38,6 @@
 
 class EmulatorQtWindow;
 class ToolWindow;
-class ToolWindow2;
 class GeoDataLoaderThread;
 class VirtualSceneControlWindow;
 
@@ -51,7 +50,7 @@ class ExtendedWindow : public QFrame
     Q_OBJECT
 
 public:
-    ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW, ToolWindow2* tW2);
+    ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW);
 
     ~ExtendedWindow();
 
@@ -72,7 +71,6 @@ public:
 private slots:
     void switchFrameAlways(bool showFrame);
     void switchOnTop(bool isOntop);
-    void switchFoldableDisplay(bool isFoldableDisplay);
     void switchToTheme(SettingsTheme theme);
     void disableMouseWheel(bool disabled);
 
@@ -103,7 +101,6 @@ private:
 
     EmulatorQtWindow* mEmulatorWindow;
     ToolWindow*  mToolWindow;
-    ToolWindow2* mToolWindow2;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     std::unique_ptr<Ui::ExtendedControls> mExtendedUi;
