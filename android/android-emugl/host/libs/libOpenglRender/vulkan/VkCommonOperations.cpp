@@ -1119,7 +1119,7 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
     return 0;
 }
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported, VkDeviceSize* allocSize) {
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1230,6 +1230,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported, VkDeviceSize
             res.memory.size,
             false /* dedicated */,
             res.tiling == VK_IMAGE_TILING_LINEAR,
+            vulkanOnly,
             colorBufferHandle)) {
         res.glExported = true;
     }

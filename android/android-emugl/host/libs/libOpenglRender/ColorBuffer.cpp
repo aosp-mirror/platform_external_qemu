@@ -861,7 +861,8 @@ bool ColorBuffer::importMemory(
 #endif
         uint64_t size,
         bool dedicated,
-        bool linearTiling) {
+        bool linearTiling,
+        bool vulkanOnly) {
     RecursiveScopedHelperContext context(m_helper);
     s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
     if (dedicated) {
@@ -879,10 +880,14 @@ bool ColorBuffer::importMemory(
 
     GLuint glTiling = linearTiling ? GL_LINEAR_TILING_EXT : GL_OPTIMAL_TILING_EXT;
 
-    size_t bytes;
-    readContents(&bytes, nullptr);
-    std::vector<uint8_t> prevContents(bytes, 0);
-    readContents(&bytes, prevContents.data());
+    std::vector<uint8_t> prevContents;
+
+    if (!vulkanOnly) {
+        size_t bytes;
+        readContents(&bytes, nullptr);
+        prevContents.resize(bytes, 0);
+        readContents(&bytes, prevContents.data());
+    }
 
     s_gles2.glDeleteTextures(1, &m_tex);
     s_gles2.glGenTextures(1, &m_tex);
@@ -902,7 +907,9 @@ bool ColorBuffer::importMemory(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
 
-    replaceContents(prevContents.data(), m_numBytes);
+    if (!vulkanOnly) {
+        replaceContents(prevContents.data(), m_numBytes);
+    }
 
     return true;
 }

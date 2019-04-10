@@ -585,6 +585,7 @@ bool FrameBuffer::importMemoryToColorBuffer(
         uint64_t size,
         bool dedicated,
         bool linearTiling,
+        bool vulkanOnly,
         uint32_t colorBufferHandle) {
     AutoLock mutex(m_lock);
 
@@ -595,7 +596,7 @@ bool FrameBuffer::importMemoryToColorBuffer(
         return false;
     }
 
-    return (*c).second.cb->importMemory(handle, size, dedicated, linearTiling);
+    return (*c).second.cb->importMemory(handle, size, dedicated, linearTiling, vulkanOnly);
 }
 
 void FrameBuffer::setColorBufferInUse(
