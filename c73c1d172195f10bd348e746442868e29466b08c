@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb05f43_bfdf1ea6",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-04-11T15:57:25Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 58,
+        "startChar": 17,
+        "endLine": 58,
+        "endChar": 18
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d5d2ff4_e1a9b5d6",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-04-11T15:57:25Z",
+      "side": 1,
+      "message": "You can use VLOG(foldable) instead.",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 6
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de68bb6c_bc1db2fc",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-04-11T15:57:25Z",
+      "side": 1,
+      "message": "Unfold",
+      "range": {
+        "startLine": 571,
+        "startChar": 67,
+        "endLine": 571,
+        "endChar": 73
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fa1ba3c_5b8b03d7",
+        "filename": "android/android-emu/android/skin/qt/tool-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-04-11T15:57:25Z",
+      "side": 1,
+      "message": "\u0027u\u0027",
+      "range": {
+        "startLine": 144,
+        "startChar": 16,
+        "endLine": 144,
+        "endChar": 17
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
