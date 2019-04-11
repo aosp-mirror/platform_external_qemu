@@ -1,0 +1,44 @@
+type: google.api.Service
+config_version: 3
+
+
+http:
+  rules:
+  - selector: android.emulation.control.EmulatorController.getRotation
+    get: /v1/rotation
+  - selector: android.emulation.control.EmulatorController.setRotation
+    post: /v1/rotation
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.getBattery
+    get: /v1/battery
+  - selector: android.emulation.control.EmulatorController.setBattery
+    post: /v1/battery
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.getGps
+    get: /v1/gps
+  - selector: android.emulation.control.EmulatorController.setGps
+    post: /v1/gps
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.sendTouch
+    post: /v1/touch
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.sendKey
+    post: /v1/key
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.sendMouse
+    post: /v1/mouse
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.sendRotary
+    post: /v1/rotatary
+    body: "*"
+  - selector: android.emulation.control.EmulatorController.getVmConfiguration
+    get: /v1/vmconfiguration
+  - selector: android.emulation.control.EmulatorController.getScreenshot
+    get: /v1/screenshot
+  - selector: android.emulation.control.EmulatorController.usePhone
+    post: /v1/phone
+    body: "*"
+
+
+# TODO(jansene): Add additional http bindings if needed.
+

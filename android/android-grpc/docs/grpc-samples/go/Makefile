@@ -1,4 +1,17 @@
-# Go parameters
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
@@ -6,7 +19,6 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 GOPATH=$(shell go env GOPATH)
 BINARY_NAME=httpbridge
-BINARY_UNIX=$(BINARY_NAME)_unix
 GOPATH = $(shell $(GOCMD) env GOPATH)
 export PATH :=$(GOPATH)/bin:$(PATH)
 PROTOC=protoc
@@ -26,28 +38,38 @@ SYSTEM_OK = true
 endif
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CURRENT_DIR := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
 QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
-
+PROTODIR = $(CURRENT_DIR)/android_emulation_control
+PROTO = $(PROTODIR)/emulator_controller.proto
 
 all: build
 
-protoc: deps system-check $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
-		mkdir -p $(GOPATH)/src/android_emulation_control
-		$(PROTOC)  -I/usr/local/include -I$(QEMU_ROOT) \
+$(PROTO):
+		mkdir -p $(PROTODIR)
+ifeq (,$(wildcard $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto))
+		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto  $(PROTO)
+else
+		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
+endif
+
+protoc: deps system-check $(PROTO)
+		@mkdir -p /tmp/proto
+		@mkdir -p $(GOPATH)/src/android_emulation_control
+		$(PROTOC) -I$(PROTODIR) \
 				-I$(GOPATH)/src \
 				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-				--go_out=plugins=$(GRPC_GO_PLUGIN):/tmp \
-				$(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
-		$(PROTOC)  -I/usr/local/include -I$(QEMU_ROOT) -I$(GOPATH)/src \
+				--go_out=plugins=$(GRPC_GO_PLUGIN):/tmp/proto \
+				$(PROTO)
+		$(PROTOC) -I$(PROTODIR) -I$(GOPATH)/src \
 				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-				--grpc-gateway_out=logtostderr=true,grpc_api_configuration=$(QEMU_ROOT)/android/android-grpc/android/emulation/control/api_config.yaml:/tmp \
-				$(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
-		$(PROTOC) -I/usr/local/include -I$(QEMU_ROOT) -I$(GOPATH)/src \
+				--grpc-gateway_out=logtostderr=true,grpc_api_configuration=api_config.yaml:/tmp/proto \
+				$(PROTO)
+		$(PROTOC) -I$(PROTODIR) -I$(GOPATH)/src \
 				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 				--swagger_out=logtostderr=true:. \
-				$(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
-		mv  /tmp/android/android-grpc/android/emulation/control/* $(GOPATH)/src/android_emulation_control
+				$(PROTO)
+		mv  /tmp/proto/* $(GOPATH)/src/android_emulation_control
 
 build: protoc
 		$(GOBUILD) -o $(BINARY_NAME) -v
@@ -56,10 +78,11 @@ test:
 clean:
 		$(GOCLEAN)
 		rm -f $(BINARY_NAME)
-		rm -f $(BINARY_UNIX)
+
 run: build
 		$(GOBUILD) -o $(BINARY_NAME) -v ./...
 		./$(BINARY_NAME)
+
 deps:
 		$(GOGET) github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 		$(GOGET) github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
@@ -85,7 +108,3 @@ endif
 ifneq ($(SYSTEM_OK),true)
 	@false
 endif
-
-# Cross compilation
-build-linux:
-		CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v

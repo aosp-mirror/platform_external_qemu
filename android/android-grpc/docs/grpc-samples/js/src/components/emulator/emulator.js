@@ -1,19 +1,43 @@
+/*
+ * Copyright 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import * as Device from "../../android_emulation_control/emulator_controller_grpc_web_pb.js";
 import * as Proto from "../../android_emulation_control/emulator_controller_pb.js";
-import Log from "../../util/log.js";
 import EmulatorPngView from "./views/simple_png_view.js";
 
+/**
+ * An emulator object that displays the screen and sends mouse events via gRPC.
+ *
+ * The emulator will mount an EmulatorPngView component to display the current state
+ * of the emulator. It will translate mouse events on this component and send them
+ * to the actual emulator.
+ *
+ * The size of this component will be: (width * scale) x (height * scale)
+ * The refreshRate will be passed on to the view.
+ */
 export default class Emulator extends Component {
   state = {
-    mouseDown: false,
+    mouseDown: false, // Current state of mouse
     xpos: 0,
     ypos: 0
   };
 
   static propTypes = {
-    uri: PropTypes.string,
+    uri: PropTypes.string, // gRPC endpoint of the emulator.
     width: PropTypes.number,
     height: PropTypes.number,
     scale: PropTypes.number,
@@ -21,9 +45,9 @@ export default class Emulator extends Component {
   };
 
   static defaultProps = {
-    width: 1080,
-    height: 1920,
-    scale: 0.4,   // Scale factor of the emulator image
+    width: 1080, // The width of the emulator display
+    height: 1920, // The height of the emulator display
+    scale: 0.4, // Scale factor of the emulator image
     refreshRate: 5 // Desired refresh rate.
   };
 
@@ -48,7 +72,7 @@ export default class Emulator extends Component {
       response
     ) {
       if (err) {
-        Log.error(
+        console.error(
           "Grpc: " + err.code + ", msg: " + err.message,
           "Emulator:setCoordinates"
         );
@@ -57,7 +81,7 @@ export default class Emulator extends Component {
 
     // Status callback..
     call.on("status", function(status) {
-      Log.debug("Status: " + JSON.stringify(status));
+      console.log("Status: " + JSON.stringify(status));
     });
   };
 

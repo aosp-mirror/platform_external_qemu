@@ -20,6 +20,8 @@ from __future__ import print_function
 
 from absl import logging
 
+from aemu.definitions import get_qemu_root
+
 import os
 import re
 import zipfile
@@ -35,19 +37,20 @@ zip_sets = {
     'debug':  # Release type..
     {
         # Look for *.gcda files under the build tree
-        'code-coverage-{target}.zip': ['.', r'.*(gcda|gcno)'],
-         # Look for all files under {out}/distribution
-        'sdk-repo-{target}-emulator-full-debug-{sdk_build_number}.zip': ['distribution', r'.*']
+        'code-coverage-{target}.zip': ['{build_dir}.', r'.*(gcda|gcno)'],
+        # Look for all files under {out}/distribution
+        'sdk-repo-{target}-emulator-full-debug-{sdk_build_number}.zip': ['{build_dir}/distribution', r'.*']
     },
 
     'release':
     {
         'sdk-repo-{target}-debug-emulator-{sdk_build_number}.zip': [
             # Look for all files under {out}/build/debug_info/
-            'build/debug_info', r'.*'
+            '{build_dir}/build/debug_info', r'.*'
         ],
+        'sdk-repo-{target}-grpc-samples.zip': ['{src_dir}/android/android-grpc/docs/grpc-samples/', r'.*'],
         # Look for all files under {out}/distribution
-        'sdk-repo-{target}-emulator-{sdk_build_number}.zip': ['distribution', r'.*']
+        'sdk-repo-{target}-emulator-{sdk_build_number}.zip': ['{build_dir}/distribution', r'.*']
     }
 }
 
@@ -92,7 +95,7 @@ def create_distribution(dist_dir, build_dir, data):
         files = []
         with zipfile.ZipFile(zip_fname, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zipf:
             start_dir, regex = params
-            search_dir = os.path.join(build_dir, start_dir)
+            search_dir = os.path.normpath(start_dir.format(build_dir = build_dir, src_dir = get_qemu_root()))
             for fname in recursive_glob(search_dir, regex.format(data)):
                 arcname = fname[len(search_dir):]
                 files.append(arcname)
