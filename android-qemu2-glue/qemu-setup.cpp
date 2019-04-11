@@ -231,9 +231,11 @@ bool qemu_android_emulation_setup() {
                         },
                         "The goldfish event queue is overflowing, the system is no longer responding.");
     }
-    #ifdef ANDROID_GRPC
-       android::emulation::control::GrpcServices::setup(android_cmdLineOptions->grpc, getConsoleAgents());
-    #endif
+#ifdef ANDROID_GRPC
+    if (android_cmdLineOptions->grpc) {
+        android::emulation::control::GrpcServices::setup(android_cmdLineOptions->grpc, getConsoleAgents());
+    }
+#endif
     return true;
 }
 
