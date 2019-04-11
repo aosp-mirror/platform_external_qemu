@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "81bc8d46_68165bac",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-04-11T17:03:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8eb05f43_bfdf1ea6",
+      "range": {
+        "startLine": 58,
+        "startChar": 17,
+        "endLine": 58,
+        "endChar": 18
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d5d2ff4_e1a9b5d6",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "c73c1d172195f10bd348e746442868e29466b08c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "41a10d32_4fbc1e4d",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-04-11T17:03:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d5d2ff4_e1a9b5d6",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 6
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6301079a_eb6e6fb1",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-04-11T17:03:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de68bb6c_bc1db2fc",
+      "range": {
+        "startLine": 571,
+        "startChar": 67,
+        "endLine": 571,
+        "endChar": 73
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0fa1ba3c_5b8b03d7",
         "filename": "android/android-emu/android/skin/qt/tool-window.h",
         "patchSetId": 2
@@ -91,6 +163,30 @@
       "revId": "c73c1d172195f10bd348e746442868e29466b08c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "025ac69c_052d97e5",
+        "filename": "android/android-emu/android/skin/qt/tool-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-04-11T17:03:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0fa1ba3c_5b8b03d7",
+      "range": {
+        "startLine": 144,
+        "startChar": 16,
+        "endLine": 144,
+        "endChar": 17
+      },
+      "revId": "c73c1d172195f10bd348e746442868e29466b08c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
