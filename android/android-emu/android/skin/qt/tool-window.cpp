@@ -273,7 +273,6 @@ void ToolWindow::updateButtonUiCommand(QPushButton* button,
 }
 
 void ToolWindow::raise() {
-    QFrame::raise();
     if (mVirtualSceneControlWindow.hasInstance() &&
         mVirtualSceneControlWindow.get()->isActive()) {
         mVirtualSceneControlWindow.get()->raise();
