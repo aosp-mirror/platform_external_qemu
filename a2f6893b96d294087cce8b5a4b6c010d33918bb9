@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c71cdf1a_f4177ded",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-11T01:25:32Z",
+      "side": 1,
+      "message": "necessary? this may affect the headless build",
+      "range": {
+        "startLine": 102,
+        "startChar": 65,
+        "endLine": 102,
+        "endChar": 75
+      },
+      "revId": "a2f6893b96d294087cce8b5a4b6c010d33918bb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
