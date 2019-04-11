@@ -318,7 +318,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mLooper(android::qt::createLooper()),
       mStartupDialog(this),
       mToolWindow(nullptr),
-      mToolWindow2(nullptr),
       mCarClusterWindow(nullptr),
       mCarClusterConnector(nullptr),
       mContainer(this),
@@ -444,13 +443,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
     mPreviouslyFramed = mFrameAlways;
 
-    mToolWindow2 = new ToolWindow2(this, &mContainer, mEventLogger,
-                                   mUserActionsCounter);
-
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
-                                 mUserActionsCounter, mToolWindow2);
-
-    mToolWindow2->setMainToolWindow(mToolWindow);
+                                 mUserActionsCounter);
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mCarClusterWindow = new CarClusterWindow(this, &mContainer);
@@ -660,9 +654,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
-                        if (mToolWindow2) {
-                            mToolWindow2->setEnabled(false);
-                        }
                         if (mCarClusterWindow) {
                             mCarClusterWindow->setEnabled(false);
                         }
@@ -677,9 +668,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
-                        }
-                        if (mToolWindow2) {
-                            mToolWindow2->setEnabled(true);
                         }
                         if (mCarClusterWindow) {
                             mCarClusterWindow->setEnabled(true);
@@ -711,10 +699,6 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mToolWindow) {
         delete mToolWindow;
         mToolWindow = NULL;
-    }
-    if (mToolWindow2) {
-        delete mToolWindow2;
-        mToolWindow2 = NULL;
     }
 
     if (mCarClusterWindow) {
@@ -890,9 +874,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     if (mToolWindow) {
         mToolWindow->setEnabled(false);
     }
-    if (mToolWindow2) {
-        mToolWindow2->setEnabled(false);
-    }
 
     if (mCarClusterWindow) {
         mCarClusterWindow->setEnabled(false);
@@ -952,9 +933,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         if (mToolWindow) {
             mToolWindow->hide();
             mToolWindow->closeExtendedWindow();
-        }
-        if (mToolWindow2) {
-            mToolWindow2->hide();
         }
         if (mCarClusterWindow) {
             mCarClusterWindow->hide();
@@ -1166,7 +1144,6 @@ void EmulatorQtWindow::maskWindowFrame() {
     }
     mContainer.show();
     mToolWindow->dockMainWindow();
-    mToolWindow2->dockMainWindow();
 
     if (haveFrame != mPreviouslyFramed) {
         // We are switching between framed and frameless. We need to
@@ -1259,7 +1236,6 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
 void EmulatorQtWindow::raise() {
     mContainer.raise();
     mToolWindow->raise();
-    mToolWindow2->raise();
     if (mCarClusterWindow) {
         mCarClusterWindow->raise();
     }
@@ -1272,7 +1248,6 @@ void EmulatorQtWindow::show() {
     mContainer.show();
     QFrame::show();
     mToolWindow->show();
-    mToolWindow2->show();
     if (mCarClusterWindow) {
         mCarClusterConnector->startSendingStartRequest();
     }
@@ -1293,7 +1268,6 @@ void EmulatorQtWindow::show() {
 void EmulatorQtWindow::setOnTop(bool onTop) {
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(mToolWindow, onTop);
-    setFrameOnTop(mToolWindow2, onTop);
     if (mCarClusterWindow) {
         setFrameOnTop(mCarClusterWindow, onTop);
     }
@@ -1417,10 +1391,6 @@ void EmulatorQtWindow::slot_clearInstance() {
     if (mToolWindow) {
         delete mToolWindow;
         mToolWindow = NULL;
-    }
-    if (mToolWindow2) {
-        delete mToolWindow2;
-        mToolWindow2 = NULL;
     }
     if (mCarClusterWindow) {
         delete mCarClusterWindow;
@@ -2145,10 +2115,6 @@ void EmulatorQtWindow::doResize(const QSize& size,
     maskWindowFrame();
 }
 
-void EmulatorQtWindow::exposeMaskWindowFrame() {
-    maskWindowFrame();
-}
-
 void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
@@ -2438,10 +2404,6 @@ ToolWindow* EmulatorQtWindow::toolWindow() const {
     return mToolWindow;
 }
 
-ToolWindow2* EmulatorQtWindow::toolWindow2() const {
-    return mToolWindow2;
-}
-
 CarClusterWindow* EmulatorQtWindow::carClusterWindow() const {
     return mCarClusterWindow;
 }
@@ -2705,7 +2667,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
 
-    if (ToolWindow2::isFolded()) {
+    if (ToolWindow::isFolded()) {
         resizeAndChangeAspectRatio(true);
     }
 }

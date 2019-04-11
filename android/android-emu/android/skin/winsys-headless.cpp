@@ -389,7 +389,9 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
     fprintf(stderr, "%s: error dialog: title: [%s] msg: [%s]\n", __func__, title, message);
 }
 
-void skin_winsys_set_ui_agent(const UiEmuAgent* agent) { }
+void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
+    EmulatorNoQtNoWindow::earlyInitialization(agent);
+}
 
 void skin_winsys_report_entering_main_loop(void) { }
 

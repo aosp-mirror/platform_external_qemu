@@ -766,7 +766,6 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
     ToolWindow::earlyInitialization(agent);
-    ToolWindow2::earlyInitialization();
 
     // Set more early init stuff here:
     // 1. Clipboard sharing
@@ -796,7 +795,7 @@ void skin_winsys_report_entering_main_loop(void) {
 }
 
 extern bool skin_winsys_is_folded() {
-    return ToolWindow2::isFolded();
+    return ToolWindow::isFolded();
 }
 
 #ifdef _WIN32

@@ -23,7 +23,6 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
-#include "android/skin/qt/tool-window-2.h"
 #include "android/ui-emu-agent.h"
 
 #include "ui_extended.h"
@@ -31,12 +30,10 @@
 #include <QDesktopWidget>
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
-    ToolWindow  *tW,
-    ToolWindow2 *tW2) :
+    ToolWindow  *tW) :
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
-    mToolWindow2(tW2),
     mExtendedUi(new Ui::ExtendedControls),
     mSizeTweaker(this),
     mSidebarButtons(this)
@@ -71,10 +68,6 @@ ExtendedWindow::ExtendedWindow(
     connect(
         mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
         this, SLOT(switchOnTop(bool)));
-
-    connect(
-        mExtendedUi->settingsPage, SIGNAL(foldableDisplayChanged(bool)),
-        this, SLOT(switchFoldableDisplay(bool)));
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(onForwardShortcutsToDeviceChanged(int)),
@@ -343,16 +336,6 @@ void ExtendedWindow::switchOnTop(bool isOnTop) {
     mToolWindow->notifySwitchOnTop();
 }
 
-void ExtendedWindow::switchFoldableDisplay(bool isFoldableDisplay) {
-    if (isFoldableDisplay) {
-        mToolWindow->hideRotateButton();
-        mToolWindow2->forceShow();
-    } else {
-        mToolWindow->showRotateButton();
-        mToolWindow2->forceHide();
-    }
-}
-
 void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // Switch to the icon images that are appropriate for this theme.
     adjustAllButtonsForTheme(theme);
@@ -372,7 +355,6 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // and to the main tool-bar.
     this->setStyleSheet(styleString);
     mToolWindow->updateTheme(styleString);
-    mToolWindow2->updateTheme(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->location_page->updateTheme();
     mExtendedUi->bugreportPage->updateTheme();
@@ -404,7 +386,6 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
 
         // There is a gap between the main window and the tool bar. Use the same
         // gap between the tool bar and the extended window.
-
         move(mToolWindow->geometry().right() + 3 + ToolWindow::TOOL_GAP_FRAMELESS,
              mToolWindow->geometry().top());
     }

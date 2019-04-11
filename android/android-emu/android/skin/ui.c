@@ -273,7 +273,7 @@ bool skin_ui_process_events(SkinUI* ui) {
     while(skin_event_poll(&ev)) {
         switch(ev.type) {
         case kEventForceRedraw:
-            DE("EVENT: kEventVideoExpose\n");
+            DE("EVENT: kEventForceRedraw\n");
             skin_window_redraw(ui->window, NULL);
             break;
 

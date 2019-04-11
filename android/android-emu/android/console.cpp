@@ -3569,6 +3569,16 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
     return (int)client->global->emu_agent->rotate90Clockwise();
 }
 
+static int do_fold(ControlClient client, char* args) {
+    client->global->emu_agent->fold(true);
+    return 0;
+}
+
+static int do_unfold(ControlClient client, char* args) {
+    client->global->emu_agent->fold(false);
+    return 0;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -3672,6 +3682,10 @@ extern const CommandDefRec main_commands[] = {
 
         {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,
          screenrecord_commands},
+
+        {"fold", "fold the device", NULL, NULL, do_fold, NULL},
+
+        {"unfold", "unfold the device", NULL, NULL, do_unfold, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

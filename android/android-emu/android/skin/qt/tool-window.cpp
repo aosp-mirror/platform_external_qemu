@@ -47,7 +47,6 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
-#include "android/skin/qt/tool-window-2.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
@@ -55,6 +54,7 @@
 
 #include <cassert>
 #include <string>
+
 
 namespace {
 
@@ -88,43 +88,21 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
     mWindow->deleteLater();
 }
 
-template <typename T>
-ToolWindow::DualWindowHolder<T>::DualWindowHolder(ToolWindow*   tw,
-                                                  ToolWindow2*  tw2,
-                                                  OnCreatedCallback onCreated)
-    : mWindow(new T(tw->mEmulatorWindow, tw, tw2)) {
-    (tw ->*onCreated)(mWindow);
-}
-
-template <typename T>
-ToolWindow::DualWindowHolder<T>::~DualWindowHolder() {
-    // The window may have slots with subscribers, so use deleteLater() instead
-    // of a regular delete for it.
-    mWindow->deleteLater();
-}
-
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
-static bool sDualWindow = false;
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder,
-                       ToolWindow::UserActionsCounterPtr user_actions_counter,
-                       ToolWindow2* tw2)
+                       ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(this, tw2, &ToolWindow ::onExtendedWindowCreated),
+      mExtendedWindow(this, &ToolWindow ::onExtendedWindowCreated),
       mVirtualSceneControlWindow(this,
                                  &ToolWindow::onVirtualSceneWindowCreated),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
-      mUserActionsCounter(user_actions_counter),
-      mToolWindow2(tw2) {
-
-      if (mToolWindow2 && !ToolWindow2::shouldHide()) {
-          sDualWindow = true;
-      }
+      mUserActionsCounter(user_actions_counter) {
 
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
@@ -141,9 +119,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-
-    if (!ToolWindow2::shouldHide()) {
-        hideRotateButton();
+    if (!isFoldableConfigured()) {
+        mToolsUi->fold_switch->hide();
+        mToolsUi->fold_switch->setEnabled(false);
     }
 
     // Get the latest user selections from the user-config code.
@@ -190,7 +168,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+O     OVERVIEW\n"
             "Ctrl+Backspace BACK\n"
             "Ctrl+Left ROTATE_LEFT\n"
-            "Ctrl+Right ROTATE_RIGHT\n";
+            "Ctrl+Right ROTATE_RIGHT\n"
+            "Ctrl+F     FOLD\n"
+            "Ctrl+U     UNFOLD\n";
 
     if (fc::isEnabled(fc::PlayStoreImage)) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
@@ -269,12 +249,27 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     // How big is the toolbar naturally? This is just tall enough
     // to show all the buttons, so we should never shrink it
     // smaller than this.
-    mMinimumToolBarHeight = this->size().height();
 
     sToolWindow = this;
 }
 
 ToolWindow::~ToolWindow() {
+}
+
+void ToolWindow::updateButtonUiCommand(QPushButton* button,
+                                       const char* uiCommand) {
+    button->setProperty("uiCommand", uiCommand);
+    QtUICommand cmd;
+    if (parseQtUICommand(QString(uiCommand), &cmd)) {
+        QVector<QKeySequence>* shortcuts =
+                mShortcutKeyStore.reverseLookup(cmd);
+        if (shortcuts && shortcuts->length() > 0) {
+            button->setToolTip(getQtUICommandDescription(cmd) + " (" +
+                               shortcuts->at(0).toString(
+                                       QKeySequence::NativeText) +
+                               ")");
+        }
+    }
 }
 
 void ToolWindow::raise() {
@@ -286,10 +281,8 @@ void ToolWindow::raise() {
     if (mTopSwitched) {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
-        mToolWindow2->raise();
         mTopSwitched = false;
     }
-    mToolWindow2->raise();
 }
 
 void ToolWindow::allowExtWindowCreation() {
@@ -375,10 +368,7 @@ void ToolWindow::hideEvent(QHideEvent*) {
 
 void ToolWindow::show() {
     QFrame::show();
-
-    // Ensure that Qt does not treat the tool bar
-    // as fixed size
-    setMaximumSize(62, 99999);
+    setFixedSize(size());
 
     if (mIsVirtualSceneWindowVisibleOnShow) {
         mVirtualSceneControlWindow.get()->show();
@@ -565,6 +555,27 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 mEmulatorWindow->queueSkinEvent(skin_event);
             }
             break;
+        case QtUICommand::FOLD:
+            if (down && isFoldableConfigured()) {
+                mFolded = true;
+                ChangeIcon(mToolsUi->fold_switch, "expand_horiz", "Unfold");
+                updateButtonUiCommand(mToolsUi->fold_switch, "UNFOLD");
+                mEmulatorWindow->resizeAndChangeAspectRatio(true);
+                sendFoldedArea();
+                forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
+        case QtUICommand::UNFOLD:
+            if (down && isFoldableConfigured()) {
+                mFolded = false;
+                ChangeIcon(mToolsUi->fold_switch, "compress_horiz", "Fold");
+                updateButtonUiCommand(mToolsUi->fold_switch, "FOLD");
+                mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
         case QtUICommand::SHOW_MULTITOUCH:
         // Multitouch is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
@@ -574,16 +585,23 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     }
 }
 
+//static
 void ToolWindow::forwardGenericEventToEmulator(int type,
                                                int code,
                                                int value) {
+    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+    if (emuQtWindow == nullptr) {
+        VLOG(foldable) << "Error send Event, null emulator qt window";
+        return;
+    }
+
     SkinEvent* skin_event = new SkinEvent();
     skin_event->type = kEventGeneric;
     SkinEventGenericData& genericData = skin_event->u.generic_event;
     genericData.type = type;
     genericData.code = code;
     genericData.value = value;
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    emuQtWindow->queueSkinEvent(skin_event);
 }
 
 void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
@@ -602,8 +620,6 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
             return true;
         }
     }
-
-    mToolWindow2->handleQtKeyEvent(event, source);
 
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
@@ -655,18 +671,6 @@ void ToolWindow::dockMainWindow() {
          parentWidget()->geometry().top()
              + mEmulatorWindow->getTopTransparency());
 
-    // Set the height to match the main window
-    if (sDualWindow) {
-        QSize size = this->size();
-        int newHeight = parentWidget()->geometry().height()
-                        - mEmulatorWindow->getTopTransparency()
-                        - mEmulatorWindow->getBottomTransparency() + 1;
-        if (newHeight < mMinimumToolBarHeight) newHeight = mMinimumToolBarHeight;
-
-        size.setHeight(newHeight);
-        resize(size);
-    }
-
     mVirtualSceneControlWindow.ifExists(
             [&] { mVirtualSceneControlWindow.get()->dockMainWindow(); });
 }
@@ -683,10 +687,34 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 }
 
 // static
+bool ToolWindow::isFoldableConfigured() {
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+
+    bool enableFoldableByDefault =
+        !(xOffset < 0 || xOffset > 9999 ||
+          yOffset < 0 || yOffset > 9999 ||
+          width   < 1 || width   > 9999 ||
+          height  < 1 || height  > 9999 ||
+          // TODO: 29 needed
+          avdInfo_getApiLevel(android_avdInfo) < 28);
+
+    return enableFoldableByDefault;
+}
+
+// static
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
+
+    if (isFoldableConfigured()) {
+        sendFoldedArea();
+        forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+        forwardGenericEventToEmulator(EV_SYN, 0, 0);
+    }
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
@@ -913,10 +941,6 @@ void ToolWindow::on_minimize_button_clicked() {
 #else
     this->showMinimized();
 #endif
-
-    if (!ToolWindow2::shouldHide()) {
-        mToolWindow2->forceHide();
-    }
     mEmulatorWindow->showMinimized();
 }
 
@@ -938,6 +962,11 @@ void ToolWindow::on_tablet_mode_button_clicked() {
                tablet_mode ? "laptop_mode" : "tablet_mode",
                tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
     handleUICommand(QtUICommand::TABLET_MODE, tablet_mode);
+}
+
+void ToolWindow::on_fold_switch_clicked() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(mFolded ? QtUICommand::UNFOLD : QtUICommand::FOLD, true);
 }
 
 void ToolWindow::on_volume_up_button_pressed() {
@@ -1049,16 +1078,37 @@ void ToolWindow::notifySwitchOnTop() {
 #endif
 }
 
-void ToolWindow::hideRotateButton() {
-    mToolsUi->prev_layout_button->hide();
-    mToolsUi->next_layout_button->hide();
-}
-
-void ToolWindow::showRotateButton() {
-    mToolsUi->prev_layout_button->show();
-    mToolsUi->next_layout_button->show();
-}
-
 void ToolWindow::touchExtendedWindow() {
     mExtendedWindow.get();
+}
+
+//static
+void ToolWindow::sendFoldedArea() {
+    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+    if (emuQtWindow == nullptr) return;
+
+    int xOffset = 0;
+    int yOffset = 0;
+//  TODO: support none-0 offset
+//    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+//    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+    char foldedArea[64];
+    sprintf(foldedArea, "folded-area %d,%d,%d,%d",
+            xOffset,
+            yOffset,
+            xOffset + width,
+            yOffset + height);
+    emuQtWindow->getAdbInterface()->enqueueCommand(
+            {"shell", "wm", foldedArea},
+            [](const android::emulation::OptionalAdbCommandResult& result) {
+                if (result && result->exit_code == 0) {
+                    VLOG(foldable) << "foldable-page: 'fold-area' command succeeded";
+                }});
+}
+
+//static
+bool ToolWindow::isFolded() {
+    return sToolWindow->mFolded;
 }

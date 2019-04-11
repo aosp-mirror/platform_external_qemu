@@ -41,7 +41,6 @@ signals:
     void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);
     void onTopChanged(bool isOnTop);
-    void foldableDisplayChanged(bool isFoldableDisplay);
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
@@ -50,7 +49,6 @@ private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
     void on_set_frameAlways_toggled(bool checked);
     void on_set_onTop_toggled(bool checked);
-    void on_set_foldableDisplay_toggled(bool checked);
     void on_set_autoFindAdb_toggled(bool checked);
     void on_set_saveLocBox_textEdited(const QString&);
     void on_set_saveLocFolderButton_clicked();

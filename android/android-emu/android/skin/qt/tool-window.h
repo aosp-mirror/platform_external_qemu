@@ -20,7 +20,6 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/size-tweaker.h"
-#include "android/skin/qt/tool-window-2.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
 #include "android/skin/qt/virtualscene-control-window.h"
@@ -61,27 +60,11 @@ class ToolWindow : public QFrame {
         T* const mWindow;
     };
 
-    template <typename T>
-    class DualWindowHolder final {
-        DISALLOW_COPY_AND_ASSIGN(DualWindowHolder);
-        using OnCreatedCallback = void (ToolWindow::*)(T*);
-
-    public:
-        DualWindowHolder(ToolWindow* tw, ToolWindow2* tw2, OnCreatedCallback onCreated);
-        ~DualWindowHolder();
-        T* operator->() const { return mWindow; }
-        T* get() const { return mWindow; }
-
-    private:
-        T* const mWindow;
-    };
-
 public:
     ToolWindow(EmulatorQtWindow* emulatorWindow,
                QWidget* parent,
                UIEventRecorderPtr event_recorder,
-               UserActionsCounterPtr user_actions_counter,
-               ToolWindow2* tw2);
+               UserActionsCounterPtr user_actions_counter);
     ~ToolWindow();
 
     void allowExtWindowCreation();
@@ -96,6 +79,7 @@ public:
     static void earlyInitialization(const UiEmuAgent* agentPtr);
     static void onMainLoopStart();
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
+    static bool isFolded();
 
     const ShortcutKeyStore<QtUICommand>* getShortcutKeyStore() {
         return &mShortcutKeyStore;
@@ -125,8 +109,6 @@ public:
         return mClipboardSupported;
     }
     void forwardKeyToEmulator(uint32_t keycode, bool down);
-    void showRotateButton();
-    void hideRotateButton();
     void touchExtendedWindow();
     // Handle a full key press (down + up) in a single call.
     void handleUICommand(QtUICommand cmd) {
@@ -139,8 +121,10 @@ signals:
     void haveClipboardSharingKnown(bool have);
 
 private:
+    static void forwardGenericEventToEmulator(int type, int code, int value);
+    static void sendFoldedArea();
+    static bool isFoldableConfigured();
     void handleUICommand(QtUICommand cmd, bool down);
-    void forwardGenericEventToEmulator(int type, int code, int value);
     void ensureExtendedWindowExists();
 
     void stopExtendedWindowCreation();
@@ -155,7 +139,9 @@ private:
     }
     bool askWhetherToSaveSnapshot();
 
+
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
+    void updateButtonUiCommand(QPushButton* button, const char* uiCommand);
 
     virtual void closeEvent(QCloseEvent* ce) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
@@ -163,9 +149,8 @@ private:
     virtual void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    android::base::MemberOnDemandT<DualWindowHolder<ExtendedWindow>,
+    android::base::MemberOnDemandT<WindowHolder<ExtendedWindow>,
                                    ToolWindow*,
-                                   ToolWindow2*,
                                    void (ToolWindow::*)(ExtendedWindow*)>
             mExtendedWindow;
     android::base::MemberOnDemandT<WindowHolder<VirtualSceneControlWindow>,
@@ -182,17 +167,14 @@ private:
     UIEventRecorderPtr mUIEventRecorder;
     UserActionsCounterPtr mUserActionsCounter;
     bool mTopSwitched = false;
-    int mMinimumToolBarHeight = 512;
 
     bool mIsExiting = false;
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
+    bool mFolded = false;
 
-    ToolWindow2* mToolWindow2 = nullptr;
     static const UiEmuAgent* sUiEmuAgent;
-
-    friend class ToolWindow2;
 
 public slots:
     void raise();
@@ -220,6 +202,7 @@ private slots:
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
+    void on_fold_switch_clicked();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
