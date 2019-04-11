@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7cee36f8_3bfa798e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 2515,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-11T20:52:39Z",
+      "side": 1,
+      "message": "needs lock? also, we might consider including extra fields in the boxed version of the command buffer to avoid globally locking for preprocessFuncs/subCmds.",
+      "range": {
+        "startLine": 2513,
+        "startChar": 1,
+        "endLine": 2515,
+        "endChar": 54
+      },
+      "revId": "c98c214014edd06bb39d45612abf9b9f42904c83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
