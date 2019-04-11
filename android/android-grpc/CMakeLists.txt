@@ -23,3 +23,6 @@ target_include_directories(android-grpc
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
+
+# Lets distribute the proto file
+install(FILES android/emulation/control/emulator_controller.proto DESTINATION lib)
