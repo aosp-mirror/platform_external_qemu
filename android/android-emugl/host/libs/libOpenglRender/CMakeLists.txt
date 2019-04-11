@@ -99,7 +99,7 @@ target_include_directories(
         ${ANDROID_EMUGL_DIR}/host/libs/Translator/include
         .
         ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
-android_target_link_libraries(OpenglRender linux-x86_64 PRIVATE "-lX11" "-WL,--version-script=render_api.entries")
+android_target_link_libraries(OpenglRender linux-x86_64 PRIVATE "-WL,--version-script=render_api.entries")
 android_target_link_libraries(OpenglRender darwin-x86_64 PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
 
