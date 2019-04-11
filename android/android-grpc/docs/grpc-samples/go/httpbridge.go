@@ -22,7 +22,8 @@ func run() error {
 	defer cancel()
 
 	mux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithInsecure()}
+	opts := []grpc.DialOption{grpc.WithMaxMsgSize(8 * 1024 * 1024), grpc.WithInsecure()}
+
 	err := gw.RegisterEmulatorControllerHandlerFromEndpoint(ctx, mux, *emulatorEndpoint, opts)
 	if err != nil {
 		return err

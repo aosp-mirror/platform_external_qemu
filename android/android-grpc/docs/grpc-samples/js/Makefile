@@ -1,0 +1,105 @@
+GOCMD=go
+GOPATH = $(shell $(GOCMD) env GOPATH)
+
+DEP=dep
+PROTOC=protoc
+GRPC_WEB_PLUGIN = protoc-gen-grpc-web
+GRPC_WEB_PLUGIN_PATH ?= `which $(GRPC_WEB_PLUGIN)`
+PROTOC_CMD = which $(PROTOC)
+PROTOC_CHECK_CMD = $(PROTOC) --version | grep -q libprotoc.3
+HAS_PLUGIN = $(shell which $(GRPC_WEB_PLUGIN) > /dev/null && echo true || echo false)
+HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
+HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
+ifeq ($(HAS_PROTOC),true)
+HAS_VALID_PROTOC = $(shell $(PROTOC_CHECK_CMD) 2> /dev/null && echo true || echo false)
+endif
+
+SYSTEM_OK = false
+ifeq ($(HAS_VALID_PROTOC),true)
+    ifeq ($(HAS_DEP), true)
+       SYSTEM_OK = true
+    endif
+endif
+
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
+CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
+OUT_DIR := $(CURRENT_DIR)/src/
+WEBPROXY = $(GOPATH)/bin/grpcwebproxy
+CONTROLPB = $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
+GRPCPB = $(OUT_DIR)/android_emulation_control/emulator_controller_grpc_web_pb.js
+all: develop
+
+clean:
+	rm $(WEBPROXY)
+
+$(CONTROLPB) $(GRPCPB): $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
+	@mkdir -p $(OUT_DIR)/android_emulation_control
+	@$(PROTOC)  -I/usr/local/include -I$(QEMU_ROOT) \
+			--js_out=import_style=commonjs:/tmp \
+			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:/tmp \
+			$(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
+	@echo "/* eslint-disable */" > $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
+	@cat /tmp/android/android-grpc/android/emulation/control/emulator_controller_pb.js >>  $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
+	@cp  /tmp/android/android-grpc/android/emulation/control/emulator_controller_grpc_web_pb.js $(GRPCPB)
+
+$(WEBPROXY):
+	@rm -rf $(GOPATH)/src/grpc-web
+	@mkdir -p $(GOPATH)/src
+	@cp -r $(CURRENT_DIR)/grpc-web $(GOPATH)/src
+	cd $(GOPATH)/src/grpc-web/ && dep ensure -v && go install ./go/grpcwebproxy
+
+deps: $(WEBPROXY) $(CONTROLPB) $(GRPCPB) system-check
+	@npm install
+
+develop:
+	$(WEBPROXY) --backend_addr localhost:5556 --backend_tls=false --run_tls_server=false --allow_all_origins &
+	npm start
+
+stop:
+	pkill -9 grpcwebproxy; pkill -9 npm; true
+
+system-check:
+ifneq ($(HAS_VALID_PROTOC),true)
+	@echo " DEPENDENCY ERROR"
+	@echo
+	@echo "You don't have protoc 3.0.0 installed in your path."
+	@echo "Please install Google protocol buffers 3.0.0 and its compiler."
+	@echo "You can find it here:"
+	@echo
+	@echo "   https://github.com/google/protobuf/releases/tag/v3.0.0-beta-3.3"
+	@echo "   or try $ brew install protoc"
+	@echo
+	@echo "Here is what I get when trying to evaluate your version of protoc:"
+	@echo
+	-$(PROTOC) --version
+	@echo
+	@echo
+endif
+ifneq ($(HAS_PLUGIN), true)
+	@echo " DEPENDENCY ERROR"
+	@echo
+	@echo "You don't have protoc-gen-grpc-web installed in your path."
+	@echo "Please install the code generator plugin by building or "
+	@echo "copying the release. You can find it here:"
+	@echo
+	@echo "  https://github.com/grpc/grpc-web/releases"
+	@echo
+	@echo "Make sure it is named protoc-gen-grpc-web and on the path."
+	@echo "You will not be able to update the .proto file!"
+endif
+ifneq ($(HAS_DEP), true)
+	@echo " DEPENDENCY ERROR"
+	@echo
+	@echo "You don't have dep installed in your path."
+	@echo "Please install the godependency manager by building or "
+	@echo "copying the release. You can find it here:"
+	@echo
+	@echo "  https://golang.github.io/dep/"
+	@echo "  or try $ brew install dep"
+	@echo
+	@echo "Make sure it is named dep and on the path."
+endif
+ifneq ($(SYSTEM_OK),true)
+	@false
+endif

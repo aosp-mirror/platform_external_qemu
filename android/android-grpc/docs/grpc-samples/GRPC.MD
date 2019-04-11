@@ -13,19 +13,27 @@ This is currently an experimental feature, and as such there are some things lac
 
 In other words, make sure you keep this port private on your network and be ready to recompile your code when changes happen.
 
+**DO NOT RUN THIS AS IS IN A PRODUCTION ENVIRONMENT**
+
 ### Introduction
 
-This document describes how you can control the emulator over the gRPC interface. To learn more about gRPC you can visit the [website](https://grpc.io).
+This document describes how you can control the emulator over the gRPC
+interface. To learn more about gRPC you can visit the
+[website](https://grpc.io).
 
-This document describes two sample cases. One where we will use the GO language to create a webserver that allows you to control the emulator over http.
+We describe two sample cases. One where we will use the GO language
+to create a webserver that allows you to control the emulator over http.
 
-The second example demonstrates how you can use python to control the emulator.
+The second example demonstrates how you can use Javascript & React to control
+the emulator.
 
-Note that this is still under active development, so more functionality might be added in the future.
+Note that this is still under active development, so more functionality might
+be added in the future.
 
 # Enabling gRPC in the build
 
-You must enable gRPC in the build, either by editing CMakeLists.txt and setting GRPC to TRUE or by building as follows:
+You must enable gRPC in the build, either by editing CMakeLists.txt and setting
+GRPC to TRUE or by building as follows:
 
 ```sh
    ./android/rebuild --cmake_option GRPC=TRUE
@@ -35,9 +43,12 @@ This will compile in the gRPC feature.
 
 # Controlling the emulator with http.
 
-In this example we will construct an intermediate server that acts as a webserver. The webserver will enable an API that is forwarded to the emulator.
+In this example we will construct an intermediate server that acts as
+a webserver. The webserver will enable an API that is forwarded to the
+emulator.
 
-In order to run this sample you will need to have a working Go environment. You can find a Go distribution and learn more about Go [here](https://golang.org)
+In order to run this sample you will need to have a working Go environment. You
+can find a Go distribution and learn more about Go [here](https://golang.org)
 
 *Note: The example requires you to have the ports 5556 & 8080 available*
 
@@ -55,7 +66,7 @@ Your best bet is to use [homebrew](https://brew.sh/) and use the following
 
 ### I'm using linux
 
-If you have
+You must make sure you have a recent version of protobuf available:
 
 ```sh
 $ mkdir tmp && cd tmp
@@ -67,22 +78,24 @@ $ sudo make install
 
 ### Launch the emulator and webserver
 
-*Note: Make sure you have a proper $GOPATH!*
 
-Before we can access the emulator we must launch it with the gRPC server enabled.
+Before we can access the emulator we must launch it with the gRPC server
+enabled.
 
 ```sh
   $ emulator @my_avd -grpc 5556 [..other options...]
 ```
 
-Once the emulator is launched you can build and launch the web service as follows:
+Once the emulator is launched you can build and launch the web service as
+follows:
 
 ```sh
   $ cd $AOSP/external/qemu/android/android-grpc/docs/grpc-samples/go && make deps && make run
 ```
 
-Now you should be able to access the emulator over http on port 8080. For example:
-[http://localhost:8080/v1/gps](http://localhost:8080/v1/gps) will show you the current gps settings.
+Now you should be able to access the emulator over http on port 8080. For
+example: [http://localhost:8080/v1/gps](http://localhost:8080/v1/gps) will show
+you the current gps settings.
 
 The following example will send a keycode to the emulator:
 
@@ -90,17 +103,89 @@ The following example will send a keycode to the emulator:
 curl -H "Accept: application/json" -X POST -d '{"key": "30"}' http://localhost:8080/v1/key
 ```
 
-For more details on the endpoints look at $AOSP/android/android-grpc/android/emulation/control/api_config.yaml
+For more details on the endpoints look at
+$AOSP/android/android-grpc/android/emulation/control/api_config.yaml
+
+### Troubleshooting:
+
+- I see the following json:
+
+  ```json
+    {"error":"all SubConns are in TransientFailure, latest connection error: connection error: desc = \"transport: Error while dialing dial tcp [::1]:5556: connect: connection refused\"","message":"all SubConns are in TransientFailure, latest connection error: connection error: desc = \"transport: Error while dialing dial tcp [::1]:5556: connect: connection refused\"","code":14}
+  ```
+
+  You likely restarted the emulator, restart the httpbridge.
+
+- Why are screenshots slow in debug builds?
+
+  The emulator enables a lot of checks (address sanitizers, code coverage) that
+  take up a lot of resources. You might be better of using a release build.
 
 
- # Controlling the emulator from Python (TODO)
+# Controlling the emulator from JavaScript with React
 
-gRPC Python is supported for use with Python 2.7 or Python 3.4 or higher. First we will need some required packages to work with gRPC:
+The javascript example showcases how you can interact with the emulator by
+displaying the current screeenshot, and sending mouse events to the emulator.
+The sample consists of two react components:
+
+- `Emulator` -> Responsible for sending mouse clicks, and hosting a view
+- `EmulatorPngView` -> Responsible for displaying a view of the emulator. (Very slow)
+
+In the future we hope to replace the `EmulatorPngView` with something like an
+`EmulatorWebRTCView` that has significantly better performance characteristics.
+
+In order to control the emulator from Javascript we will have to route the
+calls through an intermediate proxy. We will use
+[gRPC-web](https://github.com/grpc/grpc-web) to make it all possible.
+
+## Requirements
+
+In order to run the demo you will need Node, dep and a protoc plugin to
+generate the javascript classes.
+
+Your best bet is to use [homebrew](https://brew.sh/) and use the following
 
 ```sh
-$ python -m pip install grpcio grpcio-tools
+  $ brew install dep npm
 ```
 
+or else follow the documentation here:
+https://golang.github.io/dep/docs/installation.html
+
+If you are planning to modify .proto files you willneed to acquire the
+proper protoc plugin from [here](https://github.com/grpc/grpc-web/releases).
+You can either build it yourself, or install the binary.
+
+
+## Launch the emulator and website
+
+In order to launch this demo you will need the following ports available:
+
+- 5556 Emulator gRPC port
+- 8080 gRPC JavaScript proxy
+- 3000 npm developer port.
+
+Before we can access the emulator we must launch it with the gRPC server enabled.
+
+```sh
+  $ emulator @my_avd -grpc 5556 [..other options...]
 ```
-python -m grpc_tools.protoc -I../../protos --python_out=. --grpc_python_out=. ../../protos/helloworld.proto
+
+Once the emulator is launched you can build and launch the web application as follows:
+
+```sh
+  $ cd $AOSP/external/qemu/android/android-grpc/docs/grpc-samples/js  && make deps && make develop
 ```
+
+*Note: Make deps is only needed once*
+
+A browser should open and you should be able to interact with the emulator.
+
+You can stop all the components by running:
+
+```sh
+  $ cd $AOSP/external/qemu/android/android-grpc/docs/grpc-samples/js  && make stop
+```
+
+*Note: this will just kill npm and the proxy*
+

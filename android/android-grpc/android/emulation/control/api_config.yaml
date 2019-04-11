@@ -33,6 +33,12 @@ http:
     body: "*"
   - selector: android.emulation.control.EmulatorController.getVmConfiguration
     get: /v1/vmconfiguration
+  - selector: android.emulation.control.EmulatorController.getScreenshot
+    get: /v1/screenshot
+  - selector: android.emulation.control.EmulatorController.usePhone
+    post: /v1/phone
+    body: "*"
+
 
 # TODO(jansene): Add additional http bindings if needed.
 
