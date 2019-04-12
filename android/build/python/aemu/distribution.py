@@ -48,7 +48,7 @@ zip_sets = {
             # Look for all files under {out}/build/debug_info/
             '{build_dir}/build/debug_info', r'.*'
         ],
-        'sdk-repo-{target}-grpc-samples.zip': ['{src_dir}/android/android-grpc/docs/grpc-samples/', r'.*'],
+        'sdk-repo-{target}-grpc-samples-{sdk_build_number}.zip': ['{src_dir}/android/android-grpc/docs/grpc-samples/', r'.*'],
         # Look for all files under {out}/distribution
         'sdk-repo-{target}-emulator-{sdk_build_number}.zip': ['{build_dir}/distribution', r'.*']
     }
