@@ -11,6 +11,7 @@ prebuilt(TCMALLOC)
 set(android-emu-base_src
     android/base/AlignedBuf.cpp
     android/base/Backtrace.cpp
+    android/base/back_trace.cpp
     android/base/ContiguousRangeMapper.cpp
     android/base/CpuTime.cpp
     android/base/CpuUsage.cpp

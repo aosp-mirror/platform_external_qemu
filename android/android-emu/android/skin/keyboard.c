@@ -61,7 +61,7 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     /* first, handle the arrow keys directly */
     if (skin_key_code_is_arrow(code)) {
         code = skin_keycode_rotate(code, -keyboard->rotation);
-        D("handling arrow (code=%d mod=%d)", code, mod);
+        fprintf(stderr, "handling arrow (code=0x%x mod=%d)\n", code, mod);
         int  doCapL, doCapR, doAltL, doAltR;
 
         doCapL = mod & kKeyModLShift;
@@ -192,6 +192,7 @@ static SkinKeyMod sync_modifier_key(int modifier_key, SkinKeyboard* kb,
      * if the release event happens outside of emulator window. Sync status
      * now */
     if (down && old && !(mod & mask)) {
+        fprintf(stderr, "%s: add mod key event\n", __func__);
         skin_keyboard_add_key_event(kb, modifier_key, 0);
         tracked &= ~mask;
     }
@@ -256,7 +257,9 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
 
+        fprintf(stderr, "%s: code 0x%x\n", __func__, keycode);
         if (android_hw->hw_arc) {
+        fprintf(stderr, "%s: arc\n", __func__);
             sync_modifier_key(LINUX_KEY_LEFTALT, kb, keycode, mod, down);
             sync_modifier_key(LINUX_KEY_LEFTCTRL, kb, keycode, mod, down);
             sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, keycode, mod, down);
@@ -268,11 +271,13 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         }
 
         /* first, try the keyboard-mode-independent keys */
-        int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
+        int code = android_hw->hw_fuchsia ? keycode : skin_keyboard_key_to_code(kb, keycode, mod, down);
+        fprintf(stderr, "%s: code 2 0x%x\n", __func__, code);
         if (code == 0) {
             return;
         }
         if ((int)code > 0) {
+        fprintf(stderr, "%s: add primary key event\n", __func__);
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
@@ -295,6 +300,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             code == LINUX_KEY_HOME || code == LINUX_KEY_SLEEP ||
             code == KEY_STEM_1 || code == KEY_STEM_2 ||
             code == KEY_STEM_3 || code == KEY_STEM_PRIMARY) {
+        fprintf(stderr, "%s: add switchy key event\n", __func__);
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;

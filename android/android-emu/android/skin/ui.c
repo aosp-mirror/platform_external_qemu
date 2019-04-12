@@ -278,7 +278,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventKeyDown:
-            DE("EVENT: kEventKeyDown scancode=%d mod=0x%x\n",
+            fprintf(stderr, "EVENT: kEventKeyDown scancode=0x%x mod=0x%x\n",
                ev.u.key.keycode, ev.u.key.mod);
             skin_keyboard_process_event(ui->keyboard, &ev, 1);
             break;

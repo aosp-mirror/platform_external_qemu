@@ -73,6 +73,7 @@ static void virtio_input_key_config(VirtIOInput *vinput,
 static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
                                       InputEvent *evt)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     VirtIOInputHID *vhid = VIRTIO_INPUT_HID(dev);
     VirtIOInput *vinput = VIRTIO_INPUT(dev);
     virtio_input_event event;
@@ -85,12 +86,15 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     case INPUT_EVENT_KIND_KEY:
         key = evt->u.key.data;
         qcode = qemu_input_key_value_to_qcode(key->key);
+        fprintf(stderr, "%s: qcode 0x%x\n", __func__, qcode);
         if (qcode < qemu_input_map_qcode_to_linux_len &&
             qemu_input_map_qcode_to_linux[qcode]) {
             event.type  = cpu_to_le16(EV_KEY);
             event.code  = cpu_to_le16(qemu_input_map_qcode_to_linux[qcode]);
+        fprintf(stderr, "%s: linux 0x%x\n", __func__, event.code);
             event.value = cpu_to_le32(key->down ? 1 : 0);
             virtio_input_send(vinput, &event);
+        fprintf(stderr, "%s: sended input\n", __func__);
         } else {
             if (key->down) {
                 fprintf(stderr, "%s: unmapped key: %d [%s]\n", __func__,

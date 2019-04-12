@@ -695,6 +695,7 @@ static int startEmulatorWithMinConfig(
     char** argv,
     const char* avdName,
     int apiLevel,
+    bool isFuchsia,
     const char* abi,
     const char* arch,
     bool isGoogleApis,
@@ -737,6 +738,7 @@ static int startEmulatorWithMinConfig(
     hw->hw_lcd_width = lcdWidth;
     hw->hw_lcd_height = lcdHeight;
     hw->hw_lcd_density = lcdDensity;
+    hw->hw_fuchsia = isFuchsia;
 
     if (gQAndroidBatteryAgent &&
         gQAndroidBatteryAgent->setHasBattery) {
@@ -938,7 +940,8 @@ extern "C" int main(int argc, char** argv) {
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
-                    "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
+                    "custom", 25, true /* is fuchsia */,
+                    "x86_64", "x86_64", true, AVD_PHONE,
                     // TODO: Have a way to communicate GPU mode via plain QEMU command line args
                     "host", opts->no_window,
                     // LCD width, height, DPI, orientation

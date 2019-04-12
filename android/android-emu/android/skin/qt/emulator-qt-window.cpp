@@ -2072,6 +2072,8 @@ static int convertKeyCode(int sym) {
     return -1;
 }
 
+#include "android/skin/qt/linux-to-qcode.inl"
+
 SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
     SkinEvent* skin_event = new SkinEvent();
     skin_event->type = type;
@@ -2217,7 +2219,14 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
                                                  QKeyEvent* event) {
     SkinEvent* skin_event = createSkinEvent(type);
     SkinEventKeyData& keyData = skin_event->u.key;
+    fprintf(stderr, "%s: evt key 0x%x\n", __func__, event->key());
     keyData.keycode = convertKeyCode(event->key());
+
+    if (android_hw->hw_fuchsia) {
+        fprintf(stderr, "%s: linux2qcode 0x%x\n", __func__, keyData.keycode);
+        keyData.keycode = linux_keycode_to_qemu_qcode[keyData.keycode];
+        fprintf(stderr, "%s: linux2qcode 0x%x (after)\n", __func__, keyData.keycode);
+    }
 
     Qt::KeyboardModifiers modifiers = event->modifiers();
     if (modifiers & Qt::ShiftModifier)
@@ -2231,6 +2240,7 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
 }
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
+    fprintf(stderr, "%s: call\n", __func__);
     if (!mForwardShortcutsToDevice && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
             if (type == kEventKeyUp) {
@@ -2258,7 +2268,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
         if (type == kEventKeyDown && event->text().length() > 0) {
             Qt::KeyboardModifiers mods = event->modifiers();
             mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
-            if (mods == 0) {
+            if (mods == 0 && !android_hw->hw_fuchsia) {
                 // The key event generated text without Ctrl, Alt, etc.
                 // Send an additional TextInput event to the emulator.
                 SkinEvent* skin_event = createSkinEvent(kEventTextInput);

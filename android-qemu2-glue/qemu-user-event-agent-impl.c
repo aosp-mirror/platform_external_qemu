@@ -37,7 +37,7 @@ static void user_event_key(unsigned code, bool down) {
 
 static void user_event_keycode(int code) {
     bool down = code & 0x400;
-    if (VERBOSE_CHECK(keys))
+    // if (VERBOSE_CHECK(keys))
         printf(">> %s KEY [0x%03x,%s]\n", __func__, (code & 0x3ff), down ? "down" : " up ");
 
     // Android already translates all the keycodes, so

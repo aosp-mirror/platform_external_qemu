@@ -1,4 +1,4 @@
-// Copyright 2018 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#pragma once
 
-#include <string>
+#include "android/base/Backtrace.h"
 
-namespace android {
-namespace base {
+using android::base::bt;
 
-// Returns backtrace of current thread, if supported by platform.
-// Otherwise, returns empty string.
-std::string bt();
+#include <stdio.h>
 
-} // namespace android
-} // namespace base
+extern "C" {
+
+void print_bt(void) {
+    auto b = bt();
+    fprintf(stderr, "%s\n", b.c_str());
+}
+
+}
