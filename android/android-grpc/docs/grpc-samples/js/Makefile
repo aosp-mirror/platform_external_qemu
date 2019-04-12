@@ -1,3 +1,17 @@
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 GOCMD=go
 GOPATH = $(shell $(GOCMD) env GOPATH)
 
@@ -28,20 +42,31 @@ OUT_DIR := $(CURRENT_DIR)/src/
 WEBPROXY = $(GOPATH)/bin/grpcwebproxy
 CONTROLPB = $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
 GRPCPB = $(OUT_DIR)/android_emulation_control/emulator_controller_grpc_web_pb.js
+PROTODIR = $(CURRENT_DIR)/android_emulation_control
+PROTO = $(PROTODIR)/emulator_controller.proto
+
 all: develop
 
 clean:
 	rm $(WEBPROXY)
 
-$(CONTROLPB) $(GRPCPB): $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
+$(PROTO):
+		mkdir -p $(PROTODIR)
+ifeq (,$(wildcard $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto))
+		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto  $(PROTO)
+else
+		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
+endif
+
+$(CONTROLPB) $(GRPCPB): $(PROTO)
 	@mkdir -p $(OUT_DIR)/android_emulation_control
-	@$(PROTOC)  -I/usr/local/include -I$(QEMU_ROOT) \
+	$(PROTOC)  -I/usr/local/include -I$(PROTODIR) \
 			--js_out=import_style=commonjs:/tmp \
 			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:/tmp \
-			$(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto
-	@echo "/* eslint-disable */" > $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
-	@cat /tmp/android/android-grpc/android/emulation/control/emulator_controller_pb.js >>  $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
-	@cp  /tmp/android/android-grpc/android/emulation/control/emulator_controller_grpc_web_pb.js $(GRPCPB)
+			$(PROTO)
+	@echo "/* eslint-disable */" > $(CONTROLPB)
+	@cat /tmp/emulator_controller_pb.js >>  $(CONTROLPB)
+	@cp  /tmp/emulator_controller_grpc_web_pb.js $(GRPCPB)
 
 $(WEBPROXY):
 	@rm -rf $(GOPATH)/src/grpc-web
