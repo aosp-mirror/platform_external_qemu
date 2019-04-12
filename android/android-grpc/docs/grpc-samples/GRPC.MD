@@ -21,14 +21,26 @@ This document describes how you can control the emulator over the gRPC
 interface. To learn more about gRPC you can visit the
 [website](https://grpc.io).
 
-We describe two sample cases. One where we will use the GO language
-to create a webserver that allows you to control the emulator over http.
+We describe several sample cases.
 
-The second example demonstrates how you can use Javascript & React to control
-the emulator.
+ - One where we will use the GO language to create a webserver
+   that allows you to control the emulator over http.
+
+ - An example demonstrates how you can use Javascript & React to control
+   the emulator.
+
+  - An example that uses the python bindings.
+
 
 Note that this is still under active development, so more functionality might
 be added in the future.
+
+In general all the approaches work in a similar fashion:
+
+1. Create the grpc bindings using protoc
+2. Place the generated bindings in the right location.
+3. Configure the EmulatorService, (i.e. set port, authentication etc.)
+4. Make calls to the emulator.
 
 # Enabling gRPC in the build
 
@@ -188,4 +200,21 @@ You can stop all the components by running:
 ```
 
 *Note: this will just kill npm and the proxy*
+
+# Controlling the emulator with Python
+
+In the python directory you will find an example that aks the emulator about the vm configuration
+after which it will send a series of key events with a 2ms delay.
+
+Before we can access the emulator we must launch it with the gRPC server enabled.
+
+```sh
+  $ emulator @my_avd -grpc 5556 [..other options...]
+```
+
+Once the emulator is launched you can build and run the sample as follows:
+
+```sh
+  $ make deps && make run
+```
 
