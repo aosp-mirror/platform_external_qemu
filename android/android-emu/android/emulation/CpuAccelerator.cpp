@@ -953,6 +953,10 @@ CpuAccelerator GetCurrentCpuAccelerator() {
             g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
             status_code = status_code_WHPX;
             status = std::move(statusWHPX);
+            // Turn off file-backed RAM for WHPX users until
+            // we figure out what's going on.
+            featurecontrol::setEnabledOverride(
+                featurecontrol::QuickbootFileBacked, false);
         }
 
 #ifdef _WIN32
