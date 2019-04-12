@@ -76,7 +76,7 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     VirtIOInputHID *vhid = VIRTIO_INPUT_HID(dev);
     VirtIOInput *vinput = VIRTIO_INPUT(dev);
     virtio_input_event event;
-    int qcode;
+    int linux_keycode;
     InputKeyEvent *key;
     InputMoveEvent *move;
     InputBtnEvent *btn;
@@ -84,17 +84,22 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     switch (evt->type) {
     case INPUT_EVENT_KIND_KEY:
         key = evt->u.key.data;
-        qcode = qemu_input_key_value_to_qcode(key->key);
-        if (qcode < qemu_input_map_qcode_to_linux_len &&
-            qemu_input_map_qcode_to_linux[qcode]) {
+        // On AEMU (Android Emulator), we get the keycode from Qt
+        // where we already converted it to a linux keycode.
+        // That means |linux_keycode| (previously |qcode|)
+        // here is a linux keycode already.
+        linux_keycode = qemu_input_key_value_to_qcode(key->key);
+        // Nice to still have the bounds check here though.
+        if (linux_keycode < qemu_input_map_linux_to_qcode_len &&
+            qemu_input_map_linux_to_qcode[linux_keycode]) {
             event.type  = cpu_to_le16(EV_KEY);
-            event.code  = cpu_to_le16(qemu_input_map_qcode_to_linux[qcode]);
+            event.code  = cpu_to_le16(linux_keycode);
             event.value = cpu_to_le32(key->down ? 1 : 0);
             virtio_input_send(vinput, &event);
         } else {
             if (key->down) {
                 fprintf(stderr, "%s: unmapped key: %d [%s]\n", __func__,
-                        qcode, QKeyCode_str(qcode));
+                        linux_keycode, QKeyCode_str(linux_keycode));
             }
         }
         break;
