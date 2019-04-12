@@ -20,7 +20,7 @@ PROTOC=protoc
 GRPC_WEB_PLUGIN = protoc-gen-grpc-web
 GRPC_WEB_PLUGIN_PATH ?= `which $(GRPC_WEB_PLUGIN)`
 PROTOC_CMD = which $(PROTOC)
-PROTOC_CHECK_CMD = $(PROTOC) --version | grep -q libprotoc.3
+PROTOC_CHECK_CMD=$(PROTOC) --version | grep -q "libprotoc 3.6" && echo true || echo false
 PROTOHEADER=$(shell pkg-config --variable prefix protobuf)/include
 PROTOLIB=$(shell pkg-config --variable prefix protobuf)/lib
 
@@ -28,13 +28,16 @@ HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
 HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
 
 ifeq ($(HAS_PROTOC),true)
-	HAS_VALID_PROTOC = $(shell $(PROTOC_CHECK_CMD) 2> /dev/null && echo true || echo false)
+	HAS_VALID_PROTOC := $(shell $(PROTOC_CHECK_CMD))
 endif
 
-ifneq (,$(wildcard $(PROTOHEADER)/google/protobuf/compiler/code_generator.h))
-  HAS_VALID_PROTOC = true
-else
-  HAS_VALID_PROTOC = false
+
+ifeq ($(HAS_VALID_PROTOC),true)
+	ifneq (,$(wildcard $(PROTOHEADER)/google/protobuf/compiler/code_generator.h))
+		HAS_VALID_PROTOC := true
+	else
+		HAS_VALID_PROTOC := false
+	endif
 endif
 
 
@@ -44,6 +47,7 @@ ifeq ($(HAS_VALID_PROTOC),true)
 	    SYSTEM_OK = true
     endif
 endif
+
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
@@ -107,11 +111,11 @@ system-check:
 ifneq ($(HAS_VALID_PROTOC),true)
 	@echo " DEPENDENCY ERROR"
 	@echo
-	@echo "You don't have protoc 3.0.0 installed in your path."
-	@echo "Please install Google protocol buffers 3.0.0 and its compiler."
+	@echo "You don't have protoc 3.6.0 installed in your path."
+	@echo "Please install Google protocol buffers 3.6.0 and its compiler."
 	@echo "You can find it here:"
 	@echo
-	@echo "   https://github.com/google/protobuf/releases/tag/v3.0.0-beta-3.3"
+	@echo "   https://github.com/google/protobuf/releases/tag/v3.6.0"
 	@echo "   or try $ brew install protoc"
 	@echo
 	@echo "Here is what I get when trying to evaluate your version of protoc:"
