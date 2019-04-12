@@ -15,26 +15,33 @@
 GOCMD=go
 GOPATH = $(shell $(GOCMD) env GOPATH)
 
-CXX = g++
-CPPFLAGS += -I/usr/local/include -pthread
-CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib -lprotoc -lprotobuf -lpthread -ldl
 DEP=dep
 PROTOC=protoc
 GRPC_WEB_PLUGIN = protoc-gen-grpc-web
 GRPC_WEB_PLUGIN_PATH ?= `which $(GRPC_WEB_PLUGIN)`
 PROTOC_CMD = which $(PROTOC)
 PROTOC_CHECK_CMD = $(PROTOC) --version | grep -q libprotoc.3
+PROTOHEADER=$(shell pkg-config --variable prefix protobuf)/include
+PROTOLIB=$(shell pkg-config --variable prefix protobuf)/lib
+
 HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
 HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
+
 ifeq ($(HAS_PROTOC),true)
-HAS_VALID_PROTOC = $(shell $(PROTOC_CHECK_CMD) 2> /dev/null && echo true || echo false)
+	HAS_VALID_PROTOC = $(shell $(PROTOC_CHECK_CMD) 2> /dev/null && echo true || echo false)
 endif
+
+ifneq (,$(wildcard $(PROTOHEADER)/google/protobuf/compiler/code_generator.h))
+  HAS_VALID_PROTOC = true
+else
+  HAS_VALID_PROTOC = false
+endif
+
 
 SYSTEM_OK = false
 ifeq ($(HAS_VALID_PROTOC),true)
     ifeq ($(HAS_DEP), true)
-       SYSTEM_OK = true
+	    SYSTEM_OK = true
     endif
 endif
 
@@ -47,6 +54,11 @@ CONTROLPB = $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
 GRPCPB = $(OUT_DIR)/android_emulation_control/emulator_controller_grpc_web_pb.js
 PROTODIR = $(CURRENT_DIR)/android_emulation_control
 PROTO = $(PROTODIR)/emulator_controller.proto
+
+CXX = g++
+CPPFLAGS += -I$(PROTOHEADER) -pthread
+CXXFLAGS += -std=c++11
+LDFLAGS += -L$(PROTOLIB) -lprotoc -lprotobuf -lpthread -ldl
 
 all: develop
 
@@ -106,13 +118,14 @@ ifneq ($(HAS_VALID_PROTOC),true)
 	@echo
 	-$(PROTOC) --version
 	@echo
+	@echo "And here is where I am looking for the headers: $(PROTOHEADER)/google/protobuf"
 	@echo
 endif
 ifneq ($(HAS_DEP), true)
 	@echo " DEPENDENCY ERROR"
 	@echo
 	@echo "You don't have dep installed in your path."
-	@echo "Please install the godependency manager by building or "
+	@echo "Please install the go dependency manager by building or "
 	@echo "copying the release. You can find it here:"
 	@echo
 	@echo "  https://golang.github.io/dep/"
