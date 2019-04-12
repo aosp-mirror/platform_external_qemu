@@ -32,6 +32,7 @@
 #include <string>
 
 using android::base::System;
+using android::base::PathUtils;
 using android::emulation::captureScreenshot;
 using android::emulation::takeScreenshot;
 using android::emulation::ImageFormat;
@@ -298,7 +299,7 @@ TEST_F(ScreenCapturerTest, takePngScreenShotRotations) {
     const SkinRotation rotations[] = {SKIN_ROTATION_0, SKIN_ROTATION_90,
                                       SKIN_ROTATION_180, SKIN_ROTATION_270};
 
-    std::string screenShot = mScreenshotPath + PATH_SEP  + "png_capture.png";
+    std::string screenShot = PathUtils::join(mScreenshotPath, "png_capture.png");
     for (SkinRotation rotation : rotations) {
         Image img = takeScreenshot(ImageFormat::PNG, rotation, nullptr,
                                    framebuffer4Pixels);
@@ -307,6 +308,7 @@ TEST_F(ScreenCapturerTest, takePngScreenShotRotations) {
         std::ofstream ofile(screenShot, std::ofstream::binary | std::ofstream::trunc);
         ofile.write((char*) img.getPixelBuf(), img.getPixelCount());
         ofile.flush();
+        ofile.close();
         uint8_t* pixels = (uint8_t*)loadScreenshot(screenShot.c_str(), 2, 2);
 
         verifyframebuffer4Pixels(rotation, pixels);
@@ -366,7 +368,7 @@ TEST_F(ScreenCapturerTest, saveAndLoadRotation270) {
 TEST_F(ScreenCapturerTest, pbFileSuccess) {
     MockRenderer renderer(true);
     // Create a temporary file with a .pb extension.
-    const std::string tmp_file = android::base::PathUtils::join(
+    const std::string tmp_file = PathUtils::join(
             System::get()->getTempDir(), "normal_file.pb");
     FILE* file = std::fopen(tmp_file.c_str(), "w");
     EXPECT_THAT(file, testing::NotNull()) << "Failed to open " << tmp_file;
