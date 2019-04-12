@@ -1105,111 +1105,6 @@ extern "C" int main(int argc, char** argv) {
     if (opts->allow_host_audio)
         args.add("-allow-host-audio");
 
-    bool badSnapshots = false;
-
-    // Check situations where snapshots should be turned off
-    {
-        // Just dont' use snapshots on 32 bit - crashes galore
-        badSnapshots = badSnapshots || (System::get()->getProgramBitness() == 32);
-
-        // bug: 130381533
-        // Don't use snapshots with car image
-        if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
-            badSnapshots = true;
-        }
-
-        // Bad generic snapshots command line option
-        if (opts->snapshot && opts->snapshot[0] == '\0') {
-            opts->snapshot = nullptr;
-            opts->no_snapshot_load = true;
-            opts->no_snapshot_save = true;
-            badSnapshots = true;
-        } else if (opts->snapshot) {
-            // Never save snapshot on exit if we are booting with a snapshot;
-            // it will overwrite quickboot state
-            opts->no_snapshot_save = true;
-        }
-
-        if (badSnapshots) {
-            feature_set_enabled_override(kFeature_FastSnapshotV1, false);
-            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
-        }
-
-        // Situations where not to use mmap() for RAM
-        // 1. Using HDD on Linux; no file mapping or we will have a bad time.
-        if (avd){
-            auto contentPath = avdInfo_getContentPath(avd);
-            auto diskKind = System::get()->pathDiskKind(contentPath);
-            if (diskKind) {
-                if (*diskKind == System::DiskKind::Hdd) {
-                    androidSnapshot_setUsingHdd(true /* is hdd */);
-#ifdef __linux__
-                    feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
-#endif
-                }
-            }
-        }
-        // 2. TODO
-    }
-
-    if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
-        if (!opts->no_snapshot_load) {
-            args.add2("-loadvm", opts->snapshot);
-        }
-    }
-
-    bool useQuickbootRamFile =
-        feature_is_enabled(kFeature_QuickbootFileBacked) &&
-        !opts->snapshot;
-
-    if (useQuickbootRamFile) {
-        ScopedCPtr<const char> memPath(
-            androidSnapshot_prepareAutosave(hw->hw_ramSize, nullptr));
-
-        if (memPath) {
-            args.add2("-mem-path", memPath.get());
-
-            bool mapAsShared =
-                !opts->read_only &&
-                !opts->snapshot &&
-                !opts->no_snapshot_save &&
-                androidSnapshot_getQuickbootChoice();
-
-            if (mapAsShared) {
-                args.add("-mem-file-shared");
-                androidSnapshot_setRamFileDirty(nullptr, true);
-            }
-        } else {
-            fprintf(stderr, "Warning: could not initialize Quickboot RAM file. "
-                            "Please ensure enough disk space for the guest RAM size "
-                            "(%d MB) along with a safety factor.\n", hw->hw_ramSize);
-            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
-        }
-    }
-
-    /** SNAPSHOT STORAGE HANDLING */
-
-    if (opts->snapshot_list) {
-        args.add("-snapshot-list");
-    }
-
-    /* If we have a valid snapshot storage path */
-
-    if (opts->snapstorage) {
-        // NOTE: If QEMU2_SNAPSHOT_SUPPORT is not defined, a warning has been
-        //       already printed by emulator_parseCommonCommandLineOptions().
-#ifdef QEMU2_SNAPSHOT_SUPPORT
-        /* We still use QEMU command-line options for the following since
-         * they can change from one invokation to the next and don't really
-         * correspond to the hardware configuration itself.
-         */
-        if (!opts->no_snapshot_save)
-            args.add2("-savevm-on-exit", opts->snapshot);
-        if (opts->no_snapshot_update_time)
-            args.add("-snapshot-no-time-update");
-#endif  // QEMU2_SNAPSHOT_SUPPORT
-    }
-
     if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
         boot_property_add_logcat_pipe(opts->logcat);
         // we have done with -logcat option.
@@ -1538,6 +1433,120 @@ extern "C" int main(int argc, char** argv) {
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
+    // Snapshots
+    bool badSnapshots = false;
+
+    // Check situations where snapshots should be turned off
+    {
+        // Just dont' use snapshots on 32 bit - crashes galore
+        badSnapshots = badSnapshots || (System::get()->getProgramBitness() == 32);
+
+        // bug: 130381533
+        // Don't use snapshots with car image
+        if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
+            badSnapshots = true;
+        }
+
+        // bug: 129484301
+        // Don't use snapshots with Vulkan yet
+        if (feature_is_enabled(kFeature_GLDirectMem) ||
+            feature_is_enabled(kFeature_Vulkan)) {
+            opts->no_snapshot_load = true;
+            opts->no_snapshot_save = true;
+            badSnapshots = true;
+        }
+
+        // Bad generic snapshots command line option
+        if (opts->snapshot && opts->snapshot[0] == '\0') {
+            opts->snapshot = nullptr;
+            opts->no_snapshot_load = true;
+            opts->no_snapshot_save = true;
+            badSnapshots = true;
+        } else if (opts->snapshot) {
+            // Never save snapshot on exit if we are booting with a snapshot;
+            // it will overwrite quickboot state
+            opts->no_snapshot_save = true;
+        }
+
+        if (badSnapshots) {
+            feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
+        }
+
+        // Situations where not to use mmap() for RAM
+        // 1. Using HDD on Linux; no file mapping or we will have a bad time.
+        if (avd){
+            auto contentPath = avdInfo_getContentPath(avd);
+            auto diskKind = System::get()->pathDiskKind(contentPath);
+            if (diskKind) {
+                if (*diskKind == System::DiskKind::Hdd) {
+                    androidSnapshot_setUsingHdd(true /* is hdd */);
+#ifdef __linux__
+                    feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
+#endif
+                }
+            }
+        }
+        // 2. TODO
+    }
+
+    if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
+        if (!opts->no_snapshot_load) {
+            args.add2("-loadvm", opts->snapshot);
+        }
+    }
+
+    bool useQuickbootRamFile =
+        feature_is_enabled(kFeature_QuickbootFileBacked) &&
+        !opts->snapshot;
+
+    if (useQuickbootRamFile) {
+        ScopedCPtr<const char> memPath(
+            androidSnapshot_prepareAutosave(hw->hw_ramSize, nullptr));
+
+        if (memPath) {
+            args.add2("-mem-path", memPath.get());
+
+            bool mapAsShared =
+                !opts->read_only &&
+                !opts->snapshot &&
+                !opts->no_snapshot_save &&
+                androidSnapshot_getQuickbootChoice();
+
+            if (mapAsShared) {
+                args.add("-mem-file-shared");
+                androidSnapshot_setRamFileDirty(nullptr, true);
+            }
+        } else {
+            fprintf(stderr, "Warning: could not initialize Quickboot RAM file. "
+                            "Please ensure enough disk space for the guest RAM size "
+                            "(%d MB) along with a safety factor.\n", hw->hw_ramSize);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
+        }
+    }
+
+    /** SNAPSHOT STORAGE HANDLING */
+
+    if (opts->snapshot_list) {
+        args.add("-snapshot-list");
+    }
+
+    /* If we have a valid snapshot storage path */
+
+    if (opts->snapstorage) {
+        // NOTE: If QEMU2_SNAPSHOT_SUPPORT is not defined, a warning has been
+        //       already printed by emulator_parseCommonCommandLineOptions().
+#ifdef QEMU2_SNAPSHOT_SUPPORT
+        /* We still use QEMU command-line options for the following since
+         * they can change from one invokation to the next and don't really
+         * correspond to the hardware configuration itself.
+         */
+        if (!opts->no_snapshot_save)
+            args.add2("-savevm-on-exit", opts->snapshot);
+        if (opts->no_snapshot_update_time)
+            args.add("-snapshot-no-time-update");
+#endif  // QEMU2_SNAPSHOT_SUPPORT
+    }
     // Memory size
     args.add("-m");
     args.addFormat("%d", hw->hw_ramSize);
