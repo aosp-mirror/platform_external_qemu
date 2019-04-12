@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0915e447_b5526b5b",
+        "filename": "hw/input/virtio-input-hid.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1480857
+      },
+      "writtenOn": "2019-04-12T21:01:22Z",
+      "side": 1,
+      "message": "Would we want to have a different bounds check here if we are using linux keycodes?\nWorst case this might prevent some valid keycodes from being passed through",
+      "range": {
+        "startLine": 92,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 51
+      },
+      "revId": "480c9bfa93f7ac2c98b648f2f6eb6b0bace6752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
