@@ -84,11 +84,15 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     switch (evt->type) {
     case INPUT_EVENT_KIND_KEY:
         key = evt->u.key.data;
+        // On AEMU (Android Emulator), we get the keycode from Qt
+        // where we already converted it to a linux keycode.
+        // That means |qcode| here is a linux keycode already.
         qcode = qemu_input_key_value_to_qcode(key->key);
+        // Nice to still have the basic bounds check here though.
         if (qcode < qemu_input_map_qcode_to_linux_len &&
             qemu_input_map_qcode_to_linux[qcode]) {
             event.type  = cpu_to_le16(EV_KEY);
-            event.code  = cpu_to_le16(qemu_input_map_qcode_to_linux[qcode]);
+            event.code  = cpu_to_le16(qcode);
             event.value = cpu_to_le32(key->down ? 1 : 0);
             virtio_input_send(vinput, &event);
         } else {
