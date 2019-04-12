@@ -22,6 +22,30 @@
       "revId": "480c9bfa93f7ac2c98b648f2f6eb6b0bace6752e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "864bac81_5fa89da9",
+        "filename": "hw/input/virtio-input-hid.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-12T21:13:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0915e447_b5526b5b",
+      "range": {
+        "startLine": 92,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 51
+      },
+      "revId": "480c9bfa93f7ac2c98b648f2f6eb6b0bace6752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
