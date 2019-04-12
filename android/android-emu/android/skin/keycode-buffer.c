@@ -12,6 +12,8 @@
 
 #include "android/skin/keycode-buffer.h"
 
+#include "android/base/back_trace.h"
+
 #include "android/utils/debug.h"
 
 #include <stdio.h>
@@ -33,8 +35,12 @@ void skin_keycode_buffer_add(SkinKeycodeBuffer* keycodes,
 
 void skin_keycode_buffer_flush(SkinKeycodeBuffer* keycodes) {
     if (keycodes->keycode_count > 0) {
-        if (VERBOSE_CHECK(keys)) {
+        // if (VERBOSE_CHECK(keys)) {
             int  nn;
+            printf(">> COUNT %d\n", keycodes->keycode_count);
+            if (keycodes->keycode_count == 2) {
+                print_bt();
+            }
             printf(">> %s KEY", __func__);
             for (nn = 0; nn < keycodes->keycode_count; nn++) {
                 int  code = keycodes->keycodes[nn];
@@ -42,11 +48,12 @@ void skin_keycode_buffer_flush(SkinKeycodeBuffer* keycodes) {
                        (code & 0x3ff), (code & 0x400) ? "down" : " up ");
             }
             printf("\n");
-        }
+        // }
         if (keycodes->keycode_flush) {
             keycodes->keycode_flush(keycodes->keycodes,
                                     keycodes->keycode_count);
         }
         keycodes->keycode_count = 0;
+        fprintf(stderr, "%s: set 2 z\n", __func__);
     }
 }
