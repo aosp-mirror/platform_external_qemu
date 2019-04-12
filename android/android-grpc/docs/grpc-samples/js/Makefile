@@ -15,13 +15,16 @@
 GOCMD=go
 GOPATH = $(shell $(GOCMD) env GOPATH)
 
+CXX = g++
+CPPFLAGS += -I/usr/local/include -pthread
+CXXFLAGS += -std=c++11
+LDFLAGS += -L/usr/local/lib -lprotoc -lprotobuf -lpthread -ldl
 DEP=dep
 PROTOC=protoc
 GRPC_WEB_PLUGIN = protoc-gen-grpc-web
 GRPC_WEB_PLUGIN_PATH ?= `which $(GRPC_WEB_PLUGIN)`
 PROTOC_CMD = which $(PROTOC)
 PROTOC_CHECK_CMD = $(PROTOC) --version | grep -q libprotoc.3
-HAS_PLUGIN = $(shell which $(GRPC_WEB_PLUGIN) > /dev/null && echo true || echo false)
 HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
 HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
 ifeq ($(HAS_PROTOC),true)
@@ -58,9 +61,13 @@ else
 		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
 endif
 
-$(CONTROLPB) $(GRPCPB): $(PROTO)
+protoc-gen-grpc-web: protoc-plugin/grpc_generator.o
+	$(CXX) $^ $(LDFLAGS) -o $@
+
+$(CONTROLPB) $(GRPCPB): $(PROTO) protoc-gen-grpc-web
 	@mkdir -p $(OUT_DIR)/android_emulation_control
 	$(PROTOC)  -I/usr/local/include -I$(PROTODIR) \
+			--plugin=protoc-gen-grpc-web=$(CURRENT_DIR)/protoc-gen-grpc-web \
 			--js_out=import_style=commonjs:/tmp \
 			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:/tmp \
 			$(PROTO)
@@ -100,18 +107,6 @@ ifneq ($(HAS_VALID_PROTOC),true)
 	-$(PROTOC) --version
 	@echo
 	@echo
-endif
-ifneq ($(HAS_PLUGIN), true)
-	@echo " DEPENDENCY ERROR"
-	@echo
-	@echo "You don't have protoc-gen-grpc-web installed in your path."
-	@echo "Please install the code generator plugin by building or "
-	@echo "copying the release. You can find it here:"
-	@echo
-	@echo "  https://github.com/grpc/grpc-web/releases"
-	@echo
-	@echo "Make sure it is named protoc-gen-grpc-web and on the path."
-	@echo "You will not be able to update the .proto file!"
 endif
 ifneq ($(HAS_DEP), true)
 	@echo " DEPENDENCY ERROR"
