@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c485f829_8476d646",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/common/vulkantypes.py",
+        "patchSetId": 25
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-04-15T22:18:07Z",
+      "side": 1,
+      "message": "nit: space, and a few more places in this file",
+      "range": {
+        "startLine": 824,
+        "startChar": 0,
+        "endLine": 824,
+        "endChar": 4
+      },
+      "revId": "89df28f5a0db5f4efb1ca87abc4ecea1df21c7a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2c54830_caeed718",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanProtobuf_unittest.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-04-15T22:18:07Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 323,
+        "endChar": 14
+      },
+      "revId": "89df28f5a0db5f4efb1ca87abc4ecea1df21c7a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7064b7e_02adaf12",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanProtobuf_unittest.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-04-15T22:18:07Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 376,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 14
+      },
+      "revId": "89df28f5a0db5f4efb1ca87abc4ecea1df21c7a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
