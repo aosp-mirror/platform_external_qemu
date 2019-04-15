@@ -33,6 +33,7 @@ public:
     explicit RecordMacroPage(QWidget* parent = 0);
 
     static void setAutomationAgent(const QAndroidAutomationAgent* agent);
+    static void stopCurrentMacro();
 
 private slots:
     void on_playStopButton_clicked();
@@ -46,6 +47,9 @@ private slots:
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
+
+signals:
+    void syncWithThreadRequired();
 
 private:
     void loadUi();
@@ -68,11 +72,16 @@ private:
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
     std::unique_ptr<Ui::RecordMacroPage> mUi;
     RecordMacroSavedItem* mMacroItemPlaying;
+    QListWidgetItem* mListItemPlaying;
     std::unordered_map<std::string, QString> mLengths;
     std::unordered_map<std::string, QString> mDescriptions;
     MacroUiState mState = MacroUiState::Waiting;
     int mSec = 0;
     QTimer mTimer;
 
+    void emitStopSignal();
+    void playbackFinished();
+
+    static RecordMacroPage* sInstance;
     static const QAndroidAutomationAgent* sAutomationAgent;
 };
