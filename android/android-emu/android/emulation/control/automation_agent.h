@@ -33,6 +33,11 @@ typedef struct QAndroidAutomationAgent {
 
     // Stop playback from a file.
     android::automation::StopResult (*stopPlayback)();
+
+    // Start playback with stop callback.
+    android::automation::StartResult (*startPlaybackWithCallback)(
+            StringView filename,
+            void (*onStopCallback)());
 } QAndroidAutomationAgent;
 
 ANDROID_END_HEADER
