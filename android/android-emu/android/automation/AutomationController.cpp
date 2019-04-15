@@ -363,6 +363,8 @@ public:
     StopResult stopRecording() override;
 
     StartResult startPlayback(StringView filename) override;
+    StartResult startPlaybackWithCallback(StringView filename,
+                                          void (*onStopCallback)()) override;
     StopResult stopPlayback() override;
 
     ReplayResult replayInitialState(StringView state) override;
@@ -397,6 +399,9 @@ private:
     bool mPlayingFromFile = false;
     std::unique_ptr<EventSource> mPlaybackEventSource;
     DurationNs mNextPlaybackCommandTime = 0L;
+
+    // After replay callback.
+    std::function<void()> mOnStopCallback;
 
     // Offworld state.
     OffworldEventSource* mOffworldEventSource = nullptr;
@@ -631,12 +636,25 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
         mPlaybackEventSource = std::move(source);
         mNextPlaybackCommandTime =
                 mLooper->nowNs(Looper::ClockType::kVirtual) + nextCommandDelay;
+
+        mPlayingFromFile = true;
     } else {
         LOG(INFO) << "Playback did not contain any commands";
+
+        if (mOnStopCallback) {
+            mOnStopCallback();
+            mOnStopCallback = nullptr;
+        }
     }
 
-    mPlayingFromFile = true;
     return Ok();
+}
+
+StartResult AutomationControllerImpl::startPlaybackWithCallback(
+        StringView filename,
+        void (*onStopCallback)()) {
+    mOnStopCallback = onStopCallback;
+    return startPlayback(filename);
 }
 
 StopResult AutomationControllerImpl::stopPlayback() {
@@ -776,8 +794,14 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         mNextPlaybackCommandTime += nextCommandDelay;
     } else {
         VLOG(automation) << "Playback hit EOF";
+        mPlayingFromFile = false;
         mPlaybackEventSource.reset();
         mOffworldEventSource = nullptr;
+
+        if (mOnStopCallback) {
+            mOnStopCallback();
+            mOnStopCallback = nullptr;
+        }
     }
 }
 
