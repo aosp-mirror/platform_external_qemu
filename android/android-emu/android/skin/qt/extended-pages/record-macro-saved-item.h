@@ -29,6 +29,8 @@ public:
     void setName(QString name);
     std::string getName() const;
     void setDisplayInfo(QString displayInfo);
+    void setDisplayTime(QString displayTime);
+    void macroSelected(bool state);
 
 private:
     void setDisplayInfoOpacity(double opacity);
