@@ -37,7 +37,7 @@ zip_sets = {
     'debug':  # Release type..
     {
         # Look for *.gcda files under the build tree
-        'code-coverage-{target}.zip': ['{build_dir}.', r'.*(gcda|gcno)'],
+        'code-coverage-{target}.zip': ['{build_dir}', r'.*(gcda|gcno)'],
         # Look for all files under {out}/distribution
         'sdk-repo-{target}-emulator-full-debug-{sdk_build_number}.zip': ['{build_dir}/distribution', r'.*']
     },
