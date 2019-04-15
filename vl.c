@@ -4631,6 +4631,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_registerMainLooper(looper_getForThread());
     }
 
+    if (min_config_qemu_mode) {
+        mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
+    }
+
     if (android_qemu_mode) {
         if (!android_hw_file) {
             error_report("Missing -android-hw <file> option!");
