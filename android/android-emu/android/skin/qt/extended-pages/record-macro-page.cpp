@@ -27,11 +27,17 @@
 using namespace android::base;
 
 const QAndroidAutomationAgent* RecordMacroPage::sAutomationAgent = nullptr;
+RecordMacroPage* RecordMacroPage::sInstance = nullptr;
 
 RecordMacroPage::RecordMacroPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordMacroPage()) {
     mUi->setupUi(this);
     loadUi();
+    sInstance = this;
+}
+
+RecordMacroPage::~RecordMacroPage() {
+    sInstance = nullptr;
 }
 
 // static
@@ -44,10 +50,10 @@ void RecordMacroPage::loadUi() {
     mUi->macroList->clear();
 
     // Lengths as QStrings have to be initialized here to use tr().
-    mLengths = {{"Reset_position", tr("0:05")},
-                {"Track_horizontal_plane", tr("0:18")},
-                {"Track_vertical_plane", tr("0:14")},
-                {"Walk_to_image_room", tr("0:15")}};
+    mLengths = {{"Reset_position", tr("0:00")},
+                {"Track_horizontal_plane", tr("0:16")},
+                {"Track_vertical_plane", tr("0:12")},
+                {"Walk_to_image_room", tr("0:14")}};
 
     // Descriptions as QStrings have to be initialized here to use tr().
     mDescriptions = {
@@ -82,6 +88,9 @@ void RecordMacroPage::loadUi() {
 
     QObject::connect(&mTimer, &QTimer::timeout, this,
                      &RecordMacroPage::updateElapsedTime);
+
+    QObject::connect(this, &RecordMacroPage::playbackFinishedSignal, this,
+                     &RecordMacroPage::playbackFinished);
 
     setMacroUiState(MacroUiState::Waiting);
 }
@@ -202,7 +211,23 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     const std::string macroAbsolutePath =
             PathUtils::join(getMacrosDirectory(), macroName);
 
-    auto result = sAutomationAgent->startPlayback(macroAbsolutePath);
+    disableMacroItemsExcept(listItem);
+
+    mCurrentMacroName = macroName;
+    mMacroPlaying = true;
+    mMacroItemPlaying = macroSavedItem;
+    mListItemPlaying = listItem;
+    setMacroUiState(MacroUiState::Playing);
+
+    // Update every second.
+    mSec = 0;
+    mMacroItemPlaying->setDisplayTime(getTimerString(0));
+    mTimer.start(1000);
+
+    showPreviewFrame(macroName);
+
+    auto result = sAutomationAgent->startPlaybackWithCallback(
+            macroAbsolutePath, &RecordMacroPage::stopCurrentMacro);
     if (result.err()) {
         std::ostringstream errString;
         errString << result.unwrapErr();
@@ -216,20 +241,6 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
         int ret = msgBox.exec();
         return;
     }
-
-    disableMacroItemsExcept(listItem);
-
-    mCurrentMacroName = macroName;
-    mMacroPlaying = true;
-    mMacroItemPlaying = macroSavedItem;
-    setMacroUiState(MacroUiState::Playing);
-
-    // Update every second.
-    mSec = 0;
-    mMacroItemPlaying->setDisplayTime(getTimerString(0));
-    mTimer.start(1000);
-
-    showPreviewFrame(macroName);
 }
 
 void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
@@ -354,4 +365,17 @@ QString RecordMacroPage::getTimerString(int seconds) {
                          .arg(seconds % 60);
     qs.append(mLengths[mCurrentMacroName]);
     return qs;
+}
+
+// static
+void RecordMacroPage::stopCurrentMacro() {
+    sInstance->emitPlaybackFinished();
+}
+
+void RecordMacroPage::emitPlaybackFinished() {
+    emit playbackFinishedSignal();
+}
+
+void RecordMacroPage::playbackFinished() {
+    stopButtonClicked(mListItemPlaying);
 }
