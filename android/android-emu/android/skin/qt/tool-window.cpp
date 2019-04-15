@@ -179,6 +179,11 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD\n";
     }
 
+    if (android_avdInfo &&
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
+    }
+
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
     // Need to add this one separately because QKeySequence cannot parse
@@ -453,6 +458,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_RECORD:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_RECORD);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_CAR:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_CAR);
             }
             break;
         case QtUICommand::SHOW_PANE_SETTINGS:
