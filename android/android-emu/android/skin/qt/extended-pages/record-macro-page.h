@@ -17,6 +17,7 @@
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
 #include "android/skin/qt/video-player/VideoInfo.h"
 
+#include <QTime>
 #include <QTimer>
 #include <QWidget>
 #include <memory>
@@ -66,6 +67,10 @@ private:
     void showPreviewFrame(const std::string& previewName);
     std::string getMacroNameFromItem(QListWidgetItem* listItem);
     QString getTimerString(int seconds);
+    void reportMacroPlayed();
+    void reportPreviewPlayedAgain();
+    void reportTotalDuration();
+    void reportPresetMacroPlayed(const std::string& macroName);
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
@@ -79,6 +84,7 @@ private:
     MacroUiState mState = MacroUiState::Waiting;
     int mSec = 0;
     QTimer mTimer;
+    QTime mElapsedTimeTimer;
 
     void emitPlaybackFinished();
     void playbackFinished();

@@ -15,6 +15,8 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
@@ -23,6 +25,11 @@
 #include <QMessageBox>
 #include <iostream>
 #include <sstream>
+
+using android::metrics::MetricsReporter;
+using android_studio::EmulatorAutomation;
+using EmulatorAutomationPresetMacro =
+        android_studio::EmulatorAutomation::EmulatorAutomationPresetMacro;
 
 using namespace android::base;
 
@@ -103,6 +110,7 @@ void RecordMacroPage::on_playStopButton_clicked() {
     if (mState == MacroUiState::Playing) {
         stopButtonClicked(listItem);
     } else {
+        reportMacroPlayed();
         playButtonClicked(listItem);
     }
 }
@@ -224,6 +232,9 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     mMacroItemPlaying->setDisplayTime(getTimerString(0));
     mTimer.start(1000);
 
+    // Start timer for report.
+    mElapsedTimeTimer.start();
+
     showPreviewFrame(macroName);
 
     auto result = sAutomationAgent->startPlaybackWithCallback(
@@ -241,6 +252,8 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
         int ret = msgBox.exec();
         return;
     }
+
+    reportPresetMacroPlayed(macroName);
 }
 
 void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
@@ -256,6 +269,7 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
     mTimer.stop();
     mMacroItemPlaying->setDisplayTime(mLengths[mCurrentMacroName]);
 
+    reportTotalDuration();
     showPreviewFrame(macroName);
 }
 
@@ -301,6 +315,8 @@ void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
         const std::string macroName = getMacroNameFromItem(listItem);
         showPreview(macroName);
         setMacroUiState(MacroUiState::Selected);
+
+        reportPreviewPlayedAgain();
     }
 }
 
@@ -378,4 +394,60 @@ void RecordMacroPage::emitPlaybackFinished() {
 
 void RecordMacroPage::playbackFinished() {
     stopButtonClicked(mListItemPlaying);
+}
+
+void RecordMacroPage::reportMacroPlayed() {
+    MetricsReporter::get().report(
+            [](android_studio::AndroidStudioEvent* event) {
+                auto automation =
+                        event->mutable_emulator_details()->mutable_automation();
+                automation->set_macro_playback_count(
+                        1 + automation->macro_playback_count());
+            });
+}
+
+void RecordMacroPage::reportPreviewPlayedAgain() {
+    MetricsReporter::get().report(
+            [](android_studio::AndroidStudioEvent* event) {
+                auto automation =
+                        event->mutable_emulator_details()->mutable_automation();
+                automation->set_preview_replay_count(
+                        1 + automation->preview_replay_count());
+            });
+}
+
+void RecordMacroPage::reportTotalDuration() {
+    int elapsedTime = mElapsedTimeTimer.elapsed();
+    MetricsReporter::get().report(
+            [elapsedTime](android_studio::AndroidStudioEvent* event) {
+                auto automation =
+                        event->mutable_emulator_details()->mutable_automation();
+                automation->set_total_duration_ms(
+                        elapsedTime + automation->total_duration_ms());
+            });
+}
+
+void RecordMacroPage::reportPresetMacroPlayed(const std::string& macroName) {
+    EmulatorAutomationPresetMacro preset_macro;
+
+    if (macroName == "Reset_position") {
+        preset_macro =
+                EmulatorAutomation::EMULATOR_AUTOMATION_PRESET_MACRO_RESET;
+    } else if (macroName == "Track_horizontal_plane") {
+        preset_macro = EmulatorAutomation::
+                EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_HORIZONTAL;
+    } else if (macroName == "Track_vertical_plane") {
+        preset_macro = EmulatorAutomation::
+                EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_VERTICAL;
+    } else if (macroName == "Walk_to_image_room") {
+        preset_macro =
+                EmulatorAutomation::EMULATOR_AUTOMATION_PRESET_MACRO_IMAGE_ROOM;
+    }
+
+    MetricsReporter::get().report(
+            [preset_macro](android_studio::AndroidStudioEvent* event) {
+                auto automation =
+                        event->mutable_emulator_details()->mutable_automation();
+                automation->add_played_preset_macro(preset_macro);
+            });
 }
