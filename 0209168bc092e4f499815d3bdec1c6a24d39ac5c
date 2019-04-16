@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5d3383a_c3ad48b1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-16T22:54:42Z",
+      "side": 1,
+      "message": "This event doesn\u0027t actually aggregate previous stats, it constructs a new one each time: https://android.googlesource.com/platform/external/qemu/+/6951a35ff27e9ebe6ec4b1219e0137397107273e/android/android-emu/android/metrics/SyncMetricsReporter.cpp#28\n\nTo aggregate, we need to do it manually.  There\u0027s two different ways we could do this.  virtualscene-control-window.cpp does it by manually aggregating events while the camera is running, and then sending them all at once when the window hides.  Just make sure that we only report if there are things to report :-)\n\nAnother way is to use a PeriodicReporter, and then use that to trigger every few minutes (if there are things to report)",
+      "range": {
+        "startLine": 415,
+        "startChar": 28,
+        "endLine": 415,
+        "endChar": 61
+      },
+      "revId": "0209168bc092e4f499815d3bdec1c6a24d39ac5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d71e3186_c79d93cc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-16T22:54:42Z",
+      "side": 1,
+      "message": "Can we exit out if we don\u0027t find a match?  Otherwise we may report an uninitialized enum.",
+      "range": {
+        "startLine": 445,
+        "startChar": 4,
+        "endLine": 445,
+        "endChar": 5
+      },
+      "revId": "0209168bc092e4f499815d3bdec1c6a24d39ac5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
