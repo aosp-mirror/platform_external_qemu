@@ -13,10 +13,13 @@
 
 #include "ui_record-macro-page.h"
 
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
 #include "android/skin/qt/video-player/VideoInfo.h"
 
+#include <QTime>
 #include <QTimer>
 #include <QWidget>
 #include <memory>
@@ -35,6 +38,9 @@ public:
 
     static void setAutomationAgent(const QAndroidAutomationAgent* agent);
     static void stopCurrentMacro();
+
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
 
 private slots:
     void on_playStopButton_clicked();
@@ -66,6 +72,11 @@ private:
     void showPreviewFrame(const std::string& previewName);
     std::string getMacroNameFromItem(QListWidgetItem* listItem);
     QString getTimerString(int seconds);
+    void reportMacroPlayed();
+    void reportPreviewPlayedAgain();
+    void reportTotalDuration();
+    void reportPresetMacroPlayed(const std::string& macroName);
+    void reportAllMetrics();
 
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
@@ -85,4 +96,22 @@ private:
 
     static RecordMacroPage* sInstance;
     static const QAndroidAutomationAgent* sAutomationAgent;
+
+    // Aggregate metrics to determine how the macro page is used.
+    // Metrics are collected while the tab is visible, and reported when the
+    // session ends.
+    uint64_t mReportWindowStartUs = 0;
+    uint32_t mReportWindowCount = 0;
+    QTime mElapsedTimeTimer;
+
+    struct AutomationMetrics {
+        uint64_t totalDurationMs = 0;
+        uint64_t playbackCount = 0;
+        uint64_t previewReplayCount = 0;
+        std::vector<android_studio::EmulatorAutomation::
+                            EmulatorAutomationPresetMacro>
+                presetsPlayed = {};
+    };
+
+    AutomationMetrics mAutomationMetrics;
 };
