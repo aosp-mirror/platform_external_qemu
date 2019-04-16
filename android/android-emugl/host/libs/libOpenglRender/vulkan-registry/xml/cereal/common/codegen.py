@@ -85,6 +85,52 @@ class Module(object):
         self.headerFileHandle.close()
         self.implFileHandle.close()
 
+# Class capturing a .proto protobuf definition file
+class Proto(object):
+
+    def __init__(self, directory, basename, customAbsDir = None):
+        self.directory = directory
+        self.basename = basename
+        self.customAbsDir = customAbsDir
+
+        self.preamble = ""
+        self.postamble = ""
+
+    def getMakefileSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".proto \\\n"
+        dirName = self.directory
+        baseName = self.basename
+        joined = os.path.join(dirName, baseName)
+        return "    " + joined + ".proto \\\n"
+
+    def getCMakeSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".proto "
+        dirName = self.directory
+        baseName = self.basename
+        joined = os.path.join(dirName, baseName)
+        return "    " + joined + ".proto "
+
+    def begin(self, globalDir):
+        # Create subdirectory, if needed
+        if self.customAbsDir:
+            absDir = self.customAbsDir
+        else:
+            absDir = os.path.join(globalDir, self.directory)
+
+        filename = os.path.join(absDir, self.basename)
+
+        fpProto = open(filename + ".proto", "w", encoding="utf-8")
+        self.protoFileHandle = fpProto
+        self.protoFileHandle.write(self.preamble)
+
+    def append(self, toAppend):
+        self.protoFileHandle.write(toAppend)
+
+    def end(self):
+        self.protoFileHandle.write(self.postamble)
+        self.protoFileHandle.close()
 
 class CodeGen(object):
 
@@ -701,3 +747,23 @@ class VulkanWrapperGenerator(object):
         cgen.endBlock()
 
         cgen.endBlock()
+
+    def emitForEachStructExtensionGeneral(self, cgen, forEachFunc, doFeatureIfdefs=False):
+        currFeature = None
+
+        for (i, ext) in enumerate(self.extensionStructTypes):
+            if doFeatureIfdefs:
+                if not currFeature:
+                    cgen.leftline("#ifdef %s" % ext.feature)
+                    currFeature = ext.feature
+
+                if currFeature and ext.feature != currFeature:
+                    cgen.leftline("#endif")
+                    cgen.leftline("#ifdef %s" % ext.feature)
+                    currFeature = ext.feature
+
+            forEachFunc(i, ext, cgen)
+
+        if doFeatureIfdefs:
+            if currFeature:
+                cgen.leftline("#endif")

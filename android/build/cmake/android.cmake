@@ -388,12 +388,35 @@ function(android_add_protobuf name protofiles)
   set(${name}_src ${PROTO_SRCS} ${PROTO_HDRS})
   android_add_library(${name})
   target_link_libraries(${name} PUBLIC libprotobuf)
+  target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
   # Disable generation of information about every class with virtual functions for use by the C++ runtime type
   # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
   # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
   # The  dynamic_cast operator can still be used for casts that do not require runtime type information, i.e. casts to
   # void * or to unambiguous base classes.
   target_compile_options(${name} PRIVATE -fno-rtti)
+  # This needs to be public, as we don't want the headers to start exposing exceptions.
+  target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
+endfunction()
+
+# For adding big proto files that mingw can't handle.
+function(android_add_big_protobuf name protofiles)
+  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
+  set(${name}_src ${PROTO_SRCS} ${PROTO_HDRS})
+  android_add_library(${name})
+  target_link_libraries(${name} PUBLIC libprotobuf)
+  target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+  # Disable generation of information about every class with virtual functions for use by the C++ runtime type
+  # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
+  # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
+  # The  dynamic_cast operator can still be used for casts that do not require runtime type information, i.e. casts to
+  # void * or to unambiguous base classes.
+  if (WINDOWS_X86_64)
+    target_compile_options(${name} PRIVATE -fno-rtti "-Wa,-mbig-obj")
+  else()
+    target_compile_options(${name} PRIVATE -fno-rtti)
+  endif()
+
   # This needs to be public, as we don't want the headers to start exposing exceptions.
   target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
 endfunction()
