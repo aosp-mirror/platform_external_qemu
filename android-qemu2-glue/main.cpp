@@ -1652,7 +1652,9 @@ extern "C" int main(int argc, char** argv) {
 
     if (fc::isEnabled(fc::VirtioInput)) {
         args.add("-device");
-        args.add("virtio-input-multi-touch-pci");
+        args.add("virtio-input-multi-touch-pci1");
+        args.add("-device");
+        args.add("virtio-input-multi-touch-pci2");
     }
 
     if (opts->tcpdump) {
