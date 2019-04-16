@@ -546,12 +546,14 @@ LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
     type new_boxed_##type(type underlying, VulkanDispatch* dispatch, bool ownDispatch); \
     void delete_boxed_##type(type boxed); \
     type unbox_##type(type boxed); \
+    type unboxed_to_boxed_##type(type boxed); \
     VulkanDispatch* dispatch_##type(type boxed); \
 
 #define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DECL(type) \
     type new_boxed_non_dispatchable_##type(type underlying); \
     void delete_boxed_non_dispatchable_##type(type boxed); \
     type unbox_non_dispatchable_##type(type boxed); \
+    type unboxed_to_boxed_non_dispatchable_##type(type boxed); \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_DECL)
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DECL)
@@ -563,6 +565,7 @@ private:
 
 #define DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL(type) \
     type unbox_##type(type boxed); \
+    type unboxed_to_boxed_##type(type boxed); \
     VulkanDispatch* dispatch_##type(type boxed); \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
@@ -571,6 +574,7 @@ GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOB
     type new_boxed_non_dispatchable_##type(type underlying); \
     void delete_boxed_non_dispatchable_##type(type boxed); \
     type unbox_non_dispatchable_##type(type boxed); \
+    type unboxed_to_boxed_non_dispatchable_##type(type boxed); \
 
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
 
@@ -610,13 +614,24 @@ public:
     GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(BOXED_NON_DISPATCHABLE_UNWRAP_IMPL)
 };
 
-// We currently don't need a BoxedHandleWrapMapping because there are, now, no
-// APIs where dispatchable handle types are created and not touched by us: all are wrapped:
-// vkCreateInstance
-// vkEnumeratePhysicalDevices
-// vkCreateDevice
-// vkGetDeviceQueue
-// vkAllocateCommandBuffers
+#define BOXED_DISPATCHABLE_WRAP_IMPL(type_name) \
+    MAKE_HANDLE_MAPPING_FOREACH(type_name, \
+        if (handles[i]) { handles[i] = VkDecoderGlobalState::get()->unboxed_to_boxed_##type_name(handles[i]); } else { handles[i] = nullptr; } ;, \
+        if (handles[i]) { handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unboxed_to_boxed_##type_name(handles[i]); } else { handle_u64s[i] = 0; }, \
+        if (handle_u64s[i]) { handles[i] = VkDecoderGlobalState::get()->unboxed_to_boxed_##type_name((type_name)(uintptr_t)handle_u64s[i]); } else { handles[i] = nullptr; })
+
+#define BOXED_NON_DISPATCHABLE_WRAP_IMPL(type_name) \
+    MAKE_HANDLE_MAPPING_FOREACH(type_name, \
+        if (handles[i]) { handles[i] = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type_name(handles[i]); } else { handles[i] = nullptr; } ;, \
+        if (handles[i]) { handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type_name(handles[i]); } else { handle_u64s[i] = 0; }, \
+        if (handle_u64s[i]) { handles[i] = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type_name((type_name)(uintptr_t)handle_u64s[i]); } else { handles[i] = nullptr; })
+
+class BoxedHandleWrapMapping : public VulkanHandleMapping {
+public:
+    virtual ~BoxedHandleWrapMapping() { }
+    GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(BOXED_DISPATCHABLE_WRAP_IMPL)
+    GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(BOXED_NON_DISPATCHABLE_WRAP_IMPL)
+};
 
 // Not used, so we do not define.
 #define BOXED_DISPATCHABLE_CREATE_IMPL(type_name) \

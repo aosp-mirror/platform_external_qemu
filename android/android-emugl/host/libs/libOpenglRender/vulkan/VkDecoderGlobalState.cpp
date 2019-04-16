@@ -2642,6 +2642,11 @@ public:
         if (!elt) return VK_NULL_HANDLE; \
         return elt->underlying; \
     } \
+    type unboxed_to_boxed_##type(type unboxed) { \
+        AutoLock lock(mBoxedDispatchableHandles_##type.lock); \
+        return (type)mBoxedDispatchableHandles_##type.getBoxedFromUnboxedLocked( \
+            (uint64_t)(uintptr_t)unboxed); \
+    } \
     VulkanDispatch* dispatch_##type(type boxed) { \
         AutoLock lock(mBoxedDispatchableHandles_##type.lock); \
         auto elt = mBoxedDispatchableHandles_##type.getLocked( \
@@ -2659,6 +2664,11 @@ public:
     } \
     void delete_boxed_non_dispatchable_##type(type boxed) { \
         mBoxedNonDispatchableHandles_##type.remove((uint64_t)boxed); \
+    } \
+    type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
+        AutoLock lock(mBoxedNonDispatchableHandles_##type.lock); \
+        return (type)mBoxedNonDispatchableHandles_##type.getBoxedFromUnboxedLocked( \
+            (uint64_t)(uintptr_t)unboxed); \
     } \
     type unbox_non_dispatchable_##type(type boxed) { \
         AutoLock lock(mBoxedNonDispatchableHandles_##type.lock); \
@@ -3422,22 +3432,35 @@ private:
     class BoxedHandleManager {
     public:
         using Store = android::base::EntityManager<32, 16, 16, T>;
-        Store store;
 
         Lock lock;
+        Store store;
+        std::unordered_map<uint64_t, uint64_t> reverseMap;
 
         uint64_t add(const T& item, BoxedHandleTypeTag tag) {
             AutoLock l(lock);
-            return (uint64_t)store.add(item, (size_t)tag);
+            auto res = (uint64_t)store.add(item, (size_t)tag);
+            reverseMap[(uint64_t)(item.underlying)] = res;
+            return res;
         }
 
         void remove(uint64_t h) {
             AutoLock l(lock);
+            auto item = getLocked(h);
+            if (item) {
+                reverseMap.erase((uint64_t)(item->underlying));
+            }
             store.remove(h);
         }
 
         T* getLocked(uint64_t h) {
             return store.get(h);
+        }
+
+        uint64_t getBoxedFromUnboxedLocked(uint64_t unboxed) {
+            auto res = android::base::find(reverseMap, unboxed);
+            if (!res) return 0;
+            return *res;
         }
     };
 
@@ -4231,6 +4254,9 @@ LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
     type VkDecoderGlobalState::unbox_##type(type boxed) { \
         return mImpl->unbox_##type(boxed); \
     } \
+    type VkDecoderGlobalState::unboxed_to_boxed_##type(type unboxed) { \
+        return mImpl->unboxed_to_boxed_##type(unboxed); \
+    } \
     VulkanDispatch* VkDecoderGlobalState::dispatch_##type(type boxed) { \
         return mImpl->dispatch_##type(boxed); \
     } \
@@ -4245,6 +4271,9 @@ LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
     type VkDecoderGlobalState::unbox_non_dispatchable_##type(type boxed) { \
         return mImpl->unbox_non_dispatchable_##type(boxed); \
     } \
+    type VkDecoderGlobalState::unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
+        return mImpl->unboxed_to_boxed_non_dispatchable_##type(unboxed); \
+    } \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_DEF)
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DEF)
@@ -4256,6 +4285,9 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
     VulkanDispatch* dispatch_##type(type boxed) { \
         return VkDecoderGlobalState::get()->dispatch_##type(boxed); \
     } \
+    type unboxed_to_boxed_##type(type unboxed) { \
+        return VkDecoderGlobalState::get()->unboxed_to_boxed_##type(unboxed); \
+    } \
 
 #define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
     type new_boxed_non_dispatchable_##type(type underlying) { \
@@ -4266,6 +4298,9 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
     } \
     type unbox_non_dispatchable_##type(type boxed) { \
         return VkDecoderGlobalState::get()->unbox_non_dispatchable_##type(boxed); \
+    } \
+    type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
+        return VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type(unboxed); \
     } \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
