@@ -40,13 +40,14 @@
 #endif
 
 #include "FrameBuffer.h"
-#define MD_DEBUG \
-    FrameBuffer* fb = FrameBuffer::getFB(); \
-    for (auto iter = fb->m_displays.begin(); iter != fb->m_displays.end(); ++iter) { \
-      if (iter->second.cb == mHndl) { \
-          printf("%s: cb %d\n", __FUNCTION__, mHndl); \
-      } \
-    }
+#define MD_DEBUG
+//#define MD_DEBUG \
+//    FrameBuffer* fb = FrameBuffer::getFB(); \
+//    for (auto iter = fb->m_displays.begin(); iter != fb->m_displays.end(); ++iter) { \
+//      if (iter->second.cb == mHndl) { \
+//          printf("%s: cb %d\n", __FUNCTION__, mHndl); \
+//      } \
+//    }
 
 
 namespace {

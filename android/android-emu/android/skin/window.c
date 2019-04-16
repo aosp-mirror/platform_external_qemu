@@ -1100,12 +1100,15 @@ add_finger_event(SkinWindow* window,
     if (finger->display && finger->display->sub_display) {
         SubDisplay* t = finger->display->sub_display;
         while(t) {
-//            printf("sub_display %d\n", t->id);
+            printf("sub_display %d(%d, %d, %dx%d) input(%d, %d)\n", t->id,
+                   t->rect.pos.x, t->rect.pos.y,
+                   t->rect.size.w, t->rect.size.h,
+                   posX, posY);
             if (skin_rect_contains(&t->rect, posX, posY)) {
-                if (t->id == 0) {
-                    window->win_funcs->mouse_event(posX, posY, state);
-//                    printf("send %d %d\n", posX, posY);
-                }
+                unsigned newX = posX - t->rect.pos.x;
+                unsigned newY = posY - t->rect.pos.y;
+                window->win_funcs->mouse_event(newX, newY, state, t->id);
+                printf("send %d %d\n", newX, newY);
                 break;
             }
             t = t->next;
@@ -1115,7 +1118,7 @@ add_finger_event(SkinWindow* window,
 #endif
 //                    printf("send %d %d\n", posX, posY);
 
-    window->win_funcs->mouse_event(posX, posY, state);
+    window->win_funcs->mouse_event(posX, posY, state, 0);
 }
 
 static void

@@ -2447,7 +2447,7 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
     m_displays[displayId].height = h;
 
     get_emugl_window_operations().setMultiDisplay(0, 0, 0, getWidth(), getHeight(), true);
-    get_emugl_window_operations().setMultiDisplay(displayId, pos_x, pos_y, w, h, true);
+    get_emugl_window_operations().setMultiDisplay(displayId, pos_x, 0, w, h, true);
 
     int width, height;
     getCombinedDisplaySize(&width, &height, true);
