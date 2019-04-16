@@ -1473,6 +1473,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkBindImageMemory\n");
+                    ;
+                }
                 VkDevice device;
                 VkImage image;
                 VkDeviceMemory memory;
@@ -1494,7 +1498,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_77, (VkDeviceMemory*)&memory, 1);
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
                 VkResult vkBindImageMemory_VkResult_return = (VkResult)0;
-                vkBindImageMemory_VkResult_return = vk->vkBindImageMemory(unboxed_device, image, memory, memoryOffset);
+                vkBindImageMemory_VkResult_return =
+                        m_state->on_vkBindImageMemory(&m_pool, device, image,
+                                                      memory, memoryOffset);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindImageMemory_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -4343,6 +4349,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBeginCommandBuffer:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkBeginCommandBuffer\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -4361,7 +4371,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     transform_tohost_VkCommandBufferBeginInfo(m_state, (VkCommandBufferBeginInfo*)(pBeginInfo));
                 }
                 VkResult vkBeginCommandBuffer_VkResult_return = (VkResult)0;
-                vkBeginCommandBuffer_VkResult_return = vk->vkBeginCommandBuffer(unboxed_commandBuffer, pBeginInfo);
+                vkBeginCommandBuffer_VkResult_return =
+                        m_state->on_vkBeginCommandBuffer(&m_pool, commandBuffer,
+                                                         pBeginInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBeginCommandBuffer_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -5549,6 +5561,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdPipelineBarrier:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCmdPipelineBarrier\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineStageFlags srcStageMask;
                 VkPipelineStageFlags dstStageMask;
@@ -5610,7 +5626,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageMemoryBarrier(m_state, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
                     }
                 }
-                vk->vkCmdPipelineBarrier(unboxed_commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
+                m_state->on_vkCmdPipelineBarrier(
+                        &m_pool, commandBuffer, srcStageMask, dstStageMask,
+                        dependencyFlags, memoryBarrierCount, pMemoryBarriers,
+                        bufferMemoryBarrierCount, pBufferMemoryBarriers,
+                        imageMemoryBarrierCount, pImageMemoryBarriers);
                 vkStream->unsetHandleMapping();
                 vkReadStream->clearPool();
                 m_pool.freeAll();
