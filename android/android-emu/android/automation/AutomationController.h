@@ -127,6 +127,11 @@ public:
     // Stop playback from a file.
     virtual StopResult stopPlayback() = 0;
 
+    // Start playback with stop callback.
+    virtual StartResult startPlaybackWithCallback(
+            android::base::StringView filename,
+            void (*onStopCallback)()) = 0;
+
     //
     // Offworld API
     //

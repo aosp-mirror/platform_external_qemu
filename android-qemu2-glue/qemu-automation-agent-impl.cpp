@@ -34,12 +34,20 @@ static StopResult stop_playback() {
     return AutomationController::get().stopPlayback();
 }
 
+static StartResult start_playback_with_callback(
+        android::base::StringView filename,
+        void (*onStopCallback)()) {
+    return AutomationController::get().startPlaybackWithCallback(
+            filename, onStopCallback);
+}
+
 static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
         .reset = reset,
         .startRecording = start_recording,
         .stopRecording = stop_recording,
         .startPlayback = start_playback,
-        .stopPlayback = stop_playback};
+        .stopPlayback = stop_playback,
+        .startPlaybackWithCallback = start_playback_with_callback};
 
 extern "C" const QAndroidAutomationAgent* const gQAndroidAutomationAgent =
         &sQAndroidAutomationAgent;

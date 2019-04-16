@@ -116,6 +116,8 @@ protected:
                         }));
     }
 
+    static void onStopCallback() { sCallbackInt++; }
+
     MOCK_METHOD2(offworldSendResponse,
                  void(android::AsyncMessagePipeHandle,
                       const ::offworld::Response&));
@@ -124,7 +126,10 @@ protected:
     std::unique_ptr<TestLooper> mLooper;
     PhysicalModelPtr mPhysicalModel;
     std::unique_ptr<AutomationController> mController;
+    static int sCallbackInt;
 };
+
+int AutomationControllerTest::sCallbackInt;
 
 TEST_F(AutomationControllerTest, InvalidInput) {
     EXPECT_THAT(mController->startRecording(nullptr),
@@ -142,10 +147,28 @@ TEST_F(AutomationControllerTest, InvalidInput) {
                 IsErr(StartError::FileOpenError));
 }
 
-TEST_F(AutomationControllerTest, SimpleRecordPlay) {
+TEST_F(AutomationControllerTest, SimpleRecordPlayEmpty) {
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->stopRecording(), IsOk());
 
+    // Playback stops after no commands.
+    EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
+    EXPECT_THAT(mController->stopPlayback(), IsErr(StopError::NotStarted));
+}
+
+TEST_F(AutomationControllerTest, SimpleRecordPlay) {
+    // Non empty recording.
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
+    EXPECT_THAT(mController->stopRecording(), IsOk());
+
+    // Playback stops before all commands are excecuted.
     EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->stopPlayback(), IsOk());
 }
@@ -157,9 +180,18 @@ TEST_F(AutomationControllerTest, DuplicateRecord) {
 }
 
 TEST_F(AutomationControllerTest, DuplicatePlay) {
+    // Non empty recording.
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
     EXPECT_THAT(mController->stopRecording(), IsOk());
 
+    // Start second recording before first ends.
     EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->startPlayback("testRecording.txt"),
                 IsErr(StartError::AlreadyStarted));
@@ -196,6 +228,9 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
     const vec3 kVelocity = {1.0f, 0.0f, 0.0f};
     const uint64_t kPlaybackStartTime = secondsToNs(100.0);
 
+    // Need a 4th state so recording doesn't stop by itself.
+    const uint64_t kEventTime4 = secondsToNs(120.0);
+
     advanceTimeToNs(kEventTime1);
     physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
                                     PHYSICAL_INTERPOLATION_SMOOTH);
@@ -205,6 +240,10 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
                                     PHYSICAL_INTERPOLATION_STEP);
 
     advanceTimeToNs(kEventTime3);
+    physicalModel_setTargetVelocity(mPhysicalModel.get(), kVelocity,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
+    advanceTimeToNs(kEventTime4);
     physicalModel_setTargetVelocity(mPhysicalModel.get(), kVelocity,
                                     PHYSICAL_INTERPOLATION_STEP);
     EXPECT_THAT(mController->stopRecording(), IsOk());
@@ -252,12 +291,52 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
               kVecZero);
 }
 
+TEST_F(AutomationControllerTest, PlaybackStops) {
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const uint64_t kEventTime2 = secondsToNs(1);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    advanceTimeToNs(kEventTime2);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
+    EXPECT_THAT(mController->stopRecording(), IsOk());
+
+    EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
+
+    // Check Playback stops after last event.
+    advanceTimeToNs(kEventTime2 + secondsToNs(1));
+    EXPECT_THAT(mController->stopPlayback(), IsErr(StopError::NotStarted));
+}
+
+TEST_F(AutomationControllerTest, PlaybackWithCallback) {
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+    EXPECT_THAT(mController->stopRecording(), IsOk());
+
+    sCallbackInt = 0;
+
+    EXPECT_THAT(mController->startPlaybackWithCallback(
+                        "testRecording.txt",
+                        &AutomationControllerTest::onStopCallback),
+                IsOk());
+
+    EXPECT_EQ(sCallbackInt, 1);
+}
+
 TEST_F(AutomationControllerTest, DestructWhileRecording) {
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
 
     const uint64_t kEventTime1 = secondsToNs(0.5);
+    const uint64_t kEventTime2 = secondsToNs(1);
     const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
     advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    advanceTimeToNs(kEventTime2);
     physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
                                     PHYSICAL_INTERPOLATION_STEP);
 
