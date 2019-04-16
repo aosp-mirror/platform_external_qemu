@@ -1063,7 +1063,6 @@ public:
                 // Size compatible image view
                 if (imageInfoIt->second.cmpInfo.sizeCompImg) {
                     createInfo = *pCreateInfo;
-                    createInfo.format = cmpInfo.sizeCompFormat;
                     needEmulatedAlpha = false;
                     createInfo.image = imageInfoIt->second.cmpInfo.sizeCompImg;
                     pCreateInfo = &createInfo;
@@ -2901,13 +2900,15 @@ private:
     VkFormat getSizeCmpFormat(VkFormat compFmt) {
         switch (compFmt) {
             case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
-                return VK_FORMAT_R16G16B16A16_UINT;
+                return VK_FORMAT_R16G16B16A16_UNORM;
             case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
                 return VK_FORMAT_R16G16B16A16_SINT;
             case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+                return VK_FORMAT_R16G16B16A16_UNORM;
             case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
                 return VK_FORMAT_R32G32B32A32_UINT;
             case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+                return VK_FORMAT_R16G16B16A16_SNORM;
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 return VK_FORMAT_R32G32B32A32_SINT;
             case VK_FORMAT_EAC_R11_UNORM_BLOCK:
