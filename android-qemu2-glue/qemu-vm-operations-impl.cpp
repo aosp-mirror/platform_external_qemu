@@ -548,6 +548,16 @@ static bool is_real_audio_allowed() {
     return qemu_is_real_audio_allowed();
 }
 
+static bool need_skip_snapshot_save = false;
+
+static void set_skip_snapshot_save(bool used) {
+    need_skip_snapshot_save = true;
+}
+
+static bool is_snapshot_save_skipped() {
+    return need_skip_snapshot_save;
+}
+
 static void system_reset_request() {
     qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
 }
@@ -596,6 +606,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .allowRealAudio = allow_real_audio,
         .physicalMemoryGetAddr = physical_memory_get_addr,
         .isRealAudioAllowed = is_real_audio_allowed,
+        .setSkipSnapshotSave = set_skip_snapshot_save,
+        .isSnapshotSaveSkipped = is_snapshot_save_skipped,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =
