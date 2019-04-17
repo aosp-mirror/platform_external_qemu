@@ -297,12 +297,7 @@ static void flatview_destroy(FlatView *view)
     g_free(view);
 }
 
-static bool flatview_ref(FlatView *view)
-{
-    return atomic_fetch_inc_nonzero(&view->ref) > 0;
-}
-
-static void flatview_unref(FlatView *view)
+void flatview_unref(FlatView *view)
 {
     if (atomic_fetch_dec(&view->ref) == 1) {
         trace_flatview_destroy_rcu(view, view->root);
