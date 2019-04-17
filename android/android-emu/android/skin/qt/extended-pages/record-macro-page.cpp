@@ -24,7 +24,16 @@
 #include <iostream>
 #include <sstream>
 
+using android::metrics::MetricsReporter;
+using android_studio::EmulatorAutomation;
+using EmulatorAutomationPresetMacro =
+        android_studio::EmulatorAutomation::EmulatorAutomationPresetMacro;
+
 using namespace android::base;
+
+// Allow at most 5 reports every 60 seconds.
+static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
+static constexpr uint32_t kMaxReportsPerWindow = 5;
 
 const QAndroidAutomationAgent* RecordMacroPage::sAutomationAgent = nullptr;
 RecordMacroPage* RecordMacroPage::sInstance = nullptr;
@@ -43,6 +52,35 @@ RecordMacroPage::~RecordMacroPage() {
 // static
 void RecordMacroPage::setAutomationAgent(const QAndroidAutomationAgent* agent) {
     sAutomationAgent = agent;
+}
+
+void RecordMacroPage::showEvent(QShowEvent* event) {
+    mAutomationMetrics = AutomationMetrics();
+}
+
+void RecordMacroPage::hideEvent(QHideEvent* event) {
+    if (!mAutomationMetrics.previewReplayCount &&
+        !mAutomationMetrics.playbackCount) {
+        LOG(INFO) << "Dropping metrics, nothing to report.";
+        return;
+    }
+
+    const uint64_t now = android::base::System::get()->getHighResTimeUs();
+
+    // Reset the metrics reporting limiter if enough time has passed.
+    if (mReportWindowStartUs + kReportWindowDurationUs < now) {
+        mReportWindowStartUs = now;
+        mReportWindowCount = 0;
+    }
+
+    if (mReportWindowCount > kMaxReportsPerWindow) {
+        LOG(INFO) << "Dropping metrics, too many recent reports.";
+        return;
+    }
+
+    ++mReportWindowCount;
+
+    reportAllMetrics();
 }
 
 void RecordMacroPage::loadUi() {
@@ -103,6 +141,7 @@ void RecordMacroPage::on_playStopButton_clicked() {
     if (mState == MacroUiState::Playing) {
         stopButtonClicked(listItem);
     } else {
+        reportMacroPlayed();
         playButtonClicked(listItem);
     }
 }
@@ -224,6 +263,9 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     mMacroItemPlaying->setDisplayTime(getTimerString(0));
     mTimer.start(1000);
 
+    // Start timer for report.
+    mElapsedTimeTimer.start();
+
     showPreviewFrame(macroName);
 
     auto result = sAutomationAgent->startPlaybackWithCallback(
@@ -241,6 +283,8 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
         int ret = msgBox.exec();
         return;
     }
+
+    reportPresetMacroPlayed(macroName);
 }
 
 void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
@@ -256,6 +300,7 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
     mTimer.stop();
     mMacroItemPlaying->setDisplayTime(mLengths[mCurrentMacroName]);
 
+    reportTotalDuration();
     showPreviewFrame(macroName);
 }
 
@@ -301,6 +346,8 @@ void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
         const std::string macroName = getMacroNameFromItem(listItem);
         showPreview(macroName);
         setMacroUiState(MacroUiState::Selected);
+
+        reportPreviewPlayedAgain();
     }
 }
 
@@ -378,4 +425,56 @@ void RecordMacroPage::emitPlaybackFinished() {
 
 void RecordMacroPage::playbackFinished() {
     stopButtonClicked(mListItemPlaying);
+}
+
+void RecordMacroPage::reportMacroPlayed() {
+    mAutomationMetrics.playbackCount++;
+}
+
+void RecordMacroPage::reportPreviewPlayedAgain() {
+    mAutomationMetrics.previewReplayCount++;
+}
+
+void RecordMacroPage::reportTotalDuration() {
+    mAutomationMetrics.totalDurationMs += mElapsedTimeTimer.elapsed();
+}
+
+void RecordMacroPage::reportPresetMacroPlayed(const std::string& macroName) {
+    EmulatorAutomationPresetMacro presetMacro;
+
+    if (macroName == "Reset_position") {
+        presetMacro =
+                EmulatorAutomation::EMULATOR_AUTOMATION_PRESET_MACRO_RESET;
+    } else if (macroName == "Track_horizontal_plane") {
+        presetMacro = EmulatorAutomation::
+                EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_HORIZONTAL;
+    } else if (macroName == "Track_vertical_plane") {
+        presetMacro = EmulatorAutomation::
+                EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_VERTICAL;
+    } else if (macroName == "Walk_to_image_room") {
+        presetMacro =
+                EmulatorAutomation::EMULATOR_AUTOMATION_PRESET_MACRO_IMAGE_ROOM;
+    } else {
+        return;
+    }
+
+    mAutomationMetrics.presetsPlayed.push_back(presetMacro);
+}
+
+void RecordMacroPage::reportAllMetrics() {
+    EmulatorAutomation metrics;
+
+    metrics.set_macro_playback_count(mAutomationMetrics.playbackCount);
+    metrics.set_preview_replay_count(mAutomationMetrics.previewReplayCount);
+    metrics.set_total_duration_ms(mAutomationMetrics.totalDurationMs);
+    for (auto presetMacro : mAutomationMetrics.presetsPlayed) {
+        metrics.add_played_preset_macro(presetMacro);
+    }
+
+    MetricsReporter::get().report(
+            [metrics](android_studio::AndroidStudioEvent* event) {
+                auto automation =
+                        event->mutable_emulator_details()->mutable_automation();
+                automation->CopyFrom(metrics);
+            });
 }
