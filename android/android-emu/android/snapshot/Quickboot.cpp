@@ -467,6 +467,14 @@ bool Quickboot::save(StringView name) {
         return false;
     }
 
+    if (mVmOps.isSnapshotSaveSkipped()) {
+        dwarning("Not saving state: current state "
+                 "does not support snapshotting");
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
+        return false;
+    }
+
     dprint("Saving state on exit with session uptime %d ms",
            int(sessionUptimeMs));
     Stopwatch sw;

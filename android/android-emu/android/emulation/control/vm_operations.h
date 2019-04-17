@@ -166,6 +166,13 @@ typedef struct QAndroidVmOperations {
 
     // Query whether host audio is allowed.
     bool (*isRealAudioAllowed)(void);
+
+    // Set whether to skip snapshotting on exit.
+    void (*setSkipSnapshotSave)(bool used);
+
+    // Retrieve the state of whether snapshotting is skipped.
+    bool (*isSnapshotSaveSkipped)(void);
+
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

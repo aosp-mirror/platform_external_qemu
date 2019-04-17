@@ -103,6 +103,9 @@ public:
 
         AutoLock lock(mLock);
 
+        // TODO: bug 129484301
+        get_emugl_vm_operations().setSkipSnapshotSave(true /* skip saving */);
+
         InstanceInfo info;
         for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;
              ++i) {
