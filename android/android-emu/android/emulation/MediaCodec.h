@@ -14,44 +14,17 @@
 #pragma once
 
 #include "android/emulation/GoldfishMediaDefs.h"
-#include "android/emulation/MediaCodec.h"
-
-#include <inttypes.h>
-
-extern "C" {
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_decoder.h"
-#include "vpx/vpx_image.h"
-#include "vpx/vp8dx.h"
-}
 
 namespace android {
 namespace emulation {
 
-class MediaVpxDecoder : MediaCodec {
+class MediaCodec {
 public:
-    MediaVpxDecoder() = default;
-    virtual ~MediaVpxDecoder() = default;
+    MediaCodec() = default;
+    virtual ~MediaCodec() = default;
 
-public:
-
-    // this is the entry point
-    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
-
-private:
-
-    void initVpxContext(void *ptr, int vpversion);
-    void destroyVpxContext(void *ptr);
-    void decodeFrame(void* ptr);
-    void flush(void* ptr);
-    void getImage(void* ptr);
-
-private:
-
-    vpx_codec_ctx_t *mCtx = NULL;
-    bool mImageReady = false;
-    vpx_codec_iter_t  mIter = NULL;
-    vpx_image_t *mImg = NULL;
+    // Handler called from the guest media device.
+    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) = 0;
 };
 
 }  // namespace emulation
