@@ -10,6 +10,9 @@
 ** GNU General Public License for more details.
 */
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
+
+#include "android/skin/winsys.h"
+
 #include <math.h>
 #include <fstream>
 #include <iostream>
@@ -124,21 +127,37 @@ WorkerProcessingResult CarClusterConnector::workerProcessFrame(
 
     av_log_set_level(AV_LOG_INFO);
 
-    if (!mCarClusterWindow->isVisible() && !mCarClusterWindow->isDismissed()) {
-        // Open the Cluster window, stop the request thread,
-        // Restart the pipe to get first frame
-        mCarClusterWindow->show();
-        mRefreshMsg.trySend(MSG_RESTART);
-    }
+    auto showFunc = [](void* data) {
+        CarClusterWindow* window =
+            static_cast<CarClusterWindow*>(data);
+        if (!window->isVisible() && !window->isDismissed()) {
+            // Open the Cluster window, stop the request thread,
+            // Restart the pipe to get first frame
+            window->show();
+        }
+    };
+
+    skin_winsys_run_ui_update(
+        showFunc, mCarClusterWindow, true /* wait for result */);
+
+    mRefreshMsg.trySend(MSG_RESTART);
 
     if (frameFinished > 0) {
         sws_scale(mCtx, mFrame->extended_data, mFrame->linesize, 0,
                   FRAME_HEIGHT, &mRgbData, rgbStride);
         if (mCarClusterWindow) {
-            mCarClusterWidget = mCarClusterWindow->findChild<CarClusterWidget*>(
-                    "render_window");
-            mCarClusterWidget->updatePixmap(QImage(
-                    mRgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
+            auto pixmapUpdateFunc = [](void* data) {
+                CarClusterConnector* connector =
+                    static_cast<CarClusterConnector*>(data);
+                CarClusterWindow* window = connector->mCarClusterWindow;
+                uint8_t* rgbData = connector->mRgbData;
+                auto widget = window->findChild<CarClusterWidget*>(
+                        "render_window");
+                widget->updatePixmap(QImage(
+                        rgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
+            };
+            skin_winsys_run_ui_update(
+                pixmapUpdateFunc, this, false /* async */);
         }
     }
 
