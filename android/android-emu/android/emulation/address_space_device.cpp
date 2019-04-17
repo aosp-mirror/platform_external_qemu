@@ -188,6 +188,7 @@ private:
         case AddressSpaceDeviceType::Graphics:
             return nullptr;
         case AddressSpaceDeviceType::Media:
+            AS_DEVICE_DPRINT("allocating media context");
             return DeviceContextPtr(new AddressSpaceHostMediaContext(phys_addr));
         case AddressSpaceDeviceType::Sensors:
             return nullptr;
@@ -199,6 +200,7 @@ private:
             return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext);
 
         default:
+            AS_DEVICE_DPRINT("Bad device type");
             return nullptr;
         }
     }

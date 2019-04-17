@@ -15,6 +15,7 @@
 
 #include "android/emulation/AddressSpaceService.h"
 #include "android/emulation/address_space_device.h"
+#include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/MediaVpxDecoder.h"
 
 #include <unordered_map>
@@ -34,6 +35,8 @@ public:
 private:
     void allocatePages(uint64_t phys_addr, int num_pages);
     void handleMediaRequest(AddressSpaceDevicePingInfo *info);
+    static MediaCodecType getMediaCodecType(uint64_t metadata);
+    static MediaOperation getMediaOperation(uint64_t metadata);
 
     static constexpr int kAlignment = 4096;
     static constexpr int kNumPages = 1 + 4096 * 2; // 32M + 4k
