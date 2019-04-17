@@ -29,42 +29,31 @@
 namespace android {
 namespace emulation {
 
-enum vpx_metadata {
-    VPX_INIT_CONTEXT_VP8 = 1,
-    VPX_INIT_CONTEXT_VP9 = 2,
-    VPX_DESTROY_CONTEXT = 3,
-    VPX_DECODE = 4,
-    VPX_FLUSH = 5,
-    VPX_GET_IMGE = 6,
-};
-
-void MediaVpxDecoder::handlePing(uint64_t metadata, void* ptr) {
-    switch (metadata) {
-        case VPX_INIT_CONTEXT_VP8:
-            initVpxContext(ptr, VpxVersion::VP8);
+void MediaVpxDecoder::handlePing(MediaCodecType type, MediaOperation op, void* ptr) {
+    switch (op) {
+        case MediaOperation::InitContext:
+            initVpxContext(ptr, type);
             break;
-        case VPX_INIT_CONTEXT_VP9:
-            initVpxContext(ptr, VpxVersion::VP9);
-            break;
-        case VPX_DESTROY_CONTEXT:
+        case MediaOperation::DestroyContext:
             destroyVpxContext(ptr);
             break;
-        case VPX_DECODE:
+        case MediaOperation::DecodeImage:
             decodeFrame(ptr);
             break;
-        case VPX_FLUSH:
+        case MediaOperation::Flush:
             flush(ptr);
             break;
-        case VPX_GET_IMGE:
+        case MediaOperation::GetImage:
             getImage(ptr);
             break;
         default:
-            VPX_DPRINT("Unknown command %llu\n", metadata);
+            VPX_DPRINT("Unknown command %u\n", (unsigned int)op);
             break;
     }
 }
 
-void MediaVpxDecoder::initVpxContext(void* ptr, VpxVersion vpversion) {
+void MediaVpxDecoder::initVpxContext(void* ptr, MediaCodecType type) {
+    assert(type == MediaCodecType::VP8Codec || type == MediaCodecType::VP9Codec);
     mCtx.reset(new vpx_codec_ctx_t);
     vpx_codec_err_t vpx_err;
     vpx_codec_dec_cfg_t cfg;
@@ -75,7 +64,7 @@ void MediaVpxDecoder::initVpxContext(void* ptr, VpxVersion vpversion) {
 
     if ((vpx_err = vpx_codec_dec_init(
                  mCtx.get(),
-                 vpversion == VpxVersion::VP8 ?
+                 type == MediaCodecType::VP8Codec ?
                  &vpx_codec_vp8_dx_algo : &vpx_codec_vp9_dx_algo,
                  &cfg, flags))) {
         VPX_DPRINT("vpx decoder failed to initialize. (%d)", vpx_err);

@@ -14,6 +14,8 @@
 #pragma once
 
 #include <memory>
+#include "android/emulation/GoldfishMediaDefs.h"
+#include "android/emulation/MediaCodec.h"
 #include <inttypes.h>
 
 extern "C" {
@@ -26,22 +28,17 @@ extern "C" {
 namespace android {
 namespace emulation {
 
-class MediaVpxDecoder {
+class MediaVpxDecoder : MediaCodec {
 public:
     MediaVpxDecoder() = default;
-    ~MediaVpxDecoder() = default;
-
-    enum class VpxVersion: uint8_t {
-        VP8 = 8,
-        VP9 = 9,
-    };
+    virtual ~MediaVpxDecoder() = default;
 
 public:
     // this is the entry point
-    void handlePing(uint64_t metadata, void* ptr);
+    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
 private:
-    void initVpxContext(void *ptr, VpxVersion version);
+    void initVpxContext(void *ptr, MediaCodecType type);
     void destroyVpxContext(void *ptr);
     void decodeFrame(void* ptr);
     void flush(void* ptr);
