@@ -606,6 +606,8 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
                                                  AddressSpace **target_as)
 {
     MemoryRegionSection *section = NULL;
+    MemoryRegionSection result;
+
     IOMMUMemoryRegion *iommu_mr;
     hwaddr plen = (hwaddr)(-1);
 
@@ -613,15 +615,27 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
         plen_out = &plen;
     }
 
+    flatview_ref(fv);
+
     section = address_space_translate_internal(
             flatview_to_dispatch(fv), addr, xlat,
             plen_out, is_mmio);
+
     iommu_mr = memory_region_get_iommu(section->mr);
     if (unlikely(iommu_mr)) {
-        return address_space_translate_iommu(iommu_mr, xlat,
-                                             plen_out, page_mask_out,
-                                             is_write, is_mmio,
-                                             target_as);
+
+        MemoryRegionSection iommu_section;
+
+        iommu_section =
+            address_space_translate_iommu(
+                iommu_mr, xlat,
+                plen_out, page_mask_out,
+                is_write, is_mmio,
+                target_as);
+
+        flatview_unref(fv);
+
+        return iommu_section;
     }
 
     if (page_mask_out) {
@@ -629,7 +643,10 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
         *page_mask_out = ~TARGET_PAGE_MASK;
     }
 
-    return *section;
+    result = *section;
+    flatview_unref(fv);
+
+    return result;
 }
 
 /* Called from RCU critical section */

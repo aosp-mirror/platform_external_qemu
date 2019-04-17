@@ -14,6 +14,7 @@
 
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
 #include "android/opengl/EmuglBackendList.h"
 #include "android/skin/winsys.h"
@@ -31,7 +32,7 @@
 #if DEBUG
 #define D(...)  printf(__VA_ARGS__)
 #else
-#define D(...)  ((void)0)
+#define D(...)  crashhandler_append_message_format(__VA_ARGS__)
 #endif
 
 using android::base::RunOptions;
@@ -341,11 +342,19 @@ bool emuglConfig_init(EmuglConfig* config,
         const std::vector<std::string>& backends = sBackendList->names();
         if (!stringVectorContains(backends, gpu_mode)) {
             std::string error = StringFormat(
-                "Invalid GPU mode '%s', use one of: on off host guest", gpu_mode);
+                "Invalid GPU mode '%s', use one of: host swiftshader_indirect. "
+                "If you're already using one of those modes, "
+                "the emulator installation may be corrupt. "
+                "Please re-install the emulator.", gpu_mode);
+
             for (size_t n = 0; n < backends.size(); ++n) {
                 error += " ";
                 error += backends[n];
             }
+
+            D("%s: Error: [%s]\n", __func__, error.c_str());
+            fprintf(stderr, "%s: %s\n", __func__, error.c_str());
+
             config->enabled = false;
             gpu_mode = "error";
             snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);

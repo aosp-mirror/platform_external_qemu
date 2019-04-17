@@ -212,6 +212,9 @@ public:
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
+
+        if (!win) { return false; }
+
         if (win->type() != MacSurface::WINDOW) {
             return false;
         } else {
@@ -221,6 +224,7 @@ public:
 
     virtual bool isValidNativeWin(EGLNativeWindowType win) {
         unsigned int width, height;
+        if (!win) return false;
         return nsGetWinDims(win, &width, &height);
     }
 
