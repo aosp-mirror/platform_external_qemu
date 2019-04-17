@@ -524,6 +524,19 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
         return false;
     }
 
+    // Check whether skipping snapshot saves was set.
+    if (mVmOperations.isSnapshotSaveSkipped()) {
+        showError("Skipping snapshot save: "
+                  "current state "
+                  "doesn't support snapshotting");
+        if (reportMetrics) {
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                 EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
+                             FailureReason::SnapshotsNotSupported);
+        }
+        return false;
+    }
+
     return true;
 }
 

@@ -15,6 +15,8 @@
 #include "android/emulation/testing/MockAndroidVmOperations.h"
 #include "android/base/Log.h"
 
+static bool sSkipSnapshotSave = false;
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = []() -> bool {
             CHECK(android::MockAndroidVmOperations::mock);
@@ -60,9 +62,16 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
                 },
         .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {},
         .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {},
-        .getVmConfiguration = nullptr,  // Not currently mocked.
-        .setFailureReason = nullptr,    // Not currently mocked.
-        .setExiting = nullptr,          // Not currently mocked.
+        .getVmConfiguration = nullptr,       // Not currently mocked.
+        .setFailureReason = nullptr,         // Not currently mocked.
+        .setExiting = nullptr,               // Not currently mocked.
+        .allowRealAudio = nullptr,           // Not currently mocked.
+        .physicalMemoryGetAddr = nullptr,    // Not currently mocked.
+        .isRealAudioAllowed = nullptr,       // Not currently mocked.
+        .setSkipSnapshotSave =
+            [](bool skip) { sSkipSnapshotSave = skip; },
+        .isSnapshotSaveSkipped =
+            []() -> bool { return sSkipSnapshotSave; },
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
