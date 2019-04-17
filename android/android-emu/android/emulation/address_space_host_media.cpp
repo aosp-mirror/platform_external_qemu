@@ -42,9 +42,50 @@ void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pag
                      phys_addr, myptr);
 }
 
+// static
+MediaCodecType AddressSpaceHostMediaContext::getMediaCodecType(uint64_t metadata) {
+    // Metadata has the following structure:
+    // - Upper 8 bits has the codec type (MediaCodecType)
+    // - Lower 56 bits has metadata specifically for that codec
+    //
+    // We need to hand the data off to the right codec depending on which
+    // codec type we get.
+    uint8_t ret = (uint8_t)(metadata >> (64 - 8));
+    return ret > static_cast<uint8_t>(MediaCodecType::Max) ?
+            MediaCodecType::Max : (MediaCodecType)ret;
+}
+
+// static
+MediaOperation AddressSpaceHostMediaContext::getMediaOperation(uint64_t metadata) {
+    // Metadata has the following structure:
+    // - Upper 8 bits has the codec type (MediaCodecType)
+    // - Lower 56 bits has metadata specifically for that codec
+    //
+    // We need to hand the data off to the right codec depending on which
+    // codec type we get.
+    uint8_t ret = (uint8_t)(metadata & 0xFF);
+    return ret > static_cast<uint8_t>(MediaOperation::Max) ?
+            MediaOperation::Max : (MediaOperation)ret;
+}
+
 void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo *info) {
-    mVpxDecoder.handlePing(info->metadata,
-                           AddressSpaceHostMediaContext::getHostAddress(info->phys_addr));
+    auto codecType = getMediaCodecType(info->metadata);
+    auto op = getMediaOperation(info->metadata);
+
+    AS_DEVICE_DPRINT("Got media request (type=%u, op=%u)", static_cast<uint8_t>(codecType),
+                     static_cast<uint8_t>(op));
+
+    switch (codecType) {
+        case MediaCodecType::VP8Codec:
+        case MediaCodecType::VP9Codec:
+            mVpxDecoder.handlePing(codecType,
+                                   op,
+                                   AddressSpaceHostMediaContext::getHostAddress(info->phys_addr));
+            break;
+        case MediaCodecType::H264Codec:
+            AS_DEVICE_DPRINT("H264Codec not implemented");
+            break;
+    }
 }
 
 // static
