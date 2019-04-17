@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8bfad16d_dc81da6c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-17T20:40:30Z",
+      "side": 1,
+      "message": "Followed example in virtualscene. Thanks!",
+      "parentUuid": "c5d3383a_c3ad48b1",
+      "range": {
+        "startLine": 415,
+        "startChar": 28,
+        "endLine": 415,
+        "endChar": 61
+      },
+      "revId": "0209168bc092e4f499815d3bdec1c6a24d39ac5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d71e3186_c79d93cc",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "0209168bc092e4f499815d3bdec1c6a24d39ac5c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11509779_90ee746d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-17T20:40:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d71e3186_c79d93cc",
+      "range": {
+        "startLine": 445,
+        "startChar": 4,
+        "endLine": 445,
+        "endChar": 5
+      },
+      "revId": "0209168bc092e4f499815d3bdec1c6a24d39ac5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
