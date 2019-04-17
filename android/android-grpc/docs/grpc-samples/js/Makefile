@@ -101,7 +101,7 @@ develop:
 	npm start
 
 stop:
-	pkill -9 grpcwebproxy; pkill -9 npm; true
+	pkill -9 grpcwebproxy; pkill -9 npm; pkill -9 js; true
 
 system-check:
 ifneq ($(HAS_VALID_PROTOC),true)
