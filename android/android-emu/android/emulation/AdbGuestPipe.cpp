@@ -574,7 +574,6 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                     DD("%s: [%p] loaded %d data from buffer", __func__, this,
                        (int)len);
                 } else if (mHostSocket.valid()) {
-                    ScopedVmUnlock unlockBql;
                     len = android::base::socketRecv(
                             mHostSocket.fd(), data, dataSize);
                 } else {
@@ -643,7 +642,6 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
         while (dataSize > 0) {
             ssize_t len;
             {
-                ScopedVmUnlock unlockBql;
                 // Possible that the host socket has been reset.
                 if (mHostSocket.valid()) {
                     len = android::base::socketSend(
