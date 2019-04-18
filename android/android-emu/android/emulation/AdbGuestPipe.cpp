@@ -20,9 +20,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Async.h"
-#include "android/base/threads/FunctorThread.h"
 #include "android/emulation/VmLock.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -293,9 +291,11 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            Service* service,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
-    : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
+    : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
+      mSocketTrafficThread([this] { adbGuestPipeSocketTrafficWorker(); }) {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
+    mSocketTrafficThread.start();
     if (!stream) {
         setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
     } else {
@@ -384,6 +384,10 @@ AdbGuestPipe::~AdbGuestPipe() {
     CHECK(mState == State::ClosedByGuest ||
           mState == State::ClosedByHost);
     service()->unregisterActivePipe(this);
+    SocketTrafficMessage msg;
+    msg.type = SocketTrafficType::Exit;
+    mToSocketMessages.send(msg);
+    mSocketTrafficThread.wait();
 }
 
 void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
@@ -568,14 +572,27 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
         while (dataSize > 0) {
             ssize_t len;
             {
-                // Possible that the host socket has been reset.
-                if (mHostSocket.hasStaleData()) {
-                    len = mHostSocket.readStaleData(data, dataSize);
-                    DD("%s: [%p] loaded %d data from buffer", __func__, this,
-                       (int)len);
-                } else if (mHostSocket.valid()) {
-                    len = android::base::socketRecv(
-                            mHostSocket.fd(), data, dataSize);
+                if (mHostSocket.valid()) {
+                    SocketTrafficMessage msg;
+                    msg.type = SocketTrafficType::Recv;
+                    msg.fd = mHostSocket.fd();
+                    msg.data.resize(dataSize);
+                    
+                    bool again = false;
+
+                    if (mToSocketMessages.trySend(msg)) {
+                        mFromSocketMessages.receive(&msg);
+                        len = msg.result;
+                        errno = msg.err;
+                        memcpy(data, msg.data.data(), dataSize);
+                    } else { // blocked
+                        again = true;
+                    }
+
+                    if (again) {
+                        len = -1;
+                        errno = EAGAIN;
+                    }
                 } else {
                     fprintf(stderr, "WARNING: AdbGuestPipe socket closed in the middle of recv\n");
                     mState = State::ClosedByHost;
@@ -644,17 +661,41 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
             {
                 // Possible that the host socket has been reset.
                 if (mHostSocket.valid()) {
-                    len = android::base::socketSend(
-                            mHostSocket.fd(), data, dataSize);
+                    SocketTrafficMessage msg;
+                    msg.type = SocketTrafficType::Send;
+                    msg.fd = mHostSocket.fd();
+                    msg.data.resize(dataSize);
+                    memcpy(msg.data.data(), data, dataSize);
+
+                    bool again = false;
+
+                    if (mToSocketMessages.trySend(msg)) {
+                        auto future = base::System::get()->getUnixTimeUs() + 2000ULL;
+                        auto res = mFromSocketMessages.timedReceive(future);
+                        // mFromSocketMessages.receive(&msg);
+                        if (res) {
+                            len = res->result;
+                            errno = res->err;
 #ifdef _DEBUG
-                    if (msgSize) {
-                        msgSize -= dataSize;
-                        assert(msgSize >= 0);
-                    } else {
-                        msgSize = parseMsgSize(data);
-                        assert(msgSize >= 0);
-                    }
+                            if (msgSize) {
+                                msgSize -= dataSize;
+                                assert(msgSize >= 0);
+                            } else {
+                                msgSize = parseMsgSize(data);
+                                assert(msgSize >= 0);
+                            }
 #endif
+                        } else {
+                            again = true;
+                        }
+                    } else { // 2 much stuff blocked
+                        again = true;
+                    }
+
+                    if (again) {
+                        len = -1;
+                        errno = EAGAIN;
+                    }
                 } else {
                     fprintf(stderr, "WARNING: AdbGuestPipe socket closed in the middle of send\n");
                     mState = State::ClosedByHost;
@@ -810,6 +851,37 @@ void AdbGuestPipe::waitForHostConnection() {
 
 bool AdbGuestPipe::shouldUseRecvBuffer() {
     return isProxyingData();
+}
+
+void AdbGuestPipe::adbGuestPipeSocketTrafficWorker() {
+    SocketTrafficMessage msg;
+    while (true) {
+        mToSocketMessages.receive(&msg);
+        switch (msg.type) {
+            case SocketTrafficType::Exit:
+                return;
+            case SocketTrafficType::Send:
+                msg.result =
+                    android::base::socketSend(
+                        msg.fd, msg.data.data(), msg.data.size());
+                msg.err = errno;
+                // dont need the data anymore
+                msg.data.clear();
+                mFromSocketMessages.send(msg);
+                break;
+            case SocketTrafficType::Recv:
+                if (mHostSocket.hasStaleData()) {
+                    msg.result = mHostSocket.readStaleData(msg.data.data(), msg.data.size());
+                    DD("%s: [%p] loaded %d data from buffer", __func__, this, (int)len);
+                } else {
+                    msg.result = android::base::socketRecv(
+                        msg.fd, msg.data.data(), msg.data.size());
+                }
+                msg.err = errno;
+                mFromSocketMessages.send(msg);
+                break;
+        }
+    }
 }
 
 }  // namespace emulation
