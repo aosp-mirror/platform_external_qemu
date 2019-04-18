@@ -2250,7 +2250,7 @@ static int do_event_mouse(ControlClient client, char* args) {
         return -1;
     }
 
-    client->global->user_event_agent->sendMouseEvent(x, y, dev, btn);
+    client->global->user_event_agent->sendMouseEvent(x, y, dev, btn, 0);
     return 0;
 }
 
