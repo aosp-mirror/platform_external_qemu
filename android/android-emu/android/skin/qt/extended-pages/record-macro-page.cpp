@@ -15,6 +15,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
@@ -41,8 +42,15 @@ RecordMacroPage* RecordMacroPage::sInstance = nullptr;
 RecordMacroPage::RecordMacroPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordMacroPage()) {
     mUi->setupUi(this);
-    loadUi();
     sInstance = this;
+
+    mRecordEnabled = android::featurecontrol::isEnabled(
+            android::featurecontrol::MacroUi);
+    if (!mRecordEnabled) {
+        mUi->recButton->hide();
+    }
+
+    loadUi();
 }
 
 RecordMacroPage::~RecordMacroPage() {
@@ -238,6 +246,10 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->playStopButton->setEnabled(true);
             break;
         }
+    }
+
+    if (mRecordEnabled) {
+        setRecordState();
     }
 }
 
@@ -477,4 +489,27 @@ void RecordMacroPage::reportAllMetrics() {
                         event->mutable_emulator_details()->mutable_automation();
                 automation->CopyFrom(metrics);
             });
+}
+
+void RecordMacroPage::setRecordState() {
+    mUi->recButton->setText(tr("RECORD NEW "));
+
+    switch (mState) {
+        case MacroUiState::Waiting: {
+            mUi->recButton->setEnabled(false);
+            break;
+        }
+        case MacroUiState::Selected: {
+            mUi->recButton->setEnabled(true);
+            break;
+        }
+        case MacroUiState::PreviewFinished: {
+            mUi->recButton->setEnabled(true);
+            break;
+        }
+        case MacroUiState::Playing: {
+            mUi->recButton->setEnabled(false);
+            break;
+        }
+    }
 }

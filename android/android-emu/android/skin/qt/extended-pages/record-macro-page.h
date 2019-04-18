@@ -78,6 +78,10 @@ private:
     void reportPresetMacroPlayed(const std::string& macroName);
     void reportAllMetrics();
 
+    // Behind feature flag.
+    void setRecordState();
+    bool mRecordEnabled = false;
+
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
