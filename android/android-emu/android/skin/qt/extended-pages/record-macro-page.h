@@ -31,7 +31,7 @@ class RecordMacroPage : public QWidget {
     Q_OBJECT
 
 public:
-    enum class MacroUiState { Waiting, Selected, PreviewFinished, Playing };
+    enum class MacroUiState { Waiting, Selected, PreviewFinished, Playing, Recording };
 
     explicit RecordMacroPage(QWidget* parent = 0);
     ~RecordMacroPage();
@@ -48,6 +48,7 @@ private slots:
                                          QListWidgetItem* previous);
     void on_macroList_itemPressed(QListWidgetItem* listItem);
     void on_macroList_itemSelectionChanged();
+    void on_recButton_clicked();
     void updatePreviewVideoView();
     void previewVideoPlayingFinished();
     void updateElapsedTime();
@@ -68,6 +69,7 @@ private:
     void showPreview(const std::string& previewName);
     RecordMacroSavedItem* getItemWidget(QListWidgetItem* listItem);
     void disableMacroItemsExcept(QListWidgetItem* listItem);
+    void disableMacroItems();
     void enableMacroItems();
     void showPreviewFrame(const std::string& previewName);
     std::string getMacroNameFromItem(QListWidgetItem* listItem);
@@ -77,11 +79,14 @@ private:
     void reportTotalDuration();
     void reportPresetMacroPlayed(const std::string& macroName);
     void reportAllMetrics();
+    void startRecording();
+    void stopRecording();
 
     // Behind feature flag.
     void setRecordState();
     bool mRecordEnabled = false;
 
+    bool mRecording = false;
     bool mMacroPlaying = false;
     std::string mCurrentMacroName;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
