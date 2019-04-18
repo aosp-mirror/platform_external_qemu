@@ -76,8 +76,10 @@ void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
     for (const auto& objData : m_objectDataMap) {
         GL_LOG("NameSpace::%s: %p: try to load object %llu\n", __func__, this, objData.first);
         if (!objData.second) {
-            emugl::emugl_crash_reporter(
-                    "Fatal: null object data ptr on restore\n");
+            // bug: 130631787
+            // emugl::emugl_crash_reporter(
+            //         "Fatal: null object data ptr on restore\n");
+            continue;
         }
         objData.second->postLoad(getObjDataPtr);
     }

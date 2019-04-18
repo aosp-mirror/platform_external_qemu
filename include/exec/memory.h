@@ -348,6 +348,12 @@ static inline FlatView *address_space_to_flatview(AddressSpace *as)
     return atomic_rcu_read(&as->current_map);
 }
 
+static bool flatview_ref(FlatView *view)
+{
+    return atomic_fetch_inc_nonzero(&view->ref) > 0;
+}
+
+void flatview_unref(FlatView *view);
 
 /**
  * MemoryRegionSection: describes a fragment of a #MemoryRegion

@@ -13,6 +13,7 @@
 
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/base/gl_object_counter.h"
 #include "android/camera/camera-list.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/android_pipe_unix.h"
@@ -2065,6 +2066,9 @@ bool configAndStartRenderer(
     if (strcmp(gpu_mode, "guest") == 0 ||
         strcmp(gpu_mode, "off") == 0 ||
         !hw->hw_gpu_enabled) {
+
+        android_gl_object_counter_get();
+
         if (avdInfo_isGoogleApis(avd) &&
                 avdInfo_getApiLevel(avd) >= 19) {
             config_out->glesMode = kAndroidGlesEmulationGuest;
