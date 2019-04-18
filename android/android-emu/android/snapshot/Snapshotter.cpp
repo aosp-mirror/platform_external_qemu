@@ -412,6 +412,8 @@ Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
 
 Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
                                                               System::Duration durationMs) {
+    SnapshotOperationStats defaultStats;
+
     auto& load = loader();
     const auto onDemandRamEnabled = load.ramLoader().onDemandEnabled();
     const auto compressedRam = load.ramLoader().compressed();
@@ -443,6 +445,9 @@ Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
 
 void Snapshotter::appendSuccessfulSave(const char* name,
                                        System::Duration durationMs) {
+    if (!mSaver ||
+        !mSaver->textureSaver()) return;
+
     auto stats = getSaveStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
@@ -451,6 +456,9 @@ void Snapshotter::appendSuccessfulSave(const char* name,
 
 void Snapshotter::appendSuccessfulLoad(const char* name,
                                        System::Duration durationMs) {
+    if (!mLoader ||
+        !mLoader->textureLoader()) return;
+
     loader().reportSuccessful();
     auto stats = getLoadStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
