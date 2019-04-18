@@ -11,6 +11,7 @@
 
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/ProcessControl.h"
 #include "android/emulation/control/AdbInterface.h"
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/emulation/control/vm_operations.h"
@@ -24,6 +25,7 @@
 #include <atomic>
 #include <memory>
 #include <random>
+#include <thread>
 #include <vector>
 
 // This indicates the number of heartbeats from guest
@@ -60,6 +62,30 @@ static void fillWithOK(std::vector<uint8_t> &output) {
     output[0]='O';
     output[1]='K';
     output[2]='\0';
+}
+
+static void watchDogFunction(int sleep_minutes) {
+    if (sleep_minutes <= 0) return;
+
+    int current = guest_heart_beat_count.load();
+    // guest does not have heartbeat, do nothing
+    if (current <= 0) return;
+
+    while (1) {
+        // sleep x minutes
+        base::Thread::sleepMs(sleep_minutes * 1000);
+        int now = guest_heart_beat_count.load();
+        if (now <= current) {
+            // reboot
+            printf("guest seems stalled, reboot now\n");
+            fflush(stdout);
+            android::base::restartEmulator();
+            break;
+        } else {
+            current = now;
+        }
+    }
+    return 0;
 }
 
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
@@ -107,6 +133,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 { "shell", "pm", "revoke",
                   "com.google.android.googlequicksearchbox",
                   "android.permission.RECORD_AUDIO" });
+
+             std::thread{watchDogFunction, 1}.detach();
         }
 
         return;
