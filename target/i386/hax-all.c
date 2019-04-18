@@ -354,6 +354,8 @@ int hax_init_vcpu(CPUState *cpu)
 {
     int ret;
 
+    qemu_mutex_lock(&hax_global.io_mmio_lock);
+
     ret = hax_vcpu_create(cpu->cpu_index);
     if (ret < 0) {
         fprintf(stderr, "Failed to create HAX vcpu\n");
@@ -364,6 +366,8 @@ int hax_init_vcpu(CPUState *cpu)
     cpu->hax_vcpu->emulation_state = HAX_EMULATE_STATE_INITIAL;
     cpu->vcpu_dirty = true;
     qemu_register_reset(hax_reset_vcpu_state, (CPUArchState *) (cpu->env_ptr));
+
+    qemu_mutex_unlock(&hax_global.io_mmio_lock);
 
     return ret;
 }
@@ -419,6 +423,9 @@ int hax_vm_destroy(struct hax_vm *vm)
     hax_close_fd(vm->fd);
     g_free(vm);
     hax_global.vm = NULL;
+
+    qemu_mutex_destroy(&hax_global.io_mmio_lock);
+
     return 0;
 }
 
@@ -481,6 +488,8 @@ static int hax_init(ram_addr_t ram_size)
     qversion.min_version = hax_min_version;
     hax_notify_qemu_version(hax->vm->fd, &qversion);
     cpu_interrupt_handler = hax_handle_interrupt;
+
+    qemu_mutex_init(&hax->io_mmio_lock);
 
     return ret;
   error:
@@ -724,12 +733,16 @@ vcpu_run:
         }
         switch (ht->_exit_status) {
         case HAX_EXIT_IO:
+            qemu_mutex_lock(&hax_global.io_mmio_lock);
             ret = hax_handle_io(env, ht->pio._df, ht->pio._port,
                             ht->pio._direction,
                             ht->pio._size, ht->pio._count, vcpu->iobuf);
+            qemu_mutex_unlock(&hax_global.io_mmio_lock);
             break;
         case HAX_EXIT_FAST_MMIO:
+            qemu_mutex_lock(&hax_global.io_mmio_lock);
             ret = hax_handle_fastmmio(env, (struct hax_fastmmio *) vcpu->iobuf);
+            qemu_mutex_unlock(&hax_global.io_mmio_lock);
             break;
         /* Guest state changed, currently only for shutdown */
         case HAX_EXIT_STATECHANGE:
