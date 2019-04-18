@@ -174,7 +174,7 @@ public:
                      ::google::protobuf::Empty* reply) override {
         LOG(VERBOSE) << request->DebugString();
         mAgents->user_event->sendMouseEvent(request->x(), request->y(), 0,
-                                            request->buttons());
+                                            request->buttons(), 0);
         return Status::OK;
     }
 
