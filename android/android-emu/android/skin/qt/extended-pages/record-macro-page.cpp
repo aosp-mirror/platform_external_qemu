@@ -307,6 +307,7 @@ void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
     enableMacroItems();
 
     mMacroPlaying = false;
+    mUi->macroList->setCurrentItem(listItem);
     setMacroUiState(MacroUiState::PreviewFinished);
 
     mTimer.stop();
