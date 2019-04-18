@@ -14,6 +14,7 @@
 #define _HAX_I386_H
 
 #include "cpu.h"
+#include "qemu/thread.h"
 #include "sysemu/hax.h"
 
 #ifdef CONFIG_DARWIN
@@ -54,6 +55,7 @@ struct hax_state {
     bool supports_ram_protection;
     bool supports_implicit_ramblock;
     struct hax_slot memslots[HAX_MAX_SLOTS];
+    QemuMutex io_mmio_lock;
 };
 
 #define HAX_MAX_VCPU 0x10
