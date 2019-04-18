@@ -16,6 +16,8 @@
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/Thread.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
@@ -24,6 +26,8 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <inttypes.h>
 
 namespace android {
 namespace emulation {
@@ -218,6 +222,32 @@ private:
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
     std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
+
+    // Separate thread to perform blocking socket operations
+    // and a MessageChannel to hold the intermediate buffers.
+    //
+    // If we block too much, then eagain
+    enum class SocketTrafficType {
+        Exit = 0,
+        Send = 1,
+        Recv = 2,
+    };
+
+    struct SocketTrafficMessage {
+        SocketTrafficType type;
+        int fd;
+        // for send or recv
+        std::vector<uint8_t> data;
+        // the result to return
+        ssize_t result;
+        // err
+        int err;
+    };
+
+    android::base::MessageChannel<SocketTrafficMessage, 1> mToSocketMessages;
+    android::base::MessageChannel<SocketTrafficMessage, 1> mFromSocketMessages;
+    void adbGuestPipeSocketTrafficWorker();
+    android::base::FunctorThread mSocketTrafficThread;
 };
 
 }  // namespace emulation
