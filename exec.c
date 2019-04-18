@@ -2353,7 +2353,6 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t maxsz,
 RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
                                      Error **errp)
 {
-    fprintf(stderr, "%s: call\n", __func__);
     RAMBlock *new_block;
     Error *local_err = NULL;
 
