@@ -72,9 +72,14 @@ def _construct_notice_file(files, aosp):
     notice += '\n'.join(files)
     notice += '\n'
     notice += '===========================================================\n'
-    with open(os.path.join(aosp, 'external', 'qemu', 'NOTICE'),
-              'r') as nfile:
-        notice += nfile.read()
+
+    notices = set()
+    for notice_file in recursive_glob(os.path.join(aosp,'external'), '.*NOTICE'):
+          logging.info("Adding notice for: %s", notice_file)
+          with open(notice_file, 'r') as nfile:
+              notices.add(nfile.read())
+
+    notice += '\n\n-~-~-~-~\n\n'.join(notices)
 
     return notice
 
