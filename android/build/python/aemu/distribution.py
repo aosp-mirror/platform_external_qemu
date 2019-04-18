@@ -104,3 +104,12 @@ def create_distribution(dist_dir, build_dir, data):
             # add a notice file.
             notice = _construct_notice_file(files, data['aosp'])
             zipf.writestr('emulator/NOTICE.txt', notice)
+
+        zip_fname_relative = zip_fname.format(**data)
+        zip_fname_no_ext = zip_fname_relative.split(".zip")[0]
+        zip_fname_64 = "%s-x86_64.zip" % zip_fname_no_ext
+        zip_symlink_64_path = os.path.join(dist_dir, zip_fname_64)
+
+        logging.info('Creating 64-bit symlink for %s: %s', zip_fname, zip_symlink_64_path)
+
+        os.symlink(zip_fname_relative, zip_symlink_64_path)
