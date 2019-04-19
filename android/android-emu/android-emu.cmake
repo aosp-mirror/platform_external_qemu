@@ -313,6 +313,7 @@ set(android-emu_windows_src
 # Mac specific sources, these will only be included when building for darwin
 set(android-emu_darwin-x86_64_src
     android/camera/camera-capture-mac.m
+    android/emulation/MediaH264DecoderVideoToolBox.cpp
     android/opengl/NativeGpuInfo_darwin.cpp
     android/snapshot/MemoryWatch_darwin.cpp
     android/opengl/macTouchOpenGL.m
@@ -488,6 +489,7 @@ set(android-emu-shared_darwin-x86_64_src
     android/opengl/NativeGpuInfo_darwin.cpp
     android/snapshot/MemoryWatch_darwin.cpp
     android/opengl/macTouchOpenGL.m
+    android/emulation/MediaH264DecoderVideoToolBox.cpp
     android/snapshot/MacSegvHandler.cpp
     android/crashreport/CrashReporter_darwin.cpp)
 
