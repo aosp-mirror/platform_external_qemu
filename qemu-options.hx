@@ -4793,6 +4793,14 @@ STEXI
 Allows sending of audio from audio input devices. Otherwise, zeroes out audio.
 ETEXI
 
+DEF("restart-when-stalled", 0, QEMU_OPTION_restart_when_stalled,
+"-restart-when-stalled Allows restarting guest when it is stalled.", QEMU_ARCH_ALL)
+STEXI
+@item -restart-when-stalled
+@findex -restart-when-stalled
+Allows restarting guest when it is stalled.
+ETEXI
+
 DEF("perf-stat", HAS_ARG, QEMU_OPTION_perf_stat,
 "-perf-stat <file> Run periodic perf stat reporter in the background and write output to specified file.", QEMU_ARCH_ALL)
 STEXI

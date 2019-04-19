@@ -1106,6 +1106,9 @@ extern "C" int main(int argc, char** argv) {
     if (opts->allow_host_audio)
         args.add("-allow-host-audio");
 
+    if (opts->restart_when_stalled)
+        args.add("-restart-when-stalled");
+
     bool badSnapshots = false;
 
     // Check situations where snapshots should be turned off
