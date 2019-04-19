@@ -1547,6 +1547,14 @@ help_use_system_libs(stralloc_t* out)
     "\n"
     );
 }
+
+static void
+help_stdouterr_file(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-stdouterr-file' to redirect stdout and stderr to it.\n\n"
+    );
+}
 #endif  // __linux__
 
 static void
