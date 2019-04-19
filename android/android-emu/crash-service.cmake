@@ -49,6 +49,7 @@ set(emulator_crashreport_unittests_src
     android/crashreport/CrashService_unittest.cpp
     android/crashreport/CrashSystem_unittest.cpp
     android/crashreport/HangDetector_unittest.cpp
+    android/crashreport/detectors/CrashDetectors_unittest.cpp
 )
 set(emulator_crashreport_unittests_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
 set(emulator_crashreport_unittests_darwin-x86_64_src android/crashreport/CrashService_darwin.cpp)
