@@ -355,7 +355,6 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-allow-host-audio")) {
-            nn++;
             continue;
         }
 
