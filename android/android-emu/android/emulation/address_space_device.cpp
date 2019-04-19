@@ -28,7 +28,7 @@ using android::base::LazyInstance;
 using android::base::Lock;
 using namespace android::emulation;
 
-#define AS_DEVICE_DEBUG 1
+#define AS_DEVICE_DEBUG 0
 
 #if AS_DEVICE_DEBUG
 #define AS_DEVICE_DPRINT(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
