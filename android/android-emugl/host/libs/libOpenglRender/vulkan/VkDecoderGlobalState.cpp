@@ -17,6 +17,7 @@
 
 #include "VkAndroidNativeBuffer.h"
 #include "VkCommonOperations.h"
+#include "VkDecoderSnapshot.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
 #include "vk_util.h"
@@ -2684,6 +2685,8 @@ public:
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_IMPL)
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_IMPL)
 
+    VkDecoderSnapshot* snapshot() { return &mSnapshot; }
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -3529,6 +3532,7 @@ private:
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_STORE)
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_STORE)
 
+    VkDecoderSnapshot mSnapshot;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -4235,6 +4239,10 @@ void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
     (void)size; (void)sizeCount;
     (void)typeIndex; (void)typeIndexCount;
     (void)typeBits; (void)typeBitsCount;
+}
+
+VkDecoderSnapshot* VkDecoderGlobalState::snapshot() {
+    return mImpl->snapshot();
 }
 
 #define DEFINE_TRANSFORMED_TYPE_IMPL(type) \

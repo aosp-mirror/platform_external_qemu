@@ -249,6 +249,23 @@ def emit_decode_finish(cgen):
     cgen.stmt("m_pool.freeAll()")
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
+def emit_snapshot(typeInfo, api, cgen):
+
+    additionalParams = [makeVulkanTypeSimple(False, "android::base::Pool", 1, "&m_pool")]
+
+    retTypeName = api.getRetTypeExpr()
+    if retTypeName != "void":
+        retVar = api.getRetVarExpr()
+        additionalParams.append(makeVulkanTypeSimple(False, retTypeName, 0, retVar))
+
+    customParams = additionalParams + api.parameters
+
+    apiForSnapshot = \
+        api.withCustomReturnType(makeVulkanTypeSimple(False, "void", 0, "void")). \
+            withCustomParameters(customParams)
+
+    cgen.vkApiCall(apiForSnapshot, customPrefix="m_state->snapshot()->")
+
 def emit_default_decoding(typeInfo, api, cgen):
     emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
@@ -256,6 +273,7 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
+    emit_snapshot(typeInfo, api, cgen);
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_call_log(api, cgen)
@@ -264,6 +282,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
+    emit_snapshot(typeInfo, api, cgen);
 
 ## Custom decoding definitions##################################################
 def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
@@ -290,6 +309,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
+    emit_snapshot(typeInfo, api, cgen);
 
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_call_log(api, cgen)
@@ -316,6 +336,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     cgen.endIf()
 
     emit_decode_finish(cgen)
+    emit_snapshot(typeInfo, api, cgen);
 
 custom_decodes = {
     "vkEnumerateInstanceVersion" : emit_global_state_wrapped_decoding,
@@ -468,6 +489,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
             emit_decode_parameters_writeback(typeInfo, api, cgen)
             emit_decode_return_writeback(api, cgen)
             emit_decode_finish(cgen)
+            emit_snapshot(typeInfo, api, cgen);
 
         cgen.stmt("break")
         cgen.endBlock()

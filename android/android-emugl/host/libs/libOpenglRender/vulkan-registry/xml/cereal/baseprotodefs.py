@@ -28,6 +28,8 @@ class VulkanBaseProtoDefs(VulkanWrapperGenerator):
 
         self.knownStructs = {}
 
+        self.apis = []
+
     def onBegin(self,):
         VulkanWrapperGenerator.onBegin(self)
 
@@ -94,6 +96,57 @@ class VulkanBaseProtoDefs(VulkanWrapperGenerator):
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
 
+        vulkanApi = self.typeInfo.apis[name]
+
+        self.apis.append(name)
+
+        def messageGenerator(cgen):
+            cgen.line("message %s" % name)
+            cgen.beginBlock()
+            for (i, param) in enumerate(vulkanApi.parameters):
+                protoInfo = VulkanTypeProtobufInfo(self.typeInfo, vulkanApi, param)
+                self.codegen.line("// Original field: %s %s %s. stringarray? %d string? %d hasLenInfo? %d" %
+                    (protoInfo.origTypeCategory, param.typeName, param.paramName, \
+                     protoInfo.isRepeatedString, protoInfo.isString, protoInfo.lengthInfo != None))
+
+                protoFieldTypeModifier = ""
+
+                if protoInfo.isRepeatedString:
+                    protoFieldTypeModifier = "repeated"
+                elif protoInfo.isString:
+                    protoFieldTypeModifier = "optional"
+                elif protoInfo.isExtensionStruct:
+                    protoFieldTypeModifier = "optional"
+                elif protoInfo.lengthInfo == None:
+                    protoFieldTypeModifier = "optional"
+                else:
+                    protoFieldTypeModifier = "repeated"
+
+                protoFieldType = ""
+
+                if protoInfo.isRepeatedString:
+                    protoFieldType = "string"
+                elif protoInfo.isString:
+                    protoFieldType = "string"
+                elif protoInfo.isExtensionStruct:
+                    protoFieldType = "VkExtensionStruct"
+                elif protoInfo.needsMessage:
+                    protoFieldType = "%s" % (param.typeName)
+                else:
+                    protoFieldType = "%s" % (protoInfo.protobufType)
+
+                protoFieldName = param.paramName
+
+                protoTagNumber = i + 1
+
+                self.codegen.stmt("%s %s %s = %d" %
+                    (protoFieldTypeModifier, protoFieldType, protoFieldName, protoTagNumber))
+
+            cgen.endBlock()
+            return cgen.swapCode()
+
+        self.module.append(messageGenerator(self.codegen))
+
     def onEnd(self,):
         VulkanWrapperGenerator.onEnd(self)
 
@@ -108,6 +161,21 @@ class VulkanBaseProtoDefs(VulkanWrapperGenerator):
 
         self.emitForEachStructExtensionGeneral( \
             self.codegen, onStructExtension)
+
+        self.codegen.endBlock()
+        self.codegen.endBlock()
+
+        # Generate a proto that captures all Vulkan APIs.
+
+        self.codegen.line("message VkApiCall")
+
+        self.codegen.beginBlock()
+
+        self.codegen.line("oneof api")
+        self.codegen.beginBlock()
+
+        for (i, api) in enumerate(self.apis):
+            self.codegen.stmt("%s api_%s = %d" % (api, api, i + 1))
 
         self.codegen.endBlock()
         self.codegen.endBlock()
