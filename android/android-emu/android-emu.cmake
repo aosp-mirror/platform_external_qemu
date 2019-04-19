@@ -87,6 +87,7 @@ set(android-emu-common
     android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
+    android/emulation/H264NaluParser.cpp
     android/emulation/MediaVpxDecoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
     android/emulation/MediaH264DecoderFfmpeg.cpp
