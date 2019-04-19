@@ -1,0 +1,576 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "android/emulation/MediaH264Decoder.h"
+
+#include "android/emulation/H264NaluParser.h"
+
+#include <VideoToolbox/VideoToolbox.h>
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include <stdio.h>
+#include <string.h>
+
+#ifndef kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder
+#define kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder CFSTR("RequireHardwareAcceleratedVideoDecoder")
+#endif
+
+#define MEDIA_H264_DEBUG 1
+
+#if MEDIA_H264_DEBUG
+#define H264_DPRINT(fmt,...) fprintf(stderr, "h264-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define H264_DPRINT(fmt,...)
+#endif
+
+
+namespace android {
+namespace emulation {
+
+namespace {
+
+class MediaH264DecoderImpl : public MediaH264Decoder {
+public:
+    MediaH264DecoderImpl() = default;
+    virtual ~MediaH264DecoderImpl() = default;
+
+    // This is the entry point
+    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
+
+private:
+    // Passes the Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) to the
+    // videotoolbox decoder
+    CFDataRef createVTDecoderConfig();
+    // Callback passed to the VTDecompressionSession
+    static void videoToolboxDecompressCallback(void* opaque,
+                                               void* sourceFrameRefCon,
+                                               OSStatus status,
+                                               VTDecodeInfoFlags flags,
+                                               CVImageBufferRef image_buffer,
+                                               CMTime pts,
+                                               CMTime duration);
+    static CFDictionaryRef createOutputBufferAttributes(int width,
+                                                        int height,
+                                                        OSType pix_fmt);
+    static CMSampleBufferRef createSampleBuffer(CMFormatDescriptionRef fmtDesc,
+                                                void* buffer,
+                                                size_t sz);
+    static OSType toNativePixelFormat(PixelFormat fmt);
+
+    // We should move these shared memory calls elsewhere, as vpx decoder is also using the same/similar
+    // functions
+    static int* getReturnAddress(void* ptr);
+    static uint8_t* getDst(void* ptr);
+
+    virtual void initH264Context(unsigned int width,
+                                 unsigned int height,
+                                 unsigned int outWidth,
+                                 unsigned int outHeight,
+                                 PixelFormat pixFmt) override;
+    virtual void destroyH264Context() override;
+    virtual void decodeFrame(const uint8_t* ptr, size_t szBytes) override;
+    virtual void flush(void* ptr) override;
+    virtual void getImage(void* ptr) override;
+    
+    void handleIDRFrame(const uint8_t* ptr, size_t szBytes);
+    void handleNonIDRFrame(const uint8_t* ptr, size_t szBytes);
+    void handleSEIFrame(const uint8_t* ptr, size_t szBytes);
+
+    void createCMFormatDescription();
+    void createDecompressionSession();
+    
+    // The VideoToolbox decoder session
+    VTDecompressionSessionRef mDecoderSession = nullptr;
+    // The decoded video buffer
+    CVImageBufferRef mDecodedFrame = nullptr;
+    CMFormatDescriptionRef mCmFmtDesc = nullptr;
+    bool mImageReady = false;
+    static constexpr int kBPP = 2; // YUV420 is 2 bytes per pixel
+    unsigned int mOutputHeight = 0;
+    unsigned int mOutputWidth = 0;
+    PixelFormat mOutPixFmt; 
+    std::vector<uint8_t> mSPS; // sps NALU
+    std::vector<uint8_t> mPPS; // pps NALU
+}; // MediaH264DecoderImpl
+
+};  // namespace
+
+// static
+MediaH264Decoder* MediaH264Decoder::create() {
+    return new MediaH264DecoderImpl();
+}
+
+// static
+void MediaH264DecoderImpl::videoToolboxDecompressCallback(void* opaque,
+                                                          void* sourceFrameRefCon,
+                                                          OSStatus status,
+                                                          VTDecodeInfoFlags flags,
+                                                          CVImageBufferRef image_buffer,
+                                                          CMTime pts,
+                                                          CMTime duration) {
+    H264_DPRINT("%s", __func__);
+    auto ptr = static_cast<MediaH264DecoderImpl*>(opaque);
+
+    if (ptr->mDecodedFrame) {
+        CVPixelBufferRelease(ptr->mDecodedFrame);
+        ptr->mDecodedFrame = nullptr;
+    }
+
+    if (!image_buffer) {
+        H264_DPRINT("%s: output image buffer is null", __func__);
+        return;
+    }
+
+    ptr->mDecodedFrame = CVPixelBufferRetain(image_buffer);
+    // Image is ready to be comsumed
+    ptr->mImageReady = true;
+    H264_DPRINT("Got decoded frame");
+}
+
+// static
+CFDictionaryRef MediaH264DecoderImpl::createOutputBufferAttributes(int width,
+                                                                   int height,
+                                                                   OSType pix_fmt) {
+    CFMutableDictionaryRef buffer_attributes;
+    CFMutableDictionaryRef io_surface_properties;
+    CFNumberRef cv_pix_fmt;
+    CFNumberRef w;
+    CFNumberRef h;
+
+    w = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &width);
+    h = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &height);
+    cv_pix_fmt = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pix_fmt);
+
+    buffer_attributes = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                                  4,
+                                                  &kCFTypeDictionaryKeyCallBacks,
+                                                  &kCFTypeDictionaryValueCallBacks);
+    io_surface_properties = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                                      0,
+                                                      &kCFTypeDictionaryKeyCallBacks,
+                                                      &kCFTypeDictionaryValueCallBacks);
+
+    if (pix_fmt) {
+        CFDictionarySetValue(buffer_attributes, kCVPixelBufferPixelFormatTypeKey, cv_pix_fmt);
+    }
+    CFDictionarySetValue(buffer_attributes, kCVPixelBufferIOSurfacePropertiesKey, io_surface_properties);
+    CFDictionarySetValue(buffer_attributes, kCVPixelBufferWidthKey, w);
+    CFDictionarySetValue(buffer_attributes, kCVPixelBufferHeightKey, h);
+    // Not sure if this will work becuase we are passing the pixel buffer back into the guest
+    CFDictionarySetValue(buffer_attributes, kCVPixelBufferIOSurfaceOpenGLTextureCompatibilityKey, kCFBooleanTrue);
+
+    CFRelease(io_surface_properties);
+    CFRelease(cv_pix_fmt);
+    CFRelease(w);
+    CFRelease(h);
+
+    return buffer_attributes;
+}
+
+// static
+CMSampleBufferRef MediaH264DecoderImpl::createSampleBuffer(CMFormatDescriptionRef fmtDesc,
+                                                           void* buffer,
+                                                           size_t sz) {
+    OSStatus status;
+    CMBlockBufferRef blockBuf = nullptr;
+    CMSampleBufferRef sampleBuf = nullptr;
+
+    status = CMBlockBufferCreateWithMemoryBlock(kCFAllocatorDefault, // structureAllocator
+                                                buffer,              // memoryBlock
+                                                sz,                  // blockLength
+                                                kCFAllocatorNull,    // blockAllocator
+                                                NULL,                // customBlockSource
+                                                0,                   // offsetToData
+                                                sz,                  // dataLength
+                                                0,                   // flags
+                                                &blockBuf);
+
+    if (!status) {
+        status = CMSampleBufferCreate(kCFAllocatorDefault, // allocator
+                                      blockBuf,            // dataBuffer
+                                      TRUE,                // dataReady
+                                      0,                   // makeDataReadyCallback
+                                      0,                   // makeDataReadyRefCon
+                                      fmtDesc,             // formatDescription
+                                      1,                   // numSamples
+                                      0,                   // numSampleTimingEntries
+                                      NULL,                // sampleTimingArray
+                                      0,                   // numSampleSizeEntries
+                                      NULL,                // sampleSizeArray
+                                      &sampleBuf);
+    }
+
+    if (blockBuf) {
+        CFRelease(blockBuf);
+    }
+
+    return sampleBuf;
+}
+
+// static
+OSType MediaH264DecoderImpl::toNativePixelFormat(PixelFormat pixFmt) {
+    switch (pixFmt) {
+        case PixelFormat::YUV420P:
+            return kCVPixelFormatType_420YpCbCr8Planar;
+        case PixelFormat::UYVY422:
+            return kCVPixelFormatType_422YpCbCr8;
+        case PixelFormat::BGRA8888:
+            return kCVPixelFormatType_32BGRA;
+        default:
+            H264_DPRINT("Unsupported VideoToolbox pixel format");
+            return '0000';
+    }
+}
+
+// static
+int* MediaH264DecoderImpl::getReturnAddress(void* ptr) {
+    uint8_t* xptr = (uint8_t*)ptr;
+    int* pint = (int*)(xptr + 256);
+    return pint;
+}
+
+// static
+uint8_t* MediaH264DecoderImpl::getDst(void* ptr) {
+    // Guest will pass us the offset from the start address for where to write the image data.
+    uint8_t* xptr = (uint8_t*)ptr;
+    uint64_t offset = *(uint64_t*)(xptr);
+    return (uint8_t*)ptr + offset;
+}
+
+void MediaH264DecoderImpl::createCMFormatDescription() {
+    uint8_t*  parameterSets[2] = {mSPS.data(), mPPS.data()};
+    size_t parameterSetSizes[2] = {mSPS.size(), mPPS.size()};
+
+    if (mCmFmtDesc) {
+        CFRelease(mCmFmtDesc);
+        mCmFmtDesc = nullptr;
+    }
+
+    OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(
+                              kCFAllocatorDefault,
+                              2, 
+                              (const uint8_t *const*)parameterSets, 
+                              parameterSetSizes,
+                              4, 
+                              &mCmFmtDesc);
+
+    if (status == noErr) {
+        H264_DPRINT("Created CMFormatDescription from SPS/PPS sets");
+    } else {
+        H264_DPRINT("Unable to create CMFormatDescription (%d)\n", (int)status);
+    }
+}
+
+CFDataRef MediaH264DecoderImpl::createVTDecoderConfig() {
+    CFDataRef data = nullptr;
+    return data;
+}
+
+void MediaH264DecoderImpl::handlePing(MediaCodecType type, MediaOperation op, void* ptr) {
+    switch (op) {
+        case MediaOperation::InitContext:
+        {
+            uint8_t* xptr = (uint8_t*)ptr;
+            unsigned int width = *(unsigned int*)(xptr);
+            unsigned int height = *(unsigned int*)(xptr + 8);
+            unsigned int outWidth = *(unsigned int*)(xptr + 16);
+            unsigned int outHeight = *(unsigned int*)(xptr + 24);
+            PixelFormat pixFmt = static_cast<PixelFormat>(*(uint8_t*)(xptr + 30));
+            initH264Context(width, height, outWidth, outHeight, pixFmt);
+            break;
+        }
+        case MediaOperation::DestroyContext:
+            destroyH264Context();
+            break;
+        case MediaOperation::DecodeImage:
+        {
+            uint64_t offset = *(uint64_t*)(ptr);
+            const uint8_t* img = (const uint8_t*)ptr + offset;
+            size_t szBytes = *(size_t*)((uint8_t*)ptr + 8);
+            decodeFrame(img, szBytes);
+            break;
+        }
+        case MediaOperation::Flush:
+            flush(ptr);
+            break;
+        case MediaOperation::GetImage:
+            getImage(ptr);
+            break;
+        default:
+            H264_DPRINT("Unknown command %u\n", (unsigned int)op);
+            break;
+    }
+}
+
+void MediaH264DecoderImpl::initH264Context(unsigned int width,
+                                           unsigned int height,
+                                           unsigned int outWidth,
+                                           unsigned int outHeight,
+                                           PixelFormat outPixFmt) {
+    H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
+                __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
+    mOutputWidth = outWidth;
+    mOutputHeight = outHeight;
+    mOutPixFmt = outPixFmt;
+}
+
+void MediaH264DecoderImpl::destroyH264Context() {
+    H264_DPRINT("%s", __func__);
+    if (mDecoderSession) {
+        VTDecompressionSessionInvalidate(mDecoderSession);
+        CFRelease(mDecoderSession);
+        mDecoderSession = nullptr;
+    }
+    if (mCmFmtDesc) {
+        CFRelease(mCmFmtDesc);
+        mCmFmtDesc = nullptr;
+    }
+    if (mDecodedFrame) {
+        CVPixelBufferRelease(mDecodedFrame);
+        mDecodedFrame = nullptr;
+    }
+}
+
+static void dumpBytes(const uint8_t* img, size_t szBytes, bool all = false) {
+    printf("data=");
+    size_t numBytes = szBytes;
+    if (!all) {
+        numBytes = 32;
+    }
+
+    for (size_t i = 0; i < (numBytes > szBytes ? szBytes : numBytes); ++i) {
+        if (i % 8 == 0) {
+           printf("\n");
+        }
+        printf("0x%02x ", img[i]);
+    }
+    printf("\n");
+}
+
+void MediaH264DecoderImpl::decodeFrame(const uint8_t* frame, size_t szBytes) {
+    // IMPORTANT: There is an assumption that each |frame| we get from the guest are contain
+    // complete NALUs. Usually, an H.264 bitstream would be continuously fed to us, but in this case,
+    // it seems that the Android frameworks passes us complete NALUs, and may be more than one NALU at
+    // a time.
+    H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
+    const uint8_t* currentNalu = getNextStartCodeHeader(frame, szBytes);
+    if (currentNalu == nullptr) {
+        H264_DPRINT("No start code header found in this frame");
+        return;
+    }
+    const uint8_t* nextNalu = nullptr;
+    size_t remaining = szBytes - (currentNalu - frame);
+
+    do {
+        // Figure out the size of |currentNalu|.
+        size_t currentNaluSize = remaining;
+        // 3 is the minimum size of the start code header (3 or 4 bytes).
+        dumpBytes(currentNalu, currentNaluSize);
+        nextNalu = getNextStartCodeHeader(currentNalu + 3, remaining - 3);
+        if (nextNalu != nullptr) {
+            currentNaluSize = nextNalu - currentNalu;
+        }
+
+        // |data| is currentNalu, but with the start code header discarded.
+        uint8_t* data = nullptr;
+        H264NaluType naluType = getFrameNaluType(currentNalu, currentNaluSize, &data);
+        size_t dataSize = currentNaluSize - (data - currentNalu);
+        H264_DPRINT("Got frame type=%u (%s)", (uint8_t)naluType, naluTypeToString(naluType).c_str());
+
+        // We can't do anything until we set up a CMFormatDescription from a set of SPS and PPS NALUs.
+        // So just discard the NALU.
+        if (naluType != H264NaluType::SPS && naluType != H264NaluType::PPS &&
+            mCmFmtDesc == nullptr) {
+            H264_DPRINT("CMFormatDescription not set up yet. Need SPS/PPS frames.");
+            continue;
+        }
+
+        switch (naluType) {
+            case H264NaluType::SPS:
+                // We should be getting a PPS frame on the next decodeFrame(). Once we have
+                // both sps and pps, we can create/recreate the decoder session.
+                // Don't include the start code header when we copy the sps/pps.
+                mSPS.assign(data, data + dataSize);
+                break;
+            case H264NaluType::PPS:
+                mPPS.assign(data, data + dataSize);
+                createCMFormatDescription();
+                // TODO: We will need to recreate the decompression session whenever we get a
+                // resolution change.
+                createDecompressionSession();
+                break;
+            case H264NaluType::SEI:
+//                dumpBytes(nextNalu, remaining, true);
+                // In some cases, after the SPS and PPS NALUs are emitted, we'll get a frame that
+                // contains both an SEI NALU and a CodedSliceIDR NALU.
+                handleSEIFrame(currentNalu, currentNaluSize);
+                break;
+            case H264NaluType::CodedSliceIDR:
+                handleIDRFrame(currentNalu, currentNaluSize);
+                break;
+            case H264NaluType::CodedSliceNonIDR:
+                handleNonIDRFrame(currentNalu, currentNaluSize);
+                break;
+            default:
+                H264_DPRINT("Support for nalu_type=%u not implemented", (uint8_t)naluType);
+                break;
+        }
+
+        remaining -= currentNaluSize;
+        currentNalu = nextNalu;
+    } while (nextNalu != nullptr);
+}
+
+void MediaH264DecoderImpl::handleIDRFrame(const uint8_t* ptr, size_t szBytes) {
+    H264_DPRINT("Got IDR frame (sz=%zu)", szBytes);
+    uint8_t* fptr = const_cast<uint8_t*>(ptr);
+
+    // We can assume fptr has a valid start code header because it has already
+    // gone through validation in H264NaluParser.
+    uint8_t startHeaderSz = fptr[2] == 1 ? 3 : 4;
+    uint32_t dataSz = szBytes - startHeaderSz;
+    std::unique_ptr<uint8_t> idr(new uint8_t[dataSz + 4]);
+    uint32_t dataSzNl = htonl(dataSz);
+
+    // AVCC format requires us to replace the start code header on this NALU
+    // with the size of the data. Start code is either 0x000001 or 0x00000001.
+    // The size needs to be the first four bytes in network byte order.
+    memcpy(idr.get(), &dataSzNl, 4);
+    memcpy(idr.get() + 4, ptr + startHeaderSz, dataSz);
+
+    CMSampleBufferRef sampleBuf = nullptr;
+    sampleBuf = createSampleBuffer(mCmFmtDesc, (void*)idr.get(), dataSz + 4);
+    if (!sampleBuf) {
+        H264_DPRINT("%s: Failed to create CMSampleBufferRef", __func__);
+        return;
+    }
+
+    OSStatus status;
+    status = VTDecompressionSessionDecodeFrame(mDecoderSession,
+                                               sampleBuf,
+                                               0,       // decodeFlags
+                                               NULL,    // sourceFrameRefCon
+                                               0);      // infoFlagsOut
+
+    if (status == noErr) {
+        status = VTDecompressionSessionWaitForAsynchronousFrames(mDecoderSession);
+    } else {
+        H264_DPRINT("%s: Failed to decompress frame (err=%d)", __func__, status);
+    }
+
+    CFRelease(sampleBuf);
+    H264_DPRINT("Success decoding IDR frame");
+}
+
+void MediaH264DecoderImpl::handleNonIDRFrame(const uint8_t* ptr, size_t szBytes) {
+    // Same as handling an IDR frame
+    handleIDRFrame(ptr, szBytes);
+}
+
+void MediaH264DecoderImpl::handleSEIFrame(const uint8_t* ptr, size_t szBytes) {
+    H264_DPRINT("NOT IMPLEMENTED");
+}
+
+void MediaH264DecoderImpl::flush(void* ptr) {
+    H264_DPRINT("%s: NOT IMPLEMENTED", __func__);
+}
+
+void MediaH264DecoderImpl::getImage(void* ptr) {
+    int* retptr = getReturnAddress(ptr);
+
+    if (!mDecodedFrame) {
+        H264_DPRINT("%s: frame is null", __func__);
+        *retptr = static_cast<int>(Err::NoDecodedFrame);
+        return;
+    }
+    if (!mImageReady) {
+        H264_DPRINT("%s: no new frame yet", __func__);
+        *retptr = static_cast<int>(Err::NoDecodedFrame);
+        return;
+    }
+
+    CGSize imageDim = CVImageBufferGetDisplaySize(mDecodedFrame);
+    size_t imageSize = CVPixelBufferGetDataSize(mDecodedFrame);
+    // Copies the image data to the guest.
+    uint8_t* dst =  getDst(ptr);
+    memcpy(dst, (uint8_t*)mDecodedFrame, imageSize);
+    *retptr = imageSize;
+    mImageReady = false;
+    H264_DPRINT("size=%zu dimension=[%fx%f]", imageSize, imageDim.width, imageDim.height);
+}
+
+void MediaH264DecoderImpl::createDecompressionSession() {
+    if (mCmFmtDesc == nullptr) {
+        H264_DPRINT("CMFormatDescription not created. Need sps and pps NALUs.");
+        return;
+    }
+
+    CMVideoCodecType codecType = kCMVideoCodecType_H264;
+    CFMutableDictionaryRef decoder_spec = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                                                    0,
+                                                                    &kCFTypeDictionaryKeyCallBacks,
+                                                                    &kCFTypeDictionaryValueCallBacks);
+    CFDictionarySetValue(decoder_spec,
+                         kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder,
+                         kCFBooleanTrue);
+
+    CFDictionaryRef bufAttr = createOutputBufferAttributes(mOutputWidth,
+                                                           mOutputHeight,
+                                                           toNativePixelFormat(mOutPixFmt));
+
+    VTDecompressionOutputCallbackRecord decoderCb;
+    decoderCb.decompressionOutputCallback = videoToolboxDecompressCallback;
+    decoderCb.decompressionOutputRefCon = this;
+
+    OSStatus status;
+    status = VTDecompressionSessionCreate(NULL,              // allocator
+                                          mCmFmtDesc,        // videoFormatDescription
+                                          decoder_spec,      // videoDecoderSpecification
+                                          bufAttr,           // destinationImageBufferAttributes
+                                          &decoderCb,        // outputCallback
+                                          &mDecoderSession); // decompressionSessionOut
+
+    if (decoder_spec) {
+        CFRelease(decoder_spec);
+    }
+    if (bufAttr) {
+        CFRelease(bufAttr);
+    }
+
+    switch (status) {
+        case kVTVideoDecoderNotAvailableNowErr:
+            H264_DPRINT("VideoToolbox session not available");
+            return;
+        case kVTVideoDecoderUnsupportedDataFormatErr:
+            H264_DPRINT("VideoToolbox does not support this format");
+            return;
+        case kVTVideoDecoderMalfunctionErr:
+            H264_DPRINT("VideoToolbox malfunction");
+            return;
+        case kVTVideoDecoderBadDataErr:
+            H264_DPRINT("VideoToolbox reported invalid data");
+            return;
+        case 0:
+            H264_DPRINT("VideoToolbox session created");
+            return;
+        default:
+            H264_DPRINT("Unknown VideoToolbox session creation error %u", (unsigned)status);
+            return;
+    }
+}
+}  // namespace emulation
+}  // namespace android
