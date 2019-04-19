@@ -14,6 +14,9 @@
 
 #include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/MediaH264DecoderFfmpeg.h"
+#ifdef __APPLE__
+#include "android/emulation/MediaH264DecoderVideoToolBox.h"
+#endif
 #include "android/base/system/System.h"
 
 #include <cstdint>
@@ -22,6 +25,7 @@
 
 #include <stdio.h>
 #include <string.h>
+
 
 #define MEDIA_H264_DEBUG 1
 
@@ -33,6 +37,21 @@
 
 namespace android {
 namespace emulation {
+
+namespace {
+MediaH264DecoderPlugin* makeDecoderPlugin() {
+#ifdef __APPLE__
+    auto useVideoToolBox = android::base::System::getEnvironmentVariable(
+            "ANDROID_EMU_CODEC_USE_VIDEOTOOLBOX_DECODER");
+    if (useVideoToolBox != "") {
+        return new MediaH264DecoderVideoToolBox();
+    }
+#endif
+    return new MediaH264DecoderFfmpeg();
+}
+
+}; // anon namespace
+
 
 uint64_t MediaH264DecoderDefault::readId(void* ptr) {
     if (nullptr == ptr)
@@ -119,14 +138,14 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             unsigned int outHeight = *(unsigned int*)(xptr + 32);
             PixelFormat pixFmt =
                     static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
-            MediaH264DecoderPlugin* mydecoder =
-                    new MediaH264DecoderFfmpeg();
+            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin();
             uint64_t myid = createId();
             addDecoder(myid, mydecoder);
             mydecoder->initH264Context(width, height, outWidth, outHeight,
                                        pixFmt);
             uint64_t* ret = static_cast<uint64_t*>(getReturnAddress(ptr));
             *ret = myid;
+            H264_DPRINT("done handling InitContext");
             break;
         }
         case MediaOperation::DestroyContext: {
@@ -184,8 +203,7 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             unsigned int outHeight = *(unsigned int*)(xptr + 32);
             PixelFormat pixFmt =
                     static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
-            MediaH264DecoderPlugin* mydecoder =
-                    new MediaH264DecoderFfmpeg();
+            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin();
             mydecoder->initH264Context(width, height, outWidth, outHeight,
                                        pixFmt);
             updateDecoder(oldId, mydecoder);
