@@ -512,6 +512,14 @@ help_data(stralloc_t*  out)
 }
 
 static void
+help_stdouterr_file(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-stdouterr-file' to redirect stdout and stderr to it.\n\n"
+    );
+}
+
+static void
 help_wipe_data(stralloc_t*  out)
 {
     PRINTF(
