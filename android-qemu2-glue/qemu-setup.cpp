@@ -24,6 +24,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/address_space_device.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/snapshot/interface.h"
 
 #include "android/featurecontrol/FeatureControl.h"
@@ -192,6 +193,46 @@ bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
 }
 
+struct HeartBeatDetector {
+public:
+    int current_heart_beat = 0;
+    int countdown = 12;
+public:
+    bool check() {
+        if (guest_boot_completed == 0) {
+            // guest is not booted, ignore
+            return true;
+        }
+        -- countdown;
+        if (countdown == 0) {
+            countdown = 12;
+            return real_check();
+        } else {
+            // ignore too frequent check
+            return true;
+        }
+    }
+
+    bool real_check() {
+        int now = get_guest_heart_beat_count();
+        if (current_heart_beat == 0 ) {
+            current_heart_beat = now;
+            // we have not received any yet;
+            return true;
+        }
+        if (current_heart_beat >= now) {
+            // we detected a real problem
+            return false;
+        } else {
+            current_heart_beat = now;
+            fflush(stdout);
+        }
+        return true;
+    }
+};
+
+static HeartBeatDetector sHeartBeatDetector {};
+
 bool qemu_android_emulation_setup() {
     android_qemu_init_slirp_shapers();
 
@@ -230,6 +271,15 @@ bool qemu_android_emulation_setup() {
                                     kMaxEventsDropped;
                         },
                         "The goldfish event queue is overflowing, the system is no longer responding.");
+
+        // heartbeat detector
+        android::crashreport::CrashReporter::get()
+                ->hangDetector()
+                .addPredicateCheck(
+                        [] {
+                            return !sHeartBeatDetector.check();
+                        },
+                        "The guest is not sending heartbeat update, probably stalled.");
     }
 #ifdef ANDROID_GRPC
     if (android_cmdLineOptions->grpc) {
