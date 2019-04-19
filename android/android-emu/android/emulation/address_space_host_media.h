@@ -17,6 +17,7 @@
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/MediaVpxDecoder.h"
+#include "android/emulation/MediaH264Decoder.h"
 
 #include <unordered_map>
 
@@ -42,8 +43,10 @@ private:
     static constexpr int kNumPages = 1 + 4096 * 2; // 32M + 4k
     bool isMemoryAllocated = false;
     MediaVpxDecoder mVpxDecoder;
+    std::unique_ptr<MediaH264Decoder> mH264Decoder;
     void* mHostBuffer = nullptr;
     const address_space_device_control_ops* mControlOps = 0;
+    void* mPhysAddr = nullptr;
 };
 
 }  // namespace emulation
