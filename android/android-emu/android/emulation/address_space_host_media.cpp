@@ -83,7 +83,12 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
                                    AddressSpaceHostMediaContext::getHostAddress(info->phys_addr));
             break;
         case MediaCodecType::H264Codec:
-            AS_DEVICE_DPRINT("H264Codec not implemented");
+            if (!mH264Decoder) {
+                mH264Decoder.reset(MediaH264Decoder::create());
+            }
+            mH264Decoder->handlePing(codecType,
+                                     op,
+                                     AddressSpaceHostMediaContext::getHostAddress(info->phys_addr));
             break;
     }
 }
