@@ -359,6 +359,10 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt,"-restart-when-stalled")) {
+            nn++;
+            continue;
+        }
 
         if (!strcmp(opt,"-ranchu")) {
             // Nothing: the option is deprecated and defaults to auto-detect.

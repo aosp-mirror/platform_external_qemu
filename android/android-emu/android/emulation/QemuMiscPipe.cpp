@@ -31,6 +31,7 @@
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
 
+static std::atomic<int> restart_when_stalled {};
 
 namespace android {
 static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
@@ -134,7 +135,9 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                   "com.google.android.googlequicksearchbox",
                   "android.permission.RECORD_AUDIO" });
 
-             std::thread{watchDogFunction, 1}.detach();
+            if (restart_when_stalled.load()) {
+                std::thread{watchDogFunction, 1}.detach();
+            }
         }
 
         return;
@@ -168,4 +171,12 @@ extern "C" void android_init_qemu_misc_pipe(void) {
 
 extern "C" int get_guest_heart_beat_count(void) {
     return guest_heart_beat_count.load();
+}
+
+extern "C" void set_restart_when_stalled() {
+    restart_when_stalled = 1;
+}
+
+extern "C" int is_restart_when_stalled(void) {
+    return restart_when_stalled.load();
 }
