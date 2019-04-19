@@ -23,6 +23,8 @@
 #include "cereal/common/goldfish_vk_private_defs.h"
 #include "cereal/common/goldfish_vk_transform.h"
 
+class VkDecoderSnapshot;
+
 namespace android {
 namespace base {
 class Pool;
@@ -30,6 +32,7 @@ class Pool;
 } // namespace base
 
 namespace goldfish_vk {
+
 
 // Class for tracking host-side state. Currently we only care about
 // tracking VkDeviceMemory to make it easier to pass the right data
@@ -534,6 +537,9 @@ public:
         VkDeviceSize* size, uint32_t sizeCount,
         uint32_t* typeIndex, uint32_t typeIndexCount,
         uint32_t* typeBits, uint32_t typeBitsCount);
+
+    // Snapshot access
+    VkDecoderSnapshot* snapshot();
 
 #define DEFINE_TRANSFORMED_TYPE_PROTOTYPE(type) \
     void transformImpl_##type##_tohost(const type*, uint32_t); \
