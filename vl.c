@@ -161,6 +161,7 @@ int main(int argc, char **argv)
 #include "android/crashreport/crash-handler.h"
 #include "android/cros.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
@@ -4569,6 +4570,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_read_only:
               read_only = true;
               break;
+            case QEMU_OPTION_restart_when_stalled:
+                set_restart_when_stalled();
+                break;
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
