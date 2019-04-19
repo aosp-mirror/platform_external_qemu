@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ce5a390_6cac01c8",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-04-19T21:08:19Z",
+      "side": 1,
+      "message": "everything in struct is public by default.",
+      "revId": "9ddfeb9d72f5f0e7d69d7dee4bbe854d2cc91ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a97d3a87_33b3bfd7",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-04-19T21:08:19Z",
+      "side": 1,
+      "message": "countdown now relies on callback being invoked every 5 secs.",
+      "revId": "9ddfeb9d72f5f0e7d69d7dee4bbe854d2cc91ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bcbe03da_963fbd6e",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-04-19T21:08:19Z",
+      "side": 1,
+      "message": "Why do we need to flush stdout?",
+      "revId": "9ddfeb9d72f5f0e7d69d7dee4bbe854d2cc91ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
