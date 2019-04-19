@@ -365,6 +365,16 @@ using DlSymFunc = void* (void*, const char*);
 #include <string.h>
 """
 
+        decoderSnapshotHeaderIncludes = """
+#include <memory>
+"""
+        decoderSnapshotImplIncludes = """
+#include "VulkanHandleMapping.h"
+
+#include "goldfish_vk_baseprotodefs.pb.h"
+#include "common/goldfish_vk_baseprotoconversion.h"
+"""
+
         decoderHeaderIncludes = """
 #include <memory>
 
@@ -470,6 +480,10 @@ class Pool;
         self.addHostModule("VkDecoder",
                            extraHeader=decoderHeaderIncludes,
                            extraImpl=decoderImplIncludes,
+                           useNamespace=False)
+        self.addHostModule("VkDecoderSnapshot",
+                           extraHeader=decoderSnapshotHeaderIncludes,
+                           extraImpl=decoderSnapshotImplIncludes,
                            useNamespace=False)
 
         self.addProto(
