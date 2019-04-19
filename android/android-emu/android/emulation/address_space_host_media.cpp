@@ -16,7 +16,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/base/AlignedBuf.h"
 
-#define AS_DEVICE_DEBUG 1
+#define AS_DEVICE_DEBUG 0
 
 #if AS_DEVICE_DEBUG
 #define AS_DEVICE_DPRINT(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -105,7 +105,12 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
                                    getHostAddress(info->phys_addr));
             break;
         case MediaCodecType::H264Codec:
-            AS_DEVICE_DPRINT("H264Codec not implemented");
+            if (!mH264Decoder) {
+                mH264Decoder.reset(MediaH264Decoder::create());
+            }
+            mH264Decoder->handlePing(codecType,
+                                     op,
+                                     getHostAddress(info->phys_addr));
             break;
     }
 }
