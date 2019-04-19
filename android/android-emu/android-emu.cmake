@@ -41,6 +41,7 @@ set(android-emu-common
     android/crashreport/CrashSystem.cpp
     android/crashreport/CrashReporter_common.cpp
     android/crashreport/HangDetector.cpp
+    android/crashreport/detectors/CrashDetectors.cpp
     android/cros.c
     android/curl-support.c
     android/emuctl-client.cpp

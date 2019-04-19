@@ -29,6 +29,15 @@
 namespace android {
 namespace crashreport {
 
+
+// Use this interface if your hangdetector needs to
+// keep track of state.
+class StatefulHangdetector {
+public:
+    virtual ~StatefulHangdetector() {};
+    virtual bool check() = 0;
+};
+
 // HangDetector - a class that monitors a set of Loopers and checks if any of
 // those is hanging. It calls a user-supplied callback in that case.
 //
@@ -63,7 +72,11 @@ public:
     // We implicitly assume:
     //    predicate() -> []predicate() (if a predicate becomes true, it will
     //    always return true, we only need to infer a system hangs once)
-    void addPredicateCheck(HangPredicate&& predicate, std::string&& msg = "");
+    HangDetector& addPredicateCheck(HangPredicate&& predicate, std::string&& msg = "");
+
+    // Registers a stateful hangdetector. This class will take ownership of the
+    // object
+    HangDetector& addPredicateCheck(StatefulHangdetector* detector, std::string&& msg = "");
     void pause(bool paused);
     void stop();
 
@@ -87,6 +100,8 @@ private:
     const Timing mTiming;
     std::vector<std::unique_ptr<LooperWatcher>> mLoopers;
     std::vector<std::pair<HangPredicate, std::string>> mPredicates;
+    std::vector<std::unique_ptr<StatefulHangdetector>> mRegistered;
+
     bool mPaused = false;
     bool mStopping = false;
     base::Lock mLock;
