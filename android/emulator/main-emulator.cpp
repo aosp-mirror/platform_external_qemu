@@ -58,6 +58,10 @@
 
 #include "android/skin/winsys.h"
 
+#include <iostream>
+#include <unistd.h>
+#include <fcntl.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -281,6 +285,7 @@ int main(int argc, char** argv)
     if (system_libs && system_libs[0] && system_libs[0] != '0') {
         useSystemLibs = true;
     }
+    const char* stdouterr_file = nullptr;
 #endif  // __linux__
 
     /* Parse command-line and look for
@@ -306,6 +311,14 @@ int main(int argc, char** argv)
             forceEngineLaunch = true;
             break;
         }
+
+#ifdef __linux__
+        if (!strcmp(opt, "-stdouterr-file")) {
+            stdouterr_file = argv[nn + 1];
+            nn++;
+            continue;
+        }
+#endif  // __linux__
 
         // NOTE: Process -help options immediately, ignoring all other
         // parameters.
@@ -388,6 +401,7 @@ int main(int argc, char** argv)
             useSystemLibs = true;
             continue;
         }
+
 #endif  // __linux__
 
         if (!strcmp(opt, "-list-avds")) {
@@ -431,6 +445,23 @@ int main(int argc, char** argv)
         if (!strcmp(opt, "-delete-temp-dir")) {
             doDeleteTempDir = true;
         }
+    }
+
+    if (stdouterr_file) {
+        int myfd = open(stdouterr_file,  O_APPEND | O_WRONLY);
+        if (myfd < 0) {
+            fprintf(stderr, "cannot open %s\n", stdouterr_file);
+            return -1;
+        }
+        if (dup2(myfd, 1) < 0) {
+            fprintf(stderr, "cannot dup stdout\n");
+            return -1;
+        }
+        if (dup2(myfd, 2) < 0) {
+            fprintf(stderr, "cannot dup stderr\n");
+            return -1;
+        }
+        fprintf(stderr, "emulator: Redirecting stdout/stderr to %s\n", stdouterr_file);
     }
 
     if (doAccelCheck) {
