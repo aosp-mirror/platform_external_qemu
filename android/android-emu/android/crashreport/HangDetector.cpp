@@ -231,12 +231,22 @@ void HangDetector::workerThread() {
         }
     }
 }
-void HangDetector::addPredicateCheck(HangPredicate&& predicate,
+HangDetector& HangDetector::addPredicateCheck(HangPredicate&& predicate,
                                      std::string&& msg) {
     base::AutoLock lock(mLock);
     mPredicates.emplace_back(
             std::make_pair(std::move(predicate), std::move(msg)));
+    return *this;
 }
+
+ HangDetector& HangDetector::addPredicateCheck(StatefulHangdetector* detector, std::string&& msg) {
+     {
+        base::AutoLock lock(mLock);
+        mRegistered.push_back(std::unique_ptr<StatefulHangdetector>(detector));
+     }
+     HangPredicate pred = [detector] { return detector->check();};
+     return addPredicateCheck([detector] { return detector->check();}, std::move(msg));
+ }
 
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really

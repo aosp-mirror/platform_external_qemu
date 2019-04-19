@@ -23,7 +23,9 @@
 #include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/address_space_device.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/snapshot/interface.h"
 
 #include "android/featurecontrol/FeatureControl.h"
@@ -192,6 +194,7 @@ bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
 }
 
+
 bool qemu_android_emulation_setup() {
     android_qemu_init_slirp_shapers();
 
@@ -225,11 +228,19 @@ bool qemu_android_emulation_setup() {
         android::crashreport::CrashReporter::get()
                 ->hangDetector()
                 .addPredicateCheck(
+                        new android::crashreport::TimedHangDetector(
+                                60 * 1000, new android::crashreport::HeartBeatDetector(
+                                                   get_guest_heart_beat_count,
+                                                   &guest_boot_completed)),
+                        "The guest is not sending heartbeat update, probably "
+                        "stalled.")
+                .addPredicateCheck(
                         [] {
                             return gQAndroidUserEventAgent->eventsDropped() >
-                                    kMaxEventsDropped;
+                                   kMaxEventsDropped;
                         },
-                        "The goldfish event queue is overflowing, the system is no longer responding.");
+                        "The goldfish event queue is overflowing, the system "
+                        "is no longer responding.");
     }
 #ifdef ANDROID_GRPC
     if (android_cmdLineOptions->grpc) {
