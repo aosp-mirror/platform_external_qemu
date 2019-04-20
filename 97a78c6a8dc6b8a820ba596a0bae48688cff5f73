@@ -22,6 +22,30 @@
       "revId": "97a78c6a8dc6b8a820ba596a0bae48688cff5f73",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12de6e93_9768e7f2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-20T19:05:11Z",
+      "side": 1,
+      "message": "Not changing. Both sizes are smaller than the actual extended window. This is just a change to get all the Widget items on the editor window visible.",
+      "parentUuid": "acbdc34c_e4bbcd34",
+      "range": {
+        "startLine": 9,
+        "startChar": 4,
+        "endLine": 11,
+        "endChar": 0
+      },
+      "revId": "97a78c6a8dc6b8a820ba596a0bae48688cff5f73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
