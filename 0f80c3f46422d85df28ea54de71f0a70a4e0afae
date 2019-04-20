@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84683c2f_5b3d1518",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-20T02:52:14Z",
+      "side": 1,
+      "message": "break;",
+      "range": {
+        "startLine": 557,
+        "startChar": 58,
+        "endLine": 557,
+        "endChar": 59
+      },
+      "revId": "0f80c3f46422d85df28ea54de71f0a70a4e0afae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
