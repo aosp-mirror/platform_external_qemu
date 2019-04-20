@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db30dbba_255212fa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-20T02:51:11Z",
+      "side": 0,
+      "message": "Have you confirmed that the UI is identical with/without the flag enabled?",
+      "range": {
+        "startLine": 240,
+        "startChar": 5,
+        "endLine": 240,
+        "endChar": 8
+      },
+      "revId": "120dc107a675cc8ae17997e706cc70ead9b03bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
