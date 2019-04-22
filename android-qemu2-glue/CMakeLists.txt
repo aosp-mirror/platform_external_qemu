@@ -57,7 +57,16 @@ android_target_include_directories(libqemu2-glue
                                    ../qemu2-auto-generated
                                    ../slirp
                                    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
-target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2 PIXMAN::PIXMAN emulator-libdtb ssl crypto)
-if (GRPC)
+if(GRPC)
   target_link_libraries(libqemu2-glue PRIVATE android-grpc)
 endif()
+if(WEBRTC)
+  target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
+endif()
+target_link_libraries(libqemu2-glue
+                      PRIVATE android-emu
+                              GLIB2::GLIB2
+                              PIXMAN::PIXMAN
+                              emulator-libdtb
+                              ssl
+                              crypto)
