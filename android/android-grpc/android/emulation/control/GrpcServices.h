@@ -17,19 +17,19 @@
 #include <string>
 #include "android/console.h"
 #include "android/emulation/control/EmulatorService.h"
+#include "android/emulation/control/RtcBridge.h"
 
 namespace android {
 namespace emulation {
 
 namespace control {
-// This class holds various utility functions for Windows host systems.
-// All methods here must be static!
 class GrpcServices {
 public:
-    static void setup(std::string args, const AndroidConsoleAgents* const consoleAgents);
+    static void setup(int port,
+                    const AndroidConsoleAgents* const consoleAgents,
+                    RtcBridge* bridge);
 
     static void teardown();
-
 private:
     static std::unique_ptr<EmulatorControllerService> g_controler_service;
 };
