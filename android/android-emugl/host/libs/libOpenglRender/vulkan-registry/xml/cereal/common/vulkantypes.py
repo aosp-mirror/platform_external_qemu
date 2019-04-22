@@ -572,6 +572,11 @@ class VulkanAPI(object):
         res.parameters = customParams
         return res
 
+    def withCustomReturnType(self, retType):
+        res = self.getCopy()
+        res.retType = retType
+        return res
+
 # Whether or not special handling of virtual elements
 # such as VkDeviceMemory is needed.
 def vulkanTypeNeedsTransform(structOrApi):

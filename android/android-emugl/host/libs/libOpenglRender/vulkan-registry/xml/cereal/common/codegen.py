@@ -292,9 +292,16 @@ class CodeGen(object):
 
         protoBegin = "%s %s" % (self.makeCTypeDecl(
             vulkanApi.retType, useParamName=False), vulkanApi.name)
+
+        def getFuncArgDecl(param):
+            if param.staticArrExpr:
+                return self.makeCTypeDecl(param, useParamName=useParamName) + ("[%s]" % param.staticArrExpr)
+            else:
+                return self.makeCTypeDecl(param, useParamName=useParamName)
+
         protoParams = "(\n    %s)" % ((",\n%s" % self.indent(1)).join(
             list(map(
-                lambda x: self.makeCTypeDecl(x, useParamName=useParamName),
+                getFuncArgDecl,
                 vulkanApi.parameters))))
 
         return protoBegin + protoParams
@@ -311,6 +318,12 @@ class CodeGen(object):
         self.endBlock()
 
         return self.swapCode() + "\n"
+
+    def emitFuncImpl(self, vulkanApi, codegenFunc):
+        self.line(self.makeFuncProto(vulkanApi))
+        self.beginBlock()
+        codegenFunc(self)
+        self.endBlock()
 
     def makeStructAccess(self,
                          vulkanType,
