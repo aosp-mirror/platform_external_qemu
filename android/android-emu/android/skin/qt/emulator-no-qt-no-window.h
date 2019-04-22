@@ -97,6 +97,7 @@ public:
 
     void fold();
     void unFold();
+    bool isFolded() const;
     void pollEvent(SkinEvent* event, bool* hasEvent);
     void requestClose();
     void startThread(std::function<void()> looperFunction);
@@ -115,6 +116,7 @@ private:
     android::emulation::AdbInterface* mAdbInterface;
     android::base::Lock mSkinEventQueueLock;
     std::queue<SkinEvent*> mSkinEventQueue;
+    bool mIsFolded = false;
 };
 
 #ifdef CONFIG_HEADLESS

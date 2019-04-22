@@ -65,6 +65,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                       else
                           win->unFold();
                    }
+                },
+        .isFolded =
+                [] {
+                    if (const auto win = EmulatorNoQtNoWindow::getInstance()) {
+                        return win->isFolded();
+                    }
+                    return false;
                 }
 };
 

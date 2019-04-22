@@ -424,6 +424,8 @@ bool Snapshot::save() {
     mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
+    mSnapshotPb.set_folded(
+            int(Snapshotter::get().windowAgent().isFolded()));
 
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
@@ -666,6 +668,12 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
+    }
+
+    if (mSnapshotPb.has_folded() &&
+        Snapshotter::get().windowAgent().isFolded() !=
+                mSnapshotPb.folded()) {
+        Snapshotter::get().windowAgent().fold(mSnapshotPb.folded());
     }
 
     return true;
