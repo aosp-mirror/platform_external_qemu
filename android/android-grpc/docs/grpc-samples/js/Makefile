@@ -63,7 +63,7 @@ LDFLAGS += -L$(PROTOLIB) -lprotoc -lprotobuf -lpthread -ldl
 all: develop
 
 clean:
-	rm $(WEBPROXY)
+	rm $(WEBPROXY) $(PROTO)
 
 $(PROTO):
 		mkdir -p $(PROTODIR)
