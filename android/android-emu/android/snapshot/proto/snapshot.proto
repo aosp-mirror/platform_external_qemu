@@ -140,4 +140,7 @@ message Snapshot {
 
     // Record of save stats.
     repeated SaveStats save_stats = 15;
+
+    // Folded state.
+    optional bool folded = 16;
 }
