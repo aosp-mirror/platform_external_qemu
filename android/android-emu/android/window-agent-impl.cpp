@@ -93,8 +93,14 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                           win->toolWindow()->handleUICommand(cmd);
                       });
                   }
-              }
-
+              },
+        .isFolded =
+                [] {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->isFolded();
+                    }
+                    return false;
+                }
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

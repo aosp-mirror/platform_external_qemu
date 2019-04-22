@@ -221,6 +221,7 @@ public:
     void doResize(const QSize& size,
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
+    bool isFolded() const;
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
@@ -504,6 +505,7 @@ private:
     unsigned int mHardRefreshCountDown = 0;
     SkinRotation mOrientation;       // Rotation of the main window
     bool         mWindowIsMinimized = false;
+    bool         mIsFolded = false;
 
     QScreen* mCurrentScreen = nullptr;
 
