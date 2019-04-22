@@ -14,7 +14,7 @@ set(android-grpc_src ${EMULATOR_GRPC_SRC} android/emulation/control/EmulatorServ
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE grpc++ libprotobuf android-emu-base png)
+target_link_libraries(android-grpc PRIVATE grpc++ libprotobuf android-emu png)
 target_include_directories(android-grpc
     PRIVATE
     # For Renderer.h
