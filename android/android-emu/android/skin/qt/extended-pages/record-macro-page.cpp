@@ -203,8 +203,10 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
 
     switch (mState) {
         case MacroUiState::Waiting: {
-            mUi->previewLabel->setText(tr("Select a macro to preview"));
-            mUi->previewLabel->show();
+            if (!mRecording) {
+                mUi->previewLabel->setText(tr("Select a macro to preview"));
+                mUi->previewLabel->show();
+            }
             mUi->previewOverlay->show();
             mUi->replayIcon->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
@@ -517,7 +519,9 @@ void RecordMacroPage::on_recButton_clicked() {
 }
 
 void RecordMacroPage::startRecording() {
-    mVideoPlayer->stop();
+    if (mVideoPlayer && mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
     disableMacroItems();
     mRecording = true;
     setMacroUiState(MacroUiState::Recording);
@@ -530,8 +534,10 @@ void RecordMacroPage::stopRecording() {
 }
 
 void RecordMacroPage::setRecordState() {
-    mUi->recButton->setText(tr("RECORD NEW "));
-    mUi->recButton->setIcon(getIconForCurrentTheme("record_screen"));
+    if (!mRecording) {
+        mUi->recButton->setText(tr("RECORD NEW "));
+        mUi->recButton->setIcon(getIconForCurrentTheme("record_screen"));
+    }
 
     switch (mState) {
         case MacroUiState::Waiting: {
