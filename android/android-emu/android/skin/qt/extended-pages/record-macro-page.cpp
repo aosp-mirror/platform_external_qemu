@@ -246,6 +246,13 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->playStopButton->setEnabled(true);
             break;
         }
+        case MacroUiState::Recording: {
+            mUi->previewLabel->setText(tr("Macro recording ongoing"));
+            mUi->previewLabel->show();
+            mUi->previewOverlay->show();
+            mUi->replayIcon->hide();
+            mUi->playStopButton->setEnabled(false);
+        }
     }
 
     if (mRecordEnabled) {
@@ -382,6 +389,15 @@ void RecordMacroPage::disableMacroItemsExcept(QListWidgetItem* listItem) {
     }
 }
 
+void RecordMacroPage::disableMacroItems() {
+    for (int i = 0; i < mUi->macroList->count(); ++i) {
+        QListWidgetItem* item = mUi->macroList->item(i);
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        RecordMacroSavedItem* macroItem = getItemWidget(item);
+        macroItem->setEnabled(false);
+    }
+}
+
 void RecordMacroPage::enableMacroItems() {
     // Return selection to normal.
     mUi->macroList->setStyleSheet("");
@@ -492,12 +508,36 @@ void RecordMacroPage::reportAllMetrics() {
             });
 }
 
+void RecordMacroPage::on_recButton_clicked() {
+    if (!mRecording) {
+        startRecording();
+    } else {
+        stopRecording();
+    }
+}
+
+void RecordMacroPage::startRecording() {
+    mVideoPlayer->stop();
+    disableMacroItems();
+    mRecording = true;
+    setMacroUiState(MacroUiState::Recording);
+}
+
+void RecordMacroPage::stopRecording() {
+    enableMacroItems();
+    mRecording = false;
+    setMacroUiState(MacroUiState::Waiting);
+}
+
 void RecordMacroPage::setRecordState() {
     mUi->recButton->setText(tr("RECORD NEW "));
+    mUi->recButton->setIcon(getIconForCurrentTheme("record_screen"));
 
     switch (mState) {
         case MacroUiState::Waiting: {
-            mUi->recButton->setEnabled(false);
+            if (!mMacroPlaying) {
+                mUi->recButton->setEnabled(true);
+            }
             break;
         }
         case MacroUiState::Selected: {
@@ -510,6 +550,11 @@ void RecordMacroPage::setRecordState() {
         }
         case MacroUiState::Playing: {
             mUi->recButton->setEnabled(false);
+            break;
+        }
+        case MacroUiState::Recording: {
+            mUi->recButton->setIcon(getIconForCurrentTheme("stop_red"));
+            mUi->recButton->setText(tr("STOP RECORDING "));
             break;
         }
     }
