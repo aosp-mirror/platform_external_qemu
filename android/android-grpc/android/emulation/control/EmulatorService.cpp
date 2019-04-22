@@ -21,6 +21,7 @@
 #include <string>
 
 #include "android/base/Log.h"
+#include "android/base/Uuid.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/control/ScreenCapturer.h"
@@ -31,8 +32,9 @@
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerWriter;
 using grpc::Status;
-using android::base::System;
+using namespace android::base;
 
 namespace android {
 namespace emulation {
@@ -54,8 +56,9 @@ private:
 // Logic and data behind the server's behavior.
 class EmulatorControllerImpl final : public EmulatorController::Service {
 public:
-    EmulatorControllerImpl(const AndroidConsoleAgents* agents)
-        : mAgents(agents) {}
+    EmulatorControllerImpl(const AndroidConsoleAgents* agents,
+                           RtcBridge* rtcBridge)
+        : mAgents(agents), mRtcBridge(rtcBridge) {}
 
     Status setRotation(ServerContext* context,
                        const Rotation* request,
@@ -147,7 +150,8 @@ public:
     Status sendTouch(ServerContext* context,
                      const TouchEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << request->DebugString();
+        LOG(VERBOSE) << "sendTouch: touching: " << request->istouching()
+                     << ", id: " << request->touchid();
         mAgents->finger->setTouch(request->istouching(), request->touchid());
         return Status::OK;
     }
@@ -156,14 +160,14 @@ public:
                    const KeyEvent* request,
                    ::google::protobuf::Empty* reply) override {
         if (request->text().size() > 0) {
-            LOG(VERBOSE) << "sending text: " << request->DebugString();
+            LOG(VERBOSE) << "sending text: " << request->text();
             mAgents->libui->convertUtf8ToKeyCodeEvents(
                     (const unsigned char*)request->text().c_str(),
                     request->text().size(),
                     (LibuiKeyCodeSendFunc)mAgents->user_event->sendKeyCodes);
 
         } else {
-            LOG(VERBOSE) << "sending code: " << request->DebugString();
+            LOG(VERBOSE) << "sending code: " << request->key();
             mAgents->user_event->sendKeyCode(request->key());
         }
         return Status::OK;
@@ -172,7 +176,10 @@ public:
     Status sendMouse(ServerContext* context,
                      const MouseEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << request->DebugString();
+        LOG(VERBOSE) << "sendMouse: x:" << request->x()
+                     << ", y:" << request->y()
+                     << ", buttons: " << request->buttons();
+
         mAgents->user_event->sendMouseEvent(request->x(), request->y(), 0,
                                             request->buttons(), 0);
         return Status::OK;
@@ -237,8 +244,8 @@ public:
                 LOG(ERROR) << "Unknown format retrieved during snapshot";
         }
         LOG(VERBOSE) << "Screenshot: " << img.getWidth() << "x"
-                     << img.getHeight()
-                     << ", fmt: " << reply->format().format() << " in: "
+                     << img.getHeight() << ", fmt: " << reply->format().format()
+                     << " in: "
                      << ((System::get()->getUnixTimeUs() - start) / 1000)
                      << " ms";
         return Status::OK;
@@ -258,8 +265,45 @@ public:
         return Status::OK;
     }
 
+    Status requestRtcStream(ServerContext* context,
+                            const ::google::protobuf::Empty* request,
+                            RtcId* reply) override {
+        std::string id = base::Uuid::generate().toString();
+
+        LOG(INFO) << "requestRtcStream id: " << id;
+        mRtcBridge->connect(id);
+        reply->set_guid(id);
+        return Status::OK;
+    }
+
+    Status sendJsepMessage(ServerContext* context,
+                           const JsepMsg* request,
+                           ::google::protobuf::Empty* reply) override {
+        std::string id = request->id().guid();
+        std::string msg = request->message();
+        LOG(INFO) << "sendJsepMessage from id: " << id << ", msg: " << msg;
+        mRtcBridge->acceptJsepMessage(id, msg);
+        return Status::OK;
+    }
+
+    Status receiveJsepMessage(ServerContext* context,
+                              const RtcId* request,
+                              JsepMsg* reply) override {
+        std::string msg;
+        std::string id = request->guid();
+        LOG(INFO) << "receiveJsepMessage id: " << id;
+
+        // Block and wait for at most 5 seconds.
+        mRtcBridge->nextMessage(id, &msg, 5000);
+        reply->mutable_id()->set_guid(request->guid());
+        reply->set_message(msg);
+
+        return Status::OK;
+    }
+
 private:
     const AndroidConsoleAgents* mAgents;
+    RtcBridge* mRtcBridge;
 };
 
 using Builder = EmulatorControllerService::Builder;
@@ -271,6 +315,12 @@ Builder& Builder::withConsoleAgents(
     mAgents = consoleAgents;
     return *this;
 }
+
+Builder& Builder::withRtcBridge(RtcBridge* bridge) {
+    mBridge = bridge;
+    return *this;
+}
+
 Builder& Builder::withCredentials(
         std::shared_ptr<grpc::ServerCredentials> credentials) {
     mCredentials = credentials;
@@ -290,7 +340,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     std::string server_address = "0.0.0.0:" + std::to_string(mPort);
     std::unique_ptr<EmulatorController::Service> controller(
-            new EmulatorControllerImpl(mAgents));
+            new EmulatorControllerImpl(mAgents, mBridge));
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);

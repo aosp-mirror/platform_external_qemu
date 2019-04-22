@@ -30,10 +30,16 @@ set(GRPC FALSE CACHE BOOL "True if the emulator should be build with GRPC suppor
 endif()
 set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
 
+set(WEBRTC FALSE CACHE BOOL "True if the emulator should be build with WEBRTC support. This requires gRPC upport as well!")
+
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
+
+if (WEBRTC AND NOT GRPC)
+  message(FATAL_ERROR "You need to enable GRPC if you wish to use WEBRTC")
+endif()
 
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")

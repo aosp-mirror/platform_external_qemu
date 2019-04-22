@@ -18,6 +18,7 @@ import React, { Component } from "react";
 import * as Device from "../../android_emulation_control/emulator_controller_grpc_web_pb.js";
 import * as Proto from "../../android_emulation_control/emulator_controller_pb.js";
 import EmulatorPngView from "./views/simple_png_view.js";
+import EmulatorWebrtcView from "./views/webrtc_view.js";
 
 /**
  * An emulator object that displays the screen and sends mouse events via gRPC.
@@ -78,11 +79,6 @@ export default class Emulator extends Component {
         );
       }
     });
-
-    // Status callback..
-    call.on("status", function(status) {
-      console.log("Status: " + JSON.stringify(status));
-    });
   };
 
   // Properly handle the mouse events.
@@ -114,7 +110,7 @@ export default class Emulator extends Component {
         onMouseUp={this.handleMouseUp}
         onMouseOut={this.handleMouseUp}
       >
-        <EmulatorPngView
+        <EmulatorWebrtcView
           width={width * scale}
           height={height * scale}
           refreshRate={refreshRate}
