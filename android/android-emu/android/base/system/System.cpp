@@ -1176,6 +1176,8 @@ public:
             return false;
         }
 
+        bool useComspec = false;
+
         if ((options & RunOptions::ShowOutput) == 0 ||
                 ((options & RunOptions::DumpOutputToFile) != 0 &&
                  !outputFile.empty())) {
@@ -1217,18 +1219,33 @@ public:
                 commandLineCopy.push_back(">nul");
                 commandLineCopy.push_back("2>&1");
             }
+
+            useComspec = true;
         }
 
         PROCESS_INFORMATION pinfo = {};
 
-        std::string args = commandLineCopy[0];
-        for (size_t i = 1; i < commandLineCopy.size(); ++i) {
-            args += ' ';
-            args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
-        }
-
         Win32UnicodeString commandUnicode(commandLineCopy[0]);
-        Win32UnicodeString argsUnicode(args);
+        Win32UnicodeString argsUnicode;
+
+        if (useComspec) {
+            std::string argsBeforeQuote = commandLineCopy[1];   // "/C"
+            std::string argsToQuote;
+            size_t i;
+            for (i = 2; i < commandLineCopy.size() - 1; ++i) {
+                argsToQuote += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
+                argsToQuote += ' ';
+            }
+            argsToQuote += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
+            argsUnicode = Win32UnicodeString(argsBeforeQuote + " \"" + argsToQuote + "\"");
+        } else {
+            std::string args = commandLineCopy[0];
+            for (size_t i = 1; i < commandLineCopy.size(); ++i) {
+                args += ' ';
+                args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
+            }
+            argsUnicode = Win32UnicodeString(args);
+        }
 
         if (!::CreateProcessW(commandUnicode.c_str(), // program path
                     argsUnicode.data(), // command line args, has to be writable
