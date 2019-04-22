@@ -58,6 +58,8 @@ typedef struct QAndroidEmulatorWindowAgent {
                                            int timeoutMs);
     // Fold/Unfold device
     void (*fold)(bool is_fold);
+    // Query folded state
+    bool (*isFolded)(void);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp

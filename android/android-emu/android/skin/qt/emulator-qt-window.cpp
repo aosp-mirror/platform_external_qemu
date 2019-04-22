@@ -2181,7 +2181,11 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
 
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
+
+    mIsFolded = isFolded;
 }
+
+bool EmulatorQtWindow::isFolded() const { return mIsFolded; }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
         QMouseEvent* event) const {

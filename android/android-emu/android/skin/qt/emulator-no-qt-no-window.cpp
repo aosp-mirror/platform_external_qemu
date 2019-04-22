@@ -125,11 +125,17 @@ void EmulatorNoQtNoWindow::fold() {
     sendFoldedArea();
     forwardGenericEventToEmulator(EV_SW, SW_LID, true);
     forwardGenericEventToEmulator(EV_SYN, 0, 0);
+    mIsFolded = true;
 }
 
 void EmulatorNoQtNoWindow::unFold() {
     forwardGenericEventToEmulator(EV_SW, SW_LID, false);
     forwardGenericEventToEmulator(EV_SYN, 0, 0);
+    mIsFolded = false;
+}
+
+bool EmulatorNoQtNoWindow::isFolded() const {
+    return mIsFolded;
 }
 
 void EmulatorNoQtNoWindow::sendFoldedArea() {
