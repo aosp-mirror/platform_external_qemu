@@ -21,6 +21,9 @@ namespace base {
 using BasicEntityManager = EntityManager<32, 16, 16, int>;
 using SmallEntityManager = EntityManager<16, 16, 32, int>;
 
+using BasicComponentManager = ComponentManager<32, 16, 16, int>;
+using BasicUnpackedComponentManager = UnpackedComponentManager<32, 16, 16, int>;
+
 // Tests bitfield operations on handles.
 TEST(EntityManager, BasicHandle) {
     const size_t index = 1;
@@ -133,6 +136,227 @@ TEST(EntityManager, ElementLimit) {
             EXPECT_EQ(iterCount, i);
         }
     }
+}
+
+// Tests that we can loop over the entities.
+TEST(EntityManager, IterateAll) {
+    BasicEntityManager m;
+    m.add(1, 5);
+    m.add(2, 5);
+    m.add(3, 5);
+
+    int count = 0;
+    m.forEachEntry([&count](bool live, BasicEntityManager::EntityHandle h, int& item) {
+        if (live) ++count;
+    });
+
+    EXPECT_EQ(3, count);
+}
+
+// Tests that we can loop over just the live entities.
+TEST(EntityManager, IterateLive) {
+    BasicEntityManager m;
+    m.add(1, 5);
+    m.add(2, 5);
+    m.add(3, 5);
+    auto toRemove = m.add(3, 5);
+    m.remove(toRemove);
+
+    int count = 0;
+    m.forEachLiveEntry([&count](bool live, BasicEntityManager::EntityHandle h, int& item) {
+        EXPECT_TRUE(live);
+        ++count;
+    });
+
+    EXPECT_EQ(3, count);
+}
+
+// Tests that component manager works in a basic way
+// in isolation.
+TEST(ComponentManager, Basic) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicComponentManager m;
+    auto componentHandle1 = m.add((BasicComponentManager::EntityHandle)handle1, 3, 1);
+    auto componentHandle2 = m.add((BasicComponentManager::EntityHandle)handle2, 4, 1);
+
+    EXPECT_EQ(handle1, m.getEntityHandle(componentHandle1));
+    EXPECT_EQ(handle2, m.getEntityHandle(componentHandle2));
+
+    auto data1 = m.getByComponent(componentHandle1);
+    auto data2 = m.getByComponent(componentHandle2);
+
+    EXPECT_NE(nullptr, data1);
+    EXPECT_NE(nullptr, data2);
+
+    EXPECT_EQ(3, *data1);
+    EXPECT_EQ(4, *data2);
+
+    m.removeByComponent(componentHandle1);
+    EXPECT_EQ(nullptr, m.getByComponent(componentHandle1));
+
+    EXPECT_EQ(handle2, m.getEntityHandle(componentHandle2));
+    EXPECT_NE(nullptr, m.getByComponent(componentHandle2));
+    EXPECT_EQ(4, *(m.getByComponent(componentHandle2)));
+}
+
+// Tests component manager's iteration over all elements.
+TEST(ComponentManager, IterateAll) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicComponentManager m;
+    auto componentHandle1 = m.add((BasicComponentManager::EntityHandle)handle1, 3, 1);
+    auto componentHandle2 = m.add((BasicComponentManager::EntityHandle)handle2, 4, 1);
+
+    int count = 0;
+    m.forEachComponent(
+        [&count](bool live,
+                 BasicComponentManager::ComponentHandle componentHandle,
+                 BasicEntityManager::EntityHandle h, int& item) {
+        if (live) ++count;
+    });
+
+    EXPECT_EQ(2, count);
+}
+
+// Tests component manager's iteration over only live elements.
+TEST(ComponentManager, IterateLive) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicComponentManager m;
+    auto componentHandle1 = m.add((BasicComponentManager::EntityHandle)handle1, 3, 1);
+    auto componentHandle2 = m.add((BasicComponentManager::EntityHandle)handle2, 4, 1);
+
+    int count = 0;
+    m.forEachLiveComponent(
+        [&count](bool live,
+                 BasicComponentManager::ComponentHandle componentHandle,
+                 BasicEntityManager::EntityHandle h, int& item) {
+        ++count;
+    });
+
+    EXPECT_EQ(2, count);
+}
+
+// Tests that reverse mapping of entity handles back to components works.
+TEST(ComponentManager, ReverseMapping) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicComponentManager m;
+    auto componentHandle1 =
+        m.add((BasicComponentManager::EntityHandle)handle1,
+              3, 1, true /* tracked */);
+    auto componentHandle2 =
+        m.add((BasicComponentManager::EntityHandle)handle2,
+              4, 1, true /* tracked */);
+    auto componentHandle3 =
+        m.add((BasicComponentManager::EntityHandle)handle3,
+              5, 1, false /* tracked */);
+
+    EXPECT_EQ(handle1, m.getEntityHandle(componentHandle1));
+    EXPECT_EQ(handle2, m.getEntityHandle(componentHandle2));
+
+    EXPECT_EQ(componentHandle1, m.getComponentHandle(handle1));
+    EXPECT_EQ(componentHandle2, m.getComponentHandle(handle2));
+    EXPECT_NE(componentHandle3, m.getComponentHandle(handle3));
+
+    EXPECT_NE(nullptr, m.getByEntity(handle1));
+    EXPECT_EQ(3, *(m.getByEntity(handle1)));
+    m.removeByEntity(handle1);
+    EXPECT_EQ(nullptr, m.getByEntity(handle1));
+    EXPECT_NE(nullptr, m.getByEntity(handle2));
+    EXPECT_EQ(4, *(m.getByEntity(handle2)));
+}
+
+// Tests unpacked component manager's basic usage.
+TEST(UnpackedComponentManager, Basic) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicUnpackedComponentManager m;
+
+    auto handle1Copy = m.add((BasicUnpackedComponentManager::EntityHandle)handle1, 3);
+    auto handle2Copy = m.add((BasicUnpackedComponentManager::EntityHandle)handle2, 4);
+
+    EXPECT_EQ(handle1, handle1Copy);
+    EXPECT_EQ(handle2, handle2Copy);
+
+    auto data1 = m.get(handle1);
+    auto data2 = m.get(handle2);
+
+    EXPECT_NE(nullptr, data1);
+    EXPECT_NE(nullptr, data2);
+
+    EXPECT_EQ(3, *data1);
+    EXPECT_EQ(4, *data2);
+
+    m.remove(handle1);
+
+    EXPECT_EQ(nullptr, m.get(handle1));
+
+    EXPECT_NE(nullptr, m.get(handle2));
+    EXPECT_EQ(4, *(m.get(handle2)));
+}
+
+// Tests component manager's iteration over all elements.
+TEST(UnpackedComponentManager, IterateAll) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicUnpackedComponentManager m;
+    m.add((BasicUnpackedComponentManager::EntityHandle)handle1, 3);
+    m.add((BasicUnpackedComponentManager::EntityHandle)handle2, 4);
+
+    int count = 0;
+    m.forEachComponent(
+        [&count](bool live,
+                 BasicUnpackedComponentManager::ComponentHandle componentHandle,
+                 BasicEntityManager::EntityHandle h, int& item) {
+        if (live) ++count;
+    });
+
+    EXPECT_EQ(2, count);
+}
+
+// Tests component manager's iteration over only live elements.
+TEST(UnpackedComponentManager, IterateLive) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicUnpackedComponentManager m;
+
+    m.add((BasicUnpackedComponentManager::EntityHandle)handle1, 3);
+    m.add((BasicUnpackedComponentManager::EntityHandle)handle2, 4);
+
+    int count = 0;
+    m.forEachLiveComponent(
+        [&count](bool live,
+                 BasicComponentManager::ComponentHandle componentHandle,
+                 BasicEntityManager::EntityHandle h, int& item) {
+        ++count;
+    });
+
+    EXPECT_EQ(2, count);
 }
 
 }  // namespace base
