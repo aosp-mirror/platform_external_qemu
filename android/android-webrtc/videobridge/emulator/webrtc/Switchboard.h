@@ -13,7 +13,6 @@
 // limitations under the License.
 #pragma once
 
-
 #include <string>
 
 #include "Participant.h"
@@ -30,12 +29,12 @@ namespace webrtc {
 
 class Participant;
 
-using net::SocketTransport;
-using net::JsonReceiver;
-using net::JsonProtocol;
-using net::State;
 using net::AsyncSocketAdapter;
 using net::EmulatorConnection;
+using net::JsonProtocol;
+using net::JsonReceiver;
+using net::SocketTransport;
+using net::State;
 
 // A switchboard manages a set of web rtc participants:
 //
@@ -58,16 +57,20 @@ public:
     // The participant will no longer be in use and can be finalized.
     void rtcConnectionDropped(std::string participant);
 
-    // Cleans up connections that have marked them self as deleted
-    // due to a connection dropped.
+    // Cleans up connections that have marked themselves as deleted
+    // due to a dropped connection.
     void finalizeConnections();
 
 private:
-
     std::map<std::string, rtc::scoped_refptr<Participant> > mConnections;
     std::map<std::string, std::string> mIdentityMap;
-    std::vector<std::string> mDroppedConnections;
-    std::string handle_;
+
+    std::vector<std::string> mDroppedConnections;  // Connections that need to
+                                                   // be garbage collected.
+    std::string mHandle = "video0";  // Handle to shared memory region
+    int32_t mFps = 24;               // Desired fps
+
+    // Network/communication things.
     JsonProtocol mProtocol;
     SocketTransport mTransport;
     net::EmulatorConnection* mEmulator;

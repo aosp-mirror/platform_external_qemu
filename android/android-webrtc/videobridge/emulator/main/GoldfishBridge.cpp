@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "emulator/main/flagdefs.h"
-#include "rtc_base/logging.h"
-#include "rtc_base/ssladapter.h"
 #include "emulator/net/EmulatorConnection.h"
+#include "rtc_base/logging.h"
+#include "rtc_base/logsinks.h"
+#include "rtc_base/ssladapter.h"
 
 using emulator::webrtc::Switchboard;
+
+const int kMaxFileLogSizeInBytes = 64 * 1024 * 1024;
 
 // A simple logsink that throws everyhting on stderr.
 class StdLogSink : public rtc::LogSink {
@@ -29,17 +32,25 @@ public:
     }
 };
 
-
 int main(int argc, char* argv[]) {
     rtc::FlagList::SetFlagsFromCommandLine(&argc, argv, true);
-    std::unique_ptr<StdLogSink> log_sink = nullptr;
+    std::unique_ptr<rtc::LogSink> log_sink = nullptr;
 
     if (FLAG_help) {
         rtc::FlagList::Print(NULL, false);
         return 0;
     }
 
-    if (FLAG_verbose) {
+    // Configure our loggers, we will log at most 1
+    if (FLAG_logdir != std::string("")) {
+        rtc::FileRotatingLogSink* frl = new rtc::FileRotatingLogSink(FLAG_logdir, "goldfish_rtc",
+                                                    kMaxFileLogSizeInBytes, 2);
+        frl->Init();
+        frl->DisableBuffering();
+        log_sink.reset(frl);
+        rtc::LogMessage::AddLogToStream(log_sink.get(),
+                                        rtc::LoggingSeverity::INFO);
+    } else if (FLAG_verbose) {
         log_sink.reset(new StdLogSink());
         rtc::LogMessage::AddLogToStream(log_sink.get(),
                                         rtc::LoggingSeverity::INFO);
@@ -54,7 +65,7 @@ int main(int argc, char* argv[]) {
 
     rtc::InitializeSSL();
     emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle);
-    server.listen(); // Fork, so we can guarantee caller that port is available?
+    server.listen();
     rtc::CleanupSSL();
     return 0;
 }
