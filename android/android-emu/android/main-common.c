@@ -1346,9 +1346,35 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
                     androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF);
             if (!hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
-                derror("%s emulation currently requires hardware acceleration!\n"
+                derror(
+                    "%s emulation currently requires hardware acceleration!\n"
                     "Please ensure %s is properly installed and usable.\n"
-                    "CPU acceleration status: %s",
+                    "CPU acceleration status: %s\n"
+                    "More info on configuring VM acceleration on "
+#ifdef _WIN32
+                    "Windows:\n"
+                    "https://developer.android.com/studio/run/emulator-acceleration#vm-windows\n"
+                    "If you are using an Intel CPU: please check that "
+                    "virtualization is enabled in the BIOS and that "
+                    "HAXM is installed and usable.\n"
+                    "Note: if Hyper-V or Credential Guard is enabled, "
+                    "the emulator will not work with HAXM.\n"
+                    "See https://github.com/intel/haxm/issues/105#issuecomment-470927735 "
+                    "for info on how to disable Credential Guard.\n"
+                    "If you are using an AMD CPU or need to run alongside "
+                    "Hyper-V-based apps such as Docker, "
+                    "we recommend using Windows Hypervisor Platform."
+#else // _WIN32
+#ifdef __APPLE__
+                    "macOS:\n"
+                    "https://developer.android.com/studio/run/emulator-acceleration#vm-mac\n"
+#else // __APPLE__
+                    "Linux:\n"
+                    "https://developer.android.com/studio/run/emulator-acceleration#vm-linux\n"
+#endif // !__APPLE__
+#endif // !_WIN32
+                    "General information on acceleration: "
+                    "https://developer.android.com/studio/run/emulator-acceleration.\n",
                     abi, kAccelerator, *accel_status);
                 exit(1);
             }
