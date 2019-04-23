@@ -17,9 +17,11 @@
 #include <map>
 #include <memory>
 #include <string>
+
 #include "android/base/threads/FunctorThread.h"
 #include "android/console.h"
 #include "android/emulation/control/RtcBridge.h"
+#include "emulator/net/JsonProtocol.h"
 
 namespace android {
 namespace emulation {
@@ -28,6 +30,11 @@ namespace control {
 using MessageQueue = base::BufferQueue<std::string>;
 using base::Lock;
 using base::ReadWriteLock;
+using emulator::net::AsyncSocketAdapter;
+using emulator::net::JsonProtocol;
+using emulator::net::JsonReceiver;
+using emulator::net::SocketTransport;
+using emulator::net::State;
 
 // The WebRtcBridge is responsible for marshalling the message from the gRPC
 // endpoint to the actual goldfish-webrtc-videobridge. It will:
@@ -43,8 +50,10 @@ using base::ReadWriteLock;
 //
 // Note: the videobridge will send a bye message to the webrtc bridge when a
 // connection was removed, this will cleanup the message buffer.
-class WebRtcBridge : public RtcBridge {
+class WebRtcBridge : public RtcBridge, public JsonReceiver {
 public:
+    WebRtcBridge(AsyncSocketAdapter* socket,
+                 const QAndroidRecordScreenAgent* const screenAgent);
     ~WebRtcBridge();
 
     bool connect(std::string identity) override;
@@ -60,15 +69,17 @@ public:
                              const AndroidConsoleAgents* const consoleAgents);
     bool run();
 
+    // Socket events..
+    void received(SocketTransport* from, const json object) override;
+    void stateConnectionChange(SocketTransport* connection,
+                               State current) override;
+
 private:
     void received(std::string msg);
     bool openConnection();
-    WebRtcBridge(int port, const QAndroidRecordScreenAgent* const screenAgent);
 
     static const std::string kVideoBridgeExe;
     const uint16_t kRecBufferSize = 0xffff;
-
-    bool mStop = false;
 
     // Needed to start/stop the emulators streaming rtc module..
     const QAndroidRecordScreenAgent* const mScreenAgent;
@@ -78,11 +89,9 @@ private:
     std::map<MessageQueue*, Lock*> mLocks;
     ReadWriteLock mMapLock;
 
-    // Thread, socket and port we use to communicate with the goldfish video
-    // bridge.
-    int mSo;
-    int mPort;
-    std::unique_ptr<base::FunctorThread> mThread;
+    // Transport layer.
+    SocketTransport mTransport;
+    JsonProtocol mProtocol;
 };
 
 }  // namespace control
