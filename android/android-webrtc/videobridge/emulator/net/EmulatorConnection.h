@@ -46,7 +46,7 @@ private:
     void OnConnect(AsyncSocket* socket);
 
     std::unique_ptr<AsyncSocket> mServerSocket;
-    std::map<Switchboard*, std::unique_ptr<AsyncSocket>> mConnections;
+    std::vector<std::unique_ptr<Switchboard>> mConnections;
     int mPort;
     std::string mHandle;
 };
