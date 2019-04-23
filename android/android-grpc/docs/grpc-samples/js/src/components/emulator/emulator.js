@@ -19,6 +19,7 @@ import * as Device from "../../android_emulation_control/emulator_controller_grp
 import * as Proto from "../../android_emulation_control/emulator_controller_pb.js";
 import EmulatorPngView from "./views/simple_png_view.js";
 import EmulatorWebrtcView from "./views/webrtc_view.js";
+import FallbackView from "./views/fallback_emulator_view.js";
 
 /**
  * An emulator object that displays the screen and sends mouse events via gRPC.
@@ -110,7 +111,7 @@ export default class Emulator extends Component {
         onMouseUp={this.handleMouseUp}
         onMouseOut={this.handleMouseUp}
       >
-        <EmulatorWebrtcView
+        <FallbackView
           width={width * scale}
           height={height * scale}
           refreshRate={refreshRate}
