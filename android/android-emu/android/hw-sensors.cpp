@@ -745,9 +745,9 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
         h->sensors[sensor_id].enabled = false;
     }
 
+    const int loadResult = physicalModel_snapshotLoad(h->physical_model, f);
     android::automation::AutomationController::get().reset();
-
-    return physicalModel_snapshotLoad(h->physical_model, f);
+    return loadResult;
 }
 
 /* change the coarse orientation (landscape/portrait) of the emulated device */
