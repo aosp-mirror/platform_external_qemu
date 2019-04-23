@@ -11,11 +11,14 @@
 #include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
+static const int kCarClusterWindowWidth = 650;
+static const int kCarClusterWindowHeight = 360;
 CarClusterWindow::CarClusterWindow(EmulatorQtWindow* window, QWidget* parent)
     : QFrame(nullptr),
       mCarClusterWindowUi(new Ui::CarClusterWindow),
       mEmulatorWindow(window) {
     mCarClusterWindowUi->setupUi(this);
+    this->setFixedSize(kCarClusterWindowWidth, kCarClusterWindowHeight);
     mIsDismissed = false;
 }
 
