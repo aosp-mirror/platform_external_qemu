@@ -21,6 +21,8 @@ namespace base {
 using BasicEntityManager = EntityManager<32, 16, 16, int>;
 using SmallEntityManager = EntityManager<16, 16, 32, int>;
 
+using BasicComponentManger = ComponentManager<32, 16, 16, int>;
+
 // Tests bitfield operations on handles.
 TEST(EntityManager, BasicHandle) {
     const size_t index = 1;
@@ -133,6 +135,70 @@ TEST(EntityManager, ElementLimit) {
             EXPECT_EQ(iterCount, i);
         }
     }
+}
+
+// Tests that we can loop over the entities.
+TEST(EntityManager, IterateAll) {
+    BasicEntityManager m;
+    m.add(1, 5);
+    m.add(2, 5);
+    m.add(3, 5);
+
+    int count = 0;
+    m.forEachEntry([&count](bool live, BasicEntityManager::EntityHandle h, int& item) {
+        if (live) ++count;    
+    });
+
+    EXPECT_EQ(3, count);
+}
+
+// Tests that we can loop over just the live entities.
+TEST(EntityManager, IterateLive) {
+    BasicEntityManager m;
+    m.add(1, 5);
+    m.add(2, 5);
+    m.add(3, 5);
+    auto toRemove = m.add(3, 5);
+    m.remove(toRemove);
+
+    int count = 0;
+    m.forEachLiveEntry([&count](bool live, BasicEntityManager::EntityHandle h, int& item) {
+        EXPECT_TRUE(live);
+        ++count;
+    });
+
+    EXPECT_EQ(3, count);
+}
+
+// Tests that component manager works in a basic way
+// in isolation.
+TEST(ComponentManager, Basic) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicComponentManger m;
+    auto componentHandle1 = m.add((BasicComponentManger::EntityHandle)handle1, 3, 1); 
+    auto componentHandle2 = m.add((BasicComponentManger::EntityHandle)handle2, 4, 1); 
+
+    EXPECT_EQ(handle1, m.getEntityHandle(componentHandle1));
+    EXPECT_EQ(handle2, m.getEntityHandle(componentHandle2));
+
+    auto data1 = m.getByComponent(componentHandle1);
+    auto data2 = m.getByComponent(componentHandle2);
+
+    EXPECT_NE(nullptr, data1);
+    EXPECT_NE(nullptr, data2);
+
+    EXPECT_EQ(3, *data1);
+    EXPECT_EQ(4, *data2);
+
+    m.removeByComponent(componentHandle1);
+    EXPECT_EQ(nullptr, m.getByComponent(componentHandle1));
+
+    EXPECT_EQ(handle2, m.getEntityHandle(componentHandle2));
+    EXPECT_NE(nullptr, m.getByComponent(componentHandle2));
 }
 
 }  // namespace base
