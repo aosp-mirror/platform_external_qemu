@@ -18,7 +18,7 @@
 
 WEBRTC_DEFINE_bool(help, false, "Prints this message");
 WEBRTC_DEFINE_string(server, "127.0.0.1", "The server to connect to.");
-WEBRTC_DEFINE_int(port, 5667, "The port to connect to.");
+WEBRTC_DEFINE_int(port, 5557, "The port to connect to.");
 WEBRTC_DEFINE_string(handle, "video0", "The memory handle to read frames from");
 WEBRTC_DEFINE_bool(verbose, false, "Enables logging");
 #endif  // FLAGDEFS_H_

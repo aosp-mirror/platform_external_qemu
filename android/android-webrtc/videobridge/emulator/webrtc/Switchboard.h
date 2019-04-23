@@ -13,10 +13,13 @@
 // limitations under the License.
 #pragma once
 
-#include <emulator/net/EmulatorConnection.h>
-#include <emulator/net/JsonProtocol.h>
+
 #include <string>
+
 #include "Participant.h"
+#include "emulator/net/AsyncSocketAdapter.h"
+#include "emulator/net/EmulatorConnection.h"
+#include "emulator/net/JsonProtocol.h"
 namespace emulator {
 
 namespace net {
@@ -31,7 +34,7 @@ using net::SocketTransport;
 using net::JsonReceiver;
 using net::JsonProtocol;
 using net::State;
-using rtc::AsyncSocket;
+using net::AsyncSocketAdapter;
 using net::EmulatorConnection;
 
 // A switchboard manages a set of web rtc participants:
@@ -42,16 +45,14 @@ using net::EmulatorConnection;
 // 4. Participants that are no longer streaming need to be finalized.
 class Switchboard : public JsonReceiver {
 public:
-    Switchboard(std::string handle);
     Switchboard(std::string handle,
-                AsyncSocket* connection,
+                AsyncSocketAdapter* connection,
                 EmulatorConnection* parent);
     ~Switchboard();
     void received(SocketTransport* from, const json object) override;
     void stateConnectionChange(SocketTransport* connection,
                                State current) override;
     void send(std::string to, json msg);
-    void connect(std::string server, int port);
 
     // Called when a participant is unable to send the rtc stream.
     // The participant will no longer be in use and can be finalized.
@@ -71,7 +72,6 @@ private:
     SocketTransport mTransport;
     net::EmulatorConnection* mEmulator;
     rtc::CriticalSection mCleanupCS;
-
 };
 }  // namespace webrtc
 }  // namespace emulator

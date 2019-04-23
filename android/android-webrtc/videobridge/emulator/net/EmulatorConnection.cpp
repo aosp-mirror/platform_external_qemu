@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "emulator/net/EmulatorConnection.h"
+#include "emulator/net/RtcAsyncSocketAdapter.h"
 #include "rtc_base/physicalsocketserver.h"
 #include "rtc_base/socketaddress.h"
 
@@ -47,13 +48,14 @@ void EmulatorConnection::listen() {
 
 void EmulatorConnection::disconnect(webrtc::Switchboard* disconnect) {
     RTC_LOG(INFO) << "Removing switchboard.";
-    mConnections.erase(disconnect);
+    // TODO(jansene): add to list of entries to cleanup.
 }
 void EmulatorConnection::OnRead(rtc::AsyncSocket* socket) {
     rtc::SocketAddress accept_addr;
     while (AsyncSocket* incoming = socket->Accept(&accept_addr)) {
-        Switchboard* board = new webrtc::Switchboard(mHandle, incoming, this);
-        mConnections[board] = std::unique_ptr<AsyncSocket>(incoming);
+        RtcAsyncSocketAdapter* adapter = new RtcAsyncSocketAdapter(incoming);
+        std::unique_ptr<Switchboard> board(new webrtc::Switchboard(mHandle, adapter, this));
+        mConnections.push_back(std::move(board));
         RTC_LOG(INFO) << "New switchboard registered for incoming emulator.";
     }
 }

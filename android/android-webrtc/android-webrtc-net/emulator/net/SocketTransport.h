@@ -13,10 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include <rtc_base/nethelpers.h>
-#include <rtc_base/socketaddress.h>
+#include "emulator/net/AsyncSocketAdapter.h"
 #include <string>
-using rtc::AsyncSocket;
 
 namespace emulator {
 namespace net {
@@ -28,7 +26,8 @@ enum class State {
     CONNECTED,
 };
 
-std::ostream& operator<<(std::ostream& os, const State state);
+//std::ostream& operator<<(std::ostream& os, const State state);
+
 class SocketTransport;
 
 template <class T>
@@ -50,16 +49,15 @@ using MessageReceiver = ProtocolReader<std::string>;
 // A SocketTransport can open a socket to an endpoint.
 // The socket is asynchronous and will invoke the callbacks on the receiver when
 // needed.
-class SocketTransport : public sigslot::has_slots<> {
+class SocketTransport : public AsyncSocketEventListener {
 public:
     explicit SocketTransport(MessageReceiver* receiver);
     explicit SocketTransport(MessageReceiver* receiver,
-                             AsyncSocket* connection);
-    ~SocketTransport() override;
+                             AsyncSocketAdapter* connection);
+    ~SocketTransport();
     SocketTransport(const SocketTransport&) = delete;
     SocketTransport(SocketTransport&&) = delete;
 
-    void connect(const std::string server, int port);
     void close();
     bool send(const std::string msg);
     void registerCallback(const MessageReceiver* receiver);
@@ -67,17 +65,11 @@ public:
 
 private:
     void registerCallbacks();
-    void doConnect();
-    void OnRead(rtc::AsyncSocket* socket);
-    void OnClose(rtc::AsyncSocket* socket, int err);
-    void OnResolveResult(rtc::AsyncResolverInterface* resolver);
-    void OnConnect(rtc::AsyncSocket* socket);
     void setState(State newState);
+    void OnRead(AsyncSocketAdapter* socket);
+    void OnClose(AsyncSocketAdapter* socket, int err);
 
-    rtc::SocketAddress mAddress;
-    std::unique_ptr<rtc::AsyncResolver> mResolver;
-    std::unique_ptr<rtc::AsyncSocket> mSocket;
-
+    std::unique_ptr<AsyncSocketAdapter> mSocket;
     MessageReceiver* mReceiver;
     State mState = State::NOT_CONNECTED;
 };

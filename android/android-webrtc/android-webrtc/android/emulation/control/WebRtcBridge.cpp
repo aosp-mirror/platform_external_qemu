@@ -1,19 +1,24 @@
 #include "android/emulation/control/WebRtcBridge.h"
-#include <memory>
-#include <nlohmann/json.hpp>
-#include "android/base/Log.h"
-#include "android/base/Uuid.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/control/window_agent.h"
 
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include <memory>
+#include <nlohmann/json.hpp>
+
+#include "android/base/Uuid.h"
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/misc/StringUtils.h"
+#include "android/base/sockets/SocketErrors.h"
+#include "android/base/sockets/SocketUtils.h"
+#include "android/base/system/System.h"
+#include "android/emulation/control/window_agent.h"
+#include "emulator/net/AsyncSocket.h"
+
+using emulator::net::AsyncSocket;
 using nlohmann::json;
+
 namespace android {
 namespace emulation {
 namespace control {
@@ -22,9 +27,11 @@ using namespace android::base;
 
 const std::string WebRtcBridge::kVideoBridgeExe = "goldfish-webrtc-bridge";
 
-WebRtcBridge::WebRtcBridge(int port,
+WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* connection,
                            const QAndroidRecordScreenAgent* const screenAgent)
-    : mPort(port), mScreenAgent(screenAgent) {}
+    : mProtocol(this),
+      mTransport(&mProtocol, connection),
+      mScreenAgent(screenAgent) {}
 
 WebRtcBridge::~WebRtcBridge() {
     terminate();
@@ -36,7 +43,7 @@ bool WebRtcBridge::connect(std::string identity) {
         mMapLock.unlockRead();
         AutoWriteLock upgrade(mMapLock);
         Lock* l = new Lock();
-        MessageQueue* queue = new MessageQueue(4096, *l);
+        MessageQueue* queue = new MessageQueue(128, *l);
         mId[identity] = queue;
         mLocks[queue] = l;
     } else {
@@ -110,53 +117,19 @@ bool WebRtcBridge::acceptJsepMessage(std::string identity,
     json msg;
     msg["from"] = identity;
     msg["msg"] = message;
-    std::string serialized = msg.dump();
-    LOG(INFO) << "Len + 0x0: " << serialized.length();
-    LOG(INFO) << "acceptJsepMessage: identity: " << identity
-              << ", msg: " << serialized;
-
-    // c_str() is guaranteed to be NULL terminated, we want to send the 0x00
-    int bufferLen = serialized.length() + 1;
-    const char* buf = serialized.c_str();
-    while (bufferLen > 0) {
-        ssize_t ret = socketSend(mSo, buf, bufferLen);
-        if (ret <= 0) {
-            LOG(ERROR) << "acceptJsepMessage: Failed to send: " << errno
-                       << ", ret:" << ret << " over: " << mSo;
-            return false;
-        }
-        buf += ret;
-        bufferLen -= ret;
-    }
-    return true;
+    return mProtocol.write(&mTransport, msg);
 }
 
 void WebRtcBridge::terminate() {
-    mStop = true;
     LOG(INFO) << "WebRtcBridge::terminate()";
     // Shutdowns do not unblock the read in macos.
-    socketShutdownWrites(mSo);
-    socketShutdownReads(mSo);
-    socketClose(mSo);
-    mSo = -1;
     mScreenAgent->stopWebRtcModule();
-    if (mThread) {
-        mThread->wait();
-        mThread.release();
-    }
+    mTransport.close();
 }
 
-void WebRtcBridge::received(std::string envelope) {
-    LOG(INFO) << "Received from video bridge: " << envelope;
-    if (!json::accept(envelope)) {
-        return;
-    }
-
-    // We are getting a simple pubsub message.
-    // We only care about publish
-    json object = json::parse(envelope, nullptr, false);
-    if (!object.count("type") || !object.count("envelope") ||
-        !object.count("topic") || object["type"] != "msg") {
+void WebRtcBridge::received(SocketTransport* from, json object) {
+    LOG(INFO) << "Received from video bridge: " << object.dump(2);
+    if (!object.count("msg") || !object.count("topic")) {
         LOG(ERROR) << "Ignoring incorrect message: " << object.dump(2);
     }
 
@@ -179,41 +152,12 @@ void WebRtcBridge::received(std::string envelope) {
     }
 }
 
-bool WebRtcBridge::run() {
-    char buffer[kRecBufferSize];
-    int so = 0;
-    while (so < 1 && !mStop) {
-        so = socketTcp4LoopbackClient(mPort);
-        if (so < 0) {
-            LOG(ERROR) << "failed to open up connection to port: " << mPort
-                       << ".. Sleeping...";
-            Thread::sleepMs(1000);
-        }
-    }
-    LOG(INFO) << "Connected video bridge on port: " << mPort << ", mSo: " << so;
-    std::string jsonmsg;
-    mSo = so;
-    while (mSo > 0 && !mStop) {
-        int bytes = socketRecv(mSo, buffer, sizeof(buffer));
-        if (bytes <= 0) {
-            // something went wrong
-            break;
-        }
-        for (int i = 0; i < bytes; i++) {
-            if (buffer[i] == 0) {
-                received(jsonmsg);
-                jsonmsg.clear();
-            } else {
-                jsonmsg += buffer[i];
-            }
-        }
-    }
-}  // namespace control
-
 bool WebRtcBridge::openConnection() {
-    mThread.reset(new base::FunctorThread([&] { return this->run(); }));
-    mThread->start();
     return true;
+}
+void WebRtcBridge::stateConnectionChange(SocketTransport* connection,
+        State current) {
+    LOG(ERROR) << "Bad news.. Someone must gone missing: " << (int) current;
 }
 
 RtcBridge* WebRtcBridge::create(
@@ -246,15 +190,14 @@ RtcBridge* WebRtcBridge::create(
     // System::get()->runCommand(cmdArgs, RunOptions::DontWait);
     LOG(INFO) << "Launched video bridge";
 
-    std::unique_ptr<WebRtcBridge> pThis(
-            new WebRtcBridge(port, consoleAgents->record));
-    if (!pThis->openConnection()) {
-        LOG(ERROR) << "Failed to open connection to video bridge on port: "
-                   << port;
-        return new NopRtcBridge();
+    Looper* looper =
+            android::base::ThreadLooper::get();
+    AsyncSocket* socket = new AsyncSocket(looper);
+    while (!socket->loopbackConnect(port)) {
+        Thread::sleepMs(100);
     }
 
-    return pThis.release();
+    return new WebRtcBridge(socket, consoleAgents->record);
 }
 }  // namespace control
 }  // namespace emulation

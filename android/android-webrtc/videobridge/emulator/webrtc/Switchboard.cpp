@@ -41,19 +41,10 @@ void Switchboard::stateConnectionChange(SocketTransport* connection,
     }
 }
 
-void Switchboard::connect(std::string server, int port) {
-    mTransport.connect(server, port);
-}
-
 Switchboard::~Switchboard() {}
-Switchboard::Switchboard(std::string handle)
-    : handle_(handle),
-      mProtocol(this),
-      mTransport(&mProtocol),
-      mEmulator(nullptr) {}
 
 Switchboard::Switchboard(std::string handle,
-                         AsyncSocket* connection,
+                         AsyncSocketAdapter* connection,
                          net::EmulatorConnection* parent)
     : handle_(handle),
       mProtocol(this),
@@ -135,7 +126,6 @@ void Switchboard::send(std::string to, json message) {
     }
 
     json msg;
-    msg["type"] = "publish";
     msg["msg"] = message.dump();
     msg["topic"] = mIdentityMap[to];
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "JsonProtocol.h"
-#include <rtc_base/logging.h>
 #include "SocketTransport.h"
+#include <stdio.h>
 
 
 namespace emulator {
@@ -31,7 +31,7 @@ void JsonProtocol::received(SocketTransport* from, const std::string object) {
         json jmessage = json::parse(mBuffer, nullptr, false);
         mReceiver->received(from, std::move(jmessage));
       } else {
-        RTC_LOG(LERROR) << "Rejecting invalid json: " << object;
+        // Log, notify?
       }
       mBuffer.clear();
     } else {
