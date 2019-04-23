@@ -31,11 +31,13 @@
 #include "common/goldfish_vk_baseprotoconversion.h"
 
 
-
+#include "android/base/containers/EntityManager.h"
 
 
 
 using namespace goldfish_vk;
+using android::base::EntityManager;
+using android::base::ComponentManager;
 
 class VkDecoderSnapshot::Impl {
 public:
@@ -48,6 +50,20 @@ void vkCreateInstance(
     const VkAllocationCallbacks* pAllocator,
     VkInstance* pInstance)
 {
+
+    fprintf(stderr, "%s: SNAPSHOT TEST BEGIN ************************\n", __func__);
+    SnapshotApiInfo info;
+    info.apiName = "vkCreateInstance";
+    info.dependentHandles.add((uint64_t)(uintptr_t)(*pInstance), 1, 1);
+    auto apiCallHandle = apiCallSnapshot.add(info, 1);
+
+    SnapshotHandleInfo info_pInstance;
+    info_pInstance.dependentApiCalls.add(
+        apiCallHandle, 1, 1);
+
+    handleSnapshot.add((uint64_t)(uintptr_t)(*pInstance), info_pInstance, 1);
+
+    fprintf(stderr, "%s: SNAPSHOT TEST BEGIN ************************\n", __func__);
     // TODO: Implement
 }
 void vkDestroyInstance(
@@ -3238,6 +3254,18 @@ void vkResetCommandBufferAsyncGOOGLE(
 }
 #endif
 
+    struct SnapshotApiInfo {
+        // TODO
+        std::string apiName;
+        ComponentManager<32, 16, 16, uint64_t> dependentHandles;
+    };
+
+    struct SnapshotHandleInfo {
+        ComponentManager<32, 16, 16, uint64_t> dependentApiCalls;
+    };
+
+    EntityManager<32, 16, 16, SnapshotApiInfo> apiCallSnapshot;
+    ComponentManager<32, 16, 16, SnapshotHandleInfo> handleSnapshot;
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
