@@ -20,6 +20,14 @@ bool NopRtcBridge::nextMessage(std::string identity, std::string* nextMessage, S
 }
 
 void NopRtcBridge::terminate() {}
+
+bool NopRtcBridge::start() {
+    return true;
+}
+
+RtcBridge::BridgeState NopRtcBridge::state() {
+    return BridgeState::Connected;
+}
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

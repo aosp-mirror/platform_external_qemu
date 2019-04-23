@@ -32,7 +32,7 @@ void Switchboard::stateConnectionChange(SocketTransport* connection,
     }
 
     // We got disconnected, clear out all participants.
-    if (current == State::NOT_CONNECTED) {
+    if (current == State::DISCONNECTED) {
         RTC_LOG(INFO) << "Disconnected";
         mConnections.clear();
         mIdentityMap.clear();
@@ -46,7 +46,7 @@ Switchboard::~Switchboard() {}
 Switchboard::Switchboard(std::string handle,
                          AsyncSocketAdapter* connection,
                          net::EmulatorConnection* parent)
-    : handle_(handle),
+    : mHandle(handle),
       mProtocol(this),
       mTransport(&mProtocol, connection),
       mEmulator(parent) {}
@@ -59,7 +59,11 @@ void Switchboard::rtcConnectionDropped(std::string participant) {
 void Switchboard::finalizeConnections() {
     rtc::CritScope cs(&mCleanupCS);
     for (auto participant : mDroppedConnections) {
-        send(participant, "{ \"bye\" : \"stream disconnected\" }");
+        json msg;
+        msg["bye"] = "stream disconnected";
+        msg["topic"] = participant;
+        RTC_LOG(INFO) << "Sending " << msg;
+        mProtocol.write(&mTransport, msg);
         mIdentityMap.erase(participant);
         mConnections.erase(participant);
     }
@@ -69,6 +73,17 @@ void Switchboard::finalizeConnections() {
 void Switchboard::received(SocketTransport* transport, const json object) {
     RTC_LOG(INFO) << "Received: " << object;
     finalizeConnections();
+
+    // { 'handle' : xx, 'fps' : int} messages to configure the video sharing.
+
+    if (object.count("handle") && object.count("fps")) {
+        // ignore for now as we have 1-1 correspondance between brdige - emulator.
+        // mHandle = object["handle"];
+        std::string fps = object["fps"];
+        sscanf(fps.c_str(), "%d", &mFps);
+        RTC_LOG(INFO) << "Not updating handle.. Updated fps: " << fps;
+        return;
+    }
 
     // We expect:
     // { 'msg' : some_json_object,
@@ -100,7 +115,7 @@ void Switchboard::received(SocketTransport* transport, const json object) {
         send(from, start);
 
         rtc::scoped_refptr<Participant> stream(
-                new rtc::RefCountedObject<Participant>(this, from, handle_));
+                new rtc::RefCountedObject<Participant>(this, from, mHandle, mFps));
         if (stream->Initialize()) {
             mConnections[from] = stream;
         }

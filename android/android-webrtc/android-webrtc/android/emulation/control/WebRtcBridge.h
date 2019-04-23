@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 
+#include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/console.h"
 #include "android/emulation/control/RtcBridge.h"
@@ -43,6 +44,7 @@ using emulator::net::State;
 // - Start the webrtc module inside the emulator
 // - Attempt to open a socket connection to the video bridge
 // - Forward/Receive messages from the goldfish video bridge.
+// - Terminate the video bridge on shutdown
 //
 // Messages send to the video bridge will be send immediately, messages received
 // from the video bridge will be stored in a message queue, until a client
@@ -53,7 +55,9 @@ using emulator::net::State;
 class WebRtcBridge : public RtcBridge, public JsonReceiver {
 public:
     WebRtcBridge(AsyncSocketAdapter* socket,
-                 const QAndroidRecordScreenAgent* const screenAgent);
+                 const QAndroidRecordScreenAgent* const screenAgent,
+                 int desiredFps,
+                 int videoBridgePort);
     ~WebRtcBridge();
 
     bool connect(std::string identity) override;
@@ -63,30 +67,43 @@ public:
                      std::string* nextMessage,
                      System::Duration blockAtMostMs) override;
     void terminate() override;
+    bool start() override;
+    BridgeState state() override;
+
 
     // Returns a webrtc bridge, or NopBridge in case of failures..
     static RtcBridge* create(int port,
                              const AndroidConsoleAgents* const consoleAgents);
-    bool run();
 
     // Socket events..
     void received(SocketTransport* from, const json object) override;
     void stateConnectionChange(SocketTransport* connection,
                                State current) override;
 
+
+    // Default framerate we will use..
+    // The emulator will produce frames at this rate, and the encoder in
+    // the video bridge will run at this framerate as well.
+    static const int kMaxFPS = 24;
+    static const std::string kVideoBridgeExe;
+
 private:
     void received(std::string msg);
-    bool openConnection();
 
-    static const std::string kVideoBridgeExe;
     const uint16_t kRecBufferSize = 0xffff;
+    const uint16_t kMaxMessageQueueLen = 256;
+    int mFps = kMaxFPS;
+    int mVideoBridgePort;
+    System::Pid mBridgePid;
+    std::string mVideoModule;
+    BridgeState mState = BridgeState::Disconnected;
 
     // Needed to start/stop the emulators streaming rtc module..
     const QAndroidRecordScreenAgent* const mScreenAgent;
 
     // Message queues used to store messages received from the videobridge.
-    std::map<std::string, MessageQueue*> mId;
-    std::map<MessageQueue*, Lock*> mLocks;
+    std::map<std::string, std::shared_ptr<MessageQueue>> mId;
+    std::map<MessageQueue*, std::shared_ptr<Lock>> mLocks;
     ReadWriteLock mMapLock;
 
     // Transport layer.

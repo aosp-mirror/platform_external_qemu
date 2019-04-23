@@ -291,13 +291,12 @@ public:
                               JsepMsg* reply) override {
         std::string msg;
         std::string id = request->guid();
-        LOG(INFO) << "receiveJsepMessage id: " << id;
 
         // Block and wait for at most 5 seconds.
         mRtcBridge->nextMessage(id, &msg, 5000);
         reply->mutable_id()->set_guid(request->guid());
         reply->set_message(msg);
-
+        LOG(INFO) << "receiveJsepMessage id: " << id << ", msg: " << msg;
         return Status::OK;
     }
 

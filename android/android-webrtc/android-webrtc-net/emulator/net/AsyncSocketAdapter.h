@@ -23,10 +23,13 @@ class AsyncSocketEventListener {
 public:
     virtual ~AsyncSocketEventListener() = default;
     // Called when bytes can be read from the socket.
-    virtual void OnRead(AsyncSocketAdapter* socket) = 0;
+    virtual void onRead(AsyncSocketAdapter* socket) = 0;
 
     // Called when this socket is closed.
-    virtual void OnClose(AsyncSocketAdapter* socket, int err) = 0;
+    virtual void onClose(AsyncSocketAdapter* socket, int err) = 0;
+
+    // Called when this socket (re) established a connection
+    virtual void onConnected(AsyncSocketAdapter* socket) = 0;
 };
 
 // A connected asynchronous socket.
@@ -34,12 +37,20 @@ public:
 class AsyncSocketAdapter {
 public:
     virtual ~AsyncSocketAdapter() = default;
-    virtual void AddSocketEventListener(AsyncSocketEventListener* listener) = 0;
-    virtual void RemoveSocketEventListener(
-            AsyncSocketEventListener* listener) = 0;
-    virtual void Close() = 0;
-    virtual uint64_t Recv(char* buffer, uint64_t bufferSize) = 0;
-    virtual uint64_t Send(const char* buffer, uint64_t bufferSize) = 0;
+    void setSocketEventListener(AsyncSocketEventListener* listener) { mListener = listener; }
+    virtual uint64_t recv(char* buffer, uint64_t bufferSize) = 0;
+    virtual uint64_t send(const char* buffer, uint64_t bufferSize) = 0;
+    virtual void close() = 0;
+
+    // True if this socket is connected
+    virtual bool connected() = 0;
+
+    // Asynchronously re-connect the socket, return false if
+    // reconnection will never succeed.
+    virtual bool connect() = 0;
+protected:
+    AsyncSocketEventListener* mListener = nullptr;
 };
+
 }  // namespace net
 }  // namespace emulator

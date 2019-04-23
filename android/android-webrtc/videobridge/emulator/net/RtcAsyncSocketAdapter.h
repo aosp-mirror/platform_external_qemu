@@ -17,19 +17,16 @@ public:
     RtcAsyncSocketAdapter(AsyncSocket* rtcSocket);
     ~RtcAsyncSocketAdapter();
 
-    void AddSocketEventListener(AsyncSocketEventListener* listener);
-    void RemoveSocketEventListener(AsyncSocketEventListener* listener) override;
-
-    void Close() override;
-    uint64_t Recv(char* buffer, uint64_t bufferSize) override;
-    uint64_t Send(const char* buffer, uint64_t bufferSize) override;
-
+    void close() override;
+    uint64_t recv(char* buffer, uint64_t bufferSize) override;
+    uint64_t send(const char* buffer, uint64_t bufferSize) override;
+     bool connected() override;
+    bool connect() override;
 private:
-    void OnRead(rtc::AsyncSocket* socket);
-    void OnClose(rtc::AsyncSocket* socket, int err);
+    void onRead(rtc::AsyncSocket* socket);
+    void onClose(rtc::AsyncSocket* socket, int err);
 
     std::unique_ptr<rtc::AsyncSocket> mRtcSocket;
-    AsyncSocketEventListener* mListener;
 };
 }  // namespace net
 }  // namespace emulator

@@ -13,20 +13,19 @@
 // limitations under the License.
 #pragma once
 
-#include "emulator/net/AsyncSocketAdapter.h"
 #include <string>
+#include "emulator/net/AsyncSocketAdapter.h"
 
 namespace emulator {
 namespace net {
 
 enum class State {
-    NOT_CONNECTED,
-    SIGNING_IN,
-    RESOLVING,
+    DISCONNECTED,
+    CONNECTING,
     CONNECTED,
 };
 
-//std::ostream& operator<<(std::ostream& os, const State state);
+// std::ostream& operator<<(std::ostream& os, const State state);
 
 class SocketTransport;
 
@@ -51,27 +50,29 @@ using MessageReceiver = ProtocolReader<std::string>;
 // needed.
 class SocketTransport : public AsyncSocketEventListener {
 public:
-    explicit SocketTransport(MessageReceiver* receiver);
     explicit SocketTransport(MessageReceiver* receiver,
                              AsyncSocketAdapter* connection);
     ~SocketTransport();
     SocketTransport(const SocketTransport&) = delete;
     SocketTransport(SocketTransport&&) = delete;
 
+
     void close();
     bool send(const std::string msg);
+    bool connect();
     void registerCallback(const MessageReceiver* receiver);
     State state() { return mState; }
 
 private:
     void registerCallbacks();
     void setState(State newState);
-    void OnRead(AsyncSocketAdapter* socket);
-    void OnClose(AsyncSocketAdapter* socket, int err);
+    void onRead(AsyncSocketAdapter* socket) override;
+    void onClose(AsyncSocketAdapter* socket, int err) override;
+    void onConnected(AsyncSocketAdapter* socket) override;
 
     std::unique_ptr<AsyncSocketAdapter> mSocket;
-    MessageReceiver* mReceiver;
-    State mState = State::NOT_CONNECTED;
+    MessageReceiver* mReceiver = nullptr;
+    State mState = State::DISCONNECTED;
 };
 }  // namespace net
 }  // namespace emulator

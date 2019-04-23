@@ -6,47 +6,45 @@ namespace net {
 
 RtcAsyncSocketAdapter::RtcAsyncSocketAdapter(AsyncSocket* rtcSocket)
     : mRtcSocket(rtcSocket) {
-    mRtcSocket->SignalCloseEvent.connect(this, &RtcAsyncSocketAdapter::OnClose);
-    mRtcSocket->SignalReadEvent.connect(this, &RtcAsyncSocketAdapter::OnRead);
+    mRtcSocket->SignalCloseEvent.connect(this, &RtcAsyncSocketAdapter::onClose);
+    mRtcSocket->SignalReadEvent.connect(this, &RtcAsyncSocketAdapter::onRead);
 }
 
 RtcAsyncSocketAdapter::~RtcAsyncSocketAdapter() {
-    Close();
+    close();
 };
 
-void RtcAsyncSocketAdapter::AddSocketEventListener(
-        AsyncSocketEventListener* listener)  {
-    mListener = listener;
-}
-
-void RtcAsyncSocketAdapter::RemoveSocketEventListener(
-        AsyncSocketEventListener* listener)  {
-    mListener = nullptr;
-};
-
-void RtcAsyncSocketAdapter::Close()  {
+void RtcAsyncSocketAdapter::close()  {
     mRtcSocket->Close();
 };
 
-uint64_t RtcAsyncSocketAdapter::Recv(char* buffer,
+uint64_t RtcAsyncSocketAdapter::recv(char* buffer,
                                      uint64_t bufferSize)  {
     return mRtcSocket->Recv(buffer, bufferSize, nullptr);
 }
 
-uint64_t RtcAsyncSocketAdapter::Send(const char* buffer,
+uint64_t RtcAsyncSocketAdapter::send(const char* buffer,
                                      uint64_t bufferSize)  {
     return mRtcSocket->Send(buffer, bufferSize);
 }
 
-void RtcAsyncSocketAdapter::OnRead(rtc::AsyncSocket* socket) {
+void RtcAsyncSocketAdapter::onRead(rtc::AsyncSocket* socket) {
     if (mListener) {
-        mListener->OnRead(this);
+        mListener->onRead(this);
     }
 }
-void RtcAsyncSocketAdapter::OnClose(rtc::AsyncSocket* socket, int err) {
+void RtcAsyncSocketAdapter::onClose(rtc::AsyncSocket* socket, int err) {
     if (mListener) {
-        mListener->OnClose(this, err);
+        mListener->onClose(this, err);
     }
+}
+
+bool RtcAsyncSocketAdapter::connect() {
+    return mRtcSocket->Connect(mRtcSocket->GetRemoteAddress());
+}
+
+bool RtcAsyncSocketAdapter::connected() {
+    return mRtcSocket->GetState() == rtc::AsyncSocket::ConnState::CS_CONNECTED;
 }
 
 }  // namespace net

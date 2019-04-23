@@ -51,8 +51,9 @@ Participant::~Participant() {}
 
 Participant::Participant(Switchboard* board,
                          std::string id,
-                         std::string mem_handle)
-    : mSwitchboard(board), mPeerId(id), mMemoryHandle(mem_handle) {}
+                         std::string mem_handle,
+                         int32_t fps)
+    : mSwitchboard(board), mPeerId(id), mMemoryHandle(mem_handle), mFps(fps) {}
 
 void Participant::OnIceConnectionChange(
         ::webrtc::PeerConnectionInterface::IceConnectionState new_state) {
@@ -178,7 +179,7 @@ void Participant::OnFailure(::webrtc::RTCError error) {
 
 cricket::VideoCapturer* Participant::OpenVideoCaptureDevice() {
     videocapturemodule::VideoShareFactory* factory =
-            new videocapturemodule::VideoShareFactory(mMemoryHandle, kFPS);
+            new videocapturemodule::VideoShareFactory(mMemoryHandle, mFps);
     std::unique_ptr<cricket::WebRtcVideoCapturer> capturer(
             new cricket::WebRtcVideoCapturer(factory));
     cricket::Device default_device(mMemoryHandle, 0);

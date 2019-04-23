@@ -4,44 +4,51 @@
 #include "android/base/containers/BufferQueue.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
 
 namespace emulator {
 namespace net {
 using MessageQueue = android::base::BufferQueue<std::string>;
-using android::base::Looper;
 using android::base::Lock;
+using android::base::Looper;
 
+// An AsyncSocket is a socket that can connect to a local port on
+// the current machine.
 class AsyncSocket : public AsyncSocketAdapter {
 public:
-    AsyncSocket(Looper* looper);
+    AsyncSocket(Looper* looper, int port);
     ~AsyncSocket() = default;
-    void AddSocketEventListener(AsyncSocketEventListener* listener) override;
-    void RemoveSocketEventListener(AsyncSocketEventListener* listener) override;
-    void Close() override;
-    uint64_t Recv(char* buffer, uint64_t bufferSize) override;
-    uint64_t Send(const char* buffer, uint64_t bufferSize) override;
+    void close() override;
+    uint64_t recv(char* buffer, uint64_t bufferSize) override;
+    uint64_t send(const char* buffer, uint64_t bufferSize) override;
 
-    bool loopbackConnect(int port);
-    bool connected() const;
+    bool connect() override;
+    bool connected() override;
 
     void onWrite();
     void onRead();
 
 private:
-    static const int DEFAULT_READ_BUFFER_SIZE = 1024;
+    void connectToPort();
     static const int WRITE_BUFFER_SIZE = 1024;
 
     int mSocket;
+    int mPort;
+
     Looper* mLooper;
+    bool mConnecting = false;
+
     std::unique_ptr<Looper::FdWatch> mFdWatch;
-
     ::android::base::AsyncWriter mAsyncWriter;
-    MessageQueue mWriteQueue;
-    Lock mLock;
-    std::string mWriteBuffer;
+    ::android::base::FunctorThread mConnectThread;
 
-    AsyncSocketEventListener* mListener = nullptr;
+   // Queue of message that need to go out over this socket.
+    MessageQueue mWriteQueue;
+    Lock mWriteQueueLock;
+
+    // Write buffer used by the async writer.
+    std::string mWriteBuffer;
 };
 }  // namespace net
 }  // namespace emulator

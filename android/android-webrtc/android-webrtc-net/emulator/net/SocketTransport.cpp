@@ -15,33 +15,39 @@
 
 namespace emulator {
 namespace net {
-    /*
+/*
 std::ostream& operator<<(std::ostream& os, const State state) {
-    switch (state) {
-        case State::NOT_CONNECTED:
-            os << "NOT_CONNECTED";
-            break;
-        case State::CONNECTED:
-            os << "CONNECTED";
-            break;
-    }
-    return os;
+switch (state) {
+    case State::NOT_CONNECTED:
+        os << "NOT_CONNECTED";
+        break;
+    case State::CONNECTED:
+        os << "CONNECTED";
+        break;
+}
+return os;
 }
 */
 
-SocketTransport::SocketTransport(MessageReceiver* receiver)
-    : mReceiver(receiver) {}
 SocketTransport::SocketTransport(MessageReceiver* receiver,
                                  AsyncSocketAdapter* connection)
     : mReceiver(receiver), mSocket(connection) {
+    if (mSocket->connected()) {
+        mState = State::CONNECTED;
+    }
     registerCallbacks();
 }
 
 SocketTransport::~SocketTransport() {}
 
-void SocketTransport::OnClose(AsyncSocketAdapter* socket, int err) {
-    socket->Close();
-    setState(State::NOT_CONNECTED);
+void SocketTransport::onClose(AsyncSocketAdapter* socket, int err) {
+    mSocket->setSocketEventListener(nullptr);
+    socket->close();
+    setState(State::DISCONNECTED);
+}
+
+void SocketTransport::onConnected(AsyncSocketAdapter* socket) {
+    setState(State::CONNECTED);
 }
 
 void SocketTransport::setState(State newState) {
@@ -51,23 +57,31 @@ void SocketTransport::setState(State newState) {
     }
 }
 void SocketTransport::registerCallbacks() {
-    mSocket->AddSocketEventListener(this);
+    mSocket->setSocketEventListener(this);
+}
+
+bool SocketTransport::connect() {
+    if (mState == State::CONNECTED) {
+        return true;
+    }
+    setState(State::CONNECTING);
+    return mSocket->connect();
 }
 
 void SocketTransport::close() {
-    mSocket->Close();
-    mSocket->RemoveSocketEventListener(this);
-    setState(State::NOT_CONNECTED);
+    mSocket->close();
+    setState(State::DISCONNECTED);
 }
 
 bool SocketTransport::send(const std::string msg) {
-    return mSocket->Send(msg.c_str(), msg.size()) > 0;
+    return mState == State::CONNECTED &&
+           (mSocket->send(msg.c_str(), msg.size()) > 0);
 }
 
-void SocketTransport::OnRead(AsyncSocketAdapter* socket) {
+void SocketTransport::onRead(AsyncSocketAdapter* socket) {
     char buffer[0xffff];
     do {
-        int bytes = socket->Recv(buffer, sizeof(buffer));
+        int bytes = socket->recv(buffer, sizeof(buffer));
         if (bytes <= 0) {
             break;
         }

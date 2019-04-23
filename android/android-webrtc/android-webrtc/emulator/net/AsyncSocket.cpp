@@ -22,23 +22,35 @@ static void socket_watcher(void* opaque, int fd, unsigned events) {
     }
 }
 
-AsyncSocket::AsyncSocket(Looper* looper)
-    : mLooper(looper), mWriteQueue(WRITE_BUFFER_SIZE, mLock) {}
+AsyncSocket::AsyncSocket(Looper* looper, int port)
+    : mLooper(looper),
+      mPort(port),
+      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock),
+      mConnectThread([this]() {
+          connectToPort();
+          return 0;
+      }) {}
 
-uint64_t AsyncSocket::Recv(char* buffer, uint64_t bufferSize) {
-    return socketRecv(mFdWatch->fd(), buffer, sizeof(buffer));
+uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
+    int read = socketRecv(mFdWatch->fd(), buffer, sizeof(buffer));
+    if (read == 0) {
+        // A read of 0, means the socket was closed, so clean up
+        // everything properly.
+        close();
+    }
+    return read;
 }
 
 void AsyncSocket::onRead() {
     if (!connected() || !mListener) {
         return;
     }
-    mListener->OnRead(this);
+    mListener->onRead(this);
 }
 
-uint64_t AsyncSocket::Send(const char* buffer, uint64_t bufferSize) {
+uint64_t AsyncSocket::send(const char* buffer, uint64_t bufferSize) {
     {
-        AutoLock alock(mLock);
+        AutoLock alock(mWriteQueueLock);
         if (mWriteQueue.pushLocked(std::string(buffer, bufferSize)) !=
             BufferQueueResult::Ok) {
             return 0;
@@ -48,7 +60,7 @@ uint64_t AsyncSocket::Send(const char* buffer, uint64_t bufferSize) {
     return bufferSize;
 }
 
-bool AsyncSocket::connected() const {
+bool AsyncSocket::connected() {
     return mFdWatch.get() != nullptr;
 }
 
@@ -56,12 +68,11 @@ void AsyncSocket::onWrite() {
     if (!connected()) {
         return;
     }
-
     auto status = mAsyncWriter.run();
     switch (status) {
         case kAsyncCompleted:
             if (mWriteQueue.canPopLocked()) {
-                AutoLock alock(mLock);
+                AutoLock alock(mWriteQueueLock);
                 if (mWriteQueue.popLocked(&mWriteBuffer) ==
                     BufferQueueResult::Ok) {
                     mAsyncWriter.reset(mWriteBuffer.data(), mWriteBuffer.size(),
@@ -74,35 +85,48 @@ void AsyncSocket::onWrite() {
         case kAsyncAgain:
             return;
     }
-}  // namespace net
-void AsyncSocket::AddSocketEventListener(AsyncSocketEventListener* listener) {
-    mListener = listener;
 }
-void AsyncSocket::RemoveSocketEventListener(
-        AsyncSocketEventListener* listener) {
-    mListener = nullptr;
-}
-void AsyncSocket::Close() {
+
+void AsyncSocket::close() {
     socketClose(mSocket);
+    mFdWatch = nullptr;
+    mConnecting = false;
 }
 
-bool AsyncSocket::loopbackConnect(int port) {
-    mSocket = socketTcp4LoopbackClient(port);
-    if (mSocket < 0) {
-        mSocket = socketTcp6LoopbackClient(port);
+bool AsyncSocket::connect() {
+    if (mConnecting)
+        return true;
+
+    mConnecting = true;
+    return mConnectThread.start();
+}
+
+void AsyncSocket::connectToPort() {
+    int socket = 0;
+    while (socket < 1 && mConnecting) {
+        socket = socketTcp4LoopbackClient(mPort);
+        if (socket < 0) {
+            socket = socketTcp6LoopbackClient(mPort);
+        }
+        if (socket < 0) {
+            LOG(INFO) << "Failed to connect to: " << mPort << ", sleeping..";
+            android::base::Thread::sleepMs(1000);
+        }
+    }
+    if (socket < 1) {
+        LOG(INFO) << "giving up..";
+        return;
     }
 
-    if (mSocket < 0) {
-        return false;
-    }
-
+    mSocket = socket;
     socketSetNonBlocking(mSocket);
-
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
             mLooper->createFdWatch(mSocket, socket_watcher, this));
     mFdWatch->wantRead();
-
-    return true;
+    LOG(INFO) << "Connected to: " << mPort;
+    if (mListener) {
+        mListener->onConnected(this);
+    }
 }
 
 }  // namespace net
