@@ -242,7 +242,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->back_button->setHidden(true);
-        mToolsUi->home_button->setHidden(true);
         mToolsUi->overview_button->setHidden(true);
     }
 
