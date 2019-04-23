@@ -57,15 +57,20 @@ public:
 };
 
 // A Participant in an webrtc streaming session. This class is
-// repsonsbile for:
+// repsonsbile for driving the jsep protocol. It basically:
 //
-// 1. Creating the audio & video streams.
+// 1. Creates the audio & video streams with shared mem handle & fps.
 // 2. Do network discovery (ice etc).
 // 3. Exchanging of offers between remote client.
+//
+// It talks with the switchboard to send/receive messages.
 class Participant : public EmptyConnectionObserver,
                     public ::webrtc::CreateSessionDescriptionObserver {
 public:
-    Participant(Switchboard* board, std::string id, std::string mem_handle);
+    Participant(Switchboard* board,
+                std::string id,
+                std::string mem_handle,
+                int desiredFps);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
@@ -108,12 +113,12 @@ private:
     Switchboard* mSwitchboard;
     std::string mPeerId;
     std::string mMemoryHandle;
+    uint32_t mFps = 24;
 
     const std::string kStunUri = "stun:stun.l.google.com:19302";
     const std::string kAudioLabel = "emulator_audio_stream";
     const std::string kVideoLabel = "emulator_video_stream";
     const std::string kStreamLabel = "emulator_view";
-    const uint8_t kFPS = 24;
 };
 }  // namespace webrtc
 }  // namespace emulator

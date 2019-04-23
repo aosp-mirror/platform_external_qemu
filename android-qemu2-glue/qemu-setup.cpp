@@ -247,6 +247,8 @@ bool qemu_android_emulation_setup() {
         #else
             rtcBridge.reset(new android::emulation::control::NopRtcBridge());
         #endif
+        // Go bridge go!
+        rtcBridge->start();
         android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), rtcBridge.get());
     }
 #endif
