@@ -48,7 +48,6 @@ void EmulatorConnection::listen() {
 
 void EmulatorConnection::disconnect(webrtc::Switchboard* disconnect) {
     RTC_LOG(INFO) << "Removing switchboard.";
-    // TODO(jansene): add to list of entries to cleanup.
 }
 void EmulatorConnection::OnRead(rtc::AsyncSocket* socket) {
     rtc::SocketAddress accept_addr;
