@@ -387,6 +387,9 @@ private:
     // If the playback stream reaches EOF, automatically ends playback.
     void replayNextEvent(const AutoLock& proofOfLock);
 
+    // Reset velocity, used during snapshot load and canceling playback.
+    void resetVelocity();
+
     AutomationEventSink mEventSink;
     PhysicalModel* const mPhysicalModel;
     base::Looper* const mLooper;
@@ -489,6 +492,8 @@ void AutomationControllerImpl::reset() {
     // These may return and error, but it's safe to ignore them here.
     stopRecording();
     stopPlayback();
+
+    resetVelocity();
 }
 
 DurationNs AutomationControllerImpl::advanceTime() {
@@ -663,11 +668,7 @@ StopResult AutomationControllerImpl::stopPlayback() {
         return Err(StopError::NotStarted);
     }
 
-    const vec3 vecZero = {0.0f, 0.0f, 0.0f};
-    physicalModel_setTargetVelocity(mPhysicalModel, vecZero,
-                                    PHYSICAL_INTERPOLATION_SMOOTH);
-    physicalModel_setTargetAmbientMotion(mPhysicalModel, 0.0f,
-                                         PHYSICAL_INTERPOLATION_SMOOTH);
+    resetVelocity();
 
     mPlayingFromFile = false;
     mPlaybackEventSource.reset();
@@ -803,6 +804,14 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
             mOnStopCallback = nullptr;
         }
     }
+}
+
+void AutomationControllerImpl::resetVelocity() {
+    const vec3 vecZero = {0.0f, 0.0f, 0.0f};
+    physicalModel_setTargetVelocity(mPhysicalModel, vecZero,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetAmbientMotion(mPhysicalModel, 0.0f,
+                                         PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
 }  // namespace automation
