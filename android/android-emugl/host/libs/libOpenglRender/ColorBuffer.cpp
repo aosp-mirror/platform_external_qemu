@@ -161,6 +161,12 @@ static bool sGetFormatParameters(
             *sizedInternalFormat = GL_R8;
             *isBlob = true;
             return true;
+        case GL_BGRA_EXT:
+            *texFormat = GL_BGRA_EXT;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_BGRA8_EXT;
+            return true;
         default:
             fprintf(stderr, "%s: Unknown format 0x%x\n",
                     __func__, internalFormat);
@@ -900,7 +906,14 @@ bool ColorBuffer::importMemory(
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, m_sizedInternalFormat, m_width, m_height, m_memoryObject, 0);
+
+    if (m_sizedInternalFormat == GL_BGRA8_EXT) {
+        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height, m_memoryObject, 0);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+    } else {
+        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, m_sizedInternalFormat, m_width, m_height, m_memoryObject, 0);
+    }
 
     s_egl.eglDestroyImageKHR(m_display, m_eglImage);
     m_eglImage = s_egl.eglCreateImageKHR(
