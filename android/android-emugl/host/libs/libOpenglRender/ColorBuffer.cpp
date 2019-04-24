@@ -161,6 +161,12 @@ static bool sGetFormatParameters(
             *sizedInternalFormat = GL_R8;
             *isBlob = true;
             return true;
+        case GL_BGRA_EXT:
+            *texFormat = GL_BGRA_EXT;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_BGRA8_EXT;
+            return true;
         default:
             fprintf(stderr, "%s: Unknown format 0x%x\n",
                     __func__, internalFormat);

@@ -1022,10 +1022,11 @@ GL_APICALL void GL_APIENTRY glGetSyncivAPPLE (GLsync sync, GLenum pname, GLsizei
 #endif
 #endif /* GL_APPLE_sync */
 
-#ifndef GL_APPLE_texture_format_BGRA8888
-#define GL_APPLE_texture_format_BGRA8888 1
 #define GL_BGRA_EXT                       0x80E1
 #define GL_BGRA8_EXT                      0x93A1
+
+#ifndef GL_APPLE_texture_format_BGRA8888
+#define GL_APPLE_texture_format_BGRA8888 1
 #endif /* GL_APPLE_texture_format_BGRA8888 */
 
 #ifndef GL_APPLE_texture_max_level
