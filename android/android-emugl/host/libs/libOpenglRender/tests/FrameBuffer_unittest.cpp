@@ -600,4 +600,12 @@ TEST_F(FrameBufferTest, VulkanInteropQuery) {
     (void)supported;
 }
 
+// Tests ColorBuffer with GL_BGRA input.
+TEST_F(FrameBufferTest, CreateColorBufferBGRA) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_BGRA_EXT, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    // FramBuffer::finalize handles color buffer destruction here
+}
+
 }  // namespace emugl
