@@ -29,15 +29,18 @@ namespace snapshot {
 Loader::Loader(const Snapshot& snapshot, int error)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (error) {
+        fprintf(stderr, "%s: existingError, fail\n", __func__);
         mSnapshot.saveFailure(errnoToFailure(error));
         return;
     }
 
     if (!path_is_dir(base::c_str(mSnapshot.dataDir()))) {
+        fprintf(stderr, "%s: snapshotDir not dir\n", __func__);
         return;
     }
 
     if (!mSnapshot.preload()) {
+        fprintf(stderr, "%s: fail snapshot preload\n", __func__);
         return;
     }
 
@@ -50,6 +53,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
                 "rb", android::base::FileShare::Read);
         if (!ram) {
             mSnapshot.saveFailure(FailureReason::NoRamFile);
+        fprintf(stderr, "%s: no ram file, fail\n", __func__);
             return;
         }
 
@@ -68,12 +72,14 @@ Loader::Loader(const Snapshot& snapshot, int error)
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
                 "rb", android::base::FileShare::Read);
         if (!textures) {
+            fprintf(stderr, "%s: no textures file!!!!!!!!!!!!!!\n", __func__);
             mSnapshot.saveFailure(FailureReason::NoTexturesFile);
             mRamLoader.clear();
             return;
         }
         mTextureLoader = std::make_shared<TextureLoader>(
                 StdioStream(textures, StdioStream::kOwner));
+        fprintf(stderr, "%s: made texture load\n", __func__);
     }
 
     mStatus = OperationStatus::NotStarted;
