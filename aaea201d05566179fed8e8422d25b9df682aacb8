@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6db0bc1_aceb81ab",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/WebRtcBridge.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-25T18:25:18Z",
+      "side": 1,
+      "message": "add apache 2.0 copyright headers",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 51
+      },
+      "revId": "aaea201d05566179fed8e8422d25b9df682aacb8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
