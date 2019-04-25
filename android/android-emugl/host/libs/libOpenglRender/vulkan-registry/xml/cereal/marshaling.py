@@ -40,7 +40,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                  direction = "write",
                  forApiOutput = False,
                  dynAlloc = False,
-                 mapHandles = True):
+                 mapHandles = True,
+                 handleMapOverwrites = False):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -58,6 +59,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         self.dynAlloc = dynAlloc
         self.mapHandles = mapHandles
+        self.handleMapOverwrites = handleMapOverwrites
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -119,12 +121,22 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                 makeVulkanTypeSimple(False, "uint64_t", 0, paramName=handle64Var)
 
         if self.direction == "write":
-            self.cgen.stmt(
-                "%s->handleMapping()->mapHandles_%s_u64(%s, %s, %s)" %
-                (self.streamVarName, vulkanType.typeName,
-                access,
-                handle64VarAccess, lenAccess))
-            self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
+            if self.handleMapOverwrites:
+                self.cgen.stmt(
+                    "static_assert(8 == sizeof(%s), \"handle map overwrite requres %s to be 8 bytes long\")" % \
+                            (vulkanType.typeName, vulkanType.typeName))
+                self.cgen.stmt(
+                    "%s->handleMapping()->mapHandles_%s((%s*)%s, %s)" %
+                    (self.streamVarName, vulkanType.typeName, vulkanType.typeName,
+                    access, lenAccess))
+                self.genStreamCall(vulkanType, access, "8 * %s" % lenAccess)
+            else:
+                self.cgen.stmt(
+                    "%s->handleMapping()->mapHandles_%s_u64(%s, %s, %s)" %
+                    (self.streamVarName, vulkanType.typeName,
+                    access,
+                    handle64VarAccess, lenAccess))
+                self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
         else:
             self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
             self.cgen.stmt(

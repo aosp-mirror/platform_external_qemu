@@ -388,9 +388,13 @@ using DlSymFunc = void* (void*, const char*);
 """
         decoderSnapshotImplIncludes = """
 #include "VulkanHandleMapping.h"
+#include "VkDecoderGlobalState.h"
+#include "VkReconstruction.h"
 
 #include "goldfish_vk_baseprotodefs.pb.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
+
+#include "android/base/synchronization/Lock.h"
 """
 
         decoderHeaderIncludes = """
