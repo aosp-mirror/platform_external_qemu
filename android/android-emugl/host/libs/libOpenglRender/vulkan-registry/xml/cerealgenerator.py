@@ -127,7 +127,7 @@ set(OpenglRender_vulkan_cereal_src %s)
 android_add_library(OpenglRender_vulkan_cereal)
 target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
 android_target_compile_definitions(OpenglRender_vulkan_cereal windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base OpenglRender_vulkan_cereal_proto)
+target_link_libraries(OpenglRender_vulkan_cereal PUBLIC OpenglRender_vulkan_cereal_proto PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC android-emu-base)
 
 target_include_directories(OpenglRender_vulkan_cereal
@@ -388,9 +388,13 @@ using DlSymFunc = void* (void*, const char*);
 """
         decoderSnapshotImplIncludes = """
 #include "VulkanHandleMapping.h"
+#include "VkDecoderGlobalState.h"
+#include "VkReconstruction.h"
 
 #include "goldfish_vk_baseprotodefs.pb.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
+
+#include "android/base/synchronization/Lock.h"
 """
 
         decoderHeaderIncludes = """
