@@ -27,6 +27,8 @@
 
 #include "VulkanHandleMapping.h"
 
+#include "android/base/containers/EntityManager.h"
+
 #include "goldfish_vk_baseprotodefs.pb.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
 
@@ -35,11 +37,16 @@
 
 
 
+using android::base::EntityManager;
+using android::base::ComponentManager;
+using android::base::UnpackedComponentManager;
+
 using namespace goldfish_vk;
 
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
 #ifdef VK_VERSION_1_0
 void vkCreateInstance(
     android::base::Pool* pool,
@@ -3238,6 +3245,26 @@ void vkResetCommandBufferAsyncGOOGLE(
 }
 #endif
 
+private:
+    struct ApiInfo {
+        goldfish_vk_proto::VkApiCall apiCall;
+    };
+
+    using ApiTrace = EntityManager<32, 16, 16, ApiInfo>;
+    using ApiHandle = ApiTrace::EntityHandle;
+
+    struct HandleReconstruction {
+        std::vector<ApiHandle> apiRefs;
+    };
+
+    using HandleReconstructions = UnpackedComponentManager<32, 16, 16, HandleReconstruction>;
+
+    ApiTrace mApiTrace;
+
+#define DEFINE_HANDLE_RECONSTRUCTION_MEMBER(type) \
+    HandleReconstructions mReconstructions_##type;
+
+    GOLDFISH_VK_LIST_HANDLE_TYPES(DEFINE_HANDLE_RECONSTRUCTION_MEMBER)
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :

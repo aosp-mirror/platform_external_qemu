@@ -699,4 +699,24 @@ public:
     GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(BOXED_NON_DISPATCHABLE_UNWRAP_AND_DELETE_IMPL)
 };
 
+#define HANDLE_MAPPING_DECLS(type_name) \
+    void mapHandles_##type_name(type_name* handles, size_t count) override; \
+    void mapHandles_##type_name##_u64(const type_name* handles, uint64_t* handle_u64s, size_t count) override; \
+    void mapHandles_u64_##type_name(const uint64_t* handle_u64s, type_name* handles, size_t count) override; \
+
+class BoxedHandleUnwrapAndDeletePreserveBoxedMapping : public VulkanHandleMapping {
+public:
+    void setup(android::base::Pool* pool, uint64_t** bufPtr);
+    virtual ~BoxedHandleUnwrapAndDeletePreserveBoxedMapping() { }
+
+    GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(HANDLE_MAPPING_DECLS)
+    GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(HANDLE_MAPPING_DECLS)
+
+private:
+    void allocPreserve(size_t count);
+
+    android::base::Pool* mPool = nullptr;
+    uint64_t** mPreserveBufPtr = nullptr;
+};
+
 } // namespace goldfish_vk
