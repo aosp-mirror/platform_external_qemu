@@ -110,6 +110,7 @@ public:
         return mLastSaveUptimeMs;
     }
 
+    bool hasSaver() { return bool(mSaver); }
     Saver& saver() { return *mSaver; }
     Loader& loader() { return *mLoader; }
     bool hasLoader() const { return mLoader ? true : false ; }

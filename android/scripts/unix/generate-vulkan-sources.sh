@@ -23,6 +23,8 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "Regenerate emulator host/guest Vulkan driver."
 
+option_register_var "--only=<module-name>" OPT_ONLY "Only update a particular generated module"
+
 aosp_dir_register_option
 
 option_parse "$@"
@@ -35,6 +37,10 @@ VULKAN_SRC_DIR=$RENDERLIB_DIR/vulkan
 CEREAL_OUTPUT_DIR=$VULKAN_SRC_DIR/cereal
 
 mkdir -p $CEREAL_OUTPUT_DIR
+
+if [ "$OPT_ONLY" ]; then
+export ANDROID_EMU_VK_CEREAL_SUPPRESS=$OPT_ONLY
+fi
 
 python3 $VULKAN_REGISTRY_XML_DIR/genvk.py -registry $VULKAN_REGISTRY_XML_DIR/vk.xml cereal -o $CEREAL_OUTPUT_DIR
 
