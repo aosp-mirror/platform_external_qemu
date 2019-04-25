@@ -117,3 +117,11 @@ GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
     AndroidPipe::Service::resetAll();
     android_stopOpenglesRenderer(true);
 }
+
+void GoldfishOpenglTestEnv::saveSnapshot(android::base::Stream* stream) {
+    HostGoldfishPipeDevice::get()->saveSnapshot(stream);
+}
+
+void GoldfishOpenglTestEnv::loadSnapshot(android::base::Stream* stream) {
+    HostGoldfishPipeDevice::get()->loadSnapshot(stream);
+}

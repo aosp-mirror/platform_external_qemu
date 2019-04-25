@@ -23,6 +23,8 @@
 #include <vulkan/vk_android_native_buffer.h>
 
 #include "android/base/ArraySize.h"
+#include "android/base/files/MemStream.h"
+#include "android/base/files/Stream.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -949,6 +951,11 @@ TEST_F(VulkanHalTest, BufferCreate) {
     vk->vkGetBufferMemoryRequirements(mDevice, buffer, &memReqs);
 
     vk->vkDestroyBuffer(mDevice, buffer, nullptr);
+}
+
+TEST_F(VulkanHalTest, SnapshotSave) {
+    android::base::MemStream testStream;
+    testEnv->saveSnapshot(&testStream);
 }
 
 }  // namespace aemu
