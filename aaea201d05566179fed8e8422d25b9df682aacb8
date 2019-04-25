@@ -22,6 +22,29 @@
       "revId": "aaea201d05566179fed8e8422d25b9df682aacb8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bf4665a_128a1cc9",
+        "filename": "android/android-webrtc/videobridge/emulator/net/SocketTransport.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-25T18:29:48Z",
+      "side": 1,
+      "message": "why this size? its a lot and might bump up on stack limit in some cases. is this accessed concurrently from multiple threads? what about having a buffer allocated once in the class instance itself?",
+      "range": {
+        "startLine": 157,
+        "startChar": 16,
+        "endLine": 157,
+        "endChar": 22
+      },
+      "revId": "aaea201d05566179fed8e8422d25b9df682aacb8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
