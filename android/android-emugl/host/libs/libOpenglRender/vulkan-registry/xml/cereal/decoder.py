@@ -19,6 +19,7 @@ class VkDecoder {
 public:
     VkDecoder();
     ~VkDecoder();
+    void setForSnapshotLoad(bool forSnapshotLoad);
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 private:
     class Impl;
@@ -39,10 +40,15 @@ public:
     %s* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
+    void setForSnapshotLoad(bool forSnapshotLoad) {
+        m_forSnapshotLoad = forSnapshotLoad;
+    }
+
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 
 private:
     bool m_logCalls;
+    bool m_forSnapshotLoad = false;
     VulkanDispatch* m_vk;
     VkDecoderGlobalState* m_state;
     %s m_vkStream { nullptr };
@@ -52,12 +58,17 @@ private:
     BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
     android::base::Pool m_pool { 8, 4096, 64 };
+    BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
 };
 
 VkDecoder::VkDecoder() :
     mImpl(new VkDecoder::Impl()) { }
 
 VkDecoder::~VkDecoder() = default;
+
+void VkDecoder::setForSnapshotLoad(bool forSnapshotLoad) {
+    mImpl->setForSnapshotLoad(forSnapshotLoad);
+}
 
 size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
     return mImpl->decode(buf, bufsize, stream);
@@ -110,13 +121,14 @@ def emit_transform(typeInfo, param, cgen, variant="tohost"):
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
-def emit_marshal(typeInfo, param, cgen):
+def emit_marshal(typeInfo, param, cgen, handleMapOverwrites=False):
     iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
         cgen,
         WRITE_STREAM,
         param.paramName,
         API_PREFIX_MARSHAL,
-        direction="write"))
+        direction="write",
+        handleMapOverwrites=handleMapOverwrites))
 
 class DecodingParameters(object):
     def __init__(self, api):
@@ -165,7 +177,9 @@ def emit_decode_parameters(typeInfo, api, cgen):
         else:
             if p.nonDispatchableHandleDestroy:
                 cgen.stmt("// Begin manual non dispatchable handle destroy unboxing for %s" % p.paramName)
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeleteMapping)" % READ_STREAM)
+                cgen.stmt("%s* boxed_%s_preserve" % (p.typeName, p.paramName))
+                cgen.stmt("m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_%s_preserve)" % p.paramName)
+                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping)" % READ_STREAM)
 
             if p.possiblyOutput():
                 cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
@@ -216,18 +230,23 @@ def emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=True):
 
     cgen.stmt("%s->unsetHandleMapping()" % WRITE_STREAM)
 
+    handleMapOverwrites = False
+
     for p in paramsToWrite:
         emit_transform(typeInfo, p, cgen, variant="fromhost")
+
+        handleMapOverwrites = False
 
         if autobox and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin auto non dispatchable handle create for %s" % p.paramName)
             cgen.stmt("%s->setHandleMapping(&m_boxedHandleCreateMapping)" % WRITE_STREAM)
+            handleMapOverwrites = True
 
         if (not autobox) and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin manual non dispatchable handle create for %s" % p.paramName)
             cgen.stmt("%s->unsetHandleMapping()" % WRITE_STREAM)
 
-        emit_marshal(typeInfo, p, cgen)
+        emit_marshal(typeInfo, p, cgen, handleMapOverwrites=handleMapOverwrites)
 
         if autobox and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin auto non dispatchable handle create for %s" % p.paramName)
@@ -246,19 +265,40 @@ def emit_decode_return_writeback(api, cgen):
 
 def emit_decode_finish(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
-    cgen.stmt("m_pool.freeAll()")
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
+
+def emit_pool_free(cgen):
+    cgen.stmt("m_pool.freeAll()")
 
 def emit_snapshot(typeInfo, api, cgen):
 
-    additionalParams = [makeVulkanTypeSimple(False, "android::base::Pool", 1, "&m_pool")]
+    cgen.stmt("size_t snapshotTraceBytes = %s->endTrace()" % READ_STREAM)
+
+    additionalParams = [ \
+        makeVulkanTypeSimple(True, "uint8_t", 1, "snapshotTraceBegin"),
+        makeVulkanTypeSimple(False, "size_t", 0, "snapshotTraceBytes"),
+        makeVulkanTypeSimple(False, "android::base::Pool", 1, "&m_pool"),
+    ]
 
     retTypeName = api.getRetTypeExpr()
     if retTypeName != "void":
         retVar = api.getRetVarExpr()
         additionalParams.append(makeVulkanTypeSimple(False, retTypeName, 0, retVar))
 
-    customParams = additionalParams + api.parameters
+    paramsForSnapshot = []
+
+    decodingParams = DecodingParameters(api)
+
+    for p in decodingParams.toRead:
+        if p.nonDispatchableHandleDestroy:
+            if p.pointerIndirectionLevels > 0:
+                paramsForSnapshot.append(p.withModifiedName("boxed_%s_preserve" % p.paramName))
+            else:
+                paramsForSnapshot.append(p.withModifiedName("*boxed_%s_preserve" % p.paramName))
+        else:
+            paramsForSnapshot.append(p)
+
+    customParams = additionalParams + paramsForSnapshot
 
     apiForSnapshot = \
         api.withCustomReturnType(makeVulkanTypeSimple(False, "void", 0, "void")). \
@@ -273,7 +313,8 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
-    emit_snapshot(typeInfo, api, cgen);
+    emit_snapshot(typeInfo, api, cgen)
+    emit_pool_free(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_call_log(api, cgen)
@@ -282,7 +323,8 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
-    emit_snapshot(typeInfo, api, cgen);
+    emit_snapshot(typeInfo, api, cgen)
+    emit_pool_free(cgen)
 
 ## Custom decoding definitions##################################################
 def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
@@ -310,6 +352,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
     emit_snapshot(typeInfo, api, cgen);
+    emit_pool_free(cgen)
 
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_call_log(api, cgen)
@@ -337,6 +380,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_decode_finish(cgen)
     emit_snapshot(typeInfo, api, cgen);
+    emit_pool_free(cgen)
 
 custom_decodes = {
     "vkEnumerateInstanceVersion" : emit_global_state_wrapped_decoding,
@@ -460,6 +504,10 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("unsigned char *ptr = (unsigned char *)buf")
         self.cgen.stmt("const unsigned char* const end = (const unsigned char*)buf + len")
 
+        self.cgen.beginIf("m_forSnapshotLoad")
+        self.cgen.stmt("ptr += m_state->setCreatedHandlesForSnapshotLoad(ptr)");
+        self.cgen.endIf()
+
         self.cgen.line("while (end - ptr >= 8)")
         self.cgen.beginBlock() # while loop
 
@@ -471,6 +519,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
         self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
         self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
+        self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.stmt("auto vk = m_vk")
 
@@ -496,6 +545,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
             emit_decode_return_writeback(api, cgen)
             emit_decode_finish(cgen)
             emit_snapshot(typeInfo, api, cgen);
+            emit_pool_free(cgen)
 
         cgen.stmt("break")
         cgen.endBlock()
@@ -511,6 +561,10 @@ class VulkanDecoder(VulkanWrapperGenerator):
 
         self.cgen.stmt("ptr += packetLen")
         self.cgen.endBlock() # while loop
+
+        self.cgen.beginIf("m_forSnapshotLoad")
+        self.cgen.stmt("m_state->clearCreatedHandlesForSnapshotLoad()");
+        self.cgen.endIf()
 
         self.cgen.stmt("return ptr - (unsigned char*)buf;")
         self.cgen.endBlock() # function body
