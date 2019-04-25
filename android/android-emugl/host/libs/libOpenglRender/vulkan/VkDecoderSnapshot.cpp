@@ -26,6 +26,7 @@
 
 
 #include "VulkanHandleMapping.h"
+#include "VkReconstruction.h"
 
 #include "goldfish_vk_baseprotodefs.pb.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
@@ -40,6 +41,7 @@ using namespace goldfish_vk;
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
 #ifdef VK_VERSION_1_0
 void vkCreateInstance(
     android::base::Pool* pool,
@@ -49,6 +51,19 @@ void vkCreateInstance(
     VkInstance* pInstance)
 {
     // TODO: Implement
+    // pInstance create
+    mReconstruction.addReconstruction_VkInstance(pInstance, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateinstance();
+    to_proto_VkInstanceCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkInstance(pInstance, 1, apiHandle);
 }
 void vkDestroyInstance(
     android::base::Pool* pool,
@@ -56,6 +71,9 @@ void vkDestroyInstance(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // instance destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkInstance((&instance), 1);
+    mReconstruction.removeReconstruction_VkInstance((&instance), 1);
 }
 void vkEnumeratePhysicalDevices(
     android::base::Pool* pool,
@@ -65,6 +83,13 @@ void vkEnumeratePhysicalDevices(
     VkPhysicalDevice* pPhysicalDevices)
 {
     // TODO: Implement
+    // pPhysicalDevices create
+    mReconstruction.addReconstruction_VkPhysicalDevice(pPhysicalDevices, (*(pPhysicalDeviceCount)));
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkenumeratephysicaldevices();
+    mReconstruction.forEachReconstructionAddApiRef_VkPhysicalDevice(pPhysicalDevices, (*(pPhysicalDeviceCount)), apiHandle);
 }
 void vkGetPhysicalDeviceFeatures(
     android::base::Pool* pool,
@@ -141,6 +166,19 @@ void vkCreateDevice(
     VkDevice* pDevice)
 {
     // TODO: Implement
+    // pDevice create
+    mReconstruction.addReconstruction_VkDevice(pDevice, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedevice();
+    to_proto_VkDeviceCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDevice(pDevice, 1, apiHandle);
 }
 void vkDestroyDevice(
     android::base::Pool* pool,
@@ -148,6 +186,9 @@ void vkDestroyDevice(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // device destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDevice((&device), 1);
+    mReconstruction.removeReconstruction_VkDevice((&device), 1);
 }
 void vkEnumerateInstanceExtensionProperties(
     android::base::Pool* pool,
@@ -193,6 +234,13 @@ void vkGetDeviceQueue(
     VkQueue* pQueue)
 {
     // TODO: Implement
+    // pQueue create
+    mReconstruction.addReconstruction_VkQueue(pQueue, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkgetdevicequeue();
+    mReconstruction.forEachReconstructionAddApiRef_VkQueue(pQueue, 1, apiHandle);
 }
 void vkQueueSubmit(
     android::base::Pool* pool,
@@ -227,6 +275,19 @@ void vkAllocateMemory(
     VkDeviceMemory* pMemory)
 {
     // TODO: Implement
+    // pMemory create
+    mReconstruction.addReconstruction_VkDeviceMemory(pMemory, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkallocatememory();
+    to_proto_VkMemoryAllocateInfo(&someHandleMapping, pAllocateInfo, proto->mutable_pallocateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDeviceMemory(pMemory, 1, apiHandle);
 }
 void vkFreeMemory(
     android::base::Pool* pool,
@@ -235,6 +296,9 @@ void vkFreeMemory(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // memory destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDeviceMemory((&memory), 1);
+    mReconstruction.removeReconstruction_VkDeviceMemory((&memory), 1);
 }
 void vkMapMemory(
     android::base::Pool* pool,
@@ -358,6 +422,19 @@ void vkCreateFence(
     VkFence* pFence)
 {
     // TODO: Implement
+    // pFence create
+    mReconstruction.addReconstruction_VkFence(pFence, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatefence();
+    to_proto_VkFenceCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkFence(pFence, 1, apiHandle);
 }
 void vkDestroyFence(
     android::base::Pool* pool,
@@ -366,6 +443,9 @@ void vkDestroyFence(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // fence destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkFence((&fence), 1);
+    mReconstruction.removeReconstruction_VkFence((&fence), 1);
 }
 void vkResetFences(
     android::base::Pool* pool,
@@ -404,6 +484,19 @@ void vkCreateSemaphore(
     VkSemaphore* pSemaphore)
 {
     // TODO: Implement
+    // pSemaphore create
+    mReconstruction.addReconstruction_VkSemaphore(pSemaphore, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatesemaphore();
+    to_proto_VkSemaphoreCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkSemaphore(pSemaphore, 1, apiHandle);
 }
 void vkDestroySemaphore(
     android::base::Pool* pool,
@@ -412,6 +505,9 @@ void vkDestroySemaphore(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // semaphore destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkSemaphore((&semaphore), 1);
+    mReconstruction.removeReconstruction_VkSemaphore((&semaphore), 1);
 }
 void vkCreateEvent(
     android::base::Pool* pool,
@@ -422,6 +518,19 @@ void vkCreateEvent(
     VkEvent* pEvent)
 {
     // TODO: Implement
+    // pEvent create
+    mReconstruction.addReconstruction_VkEvent(pEvent, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateevent();
+    to_proto_VkEventCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkEvent(pEvent, 1, apiHandle);
 }
 void vkDestroyEvent(
     android::base::Pool* pool,
@@ -430,6 +539,9 @@ void vkDestroyEvent(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // event destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkEvent((&event), 1);
+    mReconstruction.removeReconstruction_VkEvent((&event), 1);
 }
 void vkGetEventStatus(
     android::base::Pool* pool,
@@ -464,6 +576,19 @@ void vkCreateQueryPool(
     VkQueryPool* pQueryPool)
 {
     // TODO: Implement
+    // pQueryPool create
+    mReconstruction.addReconstruction_VkQueryPool(pQueryPool, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatequerypool();
+    to_proto_VkQueryPoolCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkQueryPool(pQueryPool, 1, apiHandle);
 }
 void vkDestroyQueryPool(
     android::base::Pool* pool,
@@ -472,6 +597,9 @@ void vkDestroyQueryPool(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // queryPool destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkQueryPool((&queryPool), 1);
+    mReconstruction.removeReconstruction_VkQueryPool((&queryPool), 1);
 }
 void vkGetQueryPoolResults(
     android::base::Pool* pool,
@@ -496,6 +624,19 @@ void vkCreateBuffer(
     VkBuffer* pBuffer)
 {
     // TODO: Implement
+    // pBuffer create
+    mReconstruction.addReconstruction_VkBuffer(pBuffer, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatebuffer();
+    to_proto_VkBufferCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkBuffer(pBuffer, 1, apiHandle);
 }
 void vkDestroyBuffer(
     android::base::Pool* pool,
@@ -504,6 +645,9 @@ void vkDestroyBuffer(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // buffer destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkBuffer((&buffer), 1);
+    mReconstruction.removeReconstruction_VkBuffer((&buffer), 1);
 }
 void vkCreateBufferView(
     android::base::Pool* pool,
@@ -514,6 +658,19 @@ void vkCreateBufferView(
     VkBufferView* pView)
 {
     // TODO: Implement
+    // pView create
+    mReconstruction.addReconstruction_VkBufferView(pView, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatebufferview();
+    to_proto_VkBufferViewCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkBufferView(pView, 1, apiHandle);
 }
 void vkDestroyBufferView(
     android::base::Pool* pool,
@@ -522,6 +679,9 @@ void vkDestroyBufferView(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // bufferView destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkBufferView((&bufferView), 1);
+    mReconstruction.removeReconstruction_VkBufferView((&bufferView), 1);
 }
 void vkCreateImage(
     android::base::Pool* pool,
@@ -532,6 +692,19 @@ void vkCreateImage(
     VkImage* pImage)
 {
     // TODO: Implement
+    // pImage create
+    mReconstruction.addReconstruction_VkImage(pImage, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateimage();
+    to_proto_VkImageCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkImage(pImage, 1, apiHandle);
 }
 void vkDestroyImage(
     android::base::Pool* pool,
@@ -540,6 +713,9 @@ void vkDestroyImage(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // image destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkImage((&image), 1);
+    mReconstruction.removeReconstruction_VkImage((&image), 1);
 }
 void vkGetImageSubresourceLayout(
     android::base::Pool* pool,
@@ -559,6 +735,19 @@ void vkCreateImageView(
     VkImageView* pView)
 {
     // TODO: Implement
+    // pView create
+    mReconstruction.addReconstruction_VkImageView(pView, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateimageview();
+    to_proto_VkImageViewCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkImageView(pView, 1, apiHandle);
 }
 void vkDestroyImageView(
     android::base::Pool* pool,
@@ -567,6 +756,9 @@ void vkDestroyImageView(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // imageView destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkImageView((&imageView), 1);
+    mReconstruction.removeReconstruction_VkImageView((&imageView), 1);
 }
 void vkCreateShaderModule(
     android::base::Pool* pool,
@@ -577,6 +769,19 @@ void vkCreateShaderModule(
     VkShaderModule* pShaderModule)
 {
     // TODO: Implement
+    // pShaderModule create
+    mReconstruction.addReconstruction_VkShaderModule(pShaderModule, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateshadermodule();
+    to_proto_VkShaderModuleCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkShaderModule(pShaderModule, 1, apiHandle);
 }
 void vkDestroyShaderModule(
     android::base::Pool* pool,
@@ -585,6 +790,9 @@ void vkDestroyShaderModule(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // shaderModule destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkShaderModule((&shaderModule), 1);
+    mReconstruction.removeReconstruction_VkShaderModule((&shaderModule), 1);
 }
 void vkCreatePipelineCache(
     android::base::Pool* pool,
@@ -595,6 +803,19 @@ void vkCreatePipelineCache(
     VkPipelineCache* pPipelineCache)
 {
     // TODO: Implement
+    // pPipelineCache create
+    mReconstruction.addReconstruction_VkPipelineCache(pPipelineCache, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatepipelinecache();
+    to_proto_VkPipelineCacheCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkPipelineCache(pPipelineCache, 1, apiHandle);
 }
 void vkDestroyPipelineCache(
     android::base::Pool* pool,
@@ -603,6 +824,9 @@ void vkDestroyPipelineCache(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // pipelineCache destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkPipelineCache((&pipelineCache), 1);
+    mReconstruction.removeReconstruction_VkPipelineCache((&pipelineCache), 1);
 }
 void vkGetPipelineCacheData(
     android::base::Pool* pool,
@@ -635,6 +859,22 @@ void vkCreateGraphicsPipelines(
     VkPipeline* pPipelines)
 {
     // TODO: Implement
+    // pPipelines create
+    mReconstruction.addReconstruction_VkPipeline(pPipelines, ((createInfoCount)));
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreategraphicspipelines();
+    for (uint32_t i = 0; i < (uint32_t)((createInfoCount)); ++i)
+    {
+        to_proto_VkGraphicsPipelineCreateInfo(&someHandleMapping, pCreateInfos + i, proto->add_pcreateinfos());
+    }
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkPipeline(pPipelines, ((createInfoCount)), apiHandle);
 }
 void vkCreateComputePipelines(
     android::base::Pool* pool,
@@ -647,6 +887,22 @@ void vkCreateComputePipelines(
     VkPipeline* pPipelines)
 {
     // TODO: Implement
+    // pPipelines create
+    mReconstruction.addReconstruction_VkPipeline(pPipelines, ((createInfoCount)));
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatecomputepipelines();
+    for (uint32_t i = 0; i < (uint32_t)((createInfoCount)); ++i)
+    {
+        to_proto_VkComputePipelineCreateInfo(&someHandleMapping, pCreateInfos + i, proto->add_pcreateinfos());
+    }
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkPipeline(pPipelines, ((createInfoCount)), apiHandle);
 }
 void vkDestroyPipeline(
     android::base::Pool* pool,
@@ -655,6 +911,9 @@ void vkDestroyPipeline(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // pipeline destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkPipeline((&pipeline), 1);
+    mReconstruction.removeReconstruction_VkPipeline((&pipeline), 1);
 }
 void vkCreatePipelineLayout(
     android::base::Pool* pool,
@@ -665,6 +924,19 @@ void vkCreatePipelineLayout(
     VkPipelineLayout* pPipelineLayout)
 {
     // TODO: Implement
+    // pPipelineLayout create
+    mReconstruction.addReconstruction_VkPipelineLayout(pPipelineLayout, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatepipelinelayout();
+    to_proto_VkPipelineLayoutCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkPipelineLayout(pPipelineLayout, 1, apiHandle);
 }
 void vkDestroyPipelineLayout(
     android::base::Pool* pool,
@@ -673,6 +945,9 @@ void vkDestroyPipelineLayout(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // pipelineLayout destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkPipelineLayout((&pipelineLayout), 1);
+    mReconstruction.removeReconstruction_VkPipelineLayout((&pipelineLayout), 1);
 }
 void vkCreateSampler(
     android::base::Pool* pool,
@@ -683,6 +958,19 @@ void vkCreateSampler(
     VkSampler* pSampler)
 {
     // TODO: Implement
+    // pSampler create
+    mReconstruction.addReconstruction_VkSampler(pSampler, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatesampler();
+    to_proto_VkSamplerCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkSampler(pSampler, 1, apiHandle);
 }
 void vkDestroySampler(
     android::base::Pool* pool,
@@ -691,6 +979,9 @@ void vkDestroySampler(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // sampler destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkSampler((&sampler), 1);
+    mReconstruction.removeReconstruction_VkSampler((&sampler), 1);
 }
 void vkCreateDescriptorSetLayout(
     android::base::Pool* pool,
@@ -701,6 +992,19 @@ void vkCreateDescriptorSetLayout(
     VkDescriptorSetLayout* pSetLayout)
 {
     // TODO: Implement
+    // pSetLayout create
+    mReconstruction.addReconstruction_VkDescriptorSetLayout(pSetLayout, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedescriptorsetlayout();
+    to_proto_VkDescriptorSetLayoutCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDescriptorSetLayout(pSetLayout, 1, apiHandle);
 }
 void vkDestroyDescriptorSetLayout(
     android::base::Pool* pool,
@@ -709,6 +1013,9 @@ void vkDestroyDescriptorSetLayout(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorSetLayout destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDescriptorSetLayout((&descriptorSetLayout), 1);
+    mReconstruction.removeReconstruction_VkDescriptorSetLayout((&descriptorSetLayout), 1);
 }
 void vkCreateDescriptorPool(
     android::base::Pool* pool,
@@ -719,6 +1026,19 @@ void vkCreateDescriptorPool(
     VkDescriptorPool* pDescriptorPool)
 {
     // TODO: Implement
+    // pDescriptorPool create
+    mReconstruction.addReconstruction_VkDescriptorPool(pDescriptorPool, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedescriptorpool();
+    to_proto_VkDescriptorPoolCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDescriptorPool(pDescriptorPool, 1, apiHandle);
 }
 void vkDestroyDescriptorPool(
     android::base::Pool* pool,
@@ -727,6 +1047,9 @@ void vkDestroyDescriptorPool(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorPool destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDescriptorPool((&descriptorPool), 1);
+    mReconstruction.removeReconstruction_VkDescriptorPool((&descriptorPool), 1);
 }
 void vkResetDescriptorPool(
     android::base::Pool* pool,
@@ -745,6 +1068,14 @@ void vkAllocateDescriptorSets(
     VkDescriptorSet* pDescriptorSets)
 {
     // TODO: Implement
+    // pDescriptorSets create
+    mReconstruction.addReconstruction_VkDescriptorSet(pDescriptorSets, pAllocateInfo->descriptorSetCount);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkallocatedescriptorsets();
+    to_proto_VkDescriptorSetAllocateInfo(&someHandleMapping, pAllocateInfo, proto->mutable_pallocateinfo());
+    mReconstruction.forEachReconstructionAddApiRef_VkDescriptorSet(pDescriptorSets, pAllocateInfo->descriptorSetCount, apiHandle);
 }
 void vkFreeDescriptorSets(
     android::base::Pool* pool,
@@ -755,6 +1086,9 @@ void vkFreeDescriptorSets(
     const VkDescriptorSet* pDescriptorSets)
 {
     // TODO: Implement
+    // pDescriptorSets destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDescriptorSet(pDescriptorSets, ((descriptorSetCount)));
+    mReconstruction.removeReconstruction_VkDescriptorSet(pDescriptorSets, ((descriptorSetCount)));
 }
 void vkUpdateDescriptorSets(
     android::base::Pool* pool,
@@ -775,6 +1109,19 @@ void vkCreateFramebuffer(
     VkFramebuffer* pFramebuffer)
 {
     // TODO: Implement
+    // pFramebuffer create
+    mReconstruction.addReconstruction_VkFramebuffer(pFramebuffer, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateframebuffer();
+    to_proto_VkFramebufferCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkFramebuffer(pFramebuffer, 1, apiHandle);
 }
 void vkDestroyFramebuffer(
     android::base::Pool* pool,
@@ -783,6 +1130,9 @@ void vkDestroyFramebuffer(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // framebuffer destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkFramebuffer((&framebuffer), 1);
+    mReconstruction.removeReconstruction_VkFramebuffer((&framebuffer), 1);
 }
 void vkCreateRenderPass(
     android::base::Pool* pool,
@@ -793,6 +1143,19 @@ void vkCreateRenderPass(
     VkRenderPass* pRenderPass)
 {
     // TODO: Implement
+    // pRenderPass create
+    mReconstruction.addReconstruction_VkRenderPass(pRenderPass, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreaterenderpass();
+    to_proto_VkRenderPassCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkRenderPass(pRenderPass, 1, apiHandle);
 }
 void vkDestroyRenderPass(
     android::base::Pool* pool,
@@ -801,6 +1164,9 @@ void vkDestroyRenderPass(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // renderPass destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkRenderPass((&renderPass), 1);
+    mReconstruction.removeReconstruction_VkRenderPass((&renderPass), 1);
 }
 void vkGetRenderAreaGranularity(
     android::base::Pool* pool,
@@ -819,6 +1185,19 @@ void vkCreateCommandPool(
     VkCommandPool* pCommandPool)
 {
     // TODO: Implement
+    // pCommandPool create
+    mReconstruction.addReconstruction_VkCommandPool(pCommandPool, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatecommandpool();
+    to_proto_VkCommandPoolCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkCommandPool(pCommandPool, 1, apiHandle);
 }
 void vkDestroyCommandPool(
     android::base::Pool* pool,
@@ -827,6 +1206,9 @@ void vkDestroyCommandPool(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // commandPool destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkCommandPool((&commandPool), 1);
+    mReconstruction.removeReconstruction_VkCommandPool((&commandPool), 1);
 }
 void vkResetCommandPool(
     android::base::Pool* pool,
@@ -845,6 +1227,14 @@ void vkAllocateCommandBuffers(
     VkCommandBuffer* pCommandBuffers)
 {
     // TODO: Implement
+    // pCommandBuffers create
+    mReconstruction.addReconstruction_VkCommandBuffer(pCommandBuffers, pAllocateInfo->commandBufferCount);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkallocatecommandbuffers();
+    to_proto_VkCommandBufferAllocateInfo(&someHandleMapping, pAllocateInfo, proto->mutable_pallocateinfo());
+    mReconstruction.forEachReconstructionAddApiRef_VkCommandBuffer(pCommandBuffers, pAllocateInfo->commandBufferCount, apiHandle);
 }
 void vkFreeCommandBuffers(
     android::base::Pool* pool,
@@ -854,6 +1244,9 @@ void vkFreeCommandBuffers(
     const VkCommandBuffer* pCommandBuffers)
 {
     // TODO: Implement
+    // pCommandBuffers destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkCommandBuffer(pCommandBuffers, ((commandBufferCount)));
+    mReconstruction.removeReconstruction_VkCommandBuffer(pCommandBuffers, ((commandBufferCount)));
 }
 void vkBeginCommandBuffer(
     android::base::Pool* pool,
@@ -1475,6 +1868,19 @@ void vkCreateSamplerYcbcrConversion(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 {
     // TODO: Implement
+    // pYcbcrConversion create
+    mReconstruction.addReconstruction_VkSamplerYcbcrConversion(pYcbcrConversion, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatesamplerycbcrconversion();
+    to_proto_VkSamplerYcbcrConversionCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkSamplerYcbcrConversion(pYcbcrConversion, 1, apiHandle);
 }
 void vkDestroySamplerYcbcrConversion(
     android::base::Pool* pool,
@@ -1483,6 +1889,9 @@ void vkDestroySamplerYcbcrConversion(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // ycbcrConversion destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkSamplerYcbcrConversion((&ycbcrConversion), 1);
+    mReconstruction.removeReconstruction_VkSamplerYcbcrConversion((&ycbcrConversion), 1);
 }
 void vkCreateDescriptorUpdateTemplate(
     android::base::Pool* pool,
@@ -1493,6 +1902,19 @@ void vkCreateDescriptorUpdateTemplate(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 {
     // TODO: Implement
+    // pDescriptorUpdateTemplate create
+    mReconstruction.addReconstruction_VkDescriptorUpdateTemplate(pDescriptorUpdateTemplate, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedescriptorupdatetemplate();
+    to_proto_VkDescriptorUpdateTemplateCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDescriptorUpdateTemplate(pDescriptorUpdateTemplate, 1, apiHandle);
 }
 void vkDestroyDescriptorUpdateTemplate(
     android::base::Pool* pool,
@@ -1501,6 +1923,9 @@ void vkDestroyDescriptorUpdateTemplate(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorUpdateTemplate destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDescriptorUpdateTemplate((&descriptorUpdateTemplate), 1);
+    mReconstruction.removeReconstruction_VkDescriptorUpdateTemplate((&descriptorUpdateTemplate), 1);
 }
 void vkUpdateDescriptorSetWithTemplate(
     android::base::Pool* pool,
@@ -1552,6 +1977,9 @@ void vkDestroySurfaceKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // surface destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkSurfaceKHR((&surface), 1);
+    mReconstruction.removeReconstruction_VkSurfaceKHR((&surface), 1);
 }
 void vkGetPhysicalDeviceSurfaceSupportKHR(
     android::base::Pool* pool,
@@ -1603,6 +2031,19 @@ void vkCreateSwapchainKHR(
     VkSwapchainKHR* pSwapchain)
 {
     // TODO: Implement
+    // pSwapchain create
+    mReconstruction.addReconstruction_VkSwapchainKHR(pSwapchain, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateswapchainkhr();
+    to_proto_VkSwapchainCreateInfoKHR(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkSwapchainKHR(pSwapchain, 1, apiHandle);
 }
 void vkDestroySwapchainKHR(
     android::base::Pool* pool,
@@ -1611,6 +2052,9 @@ void vkDestroySwapchainKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // swapchain destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkSwapchainKHR((&swapchain), 1);
+    mReconstruction.removeReconstruction_VkSwapchainKHR((&swapchain), 1);
 }
 void vkGetSwapchainImagesKHR(
     android::base::Pool* pool,
@@ -1728,6 +2172,19 @@ void vkCreateDisplayModeKHR(
     VkDisplayModeKHR* pMode)
 {
     // TODO: Implement
+    // pMode create
+    mReconstruction.addReconstruction_VkDisplayModeKHR(pMode, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedisplaymodekhr();
+    to_proto_VkDisplayModeCreateInfoKHR(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDisplayModeKHR(pMode, 1, apiHandle);
 }
 void vkGetDisplayPlaneCapabilitiesKHR(
     android::base::Pool* pool,
@@ -2139,6 +2596,19 @@ void vkCreateDescriptorUpdateTemplateKHR(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 {
     // TODO: Implement
+    // pDescriptorUpdateTemplate create
+    mReconstruction.addReconstruction_VkDescriptorUpdateTemplate(pDescriptorUpdateTemplate, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedescriptorupdatetemplatekhr();
+    to_proto_VkDescriptorUpdateTemplateCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDescriptorUpdateTemplate(pDescriptorUpdateTemplate, 1, apiHandle);
 }
 void vkDestroyDescriptorUpdateTemplateKHR(
     android::base::Pool* pool,
@@ -2147,6 +2617,9 @@ void vkDestroyDescriptorUpdateTemplateKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorUpdateTemplate destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDescriptorUpdateTemplate((&descriptorUpdateTemplate), 1);
+    mReconstruction.removeReconstruction_VkDescriptorUpdateTemplate((&descriptorUpdateTemplate), 1);
 }
 void vkUpdateDescriptorSetWithTemplateKHR(
     android::base::Pool* pool,
@@ -2362,6 +2835,19 @@ void vkCreateSamplerYcbcrConversionKHR(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 {
     // TODO: Implement
+    // pYcbcrConversion create
+    mReconstruction.addReconstruction_VkSamplerYcbcrConversion(pYcbcrConversion, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatesamplerycbcrconversionkhr();
+    to_proto_VkSamplerYcbcrConversionCreateInfo(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkSamplerYcbcrConversion(pYcbcrConversion, 1, apiHandle);
 }
 void vkDestroySamplerYcbcrConversionKHR(
     android::base::Pool* pool,
@@ -2370,6 +2856,9 @@ void vkDestroySamplerYcbcrConversionKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // ycbcrConversion destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkSamplerYcbcrConversion((&ycbcrConversion), 1);
+    mReconstruction.removeReconstruction_VkSamplerYcbcrConversion((&ycbcrConversion), 1);
 }
 #endif
 #ifdef VK_KHR_bind_memory2
@@ -2474,6 +2963,19 @@ void vkCreateDebugReportCallbackEXT(
     VkDebugReportCallbackEXT* pCallback)
 {
     // TODO: Implement
+    // pCallback create
+    mReconstruction.addReconstruction_VkDebugReportCallbackEXT(pCallback, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedebugreportcallbackext();
+    to_proto_VkDebugReportCallbackCreateInfoEXT(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDebugReportCallbackEXT(pCallback, 1, apiHandle);
 }
 void vkDestroyDebugReportCallbackEXT(
     android::base::Pool* pool,
@@ -2482,6 +2984,9 @@ void vkDestroyDebugReportCallbackEXT(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // callback destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDebugReportCallbackEXT((&callback), 1);
+    mReconstruction.removeReconstruction_VkDebugReportCallbackEXT((&callback), 1);
 }
 void vkDebugReportMessageEXT(
     android::base::Pool* pool,
@@ -2692,6 +3197,19 @@ void vkCreateIndirectCommandsLayoutNVX(
     VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout)
 {
     // TODO: Implement
+    // pIndirectCommandsLayout create
+    mReconstruction.addReconstruction_VkIndirectCommandsLayoutNVX(pIndirectCommandsLayout, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateindirectcommandslayoutnvx();
+    to_proto_VkIndirectCommandsLayoutCreateInfoNVX(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkIndirectCommandsLayoutNVX(pIndirectCommandsLayout, 1, apiHandle);
 }
 void vkDestroyIndirectCommandsLayoutNVX(
     android::base::Pool* pool,
@@ -2700,6 +3218,9 @@ void vkDestroyIndirectCommandsLayoutNVX(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // indirectCommandsLayout destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkIndirectCommandsLayoutNVX((&indirectCommandsLayout), 1);
+    mReconstruction.removeReconstruction_VkIndirectCommandsLayoutNVX((&indirectCommandsLayout), 1);
 }
 void vkCreateObjectTableNVX(
     android::base::Pool* pool,
@@ -2710,6 +3231,19 @@ void vkCreateObjectTableNVX(
     VkObjectTableNVX* pObjectTable)
 {
     // TODO: Implement
+    // pObjectTable create
+    mReconstruction.addReconstruction_VkObjectTableNVX(pObjectTable, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreateobjecttablenvx();
+    to_proto_VkObjectTableCreateInfoNVX(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkObjectTableNVX(pObjectTable, 1, apiHandle);
 }
 void vkDestroyObjectTableNVX(
     android::base::Pool* pool,
@@ -2718,6 +3252,9 @@ void vkDestroyObjectTableNVX(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // objectTable destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkObjectTableNVX((&objectTable), 1);
+    mReconstruction.removeReconstruction_VkObjectTableNVX((&objectTable), 1);
 }
 void vkRegisterObjectsNVX(
     android::base::Pool* pool,
@@ -2996,6 +3533,19 @@ void vkCreateDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT* pMessenger)
 {
     // TODO: Implement
+    // pMessenger create
+    mReconstruction.addReconstruction_VkDebugUtilsMessengerEXT(pMessenger, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatedebugutilsmessengerext();
+    to_proto_VkDebugUtilsMessengerCreateInfoEXT(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkDebugUtilsMessengerEXT(pMessenger, 1, apiHandle);
 }
 void vkDestroyDebugUtilsMessengerEXT(
     android::base::Pool* pool,
@@ -3004,6 +3554,9 @@ void vkDestroyDebugUtilsMessengerEXT(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // messenger destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkDebugUtilsMessengerEXT((&messenger), 1);
+    mReconstruction.removeReconstruction_VkDebugUtilsMessengerEXT((&messenger), 1);
 }
 void vkSubmitDebugUtilsMessageEXT(
     android::base::Pool* pool,
@@ -3082,6 +3635,19 @@ void vkCreateValidationCacheEXT(
     VkValidationCacheEXT* pValidationCache)
 {
     // TODO: Implement
+    // pValidationCache create
+    mReconstruction.addReconstruction_VkValidationCacheEXT(pValidationCache, 1);
+    DefaultHandleMapping someHandleMapping;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    auto proto = apiInfo->apiCall.mutable_api_vkcreatevalidationcacheext();
+    to_proto_VkValidationCacheCreateInfoEXT(&someHandleMapping, pCreateInfo, proto->mutable_pcreateinfo());
+    // WARNING PTR CHECK
+    if (pAllocator)
+    {
+        to_proto_VkAllocationCallbacks(&someHandleMapping, pAllocator, proto->mutable_pallocator());
+    }
+    mReconstruction.forEachReconstructionAddApiRef_VkValidationCacheEXT(pValidationCache, 1, apiHandle);
 }
 void vkDestroyValidationCacheEXT(
     android::base::Pool* pool,
@@ -3090,6 +3656,9 @@ void vkDestroyValidationCacheEXT(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // validationCache destroy
+    mReconstruction.forEachReconstructionDeleteApiRefs_VkValidationCacheEXT((&validationCache), 1);
+    mReconstruction.removeReconstruction_VkValidationCacheEXT((&validationCache), 1);
 }
 void vkMergeValidationCachesEXT(
     android::base::Pool* pool,
@@ -3238,6 +3807,9 @@ void vkResetCommandBufferAsyncGOOGLE(
 }
 #endif
 
+private:
+
+    VkReconstruction mReconstruction;
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
