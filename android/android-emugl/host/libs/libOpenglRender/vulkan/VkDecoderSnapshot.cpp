@@ -24,6 +24,7 @@
 
 #include "VkDecoderSnapshot.h"
 
+#include "VkDecoderGlobalState.h"
 
 #include "VulkanHandleMapping.h"
 
@@ -31,11 +32,13 @@
 #include "common/goldfish_vk_baseprotoconversion.h"
 
 
-
+#include "android/base/containers/EntityManager.h"
 
 
 
 using namespace goldfish_vk;
+using android::base::EntityManager;
+using android::base::ComponentManager;
 
 class VkDecoderSnapshot::Impl {
 public:
@@ -48,6 +51,23 @@ void vkCreateInstance(
     const VkAllocationCallbacks* pAllocator,
     VkInstance* pInstance)
 {
+
+    fprintf(stderr, "%s: SNAPSHOT TEST BEGIN ************************\n", __func__);
+    SnapshotApiInfo info;
+    info.apiName = "vkCreateInstance";
+    info.dependentHandles.add((uint64_t)(uintptr_t)(*pInstance), 1, 1);
+    auto apiCallHandle = apiCallSnapshot.add(info, 1);
+
+    SnapshotHandleInfo info_pInstance;
+    info_pInstance.dependentApiCalls.add(
+        apiCallHandle, 1, 1);
+
+    fprintf(stderr, "%s: handle: 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)(*pInstance));
+
+    handleSnapshot.add((uint64_t)(uintptr_t)(*pInstance), info_pInstance, 1, true /* tracked */);
+
+    fprintf(stderr, "%s: SNAPSHOT TEST BEGIN ************************\n", __func__);
     // TODO: Implement
 }
 void vkDestroyInstance(
@@ -56,6 +76,31 @@ void vkDestroyInstance(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    fprintf(stderr, "%s: SNAPSHOT TEST BEGIN ************************\n", __func__);
+
+    fprintf(stderr, "%s: handle: 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)(instance));
+
+    auto handleInfo = handleSnapshot.getByEntity((uint64_t)(uintptr_t)instance);
+
+    if (handleInfo) {
+        fprintf(stderr, "%s: has handle info!\n", __func__);
+        handleInfo->dependentApiCalls.forEachLiveComponent(
+            [this](bool live, uint64_t componentHandle, uint64_t entityHandle, uint64_t& unused) {
+                auto apiData = apiCallSnapshot.get(entityHandle);
+                if (apiData) {
+                fprintf(stderr, "%s: found dependent API call. name: %s\nn", __func__, apiData->apiName.c_str());
+
+                apiData->dependentHandles.forEachLiveComponent([this](bool live, uint64_t componentHandle2, uint64_t entityHandle2, uint64_t& unused) {
+                        fprintf(stderr, "%s: found dependent handle of API call. 0x%llx\n", __func__,
+                                (unsigned long long)entityHandle2);
+                });
+                apiCallSnapshot.remove(entityHandle);
+                }
+            });
+    }
+
+    fprintf(stderr, "%s: SNAPSHOT TEST BEGIN ************************\n", __func__);
 }
 void vkEnumeratePhysicalDevices(
     android::base::Pool* pool,
@@ -3238,6 +3283,18 @@ void vkResetCommandBufferAsyncGOOGLE(
 }
 #endif
 
+    struct SnapshotApiInfo {
+        // TODO
+        std::string apiName;
+        ComponentManager<32, 16, 16, uint64_t> dependentHandles;
+    };
+
+    struct SnapshotHandleInfo {
+        ComponentManager<32, 16, 16, uint64_t> dependentApiCalls;
+    };
+
+    EntityManager<32, 16, 16, SnapshotApiInfo> apiCallSnapshot;
+    ComponentManager<32, 16, 16, SnapshotHandleInfo> handleSnapshot;
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
