@@ -453,6 +453,7 @@ public:
         std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, Data& data)>;
 
     EntityHandle add(EntityHandle h, const Data& data) {
+        fprintf(stderr, "%s: add 0x%llx\n", __func__, (unsigned long long)h);
 
         size_t index = indexOfEntity(h);
 
