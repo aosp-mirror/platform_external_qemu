@@ -32,7 +32,9 @@ namespace snapshot {
 Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
              base::StringView ramMapFile, bool ramFileShared, bool isRemapping)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
+        fprintf(stderr, "%s: make saver\n", __func__);
     if (path_mkdir_if_needed_no_cow(c_str(mSnapshot.dataDir()), 0777) != 0) {
+        fprintf(stderr, "%s: fail no mkdir\n", __func__);
         return;
     }
     {
@@ -114,6 +116,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
                 PathUtils::join(mSnapshot.dataDir(), kTexturesFileName).c_str(),
                 "wb", android::base::FileShare::Write);
         if (!textures) {
+            fprintf(stderr, "%s: could not create textures files\n", __func__);
             mRamSaver.clear();
             return;
         }
