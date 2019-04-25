@@ -52,6 +52,7 @@ private:
     BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
     android::base::Pool m_pool { 8, 4096, 64 };
+    BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
 };
 
 VkDecoder::VkDecoder() :
@@ -165,7 +166,9 @@ def emit_decode_parameters(typeInfo, api, cgen):
         else:
             if p.nonDispatchableHandleDestroy:
                 cgen.stmt("// Begin manual non dispatchable handle destroy unboxing for %s" % p.paramName)
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeleteMapping)" % READ_STREAM)
+                cgen.stmt("%s* boxed_%s_preserve" % (p.typeName, p.paramName))
+                cgen.stmt("m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_%s_preserve)" % p.paramName)
+                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping)" % READ_STREAM)
 
             if p.possiblyOutput():
                 cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
@@ -246,19 +249,40 @@ def emit_decode_return_writeback(api, cgen):
 
 def emit_decode_finish(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
-    cgen.stmt("m_pool.freeAll()")
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
+
+def emit_pool_free(cgen):
+    cgen.stmt("m_pool.freeAll()")
 
 def emit_snapshot(typeInfo, api, cgen):
 
-    additionalParams = [makeVulkanTypeSimple(False, "android::base::Pool", 1, "&m_pool")]
+    cgen.stmt("size_t snapshotTraceBytes = %s->endTrace()" % READ_STREAM)
+
+    additionalParams = [ \
+        makeVulkanTypeSimple(True, "uint8_t", 1, "snapshotTraceBegin"),
+        makeVulkanTypeSimple(False, "size_t", 0, "snapshotTraceBytes"),
+        makeVulkanTypeSimple(False, "android::base::Pool", 1, "&m_pool"),
+    ]
 
     retTypeName = api.getRetTypeExpr()
     if retTypeName != "void":
         retVar = api.getRetVarExpr()
         additionalParams.append(makeVulkanTypeSimple(False, retTypeName, 0, retVar))
 
-    customParams = additionalParams + api.parameters
+    paramsForSnapshot = []
+
+    decodingParams = DecodingParameters(api)
+
+    for p in decodingParams.toRead:
+        if p.nonDispatchableHandleDestroy:
+            if p.pointerIndirectionLevels > 0:
+                paramsForSnapshot.append(p.withModifiedName("boxed_%s_preserve" % p.paramName))
+            else:
+                paramsForSnapshot.append(p.withModifiedName("*boxed_%s_preserve" % p.paramName))
+        else:
+            paramsForSnapshot.append(p)
+
+    customParams = additionalParams + paramsForSnapshot
 
     apiForSnapshot = \
         api.withCustomReturnType(makeVulkanTypeSimple(False, "void", 0, "void")). \
@@ -273,7 +297,8 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
-    emit_snapshot(typeInfo, api, cgen);
+    emit_snapshot(typeInfo, api, cgen)
+    emit_pool_free(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_call_log(api, cgen)
@@ -282,7 +307,8 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
-    emit_snapshot(typeInfo, api, cgen);
+    emit_snapshot(typeInfo, api, cgen)
+    emit_pool_free(cgen)
 
 ## Custom decoding definitions##################################################
 def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
@@ -310,6 +336,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
     emit_snapshot(typeInfo, api, cgen);
+    emit_pool_free(cgen)
 
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_call_log(api, cgen)
@@ -337,6 +364,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_decode_finish(cgen)
     emit_snapshot(typeInfo, api, cgen);
+    emit_pool_free(cgen)
 
 custom_decodes = {
     "vkEnumerateInstanceVersion" : emit_global_state_wrapped_decoding,
@@ -465,6 +493,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
         self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
         self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
+        self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.stmt("auto vk = m_vk")
 
@@ -490,6 +519,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
             emit_decode_return_writeback(api, cgen)
             emit_decode_finish(cgen)
             emit_snapshot(typeInfo, api, cgen);
+            emit_pool_free(cgen)
 
         cgen.stmt("break")
         cgen.endBlock()
