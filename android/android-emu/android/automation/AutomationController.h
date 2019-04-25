@@ -121,6 +121,9 @@ public:
     // Stops a recording to a file.
     virtual StopResult stopRecording() = 0;
 
+    // Stops a recording to a file and updates the name.
+    virtual StopResult stopRecordingWithName(android::base::StringView filename) = 0;
+
     // Start a playback from a file.
     virtual StartResult startPlayback(android::base::StringView filename) = 0;
 

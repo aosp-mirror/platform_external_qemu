@@ -313,6 +313,14 @@ TEST_F(AutomationControllerTest, PlaybackStops) {
     EXPECT_THAT(mController->stopPlayback(), IsErr(StopError::NotStarted));
 }
 
+TEST_F(AutomationControllerTest, PlaybackStopsWithNameChange) {
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    EXPECT_THAT(mController->stopRecordingWithName("testRecordingChanged.txt"), IsOk());
+
+    EXPECT_THAT(mController->startPlayback("testRecordingChanged.txt"), IsOk());
+}
+
 TEST_F(AutomationControllerTest, PlaybackWithCallback) {
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->stopRecording(), IsOk());

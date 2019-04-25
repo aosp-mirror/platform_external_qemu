@@ -361,6 +361,7 @@ public:
 
     StartResult startRecording(StringView filename) override;
     StopResult stopRecording() override;
+    StopResult stopRecordingWithName(StringView filename) override;
 
     StartResult startPlayback(StringView filename) override;
     StartResult startPlaybackWithCallback(StringView filename,
@@ -397,6 +398,7 @@ private:
     Lock mLock;
     bool mShutdown = false;
     std::unique_ptr<android::base::Stream> mRecordingStream;
+    std::string mLastFile;
 
     // Playback state.
     bool mPlayingFromFile = false;
@@ -526,6 +528,7 @@ StartResult AutomationControllerImpl::startRecording(StringView filename) {
     if (!PathUtils::isAbsolute(path)) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename);
     }
+    mLastFile = filename;
 
     if (mRecordingStream) {
         return Err(StartError::AlreadyStarted);
@@ -574,6 +577,24 @@ StopResult AutomationControllerImpl::stopRecording() {
     mEventSink.unregisterStream(mRecordingStream.get());
     mRecordingStream.reset();
     return Ok();
+}
+
+StopResult AutomationControllerImpl::stopRecordingWithName(StringView filename) {
+    StopResult result = stopRecording();
+    if (!result.err()) {
+        std::string oldPath = mLastFile;
+        if (!PathUtils::isAbsolute(oldPath)) {
+            oldPath = PathUtils::join(System::get()->getHomeDirectory(), mLastFile);
+        }
+
+        std::string newPath = filename;
+        if (!PathUtils::isAbsolute(newPath)) {
+            newPath = PathUtils::join(System::get()->getHomeDirectory(), filename);
+        }
+        std::rename(oldPath.c_str(), newPath.c_str());
+    }
+
+    return result;
 }
 
 StartResult AutomationControllerImpl::startPlayback(StringView filename) {
