@@ -42,8 +42,12 @@ public:
     void* connect(const char* name);
     void close(void* pipe);
 
-    // Loads a pipe from a stream, returns null if the pipe can't be loaded.
+    // Loads a single pipe from a stream, returns null if the pipe can't be loaded.
     void* load(base::Stream* stream);
+
+    // Saves/loads the entire set of pipes including pre/post save/load.
+    void saveSnapshot(base::Stream* stream);
+    void loadSnapshot(base::Stream* stream);
 
     // Read/write for a particular pipe, along with C++ versions.
     ssize_t read(void* pipe, void* buffer, size_t len);
@@ -64,6 +68,12 @@ public:
     static void resetPipeCallback(void* hwpipe, void* internal_pipe);
     static void closeFromHostCallback(void* hwpipe);
     static void signalWakeCallback(void* hwpipe, unsigned wakes);
+
+    // Iterate over all pipes.
+    using PipeCallback = std::function<void(void* pipeOrHwPipe)>;
+    void forEachPipe(PipeCallback func);
+    void forEachHwPipe(PipeCallback func);
+
 private:
     void initialize();
     // Opens a new pipe connection, returns a pointer to the host connector
@@ -90,6 +100,9 @@ private:
     void closeHwPipe(void* hwpipe);
     // Wake a hwpipe.
     void signalWake(void* hwpipe, int wakes);
+
+    // Canonical order for host pipes.
+    std::vector<void*> orderedHostPipes() const;
 
     uintptr_t mNextHwPipe = 1;
 
