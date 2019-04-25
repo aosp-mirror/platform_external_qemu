@@ -1,0 +1,6 @@
+.DS_Store
+/out/
+/.idea/
+*.gclient
+*.gclient_entries
+/cmake-build-debug/
