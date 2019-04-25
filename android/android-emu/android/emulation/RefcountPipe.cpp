@@ -34,10 +34,13 @@ RefcountPipe::RefcountPipe(void* hwPipe, Service* svc, base::Stream* loadStream)
     }
 }
 
-void RefcountPipe::onGuestClose(PipeCloseReason reason) {
+RefcountPipe::~RefcountPipe() {
     OnLastColorBufferRef func = sOnLastColorBufferRef.get();
     if (func != nullptr)
         func(mHandle);
+}
+
+void RefcountPipe::onGuestClose(PipeCloseReason reason) {
     delete this;
 }
 

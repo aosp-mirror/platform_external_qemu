@@ -999,8 +999,10 @@ HandleType FrameBuffer::createColorBufferLocked(int p_width,
         assert(m_colorbuffers.count(ret) == 0);
         // When guest feature flag RefCountPipe is on, no reference counting is
         // needed. We only memoize the mapping from handle to ColorBuffer.
+        // Explicitly set refcount to 1 to avoid the colorbuffer being added to
+        // m_colorBufferDelayedCloseList in FrameBuffer::onLoad().
         if (m_refCountPipeEnabled) {
-            m_colorbuffers[ret] = { std::move(cb), 0, false, 0 };
+            m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
         } else {
             // Android master default api level is 1000
             int apiLevel = 1000;
@@ -1289,7 +1291,8 @@ void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
            it->ts + kColorBufferClosingDelaySec <= now)) {
         if (it->cbHandle != 0) {
             const auto& cb = m_colorbuffers.find(it->cbHandle);
-            m_colorbuffers.erase(cb);
+            if (cb != m_colorbuffers.end())
+                m_colorbuffers.erase(cb);
         }
         ++it;
     }

@@ -36,7 +36,7 @@ public:
     RefcountPipe(void* hwPipe,
                  Service* svc,
                  base::Stream* loadStream = nullptr);
-
+    ~RefcountPipe();
     void onGuestClose(PipeCloseReason reason) override;
     unsigned onGuestPoll() const override;
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override;
