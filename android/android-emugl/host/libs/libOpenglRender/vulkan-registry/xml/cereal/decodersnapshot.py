@@ -9,6 +9,8 @@ from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
 
+from .baseprotoconversion import VulkanStructToProtoCodegen, VulkanProtoToStructCodegen
+
 from copy import copy
 
 decoder_snapshot_decl_preamble = """
@@ -16,6 +18,7 @@ decoder_snapshot_decl_preamble = """
 namespace android {
 namespace base {
 class Pool;
+class Stream;
 } // namespace base {
 } // namespace android {
 
@@ -23,12 +26,16 @@ class VkDecoderSnapshot {
 public:
     VkDecoderSnapshot();
     ~VkDecoderSnapshot();
+
+    void save(android::base::Stream* stream);
+    void load(android::base::Stream* stream);
 """
 
 decoder_snapshot_decl_postamble = """
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 """
 
@@ -39,19 +46,111 @@ using namespace goldfish_vk;
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
+    void save(android::base::Stream* stream) {
+        mReconstruction.save(stream);
+    }
+
+    void load(android::base::Stream* stream) {
+        mReconstruction.load(stream);
+    }
+
 """
 
 decoder_snapshot_impl_postamble = """
+private:
+    android::base::Lock mLock;
+    VkReconstruction mReconstruction;
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
     mImpl(new VkDecoderSnapshot::Impl()) { }
 
+void VkDecoderSnapshot::save(android::base::Stream* stream) {
+    mImpl->save(stream);
+}
+
+void VkDecoderSnapshot::load(android::base::Stream* stream) {
+    mImpl->load(stream);
+}
+
 VkDecoderSnapshot::~VkDecoderSnapshot() = default;
 """
 
+AUXILIARY_SNAPSHOT_API_BASE_PARAM_COUNT = 3
+
+AUXILIARY_SNAPSHOT_API_PARAM_NAMES = [
+    "input_result",
+]
+
+# Vulkan handle dependencies.
+# (a, b): a depends on b
+SNAPSHOT_HANDLE_DEPENDENCIES = [
+    # Dispatchable handle types
+    ("VkCommandBuffer", "VkCommandPool"),
+    ("VkCommandPool", "VkDevice"),
+    ("VkQueue", "VkDevice"),
+    ("VkDevice", "VkPhysicalDevice"),
+    ("VkPhysicalDevice", "VkInstance")] + \
+    list(map(lambda handleType : (handleType, "VkDevice"), NON_DISPATCHABLE_HANDLE_TYPES))
+
+handleDependenciesDict = dict(SNAPSHOT_HANDLE_DEPENDENCIES)
+
+def extract_deps_vkAllocateCommandBuffers(param, access, lenExpr, api, cgen):
+    cgen.stmt("mReconstruction.addHandleDependency((const uint64_t*)%s, %s, (uint64_t)(uintptr_t)%s)" % \
+              (access, lenExpr, "VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool)"))
+
+specialCaseDependencyExtractors = {
+    "vkAllocateCommandBuffers" : extract_deps_vkAllocateCommandBuffers,
+}
+
 def emit_impl(typeInfo, api, cgen):
+
     cgen.line("// TODO: Implement")
+
+    traceCreate = False
+
+    for p in api.parameters:
+
+        if not (p.isHandleType):
+            continue
+
+        lenExpr = cgen.generalLengthAccess(p)
+
+        if lenExpr is None:
+            lenExpr = "1"
+
+        if p.pointerIndirectionLevels > 0:
+            access = p.paramName
+        else:
+            access = "(&%s)" % p.paramName
+
+        if p.isCreatedBy(api):
+            cgen.stmt("android::base::AutoLock lock(mLock)")
+            traceCreate = True
+            cgen.line("// %s create" % p.paramName)
+            cgen.stmt("mReconstruction.addHandles((const uint64_t*)%s, %s)" % (access, lenExpr));
+
+            if p.typeName in handleDependenciesDict:
+                dependsOnType = handleDependenciesDict[p.typeName];
+                for p2 in api.parameters:
+                    if p2.typeName == dependsOnType:
+                        cgen.stmt("mReconstruction.addHandleDependency((const uint64_t*)%s, %s, (uint64_t)(uintptr_t)%s)" % (access, lenExpr, p2.paramName))
+                if api.name in specialCaseDependencyExtractors:
+                    specialCaseDependencyExtractors[api.name](p, access, lenExpr, api, cgen)
+
+        if p.isDestroyedBy(api):
+            cgen.stmt("android::base::AutoLock lock(mLock)")
+            cgen.line("// %s destroy" % p.paramName)
+            cgen.stmt("mReconstruction.removeHandles((const uint64_t*)%s, %s)" % (access, lenExpr));
+
+    if traceCreate:
+        cgen.stmt("if (!%s) return" % access)
+        cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
+        cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
+        cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
+        cgen.stmt("mReconstruction.forEachHandleAddApi((const uint64_t*)%s, %s, apiHandle)" % (access, lenExpr))
+        cgen.stmt("mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)%s, %s)" % (access, lenExpr))
 
 def emit_passthrough_to_impl(typeInfo, api, cgen):
     cgen.vkApiCall(api, customPrefix = "mImpl->")
@@ -84,9 +183,10 @@ class VulkanDecoderSnapshot(VulkanWrapperGenerator):
 
         api = self.typeInfo.apis[name]
 
-
-        additionalParams = \
-            [makeVulkanTypeSimple(False, "android::base::Pool", 1, "pool"),]
+        additionalParams = [ \
+            makeVulkanTypeSimple(True, "uint8_t", 1, "snapshotTraceBegin"),
+            makeVulkanTypeSimple(False, "size_t", 0, "snapshotTraceBytes"),
+            makeVulkanTypeSimple(False, "android::base::Pool", 1, "pool"),]
 
         if api.retType.typeName != "void":
             additionalParams.append( \

@@ -38,6 +38,7 @@
 namespace android {
 namespace base {
 class Pool;
+class Stream;
 } // namespace base {
 } // namespace android {
 
@@ -45,34 +46,49 @@ class VkDecoderSnapshot {
 public:
     VkDecoderSnapshot();
     ~VkDecoderSnapshot();
+
+    void save(android::base::Stream* stream);
+    void load(android::base::Stream* stream);
 #ifdef VK_VERSION_1_0
     void vkCreateInstance(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         const VkInstanceCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkInstance* pInstance);
     void vkDestroyInstance(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkInstance instance,
         const VkAllocationCallbacks* pAllocator);
     void vkEnumeratePhysicalDevices(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         uint32_t* pPhysicalDeviceCount,
         VkPhysicalDevice* pPhysicalDevices);
     void vkGetPhysicalDeviceFeatures(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures* pFeatures);
     void vkGetPhysicalDeviceFormatProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkFormat format,
         VkFormatProperties* pFormatProperties);
     void vkGetPhysicalDeviceImageFormatProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkFormat format,
@@ -82,98 +98,134 @@ public:
         VkImageCreateFlags flags,
         VkImageFormatProperties* pImageFormatProperties);
     void vkGetPhysicalDeviceProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceProperties* pProperties);
     void vkGetPhysicalDeviceQueueFamilyProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         uint32_t* pQueueFamilyPropertyCount,
         VkQueueFamilyProperties* pQueueFamilyProperties);
     void vkGetPhysicalDeviceMemoryProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceMemoryProperties* pMemoryProperties);
     void vkGetInstanceProcAddr(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         PFN_vkVoidFunction input_result,
         VkInstance instance,
         const char* pName);
     void vkGetDeviceProcAddr(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         PFN_vkVoidFunction input_result,
         VkDevice device,
         const char* pName);
     void vkCreateDevice(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const VkDeviceCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDevice* pDevice);
     void vkDestroyDevice(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkAllocationCallbacks* pAllocator);
     void vkEnumerateInstanceExtensionProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         const char* pLayerName,
         uint32_t* pPropertyCount,
         VkExtensionProperties* pProperties);
     void vkEnumerateDeviceExtensionProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const char* pLayerName,
         uint32_t* pPropertyCount,
         VkExtensionProperties* pProperties);
     void vkEnumerateInstanceLayerProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         uint32_t* pPropertyCount,
         VkLayerProperties* pProperties);
     void vkEnumerateDeviceLayerProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t* pPropertyCount,
         VkLayerProperties* pProperties);
     void vkGetDeviceQueue(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         uint32_t queueFamilyIndex,
         uint32_t queueIndex,
         VkQueue* pQueue);
     void vkQueueSubmit(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkQueue queue,
         uint32_t submitCount,
         const VkSubmitInfo* pSubmits,
         VkFence fence);
     void vkQueueWaitIdle(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkQueue queue);
     void vkDeviceWaitIdle(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device);
     void vkAllocateMemory(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkMemoryAllocateInfo* pAllocateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDeviceMemory* pMemory);
     void vkFreeMemory(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDeviceMemory memory,
         const VkAllocationCallbacks* pAllocator);
     void vkMapMemory(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDeviceMemory memory,
@@ -182,58 +234,78 @@ public:
         VkMemoryMapFlags flags,
         void** ppData);
     void vkUnmapMemory(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDeviceMemory memory);
     void vkFlushMappedMemoryRanges(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t memoryRangeCount,
         const VkMappedMemoryRange* pMemoryRanges);
     void vkInvalidateMappedMemoryRanges(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t memoryRangeCount,
         const VkMappedMemoryRange* pMemoryRanges);
     void vkGetDeviceMemoryCommitment(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDeviceMemory memory,
         VkDeviceSize* pCommittedMemoryInBytes);
     void vkBindBufferMemory(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkBuffer buffer,
         VkDeviceMemory memory,
         VkDeviceSize memoryOffset);
     void vkBindImageMemory(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkImage image,
         VkDeviceMemory memory,
         VkDeviceSize memoryOffset);
     void vkGetBufferMemoryRequirements(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkBuffer buffer,
         VkMemoryRequirements* pMemoryRequirements);
     void vkGetImageMemoryRequirements(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkImage image,
         VkMemoryRequirements* pMemoryRequirements);
     void vkGetImageSparseMemoryRequirements(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkImage image,
         uint32_t* pSparseMemoryRequirementCount,
         VkSparseImageMemoryRequirements* pSparseMemoryRequirements);
     void vkGetPhysicalDeviceSparseImageFormatProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkFormat format,
         VkImageType type,
@@ -243,37 +315,49 @@ public:
         uint32_t* pPropertyCount,
         VkSparseImageFormatProperties* pProperties);
     void vkQueueBindSparse(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkQueue queue,
         uint32_t bindInfoCount,
         const VkBindSparseInfo* pBindInfo,
         VkFence fence);
     void vkCreateFence(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkFenceCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkFence* pFence);
     void vkDestroyFence(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkFence fence,
         const VkAllocationCallbacks* pAllocator);
     void vkResetFences(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t fenceCount,
         const VkFence* pFences);
     void vkGetFenceStatus(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkFence fence);
     void vkWaitForFences(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t fenceCount,
@@ -281,58 +365,78 @@ public:
         VkBool32 waitAll,
         uint64_t timeout);
     void vkCreateSemaphore(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSemaphoreCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSemaphore* pSemaphore);
     void vkDestroySemaphore(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkSemaphore semaphore,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateEvent(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkEventCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkEvent* pEvent);
     void vkDestroyEvent(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkEvent event,
         const VkAllocationCallbacks* pAllocator);
     void vkGetEventStatus(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkEvent event);
     void vkSetEvent(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkEvent event);
     void vkResetEvent(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkEvent event);
     void vkCreateQueryPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkQueryPoolCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkQueryPool* pQueryPool);
     void vkDestroyQueryPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkQueryPool queryPool,
         const VkAllocationCallbacks* pAllocator);
     void vkGetQueryPoolResults(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkQueryPool queryPool,
@@ -343,99 +447,131 @@ public:
         VkDeviceSize stride,
         VkQueryResultFlags flags);
     void vkCreateBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkBufferCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkBuffer* pBuffer);
     void vkDestroyBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkBuffer buffer,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateBufferView(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkBufferViewCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkBufferView* pView);
     void vkDestroyBufferView(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkBufferView bufferView,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkImageCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkImage* pImage);
     void vkDestroyImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkImage image,
         const VkAllocationCallbacks* pAllocator);
     void vkGetImageSubresourceLayout(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkImage image,
         const VkImageSubresource* pSubresource,
         VkSubresourceLayout* pLayout);
     void vkCreateImageView(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkImageViewCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkImageView* pView);
     void vkDestroyImageView(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkImageView imageView,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateShaderModule(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkShaderModuleCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkShaderModule* pShaderModule);
     void vkDestroyShaderModule(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkShaderModule shaderModule,
         const VkAllocationCallbacks* pAllocator);
     void vkCreatePipelineCache(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkPipelineCacheCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkPipelineCache* pPipelineCache);
     void vkDestroyPipelineCache(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkPipelineCache pipelineCache,
         const VkAllocationCallbacks* pAllocator);
     void vkGetPipelineCacheData(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkPipelineCache pipelineCache,
         size_t* pDataSize,
         void* pData);
     void vkMergePipelineCaches(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkPipelineCache dstCache,
         uint32_t srcCacheCount,
         const VkPipelineCache* pSrcCaches);
     void vkCreateGraphicsPipelines(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkPipelineCache pipelineCache,
@@ -444,7 +580,9 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkPipeline* pPipelines);
     void vkCreateComputePipelines(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkPipelineCache pipelineCache,
@@ -453,210 +591,284 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkPipeline* pPipelines);
     void vkDestroyPipeline(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkPipeline pipeline,
         const VkAllocationCallbacks* pAllocator);
     void vkCreatePipelineLayout(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkPipelineLayoutCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkPipelineLayout* pPipelineLayout);
     void vkDestroyPipelineLayout(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkPipelineLayout pipelineLayout,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateSampler(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSamplerCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSampler* pSampler);
     void vkDestroySampler(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkSampler sampler,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateDescriptorSetLayout(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDescriptorSetLayout* pSetLayout);
     void vkDestroyDescriptorSetLayout(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorSetLayout descriptorSetLayout,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateDescriptorPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDescriptorPoolCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDescriptorPool* pDescriptorPool);
     void vkDestroyDescriptorPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorPool descriptorPool,
         const VkAllocationCallbacks* pAllocator);
     void vkResetDescriptorPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDescriptorPool descriptorPool,
         VkDescriptorPoolResetFlags flags);
     void vkAllocateDescriptorSets(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDescriptorSetAllocateInfo* pAllocateInfo,
         VkDescriptorSet* pDescriptorSets);
     void vkFreeDescriptorSets(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDescriptorPool descriptorPool,
         uint32_t descriptorSetCount,
         const VkDescriptorSet* pDescriptorSets);
     void vkUpdateDescriptorSets(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         uint32_t descriptorWriteCount,
         const VkWriteDescriptorSet* pDescriptorWrites,
         uint32_t descriptorCopyCount,
         const VkCopyDescriptorSet* pDescriptorCopies);
     void vkCreateFramebuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkFramebufferCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkFramebuffer* pFramebuffer);
     void vkDestroyFramebuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkFramebuffer framebuffer,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateRenderPass(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkRenderPassCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkRenderPass* pRenderPass);
     void vkDestroyRenderPass(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkRenderPass renderPass,
         const VkAllocationCallbacks* pAllocator);
     void vkGetRenderAreaGranularity(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkRenderPass renderPass,
         VkExtent2D* pGranularity);
     void vkCreateCommandPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkCommandPoolCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkCommandPool* pCommandPool);
     void vkDestroyCommandPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkCommandPool commandPool,
         const VkAllocationCallbacks* pAllocator);
     void vkResetCommandPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkCommandPool commandPool,
         VkCommandPoolResetFlags flags);
     void vkAllocateCommandBuffers(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkCommandBufferAllocateInfo* pAllocateInfo,
         VkCommandBuffer* pCommandBuffers);
     void vkFreeCommandBuffers(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkCommandPool commandPool,
         uint32_t commandBufferCount,
         const VkCommandBuffer* pCommandBuffers);
     void vkBeginCommandBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkCommandBuffer commandBuffer,
         const VkCommandBufferBeginInfo* pBeginInfo);
     void vkEndCommandBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkCommandBuffer commandBuffer);
     void vkResetCommandBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
     void vkCmdBindPipeline(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineBindPoint pipelineBindPoint,
         VkPipeline pipeline);
     void vkCmdSetViewport(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t firstViewport,
         uint32_t viewportCount,
         const VkViewport* pViewports);
     void vkCmdSetScissor(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t firstScissor,
         uint32_t scissorCount,
         const VkRect2D* pScissors);
     void vkCmdSetLineWidth(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         float lineWidth);
     void vkCmdSetDepthBias(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         float depthBiasConstantFactor,
         float depthBiasClamp,
         float depthBiasSlopeFactor);
     void vkCmdSetBlendConstants(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const float blendConstants[4]);
     void vkCmdSetDepthBounds(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         float minDepthBounds,
         float maxDepthBounds);
     void vkCmdSetStencilCompareMask(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkStencilFaceFlags faceMask,
         uint32_t compareMask);
     void vkCmdSetStencilWriteMask(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkStencilFaceFlags faceMask,
         uint32_t writeMask);
     void vkCmdSetStencilReference(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkStencilFaceFlags faceMask,
         uint32_t reference);
     void vkCmdBindDescriptorSets(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineBindPoint pipelineBindPoint,
         VkPipelineLayout layout,
@@ -666,27 +878,35 @@ public:
         uint32_t dynamicOffsetCount,
         const uint32_t* pDynamicOffsets);
     void vkCmdBindIndexBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
         VkIndexType indexType);
     void vkCmdBindVertexBuffers(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t firstBinding,
         uint32_t bindingCount,
         const VkBuffer* pBuffers,
         const VkDeviceSize* pOffsets);
     void vkCmdDraw(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t vertexCount,
         uint32_t instanceCount,
         uint32_t firstVertex,
         uint32_t firstInstance);
     void vkCmdDrawIndexed(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t indexCount,
         uint32_t instanceCount,
@@ -694,39 +914,51 @@ public:
         int32_t vertexOffset,
         uint32_t firstInstance);
     void vkCmdDrawIndirect(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
         uint32_t drawCount,
         uint32_t stride);
     void vkCmdDrawIndexedIndirect(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
         uint32_t drawCount,
         uint32_t stride);
     void vkCmdDispatch(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t groupCountX,
         uint32_t groupCountY,
         uint32_t groupCountZ);
     void vkCmdDispatchIndirect(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset);
     void vkCmdCopyBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer srcBuffer,
         VkBuffer dstBuffer,
         uint32_t regionCount,
         const VkBufferCopy* pRegions);
     void vkCmdCopyImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkImage srcImage,
         VkImageLayout srcImageLayout,
@@ -735,7 +967,9 @@ public:
         uint32_t regionCount,
         const VkImageCopy* pRegions);
     void vkCmdBlitImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkImage srcImage,
         VkImageLayout srcImageLayout,
@@ -745,7 +979,9 @@ public:
         const VkImageBlit* pRegions,
         VkFilter filter);
     void vkCmdCopyBufferToImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer srcBuffer,
         VkImage dstImage,
@@ -753,7 +989,9 @@ public:
         uint32_t regionCount,
         const VkBufferImageCopy* pRegions);
     void vkCmdCopyImageToBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkImage srcImage,
         VkImageLayout srcImageLayout,
@@ -761,21 +999,27 @@ public:
         uint32_t regionCount,
         const VkBufferImageCopy* pRegions);
     void vkCmdUpdateBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer dstBuffer,
         VkDeviceSize dstOffset,
         VkDeviceSize dataSize,
         const void* pData);
     void vkCmdFillBuffer(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer dstBuffer,
         VkDeviceSize dstOffset,
         VkDeviceSize size,
         uint32_t data);
     void vkCmdClearColorImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkImage image,
         VkImageLayout imageLayout,
@@ -783,7 +1027,9 @@ public:
         uint32_t rangeCount,
         const VkImageSubresourceRange* pRanges);
     void vkCmdClearDepthStencilImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkImage image,
         VkImageLayout imageLayout,
@@ -791,14 +1037,18 @@ public:
         uint32_t rangeCount,
         const VkImageSubresourceRange* pRanges);
     void vkCmdClearAttachments(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t attachmentCount,
         const VkClearAttachment* pAttachments,
         uint32_t rectCount,
         const VkClearRect* pRects);
     void vkCmdResolveImage(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkImage srcImage,
         VkImageLayout srcImageLayout,
@@ -807,17 +1057,23 @@ public:
         uint32_t regionCount,
         const VkImageResolve* pRegions);
     void vkCmdSetEvent(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkEvent event,
         VkPipelineStageFlags stageMask);
     void vkCmdResetEvent(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkEvent event,
         VkPipelineStageFlags stageMask);
     void vkCmdWaitEvents(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t eventCount,
         const VkEvent* pEvents,
@@ -830,7 +1086,9 @@ public:
         uint32_t imageMemoryBarrierCount,
         const VkImageMemoryBarrier* pImageMemoryBarriers);
     void vkCmdPipelineBarrier(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineStageFlags srcStageMask,
         VkPipelineStageFlags dstStageMask,
@@ -842,30 +1100,40 @@ public:
         uint32_t imageMemoryBarrierCount,
         const VkImageMemoryBarrier* pImageMemoryBarriers);
     void vkCmdBeginQuery(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkQueryPool queryPool,
         uint32_t query,
         VkQueryControlFlags flags);
     void vkCmdEndQuery(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkQueryPool queryPool,
         uint32_t query);
     void vkCmdResetQueryPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkQueryPool queryPool,
         uint32_t firstQuery,
         uint32_t queryCount);
     void vkCmdWriteTimestamp(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineStageFlagBits pipelineStage,
         VkQueryPool queryPool,
         uint32_t query);
     void vkCmdCopyQueryPoolResults(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkQueryPool queryPool,
         uint32_t firstQuery,
@@ -875,7 +1143,9 @@ public:
         VkDeviceSize stride,
         VkQueryResultFlags flags);
     void vkCmdPushConstants(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineLayout layout,
         VkShaderStageFlags stageFlags,
@@ -883,53 +1153,73 @@ public:
         uint32_t size,
         const void* pValues);
     void vkCmdBeginRenderPass(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkRenderPassBeginInfo* pRenderPassBegin,
         VkSubpassContents contents);
     void vkCmdNextSubpass(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkSubpassContents contents);
     void vkCmdEndRenderPass(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer);
     void vkCmdExecuteCommands(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t commandBufferCount,
         const VkCommandBuffer* pCommandBuffers);
 #endif
 #ifdef VK_VERSION_1_1
     void vkEnumerateInstanceVersion(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         uint32_t* pApiVersion);
     void vkBindBufferMemory2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t bindInfoCount,
         const VkBindBufferMemoryInfo* pBindInfos);
     void vkBindImageMemory2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t bindInfoCount,
         const VkBindImageMemoryInfo* pBindInfos);
     void vkGetDeviceGroupPeerMemoryFeatures(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         uint32_t heapIndex,
         uint32_t localDeviceIndex,
         uint32_t remoteDeviceIndex,
         VkPeerMemoryFeatureFlags* pPeerMemoryFeatures);
     void vkCmdSetDeviceMask(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t deviceMask);
     void vkCmdDispatchBase(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t baseGroupX,
         uint32_t baseGroupY,
@@ -938,150 +1228,204 @@ public:
         uint32_t groupCountY,
         uint32_t groupCountZ);
     void vkEnumeratePhysicalDeviceGroups(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         uint32_t* pPhysicalDeviceGroupCount,
         VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties);
     void vkGetImageMemoryRequirements2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkImageMemoryRequirementsInfo2* pInfo,
         VkMemoryRequirements2* pMemoryRequirements);
     void vkGetBufferMemoryRequirements2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkBufferMemoryRequirementsInfo2* pInfo,
         VkMemoryRequirements2* pMemoryRequirements);
     void vkGetImageSparseMemoryRequirements2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkImageSparseMemoryRequirementsInfo2* pInfo,
         uint32_t* pSparseMemoryRequirementCount,
         VkSparseImageMemoryRequirements2* pSparseMemoryRequirements);
     void vkGetPhysicalDeviceFeatures2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2* pFeatures);
     void vkGetPhysicalDeviceProperties2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceProperties2* pProperties);
     void vkGetPhysicalDeviceFormatProperties2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkFormat format,
         VkFormatProperties2* pFormatProperties);
     void vkGetPhysicalDeviceImageFormatProperties2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
         VkImageFormatProperties2* pImageFormatProperties);
     void vkGetPhysicalDeviceQueueFamilyProperties2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         uint32_t* pQueueFamilyPropertyCount,
         VkQueueFamilyProperties2* pQueueFamilyProperties);
     void vkGetPhysicalDeviceMemoryProperties2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceMemoryProperties2* pMemoryProperties);
     void vkGetPhysicalDeviceSparseImageFormatProperties2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo,
         uint32_t* pPropertyCount,
         VkSparseImageFormatProperties2* pProperties);
     void vkTrimCommandPool(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkCommandPool commandPool,
         VkCommandPoolTrimFlags flags);
     void vkGetDeviceQueue2(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkDeviceQueueInfo2* pQueueInfo,
         VkQueue* pQueue);
     void vkCreateSamplerYcbcrConversion(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSamplerYcbcrConversion* pYcbcrConversion);
     void vkDestroySamplerYcbcrConversion(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkSamplerYcbcrConversion ycbcrConversion,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateDescriptorUpdateTemplate(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate);
     void vkDestroyDescriptorUpdateTemplate(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorUpdateTemplate descriptorUpdateTemplate,
         const VkAllocationCallbacks* pAllocator);
     void vkUpdateDescriptorSetWithTemplate(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorSet descriptorSet,
         VkDescriptorUpdateTemplate descriptorUpdateTemplate,
         const void* pData);
     void vkGetPhysicalDeviceExternalBufferProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
         VkExternalBufferProperties* pExternalBufferProperties);
     void vkGetPhysicalDeviceExternalFenceProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo,
         VkExternalFenceProperties* pExternalFenceProperties);
     void vkGetPhysicalDeviceExternalSemaphoreProperties(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
         VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
     void vkGetDescriptorSetLayoutSupport(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
         VkDescriptorSetLayoutSupport* pSupport);
 #endif
 #ifdef VK_KHR_surface
     void vkDestroySurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkInstance instance,
         VkSurfaceKHR surface,
         const VkAllocationCallbacks* pAllocator);
     void vkGetPhysicalDeviceSurfaceSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t queueFamilyIndex,
         VkSurfaceKHR surface,
         VkBool32* pSupported);
     void vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         VkSurfaceCapabilitiesKHR* pSurfaceCapabilities);
     void vkGetPhysicalDeviceSurfaceFormatsKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         uint32_t* pSurfaceFormatCount,
         VkSurfaceFormatKHR* pSurfaceFormats);
     void vkGetPhysicalDeviceSurfacePresentModesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
@@ -1090,26 +1434,34 @@ public:
 #endif
 #ifdef VK_KHR_swapchain
     void vkCreateSwapchainKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSwapchainCreateInfoKHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSwapchainKHR* pSwapchain);
     void vkDestroySwapchainKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkSwapchainKHR swapchain,
         const VkAllocationCallbacks* pAllocator);
     void vkGetSwapchainImagesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSwapchainKHR swapchain,
         uint32_t* pSwapchainImageCount,
         VkImage* pSwapchainImages);
     void vkAcquireNextImageKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSwapchainKHR swapchain,
@@ -1118,30 +1470,40 @@ public:
         VkFence fence,
         uint32_t* pImageIndex);
     void vkQueuePresentKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkQueue queue,
         const VkPresentInfoKHR* pPresentInfo);
     void vkGetDeviceGroupPresentCapabilitiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDeviceGroupPresentCapabilitiesKHR* pDeviceGroupPresentCapabilities);
     void vkGetDeviceGroupSurfacePresentModesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSurfaceKHR surface,
         VkDeviceGroupPresentModeFlagsKHR* pModes);
     void vkGetPhysicalDevicePresentRectanglesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         uint32_t* pRectCount,
         VkRect2D* pRects);
     void vkAcquireNextImage2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkAcquireNextImageInfoKHR* pAcquireInfo,
@@ -1149,33 +1511,43 @@ public:
 #endif
 #ifdef VK_KHR_display
     void vkGetPhysicalDeviceDisplayPropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t* pPropertyCount,
         VkDisplayPropertiesKHR* pProperties);
     void vkGetPhysicalDeviceDisplayPlanePropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t* pPropertyCount,
         VkDisplayPlanePropertiesKHR* pProperties);
     void vkGetDisplayPlaneSupportedDisplaysKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t planeIndex,
         uint32_t* pDisplayCount,
         VkDisplayKHR* pDisplays);
     void vkGetDisplayModePropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkDisplayKHR display,
         uint32_t* pPropertyCount,
         VkDisplayModePropertiesKHR* pProperties);
     void vkCreateDisplayModeKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkDisplayKHR display,
@@ -1183,14 +1555,18 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkDisplayModeKHR* pMode);
     void vkGetDisplayPlaneCapabilitiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkDisplayModeKHR mode,
         uint32_t planeIndex,
         VkDisplayPlaneCapabilitiesKHR* pCapabilities);
     void vkCreateDisplayPlaneSurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkDisplaySurfaceCreateInfoKHR* pCreateInfo,
@@ -1199,7 +1575,9 @@ public:
 #endif
 #ifdef VK_KHR_display_swapchain
     void vkCreateSharedSwapchainsKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t swapchainCount,
@@ -1209,14 +1587,18 @@ public:
 #endif
 #ifdef VK_KHR_xlib_surface
     void vkCreateXlibSurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkXlibSurfaceCreateInfoKHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSurfaceKHR* pSurface);
     void vkGetPhysicalDeviceXlibPresentationSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkBool32 input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t queueFamilyIndex,
@@ -1225,14 +1607,18 @@ public:
 #endif
 #ifdef VK_KHR_xcb_surface
     void vkCreateXcbSurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkXcbSurfaceCreateInfoKHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSurfaceKHR* pSurface);
     void vkGetPhysicalDeviceXcbPresentationSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkBool32 input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t queueFamilyIndex,
@@ -1241,14 +1627,18 @@ public:
 #endif
 #ifdef VK_KHR_wayland_surface
     void vkCreateWaylandSurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkWaylandSurfaceCreateInfoKHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSurfaceKHR* pSurface);
     void vkGetPhysicalDeviceWaylandPresentationSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkBool32 input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t queueFamilyIndex,
@@ -1256,14 +1646,18 @@ public:
 #endif
 #ifdef VK_KHR_mir_surface
     void vkCreateMirSurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkMirSurfaceCreateInfoKHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSurfaceKHR* pSurface);
     void vkGetPhysicalDeviceMirPresentationSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkBool32 input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t queueFamilyIndex,
@@ -1271,7 +1665,9 @@ public:
 #endif
 #ifdef VK_KHR_android_surface
     void vkCreateAndroidSurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkAndroidSurfaceCreateInfoKHR* pCreateInfo,
@@ -1280,14 +1676,18 @@ public:
 #endif
 #ifdef VK_KHR_win32_surface
     void vkCreateWin32SurfaceKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkWin32SurfaceCreateInfoKHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSurfaceKHR* pSurface);
     void vkGetPhysicalDeviceWin32PresentationSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkBool32 input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t queueFamilyIndex);
@@ -1298,35 +1698,49 @@ public:
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
     void vkGetPhysicalDeviceFeatures2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2* pFeatures);
     void vkGetPhysicalDeviceProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceProperties2* pProperties);
     void vkGetPhysicalDeviceFormatProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkFormat format,
         VkFormatProperties2* pFormatProperties);
     void vkGetPhysicalDeviceImageFormatProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
         VkImageFormatProperties2* pImageFormatProperties);
     void vkGetPhysicalDeviceQueueFamilyProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         uint32_t* pQueueFamilyPropertyCount,
         VkQueueFamilyProperties2* pQueueFamilyProperties);
     void vkGetPhysicalDeviceMemoryProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceMemoryProperties2* pMemoryProperties);
     void vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo,
         uint32_t* pPropertyCount,
@@ -1334,18 +1748,24 @@ public:
 #endif
 #ifdef VK_KHR_device_group
     void vkGetDeviceGroupPeerMemoryFeaturesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         uint32_t heapIndex,
         uint32_t localDeviceIndex,
         uint32_t remoteDeviceIndex,
         VkPeerMemoryFeatureFlags* pPeerMemoryFeatures);
     void vkCmdSetDeviceMaskKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t deviceMask);
     void vkCmdDispatchBaseKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t baseGroupX,
         uint32_t baseGroupY,
@@ -1358,14 +1778,18 @@ public:
 #endif
 #ifdef VK_KHR_maintenance1
     void vkTrimCommandPoolKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkCommandPool commandPool,
         VkCommandPoolTrimFlags flags);
 #endif
 #ifdef VK_KHR_device_group_creation
     void vkEnumeratePhysicalDeviceGroupsKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         uint32_t* pPhysicalDeviceGroupCount,
@@ -1373,7 +1797,9 @@ public:
 #endif
 #ifdef VK_KHR_external_memory_capabilities
     void vkGetPhysicalDeviceExternalBufferPropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
         VkExternalBufferProperties* pExternalBufferProperties);
@@ -1382,13 +1808,17 @@ public:
 #endif
 #ifdef VK_KHR_external_memory_win32
     void vkGetMemoryWin32HandleKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkMemoryGetWin32HandleInfoKHR* pGetWin32HandleInfo,
         HANDLE* pHandle);
     void vkGetMemoryWin32HandlePropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkExternalMemoryHandleTypeFlagBits handleType,
@@ -1397,13 +1827,17 @@ public:
 #endif
 #ifdef VK_KHR_external_memory_fd
     void vkGetMemoryFdKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkMemoryGetFdInfoKHR* pGetFdInfo,
         int* pFd);
     void vkGetMemoryFdPropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkExternalMemoryHandleTypeFlagBits handleType,
@@ -1414,7 +1848,9 @@ public:
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
     void vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
         VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
@@ -1423,12 +1859,16 @@ public:
 #endif
 #ifdef VK_KHR_external_semaphore_win32
     void vkImportSemaphoreWin32HandleKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo);
     void vkGetSemaphoreWin32HandleKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSemaphoreGetWin32HandleInfoKHR* pGetWin32HandleInfo,
@@ -1436,12 +1876,16 @@ public:
 #endif
 #ifdef VK_KHR_external_semaphore_fd
     void vkImportSemaphoreFdKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo);
     void vkGetSemaphoreFdKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
@@ -1449,7 +1893,9 @@ public:
 #endif
 #ifdef VK_KHR_push_descriptor
     void vkCmdPushDescriptorSetKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineBindPoint pipelineBindPoint,
         VkPipelineLayout layout,
@@ -1457,7 +1903,9 @@ public:
         uint32_t descriptorWriteCount,
         const VkWriteDescriptorSet* pDescriptorWrites);
     void vkCmdPushDescriptorSetWithTemplateKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkDescriptorUpdateTemplate descriptorUpdateTemplate,
         VkPipelineLayout layout,
@@ -1470,19 +1918,25 @@ public:
 #endif
 #ifdef VK_KHR_descriptor_update_template
     void vkCreateDescriptorUpdateTemplateKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate);
     void vkDestroyDescriptorUpdateTemplateKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorUpdateTemplate descriptorUpdateTemplate,
         const VkAllocationCallbacks* pAllocator);
     void vkUpdateDescriptorSetWithTemplateKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorSet descriptorSet,
         VkDescriptorUpdateTemplate descriptorUpdateTemplate,
@@ -1490,37 +1944,49 @@ public:
 #endif
 #ifdef VK_KHR_create_renderpass2
     void vkCreateRenderPass2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkRenderPassCreateInfo2KHR* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkRenderPass* pRenderPass);
     void vkCmdBeginRenderPass2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkRenderPassBeginInfo* pRenderPassBegin,
         const VkSubpassBeginInfoKHR* pSubpassBeginInfo);
     void vkCmdNextSubpass2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkSubpassBeginInfoKHR* pSubpassBeginInfo,
         const VkSubpassEndInfoKHR* pSubpassEndInfo);
     void vkCmdEndRenderPass2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkSubpassEndInfoKHR* pSubpassEndInfo);
 #endif
 #ifdef VK_KHR_shared_presentable_image
     void vkGetSwapchainStatusKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSwapchainKHR swapchain);
 #endif
 #ifdef VK_KHR_external_fence_capabilities
     void vkGetPhysicalDeviceExternalFencePropertiesKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo,
         VkExternalFenceProperties* pExternalFenceProperties);
@@ -1529,12 +1995,16 @@ public:
 #endif
 #ifdef VK_KHR_external_fence_win32
     void vkImportFenceWin32HandleKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo);
     void vkGetFenceWin32HandleKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkFenceGetWin32HandleInfoKHR* pGetWin32HandleInfo,
@@ -1542,12 +2012,16 @@ public:
 #endif
 #ifdef VK_KHR_external_fence_fd
     void vkImportFenceFdKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkImportFenceFdInfoKHR* pImportFenceFdInfo);
     void vkGetFenceFdKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkFenceGetFdInfoKHR* pGetFdInfo,
@@ -1557,13 +2031,17 @@ public:
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
     void vkGetPhysicalDeviceSurfaceCapabilities2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo,
         VkSurfaceCapabilities2KHR* pSurfaceCapabilities);
     void vkGetPhysicalDeviceSurfaceFormats2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo,
@@ -1574,26 +2052,34 @@ public:
 #endif
 #ifdef VK_KHR_get_display_properties2
     void vkGetPhysicalDeviceDisplayProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t* pPropertyCount,
         VkDisplayProperties2KHR* pProperties);
     void vkGetPhysicalDeviceDisplayPlaneProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         uint32_t* pPropertyCount,
         VkDisplayPlaneProperties2KHR* pProperties);
     void vkGetDisplayModeProperties2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkDisplayKHR display,
         uint32_t* pPropertyCount,
         VkDisplayModeProperties2KHR* pProperties);
     void vkGetDisplayPlaneCapabilities2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         const VkDisplayPlaneInfo2KHR* pDisplayPlaneInfo,
@@ -1607,17 +2093,23 @@ public:
 #endif
 #ifdef VK_KHR_get_memory_requirements2
     void vkGetImageMemoryRequirements2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkImageMemoryRequirementsInfo2* pInfo,
         VkMemoryRequirements2* pMemoryRequirements);
     void vkGetBufferMemoryRequirements2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkBufferMemoryRequirementsInfo2* pInfo,
         VkMemoryRequirements2* pMemoryRequirements);
     void vkGetImageSparseMemoryRequirements2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkImageSparseMemoryRequirementsInfo2* pInfo,
         uint32_t* pSparseMemoryRequirementCount,
@@ -1627,27 +2119,35 @@ public:
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
     void vkCreateSamplerYcbcrConversionKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkSamplerYcbcrConversion* pYcbcrConversion);
     void vkDestroySamplerYcbcrConversionKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkSamplerYcbcrConversion ycbcrConversion,
         const VkAllocationCallbacks* pAllocator);
 #endif
 #ifdef VK_KHR_bind_memory2
     void vkBindBufferMemory2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t bindInfoCount,
         const VkBindBufferMemoryInfo* pBindInfos);
     void vkBindImageMemory2KHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         uint32_t bindInfoCount,
@@ -1655,14 +2155,18 @@ public:
 #endif
 #ifdef VK_KHR_maintenance3
     void vkGetDescriptorSetLayoutSupportKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
         VkDescriptorSetLayoutSupport* pSupport);
 #endif
 #ifdef VK_KHR_draw_indirect_count
     void vkCmdDrawIndirectCountKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
@@ -1671,7 +2175,9 @@ public:
         uint32_t maxDrawCount,
         uint32_t stride);
     void vkCmdDrawIndexedIndirectCountKHR(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
@@ -1684,14 +2190,18 @@ public:
 #endif
 #ifdef VK_ANDROID_native_buffer
     void vkGetSwapchainGrallocUsageANDROID(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkFormat format,
         VkImageUsageFlags imageUsage,
         int* grallocUsage);
     void vkAcquireImageANDROID(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkImage image,
@@ -1699,7 +2209,9 @@ public:
         VkSemaphore semaphore,
         VkFence fence);
     void vkQueueSignalReleaseImageANDROID(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkQueue queue,
         uint32_t waitSemaphoreCount,
@@ -1709,19 +2221,25 @@ public:
 #endif
 #ifdef VK_EXT_debug_report
     void vkCreateDebugReportCallbackEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkDebugReportCallbackCreateInfoEXT* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDebugReportCallbackEXT* pCallback);
     void vkDestroyDebugReportCallbackEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkInstance instance,
         VkDebugReportCallbackEXT callback,
         const VkAllocationCallbacks* pAllocator);
     void vkDebugReportMessageEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkInstance instance,
         VkDebugReportFlagsEXT flags,
         VkDebugReportObjectTypeEXT objectType,
@@ -1745,24 +2263,34 @@ public:
 #endif
 #ifdef VK_EXT_debug_marker
     void vkDebugMarkerSetObjectTagEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDebugMarkerObjectTagInfoEXT* pTagInfo);
     void vkDebugMarkerSetObjectNameEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDebugMarkerObjectNameInfoEXT* pNameInfo);
     void vkCmdDebugMarkerBeginEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkDebugMarkerMarkerInfoEXT* pMarkerInfo);
     void vkCmdDebugMarkerEndEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer);
     void vkCmdDebugMarkerInsertEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkDebugMarkerMarkerInfoEXT* pMarkerInfo);
 #endif
@@ -1772,7 +2300,9 @@ public:
 #endif
 #ifdef VK_AMD_draw_indirect_count
     void vkCmdDrawIndirectCountAMD(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
@@ -1781,7 +2311,9 @@ public:
         uint32_t maxDrawCount,
         uint32_t stride);
     void vkCmdDrawIndexedIndirectCountAMD(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkBuffer buffer,
         VkDeviceSize offset,
@@ -1800,7 +2332,9 @@ public:
 #endif
 #ifdef VK_AMD_shader_info
     void vkGetShaderInfoAMD(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkPipeline pipeline,
@@ -1815,7 +2349,9 @@ public:
 #endif
 #ifdef VK_NV_external_memory_capabilities
     void vkGetPhysicalDeviceExternalImageFormatPropertiesNV(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkFormat format,
@@ -1830,7 +2366,9 @@ public:
 #endif
 #ifdef VK_NV_external_memory_win32
     void vkGetMemoryWin32HandleNV(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDeviceMemory memory,
@@ -1843,7 +2381,9 @@ public:
 #endif
 #ifdef VK_NN_vi_surface
     void vkCreateViSurfaceNN(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkViSurfaceCreateInfoNN* pCreateInfo,
@@ -1856,48 +2396,66 @@ public:
 #endif
 #ifdef VK_EXT_conditional_rendering
     void vkCmdBeginConditionalRenderingEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin);
     void vkCmdEndConditionalRenderingEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer);
 #endif
 #ifdef VK_NVX_device_generated_commands
     void vkCmdProcessCommandsNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo);
     void vkCmdReserveSpaceForCommandsNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkCmdReserveSpaceForCommandsInfoNVX* pReserveSpaceInfo);
     void vkCreateIndirectCommandsLayoutNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkIndirectCommandsLayoutCreateInfoNVX* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout);
     void vkDestroyIndirectCommandsLayoutNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkIndirectCommandsLayoutNVX indirectCommandsLayout,
         const VkAllocationCallbacks* pAllocator);
     void vkCreateObjectTableNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkObjectTableCreateInfoNVX* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkObjectTableNVX* pObjectTable);
     void vkDestroyObjectTableNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkObjectTableNVX objectTable,
         const VkAllocationCallbacks* pAllocator);
     void vkRegisterObjectsNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkObjectTableNVX objectTable,
@@ -1905,7 +2463,9 @@ public:
         const VkObjectTableEntryNVX* const* ppObjectTableEntries,
         const uint32_t* pObjectIndices);
     void vkUnregisterObjectsNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkObjectTableNVX objectTable,
@@ -1913,14 +2473,18 @@ public:
         const VkObjectEntryTypeNVX* pObjectEntryTypes,
         const uint32_t* pObjectIndices);
     void vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkDeviceGeneratedCommandsFeaturesNVX* pFeatures,
         VkDeviceGeneratedCommandsLimitsNVX* pLimits);
 #endif
 #ifdef VK_NV_clip_space_w_scaling
     void vkCmdSetViewportWScalingNV(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t firstViewport,
         uint32_t viewportCount,
@@ -1928,20 +2492,26 @@ public:
 #endif
 #ifdef VK_EXT_direct_mode_display
     void vkReleaseDisplayEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkDisplayKHR display);
 #endif
 #ifdef VK_EXT_acquire_xlib_display
     void vkAcquireXlibDisplayEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         Display* dpy,
         VkDisplayKHR display);
     void vkGetRandROutputDisplayEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         Display* dpy,
@@ -1950,7 +2520,9 @@ public:
 #endif
 #ifdef VK_EXT_display_surface_counter
     void vkGetPhysicalDeviceSurfaceCapabilities2EXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkPhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
@@ -1958,20 +2530,26 @@ public:
 #endif
 #ifdef VK_EXT_display_control
     void vkDisplayPowerControlEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDisplayKHR display,
         const VkDisplayPowerInfoEXT* pDisplayPowerInfo);
     void vkRegisterDeviceEventEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDeviceEventInfoEXT* pDeviceEventInfo,
         const VkAllocationCallbacks* pAllocator,
         VkFence* pFence);
     void vkRegisterDisplayEventEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDisplayKHR display,
@@ -1979,7 +2557,9 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkFence* pFence);
     void vkGetSwapchainCounterEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSwapchainKHR swapchain,
@@ -1988,13 +2568,17 @@ public:
 #endif
 #ifdef VK_GOOGLE_display_timing
     void vkGetRefreshCycleDurationGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSwapchainKHR swapchain,
         VkRefreshCycleDurationGOOGLE* pDisplayTimingProperties);
     void vkGetPastPresentationTimingGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkSwapchainKHR swapchain,
@@ -2013,7 +2597,9 @@ public:
 #endif
 #ifdef VK_EXT_discard_rectangles
     void vkCmdSetDiscardRectangleEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         uint32_t firstDiscardRectangle,
         uint32_t discardRectangleCount,
@@ -2025,7 +2611,9 @@ public:
 #endif
 #ifdef VK_EXT_hdr_metadata
     void vkSetHdrMetadataEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         uint32_t swapchainCount,
         const VkSwapchainKHR* pSwapchains,
@@ -2033,7 +2621,9 @@ public:
 #endif
 #ifdef VK_MVK_ios_surface
     void vkCreateIOSSurfaceMVK(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkIOSSurfaceCreateInfoMVK* pCreateInfo,
@@ -2042,7 +2632,9 @@ public:
 #endif
 #ifdef VK_MVK_macos_surface
     void vkCreateMacOSSurfaceMVK(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkMacOSSurfaceCreateInfoMVK* pCreateInfo,
@@ -2055,51 +2647,73 @@ public:
 #endif
 #ifdef VK_EXT_debug_utils
     void vkSetDebugUtilsObjectNameEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDebugUtilsObjectNameInfoEXT* pNameInfo);
     void vkSetDebugUtilsObjectTagEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkDebugUtilsObjectTagInfoEXT* pTagInfo);
     void vkQueueBeginDebugUtilsLabelEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkQueue queue,
         const VkDebugUtilsLabelEXT* pLabelInfo);
     void vkQueueEndDebugUtilsLabelEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkQueue queue);
     void vkQueueInsertDebugUtilsLabelEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkQueue queue,
         const VkDebugUtilsLabelEXT* pLabelInfo);
     void vkCmdBeginDebugUtilsLabelEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkDebugUtilsLabelEXT* pLabelInfo);
     void vkCmdEndDebugUtilsLabelEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer);
     void vkCmdInsertDebugUtilsLabelEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkDebugUtilsLabelEXT* pLabelInfo);
     void vkCreateDebugUtilsMessengerEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkInstance instance,
         const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkDebugUtilsMessengerEXT* pMessenger);
     void vkDestroyDebugUtilsMessengerEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkInstance instance,
         VkDebugUtilsMessengerEXT messenger,
         const VkAllocationCallbacks* pAllocator);
     void vkSubmitDebugUtilsMessageEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkInstance instance,
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageTypes,
@@ -2107,13 +2721,17 @@ public:
 #endif
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
     void vkGetAndroidHardwareBufferPropertiesANDROID(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const AHardwareBuffer* buffer,
         VkAndroidHardwareBufferPropertiesANDROID* pProperties);
     void vkGetMemoryAndroidHardwareBufferANDROID(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkMemoryGetAndroidHardwareBufferInfoANDROID* pInfo,
@@ -2131,11 +2749,15 @@ public:
 #endif
 #ifdef VK_EXT_sample_locations
     void vkCmdSetSampleLocationsEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkSampleLocationsInfoEXT* pSampleLocationsInfo);
     void vkGetPhysicalDeviceMultisamplePropertiesEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkPhysicalDevice physicalDevice,
         VkSampleCountFlagBits samples,
         VkMultisamplePropertiesEXT* pMultisampleProperties);
@@ -2152,26 +2774,34 @@ public:
 #endif
 #ifdef VK_EXT_validation_cache
     void vkCreateValidationCacheEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         const VkValidationCacheCreateInfoEXT* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkValidationCacheEXT* pValidationCache);
     void vkDestroyValidationCacheEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkValidationCacheEXT validationCache,
         const VkAllocationCallbacks* pAllocator);
     void vkMergeValidationCachesEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkValidationCacheEXT dstCache,
         uint32_t srcCacheCount,
         const VkValidationCacheEXT* pSrcCaches);
     void vkGetValidationCacheDataEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkValidationCacheEXT validationCache,
@@ -2186,7 +2816,9 @@ public:
 #endif
 #ifdef VK_EXT_external_memory_host
     void vkGetMemoryHostPointerPropertiesEXT(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkExternalMemoryHandleTypeFlagBits handleType,
@@ -2195,7 +2827,9 @@ public:
 #endif
 #ifdef VK_AMD_buffer_marker
     void vkCmdWriteBufferMarkerAMD(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkPipelineStageFlagBits pipelineStage,
         VkBuffer dstBuffer,
@@ -2210,18 +2844,24 @@ public:
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
     void vkCmdSetCheckpointNV(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const void* pCheckpointMarker);
     void vkGetQueueCheckpointDataNV(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkQueue queue,
         uint32_t* pCheckpointDataCount,
         VkCheckpointDataNV* pCheckpointData);
 #endif
 #ifdef VK_GOOGLE_address_space
     void vkMapMemoryIntoAddressSpaceGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkDeviceMemory memory,
@@ -2229,13 +2869,17 @@ public:
 #endif
 #ifdef VK_GOOGLE_color_buffer
     void vkRegisterImageColorBufferGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkImage image,
         uint32_t colorBuffer);
     void vkRegisterBufferColorBufferGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkResult input_result,
         VkDevice device,
         VkBuffer buffer,
@@ -2243,7 +2887,9 @@ public:
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
     void vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkDevice device,
         VkDescriptorSet descriptorSet,
         VkDescriptorUpdateTemplate descriptorUpdateTemplate,
@@ -2259,14 +2905,20 @@ public:
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
     void vkBeginCommandBufferAsyncGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         const VkCommandBufferBeginInfo* pBeginInfo);
     void vkEndCommandBufferAsyncGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer);
     void vkResetCommandBufferAsyncGOOGLE(
-    android::base::Pool* pool,
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
 #endif
@@ -2274,6 +2926,7 @@ public:
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 
 
