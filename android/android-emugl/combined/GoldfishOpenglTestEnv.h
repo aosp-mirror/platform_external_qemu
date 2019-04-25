@@ -13,8 +13,19 @@
 // limitations under the License.
 #pragma once
 
+namespace android {
+namespace base {
+
+class Stream;
+
+} // namespace android
+} // namespace base
+
 class GoldfishOpenglTestEnv {
 public:
     GoldfishOpenglTestEnv();
     ~GoldfishOpenglTestEnv();
+
+    void saveSnapshot(android::base::Stream* stream);
+    void loadSnapshot(android::base::Stream* stream);
 };
