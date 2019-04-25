@@ -1520,6 +1520,8 @@ static void *qemu_hax_cpu_thread_fn(void *arg)
     int r;
 
     assert(hax_enabled() && hax_ug_platform());
+
+    rcu_register_thread();
     qemu_mutex_lock_iothread();
     qemu_thread_get_self(cpu->thread);
 
