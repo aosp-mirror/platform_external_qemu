@@ -2222,6 +2222,11 @@ void FrameBuffer::onSave(Stream* stream,
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
     }
+
+    // save Vulkan state
+    if (goldfish_vk::VkDecoderGlobalState::get()) {
+        goldfish_vk::VkDecoderGlobalState::get()->save(stream);
+    }
 }
 
 bool FrameBuffer::onLoad(Stream* stream,
@@ -2339,6 +2344,12 @@ bool FrameBuffer::onLoad(Stream* stream,
             }
         }
     }
+
+    // load Vulkan state
+    if (goldfish_vk::VkDecoderGlobalState::get()) {
+        goldfish_vk::VkDecoderGlobalState::get()->load(stream);
+    }
+
     return true;
     // TODO: restore memory management
 }
