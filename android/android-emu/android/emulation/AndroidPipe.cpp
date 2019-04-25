@@ -530,6 +530,9 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
     } else {
         // A regular service pipe.
         stream->putByte(1);
+        fprintf(stderr, "%s: service: %p\n", __func__, mService);
+        fprintf(stderr, "%s: service name: %s\n", __func__, mService->name().c_str());
+
         stream->putString(mService->name());
     }
 
