@@ -4317,4 +4317,52 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
 
+void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::setPreserve(uint64_t** bufPtr) {
+    mPreserveBufPtr = bufPtr;
+}
+
+void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::allocPreserve(size_t count) {
+    *mPreserveBufPtr = mPool.alloc(count * sizeof(uint64_t));
+}
+
+#define BOXED_DISPATCHABLE_HANDLE_UNWRAP_AND_DELETE_PRESERVE_BOXED_IMPL(type_name) \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name(type_name* handles, size_t count) override { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+        if (handles[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); } else { handles[i] = nullptr; } ; \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name##_u64(const type_name* handles, uint64_t* handle_u64s, size_t count) override { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            if (handles[i]) { handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); } else { handle_u64s[i] = 0; } \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_u64_##type_name(const uint64_t* handle_u64s, type_name* handles, size_t count) override { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            if (handle_u64s[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name((type_name)(uintptr_t)handle_u64s[i]); } else { handles[i] = nullptr; } \
+        } \
+    } \
+
+#define BOXED_NON_DISPATCHABLE_HANDLE_UNWRAP_AND_DELETE_PRESERVE_BOXED_IMPL(type_name) \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name(type_name* handles, size_t count) override { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+        if (handles[i]) { auto boxed = handles[i]; handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); delete_boxed_non_dispatchable_##type_name(boxed); } else { handles[i] = nullptr; }; \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name##_u64(const type_name* handles, uint64_t* handle_u64s, size_t count) override { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            if (handles[i]) { auto boxed = handles[i]; handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); delete_boxed_non_dispatchable_##type_name(boxed); } else { handle_u64s[i] = 0; } \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_u64_##type_name(const uint64_t* handle_u64s, type_name* handles, size_t count) override { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+        if (handle_u64s[i]) { auto boxed = (type_name)(uintptr_t)handle_u64s[i]; handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name((type_name)(uintptr_t)handle_u64s[i]); delete_boxed_non_dispatchable_##type_name(boxed); } else { handles[i] = nullptr; } \
+        } \
+    } \
+
 }  // namespace goldfish_vk
