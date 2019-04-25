@@ -372,6 +372,8 @@ using DlSymFunc = void* (void*, const char*);
         decoderSnapshotImplIncludes = """
 #include "VulkanHandleMapping.h"
 
+#include "android/base/containers/EntityManager.h"
+
 #include "goldfish_vk_baseprotodefs.pb.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
 """

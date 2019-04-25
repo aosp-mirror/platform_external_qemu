@@ -29,19 +29,58 @@ decoder_snapshot_decl_postamble = """
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 """
 
 decoder_snapshot_impl_preamble ="""
+
+using android::base::EntityManager;
+using android::base::ComponentManager;
+using android::base::UnpackedComponentManager;
 
 using namespace goldfish_vk;
 
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
 """
 
 decoder_snapshot_impl_postamble = """
+private:
+    struct ApiInfo {
+        goldfish_vk_proto::VkApiCall apiCall;
+    };
+
+    using ApiTrace = EntityManager<32, 16, 16, ApiInfo>;
+    using ApiHandle = ApiTrace::EntityHandle;
+
+    struct HandleReconstruction {
+        std::vector<ApiHandle> apiRefs;
+    };
+
+    using HandleReconstructions = UnpackedComponentManager<32, 16, 16, HandleReconstruction>;
+
+    ApiTrace mApiTrace;
+
+#define DEFINE_HANDLE_RECONSTRUCTION_MEMBER(type) \\
+    HandleReconstructions mReconstructions_##type; \\
+    void addReconstruction_##type(const type* toAdd, uint32_t count) { \\
+        if (!toAdd) return; \\
+        for (uint32_t i = 0; i < count; ++i) { \\
+            mReconstructions_##type.add((uint64_t)(uintptr_t)toAdd[i], HandleReconstruction()); \\
+        } \\
+    } \\
+    void removeReconstruction_##type(const type* toRemove, uint32_t count) { \\
+        if (!toRemove) return; \\
+        for (uint32_t i = 0; i < count; ++i) { \\
+            mReconstructions_##type.remove((uint64_t)(uintptr_t)toRemove[i]); \\
+        } \\
+    } \\
+
+    GOLDFISH_VK_LIST_HANDLE_TYPES(DEFINE_HANDLE_RECONSTRUCTION_MEMBER)
+
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
@@ -51,7 +90,31 @@ VkDecoderSnapshot::~VkDecoderSnapshot() = default;
 """
 
 def emit_impl(typeInfo, api, cgen):
+
     cgen.line("// TODO: Implement")
+
+    for p in api.parameters:
+
+        if not (p.isHandleType):
+            continue
+
+        lenExpr = cgen.generalLengthAccess(p)
+
+        if lenExpr is None:
+            lenExpr = "1"
+
+        if p.pointerIndirectionLevels > 0:
+            access = p.paramName
+        else:
+            access = "(&%s)" % p.paramName
+
+        if p.isCreatedBy(api):
+            cgen.line("// %s create" % p.paramName)
+            cgen.stmt("addReconstruction_%s(%s, %s)" % (p.typeName, access, lenExpr));
+
+        if p.isDestroyedBy(api):
+            cgen.line("// %s destroy" % p.paramName)
+            cgen.stmt("removeReconstruction_%s(%s, %s)" % (p.typeName, access, lenExpr));
 
 def emit_passthrough_to_impl(typeInfo, api, cgen):
     cgen.vkApiCall(api, customPrefix = "mImpl->")

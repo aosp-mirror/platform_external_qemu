@@ -27,6 +27,8 @@
 
 #include "VulkanHandleMapping.h"
 
+#include "android/base/containers/EntityManager.h"
+
 #include "goldfish_vk_baseprotodefs.pb.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
 
@@ -35,11 +37,16 @@
 
 
 
+using android::base::EntityManager;
+using android::base::ComponentManager;
+using android::base::UnpackedComponentManager;
+
 using namespace goldfish_vk;
 
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
 #ifdef VK_VERSION_1_0
 void vkCreateInstance(
     android::base::Pool* pool,
@@ -49,6 +56,8 @@ void vkCreateInstance(
     VkInstance* pInstance)
 {
     // TODO: Implement
+    // pInstance create
+    addReconstruction_VkInstance(pInstance, 1);
 }
 void vkDestroyInstance(
     android::base::Pool* pool,
@@ -56,6 +65,8 @@ void vkDestroyInstance(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // instance destroy
+    removeReconstruction_VkInstance((&instance), 1);
 }
 void vkEnumeratePhysicalDevices(
     android::base::Pool* pool,
@@ -65,6 +76,8 @@ void vkEnumeratePhysicalDevices(
     VkPhysicalDevice* pPhysicalDevices)
 {
     // TODO: Implement
+    // pPhysicalDevices create
+    addReconstruction_VkPhysicalDevice(pPhysicalDevices, (*(pPhysicalDeviceCount)));
 }
 void vkGetPhysicalDeviceFeatures(
     android::base::Pool* pool,
@@ -141,6 +154,8 @@ void vkCreateDevice(
     VkDevice* pDevice)
 {
     // TODO: Implement
+    // pDevice create
+    addReconstruction_VkDevice(pDevice, 1);
 }
 void vkDestroyDevice(
     android::base::Pool* pool,
@@ -148,6 +163,8 @@ void vkDestroyDevice(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // device destroy
+    removeReconstruction_VkDevice((&device), 1);
 }
 void vkEnumerateInstanceExtensionProperties(
     android::base::Pool* pool,
@@ -193,6 +210,8 @@ void vkGetDeviceQueue(
     VkQueue* pQueue)
 {
     // TODO: Implement
+    // pQueue create
+    addReconstruction_VkQueue(pQueue, 1);
 }
 void vkQueueSubmit(
     android::base::Pool* pool,
@@ -227,6 +246,8 @@ void vkAllocateMemory(
     VkDeviceMemory* pMemory)
 {
     // TODO: Implement
+    // pMemory create
+    addReconstruction_VkDeviceMemory(pMemory, 1);
 }
 void vkFreeMemory(
     android::base::Pool* pool,
@@ -235,6 +256,8 @@ void vkFreeMemory(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // memory destroy
+    removeReconstruction_VkDeviceMemory((&memory), 1);
 }
 void vkMapMemory(
     android::base::Pool* pool,
@@ -358,6 +381,8 @@ void vkCreateFence(
     VkFence* pFence)
 {
     // TODO: Implement
+    // pFence create
+    addReconstruction_VkFence(pFence, 1);
 }
 void vkDestroyFence(
     android::base::Pool* pool,
@@ -366,6 +391,8 @@ void vkDestroyFence(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // fence destroy
+    removeReconstruction_VkFence((&fence), 1);
 }
 void vkResetFences(
     android::base::Pool* pool,
@@ -404,6 +431,8 @@ void vkCreateSemaphore(
     VkSemaphore* pSemaphore)
 {
     // TODO: Implement
+    // pSemaphore create
+    addReconstruction_VkSemaphore(pSemaphore, 1);
 }
 void vkDestroySemaphore(
     android::base::Pool* pool,
@@ -412,6 +441,8 @@ void vkDestroySemaphore(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // semaphore destroy
+    removeReconstruction_VkSemaphore((&semaphore), 1);
 }
 void vkCreateEvent(
     android::base::Pool* pool,
@@ -422,6 +453,8 @@ void vkCreateEvent(
     VkEvent* pEvent)
 {
     // TODO: Implement
+    // pEvent create
+    addReconstruction_VkEvent(pEvent, 1);
 }
 void vkDestroyEvent(
     android::base::Pool* pool,
@@ -430,6 +463,8 @@ void vkDestroyEvent(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // event destroy
+    removeReconstruction_VkEvent((&event), 1);
 }
 void vkGetEventStatus(
     android::base::Pool* pool,
@@ -464,6 +499,8 @@ void vkCreateQueryPool(
     VkQueryPool* pQueryPool)
 {
     // TODO: Implement
+    // pQueryPool create
+    addReconstruction_VkQueryPool(pQueryPool, 1);
 }
 void vkDestroyQueryPool(
     android::base::Pool* pool,
@@ -472,6 +509,8 @@ void vkDestroyQueryPool(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // queryPool destroy
+    removeReconstruction_VkQueryPool((&queryPool), 1);
 }
 void vkGetQueryPoolResults(
     android::base::Pool* pool,
@@ -496,6 +535,8 @@ void vkCreateBuffer(
     VkBuffer* pBuffer)
 {
     // TODO: Implement
+    // pBuffer create
+    addReconstruction_VkBuffer(pBuffer, 1);
 }
 void vkDestroyBuffer(
     android::base::Pool* pool,
@@ -504,6 +545,8 @@ void vkDestroyBuffer(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // buffer destroy
+    removeReconstruction_VkBuffer((&buffer), 1);
 }
 void vkCreateBufferView(
     android::base::Pool* pool,
@@ -514,6 +557,8 @@ void vkCreateBufferView(
     VkBufferView* pView)
 {
     // TODO: Implement
+    // pView create
+    addReconstruction_VkBufferView(pView, 1);
 }
 void vkDestroyBufferView(
     android::base::Pool* pool,
@@ -522,6 +567,8 @@ void vkDestroyBufferView(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // bufferView destroy
+    removeReconstruction_VkBufferView((&bufferView), 1);
 }
 void vkCreateImage(
     android::base::Pool* pool,
@@ -532,6 +579,8 @@ void vkCreateImage(
     VkImage* pImage)
 {
     // TODO: Implement
+    // pImage create
+    addReconstruction_VkImage(pImage, 1);
 }
 void vkDestroyImage(
     android::base::Pool* pool,
@@ -540,6 +589,8 @@ void vkDestroyImage(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // image destroy
+    removeReconstruction_VkImage((&image), 1);
 }
 void vkGetImageSubresourceLayout(
     android::base::Pool* pool,
@@ -559,6 +610,8 @@ void vkCreateImageView(
     VkImageView* pView)
 {
     // TODO: Implement
+    // pView create
+    addReconstruction_VkImageView(pView, 1);
 }
 void vkDestroyImageView(
     android::base::Pool* pool,
@@ -567,6 +620,8 @@ void vkDestroyImageView(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // imageView destroy
+    removeReconstruction_VkImageView((&imageView), 1);
 }
 void vkCreateShaderModule(
     android::base::Pool* pool,
@@ -577,6 +632,8 @@ void vkCreateShaderModule(
     VkShaderModule* pShaderModule)
 {
     // TODO: Implement
+    // pShaderModule create
+    addReconstruction_VkShaderModule(pShaderModule, 1);
 }
 void vkDestroyShaderModule(
     android::base::Pool* pool,
@@ -585,6 +642,8 @@ void vkDestroyShaderModule(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // shaderModule destroy
+    removeReconstruction_VkShaderModule((&shaderModule), 1);
 }
 void vkCreatePipelineCache(
     android::base::Pool* pool,
@@ -595,6 +654,8 @@ void vkCreatePipelineCache(
     VkPipelineCache* pPipelineCache)
 {
     // TODO: Implement
+    // pPipelineCache create
+    addReconstruction_VkPipelineCache(pPipelineCache, 1);
 }
 void vkDestroyPipelineCache(
     android::base::Pool* pool,
@@ -603,6 +664,8 @@ void vkDestroyPipelineCache(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // pipelineCache destroy
+    removeReconstruction_VkPipelineCache((&pipelineCache), 1);
 }
 void vkGetPipelineCacheData(
     android::base::Pool* pool,
@@ -635,6 +698,8 @@ void vkCreateGraphicsPipelines(
     VkPipeline* pPipelines)
 {
     // TODO: Implement
+    // pPipelines create
+    addReconstruction_VkPipeline(pPipelines, ((createInfoCount)));
 }
 void vkCreateComputePipelines(
     android::base::Pool* pool,
@@ -647,6 +712,8 @@ void vkCreateComputePipelines(
     VkPipeline* pPipelines)
 {
     // TODO: Implement
+    // pPipelines create
+    addReconstruction_VkPipeline(pPipelines, ((createInfoCount)));
 }
 void vkDestroyPipeline(
     android::base::Pool* pool,
@@ -655,6 +722,8 @@ void vkDestroyPipeline(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // pipeline destroy
+    removeReconstruction_VkPipeline((&pipeline), 1);
 }
 void vkCreatePipelineLayout(
     android::base::Pool* pool,
@@ -665,6 +734,8 @@ void vkCreatePipelineLayout(
     VkPipelineLayout* pPipelineLayout)
 {
     // TODO: Implement
+    // pPipelineLayout create
+    addReconstruction_VkPipelineLayout(pPipelineLayout, 1);
 }
 void vkDestroyPipelineLayout(
     android::base::Pool* pool,
@@ -673,6 +744,8 @@ void vkDestroyPipelineLayout(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // pipelineLayout destroy
+    removeReconstruction_VkPipelineLayout((&pipelineLayout), 1);
 }
 void vkCreateSampler(
     android::base::Pool* pool,
@@ -683,6 +756,8 @@ void vkCreateSampler(
     VkSampler* pSampler)
 {
     // TODO: Implement
+    // pSampler create
+    addReconstruction_VkSampler(pSampler, 1);
 }
 void vkDestroySampler(
     android::base::Pool* pool,
@@ -691,6 +766,8 @@ void vkDestroySampler(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // sampler destroy
+    removeReconstruction_VkSampler((&sampler), 1);
 }
 void vkCreateDescriptorSetLayout(
     android::base::Pool* pool,
@@ -701,6 +778,8 @@ void vkCreateDescriptorSetLayout(
     VkDescriptorSetLayout* pSetLayout)
 {
     // TODO: Implement
+    // pSetLayout create
+    addReconstruction_VkDescriptorSetLayout(pSetLayout, 1);
 }
 void vkDestroyDescriptorSetLayout(
     android::base::Pool* pool,
@@ -709,6 +788,8 @@ void vkDestroyDescriptorSetLayout(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorSetLayout destroy
+    removeReconstruction_VkDescriptorSetLayout((&descriptorSetLayout), 1);
 }
 void vkCreateDescriptorPool(
     android::base::Pool* pool,
@@ -719,6 +800,8 @@ void vkCreateDescriptorPool(
     VkDescriptorPool* pDescriptorPool)
 {
     // TODO: Implement
+    // pDescriptorPool create
+    addReconstruction_VkDescriptorPool(pDescriptorPool, 1);
 }
 void vkDestroyDescriptorPool(
     android::base::Pool* pool,
@@ -727,6 +810,8 @@ void vkDestroyDescriptorPool(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorPool destroy
+    removeReconstruction_VkDescriptorPool((&descriptorPool), 1);
 }
 void vkResetDescriptorPool(
     android::base::Pool* pool,
@@ -745,6 +830,8 @@ void vkAllocateDescriptorSets(
     VkDescriptorSet* pDescriptorSets)
 {
     // TODO: Implement
+    // pDescriptorSets create
+    addReconstruction_VkDescriptorSet(pDescriptorSets, pAllocateInfo->descriptorSetCount);
 }
 void vkFreeDescriptorSets(
     android::base::Pool* pool,
@@ -755,6 +842,8 @@ void vkFreeDescriptorSets(
     const VkDescriptorSet* pDescriptorSets)
 {
     // TODO: Implement
+    // pDescriptorSets destroy
+    removeReconstruction_VkDescriptorSet(pDescriptorSets, ((descriptorSetCount)));
 }
 void vkUpdateDescriptorSets(
     android::base::Pool* pool,
@@ -775,6 +864,8 @@ void vkCreateFramebuffer(
     VkFramebuffer* pFramebuffer)
 {
     // TODO: Implement
+    // pFramebuffer create
+    addReconstruction_VkFramebuffer(pFramebuffer, 1);
 }
 void vkDestroyFramebuffer(
     android::base::Pool* pool,
@@ -783,6 +874,8 @@ void vkDestroyFramebuffer(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // framebuffer destroy
+    removeReconstruction_VkFramebuffer((&framebuffer), 1);
 }
 void vkCreateRenderPass(
     android::base::Pool* pool,
@@ -793,6 +886,8 @@ void vkCreateRenderPass(
     VkRenderPass* pRenderPass)
 {
     // TODO: Implement
+    // pRenderPass create
+    addReconstruction_VkRenderPass(pRenderPass, 1);
 }
 void vkDestroyRenderPass(
     android::base::Pool* pool,
@@ -801,6 +896,8 @@ void vkDestroyRenderPass(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // renderPass destroy
+    removeReconstruction_VkRenderPass((&renderPass), 1);
 }
 void vkGetRenderAreaGranularity(
     android::base::Pool* pool,
@@ -819,6 +916,8 @@ void vkCreateCommandPool(
     VkCommandPool* pCommandPool)
 {
     // TODO: Implement
+    // pCommandPool create
+    addReconstruction_VkCommandPool(pCommandPool, 1);
 }
 void vkDestroyCommandPool(
     android::base::Pool* pool,
@@ -827,6 +926,8 @@ void vkDestroyCommandPool(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // commandPool destroy
+    removeReconstruction_VkCommandPool((&commandPool), 1);
 }
 void vkResetCommandPool(
     android::base::Pool* pool,
@@ -845,6 +946,8 @@ void vkAllocateCommandBuffers(
     VkCommandBuffer* pCommandBuffers)
 {
     // TODO: Implement
+    // pCommandBuffers create
+    addReconstruction_VkCommandBuffer(pCommandBuffers, pAllocateInfo->commandBufferCount);
 }
 void vkFreeCommandBuffers(
     android::base::Pool* pool,
@@ -854,6 +957,8 @@ void vkFreeCommandBuffers(
     const VkCommandBuffer* pCommandBuffers)
 {
     // TODO: Implement
+    // pCommandBuffers destroy
+    removeReconstruction_VkCommandBuffer(pCommandBuffers, ((commandBufferCount)));
 }
 void vkBeginCommandBuffer(
     android::base::Pool* pool,
@@ -1475,6 +1580,8 @@ void vkCreateSamplerYcbcrConversion(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 {
     // TODO: Implement
+    // pYcbcrConversion create
+    addReconstruction_VkSamplerYcbcrConversion(pYcbcrConversion, 1);
 }
 void vkDestroySamplerYcbcrConversion(
     android::base::Pool* pool,
@@ -1483,6 +1590,8 @@ void vkDestroySamplerYcbcrConversion(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // ycbcrConversion destroy
+    removeReconstruction_VkSamplerYcbcrConversion((&ycbcrConversion), 1);
 }
 void vkCreateDescriptorUpdateTemplate(
     android::base::Pool* pool,
@@ -1493,6 +1602,8 @@ void vkCreateDescriptorUpdateTemplate(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 {
     // TODO: Implement
+    // pDescriptorUpdateTemplate create
+    addReconstruction_VkDescriptorUpdateTemplate(pDescriptorUpdateTemplate, 1);
 }
 void vkDestroyDescriptorUpdateTemplate(
     android::base::Pool* pool,
@@ -1501,6 +1612,8 @@ void vkDestroyDescriptorUpdateTemplate(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorUpdateTemplate destroy
+    removeReconstruction_VkDescriptorUpdateTemplate((&descriptorUpdateTemplate), 1);
 }
 void vkUpdateDescriptorSetWithTemplate(
     android::base::Pool* pool,
@@ -1552,6 +1665,8 @@ void vkDestroySurfaceKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // surface destroy
+    removeReconstruction_VkSurfaceKHR((&surface), 1);
 }
 void vkGetPhysicalDeviceSurfaceSupportKHR(
     android::base::Pool* pool,
@@ -1603,6 +1718,8 @@ void vkCreateSwapchainKHR(
     VkSwapchainKHR* pSwapchain)
 {
     // TODO: Implement
+    // pSwapchain create
+    addReconstruction_VkSwapchainKHR(pSwapchain, 1);
 }
 void vkDestroySwapchainKHR(
     android::base::Pool* pool,
@@ -1611,6 +1728,8 @@ void vkDestroySwapchainKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // swapchain destroy
+    removeReconstruction_VkSwapchainKHR((&swapchain), 1);
 }
 void vkGetSwapchainImagesKHR(
     android::base::Pool* pool,
@@ -1728,6 +1847,8 @@ void vkCreateDisplayModeKHR(
     VkDisplayModeKHR* pMode)
 {
     // TODO: Implement
+    // pMode create
+    addReconstruction_VkDisplayModeKHR(pMode, 1);
 }
 void vkGetDisplayPlaneCapabilitiesKHR(
     android::base::Pool* pool,
@@ -2139,6 +2260,8 @@ void vkCreateDescriptorUpdateTemplateKHR(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 {
     // TODO: Implement
+    // pDescriptorUpdateTemplate create
+    addReconstruction_VkDescriptorUpdateTemplate(pDescriptorUpdateTemplate, 1);
 }
 void vkDestroyDescriptorUpdateTemplateKHR(
     android::base::Pool* pool,
@@ -2147,6 +2270,8 @@ void vkDestroyDescriptorUpdateTemplateKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // descriptorUpdateTemplate destroy
+    removeReconstruction_VkDescriptorUpdateTemplate((&descriptorUpdateTemplate), 1);
 }
 void vkUpdateDescriptorSetWithTemplateKHR(
     android::base::Pool* pool,
@@ -2362,6 +2487,8 @@ void vkCreateSamplerYcbcrConversionKHR(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 {
     // TODO: Implement
+    // pYcbcrConversion create
+    addReconstruction_VkSamplerYcbcrConversion(pYcbcrConversion, 1);
 }
 void vkDestroySamplerYcbcrConversionKHR(
     android::base::Pool* pool,
@@ -2370,6 +2497,8 @@ void vkDestroySamplerYcbcrConversionKHR(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // ycbcrConversion destroy
+    removeReconstruction_VkSamplerYcbcrConversion((&ycbcrConversion), 1);
 }
 #endif
 #ifdef VK_KHR_bind_memory2
@@ -2474,6 +2603,8 @@ void vkCreateDebugReportCallbackEXT(
     VkDebugReportCallbackEXT* pCallback)
 {
     // TODO: Implement
+    // pCallback create
+    addReconstruction_VkDebugReportCallbackEXT(pCallback, 1);
 }
 void vkDestroyDebugReportCallbackEXT(
     android::base::Pool* pool,
@@ -2482,6 +2613,8 @@ void vkDestroyDebugReportCallbackEXT(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // callback destroy
+    removeReconstruction_VkDebugReportCallbackEXT((&callback), 1);
 }
 void vkDebugReportMessageEXT(
     android::base::Pool* pool,
@@ -2692,6 +2825,8 @@ void vkCreateIndirectCommandsLayoutNVX(
     VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout)
 {
     // TODO: Implement
+    // pIndirectCommandsLayout create
+    addReconstruction_VkIndirectCommandsLayoutNVX(pIndirectCommandsLayout, 1);
 }
 void vkDestroyIndirectCommandsLayoutNVX(
     android::base::Pool* pool,
@@ -2700,6 +2835,8 @@ void vkDestroyIndirectCommandsLayoutNVX(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // indirectCommandsLayout destroy
+    removeReconstruction_VkIndirectCommandsLayoutNVX((&indirectCommandsLayout), 1);
 }
 void vkCreateObjectTableNVX(
     android::base::Pool* pool,
@@ -2710,6 +2847,8 @@ void vkCreateObjectTableNVX(
     VkObjectTableNVX* pObjectTable)
 {
     // TODO: Implement
+    // pObjectTable create
+    addReconstruction_VkObjectTableNVX(pObjectTable, 1);
 }
 void vkDestroyObjectTableNVX(
     android::base::Pool* pool,
@@ -2718,6 +2857,8 @@ void vkDestroyObjectTableNVX(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // objectTable destroy
+    removeReconstruction_VkObjectTableNVX((&objectTable), 1);
 }
 void vkRegisterObjectsNVX(
     android::base::Pool* pool,
@@ -2996,6 +3137,8 @@ void vkCreateDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT* pMessenger)
 {
     // TODO: Implement
+    // pMessenger create
+    addReconstruction_VkDebugUtilsMessengerEXT(pMessenger, 1);
 }
 void vkDestroyDebugUtilsMessengerEXT(
     android::base::Pool* pool,
@@ -3004,6 +3147,8 @@ void vkDestroyDebugUtilsMessengerEXT(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // messenger destroy
+    removeReconstruction_VkDebugUtilsMessengerEXT((&messenger), 1);
 }
 void vkSubmitDebugUtilsMessageEXT(
     android::base::Pool* pool,
@@ -3082,6 +3227,8 @@ void vkCreateValidationCacheEXT(
     VkValidationCacheEXT* pValidationCache)
 {
     // TODO: Implement
+    // pValidationCache create
+    addReconstruction_VkValidationCacheEXT(pValidationCache, 1);
 }
 void vkDestroyValidationCacheEXT(
     android::base::Pool* pool,
@@ -3090,6 +3237,8 @@ void vkDestroyValidationCacheEXT(
     const VkAllocationCallbacks* pAllocator)
 {
     // TODO: Implement
+    // validationCache destroy
+    removeReconstruction_VkValidationCacheEXT((&validationCache), 1);
 }
 void vkMergeValidationCachesEXT(
     android::base::Pool* pool,
@@ -3237,6 +3386,39 @@ void vkResetCommandBufferAsyncGOOGLE(
     // TODO: Implement
 }
 #endif
+
+private:
+    struct ApiInfo {
+        goldfish_vk_proto::VkApiCall apiCall;
+    };
+
+    using ApiTrace = EntityManager<32, 16, 16, ApiInfo>;
+    using ApiHandle = ApiTrace::EntityHandle;
+
+    struct HandleReconstruction {
+        std::vector<ApiHandle> apiRefs;
+    };
+
+    using HandleReconstructions = UnpackedComponentManager<32, 16, 16, HandleReconstruction>;
+
+    ApiTrace mApiTrace;
+
+#define DEFINE_HANDLE_RECONSTRUCTION_MEMBER(type) \
+    HandleReconstructions mReconstructions_##type; \
+    void addReconstruction_##type(const type* toAdd, uint32_t count) { \
+        if (!toAdd) return; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mReconstructions_##type.add((uint64_t)(uintptr_t)toAdd[i], HandleReconstruction()); \
+        } \
+    } \
+    void removeReconstruction_##type(const type* toRemove, uint32_t count) { \
+        if (!toRemove) return; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mReconstructions_##type.remove((uint64_t)(uintptr_t)toRemove[i]); \
+        } \
+    } \
+
+    GOLDFISH_VK_LIST_HANDLE_TYPES(DEFINE_HANDLE_RECONSTRUCTION_MEMBER)
 
 };
 
