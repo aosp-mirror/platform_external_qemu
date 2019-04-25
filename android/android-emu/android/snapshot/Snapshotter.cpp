@@ -121,6 +121,7 @@ Snapshotter& Snapshotter::get() {
 
 void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                              const QAndroidEmulatorWindowAgent& windowAgent) {
+    fprintf(stderr, "%s: call\n", __func__);
     static const SnapshotCallbacks kCallbacks = {
             // ops
             {
@@ -666,8 +667,10 @@ void Snapshotter::handleGenericLoad(const char* name,
 }
 
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
+    fprintf(stderr, "%s: call\n", __func__);
     prepareLoaderForSaving(name);
     mVmOperations.vmStop();
+    fprintf(stderr, "%s: new saver\n", __func__);
     mSaver.reset(new Saver(
             name, (mLoader && mLoader->hasRamLoader() &&
                    mLoader->status() != OperationStatus::Error)
@@ -812,10 +815,13 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 }
 
 bool Snapshotter::onStartSaving(const char* name) {
+    fprintf(stderr, "%s: call\n", __func__);
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Save, Stage::Start);
     prepareLoaderForSaving(name);
+    fprintf(stderr, "%s: just before new saver\n", __func__);
     if (!mSaver || isComplete(*mSaver)) {
+    fprintf(stderr, "%s: new saver\n", __func__);
         mSaver.reset(new Saver(
                 name, (mLoader && mLoader->hasRamLoader() &&
                        mLoader->status() != OperationStatus::Error)
@@ -846,6 +852,7 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     //     Hierarchy::get()->currentInfo();
     // }
 
+    fprintf(stderr, "%s: good? %d status %d err %d cancel %d\n", __func__, good, mSaver->status(), OperationStatus::Error, OperationStatus::Canceled);
     return good;
 }
 
