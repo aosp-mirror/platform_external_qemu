@@ -40,7 +40,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                  direction = "write",
                  forApiOutput = False,
                  dynAlloc = False,
-                 mapHandles = True):
+                 mapHandles = True,
+                 savedHandlemapVarInfo = None):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -58,6 +59,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         self.dynAlloc = dynAlloc
         self.mapHandles = mapHandles
+
+        self.savedHandlemapVarInfo = savedHandlemapVarInfo
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -112,11 +115,26 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             handle64VarAccess = handle64Var
             handle64VarType = \
                 makeVulkanTypeSimple(False, "uint64_t", 1, paramName=handle64Var)
+
+            if self.savedHandlemapVarInfo != None:
+                print("!!!!!!!!!!ptr")
+                self.savedHandlemapVarInfo["checkExpr"] = self.checkExpr
+                self.savedHandlemapVarInfo["name"] = handle64Var
+                self.savedHandlemapVarInfo["lenAccess"] = lenAccess
+                self.savedHandlemapVarInfo["pointerIndirectionLevels"] = 1
+
         else:
             self.cgen.stmt("uint64_t %s" % handle64Var)
             handle64VarAccess = "&%s" % handle64Var
             handle64VarType = \
                 makeVulkanTypeSimple(False, "uint64_t", 0, paramName=handle64Var)
+
+            if self.savedHandlemapVarInfo != None:
+                print("!!!!!!!!!!val")
+                self.savedHandlemapVarInfo["checkExpr"] = self.checkExpr
+                self.savedHandlemapVarInfo["name"] = handle64Var
+                self.savedHandlemapVarInfo["lenAccess"] = lenAccess
+                self.savedHandlemapVarInfo["pointerIndirectionLevels"] = 0
 
         if self.direction == "write":
             self.cgen.stmt(
@@ -162,6 +180,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         access = self.exprAccessor(vulkanType)
 
+        self.checkExpr = access
+
         needConsistencyCheck = False
 
         self.cgen.line("// WARNING PTR CHECK")
@@ -195,6 +215,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         if self.checked:
             self.cgen.endIf()
             self.checked = False
+            self.checkExpr = None
 
     def onCompoundType(self, vulkanType):
 
