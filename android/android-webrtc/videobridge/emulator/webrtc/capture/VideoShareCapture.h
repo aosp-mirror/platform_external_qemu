@@ -13,9 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include "rtc_base/platform_thread.h"
 #include "android/base/memory/SharedMemory.h"
 #include "modules/video_capture/video_capture_impl.h"
+#include "rtc_base/platform_thread.h"
 
 using android::base::SharedMemory;
 using ::webrtc::VideoCaptureCapability;
@@ -49,6 +49,7 @@ private:
 
     // Min frame rate, real one comes from video share info.
     const int32_t kInitialFrameRate = 10;
+    const int64_t kUsPerSecond = 1 * 1000 * 1000;
 
     std::unique_ptr<rtc::PlatformThread> mCaptureThread;
     rtc::CriticalSection mCaptureCS;
@@ -57,7 +58,7 @@ private:
     void* mPixelBuffer;
     uint32_t mPixelBufferSize;
     uint64_t mPrevTimestamp = 0;
-    int64_t mMaxFrameDelay = (1 * 1000 * 1000) / kInitialFrameRate;
+    int64_t mMaxFrameDelayUs = kUsPerSecond / kInitialFrameRate;
     bool mCaptureStarted;
 };
 

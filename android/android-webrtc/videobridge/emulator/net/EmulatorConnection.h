@@ -15,6 +15,7 @@
 #include <map>
 #include <memory>
 #include <string>
+
 #include "emulator/webrtc/Switchboard.h"
 #include "rtc_base/asyncsocket.h"
 
@@ -24,8 +25,8 @@ class Switchboard;
 }
 namespace net {
 
-using webrtc::Switchboard;
 using rtc::AsyncSocket;
+using webrtc::Switchboard;
 
 // Binds to a port and listens for incoming emulator connections.
 class EmulatorConnection : public sigslot::has_slots<> {

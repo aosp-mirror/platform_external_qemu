@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "Switchboard.h"
+
 #include "rtc_base/logging.h"
 
 namespace emulator {
@@ -77,8 +78,8 @@ void Switchboard::received(SocketTransport* transport, const json object) {
     // { 'handle' : xx, 'fps' : int} messages to configure the video sharing.
 
     if (object.count("handle") && object.count("fps")) {
-        // ignore for now as we have 1-1 correspondance between brdige - emulator.
-        // mHandle = object["handle"];
+        // ignore for now as we have 1-1 correspondance between brdige -
+        // emulator. mHandle = object["handle"];
         std::string fps = object["fps"];
         sscanf(fps.c_str(), "%d", &mFps);
         RTC_LOG(INFO) << "Not updating handle.. Updated fps: " << fps;
@@ -115,7 +116,8 @@ void Switchboard::received(SocketTransport* transport, const json object) {
         send(from, start);
 
         rtc::scoped_refptr<Participant> stream(
-                new rtc::RefCountedObject<Participant>(this, from, mHandle, mFps));
+                new rtc::RefCountedObject<Participant>(this, from, mHandle,
+                                                       mFps));
         if (stream->Initialize()) {
             mConnections[from] = stream;
         }

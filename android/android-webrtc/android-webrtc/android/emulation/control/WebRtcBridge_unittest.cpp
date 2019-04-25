@@ -15,9 +15,11 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
 #include <gtest/gtest.h>
+
 #include <functional>
 #include <string>
 #include <vector>
+
 #include "android/base/testing/TestSystem.h"
 #include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
@@ -178,9 +180,9 @@ TEST(WebRtcBridge, disconnectNotifiesTheBridge) {
     // Disconnect will send a disconnect message to the video bridge..
     bridge.connect("moi");
     bridge.disconnect("moi");
-    EXPECT_STREQ("{\"msg\":\"disconnected\",\"topic\":\"moi\"}", socket->mSend.back().c_str());
+    EXPECT_STREQ("{\"msg\":\"disconnected\",\"topic\":\"moi\"}",
+                 socket->mSend.back().c_str());
 }
-
 
 TEST(WebRtcBridge, nextMessage) {
     // Note that the bridge owns the socket
@@ -362,7 +364,6 @@ TEST(WebRtcBridge, startStopWebRtcModule) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
     TestBridge bridge(socket);
     socket->close();
-
 
     EXPECT_FALSE(socket->connected());
     gRtcRunning = false;

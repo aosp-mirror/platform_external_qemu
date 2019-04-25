@@ -33,11 +33,14 @@ public:
 };
 
 // A connected asynchronous socket.
-// The videobridge will provide an implementation, as well as the android-webrtc module.
+// The videobridge will provide an implementation, as well as the android-webrtc
+// module.
 class AsyncSocketAdapter {
 public:
     virtual ~AsyncSocketAdapter() = default;
-    void setSocketEventListener(AsyncSocketEventListener* listener) { mListener = listener; }
+    void setSocketEventListener(AsyncSocketEventListener* listener) {
+        mListener = listener;
+    }
     virtual uint64_t recv(char* buffer, uint64_t bufferSize) = 0;
     virtual uint64_t send(const char* buffer, uint64_t bufferSize) = 0;
     virtual void close() = 0;
@@ -48,6 +51,7 @@ public:
     // Asynchronously re-connect the socket, return false if
     // reconnection will never succeed.
     virtual bool connect() = 0;
+
 protected:
     AsyncSocketEventListener* mListener = nullptr;
 };
