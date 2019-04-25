@@ -13,8 +13,11 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/Optional.h"
 
+#include <functional>
+#include <unordered_map>
 #include <vector>
 
 #include <inttypes.h>
@@ -31,10 +34,14 @@
 #endif
 
 #define INVALID_ENTITY_HANDLE 0
+#define INVALID_COMPONENT_HANDLE 0
 
 namespace android {
 namespace base {
 
+// EntityManager: A way to represent an abstrat space of objects with handles.
+// Each handle is associated with data of type Item for quick access from handles to data.
+// Otherwise, entity data is spread through ComponentManagers.
 template<size_t indexBits,
          size_t generationBits,
          size_t typeBits,
@@ -42,6 +49,7 @@ template<size_t indexBits,
 class EntityManager {
 public:
     using EntityHandle = uint64_t;
+    using IteratorFunc = std::function<void(bool live, EntityHandle h, Item& item)>;
 
     static size_t getHandleIndex(EntityHandle h) {
         return static_cast<size_t>(h & ((1ULL << indexBits) - 1ULL));
@@ -183,16 +191,211 @@ public:
         return &entry.item;
     }
 
+    bool isLive(EntityHandle h) const {
+        size_t index = getHandleIndex(h);
+        if (index >= mEntries.size()) return false;
+
+        const auto& entry = mEntries[index];
+
+        return (entry.liveGeneration == getHandleGeneration(h));
+    }
+
+    void forEachEntry(IteratorFunc func) {
+        for (auto& entry: mEntries) {
+            auto handle = entry.handle;
+            bool live = isLive(handle);
+            auto& item = entry.item;
+            func(live, handle, item);
+        }
+    }
+
+    void forEachLiveEntry(IteratorFunc func) {
+        for (auto& entry: mEntries) {
+            auto handle = entry.handle;
+            bool live = isLive(handle);
+
+            if (!live) continue;
+
+            auto& item = entry.item;
+            func(live, handle, item);
+        }
+    }
+
 private:
     EntityManager(size_t initialItems) :
         mEntries(initialItems),
         mFirstFreeIndex(0),
         mLiveEntries(0) { }
 
-
     std::vector<EntityEntry> mEntries;
     size_t mFirstFreeIndex;
     size_t mLiveEntries;
+};
+
+// Tracks components over a given space of entities.
+// Looking up by entity index is slower, but takes less space overall versus
+// a flat array that parallels the entities.
+template<size_t indexBits,
+         size_t generationBits,
+         size_t typeBits,
+         class Data>
+class ComponentManager {
+public:
+    using ComponentHandle = uint64_t;
+    using EntityHandle = uint64_t;
+    using ComponentIteratorFunc = std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, Data& data)>;
+
+    // Adds the given |data| and associates it with EntityHandle.
+    // We can also opt-in to immediately tracking the handle in the reverse mapping,
+    // which has an upfront cost in runtime.
+    // Many uses of ComponentManager don't really need to track the associated entity handle,
+    // so it is opt-in.
+
+    ComponentHandle add(
+        EntityHandle h,
+        const Data& data,
+        size_t type,
+        bool tracked = false) {
+
+        InternalItem item = { h, data, tracked };
+        auto res = static_cast<ComponentHandle>(mData.add(item, type));
+
+        if (tracked) {
+            mEntityToComponentMap[h] = res;
+        }
+
+        return res;
+    }
+
+    // If we didn't explicitly track, just fail.
+    ComponentHandle getComponentHandle(EntityHandle h) const {
+        auto componentHandlePtr = android::base::find(mEntityToComponentMap, h);
+        if (!componentHandlePtr) return INVALID_COMPONENT_HANDLE;
+        return *componentHandlePtr;
+    }
+
+    EntityHandle getEntityHandle(ComponentHandle h) const {
+        return mData.get(h)->entityHandle;
+    }
+
+    void removeByEntity(EntityHandle h) {
+        auto componentHandle = getComponentHandle(h);
+        removeByComponent(componentHandle);
+    }
+
+    void removeByComponent(ComponentHandle h) {
+        auto item = mData.get(h);
+
+        if (!item) return;
+        if (item->tracked) {
+            mEntityToComponentMap.erase(item->entityHandle);
+        }
+
+        mData.remove(h);
+    }
+
+    Data* getByEntity(EntityHandle h) {
+        return getByComponent(getComponentHandle(h));
+    }
+
+    Data* getByComponent(ComponentHandle h) {
+        auto item = mData.get(h);
+        if (!item) return nullptr;
+        return &(item->data);
+    }
+
+    void forEachComponent(ComponentIteratorFunc func) {
+        mData.forEachEntry(
+            [func](bool live, typename InternalEntityManager::EntityHandle componentHandle, InternalItem& item) {
+                func(live, componentHandle, item.entityHandle, item.data);
+        });
+    }
+
+    void forEachLiveComponent(ComponentIteratorFunc func) {
+        mData.forEachLiveEntry(
+            [func](bool live, typename InternalEntityManager::EntityHandle componentHandle, InternalItem& item) {
+                func(live, componentHandle, item.entityHandle, item.data);
+        });
+    }
+
+private:
+    struct InternalItem {
+        EntityHandle entityHandle;
+        Data data;
+        bool tracked;
+    };
+
+    using InternalEntityManager = EntityManager<indexBits, generationBits, typeBits, InternalItem>;
+    using EntityToComponentMap = std::unordered_map<EntityHandle, ComponentHandle>;
+
+    mutable InternalEntityManager mData;
+    EntityToComponentMap mEntityToComponentMap;
+};
+
+// ComponentManager, but unpacked; uses the same index space as the associated
+// entities. Takes more space by default, but not more if all entities have this component.
+template<size_t indexBits,
+         size_t generationBits,
+         size_t typeBits,
+         class Data>
+class UnpackedComponentManager {
+public:
+    using ComponentHandle = uint64_t;
+    using EntityHandle = uint64_t;
+    using ComponentIteratorFunc =
+        std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, Data& data)>;
+
+    EntityHandle add(EntityHandle h, const Data& data) {
+
+        size_t index = indexOfEntity(h);
+
+        if (index + 1 > mItems.size()) {
+            mItems.resize((index + 1) * 2);
+        }
+
+        mItems[index].live = true;
+        mItems[index].handle = h;
+        mItems[index].data = data;
+
+        return h;
+    }
+
+    void remove(EntityHandle h) {
+        size_t index = indexOfEntity(h);
+        mItems[index].live = false;
+        // no-op
+    }
+
+    Data* get(EntityHandle h) {
+        auto item = mItems.data() + indexOfEntity(h);
+        if (!item->live) return nullptr;
+        return &item->data;
+    }
+
+    void forEachComponent(ComponentIteratorFunc func) {
+        for (auto& item : mItems) {
+            func(item.live, item.handle, item.handle, item.data);
+        }
+    }
+
+    void forEachLiveComponent(ComponentIteratorFunc func) {
+        for (auto& item : mItems) {
+            if (item.live) func(item.live, item.handle, item.handle, item.data);
+        }
+    }
+
+private:
+    size_t indexOfEntity(EntityHandle h) {
+        return EntityManager<indexBits, generationBits, typeBits, int>::getHandleIndex(h);
+    }
+
+    struct InternalItem {
+        bool live = false;
+        EntityHandle handle = 0;
+        Data data;
+    };
+
+    std::vector<InternalItem> mItems;
 };
 
 } // namespace android
