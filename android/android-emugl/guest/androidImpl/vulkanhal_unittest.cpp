@@ -23,10 +23,13 @@
 #include <vulkan/vk_android_native_buffer.h>
 
 #include "android/base/ArraySize.h"
+#include "android/base/files/MemStream.h"
+#include "android/base/files/Stream.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/opengles.h"
+#include "android/snapshot/interface.h"
 
 #include <android/hardware_buffer.h>
 
@@ -949,6 +952,71 @@ TEST_F(VulkanHalTest, BufferCreate) {
     vk->vkGetBufferMemoryRequirements(mDevice, buffer, &memReqs);
 
     vk->vkDestroyBuffer(mDevice, buffer, nullptr);
+}
+
+TEST_F(VulkanHalTest, SnapshotSaveLoad) {
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+}
+
+TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
+    VkBufferCreateInfo bufCi = {
+        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
+        4096,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr,
+    };
+
+    VkFence fence;
+    VkFenceCreateInfo fenceCi = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, };
+    vk->vkCreateFence(mDevice, &fenceCi, nullptr, &fence);
+
+    fprintf(stderr, "%s: guest fence: %p\n", __func__, fence);
+
+    VkBuffer buffer;
+    vk->vkCreateBuffer(mDevice, &bufCi, nullptr, &buffer);
+
+    fprintf(stderr, "%s: guest buffer: %p\n", __func__, buffer);
+
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+
+    VkMemoryRequirements memReqs;
+    vk->vkGetBufferMemoryRequirements(mDevice, buffer, &memReqs);
+    vk->vkDestroyBuffer(mDevice, buffer, nullptr);
+
+    vk->vkDestroyFence(mDevice, fence, nullptr);
+}
+
+TEST_F(VulkanHalTest, SnapshotSaveLoadHostVisibleMemory) {
+    static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
+        kTestAlloc,
+        mHostVisibleMemoryTypeIndex,
+    };
+    VkDeviceMemory mem;
+    EXPECT_EQ(VK_SUCCESS, vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &mem));
+
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+
+    void* hostPtr;
+    EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
+
+    memset(hostPtr, 0xff, kTestAlloc);
+
+    VkMappedMemoryRange toFlush = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
+        mem, 0, kTestAlloc,
+    };
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFlushMappedMemoryRanges(mDevice, 1, &toFlush));
+    EXPECT_EQ(VK_SUCCESS, vk->vkInvalidateMappedMemoryRanges(mDevice, 1, &toFlush));
+
+    vk->vkUnmapMemory(mDevice, mem);
+    vk->vkFreeMemory(mDevice, mem, nullptr);
 }
 
 }  // namespace aemu
