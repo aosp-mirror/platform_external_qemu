@@ -2274,6 +2274,7 @@ public:
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 
 
