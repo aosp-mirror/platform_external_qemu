@@ -14,17 +14,15 @@ RtcAsyncSocketAdapter::~RtcAsyncSocketAdapter() {
     close();
 };
 
-void RtcAsyncSocketAdapter::close()  {
+void RtcAsyncSocketAdapter::close() {
     mRtcSocket->Close();
 };
 
-uint64_t RtcAsyncSocketAdapter::recv(char* buffer,
-                                     uint64_t bufferSize)  {
+uint64_t RtcAsyncSocketAdapter::recv(char* buffer, uint64_t bufferSize) {
     return mRtcSocket->Recv(buffer, bufferSize, nullptr);
 }
 
-uint64_t RtcAsyncSocketAdapter::send(const char* buffer,
-                                     uint64_t bufferSize)  {
+uint64_t RtcAsyncSocketAdapter::send(const char* buffer, uint64_t bufferSize) {
     return mRtcSocket->Send(buffer, bufferSize);
 }
 

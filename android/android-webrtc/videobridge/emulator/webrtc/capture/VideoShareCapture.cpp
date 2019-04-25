@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "VideoShareCapture.h"
+
 #include <rtc_base/logging.h>
 #include <sys/time.h>
+
 #include "VideoShareCapture.h"
 #include "VideoShareInfo.h"
-#include "rtc_base/criticalsection.h"
-
 #include "android/base/memory/SharedMemory.h"
+#include "rtc_base/criticalsection.h"
 
 using android::base::SharedMemory;
 
@@ -26,6 +27,8 @@ namespace emulator {
 namespace webrtc {
 
 namespace videocapturemodule {
+
+static const int kI420BitsPerPixel = 12;
 
 static int64_t getCurrentTimeInUs() {
     timeval tv;
@@ -43,7 +46,7 @@ bool VideoShareCapture::CaptureProcess() {
     // Sleep up to mMaxFrameDelay, as we don't want to
     // slam the encoder.
     int64_t now = getCurrentTimeInUs();
-    int64_t sleeptime = mMaxFrameDelay - (now - mPrevTimestamp);
+    int64_t sleeptime = mMaxFrameDelayUs - (now - mPrevTimestamp);
     if (sleeptime > 0)
         usleep(sleeptime);
 
@@ -77,7 +80,7 @@ int32_t VideoShareCapture::StartCapture(
 
     // Let's always try to capture at the maximum supported FPS..
     uint8_t minFps = std::min(capability.maxFPS, kInitialFrameRate);
-    mMaxFrameDelay = (1 * 1000 * 1000) / capability.maxFPS;
+    mMaxFrameDelayUs = kUsPerSecond / capability.maxFPS;
 
     // start capture thread;
     if (!mCaptureThread) {
@@ -88,17 +91,18 @@ int32_t VideoShareCapture::StartCapture(
     }
 
     mCaptureStarted = true;
-    RTC_LOG(INFO) << "Started cature thread with minFps: " << minFps << ", frameDelay: " << mMaxFrameDelay;
+    RTC_LOG(INFO) << "Started cature thread with minFps: " << minFps
+                  << ", frameDelay: " << mMaxFrameDelayUs;
     return 0;
 };
 
-static size_t getPixelCount(const VideoCaptureCapability& capability) {
-    return capability.width * capability.height * 12 / 8;
+static size_t getBytesPerFrame(const VideoCaptureCapability& capability) {
+    return (capability.width * capability.height * kI420BitsPerPixel) / 8;
 }
 
 int32_t VideoShareCapture::Init(std::string handle) {
     mSharedMemory =
-            SharedMemory(handle, getPixelCount(mSettings) +
+            SharedMemory(handle, getBytesPerFrame(mSettings) +
                                          sizeof(VideoShareInfo::VideoInfo));
     int err = mSharedMemory.open(SharedMemory::AccessMode::READ_ONLY);
     if (err != 0) {
@@ -107,7 +111,7 @@ int32_t VideoShareCapture::Init(std::string handle) {
         return -1;
     }
     mPixelBuffer = (uint8_t*)*mSharedMemory + sizeof(VideoShareInfo::VideoInfo);
-    mPixelBufferSize = getPixelCount(mSettings);
+    mPixelBufferSize = getBytesPerFrame(mSettings);
     return 0;
 };
 

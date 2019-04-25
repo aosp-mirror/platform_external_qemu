@@ -79,7 +79,7 @@ bool SocketTransport::send(const std::string msg) {
 }
 
 void SocketTransport::onRead(AsyncSocketAdapter* socket) {
-    char buffer[0xffff];
+    char buffer[RECV_BUFFER_SIZE];
     do {
         int bytes = socket->recv(buffer, sizeof(buffer));
         if (bytes <= 0) {

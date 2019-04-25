@@ -70,7 +70,6 @@ public:
     bool start() override;
     BridgeState state() override;
 
-
     // Returns a webrtc bridge, or NopBridge in case of failures..
     static RtcBridge* create(int port,
                              const AndroidConsoleAgents* const consoleAgents);
@@ -79,7 +78,6 @@ public:
     void received(SocketTransport* from, const json object) override;
     void stateConnectionChange(SocketTransport* connection,
                                State current) override;
-
 
     // Default framerate we will use..
     // The emulator will produce frames at this rate, and the encoder in
@@ -90,8 +88,7 @@ public:
 private:
     void received(std::string msg);
 
-    const uint16_t kRecBufferSize = 0xffff;
-    const uint16_t kMaxMessageQueueLen = 256;
+    const uint16_t kMaxMessageQueueLen = 128;
     int mFps = kMaxFPS;
     int mVideoBridgePort;
     System::Pid mBridgePid;

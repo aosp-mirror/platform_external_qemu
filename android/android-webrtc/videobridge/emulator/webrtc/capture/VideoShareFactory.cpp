@@ -19,25 +19,28 @@ namespace videocapturemodule {
 
 VideoShareFactory::VideoShareFactory(std::string handle, int32_t desiredFps)
     : mMemoryHandle(handle), mShareInfo(VideoShareInfo(handle, desiredFps)) {
-  mValid = mShareInfo.Init() == 0;
+    mValid = mShareInfo.Init() == 0;
 }
 rtc::scoped_refptr<::webrtc::VideoCaptureModule> VideoShareFactory::Create(
-    const char* device) {
-  if (!mValid) return nullptr;
+        const char* device) {
+    if (!mValid)
+        return nullptr;
 
-  rtc::scoped_refptr<VideoShareCapture> implementation(
-      new rtc::RefCountedObject<VideoShareCapture>(mShareInfo.capability()));
-  if (implementation->Init(mMemoryHandle) != 0) return nullptr;
+    rtc::scoped_refptr<VideoShareCapture> implementation(
+            new rtc::RefCountedObject<VideoShareCapture>(
+                    mShareInfo.capability()));
+    if (implementation->Init(mMemoryHandle) != 0)
+        return nullptr;
 
-  return implementation;
+    return implementation;
 };
 
 DeviceInfo* VideoShareFactory::CreateDeviceInfo() {
-  return &mShareInfo;
+    return &mShareInfo;
 }
 
 void VideoShareFactory::DestroyDeviceInfo(DeviceInfo* info) {}
 
 }  // namespace videocapturemodule
 }  // namespace webrtc
-}
+}  // namespace emulator

@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
 
     // Configure our loggers, we will log at most 1
     if (FLAG_logdir != std::string("")) {
-        rtc::FileRotatingLogSink* frl = new rtc::FileRotatingLogSink(FLAG_logdir, "goldfish_rtc",
-                                                    kMaxFileLogSizeInBytes, 2);
+        rtc::FileRotatingLogSink* frl = new rtc::FileRotatingLogSink(
+                FLAG_logdir, "goldfish_rtc", kMaxFileLogSizeInBytes, 2);
         frl->Init();
         frl->DisableBuffering();
         log_sink.reset(frl);

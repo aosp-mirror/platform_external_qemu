@@ -43,7 +43,7 @@ private:
     ::android::base::AsyncWriter mAsyncWriter;
     ::android::base::FunctorThread mConnectThread;
 
-   // Queue of message that need to go out over this socket.
+    // Queue of message that need to go out over this socket.
     MessageQueue mWriteQueue;
     Lock mWriteQueueLock;
 
