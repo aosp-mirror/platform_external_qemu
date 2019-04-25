@@ -23,10 +23,13 @@
 #include <vulkan/vk_android_native_buffer.h>
 
 #include "android/base/ArraySize.h"
+#include "android/base/files/MemStream.h"
+#include "android/base/files/Stream.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/opengles.h"
+#include "android/snapshot/interface.h"
 
 #include <android/hardware_buffer.h>
 
@@ -949,6 +952,150 @@ TEST_F(VulkanHalTest, BufferCreate) {
     vk->vkGetBufferMemoryRequirements(mDevice, buffer, &memReqs);
 
     vk->vkDestroyBuffer(mDevice, buffer, nullptr);
+}
+
+TEST_F(VulkanHalTest, SnapshotSaveLoad) {
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+}
+
+TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
+    VkBufferCreateInfo bufCi = {
+        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
+        4096,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr,
+    };
+
+    VkFence fence;
+    VkFenceCreateInfo fenceCi = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, };
+    vk->vkCreateFence(mDevice, &fenceCi, nullptr, &fence);
+
+    fprintf(stderr, "%s: guest fence: %p\n", __func__, fence);
+
+    VkBuffer buffer;
+    vk->vkCreateBuffer(mDevice, &bufCi, nullptr, &buffer);
+
+    fprintf(stderr, "%s: guest buffer: %p\n", __func__, buffer);
+
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+
+    VkMemoryRequirements memReqs;
+    vk->vkGetBufferMemoryRequirements(mDevice, buffer, &memReqs);
+    vk->vkDestroyBuffer(mDevice, buffer, nullptr);
+
+    vk->vkDestroyFence(mDevice, fence, nullptr);
+}
+
+// Tests save/load of host visible memory.  This is not yet a viable host-only
+// test because, the only way to really test it is to be able to preserve a
+// host visible address for the simulated guest while the backing memory under
+// it changes due to the new snapshot.  In other words, this is arbitrary
+// remapping of virtual addrs and is functionality that does not exist on
+// Linux/macOS. It would ironically require a hypervisor (or an OS that
+// supports freer ways of mapping memory) in order to test properly.
+TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
+    static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
+        kTestAlloc,
+        mHostVisibleMemoryTypeIndex,
+    };
+    VkDeviceMemory mem;
+    EXPECT_EQ(VK_SUCCESS, vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &mem));
+
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+
+    void* hostPtr;
+    EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
+
+    memset(hostPtr, 0xff, kTestAlloc);
+
+    VkMappedMemoryRange toFlush = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
+        mem, 0, kTestAlloc,
+    };
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFlushMappedMemoryRanges(mDevice, 1, &toFlush));
+    EXPECT_EQ(VK_SUCCESS, vk->vkInvalidateMappedMemoryRanges(mDevice, 1, &toFlush));
+
+    vk->vkUnmapMemory(mDevice, mem);
+    vk->vkFreeMemory(mDevice, mem, nullptr);
+}
+
+// Tests save/load of a dispatchable handle, such as VkCommandBuffer.
+// Note that the internal state of the command buffer is not snapshotted yet.
+TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleDispatchable) {
+    VkCommandPoolCreateInfo poolCi = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
+    };
+
+    VkCommandPool pool;
+    vk->vkCreateCommandPool(mDevice, &poolCi, nullptr, &pool);
+
+    VkCommandBuffer cb;
+    VkCommandBufferAllocateInfo cbAi = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi, &cb);
+
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+
+    vk->vkFreeCommandBuffers(mDevice, pool, 1, &cb);
+    vk->vkDestroyCommandPool(mDevice, pool, nullptr);
+}
+
+// Tests that dependencies are respected between different handle types,
+// such as VkImage and VkImageView.
+TEST_F(VulkanHalTest, SnapshotSaveLoadDependentHandlesImageView) {
+    VkImage image;
+    VkImageCreateInfo imageCi = {
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, 0, 0,
+        VK_IMAGE_TYPE_2D,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        { 1, 1, 1, },
+        1, 1,
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_IMAGE_TILING_LINEAR,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    vk->vkCreateImage(mDevice, &imageCi, nullptr, &image);
+
+    VkImageView imageView;
+    VkImageViewCreateInfo imageViewCi = {
+        VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO, 0, 0,
+        image,
+        VK_IMAGE_VIEW_TYPE_2D,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        {
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+            VK_COMPONENT_SWIZZLE_IDENTITY,
+        },
+        { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1, },
+    };
+
+    vk->vkCreateImageView(mDevice, &imageViewCi, nullptr, &imageView);
+
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+
+    vk->vkDestroyImageView(mDevice, imageView, nullptr);
+    vk->vkCreateImageView(mDevice, &imageViewCi, nullptr, &imageView);
+    vk->vkDestroyImageView(mDevice, imageView, nullptr);
+
+    vk->vkDestroyImage(mDevice, image, nullptr);
 }
 
 }  // namespace aemu
