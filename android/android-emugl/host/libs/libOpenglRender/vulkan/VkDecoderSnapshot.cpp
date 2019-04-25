@@ -496,6 +496,8 @@ void vkCreateBuffer(
     VkBuffer* pBuffer)
 {
     // TODO: Implement
+    fprintf(stderr, "%s: handle: 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)(*pBuffer));
 }
 void vkDestroyBuffer(
     android::base::Pool* pool,
@@ -503,6 +505,8 @@ void vkDestroyBuffer(
     VkBuffer buffer,
     const VkAllocationCallbacks* pAllocator)
 {
+    fprintf(stderr, "%s: handle: 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)(buffer));
     // TODO: Implement
 }
 void vkCreateBufferView(
