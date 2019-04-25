@@ -26,6 +26,10 @@ static StopResult stop_recording() {
     return AutomationController::get().stopRecording();
 }
 
+static StopResult stop_recording_with_name(android::base::StringView filename) {
+    return AutomationController::get().stopRecordingWithName(filename);
+}
+
 static StartResult start_playback(android::base::StringView filename) {
     return AutomationController::get().startPlayback(filename);
 }
@@ -45,6 +49,7 @@ static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
         .reset = reset,
         .startRecording = start_recording,
         .stopRecording = stop_recording,
+        .stopRecordingWithName = stop_recording_with_name,
         .startPlayback = start_playback,
         .stopPlayback = stop_playback,
         .startPlaybackWithCallback = start_playback_with_callback};

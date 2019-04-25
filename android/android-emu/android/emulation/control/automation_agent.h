@@ -28,6 +28,10 @@ typedef struct QAndroidAutomationAgent {
     // Stops a recording to a file.
     android::automation::StopResult (*stopRecording)();
 
+    // Stops a recording to a file and updates the name.
+    android::automation::StopResult (*stopRecordingWithName)(
+            StringView filename);
+
     // Start a playback from a file.
     android::automation::StartResult (*startPlayback)(StringView filename);
 

@@ -21,7 +21,9 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
+#include <QDir>
 #include <QMessageBox>
+#include <QStandardPaths>
 #include <iostream>
 #include <sstream>
 
@@ -294,14 +296,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     if (result.err()) {
         std::ostringstream errString;
         errString << result.unwrapErr();
-
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText(tr("An error ocurred."));
-        msgBox.setInformativeText(errString.str().c_str());
-        msgBox.setDefaultButton(QMessageBox::Save);
-
-        int ret = msgBox.exec();
+        displayErrorBox(errString.str());
         return;
     }
 
@@ -524,12 +519,37 @@ void RecordMacroPage::startRecording() {
     }
     disableMacroItems();
     mRecording = true;
+
+    const std::string macrosLocation = getCustomMacrosDirectory();
+    const std::string placeholderPath =
+            PathUtils::join(macrosLocation, "placeholder_name");
+
+    auto result = sAutomationAgent->startRecording(placeholderPath);
+    if (result.err()) {
+        std::ostringstream errString;
+        errString << result.unwrapErr();
+        displayErrorBox(errString.str());
+        return;
+    }
+
     setMacroUiState(MacroUiState::Recording);
 }
 
 void RecordMacroPage::stopRecording() {
     enableMacroItems();
     mRecording = false;
+
+    const std::string macrosLocation = getCustomMacrosDirectory();
+    const std::string realPath = PathUtils::join(macrosLocation, "real_name");
+
+    auto result = sAutomationAgent->stopRecordingWithName(realPath);
+    if (result.err()) {
+        std::ostringstream errString;
+        errString << result.unwrapErr();
+        displayErrorBox(errString.str());
+        return;
+    }
+
     setMacroUiState(MacroUiState::Waiting);
 }
 
@@ -564,4 +584,27 @@ void RecordMacroPage::setRecordState() {
             break;
         }
     }
+}
+
+std::string RecordMacroPage::getCustomMacrosDirectory() {
+    const std::string appDataLocation =
+            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+                    .toUtf8()
+                    .constData();
+    const std::string macrosLocation =
+            PathUtils::join(appDataLocation, "macros");
+    QDir dir(QString::fromStdString(macrosLocation));
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+    return macrosLocation;
+}
+
+void RecordMacroPage::displayErrorBox(const std::string& errorStr) {
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setText(tr("An error ocurred."));
+    msgBox.setInformativeText(errorStr.c_str());
+    msgBox.setDefaultButton(QMessageBox::Save);
+    msgBox.exec();
 }
