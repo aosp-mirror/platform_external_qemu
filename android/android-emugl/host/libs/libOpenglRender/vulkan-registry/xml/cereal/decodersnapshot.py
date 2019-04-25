@@ -9,6 +9,8 @@ from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
 
+from .baseprotoconversion import VulkanStructToProtoCodegen, VulkanProtoToStructCodegen
+
 from copy import copy
 
 decoder_snapshot_decl_preamble = """
@@ -29,19 +31,58 @@ decoder_snapshot_decl_postamble = """
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 """
 
 decoder_snapshot_impl_preamble ="""
+
+using android::base::EntityManager;
+using android::base::ComponentManager;
+using android::base::UnpackedComponentManager;
 
 using namespace goldfish_vk;
 
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
 """
 
 decoder_snapshot_impl_postamble = """
+private:
+    struct ApiInfo {
+        goldfish_vk_proto::VkApiCall apiCall;
+    };
+
+    using ApiTrace = EntityManager<32, 16, 16, ApiInfo>;
+    using ApiHandle = ApiTrace::EntityHandle;
+
+    struct HandleReconstruction {
+        std::vector<ApiHandle> apiRefs;
+    };
+
+    using HandleReconstructions = UnpackedComponentManager<32, 16, 16, HandleReconstruction>;
+
+    ApiTrace mApiTrace;
+
+#define DEFINE_HANDLE_RECONSTRUCTION_MEMBER(type) \\
+    HandleReconstructions mReconstructions_##type; \\
+    void addReconstruction_##type(const type* toAdd, uint32_t count) { \\
+        if (!toAdd) return; \\
+        for (uint32_t i = 0; i < count; ++i) { \\
+            mReconstructions_##type.add((uint64_t)(uintptr_t)toAdd[i], HandleReconstruction()); \\
+        } \\
+    } \\
+    void removeReconstruction_##type(const type* toRemove, uint32_t count) { \\
+        if (!toRemove) return; \\
+        for (uint32_t i = 0; i < count; ++i) { \\
+            mReconstructions_##type.remove((uint64_t)(uintptr_t)toRemove[i]); \\
+        } \\
+    } \\
+
+    GOLDFISH_VK_LIST_HANDLE_TYPES(DEFINE_HANDLE_RECONSTRUCTION_MEMBER)
+
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
@@ -50,8 +91,60 @@ VkDecoderSnapshot::VkDecoderSnapshot() :
 VkDecoderSnapshot::~VkDecoderSnapshot() = default;
 """
 
+AUXILIARY_SNAPSHOT_API_TYPES = [
+    "android::base::Pool",
+]
+
+AUXILIARY_SNAPSHOT_API_PARAM_NAMES = [
+    "input_result",
+]
+
 def emit_impl(typeInfo, api, cgen):
+
     cgen.line("// TODO: Implement")
+
+    traceCreate = False
+
+    for p in api.parameters:
+
+        if not (p.isHandleType):
+            continue
+
+        lenExpr = cgen.generalLengthAccess(p)
+
+        if lenExpr is None:
+            lenExpr = "1"
+
+        if p.pointerIndirectionLevels > 0:
+            access = p.paramName
+        else:
+            access = "(&%s)" % p.paramName
+
+        if p.isCreatedBy(api):
+            cgen.line("// %s create" % p.paramName)
+            cgen.stmt("addReconstruction_%s(%s, %s)" % (p.typeName, access, lenExpr));
+            traceCreate = True
+
+        if p.isDestroyedBy(api):
+            cgen.line("// %s destroy" % p.paramName)
+            cgen.stmt("removeReconstruction_%s(%s, %s)" % (p.typeName, access, lenExpr));
+
+    if traceCreate:
+        cgen.stmt("DefaultHandleMapping someHandleMapping")
+        cgen.stmt("auto apiHandle = mApiTrace.add(ApiInfo(), 1 /* type tag */)")
+        cgen.stmt("auto apiInfo = mApiTrace.get(apiHandle)")
+        cgen.stmt("auto proto = apiInfo->apiCall.mutable_api_%s()" % api.name.lower())
+        for p in api.parameters:
+
+            if p.typeName in AUXILIARY_SNAPSHOT_API_TYPES:
+                continue
+
+            if p.paramName in AUXILIARY_SNAPSHOT_API_PARAM_NAMES:
+                continue
+
+            if typeInfo.categoryOf(p.typeName) in ["struct", "union"]:
+                iterateVulkanType(typeInfo, p, VulkanStructToProtoCodegen( \
+                    cgen, "&someHandleMapping", "%s" % (p.paramName), "proto"))
 
 def emit_passthrough_to_impl(typeInfo, api, cgen):
     cgen.vkApiCall(api, customPrefix = "mImpl->")
