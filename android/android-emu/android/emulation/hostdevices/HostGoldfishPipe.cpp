@@ -41,7 +41,7 @@
 #endif
 #endif
 
-#define HOST_PIPE_DEBUG 0
+#define HOST_PIPE_DEBUG 1
 
 #if HOST_PIPE_DEBUG
 
@@ -328,6 +328,7 @@ ssize_t HostGoldfishPipeDevice::write(void* pipe, const void* buffer, size_t len
 
     auto it = mHwPipeToPipe.find(pipe);
     if (it == mHwPipeToPipe.end()) {
+        fprintf(stderr, "%s: not found: %p\n", __func__, pipe);
         LOG(ERROR) << "Pipe not found.";
         mErrno = EINVAL;
         return PIPE_ERROR_INVAL;
