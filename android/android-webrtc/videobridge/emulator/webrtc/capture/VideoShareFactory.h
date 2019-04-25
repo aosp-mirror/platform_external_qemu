@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "VideoShareInfo.h"
-#include "VideoShareCapture.h"
+#include <string>
 
+#include "VideoShareCapture.h"
+#include "VideoShareInfo.h"
+#include "api/scoped_refptr.h"
 #include "media/engine/webrtcvideocapturer.h"
 #include "media/engine/webrtcvideocapturerfactory.h"
 #include "modules/video_capture/video_capture.h"
 #include "modules/video_capture/video_capture_factory.h"
-#include "api/scoped_refptr.h"
-
-#include <string>
 
 using DeviceInfo = webrtc::VideoCaptureModule::DeviceInfo;
-
 
 namespace emulator {
 namespace webrtc {
@@ -34,21 +32,21 @@ namespace videocapturemodule {
 // A Factory that can be used by the WebRTC module to produce the
 // proper video module that retrieves frames from shared memory.
 class VideoShareFactory : public cricket::WebRtcVcmFactoryInterface {
- public:
-  VideoShareFactory(std::string handle, int32_t desiredFps);
-  ~VideoShareFactory() = default;
+public:
+    VideoShareFactory(std::string handle, int32_t desiredFps);
+    ~VideoShareFactory() = default;
 
-  rtc::scoped_refptr<::webrtc::VideoCaptureModule> Create(
-      const char* device) override;
-  DeviceInfo* CreateDeviceInfo() override;
-  void DestroyDeviceInfo(DeviceInfo* info) override;
+    rtc::scoped_refptr<::webrtc::VideoCaptureModule> Create(
+            const char* device) override;
+    DeviceInfo* CreateDeviceInfo() override;
+    void DestroyDeviceInfo(DeviceInfo* info) override;
 
- private:
-  bool mValid;
-  std::string mMemoryHandle;
-  VideoShareInfo mShareInfo;
+private:
+    bool mValid;
+    std::string mMemoryHandle;
+    VideoShareInfo mShareInfo;
 };
 
 }  // namespace videocapturemodule
 }  // namespace webrtc
-}
+}  // namespace emulator

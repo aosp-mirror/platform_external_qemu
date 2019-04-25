@@ -22,6 +22,16 @@ namespace videocapturemodule {
 // images from a shared memory handle. It will always deliver
 // frames in the I420 format, as that's what you will find in the
 // shared memory region.
+//
+// Note: We currently are not using the fps set in the shared memory
+// region.
+//
+// The shared memory region from the emulator should look as follows:
+//
+//      uint32_t width;
+//      uint32_t height;
+//      uint32_t fps;
+//      uint8_t[width*height*12/8] pixels;
 class VideoShareInfo : public ::webrtc::VideoCaptureModule::DeviceInfo {
 public:
     struct VideoInfo {

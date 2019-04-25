@@ -48,8 +48,8 @@ WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
       mScreenAgent(screenAgent),
       mFps(fps),
       mVideoBridgePort(videoBridgePort) {
-          mVideoModule = generateUniqueVideoHandle();
-      }
+    mVideoModule = generateUniqueVideoHandle();
+}
 
 WebRtcBridge::~WebRtcBridge() {
     terminate();

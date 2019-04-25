@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+
 #include "emulator/net/AsyncSocketAdapter.h"
 
 namespace emulator {
@@ -56,7 +57,6 @@ public:
     SocketTransport(const SocketTransport&) = delete;
     SocketTransport(SocketTransport&&) = delete;
 
-
     void close();
     bool send(const std::string msg);
     bool connect();
@@ -64,6 +64,7 @@ public:
     State state() { return mState; }
 
 private:
+    static const uint16_t RECV_BUFFER_SIZE = 1024;
     void registerCallbacks();
     void setState(State newState);
     void onRead(AsyncSocketAdapter* socket) override;

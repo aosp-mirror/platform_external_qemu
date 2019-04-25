@@ -1,7 +1,9 @@
 
 #include <rtc_base/nethelpers.h>
 #include <rtc_base/socketaddress.h>
+
 #include <string>
+
 #include "emulator/net/AsyncSocketAdapter.h"
 using rtc::AsyncSocket;
 
@@ -20,8 +22,9 @@ public:
     void close() override;
     uint64_t recv(char* buffer, uint64_t bufferSize) override;
     uint64_t send(const char* buffer, uint64_t bufferSize) override;
-     bool connected() override;
+    bool connected() override;
     bool connect() override;
+
 private:
     void onRead(rtc::AsyncSocket* socket);
     void onClose(rtc::AsyncSocket* socket, int err);
