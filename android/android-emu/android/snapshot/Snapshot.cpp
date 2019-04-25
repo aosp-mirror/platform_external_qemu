@@ -308,11 +308,13 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     auto res =
         saveProtobuf(
             PathUtils::join(mDataDir, "snapshot.pb"),
             mSnapshotPb,
             &mSize);
+        fprintf(stderr, "%s:%d arrive %d\n", __func__, __LINE__, res == ProtobufSaveResult::Success);
     return res == ProtobufSaveResult::Success;
 }
 
@@ -396,8 +398,11 @@ bool Snapshot::save() {
     // so we reset the invalid/successful counters.
 
     auto targetHwIni = PathUtils::join(mDataDir, "hardware.ini");
+    fprintf(stderr, "%s: target hw ini: %s\n", __func__, targetHwIni.c_str());
+    fprintf(stderr, "%s: corehwinipath: %s\n", __func__, avdInfo_getCoreHwIniPath(android_avdInfo));
     if (path_copy_file(targetHwIni.c_str(),
                        avdInfo_getCoreHwIniPath(android_avdInfo)) != 0) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         return false;
     }
 
@@ -447,6 +452,7 @@ bool Snapshot::save() {
         }
     }
 
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     return writeSnapshotToDisk();
 }
 
