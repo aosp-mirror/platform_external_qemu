@@ -38,6 +38,7 @@
 namespace android {
 namespace base {
 class Pool;
+class Stream;
 } // namespace base {
 } // namespace android {
 
@@ -45,6 +46,9 @@ class VkDecoderSnapshot {
 public:
     VkDecoderSnapshot();
     ~VkDecoderSnapshot();
+
+    void save(android::base::Stream* stream);
+    void load(android::base::Stream* stream);
 #ifdef VK_VERSION_1_0
     void vkCreateInstance(
     android::base::Pool* pool,
@@ -2274,6 +2278,7 @@ public:
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 
 
