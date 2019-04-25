@@ -9,6 +9,8 @@ from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
 
+from .baseprotoconversion import VulkanStructToProtoCodegen, VulkanProtoToStructCodegen
+
 from copy import copy
 
 decoder_snapshot_decl_preamble = """
@@ -16,6 +18,7 @@ decoder_snapshot_decl_preamble = """
 namespace android {
 namespace base {
 class Pool;
+class Stream;
 } // namespace base {
 } // namespace android {
 
@@ -23,12 +26,16 @@ class VkDecoderSnapshot {
 public:
     VkDecoderSnapshot();
     ~VkDecoderSnapshot();
+
+    void save(android::base::Stream* stream);
+    void load(android::base::Stream* stream);
 """
 
 decoder_snapshot_decl_postamble = """
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+
 };
 """
 
@@ -39,19 +46,93 @@ using namespace goldfish_vk;
 class VkDecoderSnapshot::Impl {
 public:
     Impl() { }
+
+    void save(android::base::Stream* stream) {
+        mReconstruction.save(stream);
+    }
+
+    void load(android::base::Stream* stream) {
+        mReconstruction.load(stream);
+    }
+
 """
 
 decoder_snapshot_impl_postamble = """
+private:
+
+    VkReconstruction mReconstruction;
 };
 
 VkDecoderSnapshot::VkDecoderSnapshot() :
     mImpl(new VkDecoderSnapshot::Impl()) { }
 
+void VkDecoderSnapshot::save(android::base::Stream* stream) {
+    mImpl->save(stream);
+}
+
+void VkDecoderSnapshot::load(android::base::Stream* stream) {
+    mImpl->load(stream);
+}
+
 VkDecoderSnapshot::~VkDecoderSnapshot() = default;
 """
 
+AUXILIARY_SNAPSHOT_API_TYPES = [
+    "android::base::Pool",
+]
+
+AUXILIARY_SNAPSHOT_API_PARAM_NAMES = [
+    "input_result",
+]
+
 def emit_impl(typeInfo, api, cgen):
+
     cgen.line("// TODO: Implement")
+
+    traceCreate = False
+
+    for p in api.parameters:
+
+        if not (p.isHandleType):
+            continue
+
+        lenExpr = cgen.generalLengthAccess(p)
+
+        if lenExpr is None:
+            lenExpr = "1"
+
+        if p.pointerIndirectionLevels > 0:
+            access = p.paramName
+        else:
+            access = "(&%s)" % p.paramName
+
+        if p.isCreatedBy(api):
+            cgen.line("// %s create" % p.paramName)
+            cgen.stmt("mReconstruction.addReconstruction_%s(%s, %s)" % (p.typeName, access, lenExpr));
+            traceCreate = True
+
+        if p.isDestroyedBy(api):
+            cgen.line("// %s destroy" % p.paramName)
+            cgen.stmt("mReconstruction.forEachReconstructionDeleteApiRefs_%s(%s, %s)" % (p.typeName, access, lenExpr))
+            cgen.stmt("mReconstruction.removeReconstruction_%s(%s, %s)" % (p.typeName, access, lenExpr));
+
+    if traceCreate:
+        cgen.stmt("DefaultHandleMapping someHandleMapping")
+        cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
+        cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
+        cgen.stmt("auto proto = apiInfo->apiCall.mutable_api_%s()" % api.name.lower())
+        for p in api.parameters:
+
+            if p.typeName in AUXILIARY_SNAPSHOT_API_TYPES:
+                continue
+
+            if p.paramName in AUXILIARY_SNAPSHOT_API_PARAM_NAMES:
+                continue
+
+            if typeInfo.categoryOf(p.typeName) in ["struct", "union"]:
+                iterateVulkanType(typeInfo, p, VulkanStructToProtoCodegen( \
+                    cgen, "&someHandleMapping", "%s" % (p.paramName), "proto"))
+        cgen.stmt("mReconstruction.forEachReconstructionAddApiRef_%s(%s, %s, apiHandle)" % (p.typeName, access, lenExpr))
 
 def emit_passthrough_to_impl(typeInfo, api, cgen):
     cgen.vkApiCall(api, customPrefix = "mImpl->")
