@@ -24,6 +24,7 @@
 #include "android/opengles-pipe.h"
 #include "android/opengles.h"
 #include "android/refcount-pipe.h"
+#include "android/snapshot/interface.h"
 
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
@@ -54,6 +55,8 @@ using android::base::System;
 using android::HostGoldfishPipeDevice;
 
 static constexpr int kWindowSize = 256;
+
+extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
@@ -98,6 +101,10 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
         kWindowSize, kWindowSize, 1, 28, gQAndroidVmOperations,
         gQAndroidEmulatorWindowAgent, &maj, &min);
 
+    androidSnapshot_initialize(
+        gQAndroidVmOperations,
+        gQAndroidEmulatorWindowAgent);
+
     char* vendor = nullptr;
     char* renderer = nullptr;
     char* version = nullptr;
@@ -118,4 +125,12 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
     AndroidPipe::Service::resetAll();
     android_stopOpenglesRenderer(true);
+}
+
+void GoldfishOpenglTestEnv::saveSnapshot(android::base::Stream* stream) {
+    HostGoldfishPipeDevice::get()->saveSnapshot(stream);
+}
+
+void GoldfishOpenglTestEnv::loadSnapshot(android::base::Stream* stream) {
+    HostGoldfishPipeDevice::get()->loadSnapshot(stream);
 }
