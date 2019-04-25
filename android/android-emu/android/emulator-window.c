@@ -72,7 +72,7 @@ emulator_window_light_brightness(void* opaque, const char*  light, int  value)
 }
 
 static void emulator_window_trackball_event(int dx, int dy) {
-    user_event_agent->sendMouseEvent(dx, dy, 1, 0);
+    user_event_agent->sendMouseEvent(dx, dy, 1, 0, 0);
 }
 
 static void emulator_window_window_key_event(unsigned keycode, int down) {
@@ -94,7 +94,7 @@ static void emulator_window_window_mouse_event(unsigned x,
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
-    user_event_agent->sendMouseEvent(x, y, 0, state);
+    user_event_agent->sendMouseEvent(x, y, 0, state, 0);
 }
 
 static void emulator_window_window_rotary_input_event(int delta) {

@@ -18,22 +18,10 @@
 
 ANDROID_BEGIN_HEADER
 
-#define TYPE_VIRTIO_INPUT_MULTI_TOUCH "virtio-input-multi-touch-device"
-#define VIRTIO_INPUT_MULTI_TOUCH(obj) \
-    OBJECT_CHECK(VirtIOInputMultiTouch, (obj), TYPE_VIRTIO_INPUT_MULTI_TOUCH)
-
-typedef struct VirtIOInputMultiTouch VirtIOInputMultiTouch;
-
-#define TYPE_VIRTIO_INPUT_MULTI_TOUCH_PCI "virtio-input-multi-touch-pci"
-#define VIRTIO_INPUT_MULTI_TOUCH_PCI(obj)         \
-    OBJECT_CHECK(VirtIOInputMultiTouchPCI, (obj), \
-                 TYPE_VIRTIO_INPUT_MULTI_TOUCH_PCI)
-
-typedef struct VirtIOInputMultiTouchPCI VirtIOInputMultiTouchPCI;
-
 extern int android_virtio_input_send(int type, int code, int value);
 extern void android_virtio_kbd_mouse_event(int dx,
                                            int dy,
                                            int dz,
-                                           int buttonsState);
+                                           int buttonsState,
+                                           int displayId);
 ANDROID_END_HEADER

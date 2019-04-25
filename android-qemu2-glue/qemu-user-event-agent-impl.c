@@ -92,11 +92,15 @@ static void user_event_generic_events(SkinGenericEventCode* events, int count) {
     }
 }
 
-static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
+static void user_event_mouse(int dx,
+                             int dy,
+                             int dz,
+                             int buttonsState,
+                             int displayId) {
     if (VERBOSE_CHECK(keys))
         printf(">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
     if (feature_is_enabled(kFeature_VirtioInput))
-        android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState);
+        android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState, displayId);
     else
         kbd_mouse_event(dx, dy, dz, buttonsState);
 }
