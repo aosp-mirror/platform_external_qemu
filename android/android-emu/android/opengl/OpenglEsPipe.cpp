@@ -115,6 +115,7 @@ public:
                 renderer->pauseAllPreSave();
                 stream->putByte(1);
                 stream->putBe32(OPENGL_SAVE_VERSION);
+                fprintf(stderr, "%s: saver? %d\n", __func__, bool(Snapshotter::get().hasSaver()));
                 renderer->save(stream,
                                Snapshotter::get().saver().textureSaver());
 
@@ -454,6 +455,7 @@ private:
             return;
         }
         if ((state & ChannelState::Stopped) != 0) {
+            fprintf(stderr, "%s: close %p from host\n", __func__, this);
             this->closeFromHost();
             return;
         }
