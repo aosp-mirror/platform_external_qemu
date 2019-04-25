@@ -267,6 +267,11 @@ public:
         return res;
     }
 
+    void clear() {
+        mData.clear();
+        mEntityToComponentMap.clear();
+    }
+
     // If we didn't explicitly track, just fail.
     ComponentHandle getComponentHandle(EntityHandle h) const {
         auto componentHandlePtr = android::base::find(mEntityToComponentMap, h);
@@ -358,6 +363,10 @@ public:
         mItems[index].data = data;
 
         return h;
+    }
+
+    void clear() {
+        mItems.clear();
     }
 
     void remove(EntityHandle h) {
