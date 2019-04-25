@@ -32,7 +32,9 @@ namespace snapshot {
 Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
              base::StringView ramMapFile, bool ramFileShared, bool isRemapping)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
+        fprintf(stderr, "%s: make saver\n", __func__);
     if (path_mkdir_if_needed_no_cow(c_str(mSnapshot.dataDir()), 0777) != 0) {
+        fprintf(stderr, "%s: fail no mkdir\n", __func__);
         return;
     }
     {
@@ -105,6 +107,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
                           isOnExit);
         if (mRamSaver->hasError()) {
             mRamSaver.clear();
+            fprintf(stderr, "%s: ram saver has error\n", __func__);
             return;
         }
     }
@@ -114,6 +117,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
                 PathUtils::join(mSnapshot.dataDir(), kTexturesFileName).c_str(),
                 "wb", android::base::FileShare::Write);
         if (!textures) {
+            fprintf(stderr, "%s: could not create textures files\n", __func__);
             mRamSaver.clear();
             return;
         }
@@ -122,6 +126,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
     }
 
     mStatus = OperationStatus::NotStarted;
+    fprintf(stderr, "%s: status not started\n", __func__);
 }
 
 Saver::~Saver() {
@@ -144,16 +149,21 @@ void Saver::prepare() {
 }
 
 void Saver::complete(bool succeeded) {
+
+    fprintf(stderr, "%s: complete %d\n", __func__, succeeded);
+
     mStatus = OperationStatus::Error;
     if (!succeeded) {
         return;
     }
     if (!mRamSaver || mRamSaver->hasError()) {
+        fprintf(stderr, "%s: no ram saver, or has error in ram saving\n", __func__);
         return;
     }
     mRamSaver->join();
     if (!mTextureSaver ||
         (static_cast<void>(mTextureSaver->done()), mTextureSaver->hasError())) {
+        fprintf(stderr, "%s: no tex saver, or has error in ram saving\n", __func__);
         return;
     }
 
@@ -171,6 +181,7 @@ void Saver::complete(bool succeeded) {
     }
 
     if (!mSnapshot.save()) {
+        fprintf(stderr, "%s: fail snapshot save\n", __func__);
         return;
     }
 

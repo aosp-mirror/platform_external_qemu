@@ -2224,6 +2224,11 @@ void FrameBuffer::onSave(Stream* stream,
         s->putBe32(pair.second.height);
     });
 
+    // Save Vulkan state
+    if (goldfish_vk::VkDecoderGlobalState::get()) {
+        goldfish_vk::VkDecoderGlobalState::get()->save(stream);
+    }
+
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
@@ -2238,6 +2243,7 @@ void FrameBuffer::onSave(Stream* stream,
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
     }
+
 }
 
 bool FrameBuffer::onLoad(Stream* stream,
@@ -2249,6 +2255,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         if (m_procOwnedWindowSurfaces.empty() &&
             m_procOwnedColorBuffers.empty() && m_procOwnedEGLImages.empty() &&
             m_procOwnedRenderContext.empty() &&
+            m_procOwnedCleanupCallbacks.empty() &&
             (!m_contexts.empty() || !m_windows.empty() ||
              m_colorbuffers.size() > m_colorBufferDelayedCloseList.size())) {
             // we are likely on a legacy system image, which does not have
@@ -2273,7 +2280,27 @@ bool FrameBuffer::onLoad(Stream* stream,
                 cleanupProcGLObjects_locked(
                         m_procOwnedRenderContext.begin()->first, true);
             }
+
+            std::vector<std::function<void()>> cleanupCallbacks;
+
+            while (m_procOwnedCleanupCallbacks.size()) {
+                for (auto procIte : m_procOwnedCleanupCallbacks) {
+                    for (auto it : procIte.second) {
+                        cleanupCallbacks.push_back(it.second);
+                    }
+                    m_procOwnedCleanupCallbacks.erase(procIte.first);
+                }
+            }
+
             performDelayedColorBufferCloseLocked(true);
+
+            lock.unlock();
+
+            for (auto cb : cleanupCallbacks) {
+                cb();
+            }
+
+            lock.lock();
         }
         m_colorBufferDelayedCloseList.clear();
         assert(m_contexts.empty());
@@ -2365,6 +2392,11 @@ bool FrameBuffer::onLoad(Stream* stream,
                 it.second.cb->touch();
             }
         }
+    }
+
+    // Restore Vulkan state
+    if (goldfish_vk::VkDecoderGlobalState::get()) {
+        goldfish_vk::VkDecoderGlobalState::get()->load(stream);
     }
 
     // Restore multi display state
