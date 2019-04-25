@@ -859,8 +859,11 @@ class VulkanTypeProtobufInfo(object):
         self.isRepeatedString = vulkanType.isArrayOfStrings()
         self.isString = vulkanType.isString() or (vulkanType.typeName == "char" and (vulkanType.staticArrExpr != None))
 
-        self.lengthInfo = vulkanTypeGetStructFieldLengthInfo(
-            structInfo, vulkanType)
+        if structInfo is not None:
+            self.lengthInfo = vulkanTypeGetStructFieldLengthInfo(
+                structInfo, vulkanType)
+        else:
+            self.lengthInfo = vulkanType.getLengthExpression()
 
         self.protobufType = None
         self.origTypeCategory = typeInfo.categoryOf(vulkanType.typeName)

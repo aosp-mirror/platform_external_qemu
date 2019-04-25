@@ -2224,6 +2224,11 @@ void FrameBuffer::onSave(Stream* stream,
         s->putBe32(pair.second.height);
     });
 
+    // Save Vulkan state
+    if (goldfish_vk::VkDecoderGlobalState::get()) {
+        goldfish_vk::VkDecoderGlobalState::get()->save(stream);
+    }
+
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
@@ -2238,6 +2243,7 @@ void FrameBuffer::onSave(Stream* stream,
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
     }
+
 }
 
 bool FrameBuffer::onLoad(Stream* stream,
@@ -2365,6 +2371,11 @@ bool FrameBuffer::onLoad(Stream* stream,
                 it.second.cb->touch();
             }
         }
+    }
+
+    // Restore Vulkan state
+    if (goldfish_vk::VkDecoderGlobalState::get()) {
+        goldfish_vk::VkDecoderGlobalState::get()->load(stream);
     }
 
     // Restore multi display state
