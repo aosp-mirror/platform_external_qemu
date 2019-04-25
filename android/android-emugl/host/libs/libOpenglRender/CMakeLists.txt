@@ -32,6 +32,7 @@ set(OpenglRender_vulkan_src
     vulkan/VkDecoder.cpp
     vulkan/VkDecoderGlobalState.cpp
     vulkan/VkDecoderSnapshot.cpp
+    vulkan/VkReconstruction.cpp
     vulkan/VulkanDispatch.cpp
     vulkan/VulkanHandleMapping.cpp
     vulkan/VulkanStream.cpp)
