@@ -23,7 +23,7 @@ import sys
 # Class capturing a .cpp file and a .h file (a "C++ module")
 class Module(object):
 
-    def __init__(self, directory, basename, customAbsDir = None):
+    def __init__(self, directory, basename, customAbsDir = None, suppress = False):
         self.directory = directory
         self.basename = basename
 
@@ -37,6 +37,8 @@ class Module(object):
         self.implFileHandle = ""
 
         self.customAbsDir = customAbsDir
+
+        self.suppress = suppress
 
     def getMakefileSrcEntry(self):
         if self.customAbsDir:
@@ -55,6 +57,9 @@ class Module(object):
         return "    " + joined + ".cpp "
 
     def begin(self, globalDir):
+        if self.suppress:
+            return
+
         # Create subdirectory, if needed
         if self.customAbsDir:
             absDir = self.customAbsDir
@@ -73,12 +78,21 @@ class Module(object):
         self.implFileHandle.write(self.implPreamble)
 
     def appendHeader(self, toAppend):
+        if self.suppress:
+            return
+
         self.headerFileHandle.write(toAppend)
 
     def appendImpl(self, toAppend):
+        if self.suppress:
+            return
+
         self.implFileHandle.write(toAppend)
 
     def end(self):
+        if self.suppress:
+            return
+
         self.headerFileHandle.write(self.headerPostamble)
         self.implFileHandle.write(self.implPostamble)
 
@@ -88,13 +102,15 @@ class Module(object):
 # Class capturing a .proto protobuf definition file
 class Proto(object):
 
-    def __init__(self, directory, basename, customAbsDir = None):
+    def __init__(self, directory, basename, customAbsDir = None, suppress = False):
         self.directory = directory
         self.basename = basename
         self.customAbsDir = customAbsDir
 
         self.preamble = ""
         self.postamble = ""
+
+        self.suppress = suppress
 
     def getMakefileSrcEntry(self):
         if self.customAbsDir:
@@ -107,12 +123,16 @@ class Proto(object):
     def getCMakeSrcEntry(self):
         if self.customAbsDir:
             return self.basename + ".proto "
+
         dirName = self.directory
         baseName = self.basename
         joined = os.path.join(dirName, baseName)
         return "    " + joined + ".proto "
 
     def begin(self, globalDir):
+        if self.suppress:
+            return
+
         # Create subdirectory, if needed
         if self.customAbsDir:
             absDir = self.customAbsDir
@@ -126,9 +146,15 @@ class Proto(object):
         self.protoFileHandle.write(self.preamble)
 
     def append(self, toAppend):
+        if self.suppress:
+            return
+
         self.protoFileHandle.write(toAppend)
 
     def end(self):
+        if self.suppress:
+            return
+
         self.protoFileHandle.write(self.postamble)
         self.protoFileHandle.close()
 
