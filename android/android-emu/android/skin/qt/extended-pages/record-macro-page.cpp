@@ -21,9 +21,12 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
+#include <QDialogButtonBox>
 #include <QDir>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QStandardPaths>
+#include <QVBoxLayout>
 #include <iostream>
 #include <sstream>
 
@@ -547,12 +550,19 @@ void RecordMacroPage::stopRecording() {
         return;
     }
 
-    // Renaming file.
+    const std::string newName = displayNameMacroBox();
+
     const std::string macrosLocation = getCustomMacrosDirectory();
     const std::string oldPath =
             PathUtils::join(macrosLocation, "placeholder_name");
-    const std::string newPath = PathUtils::join(macrosLocation, "real_name");
-    std::rename(oldPath.c_str(), newPath.c_str());
+    if (!newName.empty()) {
+        // Rename file.
+        const std::string newPath = PathUtils::join(macrosLocation, newName);
+        std::rename(oldPath.c_str(), newPath.c_str());
+    } else {
+        // Delete file.
+        std::remove(oldPath.c_str());
+    }
 
     setMacroUiState(MacroUiState::Waiting);
 }
@@ -560,7 +570,7 @@ void RecordMacroPage::stopRecording() {
 void RecordMacroPage::setRecordState() {
     if (!mRecording) {
         mUi->recButton->setText(tr("RECORD NEW "));
-        mUi->recButton->setIcon(getIconForCurrentTheme("record_screen"));
+        mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
     }
 
     switch (mState) {
@@ -611,4 +621,35 @@ void RecordMacroPage::displayErrorBox(const std::string& errorStr) {
     msgBox.setInformativeText(errorStr.c_str());
     msgBox.setDefaultButton(QMessageBox::Save);
     msgBox.exec();
+}
+
+std::string RecordMacroPage::displayNameMacroBox() {
+    QWidget* placeholderWidget = new QWidget;
+    QVBoxLayout* dialogLayout = new QVBoxLayout(placeholderWidget);
+
+    dialogLayout->addWidget(new QLabel(tr("Macro name")));
+    QLineEdit* name = new QLineEdit(this);
+    name->setText(tr("My Macro"));
+    name->selectAll();
+    dialogLayout->addWidget(name);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            QDialogButtonBox::Save | QDialogButtonBox::Cancel, Qt::Horizontal);
+    dialogLayout->addWidget(buttonBox);
+
+    QDialog nameDialog(this);
+
+    connect(buttonBox, SIGNAL(rejected()), &nameDialog, SLOT(reject()));
+    connect(buttonBox, SIGNAL(accepted()), &nameDialog, SLOT(accept()));
+
+    nameDialog.setWindowTitle(tr("Enter a name for your recording"));
+    nameDialog.setLayout(dialogLayout);
+    nameDialog.resize(300, nameDialog.height());
+
+    int selection = nameDialog.exec();
+
+    if (selection == QDialog::Rejected) {
+        return "";
+    }
+    return name->text().toUtf8().constData();
 }
