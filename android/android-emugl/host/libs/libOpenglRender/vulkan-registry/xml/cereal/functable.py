@@ -46,6 +46,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkBeginCommandBuffer",
     "vkEndCommandBuffer",
     "vkResetCommandBuffer",
+    "vkCreateImageView",
 ]
 
 SUCCESS_VAL = {
