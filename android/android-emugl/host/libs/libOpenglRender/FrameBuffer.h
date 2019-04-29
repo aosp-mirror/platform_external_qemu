@@ -492,6 +492,7 @@ private:
 
     void markOpened(ColorBufferRef* cbRef);
     void closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
+    void decColorBufferRefCountLocked(HandleType p_colorbuffer);
     // Close all expired color buffers for real.
     // Treat all delayed color buffers as expired if forced=true
     void performDelayedColorBufferCloseLocked(bool forced = false);
@@ -592,10 +593,12 @@ private:
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
 
-    // Flag set when guest feature RefCountPipe is enabled. When this feature is
-    // enabled, no more reference counting is needed on host side because the
-    // Refcount piepe should rely on the guest kernel to know when to destroy
-    // color buffer.
+    // When this feature is enabled, open/close operations from gralloc in guest
+    // will no longer control the reference counting of color buffers on host.
+    // Instead, it will be managed by a file descriptor in the guest kernel. In
+    // case all the native handles in guest are destroyed, the pipe will be
+    // automatically closed by the kernel. We only need to do reference counting
+    // for color buffers attached in window surface.
     bool m_refCountPipeEnabled = false;
     // Async readback
     enum class ReadbackCmd {
