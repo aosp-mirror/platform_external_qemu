@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce4c561d_470fe2bd",
+        "filename": "android/android-emu/android/crashreport/detectors/CrashDetectors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-04-29T15:20:57Z",
+      "side": 1,
+      "message": "this should be true",
+      "range": {
+        "startLine": 52,
+        "startChar": 15,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "6fea5db510037ab99fb485bb86b4609c8be6e744",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6eb6c96b_4bb49a44",
+        "filename": "android/android-emu/android/crashreport/detectors/CrashDetectors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-04-29T15:20:57Z",
+      "side": 1,
+      "message": "this should be false",
+      "range": {
+        "startLine": 55,
+        "startChar": 11,
+        "endLine": 55,
+        "endChar": 15
+      },
+      "revId": "6fea5db510037ab99fb485bb86b4609c8be6e744",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
