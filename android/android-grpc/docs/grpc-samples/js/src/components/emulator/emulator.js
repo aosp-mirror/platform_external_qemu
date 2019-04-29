@@ -82,6 +82,22 @@ export default class Emulator extends Component {
     });
   };
 
+  handleKey = e => {
+      var request = new Proto.KeyboardEvent()
+      request.setKey(e.key)
+      var call = this.emulatorService.sendKey(request, {}, function(
+          err,
+          response
+      ) {
+          if (err) {
+              console.error(
+                  "Grpc: " + err.code + ", msg: " + err.message,
+                  "Emulator:setCoordinates"
+              );
+          }
+      });
+  }
+
   // Properly handle the mouse events.
   handleMouseDown = e => {
     this.setState({ mouseDown: true });
@@ -106,10 +122,12 @@ export default class Emulator extends Component {
     const { width, height, scale, uri, refreshRate } = this.props;
     return (
       <div
+        tabIndex="1"
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
         onMouseUp={this.handleMouseUp}
         onMouseOut={this.handleMouseUp}
+        onKeyDown={this.handleKey}
       >
         <FallbackView
           width={width * scale}
