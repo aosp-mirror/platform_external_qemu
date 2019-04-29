@@ -51,6 +51,10 @@
 
 #ifdef ANDROID_GRPC
 #include "android/emulation/control/GrpcServices.h"
+#include "android/emulation/control/RtcBridge.h"
+#endif
+#ifdef ANDROID_WEBRTC
+#include "android/emulation/control/WebRtcBridge.h"
 #endif
 
 extern "C" {
@@ -192,6 +196,10 @@ bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
 }
 
+#ifdef ANDROID_GRPC
+  std::unique_ptr<android::emulation::control::RtcBridge> rtcBridge;
+#endif
+
 bool qemu_android_emulation_setup() {
     android_qemu_init_slirp_shapers();
 
@@ -232,8 +240,16 @@ bool qemu_android_emulation_setup() {
                         "The goldfish event queue is overflowing, the system is no longer responding.");
     }
 #ifdef ANDROID_GRPC
-    if (android_cmdLineOptions->grpc) {
-        android::emulation::control::GrpcServices::setup(android_cmdLineOptions->grpc, getConsoleAgents());
+    int grpc = -1;
+    if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
+        #ifdef ANDROID_WEBRTC
+            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents()));
+        #else
+            rtcBridge.reset(new android::emulation::control::NopRtcBridge());
+        #endif
+        // Go bridge go!
+        rtcBridge->start();
+        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), rtcBridge.get());
     }
 #endif
     return true;
@@ -246,5 +262,6 @@ void qemu_android_emulation_teardown() {
 
     #ifdef ANDROID_GRPC
         android::emulation::control::GrpcServices::teardown();
+        rtcBridge = nullptr;
     #endif
 }

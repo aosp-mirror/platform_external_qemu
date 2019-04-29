@@ -27,6 +27,7 @@
 #include "android/utils/tempfile.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
+#include <inttypes.h>
 
 #ifdef _WIN32
 #include "android/base/files/ScopedRegKey.h"
