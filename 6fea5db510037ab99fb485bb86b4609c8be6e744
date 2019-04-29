@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6fb2ef59_c2959bf5",
+        "filename": "android/android-emu/android/crashreport/detectors/CrashDetectors.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-04-29T17:37:20Z",
+      "side": 1,
+      "message": "Thanks for catching this!",
+      "parentUuid": "ce4c561d_470fe2bd",
+      "range": {
+        "startLine": 52,
+        "startChar": 15,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "6fea5db510037ab99fb485bb86b4609c8be6e744",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6eb6c96b_4bb49a44",
         "filename": "android/android-emu/android/crashreport/detectors/CrashDetectors.cpp",
         "patchSetId": 2
