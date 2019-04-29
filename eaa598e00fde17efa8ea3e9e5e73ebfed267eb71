@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80460696_e6b734ed",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-04-29T23:25:52Z",
+      "side": 1,
+      "message": "I\u0027m not going to block this CL on it, but could you add a TODO and file a bug to sanitize the filename provided here.  Particularly, it can\u0027t contain \"/\", be named \".\" or \"..\".\n\nWindows also has many more restrictions, such as files can\u0027t be named CON, PRN, AUX, NUL, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, and LPT9, even if they have an extension.  NUL.macro would be invalid too: https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file\n\nI\u0027m thinking something like this to make sure it\u0027s safe:\n\n1) Prefix the file with the current date/time: YYYYMMDD-mmss-\n2) Add an extension, such as .emu-macro\n3) Replace any character other than a-zA-Z0-9 with _\n4) For the name, truncate it ~32 characters.  Windows previously had a MAX_PATH of 260 characters (which is the full path, not just filename).  While this is not a strict limit anymore, older versions and certain features may still have this limit so it is best to not exceed it.\n\nThis would mean that for a name like \"My cool recording!\" it would create a file named 20190429-1625-My_cool_recording_.emu-macro",
+      "range": {
+        "startLine": 560,
+        "startChar": 68,
+        "endLine": 560,
+        "endChar": 75
+      },
+      "revId": "eaa598e00fde17efa8ea3e9e5e73ebfed267eb71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
