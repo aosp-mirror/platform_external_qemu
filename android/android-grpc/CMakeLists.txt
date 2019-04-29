@@ -9,6 +9,7 @@ protobuf_generate_grpc_cpp(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
 
 set(android-grpc_src ${EMULATOR_GRPC_SRC} android/emulation/control/EmulatorService.cpp
     android/emulation/control/EmulatorServiceStub.cpp
+    android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
     android/emulation/control/GrpcServices.cpp
     )
 

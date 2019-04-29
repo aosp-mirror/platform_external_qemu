@@ -25,6 +25,7 @@
 #include "android/console.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/emulator_controller.grpc.pb.h"
+#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
 
@@ -153,19 +154,10 @@ public:
     }
 
     Status sendKey(ServerContext* context,
-                   const KeyEvent* request,
+                   const KeyboardEvent* request,
                    ::google::protobuf::Empty* reply) override {
-        if (request->text().size() > 0) {
-            LOG(VERBOSE) << "sending text: " << request->DebugString();
-            mAgents->libui->convertUtf8ToKeyCodeEvents(
-                    (const unsigned char*)request->text().c_str(),
-                    request->text().size(),
-                    (LibuiKeyCodeSendFunc)mAgents->user_event->sendKeyCodes);
-
-        } else {
-            LOG(VERBOSE) << "sending code: " << request->DebugString();
-            mAgents->user_event->sendKeyCode(request->key());
-        }
+        keyboard::EmulatorKeyEventSender keyEvent(mAgents);
+        keyEvent.send(request);
         return Status::OK;
     }
 
