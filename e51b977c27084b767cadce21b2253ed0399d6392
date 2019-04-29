@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c94f2115_88ba9a78",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-29T16:15:56Z",
+      "side": 0,
+      "message": "isn\u0027t this needed to track folded state for snapshots?",
+      "range": {
+        "startLine": 508,
+        "startChar": 0,
+        "endLine": 508,
+        "endChar": 35
+      },
+      "revId": "e51b977c27084b767cadce21b2253ed0399d6392",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
