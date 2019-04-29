@@ -157,6 +157,35 @@ function(internal_android_install_file SRC DST_DIR)
   endif()
 endfunction()
 
+# Installs the given src file into the given destination
+function(internal_android_install_file_force_exec SRC DST_DIR)
+  # src could be a symlink, so let's resolve it.
+  get_filename_component(REAL_SRC "${SRC}" REALPATH)
+
+  # The names without directories of the src and resolved src.
+  get_filename_component(FNAME "${SRC}" NAME)
+  get_filename_component(FNAME_REAL "${REAL_SRC}" NAME)
+
+  # Okay, we now need to determine if REAL_SRC is an executable, or file
+  set(PYTHON_SCRIPT "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)")
+  execute_process(COMMAND python -c "${PYTHON_SCRIPT}"
+                  WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
+                  RESULT_VARIABLE SUCCESS
+                  OUTPUT_VARIABLE STD_OUT
+                  ERROR_VARIABLE STD_ERR)
+  string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
+  android_log(STATUS "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
+  install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
+  android_strip_prebuilt("${DST_DIR}/${FNAME}")
+  # Check if we have a symlink, gradle doesn't support symlinks, so we are
+  # copying it 2x
+  if(NOT ${SRC} STREQUAL ${REAL_SRC})
+    android_log("${SRC} ==> ${REAL_SRC}")
+    install(PROGRAMS ${REAL_SRC} DESTINATION ${DST_DIR})
+    android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
+  endif()
+endfunction()
+
 # Installs the given dependency, this will make it part of the final release.
 function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
@@ -170,6 +199,23 @@ function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
         string(REPLACE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/" "" DST_FILE ${FNAME})
         get_filename_component(DST_DIR "${DST_FILE}" DIRECTORY)
         internal_android_install_file(${FNAME} ${DST_DIR})
+      endif()
+    endforeach()
+  endif()
+endfunction()
+
+function(android_install_dependency_force_exec TARGET_TAG INSTALL_DEPENDENCIES)
+  if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
+    # Link to existing target if there.
+    if(NOT TARGET ${INSTALL_DEPENDENCIES})
+      message(FATAL_ERROR "Dependencies ${INSTALL_DEPENDENCIES} has not been declared (yet?)")
+    endif()
+    get_target_property(FILE_LIST ${INSTALL_DEPENDENCIES} SOURCES)
+    foreach(FNAME ${FILE_LIST})
+      if(NOT FNAME MATCHES ".*dummy.c")
+        string(REPLACE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/" "" DST_FILE ${FNAME})
+        get_filename_component(DST_DIR "${DST_FILE}" DIRECTORY)
+        internal_android_install_file_force_exec(${FNAME} ${DST_DIR})
       endif()
     endforeach()
   endif()
