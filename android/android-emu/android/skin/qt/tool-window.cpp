@@ -720,8 +720,6 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
 
     if (isFoldableConfigured()) {
         sendFoldedArea();
-        forwardGenericEventToEmulator(EV_SW, SW_LID, false);
-        forwardGenericEventToEmulator(EV_SYN, 0, 0);
     }
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);

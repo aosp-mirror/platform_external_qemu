@@ -505,7 +505,6 @@ private:
     unsigned int mHardRefreshCountDown = 0;
     SkinRotation mOrientation;       // Rotation of the main window
     bool         mWindowIsMinimized = false;
-    bool         mIsFolded = false;
 
     QScreen* mCurrentScreen = nullptr;
 
