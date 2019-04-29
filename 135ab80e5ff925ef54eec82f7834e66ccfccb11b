@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8fcff693_d36a51af",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-29T18:25:35Z",
+      "side": 1,
+      "message": "lets also move this to the \"delete cb\" branch of decColorBufferRefCountLocked",
+      "range": {
+        "startLine": 2107,
+        "startChar": 0,
+        "endLine": 2108,
+        "endChar": 47
+      },
+      "revId": "135ab80e5ff925ef54eec82f7834e66ccfccb11b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
