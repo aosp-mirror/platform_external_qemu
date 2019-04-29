@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82dea22c_ff807c70",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-04-29T17:25:57Z",
+      "side": 1,
+      "message": "use hashmaps to accelerate? same for other key mapping functions",
+      "range": {
+        "startLine": 235,
+        "startChar": 33,
+        "endLine": 235,
+        "endChar": 54
+      },
+      "revId": "4adcd8b5b084efc836ea60894cf3df265962a3e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2710c0fb_bb8c57cd",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/dom_key.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-04-29T17:25:57Z",
+      "side": 1,
+      "message": "clang-format this file?",
+      "revId": "4adcd8b5b084efc836ea60894cf3df265962a3e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
