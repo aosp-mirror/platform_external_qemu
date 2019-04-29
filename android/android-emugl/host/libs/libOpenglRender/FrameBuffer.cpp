@@ -1136,7 +1136,10 @@ void FrameBuffer::drainWindowSurface() {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                closeColorBufferLocked(oldColorBufferHandle);
+                if (m_refCountPipeEnabled)
+                    decColorBufferRefCountLocked(oldColorBufferHandle);
+                else
+                    closeColorBufferLocked(oldColorBufferHandle);
                 m_windows.erase(winIt);
             }
         }
@@ -1175,7 +1178,10 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         ScopedBind bind(m_colorBufferHelper);
-        closeColorBufferLocked(w->second.second);
+        if (m_refCountPipeEnabled)
+            decColorBufferRefCountLocked(w->second.second);
+        else
+            closeColorBufferLocked(w->second.second);
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
@@ -1355,7 +1361,10 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
-                    closeColorBufferLocked(w->second.second, forced);
+                    if (m_refCountPipeEnabled)
+                        decColorBufferRefCountLocked(w->second.second);
+                    else
+                        closeColorBufferLocked(w->second.second, forced);
                     m_windows.erase(w);
                 }
                 m_procOwnedWindowSurfaces.erase(procIte);
@@ -1457,7 +1466,10 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     (*w).second.first->setColorBuffer((*c).second.cb);
     markOpened(&c->second);
     if (w->second.second) {
-        closeColorBufferLocked(w->second.second);
+        if (m_refCountPipeEnabled)
+            decColorBufferRefCountLocked(w->second.second);
+        else
+            closeColorBufferLocked(w->second.second);
     }
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
@@ -2092,10 +2104,24 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
-    // Teardown Vulkan image if necessary
-    goldfish_vk::teardownVkColorBuffer(handle);
     AutoLock mutex(m_lock);
-    m_colorbuffers.erase((HandleType)handle);
+    decColorBufferRefCountLocked((HandleType)handle);
+}
+
+void FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
+    const auto& it = m_colorbuffers.find(p_colorbuffer);
+    if (it != m_colorbuffers.end()) {
+        it->second.refcount -= 1;
+        if (it->second.refcount == 0) {
+            // Teardown Vulkan image if necessary
+            goldfish_vk::teardownVkColorBuffer(p_colorbuffer);
+            m_colorbuffers.erase(p_colorbuffer);
+        }
+    } else {
+        fprintf(stderr,
+                "Trying to erase a non-existent color buffer with handle %d \n",
+                p_colorbuffer);
+    }
 }
 
 bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
@@ -2162,6 +2188,7 @@ void FrameBuffer::onSave(Stream* stream,
     // We don't need to save |m_colorBufferCloseTsMap| here - there's enough
     // information to reconstruct it when loading.
     System::Duration now = System::get()->getUnixTime();
+
     saveCollection(stream, m_colorbuffers,
                    [now](Stream* s, const ColorBufferMap::value_type& pair) {
         pair.second.cb->onSave(s);
