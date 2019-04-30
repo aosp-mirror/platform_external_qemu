@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c8ffa54_cc22e097",
+        "filename": "android/android-webrtc/android-webrtc/emulator/net/AsyncSocket.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-04-30T22:07:23Z",
+      "side": 1,
+      "message": "close() happening here is fine?",
+      "revId": "90c04f044fc13419b4a8c13f660d8c7c9967015c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
