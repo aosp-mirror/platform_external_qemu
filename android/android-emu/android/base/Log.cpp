@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/Log.h"
-
+#include "android/utils/debug.h"
 #include "android/base/Debug.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
@@ -39,12 +39,12 @@ LogSeverity gMinLogLevel = LOG_INFO;
 // Convert a severity level into a string.
 const char* severityLevelToString(LogSeverity severity) {
     const char* kSeverityStrings[] = {
-        "INFO", "WARNING", "ERROR", "FATAL",
+       "INFO", "WARNING", "ERROR", "FATAL",
     };
     if (severity >= 0 && severity < LOG_NUM_SEVERITIES)
         return kSeverityStrings[severity];
     if (severity == -1) {
-        return "VERBOSE";
+           return "VERBOSE";
     }
     return "UNKNOWN";
 }
@@ -65,7 +65,20 @@ void defaultLogMessage(const LogParams& params,
 
     FILE* output = params.severity >= LOG_WARNING ? stderr : stdout;
     if (params.quiet) {
-        fprintf(output, "%s: %.*s\n", severityLevelToString(params.severity), int(messageLen), message);
+ switch (params.severity) {
+            case LOG_VERBOSE:
+            case LOG_INFO:
+                dprint("%.*s", int(messageLen), message);
+                break;
+            case LOG_WARNING:
+                dwarning("%.*s", int(messageLen), message);
+                break;
+            case LOG_ERROR:
+            case LOG_FATAL:
+                derror("%.*s", int(messageLen), message);
+                break;
+        }
+        fprintf(output, "emulator: %s: %.*s", severityLevelToString(params.severity), int(messageLen), message);
     } else {
         StringView path = params.file;
         StringView filename;
@@ -73,10 +86,22 @@ void defaultLogMessage(const LogParams& params,
             filename = path;
         }
 
-        fprintf(output, "%s%s: %s:%d: %.*s\n", tidStr,
-                severityLevelToString(params.severity), c_str(filename).get(),
-                params.lineno, int(messageLen), message);
-
+        switch (params.severity) {
+            case LOG_VERBOSE:
+            case LOG_INFO:
+                dprint("%s:%d %.*s", c_str(filename).get(), params.lineno,
+                       int(messageLen), message);
+                break;
+            case LOG_WARNING:
+                dwarning("%s:%d %.*s", c_str(filename).get(), params.lineno,
+                         int(messageLen), message);
+                break;
+            case LOG_ERROR:
+            case LOG_FATAL:
+                derror("%s:%d %.*s", c_str(filename).get(), params.lineno,
+                         int(messageLen), message);
+                break;
+        }
         if (params.severity >= LOG_WARNING) {
             // Note: by default, stderr is non buffered, but the program might
             // have altered this setting, so always flush explicitly to ensure

@@ -41,9 +41,17 @@
 AvdInfoParams   android_avdParams[1];
 AvdInfo*        android_avdInfo;
 
-/* for debugging */
-#define  D(...)   VERBOSE_PRINT(init,__VA_ARGS__)
-#define  DD(...)  VERBOSE_PRINT(avd_config,__VA_ARGS__)
+/* set to 1 for debugging */
+#define DEBUG 0
+
+#if DEBUG >= 1
+#include <stdio.h>
+#define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
+#define DD(...) VERBOSE_PRINT(avd_config,__VA_ARGS__)
+#else
+#define D(...) (void)0
+#define DD(...) (void)0
+#endif
 
 /* technical note on how all of this is supposed to work:
  *
