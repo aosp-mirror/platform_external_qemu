@@ -148,13 +148,15 @@ bool WebRtcBridge::acceptJsepMessage(std::string identity,
 }
 
 void WebRtcBridge::terminate() {
-    LOG(INFO) << "WebRtcBridge::terminate()";
+    LOG(INFO) << "Closing transport.";
     mTransport.close();
     if (mBridgePid) {
+        LOG(INFO) << "Terminating video bridge.";
         System::get()->killProcess(mBridgePid);
     }
     // Note, closing the shared memory region can crash the bridge as it might
     // attempt to read inaccessible memory.
+    LOG(INFO) << "Stopping the rtc module.";
     mScreenAgent->stopWebRtcModule();
 }
 
@@ -237,26 +239,30 @@ bool WebRtcBridge::start() {
                    << ", no video available.";
         return false;
     }
-    std::vector<std::string> cmdArgs{executable,
-                                     "--logdir",
-                                     System::get()->getTempDir(),
-                                     "--port",
-                                     std::to_string(mVideoBridgePort),
-                                     "--handle",
-                                     mVideoModule};
+    std::vector<std::string> cmdArgs{
+            executable, "--daemon",
+            "--logdir", System::get()->getTempDir(),
+            "--port",   std::to_string(mVideoBridgePort),
+            "--handle", mVideoModule};
 
     std::string invoke = "";
     for (auto arg : cmdArgs) {
         invoke += arg + " ";
     }
 
-    if (!System::get()->runCommand(cmdArgs, RunOptions::DontWait,
-                                   System::kInfinite, nullptr, &mBridgePid)) {
+    // This either works or not.. We are not waiting around.
+    const System::Duration kHalfSecond = 500;
+    System::ProcessExitCode exitCode;
+    auto pidStr = System::get()->runCommandWithResult(cmdArgs, kHalfSecond,
+                                                      &exitCode);
+
+    if (exitCode != 0 || !pidStr) {
         // Failed to start video bridge! Mission abort!
-        LOG(INFO) << "Failed to start " << invoke;
+        LOG(ERROR) << "Failed to start video bridge, WebRTC disabled, tried:" << invoke;
         terminate();
         return false;
     }
+    sscanf(pidStr->c_str(), "%d", &mBridgePid);
     LOG(INFO) << "Launched " << invoke << ", pid:" << mBridgePid;
 
     // Let's connect the socket transport if needed.
