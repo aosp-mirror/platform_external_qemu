@@ -16,6 +16,24 @@
       "revId": "90c04f044fc13419b4a8c13f660d8c7c9967015c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c979bd04_ecc199ae",
+        "filename": "android/android-webrtc/android-webrtc/emulator/net/AsyncSocket.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-04-30T23:16:54Z",
+      "side": 1,
+      "message": "Yes, the fd will very likely be unassigned or not owned by us and a read will return 0. \n\nIn theory there is the extreme corner case where we close and open a socket that has the same fd. We are not a high concurrent server so very unlikely to ever happen. Furthermore the only places where we call close right now are:\n\n- Here, when we detect that the video bridge left us (crash/killed)\n- Terminate, the video bridge is shutting down gracefully on emulator exit.\n\nThe segfault comes from the first case. We are trying to write to the videobridge, but it crashed. The socket is getting closed before write is completed.",
+      "parentUuid": "1c8ffa54_cc22e097",
+      "revId": "90c04f044fc13419b4a8c13f660d8c7c9967015c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
