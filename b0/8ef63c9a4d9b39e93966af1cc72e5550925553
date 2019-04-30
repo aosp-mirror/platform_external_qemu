@@ -1,0 +1,8 @@
+Code-Review+2: Jeff McGlynn <jwmcglynn@google.com>
+Code-Review+1: Diego Teran Rios <dteran@google.com>
+Presubmit-Verified-1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Diego Teran Rios <dteran@google.com>
+Submitted-at: Tue, 30 Apr 2019 03:06:48 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/951922
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
