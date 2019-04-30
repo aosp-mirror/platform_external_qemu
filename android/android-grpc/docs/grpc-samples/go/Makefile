@@ -25,16 +25,12 @@ PROTOC=protoc
 GRPC_GO_PLUGIN = grpc
 GRPC_GO_PLUGIN_PATH ?= `which $(GRPC_GO_PLUGIN)`
 PROTOC_CMD = which $(PROTOC)
-PROTOC_CHECK_CMD = $(PROTOC) --version | grep -q libprotoc.3
-PLUGIN_CHECK_CMD = which $(GRPC_GO_PLUGIN)
+PROTOC_CHECK_CMD=$(PROTOC) --version | grep -q "libprotoc 3.6" && echo true || echo false
 HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
-ifeq ($(HAS_PROTOC),true)
-HAS_VALID_PROTOC = $(shell $(PROTOC_CHECK_CMD) 2> /dev/null && echo true || echo false)
-endif
+HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
 
-SYSTEM_OK = false
-ifeq ($(HAS_VALID_PROTOC),true)
-SYSTEM_OK = true
+ifeq ($(HAS_PROTOC),true)
+	HAS_VALID_PROTOC := $(shell $(PROTOC_CHECK_CMD))
 endif
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -53,7 +49,7 @@ else
 		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
 endif
 
-protoc: deps system-check $(PROTO)
+protoc: deps $(PROTO) system-check
 		@mkdir -p /tmp/proto
 		@mkdir -p $(GOPATH)/src/android_emulation_control
 		$(PROTOC) -I$(PROTODIR) \
@@ -93,18 +89,16 @@ system-check:
 ifneq ($(HAS_VALID_PROTOC),true)
 	@echo " DEPENDENCY ERROR"
 	@echo
-	@echo "You don't have protoc 3.0.0 installed in your path."
-	@echo "Please install Google protocol buffers 3.0.0 and its compiler."
+	@echo "You don't have protoc 3.6.0 installed in your path."
+	@echo "Please install Google protocol buffers 3.6.0 and its compiler."
 	@echo "You can find it here:"
 	@echo
-	@echo "   https://github.com/google/protobuf/releases/tag/v3.0.0-beta-3.3"
+	@echo "   https://github.com/google/protobuf/releases/tag/v3.6.0"
 	@echo
 	@echo "Here is what I get when trying to evaluate your version of protoc:"
 	@echo
 	-$(PROTOC) --version
 	@echo
 	@echo
-endif
-ifneq ($(SYSTEM_OK),true)
 	@false
 endif
