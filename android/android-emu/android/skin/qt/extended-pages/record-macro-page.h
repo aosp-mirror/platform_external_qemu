@@ -81,6 +81,9 @@ private:
     void reportAllMetrics();
     void startRecording();
     void stopRecording();
+    std::string getCustomMacrosDirectory();
+    void displayErrorBox(const std::string& errorStr);
+    std::string displayNameMacroBox();
 
     // Behind feature flag.
     void setRecordState();
