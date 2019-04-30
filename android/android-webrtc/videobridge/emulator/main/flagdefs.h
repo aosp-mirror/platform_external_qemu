@@ -21,6 +21,7 @@ WEBRTC_DEFINE_string(server, "127.0.0.1", "The server to connect to.");
 WEBRTC_DEFINE_int(port, 5557, "The port to connect to.");
 WEBRTC_DEFINE_string(handle, "video0", "The memory handle to read frames from");
 WEBRTC_DEFINE_bool(verbose, false, "Enables logging to stdout");
+WEBRTC_DEFINE_bool(daemon, false, "Run as a deamon, will print PID of deamon upon exit");
 WEBRTC_DEFINE_string(logdir,
                      "",
                      "Directory to log files to, or empty when unused");

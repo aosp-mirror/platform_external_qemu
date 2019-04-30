@@ -237,26 +237,30 @@ bool WebRtcBridge::start() {
                    << ", no video available.";
         return false;
     }
-    std::vector<std::string> cmdArgs{executable,
-                                     "--logdir",
-                                     System::get()->getTempDir(),
-                                     "--port",
-                                     std::to_string(mVideoBridgePort),
-                                     "--handle",
-                                     mVideoModule};
+    std::vector<std::string> cmdArgs{
+            executable, "--daemon",
+            "--logdir", System::get()->getTempDir(),
+            "--port",   std::to_string(mVideoBridgePort),
+            "--handle", mVideoModule};
 
     std::string invoke = "";
     for (auto arg : cmdArgs) {
         invoke += arg + " ";
     }
 
-    if (!System::get()->runCommand(cmdArgs, RunOptions::DontWait,
-                                   System::kInfinite, nullptr, &mBridgePid)) {
+    // This either works or not.. We are not waiting around.
+    const System::Duration kHalfSecond = 500;
+    System::ProcessExitCode exitCode;
+    auto pidStr = System::get()->runCommandWithResult(cmdArgs, kHalfSecond,
+                                                      &exitCode);
+
+    if (exitCode != 0 || !pidStr) {
         // Failed to start video bridge! Mission abort!
         LOG(INFO) << "Failed to start " << invoke;
         terminate();
         return false;
     }
+    sscanf(pidStr->c_str(), "%d", &mBridgePid);
     LOG(INFO) << "Launched " << invoke << ", pid:" << mBridgePid;
 
     // Let's connect the socket transport if needed.

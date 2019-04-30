@@ -14,7 +14,6 @@
 #include "emulator/net/EmulatorConnection.h"
 
 #include "emulator/net/RtcAsyncSocketAdapter.h"
-#include "rtc_base/physicalsocketserver.h"
 #include "rtc_base/socketaddress.h"
 
 namespace emulator {
@@ -25,26 +24,49 @@ EmulatorConnection::EmulatorConnection(int port, std::string handle)
 
 EmulatorConnection::~EmulatorConnection() {}
 
-void EmulatorConnection::listen() {
-    rtc::PhysicalSocketServer socket_server;
+bool EmulatorConnection::listen_and_fork() {
+    if (!listen()) {
+        return false;
+    }
+    pid_t pid = fork();
+    if (pid == 0) {
+        //I'm the child..
+        return run();
+    }
+    // I'm the parent.
+    mSocket->Close();
+    fprintf(stderr, "%d\n", pid);
+    return true;
+}
 
-    // TODO(jansen): Use own thread that finalizes participants?
-    rtc::AutoSocketServerThread thread(&socket_server);
-    thread.SetName("Main Socket Server", &socket_server);
-    auto socket = socket_server.CreateAsyncSocket(AF_INET, SOCK_STREAM);
+bool EmulatorConnection::listen() {
+    mThread.reset(new rtc::AutoSocketServerThread(&mSocketServer));
+    mThread->SetName("Main Socket Server", &mSocketServer);
+    mSocket.reset(mSocketServer.CreateAsyncSocket(AF_INET, SOCK_STREAM));
 
-    socket->SignalCloseEvent.connect(this, &EmulatorConnection::OnClose);
-    socket->SignalConnectEvent.connect(this, &EmulatorConnection::OnConnect);
-    socket->SignalReadEvent.connect(this, &EmulatorConnection::OnRead);
+    mSocket->SignalCloseEvent.connect(this, &EmulatorConnection::OnClose);
+    mSocket->SignalConnectEvent.connect(this, &EmulatorConnection::OnConnect);
+    mSocket->SignalReadEvent.connect(this, &EmulatorConnection::OnRead);
 
     rtc::SocketAddress address("127.0.0.1", mPort);
-    int bind = socket->Bind(address);
+    if (mSocket->Bind(address) != 0) {
+        RTC_LOG(LERROR) << "Failed to bind to " << mPort;
+        return false;
+    }
     rtc::SocketAddress accept_addr;
-    socket->Listen(1);
+    if (mSocket->Listen(32) != 0) {
+        RTC_LOG(LERROR) << "Failed to listen for incoming sockets.";
+        return false;
+    };
     RTC_LOG(INFO) << "Listening on: " << address.ToString();
 
     // Socket server is associated with this thread..
-    thread.Run();
+    return true;
+}
+
+bool EmulatorConnection::run() {
+    mThread->Run();
+    return true;
 }
 
 void EmulatorConnection::disconnect(webrtc::Switchboard* disconnect) {

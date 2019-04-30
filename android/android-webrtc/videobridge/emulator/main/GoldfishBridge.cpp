@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         log_sink.reset(frl);
         rtc::LogMessage::AddLogToStream(log_sink.get(),
                                         rtc::LoggingSeverity::INFO);
-    } else if (FLAG_verbose) {
+    } else if (FLAG_verbose && !FLAG_daemon) {
         log_sink.reset(new StdLogSink());
         rtc::LogMessage::AddLogToStream(log_sink.get(),
                                         rtc::LoggingSeverity::INFO);
@@ -65,7 +65,16 @@ int main(int argc, char* argv[]) {
 
     rtc::InitializeSSL();
     emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle);
-    server.listen();
+    int status = 1;
+    if (FLAG_daemon) {
+        status = server.listen_and_fork() ? 0 : 1;
+    }
+    else {
+         if (server.listen()) {
+             status = 0;
+             server.run();
+         }
+    }
     rtc::CleanupSSL();
-    return 0;
+    return status;
 }
