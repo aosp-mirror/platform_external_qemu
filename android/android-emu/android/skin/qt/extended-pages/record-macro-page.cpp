@@ -21,10 +21,12 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
+#include <QDateTime>
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QRegExp>
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #include <iostream>
@@ -550,7 +552,8 @@ void RecordMacroPage::stopRecording() {
         return;
     }
 
-    const std::string newName = displayNameMacroBox();
+    std::string newName = displayNameMacroBox();
+    newName.append(".emu-macro");
 
     const std::string macrosLocation = getCustomMacrosDirectory();
     const std::string oldPath =
@@ -558,7 +561,10 @@ void RecordMacroPage::stopRecording() {
     if (!newName.empty()) {
         // Rename file.
         const std::string newPath = PathUtils::join(macrosLocation, newName);
-        std::rename(oldPath.c_str(), newPath.c_str());
+        if (std::rename(oldPath.c_str(), newPath.c_str()) != 0) {
+            LOG(ERROR) << "Renaming file failed.";
+            std::remove(oldPath.c_str());
+        }
     } else {
         // Delete file.
         std::remove(oldPath.c_str());
@@ -629,6 +635,7 @@ std::string RecordMacroPage::displayNameMacroBox() {
 
     dialogLayout->addWidget(new QLabel(tr("Macro name")));
     QLineEdit* name = new QLineEdit(this);
+    name->setMaxLength(32);
     name->setText(tr("My Macro"));
     name->selectAll();
     dialogLayout->addWidget(name);
@@ -646,10 +653,21 @@ std::string RecordMacroPage::displayNameMacroBox() {
     nameDialog.setLayout(dialogLayout);
     nameDialog.resize(300, nameDialog.height());
 
-    int selection = nameDialog.exec();
+    int selection;
+    QString newName;
+    QRegExp re("\\w+");
+    // Check that name is [a-zA-Z0-9_] after trimming.
+    do {
+        selection = nameDialog.exec();
+        newName = name->text();
+        newName.replace("_", " ");
+        newName.simplified();
+        newName.replace(" ", "_");
+    } while (selection == QDialog::Accepted && !re.exactMatch(newName));
 
     if (selection == QDialog::Rejected) {
         return "";
     }
-    return name->text().toUtf8().constData();
+    newName = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-") + newName;
+    return newName.toUtf8().constData();
 }
