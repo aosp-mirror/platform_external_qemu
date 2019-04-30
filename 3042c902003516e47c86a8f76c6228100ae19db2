@@ -22,6 +22,30 @@
       "revId": "3042c902003516e47c86a8f76c6228100ae19db2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aaa6d9f9_c30e0640",
+        "filename": "android/android-emu/android/crashreport/detectors/CrashDetectors.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-04-30T17:25:15Z",
+      "side": 1,
+      "message": "Yes, I was under the incorrect assumption that every image would send a heartbeat.",
+      "parentUuid": "3640e7ca_cbf31d65",
+      "range": {
+        "startLine": 45,
+        "startChar": 3,
+        "endLine": 45,
+        "endChar": 27
+      },
+      "revId": "3042c902003516e47c86a8f76c6228100ae19db2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
