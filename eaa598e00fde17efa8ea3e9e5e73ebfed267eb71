@@ -22,6 +22,30 @@
       "revId": "eaa598e00fde17efa8ea3e9e5e73ebfed267eb71",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9765b42_40da8cb2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-04-30T00:30:21Z",
+      "side": 1,
+      "message": "Added a bug and it is the next CL I\u0027m working in. The implementation I\u0027m working with only allows a-zA-Z0-9 with _ and spaces. Will replace spaces with _ and in the UI everything will appear with just spaces. I\u0027ll add every other point mentioned here with some checks for specific OS.",
+      "parentUuid": "80460696_e6b734ed",
+      "range": {
+        "startLine": 560,
+        "startChar": 68,
+        "endLine": 560,
+        "endChar": 75
+      },
+      "revId": "eaa598e00fde17efa8ea3e9e5e73ebfed267eb71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
