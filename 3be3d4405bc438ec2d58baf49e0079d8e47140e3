@@ -22,6 +22,30 @@
       "revId": "3be3d4405bc438ec2d58baf49e0079d8e47140e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bf87aab_19aa8236",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-05-01T18:16:20Z",
+      "side": 1,
+      "message": "the approach of getting the dirname of the datapartition path is used throughout this file to get the avd folder.",
+      "parentUuid": "f1f044b6_b0224d5b",
+      "range": {
+        "startLine": 363,
+        "startChar": 51,
+        "endLine": 363,
+        "endChar": 74
+      },
+      "revId": "3be3d4405bc438ec2d58baf49e0079d8e47140e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
