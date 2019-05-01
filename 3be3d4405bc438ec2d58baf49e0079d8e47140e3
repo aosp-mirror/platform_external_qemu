@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1f044b6_b0224d5b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-01T17:49:07Z",
+      "side": 1,
+      "message": "Please don\u0027t put it in the data folder. Data folder will be mounted onto the guest and we don\u0027t want the guest to see your host computer\u0027s private key directly.\n\nJust put it in the avd folder.",
+      "range": {
+        "startLine": 363,
+        "startChar": 51,
+        "endLine": 363,
+        "endChar": 74
+      },
+      "revId": "3be3d4405bc438ec2d58baf49e0079d8e47140e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
