@@ -69,9 +69,9 @@ export default class Emulator extends Component {
     request.setX(x);
     request.setY(y);
     request.setButtons(down ? 1 : 0);
-    var call = this.emulatorService.sendMouse(request, {}, function(
+    var call = this.emulatorService.sendMouse(request, {}, function (
       err,
-      response
+      _response
     ) {
       if (err) {
         console.error(
@@ -87,7 +87,7 @@ export default class Emulator extends Component {
       request.setKey(e.key)
       var call = this.emulatorService.sendKey(request, {}, function(
           err,
-          response
+          _response
       ) {
           if (err) {
               console.error(
@@ -129,12 +129,12 @@ export default class Emulator extends Component {
         onMouseOut={this.handleMouseUp}
         onKeyDown={this.handleKey}
       >
-        <FallbackView
+      <FallbackView
           width={width * scale}
           height={height * scale}
           refreshRate={refreshRate}
           uri={uri}
-        />
+       />
       </div>
     );
   }

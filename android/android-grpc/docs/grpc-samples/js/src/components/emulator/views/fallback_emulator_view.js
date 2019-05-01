@@ -48,9 +48,22 @@ export default class FallbackView extends Component {
   onConnect = stream => {
     this.setState({ fallback: false }, () => {
       this.video.srcObject = stream
-      // Note we rely on the "muted" tag to make sure we can autoplay
-      this.video.play();
     })
+  }
+
+  onLoadedMetadata = e => {
+    this.video.play().catch(error => {
+        // Autoplay is likely disabled in chrome
+        // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
+        // so we should probably show something useful here.
+        // We explicitly set the video stream to muted, so this shouldn't happen,
+        // but is something you will have to fix once enabling audio.
+        alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
+        })
+  }
+
+  onContextMenu = e => {
+    e.preventDefault()
   }
 
   render() {
@@ -59,7 +72,12 @@ export default class FallbackView extends Component {
     return (
         <div>
             <JsepProtocolDriver uri={uri} onConnect={this.onConnect} onDisconnect={this.onDisconnect}/>
-            { !fallback && <video ref={node => (this.video = node)} width={width} height={height} muted="muted"/> }
+            { !fallback && <video ref={node => (this.video = node)}
+                                  width={width}
+                                  height={height}
+                                  onContextMenu={this.onContextMenu}
+                                  onLoadedMetadata={this.onLoadedMetadata}
+                                  muted="muted"/> }
             { fallback && <EmulatorPngView uri={uri} refreshRate={refreshRate} width={width} height={height} /> }
         </div>
     )
