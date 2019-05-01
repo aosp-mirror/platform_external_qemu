@@ -18,6 +18,7 @@
 
 #include "emulator/webrtc/Switchboard.h"
 #include "rtc_base/asyncsocket.h"
+#include "rtc_base/physicalsocketserver.h"
 
 namespace emulator {
 namespace webrtc {
@@ -37,8 +38,7 @@ public:
     EmulatorConnection(int port, std::string handle);
     ~EmulatorConnection();
 
-    void listen();
-    void listen_and_fork();
+    bool listen(bool fork);
     void disconnect(Switchboard* disconnect);
 
 private:
@@ -46,10 +46,13 @@ private:
     void OnClose(AsyncSocket* socket, int err);
     void OnConnect(AsyncSocket* socket);
 
+    rtc::PhysicalSocketServer mSocketServer;
     std::unique_ptr<AsyncSocket> mServerSocket;
     std::vector<std::unique_ptr<Switchboard>> mConnections;
-    int mPort;
+    std::unique_ptr<rtc::AutoSocketServerThread> mThread;
+    std::unique_ptr<rtc::AsyncSocket> mSocket;
     std::string mHandle;
+    int mPort;
 };
 }  // namespace net
 }  // namespace emulator

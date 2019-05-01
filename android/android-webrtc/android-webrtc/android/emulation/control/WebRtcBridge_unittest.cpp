@@ -20,13 +20,17 @@
 #include <string>
 #include <vector>
 
+
 #include "android/base/testing/TestSystem.h"
 #include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
+#include "android/base/Optional.h"
 
 namespace android {
 namespace emulation {
 namespace control {
+
+using base::Optional;
 
 class TestAsyncSocketAdapter : public AsyncSocketAdapter {
 public:
@@ -131,6 +135,15 @@ public:
     RealTimeTestSystem() : TestSystem("/foo", System::kProgramBitness) {}
     virtual Duration getUnixTimeUs() const override {
         return hostSystem()->getUnixTimeUs();
+    }
+
+    // Pretend an executable got launched.
+    virtual Optional<std::string> runCommandWithResult(
+            const std::vector<std::string>& commandLine,
+            System::Duration timeoutMs = System::kInfinite,
+            System::ProcessExitCode* outExitCode = nullptr) override {
+        *outExitCode = 0;
+        return std::string("987659876");
     }
 };
 

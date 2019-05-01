@@ -16,6 +16,7 @@
 #include "emulator/net/RtcAsyncSocketAdapter.h"
 #include "rtc_base/physicalsocketserver.h"
 #include "rtc_base/socketaddress.h"
+#include <unistd.h>
 
 namespace emulator {
 namespace net {
@@ -25,7 +26,7 @@ EmulatorConnection::EmulatorConnection(int port, std::string handle)
 
 EmulatorConnection::~EmulatorConnection() {}
 
-void EmulatorConnection::listen() {
+bool EmulatorConnection::listen(bool fork) {
     rtc::PhysicalSocketServer socket_server;
 
     // TODO(jansen): Use own thread that finalizes participants?
@@ -38,13 +39,29 @@ void EmulatorConnection::listen() {
     socket->SignalReadEvent.connect(this, &EmulatorConnection::OnRead);
 
     rtc::SocketAddress address("127.0.0.1", mPort);
-    int bind = socket->Bind(address);
-    rtc::SocketAddress accept_addr;
-    socket->Listen(1);
+    if (socket->Bind(address) != 0) {
+        RTC_LOG(LERROR) << "Failed to bind to " << mPort;
+        return false;
+    }
+
+    if (fork) {
+        pid_t pid = ::fork();
+        if (pid != 0) {
+            RTC_LOG(INFO) << "Spawned a child under: " << pid;
+            fprintf(stderr, "%d\n", pid);
+            return true;
+        }
+    }
+
+    if (socket->Listen(32) != 0) {
+        RTC_LOG(LERROR) << "Failed to listen for incoming sockets.";
+        return false;
+    };
     RTC_LOG(INFO) << "Listening on: " << address.ToString();
 
     // Socket server is associated with this thread..
     thread.Run();
+    return true;
 }
 
 void EmulatorConnection::disconnect(webrtc::Switchboard* disconnect) {
