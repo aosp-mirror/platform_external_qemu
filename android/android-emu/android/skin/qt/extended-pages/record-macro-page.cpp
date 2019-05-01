@@ -127,6 +127,7 @@ void RecordMacroPage::loadUi() {
         listItem->setData(Qt::UserRole, macroNameData);
 
         RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
+        macroSavedItem->isPreset = true;
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         std::replace(macroName.begin(), macroName.end(), '_', ' ');
@@ -137,6 +138,10 @@ void RecordMacroPage::loadUi() {
 
         mUi->macroList->addItem(listItem);
         mUi->macroList->setItemWidget(listItem, macroSavedItem);
+    }
+
+    if (mRecordEnabled) {
+        loadCustomMacros();
     }
 
     QObject::connect(&mTimer, &QTimer::timeout, this,
@@ -275,8 +280,13 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     mVideoPlayer->stop();
 
     const std::string macroName = getMacroNameFromItem(listItem);
-    const std::string macroAbsolutePath =
-            PathUtils::join(getMacrosDirectory(), macroName);
+    // Check if preset or custom.
+    std::string macroAbsolutePath;
+    if(macroSavedItem->isPreset) {
+        macroAbsolutePath = PathUtils::join(getMacrosDirectory(), macroName);
+    } else {
+        macroAbsolutePath = PathUtils::join(getCustomMacrosDirectory(), macroName);
+    }
 
     disableMacroItemsExcept(listItem);
 
@@ -301,6 +311,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     if (result.err()) {
         std::ostringstream errString;
         errString << result.unwrapErr();
+        stopButtonClicked(listItem);
         displayErrorBox(errString.str());
         return;
     }
@@ -564,6 +575,23 @@ void RecordMacroPage::stopRecording() {
         if (std::rename(oldPath.c_str(), newPath.c_str()) != 0) {
             LOG(ERROR) << "Renaming file failed.";
             std::remove(oldPath.c_str());
+        } else {
+            // Creating new list Item.
+            QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
+            QVariant macroNameData(QString::fromStdString(newName));
+            listItem->setData(Qt::UserRole, macroNameData);
+
+            RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
+            // macroSavedItem->setDisplayInfo(mDescriptions[newName]);
+            // macroSavedItem->setDisplayTime(mLengths[newName]);
+            newName = newName.substr(16, newName.length()-26);
+            std::replace(newName.begin(), newName.end(), '_', ' ');
+            macroSavedItem->setName(newName.c_str());
+
+            listItem->setSizeHint(QSize(macroSavedItem->sizeHint().width(), 50));
+
+            mUi->macroList->addItem(listItem);
+            mUi->macroList->setItemWidget(listItem, macroSavedItem);
         }
     } else {
         // Delete file.
@@ -670,4 +698,52 @@ std::string RecordMacroPage::displayNameMacroBox() {
     }
     newName = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-") + newName;
     return newName.toUtf8().constData();
+}
+
+void RecordMacroPage::loadCustomMacros() {
+    const std::string macrosPath = getCustomMacrosDirectory();
+    std::vector<std::string> macroFileNames =
+            System::get()->scanDirEntries(macrosPath);
+
+    // For every macro, create a macroSavedItem with its name.
+    for (auto& macroName : macroFileNames) {
+        // Set the real macro name as the object's data.
+        QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
+        QVariant macroNameData(QString::fromStdString(macroName));
+        listItem->setData(Qt::UserRole, macroNameData);
+
+        RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
+        // macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
+        // macroSavedItem->setDisplayTime(mLengths[macroName]);
+        macroName = macroName.substr(16, macroName.length()-26);
+        std::replace(macroName.begin(), macroName.end(), '_', ' ');
+        macroSavedItem->setName(macroName.c_str());
+
+        listItem->setSizeHint(QSize(macroSavedItem->sizeHint().width(), 50));
+
+        mUi->macroList->addItem(listItem);
+        mUi->macroList->setItemWidget(listItem, macroSavedItem);
+    }
+}
+
+void RecordMacroPage::createMacroItem(std::string macroName, bool isPreset) {
+    QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
+    QVariant macroNameData(QString::fromStdString(macroName));
+    listItem->setData(Qt::UserRole, macroNameData);
+
+    RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
+    if (isPreset) {
+        macroSavedItem->isPreset = true;
+        macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
+        macroSavedItem->setDisplayTime(mLengths[macroName]);
+    } else {
+        macroName = macroName.substr(16, macroName.length()-26);
+    }
+    std::replace(macroName.begin(), macroName.end(), '_', ' ');
+    macroSavedItem->setName(macroName.c_str());
+
+    listItem->setSizeHint(QSize(macroSavedItem->sizeHint().width(), 50));
+
+    mUi->macroList->addItem(listItem);
+    mUi->macroList->setItemWidget(listItem, macroSavedItem);
 }

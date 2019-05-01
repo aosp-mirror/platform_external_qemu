@@ -84,6 +84,7 @@ private:
     std::string getCustomMacrosDirectory();
     void displayErrorBox(const std::string& errorStr);
     std::string displayNameMacroBox();
+    void loadCustomMacros();
 
     // Behind feature flag.
     void setRecordState();
