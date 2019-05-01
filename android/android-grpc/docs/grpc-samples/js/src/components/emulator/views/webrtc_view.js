@@ -46,29 +46,40 @@ export default class EmulatorWebrtcView extends Component {
   }
 
   onConnect = stream => {
+    // This will fire an onLoadedMetadata event, after which
+    // we can really start playing the stream.
     this.video.srcObject = stream
-    var playPromise = this.video.play();
-    if (playPromise !== undefined) {
-      playPromise.then(_ => {
-        console.log("Automatic playback started!")
-      })
-      .catch(error => {
-        // Autoplay is likely disabled in chrome
-        // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
-        // so we should probably show something useful here.
-        // We explicitly set the video stream to muted, so this shouldn't happen,
-        // but is something you will have to fix once enabling audio.
-        alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
+  }
+
+  onLoadedMetadata = e => {
+      this.video.play().then(_ => {
+          console.log("Automatic playback started!")
         })
-    }
+        .catch(error => {
+          // Autoplay is likely disabled in chrome
+          // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
+          // so we should probably show something useful here.
+          // We explicitly set the video stream to muted, so this shouldn't happen,
+          // but is something you will have to fix once enabling audio.
+          alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
+          })
+  }
+
+  onContextMenu = e => {
+    e.preventDefault()
   }
 
   render() {
     const { width, height, uri } = this.props
     return (
       <div>
-        <video ref={node => (this.video = node)} width={width} height={height} muted="muted"/>
-        <JsepProtocolDriver uri={uri} onConnect={this.onConnect} onDisconnect={this.onDisconnect}/>
+        <video ref={node => (this.video = node)}
+          width={width}
+          height={height}
+          muted="muted"
+          onContextMenu={this.onContextMenu}
+          onLoadedMetadata={this.onLoadedMetadata} />
+        <JsepProtocolDriver uri={uri} onConnect={this.onConnect} onDisconnect={this.onDisconnect} />
       </div>
     )
   }
