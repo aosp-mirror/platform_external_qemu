@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05a7f940_d6f88bb5",
+        "filename": "android/android-webrtc/android-webrtc/emulator/net/AsyncSocket.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-01T18:16:23Z",
+      "side": 1,
+      "message": "nit: this one still misses a bracket",
+      "range": {
+        "startLine": 73,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 21
+      },
+      "revId": "adc6ac0d7ca65d57eebfb5432642abf9858127ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
