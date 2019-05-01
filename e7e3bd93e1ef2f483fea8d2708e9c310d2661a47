@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1f244f5_99917581",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-01T19:28:15Z",
+      "side": 1,
+      "message": "use bool as return type? same for others",
+      "range": {
+        "startLine": 483,
+        "startChar": 4,
+        "endLine": 483,
+        "endChar": 7
+      },
+      "revId": "e7e3bd93e1ef2f483fea8d2708e9c310d2661a47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
