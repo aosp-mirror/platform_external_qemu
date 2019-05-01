@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "01b37575_b2732385",
+        "filename": "android/android-webrtc/android-webrtc/emulator/net/AsyncSocket.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-05-01T02:45:58Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e89dddf9_b72c9adf",
+      "range": {
+        "startLine": 39,
+        "startChar": 12,
+        "endLine": 39,
+        "endChar": 32
+      },
+      "revId": "90c04f044fc13419b4a8c13f660d8c7c9967015c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c8ffa54_cc22e097",
         "filename": "android/android-webrtc/android-webrtc/emulator/net/AsyncSocket.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
       "writtenOn": "2019-04-30T23:43:41Z",
       "side": 1,
       "message": "do we want to move it before socketClose? will there be an issue if one thread calls close the other calls connectToPort?",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 35
+      },
+      "revId": "90c04f044fc13419b4a8c13f660d8c7c9967015c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5b6e244_0a94c05a",
+        "filename": "android/android-webrtc/android-webrtc/emulator/net/AsyncSocket.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-05-01T02:45:58Z",
+      "side": 1,
+      "message": "mConnecting needs to be false before anyone will connectToPort. It will not hurt and looks like it will make it easier to understand.",
+      "parentUuid": "10444def_cc494450",
       "range": {
         "startLine": 106,
         "startChar": 0,
