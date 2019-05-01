@@ -1666,6 +1666,7 @@ help_sim_access_rules_file(stralloc_t* out)
 
 #define help_skip_adb_auth NULL
 #define help_quit_after_boot NULL
+#define help_delay_adb NULL
 
 #define help_phone_number NULL
 

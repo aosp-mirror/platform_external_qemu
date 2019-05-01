@@ -735,6 +735,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         }
     }
 
+    if (opts->delay_adb) {
+        hw->test_delayAdbTillBootComplete = 1;
+    }
+
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
