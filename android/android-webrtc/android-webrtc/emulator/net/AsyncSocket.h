@@ -46,6 +46,7 @@ private:
     // Queue of message that need to go out over this socket.
     MessageQueue mWriteQueue;
     Lock mWriteQueueLock;
+    Lock mWatchLock;
 
     // Write buffer used by the async writer.
     std::string mWriteBuffer;

@@ -32,7 +32,18 @@ AsyncSocket::AsyncSocket(Looper* looper, int port)
       }) {}
 
 uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
-    int read = socketRecv(mFdWatch->fd(), buffer, sizeof(buffer));
+    int fd = -1;
+    {
+        AutoLock watchLock(mWatchLock);
+        if (mFdWatch) {
+            fd = mFdWatch->fd();
+        }
+        if (fd == -1) {
+            return 0;
+        }
+    }
+    // It is still possible that the fd is no longer open
+    int read = socketRecv(fd, buffer, sizeof(buffer));
     if (read == 0) {
         // A read of 0, means the socket was closed, so clean up
         // everything properly.
@@ -56,7 +67,13 @@ uint64_t AsyncSocket::send(const char* buffer, uint64_t bufferSize) {
             return 0;
         }
     }
-    mFdWatch->wantWrite();
+    {
+        // Let's make sure we actually exists when requesting writes.
+        AutoLock watchLock(mWatchLock);
+        if (mFdWatch) {
+            mFdWatch->wantWrite();
+        }
+    }
     return bufferSize;
 }
 
@@ -88,14 +105,17 @@ void AsyncSocket::onWrite() {
 }
 
 void AsyncSocket::close() {
+    // Let's not accidentally trip a reader/writer up.
+    AutoLock watchLock(mWatchLock);
     socketClose(mSocket);
     mFdWatch = nullptr;
     mConnecting = false;
 }
 
 bool AsyncSocket::connect() {
-    if (mConnecting)
+    if (mConnecting) {
         return true;
+    }
 
     mConnecting = true;
     return mConnectThread.start();
@@ -120,6 +140,7 @@ void AsyncSocket::connectToPort() {
 
     mSocket = socket;
     socketSetNonBlocking(mSocket);
+    AutoLock watchLock(mWatchLock);
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
             mLooper->createFdWatch(mSocket, socket_watcher, this));
     mFdWatch->wantRead();
