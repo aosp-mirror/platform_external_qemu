@@ -315,7 +315,8 @@ static std::string getAdbKeyPath(const char* adbKeyFileName) {
 }
 
 static void prepareDataFolder(const char* destDirectory,
-                              const char* srcDirectory) {
+                              const char* srcDirectory,
+                              AndroidHwConfig* hw) {
     // The adb_keys file permission will also be set in guest system.
     // Referencing system/core/rootdir/init.usb.rc
     static const int kAdbKeyDirFilePerm = 02750;
@@ -355,6 +356,17 @@ static void prepareDataFolder(const char* destDirectory,
         path_copy_file(guestAdbKeyPath.c_str(), adbKeyPubPath.c_str());
     }
     android_chmod(guestAdbKeyPath.c_str(), 0640);
+
+    // We now copy the private key used to generate the public key that is embedded in
+    // the image next to the avd. This will make sure we always have the corresponding
+    // private key available.
+    ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
+    std::string privKeyDest = PathUtils::join(userdata_dir.get(), "adbkey");
+    if (path_copy_file(privKeyDest.c_str(), adbKeyPrivPath.c_str()) == -1) {
+        D("Unable to copy over the private key to %s\n", privKeyDest.c_str());
+    } else {
+        android_chmod(privKeyDest.c_str(), 0600);
+    }
 }
 
 static bool creatUserDataExt4Img(AndroidHwConfig* hw,
@@ -380,7 +392,7 @@ static int createUserData(AvdInfo* avd,
     bool needCopyDataPartition = true;
     if (path_exists(initDir.get())) {
         D("Creating ext4 userdata partition: %s", dataPath);
-        prepareDataFolder(dataPath, initDir.get());
+        prepareDataFolder(dataPath, initDir.get(), hw);
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);
     }
