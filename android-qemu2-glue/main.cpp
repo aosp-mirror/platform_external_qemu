@@ -1145,6 +1145,7 @@ extern "C" int main(int argc, char** argv) {
 
         if (badSnapshots) {
             feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_GenericSnapshotsUI, false);
             feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
 
