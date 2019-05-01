@@ -64,6 +64,8 @@ CPPFLAGS += -I$(PROTOHEADER) -pthread
 CXXFLAGS += -std=c++11
 LDFLAGS += -L$(PROTOLIB) -lprotoc -lprotobuf -lpthread -ldl
 
+.PHONY: build-release run-release
+
 all: develop
 
 clean:
@@ -108,8 +110,16 @@ develop:
 		--allow_all_origins &
 	npm start
 
+build-release:  $(CONTROLPB) $(GRPCPB) system-check
+	 docker-compose -f docker/docker-compose.yaml build
+
+run-release: build-release
+	 docker-compose -f docker/docker-compose.yaml up
+
 stop:
 	pkill -9 grpcwebproxy; pkill -9 npm; pkill -9 js; pkill -9 node; true
+
+
 
 system-check:
 ifneq ($(HAS_VALID_PROTOC),true)

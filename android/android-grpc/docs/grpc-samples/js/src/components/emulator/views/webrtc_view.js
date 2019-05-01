@@ -46,12 +46,13 @@ export default class EmulatorWebrtcView extends Component {
   }
 
   onConnect = stream => {
-    // This will fire an onLoadedMetadata event, after which
-    // we can really start playing the stream.
+    console.log("Connecting video stream: " + this.video + ":" + this.video.readyState)
     this.video.srcObject = stream
+    // Kick off playing in case we already have enough data available.
+    this.video.play()
   }
 
-  onLoadedMetadata = e => {
+  onCanPlay = e => {
       this.video.play().then(_ => {
           console.log("Automatic playback started!")
         })
@@ -78,7 +79,7 @@ export default class EmulatorWebrtcView extends Component {
           height={height}
           muted="muted"
           onContextMenu={this.onContextMenu}
-          onLoadedMetadata={this.onLoadedMetadata} />
+          onCanPlay={this.onCanPlay} />
         <JsepProtocolDriver uri={uri} onConnect={this.onConnect} onDisconnect={this.onDisconnect} />
       </div>
     )

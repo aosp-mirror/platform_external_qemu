@@ -206,6 +206,26 @@ You can stop all the components by running:
 
 *Note: this will just kill npm and the proxy*
 
+## Launch the emulator in a release like environment with envoy and docker.
+
+The recommended proxy for gRPC on the web is [Envoy](https://www.envoyproxy.io/). Envoy is an L7 proxy and communication bus designed for large modern service oriented architectures. It basically can handle a few things for us:
+
+- Serve TLS.
+- Add [External Authorization](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/ext_authz_filter)
+- Add [JWT Authentication](https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/jwt_authn_filter#config-http-filters-jwt-authn)
+- Acts a s gRPC proxy
+- Redirect http -> https
+- Redirect serving of static pages to nginx.
+
+This gets us closer to what is needed to deploy the emulator with gRPC into a production environment. A sample is added that uses docker to configure a simple production like environment with the following characteristics:
+
+- An nginx container that will serve production build of the javascript example
+- An envoy gRPC proxy
+- A http -> https redirect
+- A TLS endpoint using self signed certificates.
+
+*Do not deploy this in a real production environment without adding some authorization filters, as anyone who can make an https connection will be able to control your emulator.*
+
 # Controlling the emulator with Python
 
 In the python directory you will find an example that aks the emulator about the vm configuration
