@@ -77,6 +77,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/gl-common.cpp
     android/skin/qt/gl-texture-draw.cpp
     android/skin/qt/gl-widget.cpp
+    android/skin/qt/extended-pages/car-data-emulation/car-data-rules.cpp
     android/skin/qt/extended-pages/common.cpp
     android/skin/qt/extended-pages/battery-page.cpp
     android/skin/qt/extended-pages/bug-report-page.cpp

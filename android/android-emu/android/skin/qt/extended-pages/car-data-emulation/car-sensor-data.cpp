@@ -11,12 +11,14 @@
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 
 #include "android/emulation/proto/VehicleHalProto.pb.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/car-data-rules.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
 #include "ui_car-sensor-data.h"
 #include "vehicle_constants_generated.h"
 
 #include <QSettings>
+#include <QMessageBox>
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
@@ -81,6 +83,18 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
 }
 
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
+
+    if(!isActionAvaliable(static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED))){
+        if (mUi->car_speedSlider->value() != 0) {
+            QMessageBox::warning(this, tr("Warning"),
+                               tr("Speed cannot bigger than 0 when gear is P or parking break is on"),
+                               QMessageBox::Ok,QMessageBox::Ok);
+            mUi->car_speedSlider->setValue(0);
+
+        }
+        return;
+    }
+
     mUi->car_speedLabel->setText(QString::number(speed));
     float speedMetersPerSecond = (float)speed * 
         ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR) 
