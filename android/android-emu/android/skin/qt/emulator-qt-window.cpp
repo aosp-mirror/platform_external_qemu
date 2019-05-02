@@ -2183,6 +2183,14 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
 }
 
+void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
+    QRect windowGeo = this->geometry();
+    QSize backingSize = mBackingSurface->bitmap->size();
+    float scale = (float)windowGeo.width() / (float)backingSize.width();
+    setDisplayRegionAndUpdate(x, y, w, h);
+    simulateSetScale(std::max(.2, (double)scale));
+}
+
 bool EmulatorQtWindow::isFolded() const { return ToolWindow::isFolded(); }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
@@ -2300,6 +2308,15 @@ void EmulatorQtWindow::simulateScrollBarChanged(int x, int y) {
 
 void EmulatorQtWindow::setDisplayRegion(int xOffset, int yOffset, int width, int height) {
     SkinEvent* event = createSkinEvent(kEventSetDisplayRegion);
+    event->u.display_region.xOffset = xOffset;
+    event->u.display_region.yOffset = yOffset;
+    event->u.display_region.width   = width;
+    event->u.display_region.height  = height;
+    queueSkinEvent(event);
+}
+
+void EmulatorQtWindow::setDisplayRegionAndUpdate(int xOffset, int yOffset, int width, int height) {
+    SkinEvent* event = createSkinEvent(kEventSetDisplayRegionAndUpdate);
     event->u.display_region.xOffset = xOffset;
     event->u.display_region.yOffset = yOffset;
     event->u.display_region.width   = width;
@@ -2727,4 +2744,37 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
         mSkinGapBottom = bitImage.height() - 1 - bottomVisible;
         mSkinGapLeft = leftVisible;
     }
+}
+
+void EmulatorQtWindow::setMultiDisplay(int id, int x, int y, int w, int h, bool add) {
+    AutoLock lock(mMultiDisplayLock);
+    if (add) {
+        mMultiDisplay[id].pos_x = x;
+        mMultiDisplay[id].pos_y = y;
+        mMultiDisplay[id].width = w;
+        mMultiDisplay[id].height = h;
+    } else {
+        mMultiDisplay.erase(id);
+    }
+     SkinEvent* event = new SkinEvent();
+     event->type = kEventSetMultiDisplay;
+     event->u.multi_display.id = id;
+     event->u.multi_display.xOffset = x;
+     event->u.multi_display.yOffset = y;
+     event->u.multi_display.width = w;
+     event->u.multi_display.height = h;
+     event->u.multi_display.add= add;
+     skin_event_add(event);
+}
+
+bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
+    AutoLock lock(mMultiDisplayLock);
+    if (mMultiDisplay.find(id) == mMultiDisplay.end()) {
+        return false;
+    }
+    *x = mMultiDisplay[id].pos_x;
+    *y = mMultiDisplay[id].pos_y;
+    *w = mMultiDisplay[id].width;
+    *h = mMultiDisplay[id].height;
+    return true;
 }

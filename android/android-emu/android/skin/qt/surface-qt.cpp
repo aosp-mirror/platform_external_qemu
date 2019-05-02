@@ -142,7 +142,7 @@ extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
 extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h,
                                         int original_w, int original_h)
 {
-    D("skin_surface_resize w %d h %d\n", w, h);
+    D("skin_surface_resize w %d h %d original_w %d original_h %d\n", w, h, original_w, original_h);
     if ( surface == NULL ) {
         return skin_surface_create(w, h, original_w, original_h);
     } else if (surface->bitmap->size() == QSize(original_w, original_h)) {
