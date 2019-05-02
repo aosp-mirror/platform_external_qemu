@@ -90,11 +90,12 @@ static void emulator_window_generic_event(SkinGenericEventCode* events,
 
 static void emulator_window_window_mouse_event(unsigned x,
                                          unsigned y,
-                                         unsigned state) {
+                                         unsigned state,
+                                         int displayId) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
-    user_event_agent->sendMouseEvent(x, y, 0, state, 0);
+    user_event_agent->sendMouseEvent(x, y, 0, state, displayId);
 }
 
 static void emulator_window_window_rotary_input_event(int delta) {
