@@ -371,6 +371,7 @@ bool skin_ui_process_events(SkinUI* ui) {
                                           ev.u.multi_display.width,
                                           ev.u.multi_display.height,
                                           ev.u.multi_display.add);
+            break;
 
         case kEventSetScale:
             DE("EVENT: kEventSetScale scale=%f\n", ev.u.window.scale);

@@ -15,8 +15,6 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/emulator-window.h"
-#include "android/skin/event.h"
-#include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
@@ -104,26 +102,25 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
 
         .setUIDisplayRegion =
-                [](int x_offset, int y_offset, int w, int h) {
-                        SkinEvent* event = new SkinEvent();
-                        event->type = kEventSetDisplayRegionAndUpdate;
-                        event->u.display_region.xOffset = x_offset;
-                        event->u.display_region.yOffset = y_offset;
-                        event->u.display_region.width   = w;
-                        event->u.display_region.height  = h;
-                        skin_event_add(event);
+                [](int x, int y, int w, int h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win, x, y, w, h]() {
+                            win->resizeAndChangeAspectRatio(x, y, w, h);
+                        });
+                    }
                 },
         .setMultiDisplay =
                 [](int id, int x, int y, int w, int h, bool add) {
-                    SkinEvent* event = new SkinEvent();
-                    event->type = kEventSetMultiDisplay;
-                    event->u.multi_display.id = id;
-                    event->u.multi_display.xOffset = x;
-                    event->u.multi_display.yOffset = y;
-                    event->u.multi_display.width = w;
-                    event->u.multi_display.height = h;
-                    event->u.multi_display.add= add;
-                    skin_event_add(event);
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->setMultiDisplay(id, x, y, w, h, add);
+                    }
+                },
+        .getMultiDisplay =
+                [](int id, int* x, int* y, int* w, int* h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMultiDisplay(id, x, y, w, h);
+                    }
+                    return false;
                 },
 };
 
