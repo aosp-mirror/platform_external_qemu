@@ -221,6 +221,7 @@ public:
     void doResize(const QSize& size,
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
+    void resizeAndChangeAspectRatio(int x, int y, int w, int h);
     bool isFolded() const;
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
@@ -242,6 +243,7 @@ public:
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void setDisplayRegion(int xOffset, int yOffset, int width, int height);
+    void setDisplayRegionAndUpdate(int xOffset, int yOffset, int width, int height);
     void simulateSetScale(double scale);
     void simulateSetZoom(double zoom);
     void simulateWindowMoved(const QPoint& pos);
@@ -257,6 +259,8 @@ public:
     int  getRightTransparency()  { return mSkinGapRight; }
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
+    void setMultiDisplay(int id, int x, int y, int w, int h, bool add);
+    bool getMultiDisplay(int id, int* x, int* y, int* w, int* h);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -509,6 +513,15 @@ private:
     QScreen* mCurrentScreen = nullptr;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    struct MultiDisplayInfo {
+        uint32_t pos_x;
+        uint32_t pos_y;
+        uint32_t width;
+        uint32_t height;
+        MultiDisplayInfo() : pos_x(0), pos_y(0), width(0), height(0) {}
+    };
+    std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
+    android::base::Lock mMultiDisplayLock;
 };
 
 class SkinSurfaceBitmap {
