@@ -65,6 +65,7 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*setUIDisplayRegion)(int, int, int, int);
     // Inform UI creation/modification/deletion of multi-display window
     void (*setMultiDisplay)(int, int, int, int, int, bool);
+    bool (*getMultiDisplay)(int, int*, int*, int*, int*);
 
 } QAndroidEmulatorWindowAgent;
 
