@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "68d5c01f_5fd6c348",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 46
+      },
+      "lineNbr": 1767,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-02T18:08:08Z",
+      "side": 1,
+      "message": "The spec seems to indicate compute pipeline and graphics pipeline bindings are independent of each other. I will fix it.\n\nhttps://vulkan.lunarg.com/doc/view/1.0.33.0/linux/vkspec.chunked/ch09s08.html",
+      "parentUuid": "94ff7c6b_ef278ceb",
+      "range": {
+        "startLine": 1767,
+        "startChar": 25,
+        "endLine": 1767,
+        "endChar": 58
+      },
+      "revId": "764becd3ccfafd9b7990cfbfb3de4c04c943c05e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7bd1bdde_27df3a66",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 46
@@ -139,6 +163,30 @@
       "revId": "764becd3ccfafd9b7990cfbfb3de4c04c943c05e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d7a13af_a20e5c0b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 46
+      },
+      "lineNbr": 1783,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-02T18:08:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7bd1bdde_27df3a66",
+      "range": {
+        "startLine": 1783,
+        "startChar": 12,
+        "endLine": 1783,
+        "endChar": 42
+      },
+      "revId": "764becd3ccfafd9b7990cfbfb3de4c04c943c05e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
