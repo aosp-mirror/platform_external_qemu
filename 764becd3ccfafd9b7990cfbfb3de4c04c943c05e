@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8585d2a_c05be084",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 46
+      },
+      "lineNbr": 1598,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-02T00:33:30Z",
+      "side": 1,
+      "message": "Shall we replace these literals with constants that name how they are relevant to the compressed format?",
+      "range": {
+        "startLine": 1598,
+        "startChar": 41,
+        "endLine": 1598,
+        "endChar": 43
+      },
+      "revId": "764becd3ccfafd9b7990cfbfb3de4c04c943c05e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb12e1bc_aaa5b7e1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 46
+      },
+      "lineNbr": 1606,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-02T00:33:30Z",
+      "side": 1,
+      "message": "Here too",
+      "range": {
+        "startLine": 1606,
+        "startChar": 52,
+        "endLine": 1606,
+        "endChar": 53
+      },
+      "revId": "764becd3ccfafd9b7990cfbfb3de4c04c943c05e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
