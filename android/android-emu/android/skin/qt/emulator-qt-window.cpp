@@ -2728,3 +2728,27 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
         mSkinGapLeft = leftVisible;
     }
 }
+
+void EmulatorQtWindow::setMultiDisplay(int id, int x, int y, int w, int h, bool add) {
+    AutoLock lock(mMultiDisplayLock);
+    if (add) {
+        mMultiDisplay[id].pos_x = x;
+        mMultiDisplay[id].pos_y = y;
+        mMultiDisplay[id].width = w;
+        mMultiDisplay[id].height = h;
+    } else {
+        mMultiDisplay.erase(id);
+    }
+}
+
+bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
+    AutoLock lock(mMultiDisplayLock);
+    if (mMultiDisplay.find(id) == mMultiDisplay.end()) {
+        return false;
+    }
+    *x = mMultiDisplay[id].pos_x;
+    *y = mMultiDisplay[id].pos_y;
+    *w = mMultiDisplay[id].width;
+    *h = mMultiDisplay[id].height;
+    return true;
+}

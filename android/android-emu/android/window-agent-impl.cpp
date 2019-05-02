@@ -124,6 +124,17 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     event->u.multi_display.height = h;
                     event->u.multi_display.add= add;
                     skin_event_add(event);
+
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->setMultiDisplay(id, x, y, w, h, add);
+                    }
+                },
+        .getMultiDisplay =
+                [](int id, int* x, int* y, int* w, int* h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMultiDisplay(id, x, y, w, h);
+                    }
+                    return false;
                 },
 };
 

@@ -1094,8 +1094,21 @@ add_finger_event(SkinWindow* window,
            break;
         }
     }
+    else if (finger->display && finger->display->sub_display) {
+        SubDisplay* t = finger->display->sub_display;
+        while(t) {
+            if (skin_rect_contains(&t->rect, posX, posY)) {
+                unsigned newX = posX - t->rect.pos.x;
+                unsigned newY = posY - t->rect.pos.y;
+                window->win_funcs->mouse_event(newX, newY, state, t->id);
+                break;
+            }
+            t = t->next;
+        }
+        return;
+    }
 
-    window->win_funcs->mouse_event(posX, posY, state);
+    window->win_funcs->mouse_event(posX, posY, state, 0);
 }
 
 static void

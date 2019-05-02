@@ -257,6 +257,8 @@ public:
     int  getRightTransparency()  { return mSkinGapRight; }
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
+    void setMultiDisplay(int id, int x, int y, int w, int h, bool add);
+    bool getMultiDisplay(int id, int* x, int* y, int* w, int* h);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -509,6 +511,15 @@ private:
     QScreen* mCurrentScreen = nullptr;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    struct MultiDisplayInfo {
+        uint32_t pos_x;
+        uint32_t pos_y;
+        uint32_t width;
+        uint32_t height;
+        MultiDisplayInfo() : pos_x(0), pos_y(0), width(0), height(0) {}
+    };
+    std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
+    android::base::Lock mMultiDisplayLock;
 };
 
 class SkinSurfaceBitmap {
