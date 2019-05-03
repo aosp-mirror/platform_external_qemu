@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5079079b_9a4ee1cf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2216,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-03T23:34:03Z",
+      "side": 1,
+      "message": "nit: clang-format the CL?",
+      "range": {
+        "startLine": 2216,
+        "startChar": 100,
+        "endLine": 2216,
+        "endChar": 101
+      },
+      "revId": "36dc9d15acea48c148d1c5e58343160f11356335",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b03a7b16_f39c5f7f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2565,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-03T23:34:03Z",
+      "side": 1,
+      "message": "nit: you can do \"for (auto iter : m_displays)\"",
+      "range": {
+        "startLine": 2565,
+        "startChar": 12,
+        "endLine": 2565,
+        "endChar": 82
+      },
+      "revId": "36dc9d15acea48c148d1c5e58343160f11356335",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c08e629b_e4169fcf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2573,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-03T23:34:03Z",
+      "side": 1,
+      "message": "you might want to move this function into FrameBuffer::onLoad so that it locks/unlocks one fewer time?",
+      "range": {
+        "startLine": 2556,
+        "startChar": 0,
+        "endLine": 2573,
+        "endChar": 9
+      },
+      "revId": "36dc9d15acea48c148d1c5e58343160f11356335",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
