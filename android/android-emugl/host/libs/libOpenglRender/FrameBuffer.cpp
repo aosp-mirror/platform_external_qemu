@@ -2212,6 +2212,16 @@ void FrameBuffer::onSave(Stream* stream,
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
+    saveCollection(stream, m_displays,
+                   [](Stream* s, const std::unordered_map<uint32_t, DisplayInfo>::value_type& pair) {
+        s->putBe32(pair.first);
+        s->putBe32(pair.second.cb);
+        s->putBe32(pair.second.pos_x);
+        s->putBe32(pair.second.pos_y);
+        s->putBe32(pair.second.width);
+        s->putBe32(pair.second.height);
+    });
+
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
@@ -2230,7 +2240,7 @@ void FrameBuffer::onSave(Stream* stream,
 
 bool FrameBuffer::onLoad(Stream* stream,
                          const android::snapshot::ITextureLoaderPtr& textureLoader) {
-    AutoLock mutex(m_lock);
+    lock();
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
@@ -2329,6 +2339,17 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
+    loadCollection(stream, &m_displays,
+                   [this](Stream* stream) -> std::unordered_map<uint32_t, DisplayInfo>::value_type {
+        const uint32_t idx = stream->getBe32();
+        const uint32_t cb = stream->getBe32();
+        const uint32_t pos_x = stream->getBe32();
+        const uint32_t pos_y = stream->getBe32();
+        const uint32_t width = stream->getBe32();
+        const uint32_t height = stream->getBe32();
+        return { idx, { cb, pos_x, pos_y, width, height } };
+    });
+
     if (s_egl.eglPostLoadAllImages) {
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
@@ -2343,6 +2364,9 @@ bool FrameBuffer::onLoad(Stream* stream,
             }
         }
     }
+    unlock();
+    restoreMultiDisplay();
+
     return true;
     // TODO: restore memory management
 }
@@ -2523,4 +2547,31 @@ void FrameBuffer::getCombinedDisplaySize(int* w, int* h, bool androidWindow) {
     }
     *w = total_w;
     *h = max_h;
+}
+
+void FrameBuffer::restoreMultiDisplay() {
+    int width, height;
+    {
+        AutoLock mutex(m_lock);
+        if (m_displays.size() == 0) {
+            return;
+        } else {
+            getCombinedDisplaySize(&width, &height, true);
+            emugl::get_emugl_window_operations().setMultiDisplay(0, 0,
+                                                                 height - getHeight(),
+                                                                 getWidth(),
+                                                                 getHeight(),
+                                                                 true);
+            for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+                emugl::get_emugl_window_operations().setMultiDisplay(iter->first,
+                                                                     iter->second.pos_x,
+                                                                     height - iter->second.height,
+                                                                     iter->second.width,
+                                                                     iter->second.height,
+                                                                     true);
+            }
+        }
+    }
+    // unlock before calling setUIDisplayRegion
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
 }
