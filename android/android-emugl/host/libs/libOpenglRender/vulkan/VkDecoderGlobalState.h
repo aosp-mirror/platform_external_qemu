@@ -272,6 +272,32 @@ public:
         uint32_t regionCount,
         const VkBufferImageCopy* pRegions);
 
+    void on_vkCmdCopyImageToBuffer(android::base::Pool* pool,
+                                   VkCommandBuffer commandBuffer,
+                                   VkImage srcImage,
+                                   VkImageLayout srcImageLayout,
+                                   VkBuffer dstBuffer,
+                                   uint32_t regionCount,
+                                   const VkBufferImageCopy* pRegions);
+
+    void on_vkGetImageMemoryRequirements(
+            android::base::Pool* pool,
+            VkDevice device,
+            VkImage image,
+            VkMemoryRequirements* pMemoryRequirements);
+
+    void on_vkGetImageMemoryRequirements2(
+            android::base::Pool* pool,
+            VkDevice device,
+            const VkImageMemoryRequirementsInfo2* pInfo,
+            VkMemoryRequirements2* pMemoryRequirements);
+
+    void on_vkGetImageMemoryRequirements2KHR(
+            android::base::Pool* pool,
+            VkDevice device,
+            const VkImageMemoryRequirementsInfo2* pInfo,
+            VkMemoryRequirements2* pMemoryRequirements);
+
     void on_vkCmdPipelineBarrier(
             android::base::Pool* pool,
             VkCommandBuffer commandBuffer,
@@ -524,6 +550,20 @@ public:
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
 
+    void on_vkCmdBindPipeline(android::base::Pool* pool,
+                              VkCommandBuffer commandBuffer,
+                              VkPipelineBindPoint pipelineBindPoint,
+                              VkPipeline pipeline);
+
+    void on_vkCmdBindDescriptorSets(android::base::Pool* pool,
+                                    VkCommandBuffer commandBuffer,
+                                    VkPipelineBindPoint pipelineBindPoint,
+                                    VkPipelineLayout layout,
+                                    uint32_t firstSet,
+                                    uint32_t descriptorSetCount,
+                                    const VkDescriptorSet* pDescriptorSets,
+                                    uint32_t dynamicOffsetCount,
+                                    const uint32_t* pDynamicOffsets);
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
