@@ -14,6 +14,7 @@
 
 #include "OpenGLTestContext.h"
 
+#include "android/base/GLObjectCounter.h"
 #include "android/utils/system.h"
 
 #include "Standalone.h"
@@ -26,6 +27,7 @@ EGLDisplay getDisplay() {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
     if (sDisplayNeedsInit) {
+        android::base::GLObjectCounter::get();
         egl->eglUseOsEglApi(!shouldUseHostGpu());
     }
 

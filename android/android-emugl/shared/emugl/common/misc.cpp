@@ -14,6 +14,7 @@
 
 #include "emugl/common/misc.h"
 
+#include "android/base/GLObjectCounter.h"
 #include "android/base/CpuUsage.h"
 #include "android/base/memory/MemoryTracker.h"
 
@@ -24,6 +25,8 @@ static bool s_isPhone = false;
 
 static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
+
+android::base::GLObjectCounter* s_default_gl_object_counter = nullptr;
 
 android::base::GLObjectCounter* s_gl_object_counter = nullptr;
 android::base::CpuUsage* s_cpu_usage = nullptr;
@@ -76,6 +79,12 @@ void emugl::setGLObjectCounter(android::base::GLObjectCounter* counter) {
 }
 
 android::base::GLObjectCounter* emugl::getGLObjectCounter() {
+    if (!s_gl_object_counter) {
+        if (!s_default_gl_object_counter) {
+            s_default_gl_object_counter = new android::base::GLObjectCounter;
+        }
+        return s_default_gl_object_counter;
+    }
     return s_gl_object_counter;
 }
 
