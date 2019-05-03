@@ -32,6 +32,7 @@ RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     height = stream->getBe32();
     internalformat = stream->getBe32();
     hostInternalFormat = stream->getBe32();
+    everBound = stream->getBe32();
 }
 
 void RenderbufferData::onSave(android::base::Stream* stream, unsigned int globalName) const {
@@ -47,6 +48,7 @@ void RenderbufferData::onSave(android::base::Stream* stream, unsigned int global
     stream->putBe32(height);
     stream->putBe32(internalformat);
     stream->putBe32(hostInternalFormat);
+    stream->putBe32(everBound);
 }
 
 void RenderbufferData::restore(ObjectLocalName localName,
