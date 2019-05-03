@@ -495,9 +495,11 @@ public:
         uint32_t pos_y;
         uint32_t width;
         uint32_t height;
-        DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0) {}
+        DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0) {};
+        DisplayInfo(uint32_t cb, uint32_t x, uint32_t y, uint32_t w, uint32_t h) :
+          cb(cb), pos_x(x), pos_y(y), width(w), height(h) {}
     };
-    std::map<uint32_t, DisplayInfo> m_displays;
+    std::unordered_map<uint32_t, DisplayInfo> m_displays;
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);

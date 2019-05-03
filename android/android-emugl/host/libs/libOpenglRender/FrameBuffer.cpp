@@ -2212,6 +2212,18 @@ void FrameBuffer::onSave(Stream* stream,
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
+    saveCollection(
+        stream, m_displays,
+        [](Stream* s,
+           const std::unordered_map<uint32_t, DisplayInfo>::value_type& pair) {
+        s->putBe32(pair.first);
+        s->putBe32(pair.second.cb);
+        s->putBe32(pair.second.pos_x);
+        s->putBe32(pair.second.pos_y);
+        s->putBe32(pair.second.width);
+        s->putBe32(pair.second.height);
+    });
+
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
@@ -2230,7 +2242,7 @@ void FrameBuffer::onSave(Stream* stream,
 
 bool FrameBuffer::onLoad(Stream* stream,
                          const android::snapshot::ITextureLoaderPtr& textureLoader) {
-    AutoLock mutex(m_lock);
+    AutoLock lock(m_lock);
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
@@ -2283,7 +2295,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_framebufferHeight = stream->getBe32();
     m_dpr = stream->getFloat();
     // TODO: resize the window
-
+    //
     m_useSubWindow = stream->getBe32();
     m_eglContextInitialized = stream->getBe32();
 
@@ -2329,6 +2341,17 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
+    loadCollection(stream, &m_displays,
+                   [this](Stream* stream) -> std::unordered_map<uint32_t, DisplayInfo>::value_type {
+        const uint32_t idx = stream->getBe32();
+        const uint32_t cb = stream->getBe32();
+        const uint32_t pos_x = stream->getBe32();
+        const uint32_t pos_y = stream->getBe32();
+        const uint32_t width = stream->getBe32();
+        const uint32_t height = stream->getBe32();
+        return { idx, { cb, pos_x, pos_y, width, height } };
+    });
+
     if (s_egl.eglPostLoadAllImages) {
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
@@ -2343,6 +2366,37 @@ bool FrameBuffer::onLoad(Stream* stream,
             }
         }
     }
+
+    // Restore multi display state
+    int combinedDisplayWidth = 0;
+    int combinedDisplayHeight = 0;
+
+    if (m_displays.size() == 0) {
+        return true;
+    } else {
+        getCombinedDisplaySize(
+            &combinedDisplayWidth, &combinedDisplayHeight, true);
+        emugl::get_emugl_window_operations().setMultiDisplay(
+            0,
+            0, combinedDisplayHeight - getHeight(),
+            getWidth(), getHeight(), true);
+
+        for (auto iter : m_displays) {
+            emugl::get_emugl_window_operations().setMultiDisplay(
+                iter.first,
+                iter.second.pos_x,
+                combinedDisplayHeight - iter.second.height,
+                iter.second.width,
+                iter.second.height, true);
+        }
+
+        // unlock before calling setUIDisplayRegion
+        lock.unlock();
+        emugl::get_emugl_window_operations()
+            .setUIDisplayRegion(
+                0, 0, combinedDisplayWidth, combinedDisplayHeight);
+    }
+
     return true;
     // TODO: restore memory management
 }
