@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d55282e2_855df2bd",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2405,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-03T00:17:42Z",
+      "side": 1,
+      "message": "Should we put them under the framebuffer lock? these may need to be locked if we ever run them in multiple threads.",
+      "revId": "682979eb42150bfbc7df0f14ab312c8883becc32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
