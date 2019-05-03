@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c35be3c2_95e680a7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-05-03T20:05:57Z",
+      "side": 1,
+      "message": "emulatorMsg.value_size() is already checked by the for-loop. Do we really need to check it? \nMeaning: if emulatorMsg.prop_size() \u003e 0 but emulatorMsg.value_size() is \u003c\u003d 0 then nothing would be done anyways.\n\nWhat about doing?:\n\nif (emulatorMsg.prop_size() \u003d\u003d 0) {\n   return;\n}\n\n...\n\n(saving one indentation level)",
+      "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "940e2e79_97a4e872",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-05-03T20:05:57Z",
+      "side": 1,
+      "message": "[Not for now]\n\nIn the future, we should create a new entity (maybe \"CarSensorView or something like it), that wraps a checkbox, textbox or dropdown, and encapsulates the handling of the 2-way synchronization with the emulator msgs.\n\nThe general idea would be to use OOP to avoid extending this switch() and adding more \"on_XXX_toggled()\" methods every time we add a new widget to the car sensors page.",
+      "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bea00122_af3043f7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-05-03T20:05:57Z",
+      "side": 1,
+      "message": "This is a very unusual way to do this check (a bit hard to read).\nWhat about doing a naive:\n\nfor (int index \u003d 0; index \u003c len; index++) {\n   if (static_cast\u003cint\u003e(sComboBoxGearValues[index]) \u003d\u003d gear) {\n      return index;\n   }\n}\n\nreturn len - 1;",
+      "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
