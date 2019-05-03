@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a6e914f4_cff3fbc6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-05-03T23:54:40Z",
+      "side": 1,
+      "message": "Still need to check the emulatorMsg.value_size() is \u003c\u003d 0, or the function will return earlier then it should.\nAdd it to the if condition to save one indentation level",
+      "parentUuid": "c35be3c2_95e680a7",
+      "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "940e2e79_97a4e872",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3c618cb9_5788bdae",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-05-03T23:54:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "940e2e79_97a4e872",
+      "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bea00122_af3043f7",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 3
@@ -50,6 +86,24 @@
       "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3887bbdc_239769f3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-05-03T23:54:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bea00122_af3043f7",
+      "revId": "ed4f998ab6d42aeeea5478c917d0de21808e676b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
