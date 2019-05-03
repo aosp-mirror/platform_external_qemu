@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "d8458e63_d671b6b3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-03T20:09:02Z",
+      "side": 1,
+      "message": "If I assume that each color buffer will be posted at some point, I wonder if it is necessary to  loop through the m_display to post the color buffers associated with each display specifically then.",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b65cc831_5b5c6296",
         "filename": "android/android-emugl/shared/emugl/common/window_operations.h",
         "patchSetId": 7
