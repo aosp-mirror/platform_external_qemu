@@ -147,5 +147,25 @@ TEST(Path, DeleteDirContents) {
     EXPECT_TRUE(path_is_dir(dirToDelete.c_str()));
 }
 
+TEST(Path, PathExists) {
+    TestTempDir tempDir("PathExistsTest");
+    const char* kWeirdPaths[] = {
+        "regular",
+        "have spaces in it",
+        "âêîôû",
+        "äöüß"
+        "ひらがな",
+        "汉字",
+        "漢字",
+        "हिन्दी"
+    };
+    for (const char* path : kWeirdPaths) {
+        auto subDir = tempDir.makeSubPath(path);
+        EXPECT_FALSE(path_exists(subDir.c_str()));
+        EXPECT_EQ(0, path_mkdir_if_needed(subDir.c_str(), 0755));
+        EXPECT_TRUE(path_exists(subDir.c_str()));
+    }
+}
+
 }  // namespace path
 }  // namespace android
