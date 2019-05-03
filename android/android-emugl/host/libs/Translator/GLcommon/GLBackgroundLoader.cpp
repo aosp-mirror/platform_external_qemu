@@ -32,12 +32,17 @@ intptr_t GLBackgroundLoader::main() {
     const auto start = get_uptime_ms();
     printf("Starting GL background loading at %" PRIu64 " ms\n", start);
 #endif
+
     if (s_context == EGL_NO_CONTEXT) {
         if (!m_eglIface.createAndBindAuxiliaryContext(&s_context, &s_surface)) {
             return 0;
         }
     } else {
-        m_eglIface.bindAuxiliaryContext(s_context, s_surface);
+        // In unit tests, we might have torn down EGL. Check for stale
+        // context and surface, and recreate them if that happened.
+        if (!m_eglIface.bindAuxiliaryContext(s_context, s_surface)) {
+            m_eglIface.createAndBindAuxiliaryContext(&s_context, &s_surface);
+        }
     }
 
     for (const auto& it : m_textureMap) {

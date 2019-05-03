@@ -15,6 +15,8 @@
 */
 #include <GLcommon/GLutils.h>
 
+#include "android/base/synchronization/Lock.h"
+
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -26,22 +28,28 @@ bool isPowerOf2(int num) {
     return (num & (num -1)) == 0;
 }
 
+android::base::StaticLock sGlobalSettingsLock;
+
 static bool s_gles2Gles = false;
 static bool s_coreProfile = false;
 
 void setGles2Gles(bool isGles2Gles) {
+    android::base::AutoLock lock(sGlobalSettingsLock);
     s_gles2Gles = isGles2Gles;
 }
 
 bool isGles2Gles() {
+    android::base::AutoLock lock(sGlobalSettingsLock);
     return s_gles2Gles;
 }
 
 void setCoreProfile(bool isCore) {
+    android::base::AutoLock lock(sGlobalSettingsLock);
     s_coreProfile = isCore;
 }
 
 bool isCoreProfile() {
+    android::base::AutoLock lock(sGlobalSettingsLock);
     return s_coreProfile;
 }
 
