@@ -173,7 +173,8 @@ void GLESConversionArrays::operator++(){
 
 GLDispatch     GLEScontext::s_glDispatch;
 emugl::Mutex   GLEScontext::s_lock;
-std::string*   GLEScontext::s_glExtensions= NULL;
+std::string*   GLEScontext::s_glExtensions = NULL;
+bool           GLEScontext::s_glExtensionsInitialized = false;
 std::string    GLEScontext::s_glVendor;
 std::string    GLEScontext::s_glRenderer;
 std::string    GLEScontext::s_glVersion;
@@ -373,6 +374,7 @@ void GLEScontext::initEglIface(EGLiface* iface) {
 
 void GLEScontext::initGlobal(EGLiface* iface) {
     initEglIface(iface);
+    s_lock.lock();
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
                 getHostExtensionsString(&s_glDispatch).c_str()));
@@ -383,6 +385,7 @@ void GLEScontext::initGlobal(EGLiface* iface) {
         // be populated after calling this ::init() method.
         s_glExtensions = new std::string();
     }
+    s_lock.unlock();
 }
 
 void GLEScontext::init() {

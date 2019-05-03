@@ -192,7 +192,7 @@ set(OpenglRender_unittests_src
 
 # Note! We build the test but are not registering it, as the darwin build has
 # some concurrency issues with these tests.
-android_add_executable(OpenglRender_unittests)
+android_add_test(OpenglRender_unittests)
 target_link_libraries(OpenglRender_unittests
                               PRIVATE
                               android-emu-base
