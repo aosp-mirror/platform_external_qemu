@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca15c475_b15e4a57",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2393,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-03T18:26:58Z",
+      "side": 1,
+      "message": "Do we want to have a limit check on how many display emulator can create?",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b3079d5_2eed52c7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2509,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-03T18:26:58Z",
+      "side": 1,
+      "message": "Maybe this function also needs lock since createDisplay or DestroyDisplay could be invoked when this is called?",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
