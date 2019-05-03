@@ -878,7 +878,7 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
         goldfish_events_set_bit(s, EV_SW, SW_TABLET_MODE);
     }
 
-    if (s->have_keyboard && s->have_keyboard_lid) {
+    if (s->have_keyboard_lid) {
         goldfish_events_set_bit(s, EV_SW, SW_LID);
     }
 
