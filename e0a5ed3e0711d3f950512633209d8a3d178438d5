@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "a0e65ac0_281be8be",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2228,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-03T00:30:17Z",
+      "side": 1,
+      "message": "what should we do if snapshotting? (An alternative is to cancel the current snapshot if multi display is involved:\n\nhttps://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp#107\n\n        // TODO: bug 129484301\n        get_emugl_vm_operations().setSkipSnapshotSave(true /* skip saving */);",
+      "revId": "e0a5ed3e0711d3f950512633209d8a3d178438d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c2a1eb2f_6d7e9e37",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 6
