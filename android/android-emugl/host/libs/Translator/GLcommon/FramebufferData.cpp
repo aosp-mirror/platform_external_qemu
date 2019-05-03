@@ -47,6 +47,7 @@ void RenderbufferData::onSave(android::base::Stream* stream, unsigned int global
     stream->putBe32(height);
     stream->putBe32(internalformat);
     stream->putBe32(hostInternalFormat);
+    stream->putBe32(everBound);
 }
 
 void RenderbufferData::restore(ObjectLocalName localName,
@@ -92,6 +93,7 @@ FramebufferData::FramebufferData(android::base::Stream* stream) :
     m_hasDrawBuffers = stream->getByte();
     android::base::loadBuffer(stream, &m_drawBuffers);
     m_readBuffer = stream->getBe32();
+    everBound = stream->getBe32();
 }
 
 FramebufferData::~FramebufferData() {
