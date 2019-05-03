@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf5d53d2_d5e4ec60",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2243,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-03T23:09:04Z",
+      "side": 1,
+      "message": "You can also do \n{ AutoLock mutex(m_lock); \n  code...\n}\nrestoreMultiDisplay();",
+      "revId": "c9596a7fcf4236eb21f16005e1482a9d8f48b177",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
