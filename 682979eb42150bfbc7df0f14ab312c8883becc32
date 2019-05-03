@@ -22,6 +22,30 @@
       "revId": "682979eb42150bfbc7df0f14ab312c8883becc32",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05790755_8cfdf4a6",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1953,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-03T20:53:07Z",
+      "side": 0,
+      "message": "*x \u003d *x - 0; *y \u003d *y - 0; should be redundant code.",
+      "parentUuid": "974f62bb_3f4a09f6",
+      "range": {
+        "startLine": 1949,
+        "startChar": 0,
+        "endLine": 1953,
+        "endChar": 22
+      },
+      "revId": "682979eb42150bfbc7df0f14ab312c8883becc32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

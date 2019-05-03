@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "53c1332a_bafdc1a1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2393,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-03T20:53:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca15c475_b15e4a57",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b3079d5_2eed52c7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2019-05-03T18:26:58Z",
       "side": 1,
       "message": "Maybe this function also needs lock since createDisplay or DestroyDisplay could be invoked when this is called?",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "924c2481_01531206",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2509,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-03T20:53:07Z",
+      "side": 1,
+      "message": "always locked when this function called.",
+      "parentUuid": "1b3079d5_2eed52c7",
       "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7ddf106c_0eb24cad",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-03T20:53:07Z",
+      "side": 1,
+      "message": "We can add that if necessary in the future.",
+      "parentUuid": "d8458e63_d671b6b3",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b65cc831_5b5c6296",
         "filename": "android/android-emugl/shared/emugl/common/window_operations.h",
         "patchSetId": 7
@@ -67,6 +121,24 @@
       "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4722398f_49d755a1",
+        "filename": "android/android-emugl/shared/emugl/common/window_operations.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-03T20:53:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b65cc831_5b5c6296",
+      "revId": "b0fc18e7c0cdab7f1f3b6f2e82a3c98c7b417bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
