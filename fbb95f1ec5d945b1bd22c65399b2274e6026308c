@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9347b467_e0a9d73b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2283,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-04T05:07:44Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "fbb95f1ec5d945b1bd22c65399b2274e6026308c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "36f4ad79_471d7e43",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2375,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-04T05:07:44Z",
+      "side": 1,
+      "message": "nit: remove empty line",
+      "revId": "fbb95f1ec5d945b1bd22c65399b2274e6026308c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
