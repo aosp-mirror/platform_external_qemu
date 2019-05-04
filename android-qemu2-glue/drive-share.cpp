@@ -213,7 +213,13 @@ static bool parseQemuOptForQcow2(bool wipeData) {
             }
             if (!android::base::PathUtils::isAbsolute(qcow2_image_path)) {
                 qcow2_path_buffer = path_join(avd_data_dir, qcow2_image_path);
-                sDriveShare->srcImagePaths[images[p].drive] = qcow2_path_buffer;
+                // bug: 130353176
+                // bug: 130724870
+                if (path_exists(qcow2_path_buffer)) {
+                    sDriveShare->srcImagePaths[images[p].drive] = qcow2_path_buffer;
+                } else {
+                    sDriveShare->srcImagePaths[images[p].drive] = qcow2_image_path;
+                }
             }
         }
 
@@ -334,7 +340,10 @@ static void mirrorTmpCache(const char* dst, const char* src) {
     if (!android::base::PathUtils::isAbsolute(backingFile)) {
         absPath =
                 path_join(avdInfo_getContentPath(android_avdInfo), backingFile);
-        backingFile = absPath;
+        // bug: 130724870
+        if (path_exists(absPath)) {
+            backingFile = absPath;
+        }
     }
     D("backing cache.img path: %s\n", backingFile);
     int res = bdrv_change_backing_file(bs, backingFile, NULL);
