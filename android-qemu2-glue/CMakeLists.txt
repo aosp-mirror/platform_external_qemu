@@ -48,6 +48,9 @@ set(libqemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
+set(libqemu2-glue_windows_src
+    stubs/win32-stubs.c)
+
 android_add_library(libqemu2-glue)
 android_target_include_directories(libqemu2-glue
                                    all
