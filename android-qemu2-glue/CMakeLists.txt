@@ -45,6 +45,7 @@ set(libqemu2-glue_src
     qemu-vm-operations-impl.cpp
     dtb.cpp
     snapshot_compression.cpp
+    stubs/win32-stubs.c
     telephony/modem_init.c
     utils/stream.cpp)
 
