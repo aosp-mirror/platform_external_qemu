@@ -17,6 +17,7 @@
 
 #include "android/base/Compiler.h"
 #include "emugl/common/vm_operations.h"
+#include "emugl/common/misc.h"
 
 #include <memory>
 
@@ -44,6 +45,8 @@ public:
     virtual void setDmaOps(emugl_dma_ops) override;
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) override;
+
+    virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations) override;
 
     virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
                                  android::base::MemoryTracker* memUsage) override;

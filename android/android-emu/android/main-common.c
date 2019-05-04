@@ -1998,6 +1998,7 @@ static bool isGuestRendererChoice(const char* choice) {
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
          const QAndroidVmOperations *vm_operations,
+         const struct QAndroidEmulatorWindowAgent *window_agent,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out) {
     EmuglConfig config;
@@ -2115,6 +2116,7 @@ bool configAndStartRenderer(
                     avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                     avdInfo_getApiLevel(avd),
                     vm_operations,
+                    window_agent,
                     &gles_major_version,
                     &gles_minor_version);
         if (gles_init_res || renderer_startup_res) {

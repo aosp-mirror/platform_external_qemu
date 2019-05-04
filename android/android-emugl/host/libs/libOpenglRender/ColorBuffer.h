@@ -250,6 +250,8 @@ public:
 
     void setSync(bool debug = false);
     void waitSync(bool debug = false);
+    void setDisplay(uint32_t displayId) { m_displayId = displayId; }
+    uint32_t getDisplay() { return m_displayId; }
 
 public:
     void restore();
@@ -299,6 +301,7 @@ private:
     bool m_inUse = false;
     bool m_isBuffer = false;
     GLuint m_buf = 0;
+    uint32_t m_displayId = 0;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

@@ -20,7 +20,7 @@ typedef struct SkinWindow  SkinWindow;
 
 typedef struct SkinWindowFuncs {
     void (*key_event)(unsigned keycode, int down);
-    void (*mouse_event)(unsigned x, unsigned y, unsigned state);
+    void (*mouse_event)(unsigned x, unsigned y, unsigned state, int displayId);
     void (*rotary_input_event)(int delta);
     void (*set_device_orientation)(SkinRotation rotation);
     int (*opengles_show)(void* winhandle,
@@ -67,6 +67,19 @@ extern void             skin_window_set_onion( SkinWindow*   window,
 extern void             skin_window_set_layout_region(SkinWindow* window,
                                                       int         xOffset, int yOffset,
                                                       int         width,   int height);
+
+extern void             skin_window_set_display_region_and_update(SkinWindow* window,
+                                                                  int         xOffset,
+                                                                  int         yOffset,
+                                                                  int         width,
+                                                                  int         height);
+extern void             skin_window_set_multi_display(SkinWindow* window,
+                                                      int         id,
+                                                      int         xOffset,
+                                                      int         yOffset,
+                                                      int         width,
+                                                      int         height,
+                                                      bool        add);
 
 extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );
