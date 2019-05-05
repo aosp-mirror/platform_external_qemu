@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b765e9b7_d0108202",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-05-05T20:58:39Z",
+      "side": 1,
+      "message": "Why not \"for (int index \u003d 0; index \u003c len; index++) {\"?\nYou don\u0027t need \"index\" anywhere else than in the loop.",
+      "revId": "32b797c45c10587338cc13408dd876385e26e327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
