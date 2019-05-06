@@ -43,6 +43,8 @@ struct hax_vcpu_state {
     int emulation_state;
     struct hax_tunnel *tunnel;
     unsigned char *iobuf;
+    uint64_t tpr;
+    uint64_t apic_base;
 };
 
 struct hax_state {

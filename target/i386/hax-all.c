@@ -1046,6 +1046,13 @@ static int hax_sync_vcpu_register(CPUArchState *env, int set)
         }
     }
 
+    if (set) {
+        CPUState* cpu = ENV_GET_CPU(env);
+        X86CPU *x86_cpu = X86_CPU(cpu);
+        cpu->hax_vcpu->tpr = cpu_get_apic_tpr(x86_cpu->apic_state);
+        cpu->hax_vcpu->apic_base = cpu_get_apic_base(x86_cpu->apic_state);
+    }
+
     /* generic register */
     hax_getput_reg(&regs._rax, &env->regs[R_EAX], set);
     hax_getput_reg(&regs._rbx, &env->regs[R_EBX], set);
@@ -1100,6 +1107,8 @@ static void hax_msr_entry_set(struct vmx_msr *item, uint32_t index,
 
 static int hax_get_msrs(CPUArchState *env)
 {
+    CPUState* cpu = ENV_GET_CPU(env);
+    X86CPU *x86_cpu = X86_CPU(cpu);
     struct hax_msr_data md;
     struct vmx_msr *msrs = md.entries;
     int ret, i, n;
@@ -1117,6 +1126,7 @@ static int hax_get_msrs(CPUArchState *env)
     msrs[n++].entry = MSR_FMASK;
     msrs[n++].entry = MSR_KERNELGSBASE;
 #endif
+    msrs[n++].entry = MSR_IA32_APICBASE;
     md.nr_msr = n;
     ret = hax_sync_msr(env, &md, 0);
     if (ret < 0) {
@@ -1157,6 +1167,14 @@ static int hax_get_msrs(CPUArchState *env)
             env->kernelgsbase = msrs[i].value;
             break;
 #endif
+        case MSR_IA32_APICBASE: {
+            uint64_t prev_apic_base = cpu->hax_vcpu->apic_base;
+            if (msrs[i].value != prev_apic_base) {
+                cpu->hax_vcpu->apic_base = msrs[i].value;
+                cpu_set_apic_base(x86_cpu->apic_state, cpu->hax_vcpu->apic_base);
+            }
+            break;
+                                }
         }
     }
 
@@ -1183,6 +1201,7 @@ static int hax_set_msrs(CPUArchState *env)
     hax_msr_entry_set(&msrs[n++], MSR_FMASK, env->fmask);
     hax_msr_entry_set(&msrs[n++], MSR_KERNELGSBASE, env->kernelgsbase);
 #endif
+    hax_msr_entry_set(&msrs[n++], MSR_IA32_APICBASE, ENV_GET_CPU(env)->hax_vcpu->apic_base);
     md.nr_msr = n;
     md.done = 0;
 
