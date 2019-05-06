@@ -28,6 +28,7 @@ public:
             std::function<void(const emulator::EmulatorMessage& msg,
                                const std::string& log)>;
     void setSendEmulatorMsgCallback(EmulatorMsgCallback&&);
+    void processMsg(emulator::EmulatorMessage emulatorMsg);
 
 private slots:
     void on_car_speedSlider_valueChanged(int value);
@@ -50,4 +51,5 @@ private:
     void sendIgnitionChangeMsg(const int ignition,
                                const std::string& ignitionName);
     float getSpeedMetersPerSecond(int speed, int unitIndex);
+    int getIndexFromVehicleGear(int gear);
 };
