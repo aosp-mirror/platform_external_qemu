@@ -55,3 +55,11 @@ void RecordMacroSavedItem::setDisplayInfoOpacity(double opacity) {
     effect->setOpacity(opacity);
     mUi->displayInfo->setGraphicsEffect(effect);
 }
+
+bool RecordMacroSavedItem::getIsPreset() {
+    return mIsPreset;
+}
+
+void RecordMacroSavedItem::setIsPreset(bool isPreset) {
+    mIsPreset = isPreset;
+}

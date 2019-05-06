@@ -31,9 +31,12 @@ public:
     void setDisplayInfo(QString displayInfo);
     void setDisplayTime(QString displayTime);
     void macroSelected(bool state);
+    bool getIsPreset();
+    void setIsPreset(bool isPreset);
 
 private:
     void setDisplayInfoOpacity(double opacity);
 
+    bool mIsPreset = false;
     std::unique_ptr<Ui::RecordMacroSavedItem> mUi;
 };
