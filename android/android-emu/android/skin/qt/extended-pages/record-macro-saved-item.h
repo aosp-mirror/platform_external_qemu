@@ -32,6 +32,8 @@ public:
     void setDisplayTime(QString displayTime);
     void macroSelected(bool state);
 
+    bool isPreset = false;
+
 private:
     void setDisplayInfoOpacity(double opacity);
 
