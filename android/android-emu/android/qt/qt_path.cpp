@@ -21,6 +21,11 @@ using namespace android::base;
 
 // Get the base directory for libraries and plugins.
 static std::string androidQtGetBaseDir(int bitness, const char* emulatorDir) {
+    std::string qtBaseDir = android::base::System::get()->envGet("ANDROID_QT_LIB_PATH");
+    if (!qtBaseDir.empty()) {
+        return qtBaseDir;
+    }
+
     if (!bitness) {
         bitness = System::getProgramBitness();
     }
@@ -37,17 +42,10 @@ static std::string androidQtGetBaseDir(int bitness, const char* emulatorDir) {
 }
 
 std::string androidQtGetLibraryDir(int bitness, const char* emulatorDir) {
-    auto system = android::base::System::get();
-    std::string qtLibDir =
-            system->envGet("ANDROID_QT_LIB_PATH");
-    if (!qtLibDir.empty()) {
-        return qtLibDir;
-    }
-
     std::vector<std::string> subDirVector;
     subDirVector.push_back(androidQtGetBaseDir(bitness, emulatorDir));
     subDirVector.push_back(std::string("lib"));
-    qtLibDir = PathUtils::recompose(subDirVector);
+    std::string qtLibDir = PathUtils::recompose(subDirVector);
 
     return qtLibDir;
 }
