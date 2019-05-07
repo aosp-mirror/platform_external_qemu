@@ -261,7 +261,9 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
 void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
     macroSavedItem->setDisplayInfo(tr("Now playing..."));
-    mVideoPlayer->stop();
+    if (mVideoPlayer && mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
 
     const std::string macroName = getMacroNameFromItem(listItem);
     // Check if preset or custom.
