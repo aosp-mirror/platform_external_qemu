@@ -22,6 +22,30 @@
       "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbf0e8dc_6102ee51",
+        "filename": "android/android-emu/android/emulation/GoldfishDma.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-07T18:39:28Z",
+      "side": 1,
+      "message": "not ok, since this is emulator code and it needs to run old api levels",
+      "parentUuid": "f1d6a97b_274aa229",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
