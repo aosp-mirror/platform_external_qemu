@@ -73,6 +73,7 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
         printMsg = "Received raw string: " + protoStr;
     }
     mUi->car_property_table->processMsg(emulatorMsg);
+    mUi->tab_sensor->processMsg(emulatorMsg);
     D(printMsg.c_str());
 }
 

@@ -288,6 +288,7 @@ gen_dbg_splitter_darwin() {
     local SRC_PREFIX="$1"
     local DST_PREFIX="$2"
     local DST_FILE="$3/${SRC_PREFIX}strip"
+    local CLANG_BINDIR="$4"
 
     cat > "$DST_FILE" << EOF
 #!/bin/sh
@@ -296,7 +297,7 @@ gen_dbg_splitter_darwin() {
 $EXTRA_ENV_SETUP
 # Tool invocation.
 target=\$(basename \$1)
-$AOSP_DIR/prebuilts/android-emulator-build/qemu-android-deps/darwin-x86_64/bin/dsymutil --out build/debug_info/\$target.dSYM \$1
+$CLANG_BINDIR/dsymutil --out build/debug_info/\$target.dSYM \$1
 EOF
  chmod +x "$DST_FILE"
   log "  Generating: ${SRC_PREFIX}strip"
@@ -371,7 +372,7 @@ gen_wrapper_toolchain () {
             gen_dbg_splitter "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
             ;;
         darwin-x86_64)
-            gen_dbg_splitter_darwin "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
+            gen_dbg_splitter_darwin "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
             ;;
     esac
 

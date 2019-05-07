@@ -46,7 +46,6 @@ static bool sendMessage(int fd, const std::string& message) {
     // 2. Followed by the payload itself.
     auto wireformat =
             StringFormat("%04x%s", (uint32_t)message.size(), message.c_str());
-    LOG(VERBOSE) << "Send [" << wireformat << "] to adb daemon.";
     return android::base::socketSendAll(fd, wireformat.c_str(),
                                         wireformat.size());
 }
@@ -66,7 +65,6 @@ static std::string readResponse(int fd, int bytesToRead) {
         bytesRead += ret;
     }
     buffer.resize(bytesRead);
-    LOG(VERBOSE) << "ReadResponse: [" << buffer << "]";
     return buffer;
 }
 
@@ -92,7 +90,7 @@ Optional<int> AdbHostServer::getProtocolVersion() {
     // Okay. let's see if we can connect to this adb server.
     ScopedSocket fd = connectToAdbServer(port);
     if (!fd.valid()) {
-        LOG(VERBOSE) << "Unable to connect to adb daemon on port: " << port;
+        LOG(ERROR) << "Unable to connect to adb daemon on port: " << port;
         return {};
     }
 
@@ -112,7 +110,6 @@ Optional<int> AdbHostServer::getProtocolVersion() {
         std::string version_result = readProtocolString(fd.get());
         uint32_t version = 0;
         if (sscanf(version_result.c_str(), "%04x", &version) == 1) {
-            LOG(VERBOSE) << " Server version: " << version;
             return version;
         }
     }

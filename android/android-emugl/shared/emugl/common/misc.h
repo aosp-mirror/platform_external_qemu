@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/emulation/control/window_agent.h"
 #include "android/opengl/emugl_config.h"
 
 #ifdef _MSC_VER
@@ -67,4 +68,8 @@ namespace emugl {
     // Memory usage get/set
     EMUGL_COMMON_API void setMemoryTracker(android::base::MemoryTracker* usage);
     EMUGL_COMMON_API android::base::MemoryTracker* getMemoryTracker();
+
+    // Window operation agent
+    EMUGL_COMMON_API void set_emugl_window_operations(const QAndroidEmulatorWindowAgent &vm_operations);
+    EMUGL_COMMON_API const QAndroidEmulatorWindowAgent &get_emugl_window_operations();
 }

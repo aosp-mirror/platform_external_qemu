@@ -720,6 +720,8 @@ ProgramData* GLESv2Context::getUseProgram() {
 }
 
 void GLESv2Context::initExtensionString() {
+    if (s_glExtensionsInitialized) return;
+
     *s_glExtensions = "GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
                       "GL_OES_texture_float GL_OES_texture_float_linear "
                       "GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture ";
@@ -741,6 +743,7 @@ void GLESv2Context::initExtensionString() {
         *s_glExtensions+="GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 ";
     }
 
+    s_glExtensionsInitialized = true;
 }
 
 int GLESv2Context::getMaxTexUnits() {

@@ -310,7 +310,7 @@ QString ConfirmDialog::constructDumpMessage() const {
     } else {
         dumpMessage = tr("<p>Android Emulator closed because of an internal "
                          "error:</p>") +
-                      "<p>" + dumpMessage + "</p>";
+                      "<p>" + dumpMessage.replace("\n", "<br/>") + "</p>";
     }
     dumpMessage +=
             tr("<p>Do you want to send a crash report about the problem?</p>");

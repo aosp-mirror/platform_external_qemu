@@ -32,6 +32,7 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -610,14 +611,22 @@ private:
     int m_driveIndex;
 };
 
-static void initialize_multi_touch(android::ParameterList& args, AndroidHwConfig* hw) {
-    if (fc::isEnabled(fc::VirtioInput) && androidHwConfig_isScreenMultiTouch(hw)) {
-        args.add("-device");
-        args.add("virtio_input_multi_touch_pci_1");
-        args.add("-device");
-        args.add("virtio_input_multi_touch_pci_2");
+static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHwConfig* hw) {
+    if (fc::isEnabled(fc::VirtioInput)) {
+        if(androidHwConfig_isScreenMultiTouch(hw)) {
+            args.add("-device");
+            args.add("virtio_input_multi_touch_pci_1");
+            args.add("-device");
+            args.add("virtio_input_multi_touch_pci_2");
+        }
+
+        if (hw->hw_keyboard) {
+            args.add("-device");
+            args.add("virtio-keyboard-pci");
+        }
     }
 }
+
 }  // namespace
 
 extern "C" int run_qemu_main(int argc,
@@ -836,6 +845,7 @@ static int startEmulatorWithMinConfig(
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                           gQAndroidEmulatorWindowAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the screen recorder
@@ -944,7 +954,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setEnabledOverride(fc::GLDirectMem, true);
                 fc::setEnabledOverride(fc::VirtioInput, true);
 
-                initialize_multi_touch(args, hw);
+                initialize_virtio_input_devs(args, hw);
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
@@ -1145,6 +1155,7 @@ extern "C" int main(int argc, char** argv) {
 
         if (badSnapshots) {
             feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_GenericSnapshotsUI, false);
             feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
 
@@ -1660,7 +1671,7 @@ extern "C" int main(int argc, char** argv) {
 #endif
     args.add("-show-cursor");
 
-    initialize_multi_touch(args, hw);
+    initialize_virtio_input_devs(args, hw);
 
     if (opts->tcpdump) {
         args.add("-object");
@@ -1803,6 +1814,7 @@ extern "C" int main(int argc, char** argv) {
 
         RendererConfig rendererConfig;
         configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                               gQAndroidEmulatorWindowAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder

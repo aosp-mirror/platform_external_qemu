@@ -1,5 +1,12 @@
 #ifdef _MSC_VER
   #include "msvc-posix.h"
+// TODO: MSVC build currently relies on this; it should not use this.
+#else
+
+#ifndef LIBQEMUSTUB
+#error "This file should not be linked against the Android emulator binaries, as it makes non-ASCII filename handling fail."
+#endif
+
 #endif
 #include "qemu/osdep.h"
 

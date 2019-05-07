@@ -21,7 +21,12 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
+#include <QDialogButtonBox>
+#include <QDir>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QStandardPaths>
+#include <QVBoxLayout>
 #include <iostream>
 #include <sstream>
 
@@ -294,14 +299,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     if (result.err()) {
         std::ostringstream errString;
         errString << result.unwrapErr();
-
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText(tr("An error ocurred."));
-        msgBox.setInformativeText(errString.str().c_str());
-        msgBox.setDefaultButton(QMessageBox::Save);
-
-        int ret = msgBox.exec();
+        displayErrorBox(errString.str());
         return;
     }
 
@@ -524,19 +522,55 @@ void RecordMacroPage::startRecording() {
     }
     disableMacroItems();
     mRecording = true;
+
+    const std::string macrosLocation = getCustomMacrosDirectory();
+    const std::string placeholderPath =
+            PathUtils::join(macrosLocation, "placeholder_name");
+
+    auto result = sAutomationAgent->startRecording(placeholderPath);
+    if (result.err()) {
+        std::ostringstream errString;
+        errString << result.unwrapErr();
+        displayErrorBox(errString.str());
+        return;
+    }
+
     setMacroUiState(MacroUiState::Recording);
 }
 
 void RecordMacroPage::stopRecording() {
     enableMacroItems();
     mRecording = false;
+
+    auto result = sAutomationAgent->stopRecording();
+    if (result.err()) {
+        std::ostringstream errString;
+        errString << result.unwrapErr();
+        displayErrorBox(errString.str());
+        return;
+    }
+
+    const std::string newName = displayNameMacroBox();
+
+    const std::string macrosLocation = getCustomMacrosDirectory();
+    const std::string oldPath =
+            PathUtils::join(macrosLocation, "placeholder_name");
+    if (!newName.empty()) {
+        // Rename file.
+        const std::string newPath = PathUtils::join(macrosLocation, newName);
+        std::rename(oldPath.c_str(), newPath.c_str());
+    } else {
+        // Delete file.
+        std::remove(oldPath.c_str());
+    }
+
     setMacroUiState(MacroUiState::Waiting);
 }
 
 void RecordMacroPage::setRecordState() {
     if (!mRecording) {
         mUi->recButton->setText(tr("RECORD NEW "));
-        mUi->recButton->setIcon(getIconForCurrentTheme("record_screen"));
+        mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
     }
 
     switch (mState) {
@@ -564,4 +598,58 @@ void RecordMacroPage::setRecordState() {
             break;
         }
     }
+}
+
+std::string RecordMacroPage::getCustomMacrosDirectory() {
+    const std::string appDataLocation =
+            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+                    .toUtf8()
+                    .constData();
+    const std::string macrosLocation =
+            PathUtils::join(appDataLocation, "macros");
+    QDir dir(QString::fromStdString(macrosLocation));
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+    return macrosLocation;
+}
+
+void RecordMacroPage::displayErrorBox(const std::string& errorStr) {
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setText(tr("An error ocurred."));
+    msgBox.setInformativeText(errorStr.c_str());
+    msgBox.setDefaultButton(QMessageBox::Save);
+    msgBox.exec();
+}
+
+std::string RecordMacroPage::displayNameMacroBox() {
+    QWidget* placeholderWidget = new QWidget;
+    QVBoxLayout* dialogLayout = new QVBoxLayout(placeholderWidget);
+
+    dialogLayout->addWidget(new QLabel(tr("Macro name")));
+    QLineEdit* name = new QLineEdit(this);
+    name->setText(tr("My Macro"));
+    name->selectAll();
+    dialogLayout->addWidget(name);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            QDialogButtonBox::Save | QDialogButtonBox::Cancel, Qt::Horizontal);
+    dialogLayout->addWidget(buttonBox);
+
+    QDialog nameDialog(this);
+
+    connect(buttonBox, SIGNAL(rejected()), &nameDialog, SLOT(reject()));
+    connect(buttonBox, SIGNAL(accepted()), &nameDialog, SLOT(accept()));
+
+    nameDialog.setWindowTitle(tr("Enter a name for your recording"));
+    nameDialog.setLayout(dialogLayout);
+    nameDialog.resize(300, nameDialog.height());
+
+    int selection = nameDialog.exec();
+
+    if (selection == QDialog::Rejected) {
+        return "";
+    }
+    return name->text().toUtf8().constData();
 }

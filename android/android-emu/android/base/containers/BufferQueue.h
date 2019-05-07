@@ -34,10 +34,12 @@ namespace base {
 // |TryAgain| means the operation could not be performed and should be
 // tried later.
 // |Error| means an error happened (i.e. the BufferQueue is closed).
+// |Timeout| means that an item could not be popped in time.
 enum class BufferQueueResult {
     Ok = 0,
     TryAgain = 1,
     Error = 2,
+    Timeout = 3,
 };
 
 // BufferQueue models a FIFO queue of <T> instances
@@ -156,6 +158,25 @@ public:
                 return BufferQueueResult::Error;
             }
             mCanPop.wait(&mLock);
+        }
+        return tryPopLocked(buffer);
+    }
+
+    // Pop a buffer from the queue. This is a blocking call. On success,
+    // move item into |*buffer| and return BufferQueueResult::Ok. On failure,
+    // return BufferQueueResult::Error to indicate the queue was closed or is in
+    // snapshot mode. Returns BufferQueueResult::Timeout if we waited passed
+    // waitUntilUs.
+    BufferQueueResult popLockedBefore(T* buffer, System::Duration waitUntilUs) {
+        while (mCount == 0 && !mSnapshotMode) {
+            if (mClosed) {
+                // Closed queue is empty.
+                return BufferQueueResult::Error;
+            }
+            if (!mCanPop.timedWait(&mLock, waitUntilUs)) {
+                return BufferQueueResult::Timeout;
+            }
+
         }
         return tryPopLocked(buffer);
     }

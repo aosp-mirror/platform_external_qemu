@@ -18,6 +18,8 @@ import React, { Component } from "react";
 import * as Device from "../../android_emulation_control/emulator_controller_grpc_web_pb.js";
 import * as Proto from "../../android_emulation_control/emulator_controller_pb.js";
 import EmulatorPngView from "./views/simple_png_view.js";
+import EmulatorWebrtcView from "./views/webrtc_view.js";
+import FallbackView from "./views/fallback_emulator_view.js";
 
 /**
  * An emulator object that displays the screen and sends mouse events via gRPC.
@@ -67,9 +69,9 @@ export default class Emulator extends Component {
     request.setX(x);
     request.setY(y);
     request.setButtons(down ? 1 : 0);
-    var call = this.emulatorService.sendMouse(request, {}, function(
+    var call = this.emulatorService.sendMouse(request, {}, function (
       err,
-      response
+      _response
     ) {
       if (err) {
         console.error(
@@ -78,12 +80,23 @@ export default class Emulator extends Component {
         );
       }
     });
-
-    // Status callback..
-    call.on("status", function(status) {
-      console.log("Status: " + JSON.stringify(status));
-    });
   };
+
+  handleKey = e => {
+      var request = new Proto.KeyboardEvent()
+      request.setKey(e.key)
+      var call = this.emulatorService.sendKey(request, {}, function(
+          err,
+          _response
+      ) {
+          if (err) {
+              console.error(
+                  "Grpc: " + err.code + ", msg: " + err.message,
+                  "Emulator:setCoordinates"
+              );
+          }
+      });
+  }
 
   // Properly handle the mouse events.
   handleMouseDown = e => {
@@ -109,17 +122,19 @@ export default class Emulator extends Component {
     const { width, height, scale, uri, refreshRate } = this.props;
     return (
       <div
+        tabIndex="1"
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
         onMouseUp={this.handleMouseUp}
         onMouseOut={this.handleMouseUp}
+        onKeyDown={this.handleKey}
       >
-        <EmulatorPngView
+      <FallbackView
           width={width * scale}
           height={height * scale}
           refreshRate={refreshRate}
           uri={uri}
-        />
+       />
       </div>
     );
   }
