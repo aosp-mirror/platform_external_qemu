@@ -118,6 +118,30 @@
       "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "544a967a_58e326e0",
+        "filename": "android/android-emu/android/emulation/GoldfishDma.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-07T18:47:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e33711c8_a8e2c930",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
