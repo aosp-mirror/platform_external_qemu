@@ -78,9 +78,6 @@ export default class EmulatorPngView extends Component {
         });
       }
     });
-    call.on("status", function(status) {
-      console.log("Status: " + JSON.stringify(status))
-    });
   }
 
   handleDrag = e => {

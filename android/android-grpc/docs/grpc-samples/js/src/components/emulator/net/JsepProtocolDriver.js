@@ -63,7 +63,7 @@ export default class JsepProtocol extends Component {
   }
 
   cleanup = () => {
-    disconnect()
+    this.disconnect()
     if (this.peerConnection) {
         this.peerConnection.removeEventListener('track', this.handlePeerConnectionTrack)
         this.peerConnection.removeEventListener('icecandidate', this.handlePeerIceCandidate)
@@ -73,6 +73,7 @@ export default class JsepProtocol extends Component {
 
   handlePeerConnectionTrack = e => {
     const { onConnect } = this.props
+    console.log("handlePeerConnectionTrack: connecting " + e)
     onConnect(e.streams[0])
   }
 
@@ -120,6 +121,7 @@ export default class JsepProtocol extends Component {
 
   handleJsepMessage = message => {
     try {
+      console.log("handleJsepMessage: " + message)
       const signal = JSON.parse(message)
       if (signal.start) this.handleStart(signal)
       if (signal.sdp) this.handleSDP(signal)

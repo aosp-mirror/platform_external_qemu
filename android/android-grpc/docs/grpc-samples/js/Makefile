@@ -101,11 +101,15 @@ deps: $(WEBPROXY) $(CONTROLPB) $(GRPCPB) system-check
 	@npm install
 
 develop:
-	$(WEBPROXY) --backend_addr localhost:5556 --backend_tls=false --run_tls_server=false --allow_all_origins &
+	$(WEBPROXY) \
+		--backend_addr localhost:5556 \
+		--backend_tls=false \
+		--run_tls_server=false \
+		--allow_all_origins &
 	npm start
 
 stop:
-	pkill -9 grpcwebproxy; pkill -9 npm; pkill -9 js; true
+	pkill -9 grpcwebproxy; pkill -9 npm; pkill -9 js; pkill -9 node; true
 
 system-check:
 ifneq ($(HAS_VALID_PROTOC),true)
