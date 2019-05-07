@@ -37,10 +37,17 @@ static std::string androidQtGetBaseDir(int bitness, const char* emulatorDir) {
 }
 
 std::string androidQtGetLibraryDir(int bitness, const char* emulatorDir) {
+    auto system = android::base::System::get();
+    std::string qtLibDir =
+            system->envGet("ANDROID_QT_LIB_PATH");
+    if (!qtLibDir.empty()) {
+        return qtLibDir;
+    }
+
     std::vector<std::string> subDirVector;
     subDirVector.push_back(androidQtGetBaseDir(bitness, emulatorDir));
     subDirVector.push_back(std::string("lib"));
-    std::string qtLibDir = PathUtils::recompose(subDirVector);
+    qtLibDir = PathUtils::recompose(subDirVector);
 
     return qtLibDir;
 }
