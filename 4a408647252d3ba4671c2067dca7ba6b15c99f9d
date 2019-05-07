@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1d6a97b_274aa229",
+        "filename": "android/android-emu/android/emulation/GoldfishDma.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-07T18:38:37Z",
+      "side": 1,
+      "message": "We do nothing in PIPE_WAKE_UNLOCK_DMA in new API levels. Is it ok to not support old API levels?",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
