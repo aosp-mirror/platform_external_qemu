@@ -46,6 +46,30 @@
       "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8bec58e6_5a15de87",
+        "filename": "android/android-emu/android/emulation/GoldfishDma.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-07T18:43:55Z",
+      "side": 1,
+      "message": "It will work for DMA allocations though goldfish_pipe, but if DMA is allocated though goldfish_address_space, PIPE_WAKE_UNLOCK_DMA will not be sent.",
+      "parentUuid": "dbf0e8dc_6102ee51",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
