@@ -94,6 +94,30 @@
       "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e33711c8_a8e2c930",
+        "filename": "android/android-emu/android/emulation/GoldfishDma.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-07T18:46:45Z",
+      "side": 1,
+      "message": "\u003e if you were looking at removing the wake altogether.\n\nPIPE_WAKE_UNLOCK_DMA will be sent for goldfish_pipe allocated DMAs for old API levels.",
+      "parentUuid": "0e6561a1_46f77582",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "4a408647252d3ba4671c2067dca7ba6b15c99f9d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
