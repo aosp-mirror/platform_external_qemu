@@ -42,6 +42,8 @@ typedef enum {
     kEventToggleTrackball,
     kEventWindowChanged,
     kEventSetDisplayRegion,
+    kEventSetDisplayRegionAndUpdate,
+    kEventSetMultiDisplay,
 } SkinEventType;
 
 typedef enum {
@@ -89,6 +91,15 @@ typedef struct {
 } SkinEventDisplayRegion;
 
 typedef struct {
+    int id;
+    int xOffset;
+    int yOffset;
+    int width;
+    int height;
+    bool add;
+} SkinEventMultiDisplay;
+
+typedef struct {
     int x; // Send current window coordinates to maintain window location
     int y;
     int scroll_h; // Height of the horizontal scrollbar, needed for OSX
@@ -119,6 +130,7 @@ typedef struct {
         SkinEventWindowData window;
         SkinEventLayoutRotateData layout_rotation;
         SkinEventDisplayRegion display_region;
+        SkinEventMultiDisplay multi_display;
     } u;
 } SkinEvent;
 
@@ -129,6 +141,8 @@ extern bool skin_event_poll(SkinEvent* event);
 // Turns mouse tracking on/off. If tracking is on, we receive the mouse
 // position even if there is no click.
 extern void skin_enable_mouse_tracking(bool enable);
+
+extern void skin_event_add(SkinEvent *ev);
 
 #ifdef __cplusplus
 }

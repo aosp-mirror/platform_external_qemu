@@ -17,3 +17,4 @@
 #include "android/globals.h"
 
 int guest_data_partition_mounted = 0;
+int guest_boot_completed = 0;

@@ -84,6 +84,11 @@ background_redraw(Background* back, SkinRect* rect, SkinSurface* surface)
     }
 }
 
+typedef struct SubDisplay {
+    struct SubDisplay* next;
+    SkinRect  rect;
+    int id;
+} SubDisplay;
 
 typedef struct ADisplay {
     SkinRect       rect;
@@ -97,6 +102,7 @@ typedef struct ADisplay {
     int            brightness;
     void*          gpu_frame;   /* GL_RGBA, datasize.w * datasize.h * 4 bytes */
     SkinSurface*   surface;     /* displayed surface after rotation + onion */
+    SubDisplay*    sub_display; /* partition the display into multi displays */
 } ADisplay;
 
 static void adisplay_done(ADisplay* disp) {
@@ -165,6 +171,7 @@ static int adisplay_init(ADisplay* disp,
                                         disp->rect.size.h,
                                         disp->rect.size.w,
                                         disp->rect.size.h);
+    disp->sub_display = NULL;
 
     return (disp->data == NULL) ? -1 : 0;
 }
@@ -1087,8 +1094,21 @@ add_finger_event(SkinWindow* window,
            break;
         }
     }
+    else if (finger->display && finger->display->sub_display) {
+        SubDisplay* t = finger->display->sub_display;
+        while(t) {
+            if (skin_rect_contains(&t->rect, posX, posY)) {
+                unsigned newX = posX - t->rect.pos.x;
+                unsigned newY = posY - t->rect.pos.y;
+                window->win_funcs->mouse_event(newX, newY, state, t->id);
+                break;
+            }
+            t = t->next;
+        }
+        return;
+    }
 
-    window->win_funcs->mouse_event(posX, posY, state);
+    window->win_funcs->mouse_event(posX, posY, state, 0);
 }
 
 static void
@@ -1866,6 +1886,77 @@ skin_window_set_layout_region(SkinWindow* window, int xOffset, int yOffset, int 
 }
 
 void
+skin_window_set_display_region_and_update(SkinWindow* window, int xOffset,
+                                          int yOffset, int width, int height)
+{
+    int displayIdx;
+    for (displayIdx = 0; displayIdx < window->layout.num_displays; displayIdx++) {
+        window->layout.displays[displayIdx].rect.pos.x = xOffset;
+        window->layout.displays[displayIdx].rect.pos.y = yOffset;
+        window->layout.displays[displayIdx].rect.size.w = width;
+        window->layout.displays[displayIdx].rect.size.h = height;
+    }
+
+    window->layout.rect.size.w = width;
+    window->layout.rect.size.h = height;
+}
+
+void
+skin_window_set_multi_display(SkinWindow* window,
+                              int         id,
+                              int         xOffset,
+                              int         yOffset,
+                              int         width,
+                              int         height,
+                              bool        add)
+{
+    // Set sub display on the Android display
+    SubDisplay* sub_display = window->layout.displays[0].sub_display;
+    SubDisplay* prev = sub_display;
+    SubDisplay** head = &window->layout.displays[0].sub_display;
+
+    // Locate by id
+    while(sub_display) {
+        if (sub_display->id == id) {
+            break;
+        }
+        sub_display = sub_display->next;
+        prev = sub_display;
+    }
+
+    if (add) {
+       if (sub_display) {
+            // found, then edit
+            sub_display->rect.pos.x = xOffset;
+            sub_display->rect.pos.y = yOffset;
+            sub_display->rect.size.w = width;
+            sub_display->rect.size.h = height;
+        } else {
+            // add
+            SubDisplay* sub_display = malloc(sizeof(SubDisplay));
+            sub_display->rect.pos.x = xOffset;
+            sub_display->rect.pos.y = yOffset;
+            sub_display->rect.size.w = width;
+            sub_display->rect.size.h = height;
+            sub_display->id = id;
+            sub_display->next = *head;
+            *head = sub_display;
+        }
+    } else {
+        if (sub_display) {
+            // delete
+            if (prev == *head) {
+                *head = sub_display->next;
+            } else {
+                prev->next = sub_display->next;
+            }
+            free(sub_display);
+        }
+    }
+}
+
+
+void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
@@ -1946,11 +2037,6 @@ static void
 skin_window_map_to_scale( SkinWindow*  window, int  *x, int  *y )
 {
     skin_surface_reverse_map(window->surface, x, y);
-    int xOffset = 0;
-    int yOffset = 0;
-
-    *x = *x - xOffset;
-    *y = *y - yOffset;
 }
 
 void

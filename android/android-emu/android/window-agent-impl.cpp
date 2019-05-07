@@ -15,7 +15,6 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/emulator-window.h"
-#include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
@@ -100,7 +99,29 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return win->isFolded();
                     }
                     return false;
-                }
+                },
+
+        .setUIDisplayRegion =
+                [](int x, int y, int w, int h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win, x, y, w, h]() {
+                            win->resizeAndChangeAspectRatio(x, y, w, h);
+                        });
+                    }
+                },
+        .setMultiDisplay =
+                [](int id, int x, int y, int w, int h, bool add) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->setMultiDisplay(id, x, y, w, h, add);
+                    }
+                },
+        .getMultiDisplay =
+                [](int id, int* x, int* y, int* w, int* h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMultiDisplay(id, x, y, w, h);
+                    }
+                    return false;
+                },
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
