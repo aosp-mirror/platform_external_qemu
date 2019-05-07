@@ -141,3 +141,82 @@ void CarSensorData::on_comboBox_gear_currentIndexChanged(int index) {
     sendGearChangeMsg(static_cast<int32_t>(sComboBoxGearValues[index]),
                       mUi->comboBox_gear->currentText().toStdString());
 }
+
+void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
+    if (emulatorMsg.prop_size() == 0 && emulatorMsg.value_size() == 0) {
+        return;
+    }
+    for (int valIndex = 0; valIndex < emulatorMsg.value_size(); valIndex++) {
+        VehiclePropValue val = emulatorMsg.value(valIndex);
+
+        switch (val.prop()) {
+            case static_cast<int32_t>(VehicleProperty::GEAR_SELECTION): {
+                int gear_vhal = getIndexFromVehicleGear(val.int32_values(0));
+                int gear_state = mUi->comboBox_gear->currentIndex();
+                if (gear_state != gear_vhal) {
+                    mUi->comboBox_gear->setCurrentIndex(gear_vhal);
+                }
+                break;
+            }
+            case static_cast<int32_t>(VehicleProperty::FUEL_LEVEL_LOW): {
+                bool fuelLow_vhal = val.int32_values(0) == 1;
+                bool fuelLow = mUi->checkBox_fuel_low->isChecked();
+                if (fuelLow != fuelLow_vhal) {
+                    mUi->checkBox_fuel_low->setChecked(fuelLow_vhal);
+                }
+                break;
+            }
+            case static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON): {
+                bool parkingBreak_vhal = val.int32_values(0) == 1;
+                bool parkingBreak = mUi->checkBox_park->isChecked();
+                if (parkingBreak != parkingBreak_vhal) {
+                    mUi->checkBox_park->setChecked(parkingBreak_vhal);
+                }
+                break;
+            }
+            case static_cast<int32_t>(VehicleProperty::NIGHT_MODE): {
+                bool night_vhal = val.int32_values(0) == 1;
+                bool night = mUi->checkBox_night->isChecked();
+                if (night != night_vhal) {
+                    mUi->checkBox_night->setChecked(night_vhal);
+                }
+                break;
+            }
+            case static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED): {
+                float speedMeterPerSecond = val.float_values(0);
+                int speed = static_cast<int32_t>(
+                        speedMeterPerSecond /
+                        ((mUi->comboBox_speedUnit->currentIndex() ==
+                          MILES_PER_HOUR)
+                                 ? MILES_PER_HOUR_TO_METERS_PER_SEC
+                                 : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC));
+                if (speed != mUi->car_speedSlider->value()) {
+                    mUi->car_speedSlider->setValue(speed);
+                }
+                break;
+            }
+            case static_cast<int32_t>(VehicleProperty::IGNITION_STATE): {
+                int ignition_state_vhal = val.int32_values(0);
+                int ignition_state = mUi->comboBox_ignition->currentIndex();
+                if (ignition_state != ignition_state_vhal) {
+                    mUi->comboBox_ignition->setCurrentIndex(
+                            ignition_state_vhal);
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
+int CarSensorData::getIndexFromVehicleGear(int gear) {
+    int len = sizeof(sComboBoxGearValues) / sizeof(sComboBoxGearValues[0]);
+    for (int index = 0; index < len; index++) {
+        if (static_cast<int>(sComboBoxGearValues[index]) == gear) {
+            return index;
+        }
+    }
+    return len - 1;
+}

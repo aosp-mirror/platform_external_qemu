@@ -581,6 +581,7 @@ protected:
     GLint m_clearStencil = 0;
 
     static std::string*   s_glExtensions;
+    static bool           s_glExtensionsInitialized;
     static GLSupport      s_glSupport;
 
     int m_glesMajorVersion = 1;

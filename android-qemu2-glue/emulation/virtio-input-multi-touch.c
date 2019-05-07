@@ -293,16 +293,17 @@ void android_virtio_kbd_mouse_event(int dx,
                                     int buttonsState,
                                     int displayId) {
     int w, h = 0;
-    //TODO (wdu): Each display will have different framebuffer size.
-    //Thus, we need to query w, h here based on the displayId.
-    gQAndroidDisplayAgent->getFrameBuffer(&w, &h, NULL, NULL, NULL);
+    if (displayId < VIRTIO_INPUT_MAX_NUM && displayId > 0) {
+        s_current_virtio_input = s_virtio_input_multi_touch[displayId];
+        int x, y;
+        gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, &x, &y, &w, &h);
+    } else {
+        s_current_virtio_input = s_virtio_input_multi_touch[0];
+        gQAndroidDisplayAgent->getFrameBuffer(&w, &h, NULL, NULL, NULL);
+    }
     dx = qemu_input_scale_axis(dx, 0, w, INPUT_EVENT_ABS_MIN,
                                INPUT_EVENT_ABS_MAX);
     dy = qemu_input_scale_axis(dy, 0, h, INPUT_EVENT_ABS_MIN,
                                INPUT_EVENT_ABS_MAX);
-    if (displayId < VIRTIO_INPUT_MAX_NUM && displayId >= 0)
-        s_current_virtio_input = s_virtio_input_multi_touch[displayId];
-    else
-        s_current_virtio_input = s_virtio_input_multi_touch[0];
     translate_mouse_event(dx, dy, buttonsState);
 }

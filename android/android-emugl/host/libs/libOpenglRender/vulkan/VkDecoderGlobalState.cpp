@@ -13,36 +13,32 @@
 // limitations under the License.
 #include "VkDecoderGlobalState.h"
 
-#include "FrameBuffer.h"
-
-#include "VkAndroidNativeBuffer.h"
-#include "VkCommonOperations.h"
-#include "VkDecoderSnapshot.h"
-#include "VkFormatUtils.h"
-#include "VulkanDispatch.h"
-#include "vk_util.h"
-
-#include "android/base/containers/EntityManager.h"
-#include "android/base/containers/Lookup.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Optional.h"
-#include "android/base/synchronization/Lock.h"
-
-#include "common/goldfish_vk_deepcopy.h"
-#include "common/goldfish_vk_dispatch.h"
-
-#include "emugl/common/crash_reporter.h"
-#include "emugl/common/feature_control.h"
-#include "emugl/common/vm_operations.h"
-
-#include "GLcommon/etc.h"
-
 #include <algorithm>
 #include <functional>
 #include <list>
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include "FrameBuffer.h"
+#include "GLcommon/etc.h"
+#include "VkAndroidNativeBuffer.h"
+#include "VkCommonOperations.h"
+#include "VkDecoderSnapshot.h"
+#include "VkFormatUtils.h"
+#include "VulkanDispatch.h"
+#include "android/base/Optional.h"
+#include "android/base/containers/EntityManager.h"
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "common/goldfish_vk_deepcopy.h"
+#include "common/goldfish_vk_dispatch.h"
+#include "emugl/common/crash_reporter.h"
+#include "emugl/common/feature_control.h"
+#include "emugl/common/vm_operations.h"
+#include "vk_util.h"
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -65,6 +61,7 @@ kEmulatedExtensions[] = {
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
 static constexpr uint32_t kMinVersion = VK_MAKE_VERSION(1, 0, 0);
+static const uint32_t kCompressedTexBlockSize = 4;
 
 class VkDecoderGlobalState::Impl {
 public:
@@ -293,7 +290,12 @@ public:
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
         if (needEmulatedEtc2(physicalDevice, vk)) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
-            format = cmpInfo.sizeCompFormat;
+            if (cmpInfo.isCompressed) {
+                flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
+                flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+                usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+                format = cmpInfo.sizeCompFormat;
+            }
         }
         return vk->vkGetPhysicalDeviceImageFormatProperties(
                 physicalDevice, format, type, tiling, usage, flags,
@@ -315,6 +317,9 @@ public:
             if (cmpInfo.isCompressed) {
                 imageFormatInfo = *pImageFormatInfo;
                 pImageFormatInfo = &imageFormatInfo;
+                imageFormatInfo.flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
+                imageFormatInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+                imageFormatInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
                 imageFormatInfo.format = cmpInfo.sizeCompFormat;
             }
         }
@@ -893,19 +898,24 @@ public:
             );
             cmpInfo.device = device;
             if (cmpInfo.isCompressed) {
+                cmpInfo.imageType = pCreateInfo->imageType;
                 cmpInfo.extent = pCreateInfo->extent;
                 cmpInfo.mipLevels = pCreateInfo->mipLevels;
+                cmpInfo.layerCount = pCreateInfo->arrayLayers;
                 sizeCompInfo = *pCreateInfo;
                 sizeCompInfo.format = cmpInfo.sizeCompFormat;
+                sizeCompInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+                sizeCompInfo.flags &=
+                        ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
+                sizeCompInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
                 // Each block is 4x4 in ETC2 compressed texture
-                sizeCompInfo.extent.width = (sizeCompInfo.extent.width + 3) / 4;
-                sizeCompInfo.extent.height =
-                        (sizeCompInfo.extent.height + 3) / 4;
-                if (sizeCompInfo.mipLevels > 2) {
-                    sizeCompInfo.mipLevels -= 2;
-                } else {
-                    sizeCompInfo.mipLevels = 1;
-                }
+                sizeCompInfo.extent.width = (sizeCompInfo.extent.width +
+                                             kCompressedTexBlockSize - 1) /
+                                            kCompressedTexBlockSize;
+                sizeCompInfo.extent.height = (sizeCompInfo.extent.height +
+                                              kCompressedTexBlockSize - 1) /
+                                             kCompressedTexBlockSize;
+                sizeCompInfo.mipLevels = 1;
                 if (pCreateInfo->queueFamilyIndexCount) {
                     cmpInfo.sizeCompImgQueueFamilyIndices.assign(
                             pCreateInfo->pQueueFamilyIndices,
@@ -916,6 +926,10 @@ public:
                 }
                 decompInfo = *pCreateInfo;
                 decompInfo.format = cmpInfo.decompFormat;
+                decompInfo.flags &=
+                        ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
+                decompInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+                decompInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
                 pCreateInfo = &decompInfo;
             }
         }
@@ -946,6 +960,7 @@ public:
 
         if (cmpInfo.isCompressed && deviceInfoIt->second.emulateTextureEtc2) {
             cmpInfo.decompImg = *pImage;
+            createSizeCompImages(vk, &cmpInfo);
         }
 
         auto& imageInfo = mImageInfo[*pImage];
@@ -977,22 +992,27 @@ public:
             teardownAndroidNativeBufferImage(vk, &info.anbInfo);
         } else {
             if (info.cmpInfo.isCompressed) {
-                for (const auto& buffer : info.cmpInfo.decompBuffer) {
-                    vk->vkDestroyBuffer(device, buffer, nullptr);
-                }
-                for (const auto& memory : info.cmpInfo.decompMemory) {
-                    vk->vkFreeMemory(device, memory, nullptr);
-                }
-                if (image != info.cmpInfo.decompImg) {
+                CompressedImageInfo& cmpInfo = info.cmpInfo;
+                if (image != cmpInfo.decompImg) {
                     vk->vkDestroyImage(device, info.cmpInfo.decompImg, nullptr);
-                    vk->vkFreeMemory(device, info.cmpInfo.decompImgMemory,
-                                     nullptr);
                 }
-                if (image != info.cmpInfo.sizeCompImg) {
-                    vk->vkDestroyImage(device, info.cmpInfo.sizeCompImg,
-                                       nullptr);
-                    vk->vkFreeMemory(device, info.cmpInfo.sizeCompImgMemory,
-                                     nullptr);
+                for (const auto& image : cmpInfo.sizeCompImgs) {
+                    vk->vkDestroyImage(device, image, nullptr);
+                }
+                vk->vkDestroyDescriptorSetLayout(
+                        device, cmpInfo.decompDescriptorSetLayout, nullptr);
+                vk->vkDestroyDescriptorPool(
+                        device, cmpInfo.decompDescriptorPool, nullptr);
+                vk->vkDestroyShaderModule(device, cmpInfo.decompShader,
+                                          nullptr);
+                vk->vkDestroyPipelineLayout(
+                        device, cmpInfo.decompPipelineLayout, nullptr);
+                vk->vkDestroyPipeline(device, cmpInfo.decompPipeline, nullptr);
+                for (const auto& imageView : cmpInfo.sizeCompImageViews) {
+                    vk->vkDestroyImageView(device, imageView, nullptr);
+                }
+                for (const auto& imageView : cmpInfo.decompImageViews) {
+                    vk->vkDestroyImageView(device, imageView, nullptr);
                 }
             }
             vk->vkDestroyImage(device, image, pAllocator);
@@ -1017,11 +1037,22 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+        if (!deviceInfoIt->second.emulateTextureEtc2) {
+            return VK_SUCCESS;
+        }
         auto imageInfoIt = mImageInfo.find(image);
-        CompressedImageInfo& cmp = imageInfoIt->second.cmpInfo;
         if (imageInfoIt == mImageInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+        CompressedImageInfo& cmp = imageInfoIt->second.cmpInfo;
+        if (!cmp.isCompressed) {
+            return VK_SUCCESS;
+        }
+        for (size_t i = 0; i < cmp.sizeCompImgs.size(); i++) {
+            result = vk->vkBindImageMemory(device, cmp.sizeCompImgs[i], memory,
+                                           memoryOffset + cmp.memoryOffsets[i]);
+        }
+
         return VK_SUCCESS;
     }
 
@@ -1063,15 +1094,15 @@ public:
                     pCreateInfo = &createInfo;
                 }
             } else if (imageInfoIt->second.cmpInfo.isCompressed) {
-                lazyCreateSizeCompImg(vk, &(imageInfoIt->second.cmpInfo));
                 // Size compatible image view
-                if (imageInfoIt->second.cmpInfo.sizeCompImg) {
-                    createInfo = *pCreateInfo;
-                    createInfo.format = cmpInfo.sizeCompFormat;
-                    needEmulatedAlpha = false;
-                    createInfo.image = imageInfoIt->second.cmpInfo.sizeCompImg;
-                    pCreateInfo = &createInfo;
-                }
+                createInfo = *pCreateInfo;
+                createInfo.format = cmpInfo.sizeCompFormat;
+                needEmulatedAlpha = false;
+                createInfo.image =
+                        imageInfoIt->second.cmpInfo.sizeCompImgs
+                                [pCreateInfo->subresourceRange.baseMipLevel];
+                createInfo.subresourceRange.baseMipLevel = 0;
+                pCreateInfo = &createInfo;
             }
         }
         if (imageInfoIt->second.anbInfo.externallyBacked) {
@@ -1420,6 +1451,122 @@ public:
                                    pDescriptorCopies);
     }
 
+    void on_vkCmdCopyImageToBuffer(android::base::Pool* pool,
+                                   VkCommandBuffer boxed_commandBuffer,
+                                   VkImage srcImage,
+                                   VkImageLayout srcImageLayout,
+                                   VkBuffer dstBuffer,
+                                   uint32_t regionCount,
+                                   const VkBufferImageCopy* pRegions) {
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+
+        AutoLock lock(mLock);
+        auto it = mImageInfo.find(srcImage);
+        if (it == mImageInfo.end())
+            return;
+        auto bufferInfoIt = mBufferInfo.find(dstBuffer);
+        if (bufferInfoIt == mBufferInfo.end()) {
+            return;
+        }
+        VkDevice device = bufferInfoIt->second.device;
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return;
+        }
+        if (!it->second.cmpInfo.isCompressed ||
+            !deviceInfoIt->second.emulateTextureEtc2) {
+            vk->vkCmdCopyImageToBuffer(commandBuffer, srcImage, srcImageLayout,
+                                       dstBuffer, regionCount, pRegions);
+            return;
+        }
+        CompressedImageInfo& cmp = it->second.cmpInfo;
+        for (uint32_t r = 0; r < regionCount; r++) {
+            VkBufferImageCopy region;
+            region = pRegions[r];
+            uint32_t mipLevel = region.imageSubresource.mipLevel;
+            region.imageSubresource.mipLevel = 0;
+            region.bufferRowLength /= kCompressedTexBlockSize;
+            region.bufferImageHeight /= kCompressedTexBlockSize;
+            region.imageOffset.x /= kCompressedTexBlockSize;
+            region.imageOffset.y /= kCompressedTexBlockSize;
+            uint32_t width = cmp.sizeCompMipmapWidth(mipLevel);
+            uint32_t height = cmp.sizeCompMipmapHeight(mipLevel);
+            region.imageExtent.width =
+                    (region.imageExtent.width + kCompressedTexBlockSize - 1) /
+                    kCompressedTexBlockSize;
+            region.imageExtent.height =
+                    (region.imageExtent.height + kCompressedTexBlockSize - 1) /
+                    kCompressedTexBlockSize;
+            region.imageExtent.width =
+                    std::min(region.imageExtent.width, width);
+            region.imageExtent.height =
+                    std::min(region.imageExtent.height, height);
+            vk->vkCmdCopyImageToBuffer(commandBuffer,
+                                       cmp.sizeCompImgs[mipLevel],
+                                       srcImageLayout, dstBuffer, 1, &region);
+        }
+    }
+
+    void on_vkGetImageMemoryRequirements(
+            android::base::Pool* pool,
+            VkDevice boxed_device,
+            VkImage image,
+            VkMemoryRequirements* pMemoryRequirements) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        vk->vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
+        AutoLock lock(mLock);
+        updateImageMemorySizeLocked(device, image, pMemoryRequirements);
+    }
+
+    void on_vkGetImageMemoryRequirements2(
+            android::base::Pool* pool,
+            VkDevice boxed_device,
+            const VkImageMemoryRequirementsInfo2* pInfo,
+            VkMemoryRequirements2* pMemoryRequirements) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        AutoLock lock(mLock);
+        auto physicalDevice = mDeviceToPhysicalDevice[device];
+        auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
+
+        if (!physdevInfo) {
+            // If this fails, we crash, as we assume that the memory properties
+            // map should have the info.
+            emugl::emugl_crash_reporter(
+                    "FATAL: Could not get image memory requirement for "
+                    "VkPhysicalDevice");
+        }
+        auto instance = mPhysicalDeviceToInstance[physicalDevice];
+
+        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            vk->vkGetImageMemoryRequirements2(device, pInfo,
+                                              pMemoryRequirements);
+        } else if (hasInstanceExtension(instance,
+                                        "VK_KHR_get_memory_requirements2")) {
+            vk->vkGetImageMemoryRequirements2KHR(device, pInfo,
+                                                 pMemoryRequirements);
+        } else {
+            if (pInfo->pNext) {
+                fprintf(stderr,
+                        "%s: Warning: Trying to use extension struct in "
+                        "VkMemoryRequirements2 without having enabled "
+                        "the extension!!!!11111\n",
+                        __func__);
+            }
+            *pMemoryRequirements = {
+                    VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2,
+                    nullptr,
+            };
+            vk->vkGetImageMemoryRequirements(
+                    device, pInfo->image,
+                    &pMemoryRequirements->memoryRequirements);
+        }
+        updateImageMemorySizeLocked(device, pInfo->image,
+                                    &pMemoryRequirements->memoryRequirements);
+    }
+
     void on_vkCmdCopyBufferToImage(
         android::base::Pool* pool,
         VkCommandBuffer boxed_commandBuffer,
@@ -1455,124 +1602,30 @@ public:
             return;
         }
         CompressedImageInfo& cmp = it->second.cmpInfo;
-        // Handle size-compatible compressed data
-        if (cmp.sizeCompImg) {
-            std::vector<VkBufferImageCopy> regions;
-            for (uint32_t r = 0; r < regionCount; r++) {
-                if (pRegions[r].imageSubresource.mipLevel >=
-                    cmp.mipLevels - 2) {
-                    continue;
-                }
-                VkBufferImageCopy dstRegion;
-                dstRegion = pRegions[r];
-                dstRegion.imageOffset.x = pRegions[r].imageOffset.x / 4;
-                dstRegion.imageOffset.y = pRegions[r].imageOffset.y / 4;
-                uint32_t width = cmp.mipmapWidth(
-                        dstRegion.imageSubresource.mipLevel + 2);
-                uint32_t height = cmp.mipmapHeight(
-                        dstRegion.imageSubresource.mipLevel + 2);
-                dstRegion.imageExtent.width = pRegions[r].imageExtent.width / 4;
-                dstRegion.imageExtent.height =
-                        pRegions[r].imageExtent.height / 4;
-                // TODO: fix issues when dstRegion.imageExtent.width != width
-                dstRegion.imageExtent.width =
-                        std::min(dstRegion.imageExtent.width, width);
-                dstRegion.imageExtent.height =
-                        std::min(dstRegion.imageExtent.height, height);
-                regions.push_back(dstRegion);
-            }
-            if (regions.size() > 0) {
-                vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer,
-                                           cmp.sizeCompImg, dstImageLayout,
-                                           regions.size(), regions.data());
-            }
-        }
-        // Handle decompressed data
-        if (cmp.decompImg) {
-            std::vector<VkBufferImageCopy> regions(regionCount);
-            VkDeviceSize offset = 0;
-            const VkDeviceSize decompPixelSize = cmp.decompPixelSize();
-            for (uint32_t r = 0; r < regionCount; r++) {
-                VkBufferImageCopy& dstRegion = regions[r];
-                dstRegion.bufferOffset = offset;
-                dstRegion.bufferRowLength = 0;
-                dstRegion.bufferImageHeight = 0;
-                dstRegion.imageSubresource = pRegions[r].imageSubresource;
-                dstRegion.imageOffset = pRegions[r].imageOffset;
-                dstRegion.imageExtent = pRegions[r].imageExtent;
-                uint32_t width =
-                        cmp.mipmapWidth(dstRegion.imageSubresource.mipLevel);
-                uint32_t height =
-                        cmp.mipmapHeight(dstRegion.imageSubresource.mipLevel);
-                uint32_t depth =
-                        cmp.mipmapDepth(dstRegion.imageSubresource.mipLevel);
-                dstRegion.imageExtent.width =
-                        std::min(dstRegion.imageExtent.width, width);
-                dstRegion.imageExtent.height =
-                        std::min(dstRegion.imageExtent.height, height);
-                dstRegion.imageExtent.depth =
-                        std::min(dstRegion.imageExtent.depth, depth);
-                offset += dstRegion.imageExtent.width *
-                          dstRegion.imageExtent.height *
-                          dstRegion.imageExtent.depth * decompPixelSize;
-            }
-
-            VkBufferCreateInfo bufferInfo = {};
-            bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            bufferInfo.size = offset;
-            bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-            VkBuffer buffer;
-            if (vk->vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) !=
-                VK_SUCCESS) {
-                fprintf(stderr, "create buffer failed!\n");
-                return;
-            }
-            cmp.decompBuffer.push_back(buffer);
-
-            VkMemoryRequirements memRequirements;
-            vk->vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
-
-            VkPhysicalDevice physicalDevice =
-                    mDeviceInfo[device].physicalDevice;
-
-            int32_t memIdx = findProperties(
-                    physicalDevice, memRequirements.memoryTypeBits,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-
-            if (memIdx < 0) {
-                fprintf(stderr, "Error: cannot find memory property!\n");
-                return;
-            }
-
-            VkMemoryAllocateInfo allocInfo = {};
-            allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            allocInfo.allocationSize = memRequirements.size;
-            allocInfo.memoryTypeIndex = memIdx;
-
-            VkDeviceMemory memory;
-            if (vk->vkAllocateMemory(device, &allocInfo, nullptr, &memory) !=
-                VK_SUCCESS) {
-                fprintf(stderr, "failed to allocate image buffer memory!");
-                return;
-            }
-
-            cmp.decompMemory.push_back(memory);
-
-            vk->vkBindBufferMemory(device, buffer, memory, 0);
-            cmdBufferInfoIt->second.preprocessFuncs.push_back(
-                    [this, cmp, srcBuffer, memory, regions,
-                     srcRegions = std::vector<VkBufferImageCopy>(
-                             pRegions, pRegions + regionCount)]() {
-                        decompressBufferToImage(
-                                cmp, srcBuffer, memory, srcRegions.size(),
-                                srcRegions.data(), regions.data());
-                    });
-            assert(cmp.decompMemory.size() != 0);
-            vk->vkCmdCopyBufferToImage(commandBuffer, buffer, cmp.decompImg,
-                                       dstImageLayout, regionCount,
-                                       regions.data());
+        for (uint32_t r = 0; r < regionCount; r++) {
+            VkBufferImageCopy dstRegion;
+            dstRegion = pRegions[r];
+            uint32_t mipLevel = dstRegion.imageSubresource.mipLevel;
+            dstRegion.imageSubresource.mipLevel = 0;
+            dstRegion.bufferRowLength /= kCompressedTexBlockSize;
+            dstRegion.bufferImageHeight /= kCompressedTexBlockSize;
+            dstRegion.imageOffset.x /= kCompressedTexBlockSize;
+            dstRegion.imageOffset.y /= kCompressedTexBlockSize;
+            uint32_t width = cmp.sizeCompMipmapWidth(mipLevel);
+            uint32_t height = cmp.sizeCompMipmapHeight(mipLevel);
+            dstRegion.imageExtent.width = (dstRegion.imageExtent.width +
+                                           kCompressedTexBlockSize - 1) /
+                                          kCompressedTexBlockSize;
+            dstRegion.imageExtent.height = (dstRegion.imageExtent.height +
+                                            kCompressedTexBlockSize - 1) /
+                                           kCompressedTexBlockSize;
+            dstRegion.imageExtent.width =
+                    std::min(dstRegion.imageExtent.width, width);
+            dstRegion.imageExtent.height =
+                    std::min(dstRegion.imageExtent.height, height);
+            vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer,
+                                       cmp.sizeCompImgs[mipLevel],
+                                       dstImageLayout, 1, &dstRegion);
         }
     }
 
@@ -1616,49 +1669,140 @@ public:
             return;
         }
         // Add barrier for decompressed image
-        std::vector<VkImageMemoryBarrier> decompImageMemoryBarriers;
+        std::vector<VkImageMemoryBarrier> persistentImageBarriers;
+        bool needRebind = false;
         for (uint32_t i = 0; i < imageMemoryBarrierCount; i++) {
-            auto image = pImageMemoryBarriers[i].image;
+            const VkImageMemoryBarrier& srcBarrier = pImageMemoryBarriers[i];
+            auto image = srcBarrier.image;
             auto it = mImageInfo.find(image);
             if (it == mImageInfo.end() || !it->second.cmpInfo.isCompressed) {
-                decompImageMemoryBarriers.push_back(pImageMemoryBarriers[i]);
+                persistentImageBarriers.push_back(srcBarrier);
                 continue;
             }
-            if (it->second.cmpInfo.decompImg) {
-                VkImageMemoryBarrier decompBarrier = pImageMemoryBarriers[i];
-                decompBarrier.image = it->second.cmpInfo.decompImg;
-                decompImageMemoryBarriers.push_back(decompBarrier);
+            uint32_t baseMipLevel = srcBarrier.subresourceRange.baseMipLevel;
+            uint32_t levelCount = srcBarrier.subresourceRange.levelCount;
+            VkImageMemoryBarrier decompBarrier = srcBarrier;
+            decompBarrier.image = it->second.cmpInfo.decompImg;
+            VkImageMemoryBarrier sizeCompBarrierTemplate = srcBarrier;
+            sizeCompBarrierTemplate.subresourceRange.baseMipLevel = 0;
+            sizeCompBarrierTemplate.subresourceRange.levelCount = 1;
+            std::vector<VkImageMemoryBarrier> sizeCompBarriers(
+                    srcBarrier.subresourceRange.levelCount,
+                    sizeCompBarrierTemplate);
+            for (uint32_t j = 0; j < levelCount; j++) {
+                sizeCompBarriers[j].image =
+                        it->second.cmpInfo.sizeCompImgs[baseMipLevel + j];
             }
-            if (it->second.cmpInfo.sizeCompImg) {
-                // fix mipmap level in raw image
-                uint32_t imgMaxLevel = it->second.cmpInfo.mipLevels;
-                if (imgMaxLevel > 2) {
-                    imgMaxLevel -= 2;
-                } else {
-                    imgMaxLevel = 1;
-                }
-                if (pImageMemoryBarriers[i].subresourceRange.baseMipLevel >=
-                    imgMaxLevel) {
-                    continue;
-                }
-                VkImageMemoryBarrier mipLevelCappedBarrier =
-                        pImageMemoryBarriers[i];
-                mipLevelCappedBarrier.image = it->second.cmpInfo.sizeCompImg;
-                mipLevelCappedBarrier.subresourceRange.levelCount =
-                        std::min(imgMaxLevel,
-                                 mipLevelCappedBarrier.subresourceRange
-                                                 .baseMipLevel +
-                                         mipLevelCappedBarrier.subresourceRange
-                                                 .levelCount) -
-                        mipLevelCappedBarrier.subresourceRange.baseMipLevel;
-                decompImageMemoryBarriers.push_back(mipLevelCappedBarrier);
+
+            // TODO: should we use image layout or access bit?
+            if (srcBarrier.oldLayout == 0 ||
+                (srcBarrier.newLayout != VK_IMAGE_LAYOUT_GENERAL &&
+                 srcBarrier.newLayout !=
+                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)) {
+                // TODO: might only need to push one of them?
+                persistentImageBarriers.push_back(decompBarrier);
+                persistentImageBarriers.insert(persistentImageBarriers.end(),
+                                               sizeCompBarriers.begin(),
+                                               sizeCompBarriers.end());
+                continue;
+            }
+            if (srcBarrier.newLayout !=
+                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                srcBarrier.newLayout != VK_IMAGE_LAYOUT_GENERAL) {
+                fprintf(stderr,
+                        "WARNING: unexpected usage to transfer "
+                        "compressed image layout from %d to %d\n",
+                        srcBarrier.oldLayout, srcBarrier.newLayout);
+            }
+
+            VkResult result = it->second.cmpInfo.initDecomp(
+                    vk, cmdBufferInfoIt->second.device, image);
+            if (result != VK_SUCCESS) {
+                fprintf(stderr, "WARNING: texture decompression failed\n");
+                continue;
+            }
+
+            std::vector<VkImageMemoryBarrier> currImageBarriers;
+            currImageBarriers.reserve(sizeCompBarriers.size() + 1);
+            currImageBarriers.insert(currImageBarriers.end(),
+                                     sizeCompBarriers.begin(),
+                                     sizeCompBarriers.end());
+            for (auto& barrier : currImageBarriers) {
+                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+            }
+            currImageBarriers.push_back(decompBarrier);
+            {
+                VkImageMemoryBarrier& barrier = currImageBarriers[levelCount];
+                barrier.srcAccessMask = 0;
+                barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+            }
+            vk->vkCmdPipelineBarrier(commandBuffer, srcStageMask,
+                                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0,
+                                     nullptr, 0, nullptr,
+                                     currImageBarriers.size(),
+                                     currImageBarriers.data());
+            it->second.cmpInfo.cmdDecompress(
+                    vk, commandBuffer, dstStageMask, decompBarrier.newLayout,
+                    decompBarrier.dstAccessMask, baseMipLevel, levelCount,
+                    srcBarrier.subresourceRange.baseArrayLayer,
+                    srcBarrier.subresourceRange.layerCount);
+            needRebind = true;
+
+            for (uint32_t j = 0; j < currImageBarriers.size(); j++) {
+                VkImageMemoryBarrier& barrier = currImageBarriers[j];
+                barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                barrier.dstAccessMask = srcBarrier.dstAccessMask;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                barrier.newLayout = srcBarrier.newLayout;
+            }
+            {
+                VkImageMemoryBarrier& barrier = currImageBarriers[levelCount];
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.dstAccessMask = srcBarrier.dstAccessMask;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                barrier.newLayout = srcBarrier.newLayout;
+            }
+
+            vk->vkCmdPipelineBarrier(
+                    commandBuffer,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,  // srcStageMask
+                    dstStageMask,                          // dstStageMask
+                    0,                                     // dependencyFlags
+                    0,                                     // memoryBarrierCount
+                    nullptr,                               // pMemoryBarriers
+                    0,                         // bufferMemoryBarrierCount
+                    nullptr,                   // pBufferMemoryBarriers
+                    currImageBarriers.size(),  // imageMemoryBarrierCount
+                    currImageBarriers.data()   // pImageMemoryBarriers
+            );
+        }
+        if (needRebind && cmdBufferInfoIt->second.computePipeline) {
+            // Recover pipeline bindings
+            vk->vkCmdBindPipeline(commandBuffer,
+                                  VK_PIPELINE_BIND_POINT_COMPUTE,
+                                  cmdBufferInfoIt->second.computePipeline);
+            if (cmdBufferInfoIt->second.descriptorSets.size() > 0) {
+                vk->vkCmdBindDescriptorSets(
+                        commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+                        cmdBufferInfoIt->second.descriptorLayout,
+                        cmdBufferInfoIt->second.firstSet,
+                        cmdBufferInfoIt->second.descriptorSets.size(),
+                        cmdBufferInfoIt->second.descriptorSets.data(), 0,
+                        nullptr);
             }
         }
-        vk->vkCmdPipelineBarrier(
-                commandBuffer, srcStageMask, dstStageMask, dependencyFlags,
-                memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount,
-                pBufferMemoryBarriers, decompImageMemoryBarriers.size(),
-                decompImageMemoryBarriers.data());
+        if (memoryBarrierCount || bufferMemoryBarrierCount ||
+            !persistentImageBarriers.empty()) {
+            vk->vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask,
+                                     dependencyFlags, memoryBarrierCount,
+                                     pMemoryBarriers, bufferMemoryBarrierCount,
+                                     pBufferMemoryBarriers,
+                                     persistentImageBarriers.size(),
+                                     persistentImageBarriers.data());
+        }
     }
 
     bool mapHostVisibleMemoryToGuestPhysicalAddressLocked(
@@ -2333,6 +2477,10 @@ public:
             AutoLock lock(mLock);
             mCmdBufferInfo[commandBuffer].preprocessFuncs.clear();
             mCmdBufferInfo[commandBuffer].subCmds.clear();
+            mCmdBufferInfo[commandBuffer].computePipeline = 0;
+            mCmdBufferInfo[commandBuffer].firstSet = 0;
+            mCmdBufferInfo[commandBuffer].descriptorLayout = 0;
+            mCmdBufferInfo[commandBuffer].descriptorSets.clear();
         }
         return result;
     }
@@ -2563,6 +2711,54 @@ public:
         on_vkResetCommandBuffer(pool, boxed_commandBuffer, flags);
     }
 
+    void on_vkCmdBindPipeline(android::base::Pool* pool,
+                              VkCommandBuffer boxed_commandBuffer,
+                              VkPipelineBindPoint pipelineBindPoint,
+                              VkPipeline pipeline) {
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+        vk->vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
+        if (pipelineBindPoint == VK_PIPELINE_BIND_POINT_COMPUTE) {
+            AutoLock lock(mLock);
+            auto cmdBufferInfoIt = mCmdBufferInfo.find(commandBuffer);
+            if (cmdBufferInfoIt != mCmdBufferInfo.end()) {
+                if (pipelineBindPoint == VK_PIPELINE_BIND_POINT_COMPUTE) {
+                    cmdBufferInfoIt->second.computePipeline = pipeline;
+                }
+            }
+        }
+    }
+
+    void on_vkCmdBindDescriptorSets(android::base::Pool* pool,
+                                    VkCommandBuffer boxed_commandBuffer,
+                                    VkPipelineBindPoint pipelineBindPoint,
+                                    VkPipelineLayout layout,
+                                    uint32_t firstSet,
+                                    uint32_t descriptorSetCount,
+                                    const VkDescriptorSet* pDescriptorSets,
+                                    uint32_t dynamicOffsetCount,
+                                    const uint32_t* pDynamicOffsets) {
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+        vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout,
+                                    firstSet, descriptorSetCount,
+                                    pDescriptorSets, dynamicOffsetCount,
+                                    pDynamicOffsets);
+        if (pipelineBindPoint == VK_PIPELINE_BIND_POINT_COMPUTE) {
+            AutoLock lock(mLock);
+            auto cmdBufferInfoIt = mCmdBufferInfo.find(commandBuffer);
+            if (cmdBufferInfoIt != mCmdBufferInfo.end()) {
+                cmdBufferInfoIt->second.descriptorLayout = layout;
+                if (descriptorSetCount) {
+                    cmdBufferInfoIt->second.firstSet = firstSet;
+                    cmdBufferInfoIt->second.descriptorSets.assign(
+                            pDescriptorSets,
+                            pDescriptorSets + descriptorSetCount);
+                }
+            }
+        }
+    }
+
     // TODO: Support more than one kind of guest external memory handle type
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
 
@@ -2772,22 +2968,38 @@ private:
         return false;
     }
 
+    static std::vector<char> loadShaderSource(const char* filename) {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+        if (!file.is_open()) {
+            fprintf(stderr, "WARNING: shader source open failed! %s\n",
+                    filename);
+            return {};
+        }
+        size_t fileSize = (size_t)file.tellg();
+        std::vector<char> buffer(fileSize);
+        file.seekg(0);
+        file.read(buffer.data(), fileSize);
+        file.close();
+
+        return buffer;
+    }
     struct CompressedImageInfo {
         bool isCompressed = false;
         VkDevice device = 0;
         VkFormat compFormat;  // The compressed format
+        VkImageType imageType;
         VkImageCreateInfo sizeCompImgCreateInfo;
         std::vector<uint32_t> sizeCompImgQueueFamilyIndices;
         VkFormat sizeCompFormat;  // Size compatible format
-        VkDeviceMemory sizeCompImgMemory = 0;
-        VkImage sizeCompImg = 0;  // Size compatible image
+        VkDeviceSize alignment = 0;
+        std::vector<VkDeviceSize> memoryOffsets = {};
+        std::vector<VkImage> sizeCompImgs;  // Size compatible images
         VkFormat decompFormat =
                 VK_FORMAT_R8G8B8A8_UNORM;  // Decompressed format
-        VkDeviceMemory decompImgMemory = 0;
         VkImage decompImg = 0;  // Decompressed image
-        std::vector<VkBuffer> decompBuffer = {};
-        std::vector<VkDeviceMemory> decompMemory = {};
         VkExtent3D extent;
+        uint32_t layerCount;
         uint32_t mipLevels = 1;
         uint32_t mipmapWidth(uint32_t level) {
             return std::max<uint32_t>(extent.width >> level, 1);
@@ -2798,12 +3010,16 @@ private:
         uint32_t mipmapDepth(uint32_t level) {
             return std::max<uint32_t>(extent.depth >> level, 1);
         }
-        uint32_t alignSize(uint32_t inputSize) {
-            if (isCompressed) {
-                return (inputSize + 3) & (~0x3);
-            } else {
-                return inputSize;
-            }
+        uint32_t sizeCompMipmapWidth(uint32_t level) {
+            return (mipmapWidth(level) + kCompressedTexBlockSize - 1) /
+                   kCompressedTexBlockSize;
+        }
+        uint32_t sizeCompMipmapHeight(uint32_t level) {
+            return (mipmapHeight(level) + kCompressedTexBlockSize - 1) /
+                   kCompressedTexBlockSize;
+        }
+        uint32_t sizeCompMipmapDepth(uint32_t level) {
+            return mipmapDepth(level);
         }
         VkDeviceSize decompPixelSize() {
             return getLinearFormatPixelSize(decompFormat);
@@ -2820,42 +3036,418 @@ private:
                     return false;
             }
         }
+
+        struct PushConstant {
+            uint32_t compFormat;
+            uint32_t baseLayer;
+        };
+
+        VkDescriptorSetLayout decompDescriptorSetLayout = 0;
+        VkDescriptorPool decompDescriptorPool = 0;
+        std::vector<VkDescriptorSet> decompDescriptorSets = {};
+        VkShaderModule decompShader = 0;
+        VkPipelineLayout decompPipelineLayout = 0;
+        VkPipeline decompPipeline = 0;
+        std::vector<VkImageView> sizeCompImageViews = {};
+        std::vector<VkImageView> decompImageViews = {};
+
+        static VkImageView createDefaultImageView(
+                goldfish_vk::VulkanDispatch* vk,
+                VkDevice device,
+                VkImage image,
+                VkFormat format,
+                VkImageType imageType,
+                uint32_t mipLevel,
+                uint32_t layerCount) {
+            VkImageViewCreateInfo imageViewInfo = {};
+            imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            imageViewInfo.image = image;
+            imageViewInfo.viewType = imageType == VK_IMAGE_TYPE_3D
+                                             ? VK_IMAGE_VIEW_TYPE_3D
+                                             : VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+            imageViewInfo.format = format;
+            imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+            imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+            imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+            imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+            imageViewInfo.subresourceRange.aspectMask =
+                    VK_IMAGE_ASPECT_COLOR_BIT;
+            imageViewInfo.subresourceRange.baseMipLevel = mipLevel;
+            imageViewInfo.subresourceRange.levelCount = 1;
+            imageViewInfo.subresourceRange.baseArrayLayer = 0;
+            imageViewInfo.subresourceRange.layerCount = layerCount;
+            VkImageView imageView;
+            if (VK_SUCCESS != vk->vkCreateImageView(device, &imageViewInfo,
+                                                    nullptr, &imageView)) {
+                fprintf(stderr, "Warning: %s %s:%d failure\n", __func__,
+                        __FILE__, __LINE__);
+                return 0;
+            }
+            return imageView;
+        }
+
+        VkResult initDecomp(goldfish_vk::VulkanDispatch* vk,
+                            VkDevice device,
+                            VkImage image) {
+            if (decompPipeline != 0) {
+                return VK_SUCCESS;
+            }
+            // TODO: release resources on failure
+
+#define _RETURN_ON_FAILURE(cmd)                                                \
+    {                                                                          \
+        VkResult result = cmd;                                                 \
+        if (VK_SUCCESS != result) {                                            \
+            fprintf(stderr, "Warning: %s %s:%d vulkan failure %d\n", __func__, \
+                    __FILE__, __LINE__, result);                               \
+            return (result);                                                   \
+        }                                                                      \
+    }
+
+            std::string shaderSrcFileName;
+            switch (compFormat) {
+                case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+                    shaderSrcFileName = "Etc2RGB8_";
+                    break;
+                case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+                    shaderSrcFileName = "Etc2RGBA8_";
+                    break;
+                case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                    shaderSrcFileName = "EacR11Unorm_";
+                    break;
+                case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                    shaderSrcFileName = "EacR11Snorm_";
+                    break;
+                case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                    shaderSrcFileName = "EacRG11Unorm_";
+                    break;
+                case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                    shaderSrcFileName = "EacRG11Snorm_";
+                    break;
+                default:
+                    shaderSrcFileName = "Etc2RGB8_";
+                    break;
+            }
+            if (imageType == VK_IMAGE_TYPE_3D) {
+                shaderSrcFileName += "3D.spv";
+            } else {
+                shaderSrcFileName += "2DArray.spv";
+            }
+            using android::base::pj;
+            using android::base::System;
+            const std::string fullPath =
+                    pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+                       "shaders", shaderSrcFileName);
+            std::vector<char> shaderSource = loadShaderSource(fullPath.c_str());
+            VkShaderModuleCreateInfo shaderInfo = {};
+            shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+            shaderInfo.codeSize = shaderSource.size();
+            // std::vector aligns the pointer for us, so it is safe to cast
+            shaderInfo.pCode =
+                    reinterpret_cast<const uint32_t*>(shaderSource.data());
+            _RETURN_ON_FAILURE(vk->vkCreateShaderModule(
+                    device, &shaderInfo, nullptr, &decompShader));
+
+            VkDescriptorSetLayoutBinding dsLayoutBindings[] = {
+                    {
+                            0,                                 // bindings
+                            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,  // descriptorType
+                            1,                            // descriptorCount
+                            VK_SHADER_STAGE_COMPUTE_BIT,  // stageFlags
+                            0,                            // pImmutableSamplers
+                    },
+                    {
+                            1,                                 // bindings
+                            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,  // descriptorType
+                            1,                            // descriptorCount
+                            VK_SHADER_STAGE_COMPUTE_BIT,  // stageFlags
+                            0,                            // pImmutableSamplers
+                    },
+            };
+            VkDescriptorSetLayoutCreateInfo dsLayoutInfo = {};
+            dsLayoutInfo.sType =
+                    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            dsLayoutInfo.bindingCount = sizeof(dsLayoutBindings) /
+                                        sizeof(VkDescriptorSetLayoutBinding);
+            dsLayoutInfo.pBindings = dsLayoutBindings;
+            _RETURN_ON_FAILURE(vk->vkCreateDescriptorSetLayout(
+                    device, &dsLayoutInfo, nullptr,
+                    &decompDescriptorSetLayout));
+
+            VkDescriptorPoolSize poolSize[1] = {
+                    {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 2 * mipLevels},
+            };
+            VkDescriptorPoolCreateInfo dsPoolInfo = {};
+            dsPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+            dsPoolInfo.flags =
+                    VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+            dsPoolInfo.maxSets = mipLevels;
+            dsPoolInfo.poolSizeCount = 1;
+            dsPoolInfo.pPoolSizes = poolSize;
+            _RETURN_ON_FAILURE(vk->vkCreateDescriptorPool(
+                    device, &dsPoolInfo, nullptr, &decompDescriptorPool));
+            std::vector<VkDescriptorSetLayout> layouts(
+                    mipLevels, decompDescriptorSetLayout);
+
+            VkDescriptorSetAllocateInfo dsInfo = {};
+            dsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            dsInfo.descriptorPool = decompDescriptorPool;
+            dsInfo.descriptorSetCount = mipLevels;
+            dsInfo.pSetLayouts = layouts.data();
+            decompDescriptorSets.resize(mipLevels);
+            _RETURN_ON_FAILURE(vk->vkAllocateDescriptorSets(
+                    device, &dsInfo, decompDescriptorSets.data()));
+
+            VkPushConstantRange pushConstant = {};
+            pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+            pushConstant.offset = 0;
+            pushConstant.size = sizeof(PushConstant);
+
+            VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+            pipelineLayoutInfo.sType =
+                    VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            pipelineLayoutInfo.setLayoutCount = 1;
+            pipelineLayoutInfo.pSetLayouts = &decompDescriptorSetLayout;
+            pipelineLayoutInfo.pushConstantRangeCount = 1;
+            pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+            _RETURN_ON_FAILURE(
+                    vk->vkCreatePipelineLayout(device, &pipelineLayoutInfo,
+                                               nullptr, &decompPipelineLayout));
+
+            VkComputePipelineCreateInfo computePipelineInfo = {};
+            computePipelineInfo.sType =
+                    VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            computePipelineInfo.stage.sType =
+                    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            computePipelineInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            computePipelineInfo.stage.module = decompShader;
+            computePipelineInfo.stage.pName = "main";
+            computePipelineInfo.layout = decompPipelineLayout;
+            _RETURN_ON_FAILURE(vk->vkCreateComputePipelines(
+                    device, 0, 1, &computePipelineInfo, nullptr,
+                    &decompPipeline));
+
+            VkFormat intermediateFormat = decompFormat;
+            switch (compFormat) {
+                case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+                    intermediateFormat = VK_FORMAT_R8G8B8A8_UINT;
+                    break;
+                case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                    intermediateFormat = decompFormat;
+                    break;
+                default:
+                    intermediateFormat = decompFormat;
+                    break;  // should not happen
+            }
+
+            sizeCompImageViews.resize(mipLevels);
+            decompImageViews.resize(mipLevels);
+            VkDescriptorImageInfo sizeCompDescriptorImageInfo[1] = {{}};
+            sizeCompDescriptorImageInfo[0].sampler = 0;
+            sizeCompDescriptorImageInfo[0].imageLayout =
+                    VK_IMAGE_LAYOUT_GENERAL;
+
+            VkDescriptorImageInfo decompDescriptorImageInfo[1] = {{}};
+            decompDescriptorImageInfo[0].sampler = 0;
+            decompDescriptorImageInfo[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+            VkWriteDescriptorSet writeDescriptorSets[2] = {{}, {}};
+            writeDescriptorSets[0].sType =
+                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writeDescriptorSets[0].dstBinding = 0;
+            writeDescriptorSets[0].descriptorCount = 1;
+            writeDescriptorSets[0].descriptorType =
+                    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            writeDescriptorSets[0].pImageInfo = sizeCompDescriptorImageInfo;
+
+            writeDescriptorSets[1].sType =
+                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writeDescriptorSets[1].dstBinding = 1;
+            writeDescriptorSets[1].descriptorCount = 1;
+            writeDescriptorSets[1].descriptorType =
+                    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            writeDescriptorSets[1].pImageInfo = decompDescriptorImageInfo;
+
+            for (uint32_t i = 0; i < mipLevels; i++) {
+                sizeCompImageViews[i] = createDefaultImageView(
+                        vk, device, sizeCompImgs[i], sizeCompFormat, imageType,
+                        0, layerCount);
+                decompImageViews[i] = createDefaultImageView(
+                        vk, device, decompImg, intermediateFormat, imageType, i,
+                        layerCount);
+                sizeCompDescriptorImageInfo[0].imageView =
+                        sizeCompImageViews[i];
+                decompDescriptorImageInfo[0].imageView = decompImageViews[i];
+                writeDescriptorSets[0].dstSet = decompDescriptorSets[i];
+                writeDescriptorSets[1].dstSet = decompDescriptorSets[i];
+                vk->vkUpdateDescriptorSets(device, 2, writeDescriptorSets, 0,
+                                           nullptr);
+            }
+            return VK_SUCCESS;
+        }
+
+        void cmdDecompress(goldfish_vk::VulkanDispatch* vk,
+                           VkCommandBuffer commandBuffer,
+                           VkPipelineStageFlags dstStageMask,
+                           VkImageLayout newLayout,
+                           VkAccessFlags dstAccessMask,
+                           uint32_t baseMipLevel,
+                           uint32_t levelCount,
+                           uint32_t baseLayer,
+                           uint32_t _layerCount) {
+            vk->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+                                  decompPipeline);
+
+            PushConstant pushConstant = {compFormat, baseLayer};
+            int dispatchZ = _layerCount;
+            if (extent.depth > 1) {
+                // 3D texture
+                pushConstant.baseLayer = 0;
+                dispatchZ = extent.depth;
+            }
+            vk->vkCmdPushConstants(commandBuffer, decompPipelineLayout,
+                                   VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                                   sizeof(pushConstant), &pushConstant);
+            for (uint32_t i = baseMipLevel; i < baseMipLevel + levelCount;
+                 i++) {
+                vk->vkCmdBindDescriptorSets(
+                        commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+                        decompPipelineLayout, 0, 1,
+                        decompDescriptorSets.data() + i, 0, nullptr);
+
+                vk->vkCmdDispatch(commandBuffer, sizeCompMipmapWidth(i),
+                                  sizeCompMipmapHeight(i), dispatchZ);
+
+                VkImageMemoryBarrier barrier = {};
+                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                barrier.image = decompImg;
+                barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                barrier.subresourceRange.baseArrayLayer = baseLayer;
+                barrier.subresourceRange.layerCount = _layerCount;
+                barrier.subresourceRange.baseMipLevel = 0;
+                barrier.subresourceRange.levelCount = 1;
+
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.dstAccessMask = dstAccessMask;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                barrier.newLayout = newLayout;
+                barrier.image = decompImg;
+                vk->vkCmdPipelineBarrier(
+                        commandBuffer,
+                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,  // srcStageMask
+                        dstStageMask,                          // dstStageMask
+                        0,        // dependencyFlags
+                        0,        // memoryBarrierCount
+                        nullptr,  // pMemoryBarriers
+                        0,        // bufferMemoryBarrierCount
+                        nullptr,  // pBufferMemoryBarriers
+                        1,        // imageMemoryBarrierCount
+                        &barrier  // pImageMemoryBarriers
+                );
+            }
+        }
     };
 
-    void lazyCreateSizeCompImg(goldfish_vk::VulkanDispatch* vk,
-                               CompressedImageInfo* cmpInfo) {
-        if (cmpInfo->sizeCompImg) {
+    void createSizeCompImages(goldfish_vk::VulkanDispatch* vk,
+                              CompressedImageInfo* cmpInfo) {
+        if (cmpInfo->sizeCompImgs.size() > 0) {
             return;
         }
         VkDevice device = cmpInfo->device;
-        vk->vkCreateImage(device, &(cmpInfo->sizeCompImgCreateInfo), nullptr,
-                          &cmpInfo->sizeCompImg);
+        uint32_t mipLevels = cmpInfo->mipLevels;
+        cmpInfo->sizeCompImgs.resize(mipLevels);
+        VkImageCreateInfo imageInfo = cmpInfo->sizeCompImgCreateInfo;
+        imageInfo.mipLevels = 1;
+        for (uint32_t i = 0; i < mipLevels; i++) {
+            imageInfo.extent.width = cmpInfo->sizeCompMipmapWidth(i);
+            imageInfo.extent.height = cmpInfo->sizeCompMipmapHeight(i);
+            imageInfo.extent.depth = cmpInfo->sizeCompMipmapDepth(i);
+            VkDevice device = cmpInfo->device;
+            vk->vkCreateImage(device, &imageInfo, nullptr,
+                              cmpInfo->sizeCompImgs.data() + i);
+        }
+
         VkPhysicalDevice physicalDevice = mDeviceInfo[device].physicalDevice;
-        VkMemoryRequirements memRequirements;
-        vk->vkGetImageMemoryRequirements(device, cmpInfo->sizeCompImg,
-                                         &memRequirements);
-        int32_t memIdx =
-                findProperties(physicalDevice, memRequirements.memoryTypeBits,
-                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-        if (memIdx < 0) {
-            fprintf(stderr, "Error: cannot find memory property!\n");
-            return;
+        int32_t memIdx = -1;
+        VkDeviceSize& alignment = cmpInfo->alignment;
+        std::vector<VkDeviceSize> memSizes(mipLevels);
+        VkDeviceSize decompImageSize = 0;
+        {
+            VkMemoryRequirements memRequirements;
+            vk->vkGetImageMemoryRequirements(device, cmpInfo->decompImg,
+                                             &memRequirements);
+            memIdx = findProperties(physicalDevice,
+                                    memRequirements.memoryTypeBits,
+                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            if (memIdx < 0) {
+                fprintf(stderr, "Error: cannot find memory property!\n");
+                return;
+            }
+            alignment = std::max(alignment, memRequirements.alignment);
+            decompImageSize = memRequirements.size;
         }
-
-        VkMemoryAllocateInfo allocInfo = {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = memIdx;
-        VkDeviceMemory imgMemory;
-        if (vk->vkAllocateMemory(device, &allocInfo, nullptr, &imgMemory) !=
-            VK_SUCCESS) {
-            fprintf(stderr, "failed to allocate image buffer memory!");
-            return;
+        for (size_t i = 0; i < mipLevels; i++) {
+            VkMemoryRequirements memRequirements;
+            vk->vkGetImageMemoryRequirements(device, cmpInfo->sizeCompImgs[i],
+                                             &memRequirements);
+            alignment = std::max(alignment, memRequirements.alignment);
+            memSizes[i] = memRequirements.size;
         }
-        cmpInfo->sizeCompImgMemory = imgMemory;
-        vk->vkBindImageMemory(device, cmpInfo->sizeCompImg, imgMemory, 0);
+        auto& memoryOffsets = cmpInfo->memoryOffsets;
+        memoryOffsets.resize(mipLevels + 1);
+        {
+            VkDeviceSize alignedSize = decompImageSize;
+            if (alignment != 0) {
+                alignedSize =
+                        (alignedSize + alignment - 1) / alignment * alignment;
+            }
+            memoryOffsets[0] = alignedSize;
+        }
+        for (size_t i = 0; i < cmpInfo->sizeCompImgs.size(); i++) {
+            VkDeviceSize alignedSize = memSizes[i];
+            if (alignment != 0) {
+                alignedSize =
+                        (alignedSize + alignment - 1) / alignment * alignment;
+            }
+            memoryOffsets[i + 1] = memoryOffsets[i] + alignedSize;
+        }
     }
+
+    void updateImageMemorySizeLocked(
+            VkDevice device,
+            VkImage image,
+            VkMemoryRequirements* pMemoryRequirements) {
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (!deviceInfoIt->second.emulateTextureEtc2) {
+            return;
+        }
+        auto it = mImageInfo.find(image);
+        if (it == mImageInfo.end()) {
+            return;
+        }
+        CompressedImageInfo& cmpInfo = it->second.cmpInfo;
+        if (!cmpInfo.isCompressed) {
+            return;
+        }
+        pMemoryRequirements->alignment =
+                std::max(pMemoryRequirements->alignment, cmpInfo.alignment);
+        pMemoryRequirements->size += cmpInfo.memoryOffsets[cmpInfo.mipLevels];
+    }
+
     static bool needEmulatedEtc2(VkPhysicalDevice physicalDevice,
                                  goldfish_vk::VulkanDispatch* vk) {
         VkPhysicalDeviceFeatures feature;
@@ -2893,47 +3485,42 @@ private:
     VkFormat getDecompFormat(VkFormat compFmt) {
         switch (compFmt) {
             case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
-                return VK_FORMAT_R8G8B8A8_UNORM;
-            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
-                return VK_FORMAT_R8G8B8A8_SRGB;
             case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
             case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
                 return VK_FORMAT_R8G8B8A8_UNORM;
-                break;
+            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
             case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 return VK_FORMAT_R8G8B8A8_SRGB;
             case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                return VK_FORMAT_R16_UNORM;
             case VK_FORMAT_EAC_R11_SNORM_BLOCK:
-                return VK_FORMAT_R32_SFLOAT;
+                return VK_FORMAT_R16_SNORM;
             case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                return VK_FORMAT_R16G16_UNORM;
             case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
-                return VK_FORMAT_R32G32_SFLOAT;
+                return VK_FORMAT_R16G16_SNORM;
             default:
                 return compFmt;
         }
     }
 
-    VkFormat getSizeCmpFormat(VkFormat compFmt) {
+    VkFormat getSizeCompFormat(VkFormat compFmt) {
         switch (compFmt) {
             case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
-                return VK_FORMAT_R16G16B16A16_UINT;
             case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
-                return VK_FORMAT_R16G16B16A16_SINT;
             case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
-            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
-                return VK_FORMAT_R32G32B32A32_UINT;
             case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
-            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
-                return VK_FORMAT_R32G32B32A32_SINT;
-            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
                 return VK_FORMAT_R16G16B16A16_UINT;
-            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
-                return VK_FORMAT_R16G16B16A16_SINT;
-            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 return VK_FORMAT_R32G32B32A32_UINT;
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                return VK_FORMAT_R32G32_UINT;
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
             case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
-                return VK_FORMAT_R32G32B32A32_SINT;
+                return VK_FORMAT_R32G32B32A32_UINT;
             default:
                 return compFmt;
         }
@@ -2965,7 +3552,7 @@ private:
         CompressedImageInfo cmpInfo;
         cmpInfo.compFormat = compFmt;
         cmpInfo.decompFormat = getDecompFormat(compFmt);
-        cmpInfo.sizeCompFormat = getSizeCmpFormat(compFmt);
+        cmpInfo.sizeCompFormat = getSizeCompFormat(compFmt);
         cmpInfo.isCompressed = (cmpInfo.decompFormat != compFmt);
 
         return cmpInfo;
@@ -3028,100 +3615,6 @@ private:
         }
     }
 
-    void decompressBufferToImage(CompressedImageInfo cmp,
-                                 VkBuffer srcBuffer,
-                                 VkDeviceMemory dstMemory,
-                                 uint32_t regionCount,
-                                 const VkBufferImageCopy* srcRegions,
-                                 const VkBufferImageCopy* dstRegions) {
-        ETC2ImageFormat imgFmt = getEtc2Format(cmp.compFormat);
-        // regions and buffers for the decompressed data
-        int decodedPixelSize = etc_get_decoded_pixel_size(imgFmt);
-
-        auto srcBufferInfoIt = mBufferInfo.find(srcBuffer);
-        if (srcBufferInfoIt == mBufferInfo.end()) {
-            return;
-        }
-        const auto& srcBufferInfo = srcBufferInfoIt->second;
-        VkDevice device = srcBufferInfo.device;
-
-        uint8_t* srcRawData;
-        uint8_t* dstRawData;
-        // Go through on_vkMapMemoryLocked which allows double-locking.
-        if (VK_SUCCESS != on_vkMapMemoryLocked(device, srcBufferInfo.memory,
-                                               srcBufferInfo.memoryOffset,
-                                               srcBufferInfo.size, 0,
-                                               (void**)&srcRawData)) {
-            fprintf(stderr,
-                    "WARNING: map memory failure. Textures might be broken\n");
-        }
-        m_vk->vkMapMemory(device, dstMemory, 0, VK_WHOLE_SIZE, 0,
-                          (void**)&dstRawData);
-        // The software decompression work
-        std::vector<uint8_t> decompBuffer;
-        for (uint32_t r = 0; r < regionCount; r++) {
-            const VkBufferImageCopy& dstRegion = dstRegions[r];
-            const VkBufferImageCopy& srcRegion = srcRegions[r];
-
-            const uint8_t* srcPtr = srcRawData + srcRegion.bufferOffset;
-            uint8_t* dstPtr = dstRawData + dstRegion.bufferOffset;
-            assert(srcRegion.bufferOffset + etc_get_encoded_data_size(imgFmt,
-                srcRegion.imageExtent.width, srcRegion.imageExtent.height)
-                <= srcBufferInfo.size);
-            VkExtent3D alignedSrcImgExtent;
-            alignedSrcImgExtent.width =
-                    cmp.alignSize(srcRegion.imageExtent.width);
-            alignedSrcImgExtent.height =
-                    cmp.alignSize(srcRegion.imageExtent.height);
-            // not used
-            alignedSrcImgExtent.depth = srcRegion.imageExtent.depth;
-
-            decompBuffer.resize(alignedSrcImgExtent.width *
-                                alignedSrcImgExtent.height * decodedPixelSize);
-            for (uint32_t d = 0; d < dstRegion.imageExtent.depth; d++) {
-                int err = etc2_decode_image(
-                        srcPtr + d * etc_get_encoded_data_size(
-                                             imgFmt, alignedSrcImgExtent.width,
-                                             alignedSrcImgExtent.height),
-                        imgFmt, decompBuffer.data(), alignedSrcImgExtent.width,
-                        alignedSrcImgExtent.height,
-                        decodedPixelSize * alignedSrcImgExtent.width);
-                int decompPixelSize =
-                        getLinearFormatPixelSize(cmp.decompFormat);
-                for (int h = 0; h < dstRegion.imageExtent.height; h++) {
-                    for (int w = 0; w < dstRegion.imageExtent.width; w++) {
-                        // RGB to RGBA
-                        const uint8_t* srcPixel =
-                                decompBuffer.data() +
-                                decodedPixelSize *
-                                        (w + h * alignedSrcImgExtent.width);
-                        uint8_t* dstPixel =
-                                dstPtr +
-                                decompPixelSize *
-                                        (w +
-                                         (h +
-                                          d * dstRegion.imageExtent.height) *
-                                                 dstRegion.imageExtent.width);
-                        // In case the source is not an RGBA format, we set all
-                        // channels to default values (except for R channel)
-                        switch (cmp.compFormat) {
-                            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
-                            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
-                                dstPixel[3] = 255;
-                                memcpy(dstPixel, srcPixel, decodedPixelSize);
-                                break;
-                            default:
-                                assert(decompPixelSize == decodedPixelSize);
-                                memcpy(dstPixel, srcPixel, decodedPixelSize);
-                        }
-                    }
-                }
-            }
-        }
-        // on_vkUnmapMemory is no-op in the current implementation
-        // on_vkUnmapMemory(device, srcBufferInfo.memory);
-        m_vk->vkUnmapMemory(device, dstMemory);
-    }
 
     void executePreprocessRecursive(int level, VkCommandBuffer cmdBuffer) {
         auto cmdBufferIt = mCmdBufferInfo.find(cmdBuffer);
@@ -3183,6 +3676,10 @@ private:
         VkDevice device = 0;
         VkCommandPool cmdPool = nullptr;
         VkCommandBuffer boxed = nullptr;
+        VkPipeline computePipeline = 0;
+        uint32_t firstSet = 0;
+        VkPipelineLayout descriptorLayout = 0;
+        std::vector<VkDescriptorSet> descriptorSets;
     };
 
     struct CommandPoolInfo {
@@ -3883,6 +4380,46 @@ void VkDecoderGlobalState::on_vkCmdCopyBufferToImage(
             dstImageLayout, regionCount, pRegions);
 }
 
+void VkDecoderGlobalState::on_vkCmdCopyImageToBuffer(
+        android::base::Pool* pool,
+        VkCommandBuffer commandBuffer,
+        VkImage srcImage,
+        VkImageLayout srcImageLayout,
+        VkBuffer dstBuffer,
+        uint32_t regionCount,
+        const VkBufferImageCopy* pRegions) {
+    mImpl->on_vkCmdCopyImageToBuffer(pool, commandBuffer, srcImage,
+                                     srcImageLayout, dstBuffer, regionCount,
+                                     pRegions);
+}
+
+void VkDecoderGlobalState::on_vkGetImageMemoryRequirements(
+        android::base::Pool* pool,
+        VkDevice device,
+        VkImage image,
+        VkMemoryRequirements* pMemoryRequirements) {
+    mImpl->on_vkGetImageMemoryRequirements(pool, device, image,
+                                           pMemoryRequirements);
+}
+
+void VkDecoderGlobalState::on_vkGetImageMemoryRequirements2(
+        android::base::Pool* pool,
+        VkDevice device,
+        const VkImageMemoryRequirementsInfo2* pInfo,
+        VkMemoryRequirements2* pMemoryRequirements) {
+    mImpl->on_vkGetImageMemoryRequirements2(pool, device, pInfo,
+                                            pMemoryRequirements);
+}
+
+void VkDecoderGlobalState::on_vkGetImageMemoryRequirements2KHR(
+        android::base::Pool* pool,
+        VkDevice device,
+        const VkImageMemoryRequirementsInfo2* pInfo,
+        VkMemoryRequirements2* pMemoryRequirements) {
+    mImpl->on_vkGetImageMemoryRequirements2(pool, device, pInfo,
+                                            pMemoryRequirements);
+}
+
 void VkDecoderGlobalState::on_vkCmdPipelineBarrier(
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
@@ -4211,6 +4748,31 @@ void VkDecoderGlobalState::on_vkResetCommandBufferAsyncGOOGLE(
     VkCommandBufferResetFlags flags) {
     mImpl->on_vkResetCommandBufferAsyncGOOGLE(
         pool, commandBuffer, flags);
+}
+
+void VkDecoderGlobalState::on_vkCmdBindPipeline(
+        android::base::Pool* pool,
+        VkCommandBuffer commandBuffer,
+        VkPipelineBindPoint pipelineBindPoint,
+        VkPipeline pipeline) {
+    mImpl->on_vkCmdBindPipeline(pool, commandBuffer, pipelineBindPoint,
+                                pipeline);
+}
+
+void VkDecoderGlobalState::on_vkCmdBindDescriptorSets(
+        android::base::Pool* pool,
+        VkCommandBuffer commandBuffer,
+        VkPipelineBindPoint pipelineBindPoint,
+        VkPipelineLayout layout,
+        uint32_t firstSet,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSet* pDescriptorSets,
+        uint32_t dynamicOffsetCount,
+        const uint32_t* pDynamicOffsets) {
+    mImpl->on_vkCmdBindDescriptorSets(pool, commandBuffer, pipelineBindPoint,
+                                      layout, firstSet, descriptorSetCount,
+                                      pDescriptorSets, dynamicOffsetCount,
+                                      pDynamicOffsets);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

@@ -698,6 +698,8 @@ const GLESpointer* GLEScmContext::getPointer(GLenum arrType) {
 }
 
 void GLEScmContext::initExtensionString() {
+    if (s_glExtensionsInitialized) return;
+
     *s_glExtensions = "GL_OES_blend_func_separate GL_OES_blend_equation_separate GL_OES_blend_subtract "
                       "GL_OES_byte_coordinates GL_OES_compressed_paletted_texture GL_OES_point_size_array "
                       "GL_OES_point_sprite GL_OES_single_precision GL_OES_stencil_wrap GL_OES_texture_env_crossbar "
@@ -723,6 +725,8 @@ void GLEScmContext::initExtensionString() {
             *s_glExtensions+="GL_OES_extended_matrix_palette ";
     }
     *s_glExtensions+="GL_OES_compressed_ETC1_RGB8_texture ";
+
+    s_glExtensionsInitialized = true;
 }
 
 int GLEScmContext::getMaxTexUnits() {

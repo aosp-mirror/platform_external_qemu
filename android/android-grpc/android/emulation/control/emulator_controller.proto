@@ -34,7 +34,7 @@ service EmulatorController {
     rpc setGps(GpsState) returns (GpsState) {}
 
     rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
-    rpc sendKey(KeyEvent) returns (google.protobuf.Empty) {}
+    rpc sendKey(KeyboardEvent) returns (google.protobuf.Empty) {}
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
     rpc sendRotary(RotaryEvent) returns (google.protobuf.Empty) {}
 
@@ -42,10 +42,72 @@ service EmulatorController {
 
     rpc getScreenshot(ImageFormat) returns (Image) {}
 
-    // TODO(jansene): Stream a series of images at the given framerate.
-    // rpc getRecording(ImageStream) returns (stream Image) {}
-
     rpc usePhone(TelephoneOperation) returns (TelephoneResponse) {}
+
+    // The following endpoints are needed to establish the webrtc protocol
+    // Due to limitiations in Javascript we cannot make use of bidirectional
+    // endpoints See this (blog)[https://grpc.io/blog/state-of-grpc-web] for
+    // details.
+
+    // This function will generate a new identifier that the client
+    // should use for further interaction. It will initiate the
+    // JSEP protocol on the server side.
+    rpc requestRtcStream(google.protobuf.Empty) returns (RtcId) {}
+
+    // Sends the given JsepMsg to the server. The RtcId in the
+    // message should point to an active stream negotiation in
+    // progress, otherwise the message will be ignored.
+    rpc sendJsepMessage(JsepMsg) returns (google.protobuf.Empty) {}
+
+    // Reads an available jsep messages for the given client id,
+    // blocking at most 5 seconds, or until one becomes available.
+    //
+    // The ice candidates for example will trickle in on this callback,
+    // as will the SDP negotation.
+    rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
+}
+
+message RtcId {
+    // The unique identifier of this connection. You will have to use the same
+    // identifier when sending/receiving messages. The server will generate a
+    // guid when receiving the start message.
+    string guid = 1;
+}
+
+message JsepMsg {
+    // The unique identifier of this connection. You will have to use the same
+    // identifier when sending/receiving messages. The server will generate a
+    // guid when receiving the start message.
+    RtcId id = 1;
+    // The JSON payload. This usually can be directly handled by the Javascript
+    // The dictionary can contain the following properties
+    //
+    // - bye:
+    //        You can hang up now. No new message expected for you.
+    //        The server has stopped the RTC stream.
+    //
+    // - start:
+    //        An RTCConfiguration dictionary providing options to
+    //        configure the new connection. This can include the
+    //        turn configuration the serve is using. This dictionary can be
+    //        passed in directly to the
+    //        (RTCPeerConnection)[https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection]
+    //        object.
+    //
+    // - candidate:
+    //        The WebRTC API's RTCIceCandidateInit dictionary, which
+    //        contains the information needed to fundamentally describe an
+    //        RTCIceCandidate. See
+    //        (RTCIceCandidate)[https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate]
+    //        and (Session
+    //        Lifetime)[https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Session_lifetime]
+    //        for more details.
+    //
+    // - sdp:
+    //        RTCSessionDescriptionInit dictionary containing the values
+    //        to that can be assigned to a
+    //        (RTCSessionDescription)[https://developer.mozilla.org/en-US/docs/Web/API/RTCSessionDescription]
+    string message = 2;
 }
 
 message VmConfiguration {
@@ -73,9 +135,78 @@ message MouseEvent {
     int32 buttons = 3;
 }
 
-message KeyEvent {
-    uint32 key = 1;
-    string text = 2;
+// KeyboardEvent objects describe a user interaction with the keyboard; each
+// event describes a single interaction between the user and a key (or
+// combination of a key with modifier keys) on the keyboard.
+// This follows the pattern as set by
+// (javascript)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent]
+//
+// Note: that only keyCode, key, or text can be set and that the semantics
+// will slightly vary.
+message KeyboardEvent {
+    // Code types that the emulator can receive. Note that the emulator
+    // will do its best to translate the code to an evdev value that
+    // will be send to the emulator. This translation is based on
+    // the chromium translation tables.
+    // See
+    // https://chromium.googlesource.com/chromium/src/+/lkgr/ui/events/keycodes/dom/keycode_converter_data.inc
+    // for details on the translation.
+    enum KeyCodeType {
+        Usb = 0;
+        Evdev = 1;
+        XKB = 2;
+        Win = 3;
+        Mac = 4;
+    };
+
+    enum KeyEventType {
+        // Indicates that this keyevent should be send to the emulator
+        // as a key down event. Meaning that the key event will be
+        // translated to an EvDev event type and bit 11 (0x400) will be
+        // set before it is sent to the emulator.
+        keydown = 0;
+
+        // Indicates that the keyevent should be send to the emulator
+        // as a key up event. Meaning that the key event will be
+        // translated to an EvDev event type and
+        // sent to the emulator.
+        keyup = 1;
+
+        // Indicates that the keyevent will be send to the emulator
+        // as e key down event and immediately followed by a keyup event.
+        keypress = 2;
+    };
+
+    // Type of keycode contained in the keyCode field.
+    KeyCodeType codeType = 1;
+
+
+    // The type of keyboard event that should be sent to the emulator
+    KeyEventType eventType = 2;
+
+    // This property represents a physical key on the keyboard (as opposed to
+    // the character generated by pressing the key). In other words, this
+    // property is a value which isn't altered by keyboard layout or the state
+    // of the modifier keys. This value will be interpreted by
+    // the emulator depending on the KeyCodeType. The incoming key code will be
+    // translated to an evdev code type and send to the emulator.
+    // The values in key and text will be ignored.
+    int32 keyCode = 3;
+
+    // The value of the key pressed by the user, taking into consideration the
+    // state of modifier keys such as Shift as well as the keyboard locale and
+    // layout. This follows the  w3c standard used in browsers.
+    // You can find an accurate description of valid values
+    // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
+    // The values in text, keyCode, eventType and codeType will be ignored and a keypress
+    // event will be delivered to the emulator.
+    string key = 4;
+
+    // Series of utf8 encoded characters to send to the emulator. Every
+    // character will be translated to an EvDev event type and send to the
+    // emulator as a keypress event. The values in keyCode, eventType, codeType and
+    // key will be ignored.
+    string text = 5;
 }
 
 message TouchEvent {

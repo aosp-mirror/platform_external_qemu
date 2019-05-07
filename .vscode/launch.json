@@ -62,25 +62,9 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-                "-kernel",
-                "/usr/local/google/home/jansene/Downloads/raspbian/kernel-qemu-4.14.79-stretch",
-                "-dtb",
-                "/usr/local/google/home/jansene/Downloads/raspbian/versatile-pb.dtb",
-                "-m",
-                "256",
-                "-M",
-                "versatilepb",
-                "-cpu",
-                "arm1176",
-                "-serial",
-                "stdio",
-                "-append",
-                "rw console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 loglevel=8 rootwait fsck.repair=yes memtest=1",
-                "-drive",
-                "file=/usr/local/google/home/jansene/Downloads/raspbian/2018-11-13-raspbian-stretch-lite.img,format=raw",
-                "-redir",
-                "tcp:5022::22",
-                "-no-reboot"
+                "--verbose"
+               // "--gtest_break_on_failure",
+               // "--gtest_filter=WebRtcBridge.deliverWithoutLoss",
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -92,42 +76,60 @@
             "type": "lldb",
             "request": "launch",
             // Resolved by CMake Tools:
-            "program": "${workspaceFolder}/build/emulator",
+            "program": "${command:cmake.launchTargetPath}",
             "args": [
                 // You will likely have to change these for emulator launch..
-                "@28_64",
-                "-verbose",
-                "-show-kernel"
             ],
+            "linux": {
+                "env": {
+                    // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
+                    "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
+                    "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
+                ]
+            }
+            "osx": {
+                "args": [
+                    "@28_X64",
+                    "-verbose",
+                    "-grpc",
+                    "5556",
+                    "-feature",
+                    "-HVF",
+                    "-feature",
+                    "+HAXM",
+                ]
+            },
             "postRunCommands": [
                 "pro handle -p true -s false SIGUSR1"
             ],
             "cwd": "${workspaceFolder}",
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-            },
+                "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
+                "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
+            ]
         },
-        {
-            // You need root access to attach debugger
-            "name": "(lldb) Debug attach Emulator",
-            "type": "lldb",
-            "request": "attach",
-            // Resolved by CMake Tools:
-            "program": "/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/build/qemu-upstream-aarch64",
-            "pid": 80501, // replace pid with your real pid
-            // Ignore signal SIGUSR1
-            "postRunCommands": [
-                "pro hand -p true -s false SIGUSR1"
-            ],
-        },
-        {
-            "name": "(lldb) Debug core dump",
-            "type": "lldb",
-            "request": "custom",
-            "targetCreateCommands": [
-                "target create -c ${workspaceFolder}/core"
-            ],
-        }
-    ]
+    },
+    {
+        // You need root access to attach debugger
+        "name": "(lldb) Debug attach Emulator",
+        "type": "lldb",
+        "request": "attach",
+        // Resolved by CMake Tools:
+        "program": "/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/build/qemu-upstream-aarch64",
+        "pid": 80501, // replace pid with your real pid
+        // Ignore signal SIGUSR1
+        "postRunCommands": [
+            "pro hand -p true -s false SIGUSR1"
+        ],
+    },
+    {
+        "name": "(lldb) Debug core dump",
+        "type": "lldb",
+        "request": "custom",
+        "targetCreateCommands": [
+            "target create -c ${workspaceFolder}/core"
+        ],
+    }
+]
 }

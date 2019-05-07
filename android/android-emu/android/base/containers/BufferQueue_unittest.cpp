@@ -39,6 +39,29 @@ TEST(BufferQueue, Constructor) {
     BufferQueue<Buffer> queue(16, lock);
 }
 
+TEST(BufferQueue, popLockedBefore) {
+    Lock lock;
+    BufferQueue<Buffer> queue(2, lock);
+    AutoLock al(lock);
+    Buffer msg;
+    System::Duration blockUntil =
+            System::get()->getUnixTimeUs() + 2 * 1000;
+    EXPECT_EQ(Result::Timeout, queue.popLockedBefore(&msg, blockUntil));
+}
+
+TEST(BufferQueue, popLockedBeforeWithDataPresent) {
+    Lock lock;
+    BufferQueue<Buffer> queue(2, lock);
+    AutoLock al(lock);
+    Buffer msg;
+    EXPECT_EQ(Result::Ok, queue.tryPushLocked(Buffer("Hello")));
+
+    System::Duration blockUntil =
+            System::get()->getUnixTimeUs() + 2 * 1000;
+    EXPECT_EQ(Result::Ok, queue.popLockedBefore(&msg, blockUntil));
+    EXPECT_STREQ("Hello", msg.c_str());
+}
+
 TEST(BufferQueue, tryPushLocked) {
     Lock lock;
     BufferQueue<Buffer> queue(2, lock);

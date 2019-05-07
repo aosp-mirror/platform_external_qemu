@@ -65,7 +65,7 @@ void defaultLogMessage(const LogParams& params,
 
     FILE* output = params.severity >= LOG_WARNING ? stderr : stdout;
     if (params.quiet) {
-        fprintf(output, "%s: %.*s\n", severityLevelToString(params.severity), int(messageLen), message);
+        fprintf(output, "emulator: %s: %.*s\n", severityLevelToString(params.severity), int(messageLen), message);
     } else {
         StringView path = params.file;
         StringView filename;
@@ -73,7 +73,7 @@ void defaultLogMessage(const LogParams& params,
             filename = path;
         }
 
-        fprintf(output, "%s%s: %s:%d: %.*s\n", tidStr,
+        fprintf(output, "emulator: %s%s: %s:%d: %.*s\n", tidStr,
                 severityLevelToString(params.severity), c_str(filename).get(),
                 params.lineno, int(messageLen), message);
 

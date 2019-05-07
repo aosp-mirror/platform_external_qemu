@@ -433,6 +433,8 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
         return onGuestRecvData(buffers, numBuffers);
+    } else if (guest_boot_completed == 0 && android_hw->test_delayAdbTillBootComplete == 1) {
+        return PIPE_ERROR_AGAIN;
     } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
         return PIPE_ERROR_AGAIN;
     } else if (mState == State::SendingAcceptReplyOk) {

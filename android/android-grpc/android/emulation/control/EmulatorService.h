@@ -14,9 +14,10 @@
 
 #include <memory>
 #include "android/console.h"
+#include "android/emulation/control/RtcBridge.h"
 
 namespace grpc {
-    class ServerCredentials;
+class ServerCredentials;
 }
 
 namespace android {
@@ -29,7 +30,6 @@ public:
     virtual void stop() = 0;
 };
 
-
 class EmulatorControllerService::Builder {
 public:
     Builder();
@@ -37,6 +37,7 @@ public:
     Builder& withCredentials(
             std::shared_ptr<grpc::ServerCredentials> credentials);
     Builder& withPort(int port);
+    Builder& withRtcBridge(RtcBridge* bridge);
 
     // Returns the fully configured and running service, or nullptr if
     // construction failed.
@@ -46,6 +47,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     int mPort{5556};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
+    RtcBridge* mBridge{nullptr};
 };
 
 }  // namespace control

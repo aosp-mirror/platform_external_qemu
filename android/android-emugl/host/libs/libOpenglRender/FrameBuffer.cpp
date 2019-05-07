@@ -38,9 +38,12 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/vm_operations.h"
 
 #include <stdio.h>
 #include <string.h>
+
+#define MAX_NUM_MULTI_DISPLAY 10
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -84,6 +87,7 @@ private:
 
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
+uint32_t FrameBuffer::s_nextDisplayId = 1;  /* start from 1, 0 is for default Android display */
 
 static const GLint gles2ContextAttribsESOrGLCompat[] =
    { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -1136,7 +1140,10 @@ void FrameBuffer::drainWindowSurface() {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                closeColorBufferLocked(oldColorBufferHandle);
+                if (m_refCountPipeEnabled)
+                    decColorBufferRefCountLocked(oldColorBufferHandle);
+                else
+                    closeColorBufferLocked(oldColorBufferHandle);
                 m_windows.erase(winIt);
             }
         }
@@ -1175,7 +1182,10 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         ScopedBind bind(m_colorBufferHelper);
-        closeColorBufferLocked(w->second.second);
+        if (m_refCountPipeEnabled)
+            decColorBufferRefCountLocked(w->second.second);
+        else
+            closeColorBufferLocked(w->second.second);
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
@@ -1355,7 +1365,10 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
-                    closeColorBufferLocked(w->second.second, forced);
+                    if (m_refCountPipeEnabled)
+                        decColorBufferRefCountLocked(w->second.second);
+                    else
+                        closeColorBufferLocked(w->second.second, forced);
                     m_windows.erase(w);
                 }
                 m_procOwnedWindowSurfaces.erase(procIte);
@@ -1457,7 +1470,10 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     (*w).second.first->setColorBuffer((*c).second.cb);
     markOpened(&c->second);
     if (w->second.second) {
-        closeColorBufferLocked(w->second.second);
+        if (m_refCountPipeEnabled)
+            decColorBufferRefCountLocked(w->second.second);
+        else
+            closeColorBufferLocked(w->second.second);
     }
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
@@ -2092,10 +2108,24 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
-    // Teardown Vulkan image if necessary
-    goldfish_vk::teardownVkColorBuffer(handle);
     AutoLock mutex(m_lock);
-    m_colorbuffers.erase((HandleType)handle);
+    decColorBufferRefCountLocked((HandleType)handle);
+}
+
+void FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
+    const auto& it = m_colorbuffers.find(p_colorbuffer);
+    if (it != m_colorbuffers.end()) {
+        it->second.refcount -= 1;
+        if (it->second.refcount == 0) {
+            // Teardown Vulkan image if necessary
+            goldfish_vk::teardownVkColorBuffer(p_colorbuffer);
+            m_colorbuffers.erase(p_colorbuffer);
+        }
+    } else {
+        fprintf(stderr,
+                "Trying to erase a non-existent color buffer with handle %d \n",
+                p_colorbuffer);
+    }
 }
 
 bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
@@ -2162,6 +2192,7 @@ void FrameBuffer::onSave(Stream* stream,
     // We don't need to save |m_colorBufferCloseTsMap| here - there's enough
     // information to reconstruct it when loading.
     System::Duration now = System::get()->getUnixTime();
+
     saveCollection(stream, m_colorbuffers,
                    [now](Stream* s, const ColorBufferMap::value_type& pair) {
         pair.second.cb->onSave(s);
@@ -2181,6 +2212,18 @@ void FrameBuffer::onSave(Stream* stream,
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
+    saveCollection(
+        stream, m_displays,
+        [](Stream* s,
+           const std::unordered_map<uint32_t, DisplayInfo>::value_type& pair) {
+        s->putBe32(pair.first);
+        s->putBe32(pair.second.cb);
+        s->putBe32(pair.second.pos_x);
+        s->putBe32(pair.second.pos_y);
+        s->putBe32(pair.second.width);
+        s->putBe32(pair.second.height);
+    });
+
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
@@ -2199,7 +2242,7 @@ void FrameBuffer::onSave(Stream* stream,
 
 bool FrameBuffer::onLoad(Stream* stream,
                          const android::snapshot::ITextureLoaderPtr& textureLoader) {
-    AutoLock mutex(m_lock);
+    AutoLock lock(m_lock);
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
@@ -2252,7 +2295,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_framebufferHeight = stream->getBe32();
     m_dpr = stream->getFloat();
     // TODO: resize the window
-
+    //
     m_useSubWindow = stream->getBe32();
     m_eglContextInitialized = stream->getBe32();
 
@@ -2298,6 +2341,17 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
+    loadCollection(stream, &m_displays,
+                   [this](Stream* stream) -> std::unordered_map<uint32_t, DisplayInfo>::value_type {
+        const uint32_t idx = stream->getBe32();
+        const uint32_t cb = stream->getBe32();
+        const uint32_t pos_x = stream->getBe32();
+        const uint32_t pos_y = stream->getBe32();
+        const uint32_t width = stream->getBe32();
+        const uint32_t height = stream->getBe32();
+        return { idx, { cb, pos_x, pos_y, width, height } };
+    });
+
     if (s_egl.eglPostLoadAllImages) {
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
@@ -2312,6 +2366,37 @@ bool FrameBuffer::onLoad(Stream* stream,
             }
         }
     }
+
+    // Restore multi display state
+    int combinedDisplayWidth = 0;
+    int combinedDisplayHeight = 0;
+
+    if (m_displays.size() == 0) {
+        return true;
+    } else {
+        getCombinedDisplaySize(
+            &combinedDisplayWidth, &combinedDisplayHeight, true);
+        emugl::get_emugl_window_operations().setMultiDisplay(
+            0,
+            0, combinedDisplayHeight - getHeight(),
+            getWidth(), getHeight(), true);
+
+        for (auto iter : m_displays) {
+            emugl::get_emugl_window_operations().setMultiDisplay(
+                iter.first,
+                iter.second.pos_x,
+                combinedDisplayHeight - iter.second.height,
+                iter.second.width,
+                iter.second.height, true);
+        }
+
+        // unlock before calling setUIDisplayRegion
+        lock.unlock();
+        emugl::get_emugl_window_operations()
+            .setUIDisplayRegion(
+                0, 0, combinedDisplayWidth, combinedDisplayHeight);
+    }
+
     return true;
     // TODO: restore memory management
 }
@@ -2357,4 +2442,139 @@ void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
             __func__, key, (unsigned long long)(tInfo->m_puid));
     }
     callbackMap.erase(key);
+}
+
+int FrameBuffer::createDisplay(uint32_t* displayId) {
+    AutoLock mutex(m_lock);
+    if (displayId == nullptr) {
+        ERR("%s: null displayId", __FUNCTION__);
+        return -1;
+    }
+    if (m_displays.size() > MAX_NUM_MULTI_DISPLAY) {
+        ERR("%s: cannot create more displays, exceeding limits %d",
+            __FUNCTION__, MAX_NUM_MULTI_DISPLAY);
+        return -1;
+    }
+    *displayId = s_nextDisplayId++;
+    m_displays.emplace(*displayId, DisplayInfo());
+    DBG("create display %d\n", *displayId);
+    return 0;
+}
+
+int FrameBuffer::destroyDisplay(uint32_t displayId) {
+    int width, height;
+    {
+        AutoLock mutex(m_lock);
+        m_displays.erase(displayId);
+        // shift the displays
+        uint32_t x = 0;
+        for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+            if (iter->first > displayId) {
+                iter->second.pos_x = x;
+            }
+            x += iter->second.width;
+        }
+        getCombinedDisplaySize(&width, &height, true);
+    }
+    // unlock before calling setUIDisplayRegion
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+    return 0;
+}
+
+int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
+    DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
+    AutoLock mutex(m_lock);
+    if (m_displays.find(displayId) == m_displays.end()) {
+        ERR("cannot find display %d\n", displayId);
+        return -1;
+    }
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
+    if (c == m_colorbuffers.end()) {
+        return -1;
+    }
+    m_displays[displayId].cb = colorBuffer;
+    c->second.cb->setDisplay(displayId);
+    return 0;
+}
+
+int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+    DBG("%s: display %d cb %p\n", __FUNCTION__, displayId, colorBuffer);
+    AutoLock mutex(m_lock);
+    if (m_displays.find(displayId) == m_displays.end()) {
+        return -1;
+    }
+    *colorBuffer = m_displays[displayId].cb;
+    return 0;
+}
+
+int FrameBuffer::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
+    AutoLock mutex(m_lock);
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
+    if (c == m_colorbuffers.end()) {
+        return -1;
+    }
+    *displayId = c->second.cb->getDisplay();
+    return 0;
+}
+
+int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+    AutoLock mutex(m_lock);
+    if (m_displays.find(displayId) == m_displays.end()) {
+        return -1;
+    }
+    *x = m_displays[displayId].pos_x;
+    *y = m_displays[displayId].pos_y;
+    *w = m_displays[displayId].width;
+    *h = m_displays[displayId].height;
+    return 0;
+}
+
+int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    int width, height;
+    {
+        AutoLock mutex(m_lock);
+        if (m_displays.find(displayId) == m_displays.end()) {
+            return -1;
+        }
+        if (x == 0 && y ==0) {
+            // ignore x/y, replace display. Assume displays in a row
+            int32_t pos_x, pos_y;
+            getCombinedDisplaySize(&pos_x, &pos_y, true);
+            m_displays[displayId].pos_x = pos_x;
+            m_displays[displayId].pos_y = 0;
+            m_displays[displayId].width = w;
+            m_displays[displayId].height = h;
+        } else {
+            m_displays[displayId].pos_x = x;
+            m_displays[displayId].pos_y = y;
+            m_displays[displayId].width = w;
+            m_displays[displayId].height = h;
+        }
+        getCombinedDisplaySize(&width, &height, true);
+        // (0, 0) at left-top for QT window, at left-bottom for FrameBuffer.
+        emugl::get_emugl_window_operations().setMultiDisplay(0, 0, height - getHeight(),
+                                                             getWidth(), getHeight(),
+                                                              true);
+        emugl::get_emugl_window_operations().setMultiDisplay(displayId,
+                                                             m_displays[displayId].pos_x,
+                                                             height - h,
+                                                             w, h, true);
+    }
+    // unlock before calling setUIDisplayRegion
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+    return 0;
+}
+
+void FrameBuffer::getCombinedDisplaySize(int* w, int* h, bool androidWindow) {
+    // Simple version, displays in a row
+    int max_h = androidWindow ? getHeight() : 0;
+    int total_w = androidWindow ? getWidth() : 0;
+    for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+        if (iter->second.height > max_h) {
+            max_h = iter->second.height;
+        }
+        total_w += iter->second.width;
+    }
+    *w = total_w;
+    *h = max_h;
 }

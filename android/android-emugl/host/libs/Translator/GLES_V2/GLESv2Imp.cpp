@@ -614,6 +614,10 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
                     ObjectDataPtr(rboData));
             globalRenderBufferName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::RENDERBUFFER, renderbuffer);
+        } else {
+            RenderbufferData* rboData = (RenderbufferData*)(ctx->shareGroup()->getObjectDataPtr(
+                    NamedObjectType::RENDERBUFFER, renderbuffer).get());
+            if (rboData) rboData->everBound = true;
         }
     }
     ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
