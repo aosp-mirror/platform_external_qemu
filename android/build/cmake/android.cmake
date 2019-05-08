@@ -683,7 +683,6 @@ function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
                              LIBRARIES   android-emu
                                          libqemu2-glue
                                          libqemu2-util
-                                         android-emu
                                          SDL2::SDL2
                                          android-qemu-deps
                                          android-qemu-deps-headful)
