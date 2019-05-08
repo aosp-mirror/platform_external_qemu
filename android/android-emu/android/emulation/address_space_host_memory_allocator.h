@@ -27,6 +27,8 @@ public:
 
     void perform(AddressSpaceDevicePingInfo *info) override;
 
+    static void* getHostAddr(uint64_t addr);
+
 private:
     uint64_t allocate(AddressSpaceDevicePingInfo *info);
     uint64_t unallocate(AddressSpaceDevicePingInfo *info);
