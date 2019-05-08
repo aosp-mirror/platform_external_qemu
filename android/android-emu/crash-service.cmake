@@ -37,12 +37,23 @@ target_compile_definitions(emulator-crash-service PRIVATE
     -DCONFIG_QT -DCRASHUPLOAD=${OPTION_CRASHUPLOAD}
     -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
     -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
-target_link_libraries(emulator-crash-service PRIVATE android-emu-crash-service android-emu emulator-libui breakpad_server Qt5::Gui)
+target_link_libraries(emulator-crash-service PRIVATE
+                      android-emu-crash-service
+                      android-emu
+                      emulator-libui
+                      breakpad_server
+                      libqemu2-glue android-mock-vm-operations
+                      Qt5::Gui)
 android_install_exe(emulator-crash-service .)
 
-set(emulator64_test_crasher_src android/crashreport/testing/main-test-crasher.cpp)
+set(emulator64_test_crasher_src
+    android/crashreport/testing/main-test-crasher.cpp
+)
 android_add_executable(emulator64_test_crasher)
-target_link_libraries(emulator64_test_crasher PRIVATE android-emu libqemu2-glue breakpad_server)
+target_link_libraries(emulator64_test_crasher PRIVATE
+                      android-emu
+                      libqemu2-glue android-mock-vm-operations
+                      breakpad_server)
 
 set(emulator_crashreport_unittests_src
     android/crashreport/CrashService_common.cpp
@@ -57,7 +68,11 @@ set(emulator_crashreport_unittests_windows-x86_64_src android/crashreport/CrashS
 set(emulator_crashreport_unittests_windows_msvc-x86_64_src android/crashreport/CrashService_windows.cpp)
 
 android_add_test(emulator_crashreport_unittests)
-target_link_libraries(emulator_crashreport_unittests PRIVATE android-emu libqemu2-glue breakpad_server gtest_main)
+target_link_libraries(emulator_crashreport_unittests PRIVATE
+                      android-emu
+                      libqemu2-glue android-mock-vm-operations
+                      breakpad_server
+                      gtest_main)
 target_include_directories(emulator_crashreport_unittests PRIVATE .)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator_crashreport_unittests windows_msvc-x86_64 PUBLIC dirent-win32)
