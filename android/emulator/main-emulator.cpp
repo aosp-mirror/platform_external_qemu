@@ -91,6 +91,10 @@ using android::ConfigDirs;
 #endif
 
 /* Forward declarations */
+static char* getClassicEmulatorPath(const char* progDir,
+                                    const char* avdArch,
+                                    int* wantedBitness);
+
 static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    bool force64bitTarget,
@@ -647,8 +651,16 @@ int main(int argc, char** argv)
     const auto progDirSystem = android::base::System::get()->getProgramDirectory();
     D("argv[0]: '%s'; program directory: '%s'", argv[0], progDirSystem.c_str());
 
+    enum RanchuState {
+        RANCHU_ON,
+        RANCHU_OFF,
+    } ranchu = RANCHU_ON;
+
     if (engine) {
-        fprintf(stderr, "WARNING: engine selection is no longer supported, always using RACNHU.\n");
+        if (!strcmp(engine, "classic")) {
+            ranchu = RANCHU_OFF;
+        }
+        fprintf(stderr, "WARNING: engine selection is deprecated.\n");
     }
 
     // Sanity checks.
@@ -689,8 +701,13 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
-        emulatorPath = getQemuExecutablePath(
-                progDir.data(), avdArch, force64bitTarget, wantedBitness);
+        if (ranchu == RANCHU_ON) {
+            emulatorPath = getQemuExecutablePath(
+                    progDir.data(), avdArch, force64bitTarget, wantedBitness);
+        } else {
+            emulatorPath = getClassicEmulatorPath(progDir.data(), avdArch,
+                                                  &wantedBitness);
+        }
         D("Trying emulator path '%s'", emulatorPath);
         if (path_exists(emulatorPath)) {
             break;
@@ -772,6 +789,89 @@ int main(int argc, char** argv)
     /* We could not launch the program ! */
     fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath, strerror(errno));
     return errno;
+}
+
+static char* bufprint_emulatorName(char* p,
+                                   char* end,
+                                   const char* progDir,
+                                   const char* prefix,
+                                   const char* archSuffix) {
+    if (progDir) {
+        p = bufprint(p, end, "%s" PATH_SEP, progDir);
+    }
+    p = bufprint(p, end, "%s%s%s", prefix, archSuffix, kExeExtension);
+    return p;
+}
+
+/* Probe the filesystem to check if an emulator executable named like
+ * <progDir>/<prefix><arch> exists.
+ *
+ * |progDir| is an optional program directory. If NULL, the executable
+ * will be searched in the current directory.
+ * |archSuffix| is an architecture-specific suffix, like "arm", or 'x86"
+ * |wantedBitness| points to an integer describing the wanted bitness of
+ * the program. The function might modify it, in the case where it is 64
+ * but only 32-bit versions of the executables are found (in this case,
+ * |*wantedBitness| is set to 32).
+ * On success, returns the absolute path of the executable (string must
+ * be freed by the caller). On failure, return NULL.
+ */
+static char* probeTargetEmulatorPath(const char* progDir,
+                                     const char* archSuffix,
+                                     int* wantedBitness) {
+    char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
+
+    static const char kEmulatorPrefix[] = "emulator-";
+    static const char kEmulator64Prefix[] = "emulator64-";
+
+    // First search for the 64-bit emulator binary.
+    if (*wantedBitness == 64) {
+        p = bufprint_emulatorName(path,
+                                  pathEnd,
+                                  progDir,
+                                  kEmulator64Prefix,
+                                  archSuffix);
+        D("Probing program: %s", path);
+        if (p < pathEnd && path_exists(path)) {
+            return strdup(path);
+        }
+    }
+
+    // Then for the 32-bit one.
+    p = bufprint_emulatorName(path,
+                                pathEnd,
+                                progDir,
+                                kEmulatorPrefix,
+                                archSuffix);
+    D("Probing program: %s", path);
+    if (p < pathEnd && path_exists(path)) {
+        *wantedBitness = 32;
+        return path_get_absolute(path);
+    }
+
+    return NULL;
+}
+
+// Find the absolute path to the classic emulator binary that supports CPU architecture
+// |avdArch|. |progDir| is the program's directory.
+static char* getClassicEmulatorPath(const char* progDir,
+                                    const char* avdArch,
+                                    int* wantedBitness) {
+    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
+    if (!emulatorSuffix) {
+        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
+    }
+    D("Looking for emulator-%s to emulate '%s' CPU", emulatorSuffix,
+      avdArch);
+
+    char* result = probeTargetEmulatorPath(progDir,
+                                           emulatorSuffix,
+                                           wantedBitness);
+    if (!result) {
+        APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
+    }
+    D("return result: %s", result);
+    return result;
 }
 
 // Convert an emulator-specific CPU architecture name |avdArch| into the
