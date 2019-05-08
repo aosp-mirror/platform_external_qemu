@@ -42,7 +42,6 @@ set(libqemu2-glue_src
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
-    qemu-vm-operations-impl.cpp
     dtb.cpp
     snapshot_compression.cpp
     telephony/modem_init.c
@@ -73,3 +72,19 @@ target_link_libraries(libqemu2-glue
                               emulator-libdtb
                               ssl
                               crypto)
+
+set(libqemu2-glue-vm-operations_src
+    ${ANDROID_HW_CONFIG_H}
+    qemu-vm-operations-impl.cpp)
+
+set(libqemu2-glue-vm-operations_windows-x86_64_src
+    stubs/win32-stubs.c)
+
+android_add_library(libqemu2-glue-vm-operations)
+android_target_include_directories(libqemu2-glue-vm-operations
+                                   all
+                                   PRIVATE
+                                   ..
+                                   ../include
+                                   ../qemu2-auto-generated)
+target_link_libraries(libqemu2-glue-vm-operations PRIVATE android-emu GLIB2::GLIB2)
