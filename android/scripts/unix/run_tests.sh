@@ -188,6 +188,7 @@ if ! check_file_type_substring "$EMULATOR_FILE_TYPE" "$EXPECTED_EMULATOR_FILE_TY
     FAILURES="$FAILURES emulator-bitness-check"
 fi
 
+DISTRIBUTION_DIR=$OPT_OUT/distribution/emulator
 if [ "$TARGET_OS" = "darwin-x86_64" ]; then
     log "Checking that darwin binaries target OSX $OSX_DEPLOYMENT_TARGET"
     for EXEC in $EXECUTABLES; do
@@ -199,10 +200,10 @@ if [ "$TARGET_OS" = "darwin-x86_64" ]; then
     done
     # Let's make sure all our dependencies exist in a release.. So we don't fall over
     # during launch.
-    if [ -d $OPT_OUT/gradle-release ]; then
+    if [ -d $DISTRIBUTION_DIR ]; then
         log "Checking that darwin binaries have all needed dependencies in the lib64 dir"
         # Make sure we can load all dependencies of every dylib/executable we have.
-        find $OPT_OUT/gradle-release \( -type f -and \( -perm +111 -or -name '*.dylib' \) \) -print0 | while read -d $'\0' file; do
+        find $DISTRIBUTION_DIR \( -type f -and \( -perm +111 -or -name '*.dylib' \) \) -print0 | while read -d $'\0' file; do
             log2 "Checking $file for dependencies"
             needed=$(otool -L $file | tail -n +2 | awk '{print $1}')
             for need in $needed; do
@@ -211,7 +212,7 @@ if [ "$TARGET_OS" = "darwin-x86_64" ]; then
                     @rpath/*)
                         # We will accept an rpath it if we can find it under lib64/
                         dylib="${need#@rpath/}"
-                        libs=$(find $OPT_OUT/gradle-release/lib64 -name $dylib);
+                        libs=$(find $DISTRIBUTION_DIR/lib64 -name $dylib);
                         # Xcode interjects a bogus path, so we skip that one
                         if [ -z $libs ] && [ ! $dylib = "libclang_rt.asan_osx_dynamic.dylib" ]; then
                             panic "Unable to locate $need [$dylib], needed by $file"
@@ -225,22 +226,22 @@ if [ "$TARGET_OS" = "darwin-x86_64" ]; then
             done
         done
     else
-        log "$OPT_OUT/gradle-release not found, not checking dependencies"
+        log "$DISTRIBUTION_DIR not found, not checking dependencies"
     fi
 fi
 
 if [ "$TARGET_OS" = "linux-x86_64" ]; then
    log "Checking that all the .so dependencies are met"
-   if [ -d $OPT_OUT/gradle-release ]; then
+   if [ -d $DISTRIBUTION_DIR ]; then
         log "Checking that linux binaries have all needed dependencies in the lib64 dir"
         # Make sure we can load all dependencies of every dylib/executable we have.
         cache=$(ldconfig --print-cache | awk '{ print $1; }')
-        files=$(find $OPT_OUT/gradle-release \( -type f -and \( -executable -or -name '*.so.*' \) \))
+        files=$(find $DISTRIBUTION_DIR \( -type f -and \( -executable -or -name '*.so.*' \) \))
         for file in $files; do
             log2 "Checking $file for dependencies on ld path, or our tree.."
             needed=$(readelf -d $file | grep "Shared" | cut -d "[" -f2 | cut -d "]" -f1)
             for need in $needed; do
-                libs=$(find $OPT_OUT/gradle-release/lib64 -name $need);
+                libs=$(find $DISTRIBUTION_DIR/lib64 -name $need);
                 if [ $libs ]; then
                   log2 "  Found $need in our release"
                 else
@@ -270,11 +271,11 @@ fi
 
 if [ "$TARGET_OS" = "windows-x86_64" ]; then
    log "Checking that all the .dll dependencies are met"
-   if [ -d $OPT_OUT/gradle-release ]; then
+   if [ -d $DISTRIBUTION_DIR ]; then
         log "Checking that windows binaries have all dependencies available"
         # Make sure we can load all dependencies of every dylib/executable we have.
-        echo files=find $OPT_OUT/gradle-release -name '*.exe'-or -name '*.dll'
-        files=$(find $OPT_OUT/gradle-release -name '*.exe' -or -name '*.dll')
+        echo files=find $DISTRIBUTION_DIR -name '*.exe'-or -name '*.dll'
+        files=$(find $DISTRIBUTION_DIR -name '*.exe' -or -name '*.dll')
         for file in $files; do
             if [ -f $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump ]; then
                 $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep -q CodeView || warn " !!! No CodeView entry in $file, breakpad traces will be incomplete. !!!"
@@ -284,9 +285,12 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
             needed=$($OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep "DLL Name" | awk '{ print $3 }')
             cache="KERNEL32.DLL KERNEL32.dll msvcrt.dll PSAPI.DLL SHELL32.DLL SHELL32.dll USER32.DLL ntdll.dll USER32.dll NETAPI32.dll "
             cache="${cache} ADVAPI32.dll WS2_32.dll GDI32.dll dbghelp.dll RPCRT4.dll OLEAUT32.dll IPHLPAPI.DLL imagehelp.dll WINMM.dll WTSAPI32.dll "
-            cache="${cache} d3d9.dll IMM32.dll VERSION.dll imagehlp.dll UxTheme.dll dwmapi.dll USERENV.dll ole32.dll OPENGL32.dll MPR.dll"
+            cache="${cache} d3d9.dll IMM32.dll VERSION.dll imagehlp.dll UxTheme.dll dwmapi.dll USERENV.dll ole32.dll OPENGL32.dll MPR.dll Secur32.dll"
+            cache="${cache} MSVCP140.dll VCRUNTIME140.dll api-ms-win-crt-runtime-l1-1-0.dll api-ms-win-crt-heap-l1-1-0.dll api-ms-win-crt-convert-l1-1-0.dll"
+            cache="${cache} api-ms-win-crt-stdio-l1-1-0.dll api-ms-win-crt-filesystem-l1-1-0.dll api-ms-win-crt-filesystem-l1-1-0.dll api-ms-win-crt-math-l1-1-0.dll"
+            cache="${cache} api-ms-win-crt-locale-l1-1-0.dll api-ms-win-crt-string-l1-1-0.dll"
             for need in $needed; do
-                libs=$(find $OPT_OUT/gradle-release -name $need);
+                libs=$(find $DISTRIBUTION_DIR -name $need);
                 if [ "$libs" ]; then
                   log2 "  Found $need in our release"
                 else
