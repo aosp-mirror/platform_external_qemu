@@ -118,7 +118,12 @@ curl -H "Accept: application/json" -X POST -d '{"key": "30"}' http://localhost:8
 For more details on the endpoints look at
 $AOSP/android/android-grpc/android/emulation/control/api_config.yaml
 
-### Troubleshooting:
+### Troubleshooting/Known Issues:
+
+- I see TypeError: ...
+
+  Our Makefiles are very simplisitic and are not detecting changes to the .proto files. You might have to
+  run ```make clean``` before trying again.
 
 - I see the following json:
 
