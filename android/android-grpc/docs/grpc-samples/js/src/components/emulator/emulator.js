@@ -129,7 +129,7 @@ export default class Emulator extends Component {
         onMouseOut={this.handleMouseUp}
         onKeyDown={this.handleKey}
       >
-      <FallbackView
+      <EmulatorWebrtcView
           width={width * scale}
           height={height * scale}
           refreshRate={refreshRate}
