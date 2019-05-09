@@ -20,6 +20,13 @@
 #define VIRTIO_ID_NAME_MOUSE    "QEMU Virtio Mouse"
 #define VIRTIO_ID_NAME_TABLET   "QEMU Virtio Tablet"
 
+#define DEBUG 0
+
+#if DEBUG
+#define D(...) (fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n"))
+#else
+#define D(...) ((void)0)
+#endif
 /* ----------------------------------------------------------------- */
 
 static const unsigned short keymap_button[INPUT_BUTTON__MAX] = {
@@ -98,7 +105,7 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
             virtio_input_send(vinput, &event);
         } else {
             if (key->down) {
-                fprintf(stderr, "%s: unmapped key: %d [%s]\n", __func__,
+                D("%s: unmapped key: %d [%s]", __func__,
                         linux_keycode, QKeyCode_str(linux_keycode));
             }
         }
@@ -121,7 +128,7 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
             virtio_input_send(vinput, &event);
         } else {
             if (btn->down) {
-                fprintf(stderr, "%s: unmapped button: %d [%s]\n", __func__,
+                D("%s: unmapped button: %d [%s]", __func__,
                         btn->button,
                         InputButton_str(btn->button));
             }
@@ -209,8 +216,7 @@ static void virtio_input_hid_handle_status(VirtIOInput *vinput,
         kbd_put_ledstate(vhid->ledstate);
         break;
     default:
-        fprintf(stderr, "%s: unknown type %d\n", __func__,
-                le16_to_cpu(event->type));
+        D("%s: unknown type %d", __func__, le16_to_cpu(event->type));
         break;
     }
 }
