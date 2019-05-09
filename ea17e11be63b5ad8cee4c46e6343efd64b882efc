@@ -16,6 +16,24 @@
       "revId": "ea17e11be63b5ad8cee4c46e6343efd64b882efc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57296b54_d1ad4543",
+        "filename": "android-qemu2-glue/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-09T19:29:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "123e2f86_c4059df7",
+      "revId": "ea17e11be63b5ad8cee4c46e6343efd64b882efc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
