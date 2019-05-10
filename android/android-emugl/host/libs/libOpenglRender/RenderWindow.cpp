@@ -539,6 +539,26 @@ void RenderWindow::setScreenMask(int width, int height, const unsigned char* rgb
     }
 }
 
+void RenderWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                                   uint32_t h, uint32_t dpi, bool add) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (fb) {
+        if (add) {
+            fb->createDisplay(&id);
+            fb->setDisplayPose(id, x, y, w, h);
+        } else {
+            fb->destroyDisplay(id);
+        }
+    }
+}
+
+void RenderWindow::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->setDisplayColorBuffer(id, cb);
+    }
+}
+
 void RenderWindow::repaint() {
     D("Entering\n");
     RenderWindowMessage msg = {};

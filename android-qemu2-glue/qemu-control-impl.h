@@ -21,6 +21,7 @@
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
@@ -82,6 +83,8 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
 extern const QCarDataAgent* const gQCarDataAgent;
+
+extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
 // Called by hw/android/goldfish/events_device.c to initialize generic event
 // handling.

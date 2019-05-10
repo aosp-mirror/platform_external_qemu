@@ -32,6 +32,7 @@
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/android_pipe_zero.h"
+#include "android/emulation/MultiDisplayPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
@@ -423,6 +424,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
         }
         android::network::registerWifiForwardPipeService(mode, port);
     }
+
+    //TODO: add feature control
+    android_init_multi_display_pipe();
 
 #ifndef _WIN32
     // bug: 70566718
