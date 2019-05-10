@@ -400,6 +400,19 @@ void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgb
     mRenderWindow->setScreenMask(width, height, rgbaData);
 }
 
+void RendererImpl::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                                   uint32_t h, uint32_t dpi, bool add) {
+    if (mRenderWindow) {
+        mRenderWindow->setMultiDisplay(id, x, y, w, h, dpi, add);
+    }
+}
+
+void RendererImpl::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
+    if (mRenderWindow) {
+        mRenderWindow->setMultiDisplayColorBuffer(id, cb);
+    }
+}
+
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
 }

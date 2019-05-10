@@ -79,6 +79,7 @@ set(android-emu-common
     android/emulation/goldfish_sync.cpp
     android/emulation/hostpipe/HostGoldfishPipe.cpp
     android/emulation/LogcatPipe.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
