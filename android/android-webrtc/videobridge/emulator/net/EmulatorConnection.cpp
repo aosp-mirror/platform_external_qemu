@@ -21,8 +21,8 @@
 namespace emulator {
 namespace net {
 
-EmulatorConnection::EmulatorConnection(int port, std::string handle)
-    : mPort(port), mHandle(handle) {}
+EmulatorConnection::EmulatorConnection(int port, std::string handle, std::string turnConfig)
+    : mPort(port), mHandle(handle), mTurnConfig(turnConfig) {}
 
 EmulatorConnection::~EmulatorConnection() {}
 
@@ -74,7 +74,7 @@ void EmulatorConnection::OnRead(rtc::AsyncSocket* socket) {
     while (AsyncSocket* incoming = socket->Accept(&accept_addr)) {
         RtcAsyncSocketAdapter* adapter = new RtcAsyncSocketAdapter(incoming);
         std::unique_ptr<Switchboard> board(
-                new webrtc::Switchboard(mHandle, adapter, this));
+                new webrtc::Switchboard(mHandle, mTurnConfig, adapter, this));
         mConnections.push_back(std::move(board));
         RTC_LOG(INFO) << "New switchboard registered for incoming emulator.";
     }

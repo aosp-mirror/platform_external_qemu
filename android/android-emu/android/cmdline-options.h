@@ -219,7 +219,13 @@ OPT_FLAG(restart_when_stalled, "Allows restarting guest when it is stalled.")
 
 OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the background and write output to specified file.")
 
-OPT_PARAM( grpc, "<port>", "TCP ports used for the gRPC bridge" )
+#ifdef ANDROID_GRPC
+OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge" )
+#endif
+
+#ifdef ANDROID_WEBRTC
+OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc video bridge")
+#endif
 
 #undef CFG_FLAG
 #undef CFG_PARAM
