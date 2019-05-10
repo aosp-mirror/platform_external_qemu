@@ -57,7 +57,8 @@ public:
     WebRtcBridge(AsyncSocketAdapter* socket,
                  const QAndroidRecordScreenAgent* const screenAgent,
                  int desiredFps,
-                 int videoBridgePort);
+                 int videoBridgePort,
+                 std::string turncfg = "");
     ~WebRtcBridge();
 
     bool connect(std::string identity) override;
@@ -72,7 +73,8 @@ public:
 
     // Returns a webrtc bridge, or NopBridge in case of failures..
     static RtcBridge* create(int port,
-                             const AndroidConsoleAgents* const consoleAgents);
+                             const AndroidConsoleAgents* const consoleAgents,
+                             std::string turncfg);
 
     // Socket events..
     void received(SocketTransport* from, const json object) override;
@@ -93,6 +95,7 @@ private:
     int mVideoBridgePort;
     System::Pid mBridgePid;
     std::string mVideoModule;
+    std::string mTurnConfig = "";
     BridgeState mState = BridgeState::Disconnected;
 
     // Needed to start/stop the emulators streaming rtc module..
