@@ -18,7 +18,7 @@ glslangValidator_path = os.path.join(prebuilts_path, "android-emulator-build", "
 
 shader_source_path = os.path.join(qemu_path, "android", "android-emugl", "host", "libs", "libOpenglRender", "vulkan")
 shader_lib_name = "Etc2ShaderLib"
-shader_source_names = {"Etc2RGB8", "Etc2RGBA8", "EacR11Unorm", "EacR11Snorm", "EacRG11Unorm", "EacRG11Snorm"}
+shader_source_names = {"Etc2RGB8", "Etc2RGBA8", "EacR11Unorm", "EacR11Snorm", "EacRG11Unorm", "EacRG11Snorm", "Astc"}
 image_types = {"2DArray", "3D"}
 
 shader_sources = ["", ""]
@@ -32,7 +32,11 @@ for shader_source_name in shader_source_names:
         with open(file_name, 'r') as file:
             shader_sources[1] = file.read()
         tmp_file, tmp_file_name = tempfile.mkstemp(suffix=".comp")
-        os.write(tmp_file, "\n".join(shader_sources).replace("${type}", image_type))
+        if shader_source_name != "Astc":
+            combined_shader_source = "\n".join(shader_sources)
+        else:
+            combined_shader_source = shader_sources[1]
+        os.write(tmp_file, combined_shader_source.replace("${type}", image_type))
         os.close(tmp_file)
         out_spv_path = os.path.join(shader_source_path, shader_source_name + "_" + image_type + ".spv")
         if os.path.exists(out_spv_path):
