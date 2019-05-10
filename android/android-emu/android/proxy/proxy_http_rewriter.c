@@ -750,13 +750,14 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
     case BODY_CHUNKED:
         if (conn->chunk_state == CHUNK_DATA_END) {
             /* We're waiting for the CR LF after the chunk data */
+            int old_n = str->n;
             ret = proxy_connection_receive_line(root, fd);
             if (ret != DATA_COMPLETED) {
                 PROXY_LOG("%s: receive line too early ret=%d", root->name, ret);
                 return ret;
             }
 
-            if (str->s[0] != 0) { /* this should be an empty line */
+            if (str->n != old_n) { /* should have received empty line, so nothing added */
                 PROXY_LOG("%s: invalid chunk data end: '%s'",
                             root->name, str->s);
                 return DATA_ERROR;
@@ -813,9 +814,10 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
             conn->chunk_total  = 0;
             conn->chunk_state  = CHUNK_DATA;
             if (length == 0) {
-                /* the last chunk, no we need to add the trailer */
+                /* the last chunk, now we need to add the trailer */
                 conn->chunk_state         = CHUNK_TRAILER;
                 conn->parse_chunk_trailer = 0;
+                conn->body_has_data = 1;
             }
         }
 
@@ -829,7 +831,14 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
                 conn->parse_chunk_trailer = 1;
             }
             ret = rewrite_connection_read_headers(conn, fd);
+            /* proxy_connection_receive_line() did remove the
+            * trailing \r\n, but we must preserve it when we
+            * send the trailer to the proxy
+            */
+            stralloc_add_str(root->str, "\r\n");
+
             if (ret == DATA_COMPLETED) {
+                conn->body_has_data = 1;
                 conn->body_is_closed = 1;
             }
             return ret;
