@@ -166,6 +166,10 @@ public:
     }
 
     void setScreenMask(int width, int height, const unsigned char* rgbaData) { }
+    void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                         uint32_t h, uint32_t dpi, bool add) { };
+    void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) { };
+
     void cleanupProcGLObjects(uint64_t puid) { }
     void stop(bool wait) { }
     void finish() { }
