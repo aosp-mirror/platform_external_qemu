@@ -44,6 +44,7 @@ bool EmulatorConnection::listen(bool fork) {
         return false;
     }
 
+#ifndef _WIN32
     if (fork) {
         pid_t pid = ::fork();
         if (pid != 0) {
@@ -52,6 +53,7 @@ bool EmulatorConnection::listen(bool fork) {
             return true;
         }
     }
+#endif
 
     if (socket->Listen(32) != 0) {
         RTC_LOG(LERROR) << "Failed to listen for incoming sockets.";
