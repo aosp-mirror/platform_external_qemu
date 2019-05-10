@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     }
 
     rtc::InitializeSSL();
-    emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle);
+    emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle, FLAG_turn);
     int status = server.listen(FLAG_daemon) ? 0 : 1;
     RTC_LOG(INFO) << "Finished, status: " << status;
     rtc::CleanupSSL();

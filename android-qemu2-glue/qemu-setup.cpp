@@ -253,7 +253,11 @@ bool qemu_android_emulation_setup() {
     int grpc = -1;
     if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
         #ifdef ANDROID_WEBRTC
-            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents()));
+            std::string turn = "";
+            if (android_cmdLineOptions->turncfg) {
+                turn = android_cmdLineOptions->turncfg;
+            }
+            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents(), turn));
         #else
             rtcBridge.reset(new android::emulation::control::NopRtcBridge());
         #endif

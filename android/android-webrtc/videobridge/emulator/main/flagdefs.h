@@ -26,6 +26,7 @@ WEBRTC_DEFINE_bool(verbose, false, "Enables logging to stdout");
 #else
     WEBRTC_DEFINE_bool(daemon, false, "Run as a deamon, will print PID of deamon upon exit");
 #endif
+WEBRTC_DEFINE_string(turn, "", "Process that will be invoked to retrieve TURN json configuration.");
 WEBRTC_DEFINE_string(logdir,
                      "",
                      "Directory to log files to, or empty when unused");
