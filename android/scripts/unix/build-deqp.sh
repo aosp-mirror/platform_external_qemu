@@ -45,8 +45,8 @@ EMU_DIR=$AOSP_DIR/external/qemu
 EMU_CUSTOM_DEQP_SRC_DIR=$AOSP_DIR/external/qemu/android/scripts/deqp-src-to-copy
 EMU_OUTPUT_DIR=$AOSP_DIR/external/qemu/objs
 
-rm -rf $DEQP_BUILD_DIR
-mkdir -p $DEQP_BUILD_DIR
+#rm -rf $DEQP_BUILD_DIR
+#mkdir -p $DEQP_BUILD_DIR
 
 log $LOCAL_HOST_SYSTEMS
 
