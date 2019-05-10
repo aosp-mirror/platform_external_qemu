@@ -82,6 +82,7 @@ set(android-emu-common
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp

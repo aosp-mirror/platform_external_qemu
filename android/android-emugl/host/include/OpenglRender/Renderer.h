@@ -161,6 +161,14 @@ public:
     //    device screen to mask that screen
     virtual void setScreenMask(int width, int height, const unsigned char* rgbaData) = 0;
 
+    // setMultiDisplay
+    //    add/modify/del multi-display window
+    virtual void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                                 uint32_t h, uint32_t dpi, bool add) = 0;
+    // setMultiDisplayColorBuffer
+    //    bind ColorBuffer to the display
+    virtual void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) = 0;
+
     // cleanupProcGLObjects -
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.

@@ -79,6 +79,11 @@ void android_setOpenglesTranslation(float px, float py);
 
 void android_setOpenglesScreenMask(int width, int height, const unsigned char* rgbaData);
 
+void android_setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                             uint32_t h, uint32_t dpi, bool add);
+
+void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb);
+
 void android_redrawOpenglesWindow(void);
 
 bool android_hasGuestPostedAFrame(void);

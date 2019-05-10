@@ -34,6 +34,7 @@ set(libqemu2-glue_src
     qemu-finger-agent-impl.c
     qemu-location-agent-impl.c
     qemu-http-proxy-agent-impl.c
+    qemu-multi-display-agent-impl.cpp
     qemu-net-agent-impl.c
     qemu-car-data-agent-impl.cpp
     qemu-record-screen-agent-impl.c

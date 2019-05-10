@@ -32,6 +32,7 @@
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/automation_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/error-messages.h"
@@ -784,6 +785,7 @@ static int startEmulatorWithMinConfig(
             gQAndroidUserEventAgent,
             gQAndroidVirtualSceneAgent,
             gQCarDataAgent,
+            gQAndroidMultiDisplayAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
                      // don't set it.
     };
@@ -1734,6 +1736,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidUserEventAgent,
             gQAndroidVirtualSceneAgent,
             gQCarDataAgent,
+            gQAndroidMultiDisplayAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
                      // don't set it.
     };
