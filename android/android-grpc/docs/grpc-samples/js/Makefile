@@ -20,7 +20,10 @@ PROTOC=protoc
 GRPC_WEB_PLUGIN = protoc-gen-grpc-web
 GRPC_WEB_PLUGIN_PATH ?= `which $(GRPC_WEB_PLUGIN)`
 PROTOC_CMD = which $(PROTOC)
-PROTOC_CHECK_CMD=$(PROTOC) --version | grep -q "libprotoc 3.6" && echo true || echo false
+
+PROTOC_36_CHECK_CMD=$(PROTOC) --version | grep -q "libprotoc 3.6" && echo true || echo false
+PROTOC_37_CHECK_CMD=$(PROTOC) --version | grep -q "libprotoc 3.7" && echo true || echo false
+
 PROTOHEADER=$(shell pkg-config --variable prefix protobuf)/include
 PROTOLIB=$(shell pkg-config --variable prefix protobuf)/lib
 
@@ -28,7 +31,10 @@ HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
 HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
 
 ifeq ($(HAS_PROTOC),true)
-	HAS_VALID_PROTOC := $(shell $(PROTOC_CHECK_CMD))
+	HAS_VALID_PROTOC := $(shell $(PROTOC_36_CHECK_CMD))
+	ifneq ($(HAS_VALID_PROTOC), true)
+		HAS_VALID_PROTOC := $(shell $(PROTOC_37_CHECK_CMD))
+	endif
 endif
 
 
