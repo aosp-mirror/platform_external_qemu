@@ -392,9 +392,10 @@ void RecordMacroPage::disableMacroItemsExcept(QListWidgetItem* listItem) {
 
     for (int i = 0; i < mUi->macroList->count(); ++i) {
         QListWidgetItem* item = mUi->macroList->item(i);
+        RecordMacroSavedItem* macroItem = getItemWidget(item);
+        macroItem->editEnabled(false);
         if (item != listItem) {
             item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-            RecordMacroSavedItem* macroItem = getItemWidget(item);
             macroItem->setEnabled(false);
         }
     }
@@ -418,6 +419,9 @@ void RecordMacroPage::enableMacroItems() {
         item->setFlags(item->flags() | Qt::ItemIsEnabled);
         RecordMacroSavedItem* macroItem = getItemWidget(item);
         macroItem->setEnabled(true);
+        if (!macroItem->getIsPreset()) {
+            macroItem->editEnabled(true);
+        }
     }
 }
 
@@ -608,6 +612,7 @@ void RecordMacroPage::setRecordState() {
     if (!mRecording) {
         mUi->recButton->setText(tr("RECORD NEW "));
         mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
+        mUi->recButton->setProperty("themeIconName", "recordCircle");
     }
 
     switch (mState) {
@@ -631,6 +636,7 @@ void RecordMacroPage::setRecordState() {
         }
         case MacroUiState::Recording: {
             mUi->recButton->setIcon(getIconForCurrentTheme("stop_red"));
+            mUi->recButton->setProperty("themeIconName", "stop_red");
             mUi->recButton->setText(tr("STOP RECORDING "));
             break;
         }
@@ -724,17 +730,21 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
 
     RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
     if (isPreset) {
+        macroSavedItem->editEnabled(false);
         macroSavedItem->setIsPreset(true);
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         macroName.append(" (Preset macro)");
     } else {
         macroName = macroName.substr(16, macroName.length() - 26);
+        connect(macroSavedItem,
+                SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
+                SLOT(editButtonClicked(RecordMacroSavedItem*)));
     }
     std::replace(macroName.begin(), macroName.end(), '_', ' ');
     macroSavedItem->setName(macroName.c_str());
 
-    listItem->setSizeHint(QSize(macroSavedItem->sizeHint().width(), 50));
+    listItem->setSizeHint(QSize(mUi->macroList->width(), 50));
 
     mUi->macroList->addItem(listItem);
     mUi->macroList->setItemWidget(listItem, macroSavedItem);
@@ -743,4 +753,21 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
 bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
     // Only check if it is custom for the moment.
     return macroName.find(".emu-macro") == std::string::npos;
+}
+
+void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
+    // Edit options will pop up for the specific list item.
+    std::cout << mUi->macroList->row(findListItemFromWidget(macroItem))
+              << std::endl;
+}
+
+QListWidgetItem* RecordMacroPage::findListItemFromWidget(
+        RecordMacroSavedItem* macroItem) {
+    for (int i = 0; i < mUi->macroList->count(); ++i) {
+        QListWidgetItem* item = mUi->macroList->item(i);
+        if (macroItem == getItemWidget(item)) {
+            return item;
+        }
+    }
+    return NULL;
 }

@@ -52,6 +52,7 @@ private slots:
     void updatePreviewVideoView();
     void previewVideoPlayingFinished();
     void updateElapsedTime();
+    void editButtonClicked(RecordMacroSavedItem* macroItem);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
@@ -87,6 +88,7 @@ private:
     void loadCustomMacros();
     void createMacroItem(std::string& macroName, bool isPreset);
     bool isPreviewAvailable(const std::string& macroName);
+    QListWidgetItem* findListItemFromWidget(RecordMacroSavedItem* macroItem);
 
     // Behind feature flag.
     void setRecordState();

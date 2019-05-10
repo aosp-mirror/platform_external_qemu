@@ -75,6 +75,10 @@ QListWidget QLabel, QWidget QLabel {
 QListWidget QLabel:disabled {
     color:gray;
 }
+QListWidget QPushButton {
+    background: none;
+    border: none;
+}
 QGroupBox::title { margin-top: 4px; margin-left: 0px }
 QTextEdit:disabled, QLineEdit:disabled { border: 0px }
 QTextEdit, QLineEdit {
