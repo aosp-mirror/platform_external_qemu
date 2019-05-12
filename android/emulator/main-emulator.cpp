@@ -290,6 +290,7 @@ int main(int argc, char** argv)
         useSystemLibs = true;
     }
     const char* stdouterr_file = nullptr;
+    const char* qemu_top_dir = nullptr;
 #endif  // __linux__
 
     /* Parse command-line and look for
@@ -320,6 +321,13 @@ int main(int argc, char** argv)
         if (!strcmp(opt, "-stdouterr-file")) {
             stdouterr_file = argv[nn + 1];
             nn++;
+            continue;
+        }
+        if (!strcmp(opt, "-qemu-top-dir")) {
+            qemu_top_dir = argv[nn + 1];
+            argv[nn] = "-verbose";
+            nn++;
+            argv[nn] = "-verbose";
             continue;
         }
 #endif  // __linux__
@@ -697,10 +705,13 @@ int main(int argc, char** argv)
                                                             sysDir, androidOut);
     const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
     char* emulatorPath = nullptr;
-    StringView progDir;
+    std::string progDir;
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
+        if (qemu_top_dir) {
+            progDir = progDir + std::string("/") + std::string(qemu_top_dir);
+        }
         if (ranchu == RANCHU_ON) {
             emulatorPath = getQemuExecutablePath(
                     progDir.data(), avdArch, force64bitTarget, wantedBitness);
