@@ -268,6 +268,31 @@ int main(int argc, char** argv)
     int restartPid = -1;
     bool doDeleteTempDir = false;
 
+#ifdef __linux__
+    const char* qemu_top_dir = nullptr;
+    char my_dumboption_string [] = "-ranchu";
+    for (int nn = 1; nn < argc; nn++) {
+        const char* opt = argv[nn];
+        if (!strcmp(opt, "-qemu-top-dir")) {
+            qemu_top_dir = argv[nn + 1];
+            argv[nn] = my_dumboption_string;
+            nn++;
+            argv[nn] = my_dumboption_string;
+        }
+    }
+    if (qemu_top_dir) {
+        char mybuf[1024];
+        char* c_argv0_dir_name = path_dirname(argv[0]);
+        snprintf(mybuf, sizeof(mybuf), "%s/%s/emulator", c_argv0_dir_name, qemu_top_dir);
+        char* emulatorPath = mybuf;
+        argv[0] = emulatorPath;
+        printf("emulator: INFO: launch %s ... \n", emulatorPath);
+        fflush(stdout);
+        safe_execv(emulatorPath, argv);
+        return errno;
+    }
+#endif
+
     /* Test-only actions */
     bool isLauncherTest = false;
     const char* launcherTestArg = nullptr;
