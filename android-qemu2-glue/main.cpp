@@ -1137,9 +1137,9 @@ extern "C" int main(int argc, char** argv) {
 
         // bug: 130381533
         // Don't use snapshots with car image
-        if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
-            badSnapshots = true;
-        }
+        // if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
+        //     badSnapshots = true;
+        // }
 
         // Bad generic snapshots command line option
         if (opts->snapshot && opts->snapshot[0] == '\0') {
