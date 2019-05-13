@@ -757,6 +757,232 @@
       </property>
      </item>
     </widget>
+    <widget class="QGroupBox" name="set_multiDisplayTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>420</y>
+       <width>131</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Multiple Display</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_multiDisplayWidthTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>450</y>
+       <width>41</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Width</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_multiDisplayHeightTitle">
+     <property name="geometry">
+      <rect>
+       <x>108</x>
+       <y>450</y>
+       <width>41</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Height</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_multiDisplayDpiTitle">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>450</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Dpi</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="set_multiDisplayWidth" native="true">
+     <property name="geometry">
+      <rect>
+       <x>55</x>
+       <y>450</y>
+       <width>51</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="set_multiDisplayHeight" native="true">
+     <property name="geometry">
+      <rect>
+       <x>148</x>
+       <y>450</y>
+       <width>51</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="set_multiDisplayDpi" native="true">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>450</y>
+       <width>41</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_multiDisplayPickBox">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>420</y>
+       <width>121</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="currentIndex">
+      <number>-1</number>
+     </property>
+     <property name="maxVisibleItems">
+      <number>10</number>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_multiDisplayEnabled">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>450</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Enabled</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="set_multiDisplay">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>450</y>
+       <width>41</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>8</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>APPLY</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
@@ -1212,7 +1438,7 @@
      <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="currentText">
+     <property name="currentText" stdset="0">
       <string>Autodetect based on host (default)</string>
      </property>
      <property name="report_metrics" stdset="0">
@@ -1264,7 +1490,7 @@
      <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="currentText">
+     <property name="currentText" stdset="0">
       <string>Autoselect</string>
      </property>
      <property name="report_metrics" stdset="0">
@@ -1323,6 +1549,12 @@
    <class>RaisedMaterialButton</class>
    <extends>QPushButton</extends>
    <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AngleInputWidget</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/angle-input-widget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

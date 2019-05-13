@@ -180,6 +180,7 @@ public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
     void showVirtualSceneControls(bool show);
+    void switchMultiDisplay(bool enabled, uint32_t id, uint32_t width, uint32_t height, uint32_t dpi);
 
 private slots:
     void on_back_button_pressed();
