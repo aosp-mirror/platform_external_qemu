@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "530661c3_54703aa3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3208,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-13T20:16:49Z",
+      "side": 1,
+      "message": "Thanks for the check. This is not a typo.",
+      "parentUuid": "c1ecec14_95029dc8",
+      "range": {
+        "startLine": 3208,
+        "startChar": 39,
+        "endLine": 3208,
+        "endChar": 51
+      },
+      "revId": "c518a7c07a61d26c4fa4350d3659c2559ab29bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cdd0ef5c_532a234f",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "c518a7c07a61d26c4fa4350d3659c2559ab29bf4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2667c7ee_d3907716",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3313,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-13T20:16:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cdd0ef5c_532a234f",
+      "range": {
+        "startLine": 3313,
+        "startChar": 40,
+        "endLine": 3313,
+        "endChar": 63
+      },
+      "revId": "c518a7c07a61d26c4fa4350d3659c2559ab29bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
