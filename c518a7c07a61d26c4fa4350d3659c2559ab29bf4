@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1ecec14_95029dc8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3208,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-13T19:58:42Z",
+      "side": 1,
+      "message": "Just in case of typo: PushConstant or pushConstant?",
+      "range": {
+        "startLine": 3208,
+        "startChar": 39,
+        "endLine": 3208,
+        "endChar": 51
+      },
+      "revId": "c518a7c07a61d26c4fa4350d3659c2559ab29bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdd0ef5c_532a234f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3313,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-13T19:58:42Z",
+      "side": 1,
+      "message": "This is outside of this cl, if you change layout of PushConstant, values might land not as you want.",
+      "range": {
+        "startLine": 3313,
+        "startChar": 40,
+        "endLine": 3313,
+        "endChar": 63
+      },
+      "revId": "c518a7c07a61d26c4fa4350d3659c2559ab29bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
