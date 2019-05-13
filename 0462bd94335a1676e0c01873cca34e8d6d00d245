@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d9fa3ca_913fbe76",
+        "filename": "android/android-emu/android/emulation/MultiDisplayPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-13T22:59:16Z",
+      "side": 1,
+      "message": "maybe we can try #include \"android/opengles.h\" to see if it works here?",
+      "revId": "0462bd94335a1676e0c01873cca34e8d6d00d245",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "060253e9_e25e0a5b",
+        "filename": "android/android-emu/android/emulation/MultiDisplayPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-13T22:59:16Z",
+      "side": 1,
+      "message": "Use static MultiDisplayPipe* or LazyInstance\u003cMultiDisplayPipe*\u003e might be better than global sInstance here.",
+      "revId": "0462bd94335a1676e0c01873cca34e8d6d00d245",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
