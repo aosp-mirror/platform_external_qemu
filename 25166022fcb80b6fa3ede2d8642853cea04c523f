@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a500cab_c5961a78",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/Switchboard.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-13T20:33:18Z",
+      "side": 1,
+      "message": "Do we care this string is copied while not required to?",
+      "range": {
+        "startLine": 49,
+        "startChar": 28,
+        "endLine": 49,
+        "endChar": 38
+      },
+      "revId": "25166022fcb80b6fa3ede2d8642853cea04c523f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "978fbdc4_a4e27ae9",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/Switchboard.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-13T20:33:18Z",
+      "side": 1,
+      "message": "I think this is not required.",
+      "range": {
+        "startLine": 76,
+        "startChar": 12,
+        "endLine": 76,
+        "endChar": 14
+      },
+      "revId": "25166022fcb80b6fa3ede2d8642853cea04c523f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
