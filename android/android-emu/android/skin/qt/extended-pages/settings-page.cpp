@@ -286,6 +286,16 @@ SettingsPage::SettingsPage(QWidget* parent)
         settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
     mUi->set_disableMouseWheel->setChecked(disableMouseWheel);
     on_set_disableMouseWheel_toggled(disableMouseWheel);
+
+    mUi->set_multiDisplayWidth->setMinValue(0);
+    mUi->set_multiDisplayWidth->setMaxValue(9999);
+    mUi->set_multiDisplayWidth->setValue(1200);
+    mUi->set_multiDisplayHeight->setMinValue(0);
+    mUi->set_multiDisplayHeight->setMaxValue(9999);
+    mUi->set_multiDisplayHeight->setValue(800);
+    mUi->set_multiDisplayDpi->setMinValue(0);
+    mUi->set_multiDisplayDpi->setMaxValue(999);
+    mUi->set_multiDisplayDpi->setValue(240);
 }
 
 SettingsPage::~SettingsPage() {
@@ -643,4 +653,11 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::on_set_multiDisplay_toggled(bool checked) {
+    uint32_t width = mUi->set_multiDisplayWidth->value();
+    uint32_t height = mUi->set_multiDisplayHeight->value();
+    uint32_t dpi = mUi->set_multiDisplayDpi->value();
+    emit enableMultiDisplayChanged(checked, 1, width, height, dpi);
 }

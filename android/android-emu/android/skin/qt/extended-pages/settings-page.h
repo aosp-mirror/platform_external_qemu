@@ -44,6 +44,8 @@ signals:
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
+    void enableMultiDisplayChanged(bool enabled, uint32_t id, uint32_t width,
+                                   uint32_t height, uint32_t dpi);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -81,6 +83,7 @@ private slots:
 
     void on_set_clipboardSharing_toggled(bool checked);
     void on_set_disableMouseWheel_toggled(bool checked);
+    void on_set_multiDisplay_toggled(bool checked);
 
 private:
     bool eventFilter(QObject* object, QEvent* event) override;
