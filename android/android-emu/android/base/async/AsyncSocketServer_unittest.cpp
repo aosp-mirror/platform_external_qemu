@@ -104,7 +104,7 @@ struct TestData {
 
 TEST(AsyncSocketServer, createTcpLoopbackServerIPv4) {
     int kPort = 0;  // random high value?
-    int kDelayMs = 20;
+    int kDelayMs = 100; // Lets not be too aggresive..
     Looper* looper = ThreadLooper::get();
 
     TestData data(looper, kPort);
