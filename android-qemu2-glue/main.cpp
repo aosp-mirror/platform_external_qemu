@@ -613,11 +613,11 @@ private:
 
 static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHwConfig* hw) {
     if (fc::isEnabled(fc::VirtioInput)) {
-        if(androidHwConfig_isScreenMultiTouch(hw)) {
-            args.add("-device");
-            args.add("virtio_input_multi_touch_pci_1");
-            args.add("-device");
-            args.add("virtio_input_multi_touch_pci_2");
+        if (androidHwConfig_isScreenMultiTouch(hw)) {
+            for (int id = 1; id <= 10; id++) {
+                args.add("-device");
+                args.add(StringFormat("virtio_input_multi_touch_pci_%d", id).c_str());
+            }
         }
 
         if (hw->hw_keyboard) {
