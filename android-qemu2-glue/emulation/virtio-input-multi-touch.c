@@ -28,9 +28,6 @@
 /* Maximum number of pointers, supported by multi-touch emulation. */
 #define MTS_POINTERS_NUM 10
 
-/* Maximum number of virtio input devices*/
-#define VIRTIO_INPUT_MAX_NUM 2
-
 #if DEBUG
 #include <stdio.h>
 
@@ -70,6 +67,15 @@ typedef struct VirtIOInputMultiTouch##id { \
 
 VIRTIO_INPUT_MT_STRUCT(1)
 VIRTIO_INPUT_MT_STRUCT(2)
+VIRTIO_INPUT_MT_STRUCT(3)
+VIRTIO_INPUT_MT_STRUCT(4)
+VIRTIO_INPUT_MT_STRUCT(5)
+VIRTIO_INPUT_MT_STRUCT(6)
+VIRTIO_INPUT_MT_STRUCT(7)
+VIRTIO_INPUT_MT_STRUCT(8)
+VIRTIO_INPUT_MT_STRUCT(9)
+VIRTIO_INPUT_MT_STRUCT(10)
+VIRTIO_INPUT_MT_STRUCT(11)
 
 #define VIRTIO_INPUT_MT_PCI_STRUCT(id) \
 typedef struct VirtIOInputMultiTouchPCI##id { \
@@ -79,24 +85,15 @@ typedef struct VirtIOInputMultiTouchPCI##id { \
 
 VIRTIO_INPUT_MT_PCI_STRUCT(1)
 VIRTIO_INPUT_MT_PCI_STRUCT(2)
-
-#define VIRTIO_INPUT_MT_REALIZE(id) \
-static void virtio_input_multi_touch_realize##id(DeviceState* dev, Error** errp) { \
-    VirtIOInput* vinput = VIRTIO_INPUT(dev); \
-    s_virtio_input_multi_touch[(id)-1] = vinput; }
-
-VIRTIO_INPUT_MT_REALIZE(1)
-VIRTIO_INPUT_MT_REALIZE(2)
-
-#define VIRTIO_INPUT_MT_CLASS_INIT(id) \
-static void virtio_input_multi_touch_class_init##id(ObjectClass* klass, \
-                                                 void* data) { \
-    VirtIOInputClass* vic = VIRTIO_INPUT_CLASS(klass); \
-    vic->realize = virtio_input_multi_touch_realize##id; \
-}
-
-VIRTIO_INPUT_MT_CLASS_INIT(1)
-VIRTIO_INPUT_MT_CLASS_INIT(2)
+VIRTIO_INPUT_MT_PCI_STRUCT(3)
+VIRTIO_INPUT_MT_PCI_STRUCT(4)
+VIRTIO_INPUT_MT_PCI_STRUCT(5)
+VIRTIO_INPUT_MT_PCI_STRUCT(6)
+VIRTIO_INPUT_MT_PCI_STRUCT(7)
+VIRTIO_INPUT_MT_PCI_STRUCT(8)
+VIRTIO_INPUT_MT_PCI_STRUCT(9)
+VIRTIO_INPUT_MT_PCI_STRUCT(10)
+VIRTIO_INPUT_MT_PCI_STRUCT(11)
 
 // Vendor and product values must be 0 to
 // indicate an internal device and prevent a
@@ -121,7 +118,15 @@ static struct virtio_input_config virtio_input_multi_touch_config##id[] = { \
 
 VIRTIO_INPUT_MT_CONFIG(1)
 VIRTIO_INPUT_MT_CONFIG(2)
-
+VIRTIO_INPUT_MT_CONFIG(3)
+VIRTIO_INPUT_MT_CONFIG(4)
+VIRTIO_INPUT_MT_CONFIG(5)
+VIRTIO_INPUT_MT_CONFIG(6)
+VIRTIO_INPUT_MT_CONFIG(7)
+VIRTIO_INPUT_MT_CONFIG(8)
+VIRTIO_INPUT_MT_CONFIG(9)
+VIRTIO_INPUT_MT_CONFIG(10)
+VIRTIO_INPUT_MT_CONFIG(11)
 
 static struct virtio_input_config multi_touch_config[] = {
         {
@@ -225,23 +230,30 @@ static void configure_multi_touch_ev_abs(VirtIOInput* vinput) {
 #define VIRTIO_INPUT_MT_INSTANCE_INIT(id) \
 static void virtio_input_multi_touch_init##id(Object* obj) { \
     VirtIOInput* vinput = VIRTIO_INPUT(obj); \
+    s_virtio_input_multi_touch[(id)-1] = vinput; \
     virtio_input_init_config(vinput, virtio_input_multi_touch_config##id); \
     configure_multi_touch_ev_abs(vinput); \
-}
+};
 
 VIRTIO_INPUT_MT_INSTANCE_INIT(1)
 VIRTIO_INPUT_MT_INSTANCE_INIT(2)
+VIRTIO_INPUT_MT_INSTANCE_INIT(3)
+VIRTIO_INPUT_MT_INSTANCE_INIT(4)
+VIRTIO_INPUT_MT_INSTANCE_INIT(5)
+VIRTIO_INPUT_MT_INSTANCE_INIT(6)
+VIRTIO_INPUT_MT_INSTANCE_INIT(7)
+VIRTIO_INPUT_MT_INSTANCE_INIT(8)
+VIRTIO_INPUT_MT_INSTANCE_INIT(9)
+VIRTIO_INPUT_MT_INSTANCE_INIT(10)
+VIRTIO_INPUT_MT_INSTANCE_INIT(11)
 
 #define VIRTIO_INPUT_MT_TYPE_INFO(id) \
-static const TypeInfo virtio_input_multi_touch_info##id = { \
+    { \
         .name = TYPE_VIRTIO_INPUT_MULTI_TOUCH(id), \
         .parent = TYPE_VIRTIO_INPUT, \
         .instance_size = sizeof(VirtIOInputMultiTouch##id), \
-        .class_init = virtio_input_multi_touch_class_init##id, \
-        .instance_init = virtio_input_multi_touch_init##id, };
-
-VIRTIO_INPUT_MT_TYPE_INFO(1)
-VIRTIO_INPUT_MT_TYPE_INFO(2)
+        .instance_init = virtio_input_multi_touch_init##id, \
+    }
 
 #define VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(id) \
 static void virtio_input_multi_touch_pci_init##id(Object* obj) { \
@@ -251,28 +263,50 @@ static void virtio_input_multi_touch_pci_init##id(Object* obj) { \
 
 VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(1)
 VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(2)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(3)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(4)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(5)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(6)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(7)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(8)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(9)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(10)
+VIRTIO_INPUT_MT_PCI_INSTANCE_INIT(11)
 
 #define VIRTIO_INPUT_MT_PCI_TYPE_INFO(id) \
-static const TypeInfo virtio_input_multi_touch_pci_info##id = { \
+    { \
         .name = TYPE_VIRTIO_INPUT_MULTI_TOUCH_PCI(id), \
         .parent = TYPE_VIRTIO_INPUT_PCI, \
         .instance_size = sizeof(VirtIOInputMultiTouchPCI##id), \
-        .instance_init = virtio_input_multi_touch_pci_init##id, }; \
+        .instance_init = virtio_input_multi_touch_pci_init##id, \
+    }
 
-VIRTIO_INPUT_MT_PCI_TYPE_INFO(1)
-VIRTIO_INPUT_MT_PCI_TYPE_INFO(2)
+static const TypeInfo types[] = {
+    VIRTIO_INPUT_MT_TYPE_INFO(1),
+    VIRTIO_INPUT_MT_TYPE_INFO(2),
+    VIRTIO_INPUT_MT_TYPE_INFO(3),
+    VIRTIO_INPUT_MT_TYPE_INFO(4),
+    VIRTIO_INPUT_MT_TYPE_INFO(5),
+    VIRTIO_INPUT_MT_TYPE_INFO(6),
+    VIRTIO_INPUT_MT_TYPE_INFO(7),
+    VIRTIO_INPUT_MT_TYPE_INFO(8),
+    VIRTIO_INPUT_MT_TYPE_INFO(9),
+    VIRTIO_INPUT_MT_TYPE_INFO(10),
+    VIRTIO_INPUT_MT_TYPE_INFO(11),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(1),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(2),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(3),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(4),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(5),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(6),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(7),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(8),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(9),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(10),
+    VIRTIO_INPUT_MT_PCI_TYPE_INFO(11),
+};
 
-#define VIRTIO_INPUT_MT_REGISTER(id) do { \
-    type_register_static(&virtio_input_multi_touch_info##id); \
-    type_register_static(&virtio_input_multi_touch_pci_info##id); \
-} while(0);
-
-static void virtio_register_types(void) {
-    VIRTIO_INPUT_MT_REGISTER(1)
-    VIRTIO_INPUT_MT_REGISTER(2)
-}
-
-type_init(virtio_register_types)
+DEFINE_TYPES(types)
 
 int android_virtio_input_send(int type, int code, int value) {
     if (type != EV_ABS && type != EV_SYN) {
@@ -295,8 +329,9 @@ void android_virtio_kbd_mouse_event(int dx,
     int w, h = 0;
     if (displayId < VIRTIO_INPUT_MAX_NUM && displayId > 0) {
         s_current_virtio_input = s_virtio_input_multi_touch[displayId];
-        int x, y;
-        gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, &x, &y, &w, &h);
+        uint32_t x, y;
+        gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, &x, &y,
+                                                      (uint32_t*)&w, (uint32_t*)&h);
     } else {
         s_current_virtio_input = s_virtio_input_multi_touch[0];
         gQAndroidDisplayAgent->getFrameBuffer(&w, &h, NULL, NULL, NULL);
