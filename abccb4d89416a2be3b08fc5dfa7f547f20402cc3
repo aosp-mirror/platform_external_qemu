@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e12f8378_59eef55a",
+        "filename": "android/android-grpc/docs/grpc-samples/js/package-lock.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-14T20:52:48Z",
+      "side": 1,
+      "message": "What is the purpose of this 16k line file?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "abccb4d89416a2be3b08fc5dfa7f547f20402cc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
