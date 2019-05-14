@@ -59,25 +59,11 @@ static void _hwCarClient_recv(void* opaque,
 }
 
 static void _hwCarClient_close(void* opaque) {
-    // TODO: handle close
-}
-
-static void _hwCarClient_save(Stream* f, QemudClient* client, void* opaque) {
-    // TODO
-}
-
-static int _hwCarClient_load(Stream* f, QemudClient* client, void* opaque) {
-    // TODO
-    return 0;
-}
-
-static void _hwCar_save(Stream* f, QemudService* sv, void* opaque) {
-    // TODO
-}
-
-static int _hwCar_load(Stream* f, QemudService* s, void* opaque) {
-    // TODO
-    return 0;
+    auto car = static_cast<HwCar*>(opaque);
+    if (car->client != nullptr) {
+        qemud_client_close(car->client);
+        car->client = NULL;
+    }
 }
 
 static QemudClient* _hwCar_connect(void* opaque,
@@ -90,9 +76,9 @@ static QemudClient* _hwCar_connect(void* opaque,
     if (car->client != nullptr) {
         qemud_client_close(car->client);
     }
-    QemudClient* client = qemud_client_new(
-            service, channel, client_param, opaque, _hwCarClient_recv,
-            _hwCarClient_close, _hwCarClient_save, _hwCarClient_load);
+    QemudClient* client =
+            qemud_client_new(service, channel, client_param, opaque,
+                             _hwCarClient_recv, _hwCarClient_close, NULL, NULL);
     qemud_client_set_framing(client, 1);
     car->client = client;
     return client;
@@ -101,8 +87,10 @@ static QemudClient* _hwCar_connect(void* opaque,
 void android_car_init(void) {
     HwCar* car = _car;
     if (car->service == nullptr) {
+        // Car service have nothing to save and load
+        // The callback won't change
         car->service = qemud_service_register("car", 0, car, _hwCar_connect,
-                                              _hwCar_save, _hwCar_load);
+                                              NULL, NULL);
         D("%s: car qemud service initialized", __func__);
     } else {
         D("%s: car qemud service already initialized", __func__);
