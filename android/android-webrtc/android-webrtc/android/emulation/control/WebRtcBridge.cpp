@@ -8,6 +8,7 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include "android/base/ArraySize.h"
+#include "android/base/Optional.h"
 #include "android/base/Uuid.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/misc/StringUtils.h"
@@ -16,7 +17,6 @@
 #include "android/base/system/System.h"
 #include "android/emulation/control/window_agent.h"
 #include "emulator/net/AsyncSocket.h"
-#include "android/base/Optional.h"
 
 using emulator::net::AsyncSocket;
 using nlohmann::json;
@@ -42,12 +42,14 @@ static std::string generateUniqueVideoHandle() {
 WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
                            const QAndroidRecordScreenAgent* const screenAgent,
                            int fps,
-                           int videoBridgePort)
+                           int videoBridgePort,
+                           std::string turncfg)
     : mProtocol(this),
       mTransport(&mProtocol, socket),
       mScreenAgent(screenAgent),
       mFps(fps),
-      mVideoBridgePort(videoBridgePort) {
+      mVideoBridgePort(videoBridgePort),
+      mTurnConfig(turncfg) {
     mVideoModule = generateUniqueVideoHandle();
 }
 
@@ -221,12 +223,15 @@ void WebRtcBridge::stateConnectionChange(SocketTransport* connection,
     }
 }
 
-static Optional<System::Pid> launchAsDaemon(std::string executable, int port,
-                                                 std::string videomodule) {
+static Optional<System::Pid> launchAsDaemon(std::string executable,
+                                            int port,
+                                            std::string videomodule,
+                                            std::string turnConfig) {
     std::vector<std::string> cmdArgs{executable, "--daemon",
                                      "--logdir", System::get()->getTempDir(),
                                      "--port",   std::to_string(port),
-                                     "--handle", videomodule};
+                                     "--handle", videomodule,
+                                     "--turn",   turnConfig};
 
     System::Pid bridgePid;
     std::string invoke = "";
@@ -242,21 +247,28 @@ static Optional<System::Pid> launchAsDaemon(std::string executable, int port,
 
     if (exitCode != 0 || !pidStr) {
         // Failed to start video bridge! Mission abort!
-         // Failed to start video bridge! Mission abort!
+        // Failed to start video bridge! Mission abort!
         LOG(INFO) << "Failed to start " << invoke;
         return {};
     }
     sscanf(pidStr->c_str(), "%d", &bridgePid);
     LOG(INFO) << "Launched " << invoke << ", pid:" << bridgePid;
     return bridgePid;
-}
+}  // namespace control
 
-static Optional<System::Pid> launchInBackground(std::string executable, int port,
-                                                     std::string videomodule) {
-    std::vector<std::string> cmdArgs{
-            executable, "--logdir",           System::get()->getTempDir(),
-            "--port",   std::to_string(port), "--handle",
-            videomodule};
+static Optional<System::Pid> launchInBackground(std::string executable,
+                                                int port,
+                                                std::string videomodule,
+                                                std::string turnConfig) {
+    std::vector<std::string> cmdArgs{executable,
+                                     "--logdir",
+                                     System::get()->getTempDir(),
+                                     "--port",
+                                     std::to_string(port),
+                                     "--handle",
+                                     videomodule,
+                                     "--turn",
+                                     turnConfig};
     System::Pid bridgePid;
     std::string invoke = "";
     for (auto arg : cmdArgs) {
@@ -292,12 +304,15 @@ bool WebRtcBridge::start() {
         return false;
     }
 
-    // Daemonized version is only properly supported on Linux
+// Daemonized version is only properly supported on Linux
 #ifdef __linux__
-    Optional<System::Pid> bridgePid = launchAsDaemon(executable, mVideoBridgePort, mVideoModule);
+    Optional<System::Pid> bridgePid = launchAsDaemon(
+            executable, mVideoBridgePort, mVideoModule, mTurnConfig);
 #else
-    // Windows does not have fork, darwin has security requirements that are not easily met
-    Optional<System::Pid> bridgePid = launchInBackground(executable, mVideoBridgePort, mVideoModule);
+    // Windows does not have fork, darwin has security requirements that are
+    // not easily met
+    Optional<System::Pid> bridgePid = launchInBackground(
+            executable, mVideoBridgePort, mVideoModule, mTurnConfig);
 #endif
 
     if (!bridgePid.hasValue()) {
@@ -314,9 +329,9 @@ bool WebRtcBridge::start() {
     return mTransport.connect();
 }
 
-RtcBridge* WebRtcBridge::create(
-        int port,
-        const AndroidConsoleAgents* const consoleAgents) {
+RtcBridge* WebRtcBridge::create(int port,
+                                const AndroidConsoleAgents* const consoleAgents,
+                                std::string turncfg) {
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
     if (executable.empty()) {
@@ -327,7 +342,7 @@ RtcBridge* WebRtcBridge::create(
     Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
     return new WebRtcBridge(socket, consoleAgents->record,
-                            WebRtcBridge::kMaxFPS, port);
+                            WebRtcBridge::kMaxFPS, port, turncfg);
 }
 }  // namespace control
 }  // namespace emulation
