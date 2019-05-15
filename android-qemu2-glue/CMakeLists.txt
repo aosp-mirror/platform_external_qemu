@@ -15,6 +15,7 @@ set(libqemu2-glue_src
     display.cpp
     drive-share.cpp
     emulation/android_pipe_device.cpp
+    emulation/android_address_space_device.cpp
     emulation/charpipe.c
     emulation/CharSerialLine.cpp
     emulation/DmaMap.cpp
