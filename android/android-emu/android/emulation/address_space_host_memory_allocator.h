@@ -27,9 +27,14 @@ public:
 
     void perform(AddressSpaceDevicePingInfo *info) override;
 
+    AddressSpaceDeviceType getDeviceType() const override;
+    void save(android::qemu::QemuFileStream *stream) const override;
+    bool load(android::qemu::QemuFileStream *stream) override;
+
 private:
     uint64_t allocate(AddressSpaceDevicePingInfo *info);
     uint64_t unallocate(AddressSpaceDevicePingInfo *info);
+    void *allocate_impl(uint64_t phys_addr, uint64_t size);
 
     std::unordered_map<uint64_t, std::pair<void *, size_t>> m_paddr2ptr;
 };
