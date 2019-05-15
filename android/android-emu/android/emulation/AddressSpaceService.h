@@ -51,6 +51,9 @@ class AddressSpaceDeviceContext {
 public:
     virtual ~AddressSpaceDeviceContext() {}
     virtual void perform(AddressSpaceDevicePingInfo *info) = 0;
+    virtual AddressSpaceDeviceType getDeviceType() const = 0;
+    virtual void save() const = 0;
+    virtual bool load() = 0;
 };
 
 struct AddressSpaceContextDescription {
