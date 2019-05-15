@@ -91,6 +91,22 @@ public:
         }
     }
 
+    void save() {
+        // mHandleIndex
+        // mContexts.size()
+        for (const auto &kv : mContexts) {
+            const uint32_t handle = kv.first;
+            const AddressSpaceContextDescription &desc = kv.second;
+            const AddressSpaceDeviceContext *device_context = desc.device_context.get();
+            const AddressSpaceDeviceType device_type = device_context->getDeviceType();
+            void *pingInfo = desc.pingInfo;
+            // handle, pingInfo, device_type, device_context->save()
+        }
+    }
+
+    void load() {
+    }
+
 private:
     Lock mLock;
     uint32_t mHandleIndex = 0;
