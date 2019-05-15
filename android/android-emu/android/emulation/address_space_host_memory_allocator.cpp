@@ -59,25 +59,33 @@ void AddressSpaceHostMemoryAllocatorContext::perform(AddressSpaceDevicePingInfo 
     info->metadata = result;
 }
 
-uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePingInfo *info) {
+void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_addr,
+                                                            const uint64_t size) {
     constexpr uint64_t alignment = 4096;
-    const uint64_t aligned_size = ((info->size + alignment - 1) / alignment) * alignment;
+    const uint64_t aligned_size = ((size + alignment - 1) / alignment) * alignment;
 
-    void* host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
+    void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
         std::lock_guard<std::mutex> lock(s_paddr2ptr_mutex);
-
-        const uint64_t phys_addr = info->phys_addr;
 
         if (s_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
             m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}});
             gQAndroidVmOperations->mapUserBackedRam(phys_addr, host_ptr, aligned_size);
 
-            return 0;
+            return host_ptr;
         } else {
             android::aligned_buf_free(host_ptr);
-            return -1;
+            return nullptr;
         }
+    } else {
+        return nullptr;
+    }
+}
+
+uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePingInfo *info) {
+    void* host_ptr = allocate_impl(info->phys_addr, info->size);
+    if (host_ptr) {
+        return 0;
     } else {
         return -1;
     }
@@ -112,6 +120,29 @@ void* AddressSpaceHostMemoryAllocatorContext::getHostAddr(uint64_t phys_addr) {
     } else {
         return NULL;
     }
+}
+
+AddressSpaceDeviceType AddressSpaceHostMemoryAllocatorContext::getDeviceType() const {
+    return AddressSpaceDeviceType::HostMemoryAllocator;
+}
+
+void AddressSpaceHostMemoryAllocatorContext::save() const {
+    for (const auto &kv : m_paddr2ptr) {
+        const uint64_t phys_addr = kv.first;
+        const uint64_t size = kv.second.second;
+        // write(phys_addr)
+        // write(size)
+        // write(kv.second.first, size)
+    }
+}
+
+bool AddressSpaceHostMemoryAllocatorContext::load() {
+    uint64_t phys_addr = 0;  // read
+    uint64_t size = 0;  // read
+    void *p = allocate_impl(phys_addr, size);
+    // read into (p, size)
+
+    return true;
 }
 
 }  // namespace emulation
