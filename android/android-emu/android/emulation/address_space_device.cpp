@@ -60,6 +60,7 @@ public:
         contextDesc.pingInfo =
             (AddressSpaceDevicePingInfo*)
             gQAndroidVmOperations->physicalMemoryGetAddr(gpa);
+        contextDesc.pingInfoGpa = gpa;
         AS_DEVICE_DPRINT("Ping info: gpa 0x%llx @ %p\n", (unsigned long long)gpa,
                          contextDesc.pingInfo);
     }
@@ -91,10 +92,62 @@ public:
         }
     }
 
+    void save() {
+        // write(mHandleIndex)
+        // write(mContexts.size())
+        for (const auto &kv : mContexts) {
+            const uint32_t handle = kv.first;
+            const AddressSpaceContextDescription &desc = kv.second;
+            const AddressSpaceDeviceContext *device_context = desc.device_context.get();
+            const AddressSpaceDeviceType device_type = device_context->getDeviceType();
+
+            // write(handle)
+            // write(desc.pingInfoGpa)
+            // write(device_type)
+            device_context->save();
+        }
+    }
+
+    bool load() {
+        uint32_t handleIndex = 0;  // read
+        size_t size = 0;  // read
+
+        Contexts contexts;
+        for (size_t i = 0; i < size; ++i) {
+            uint32_t handle = 0;  // read
+            uint64_t pingInfoGpa = 0;  // read
+            AddressSpaceDeviceType device_type = AddressSpaceDeviceType::Graphics;  // read
+            std::unique_ptr<AddressSpaceDeviceContext> context =
+                buildAddressSpaceDeviceContext(device_type);
+            if (context) {
+                if (context->load()) {
+                    auto &desc = contexts[handle];
+                    desc.pingInfo = (AddressSpaceDevicePingInfo*)
+                        gQAndroidVmOperations->physicalMemoryGetAddr(pingInfoGpa);
+                    desc.pingInfoGpa = pingInfoGpa;
+                    desc.device_context = std::move(context);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        {
+           AutoLock lock(mLock);
+           mHandleIndex = handleIndex;
+           mContexts = std::move(contexts);
+        }
+
+        return true;
+    }
+
 private:
     Lock mLock;
     uint32_t mHandleIndex = 0;
-    std::unordered_map<uint32_t, AddressSpaceContextDescription> mContexts;
+    typedef std::unordered_map<uint32_t, AddressSpaceContextDescription> Contexts;
+    Contexts mContexts;
 
     std::unique_ptr<AddressSpaceDeviceContext>
     buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type) {
