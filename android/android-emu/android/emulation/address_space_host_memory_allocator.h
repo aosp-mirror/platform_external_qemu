@@ -27,11 +27,16 @@ public:
 
     void perform(AddressSpaceDevicePingInfo *info) override;
 
-    static void* getHostAddr(uint64_t addr);
+    AddressSpaceDeviceType getDeviceType() const override;
+    void save() const override;
+    bool load() override;
+
+    static void *getHostAddr(uint64_t addr);
 
 private:
     uint64_t allocate(AddressSpaceDevicePingInfo *info);
     uint64_t unallocate(AddressSpaceDevicePingInfo *info);
+    void *allocate_impl(uint64_t phys_addr, uint64_t size);
 
     std::unordered_map<uint64_t, std::pair<void *, size_t>> m_paddr2ptr;
 };
