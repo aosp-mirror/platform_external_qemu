@@ -14,6 +14,7 @@
 #pragma once
 
 #include <memory>
+#include "android/base/files/Stream.h"
 
 namespace android {
 namespace emulation {
@@ -51,10 +52,14 @@ class AddressSpaceDeviceContext {
 public:
     virtual ~AddressSpaceDeviceContext() {}
     virtual void perform(AddressSpaceDevicePingInfo *info) = 0;
+    virtual AddressSpaceDeviceType getDeviceType() const = 0;
+    virtual void save(base::Stream* stream) const = 0;
+    virtual bool load(base::Stream* stream) = 0;
 };
 
 struct AddressSpaceContextDescription {
     AddressSpaceDevicePingInfo* pingInfo = nullptr;
+    uint64_t pingInfoGpa = 0;  // for snapshots
     std::unique_ptr<AddressSpaceDeviceContext> device_context;
 };
 
