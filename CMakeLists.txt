@@ -471,7 +471,7 @@ target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
 set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
 set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
 android_add_executable(qemu-img)
-target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps)
+target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps android-emu-base)
 android_install_exe(qemu-img .)
 
 # Create the qemu targets.
