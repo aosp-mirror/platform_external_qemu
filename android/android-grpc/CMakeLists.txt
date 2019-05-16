@@ -11,11 +11,12 @@ set(android-grpc_src ${EMULATOR_GRPC_SRC} android/emulation/control/EmulatorServ
     android/emulation/control/EmulatorServiceStub.cpp
     android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
     android/emulation/control/GrpcServices.cpp
+    android/emulation/control/logcat/RingStreambuf.cpp
     )
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE grpc++ android-emu-base png PUBLIC libprotobuf)
+target_link_libraries(android-grpc PRIVATE grpc++ png PUBLIC libprotobuf android-emu-base)
 target_include_directories(android-grpc
     PRIVATE
     # For Renderer.h
@@ -24,6 +25,13 @@ target_include_directories(android-grpc
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
+
+set(android-grpc_unittest_src
+    android/emulation/control/logcat/RingStreambuf_unittest.cpp
+)
+
+android_add_test(android-grpc_unittest)
+target_link_libraries(android-grpc_unittest PRIVATE android-grpc gmock_main)
 
 # Lets distribute the proto file
 install(FILES android/emulation/control/emulator_controller.proto DESTINATION lib)

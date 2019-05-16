@@ -35,14 +35,14 @@ export default class JsepProtocol extends Component {
   }
 
   static propTypes = {
-    uri: PropTypes.string, // gRPC endpoint of the emulator
+    uri: PropTypes.string.isRequired, // gRPC endpoint of the emulator
     onConnect: PropTypes.func, // Callback when the video is ready to be show.
     onDisconnect: PropTypes.func, // Callback when the video is no longer availalb.e
   };
 
   static defaultProps = {
-    onConnect: function(){},
-    onDisconnect: function(){},
+    onConnect: function () { },
+    onDisconnect: function () { },
   };
 
   componentDidMount() {
@@ -65,10 +65,10 @@ export default class JsepProtocol extends Component {
   cleanup = () => {
     this.disconnect()
     if (this.peerConnection) {
-        this.peerConnection.removeEventListener('track', this.handlePeerConnectionTrack)
-        this.peerConnection.removeEventListener('icecandidate', this.handlePeerIceCandidate)
-        this.peerConnection = null
-      }
+      this.peerConnection.removeEventListener('track', this.handlePeerConnectionTrack)
+      this.peerConnection.removeEventListener('icecandidate', this.handlePeerIceCandidate)
+      this.peerConnection = null
+    }
   }
 
   handlePeerConnectionTrack = e => {
@@ -144,36 +144,36 @@ export default class JsepProtocol extends Component {
     request.setId(this.guid)
     request.setMessage(JSON.stringify(jsonObject))
     this.emulatorService.sendJsepMessage(request, {},
-         function(err,response) {
-            if (err) {
-                console.error(
-                    "Grpc: " + err.code + ", msg: " + err.message,
-                    "Emulator:updateview"
-                );
-            }
-        });
+      function (err, response) {
+        if (err) {
+          console.error(
+            "Grpc: " + err.code + ", msg: " + err.message,
+            "Emulator:updateview"
+          );
+        }
+      });
   }
 
   startStream() {
-    this.setState({WebRTC: "connecting"})
+    this.setState({ WebRTC: "connecting" })
     var self = this
     var request = new proto.google.protobuf.Empty()
     var call = this.emulatorService.requestRtcStream(request, {},
-      function(err,response) {
-         if (err) {
-             console.error(
-                 "Grpc: " + err.code + ", msg: " + err.message,
-                 "Emulator:updateview"
-             );
-         } else {
-           // Configure
-           self.guid.setGuid(response.getGuid())
-           self.connected = true
+      function (err, response) {
+        if (err) {
+          console.error(
+            "Grpc: " + err.code + ", msg: " + err.message,
+            "Emulator:updateview"
+          );
+        } else {
+          // Configure
+          self.guid.setGuid(response.getGuid())
+          self.connected = true
 
-           // And pump messages
-           self.receiveJsepMessage()
-         }
-     });
+          // And pump messages
+          self.receiveJsepMessage()
+        }
+      });
   }
 
   receiveJsepMessage() {
@@ -186,28 +186,28 @@ export default class JsepProtocol extends Component {
     // This is a blocking call, that will return as soon as a series
     // of messages have been made available.
     this.emulatorService.receiveJsepMessage(this.guid, {},
-      function(err,response) {
-         if (err) {
-             console.error(
-                 "Grpc: " + err.code + ", msg: " + err.message,
-                 "Emulator:updateview"
-             );
-         } else {
-           const msg = response.getMessage()
-           // Handle only if we received a useful message.
-           // it is possible to get nothing if the server decides
-           // to kick us out.
-           if (msg)
+      function (err, response) {
+        if (err) {
+          console.error(
+            "Grpc: " + err.code + ", msg: " + err.message,
+            "Emulator:updateview"
+          );
+        } else {
+          const msg = response.getMessage()
+          // Handle only if we received a useful message.
+          // it is possible to get nothing if the server decides
+          // to kick us out.
+          if (msg)
             self.handleJsepMessage(response.getMessage())
 
-           // And pump messages
-           self.receiveJsepMessage()
-         }
-     });
+          // And pump messages
+          self.receiveJsepMessage()
+        }
+      });
   }
 
 
   render() {
-      return null
+    return null
   }
 }
