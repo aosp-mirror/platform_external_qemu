@@ -22,6 +22,30 @@
       "revId": "f44d98d7266ed959cbeb5c6aca296d9e99445657",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9248410_d4a08587",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 5
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-16T20:33:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c82c2c02_f55d5a9c",
+      "range": {
+        "startLine": 496,
+        "startChar": 30,
+        "endLine": 496,
+        "endChar": 56
+      },
+      "revId": "f44d98d7266ed959cbeb5c6aca296d9e99445657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
