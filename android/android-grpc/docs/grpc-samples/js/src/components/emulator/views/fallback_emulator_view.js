@@ -48,12 +48,13 @@ export default class FallbackView extends Component {
   onConnect = stream => {
     console.log("onConnect: " + JSON.stringify(this.state))
     this.setState({ fallback: false }, () => {
-      console.log("Connecting video stream: " + this.video + ":")
+      console.log("Connecting video stream: " + this.video + ":" + this.video.readyState)
       this.video.srcObject = stream
+      this.video.play()
     })
   }
 
-  onLoadedMetadata = e => {
+  onCanPlay = e => {
     console.log("Playing video stream.")
     this.video.play().catch(error => {
         // Autoplay is likely disabled in chrome
@@ -79,7 +80,7 @@ export default class FallbackView extends Component {
                                   width={width}
                                   height={height}
                                   onContextMenu={this.onContextMenu}
-                                  onLoadedMetadata={this.onLoadedMetadata}
+                                  onCanPlay={this.onCanPlay}
                                   muted="muted"/> }
             { fallback && <EmulatorPngView uri={uri} refreshRate={refreshRate} width={width} height={height} /> }
         </div>
