@@ -15,17 +15,16 @@
  */
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import * as Device from "../../../android_emulation_control/emulator_controller_grpc_web_pb.js";
 import EmulatorPngView from "./simple_png_view.js"
-import JsepProtocolDriver from "../net/JsepProtocolDriver.js"
+import JsepProtocolDriver from "../net/jsep_protocol_driver.js"
 
 /**
  * A View that will use WebRTC if possible, and otherwise will revert to
  * using the png view.
  */
-export default class FallbackView extends Component {
+export default class EmulatorFallbackView extends Component {
   static propTypes = {
-    uri: PropTypes.string, // gRPC endpoint of the emulator
+    uri: PropTypes.string.isRequired, // gRPC endpoint of the emulator
     width: PropTypes.number,
     height: PropTypes.number,
     refreshRate: PropTypes.number
@@ -38,11 +37,11 @@ export default class FallbackView extends Component {
   };
 
   state = {
-      fallback: true,
+    fallback: true,
   }
 
   onDisconnect = () => {
-    this.setState({fallback: true})
+    this.setState({ fallback: true })
   }
 
   onConnect = stream => {
@@ -57,13 +56,13 @@ export default class FallbackView extends Component {
   onCanPlay = e => {
     console.log("Playing video stream.")
     this.video.play().catch(error => {
-        // Autoplay is likely disabled in chrome
-        // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
-        // so we should probably show something useful here.
-        // We explicitly set the video stream to muted, so this shouldn't happen,
-        // but is something you will have to fix once enabling audio.
-        alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
-        })
+      // Autoplay is likely disabled in chrome
+      // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
+      // so we should probably show something useful here.
+      // We explicitly set the video stream to muted, so this shouldn't happen,
+      // but is something you will have to fix once enabling audio.
+      alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
+    })
   }
 
   onContextMenu = e => {
@@ -74,16 +73,16 @@ export default class FallbackView extends Component {
     const { width, height, uri, refreshRate } = this.props;
     const { fallback } = this.state
     return (
-        <div>
-            <JsepProtocolDriver uri={uri} onConnect={this.onConnect} onDisconnect={this.onDisconnect}/>
-            { !fallback && <video ref={node => (this.video = node)}
-                                  width={width}
-                                  height={height}
-                                  onContextMenu={this.onContextMenu}
-                                  onCanPlay={this.onCanPlay}
-                                  muted="muted"/> }
-            { fallback && <EmulatorPngView uri={uri} refreshRate={refreshRate} width={width} height={height} /> }
-        </div>
+      <div>
+        <JsepProtocolDriver uri={uri} onConnect={this.onConnect} onDisconnect={this.onDisconnect} />
+        {!fallback && <video ref={node => (this.video = node)}
+          width={width}
+          height={height}
+          onContextMenu={this.onContextMenu}
+          onCanPlay={this.onCanPlay}
+          muted="muted" />}
+        {fallback && <EmulatorPngView uri={uri} refreshRate={refreshRate} width={width} height={height} />}
+      </div>
     )
   }
 }

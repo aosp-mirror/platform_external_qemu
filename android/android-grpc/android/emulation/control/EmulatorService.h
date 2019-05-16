@@ -15,7 +15,6 @@
 #include <memory>
 #include "android/console.h"
 #include "android/emulation/control/RtcBridge.h"
-
 namespace grpc {
 class ServerCredentials;
 }
@@ -47,6 +46,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     int mPort{5556};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
+
     RtcBridge* mBridge{nullptr};
 };
 
