@@ -480,6 +480,10 @@ _avdInfo_getRootIni( AvdInfo*  i )
 static int
 _avdInfo_getContentPath( AvdInfo*  i )
 {
+    if (i->inAndroidBuild && i->androidOut && i->contentPath) {
+        return 0;
+    }
+
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
     i->contentPath = iniFile_getString(i->rootIni, ROOT_ABS_PATH_KEY, NULL);
