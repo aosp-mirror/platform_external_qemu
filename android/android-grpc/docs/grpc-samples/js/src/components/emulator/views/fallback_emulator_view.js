@@ -17,7 +17,7 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 import * as Device from "../../../android_emulation_control/emulator_controller_grpc_web_pb.js";
 import EmulatorPngView from "./simple_png_view.js"
-import JsepProtocolDriver from "../net/JsepProtocolDriver.js"
+import JsepProtocolDriver from "../net/jsep_protocol_driver.js"
 
 /**
  * A View that will use WebRTC if possible, and otherwise will revert to

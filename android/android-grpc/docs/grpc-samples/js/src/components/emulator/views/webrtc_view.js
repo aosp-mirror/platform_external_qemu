@@ -16,7 +16,7 @@
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import * as Device from "../../../android_emulation_control/emulator_controller_grpc_web_pb.js";
-import JsepProtocolDriver from "../net/JsepProtocolDriver.js"
+import JsepProtocolDriver from "../net/jsep_protocol_driver.js"
 
 /**
  * A view on the emulator that is using WebRTC. It will use the Jsep protocol over gRPC to
