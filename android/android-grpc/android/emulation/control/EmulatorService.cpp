@@ -24,9 +24,11 @@
 #include "android/base/Uuid.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
+#include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/emulator_controller.grpc.pb.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/logcat/RingStreambuf.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
 
@@ -59,7 +61,37 @@ class EmulatorControllerImpl final : public EmulatorController::Service {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents,
                            RtcBridge* rtcBridge)
-        : mAgents(agents), mRtcBridge(rtcBridge) {}
+        : mAgents(agents),
+          mRtcBridge(rtcBridge),
+          mRingStreambuf((128 * 1024) - 1) {
+        std::ostream* stream = new std::ostream(&mRingStreambuf);
+        LogcatPipe::registerStream(stream);
+    }
+
+    Status getLogcat(ServerContext* context,
+                     const LogMessage* request,
+                     LogMessage* reply) override {
+        LOG(VERBOSE) << "getLogcat: offset: " << request->start();
+        auto message = mRingStreambuf.bufferAtOffset(request->start(), 0);
+        reply->set_start(message.first);
+        reply->set_contents(message.second);
+        reply->set_next(message.first + message.second.size());
+        return Status::OK;
+    }
+
+    Status streamLogcat(ServerContext* context,
+                        const LogMessage* request,
+                        ServerWriter<LogMessage>* writer) override {
+        LogMessage log;
+        log.set_next(request->start());
+        do {
+            auto message = mRingStreambuf.bufferAtOffset(log.next(), 5 * 1000);
+            log.set_start(message.first);
+            log.set_contents(message.second);
+            log.set_next(message.first + message.second.size());
+        } while (writer->Write(log));
+        return Status::OK;
+    }
 
     Status setRotation(ServerContext* context,
                        const Rotation* request,
@@ -295,6 +327,7 @@ public:
 private:
     const AndroidConsoleAgents* mAgents;
     RtcBridge* mRtcBridge;
+    RingStreambuf mRingStreambuf;
 };
 
 using Builder = EmulatorControllerService::Builder;
@@ -336,11 +369,11 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
-    // TODO(jansene): It seems that we can easily overload the server with touch
-    // events. if the gRPC server runs out of threads to serve requests it
-    // appears to terminate ungoing requests. If one of those requests happens
-    // to have the event lock we will lock up the emulator. This is a work
-    // around until we have a proper solution.
+    // TODO(jansene): It seems that we can easily overload the server with
+    // touch events. if the gRPC server runs out of threads to serve
+    // requests it appears to terminate ungoing requests. If one of those
+    // requests happens to have the event lock we will lock up the emulator.
+    // This is a work around until we have a proper solution.
     builder.SetSyncServerOption(ServerBuilder::MAX_POLLERS, 1024);
 
     // TODO(janene): Enable tls & auth.

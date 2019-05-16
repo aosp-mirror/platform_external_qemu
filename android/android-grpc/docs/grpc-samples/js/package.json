@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^3.9.3",
     "google-protobuf": "^3.7.1",
     "grpc-web": "^1.0.4",
     "react": "^16.8.6",

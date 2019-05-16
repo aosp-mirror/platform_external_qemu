@@ -28,6 +28,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/emulation/LogcatPipe.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/automation_agent.h"
@@ -81,6 +82,8 @@ extern "C" {
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/ui-emu-agent.h"
+
+#include <iostream>
 
 #ifdef TARGET_AARCH64
 #define TARGET_ARM64
@@ -1228,10 +1231,14 @@ extern "C" int main(int argc, char** argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
-        boot_property_add_logcat_pipe(opts->logcat);
-        // we have done with -logcat option.
-        opts->logcat = NULL;
+    if (fc::isEnabled(fc::LogcatPipe)) {
+        boot_property_add_logcat_pipe("v:*");
+    }
+
+    if (opts->logcat) {
+        dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
+        auto str = new std::ostream(std::cout.rdbuf());
+        android::emulation::LogcatPipe::registerStream(str);
     }
 
     // Always setup a single serial port, that can be connected

@@ -62,7 +62,7 @@ export default class EmulatorPngView extends Component {
     /* eslint-disable */
     var request = new proto.google.protobuf.Empty();
     var self = this;
-    var call = this.emulatorService.getScreenshot(request, {}, function(
+    var call = this.emulatorService.getScreenshot(request, {}, function (
       err,
       response
     ) {
