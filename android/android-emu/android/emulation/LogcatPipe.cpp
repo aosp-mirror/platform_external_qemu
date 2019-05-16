@@ -11,27 +11,26 @@
 
 #include "android/emulation/LogcatPipe.h"
 
+#include <fstream>
+#include <iostream>
+#include <memory>
+
 #include "android/globals.h"
 #include "android/logcat-pipe.h"
 #include "android/utils/debug.h"
 
-#include <iostream>
-#include <fstream>
-
 namespace android {
 namespace emulation {
 
+static base::Lock sLogcatStreamLock;
+static std::vector<std::unique_ptr<std::ostream>> sLogcatOutputStreams;
 
-LogcatPipe::LogcatPipe(void* hwPipe, Service* svc)
-    : AndroidPipe(hwPipe, svc) {
-        if (android_hw->hw_logcatOutput_path) {
-            mOutputFile.open(android_hw->hw_logcatOutput_path, std::ios_base::app);
-            if (!mOutputFile.good()) {
-                dwarning("Cannot open logcat output file %s; print to stdout instead.\n",
-                        android_hw->hw_logcatOutput_path);
-            }
-        }
-    }
+LogcatPipe::LogcatPipe(void* hwPipe, Service* svc) : AndroidPipe(hwPipe, svc) {}
+
+void LogcatPipe::registerStream(std::ostream* stream) {
+    base::AutoLock lock(sLogcatStreamLock);
+    sLogcatOutputStreams.emplace_back(std::unique_ptr<std::ostream>(stream));
+}
 
 void LogcatPipe::onGuestClose(PipeCloseReason reason) {
     delete this;
@@ -47,24 +46,46 @@ int LogcatPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     return PIPE_ERROR_IO;
 }
 
-int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                               int numBuffers) {
+int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) {
     int result = 0;
-    std::ostream *pstream = mOutputFile.good() ? &mOutputFile : &(std::cout);
+    base::AutoLock lock(sLogcatStreamLock);
     while (numBuffers > 0) {
-        pstream->write((char*)buffers->data, static_cast<int>(buffers->size));
+        for (auto& pstream : sLogcatOutputStreams) {
+            if (pstream->good()) {
+                pstream->write((char*)buffers->data,
+                               static_cast<int>(buffers->size));
+            }
+        }
+
         result += static_cast<int>(buffers->size);
         buffers++;
         numBuffers--;
     }
-    pstream->flush();
+
+    // Flush good streams.
+    for (auto& pstream : sLogcatOutputStreams) {
+        if (pstream->good()) {
+            pstream->flush();
+        }
+    }
     return result;
 }
 
 void registerLogcatPipeService() {
+    if (android_hw->hw_logcatOutput_path &&
+        *android_hw->hw_logcatOutput_path != '\0') {
+        std::unique_ptr<std::ofstream> outputfile(new std::ofstream(
+                android_hw->hw_logcatOutput_path, std::ios_base::app));
+        if (outputfile->good()) {
+            sLogcatOutputStreams.push_back(std::move(outputfile));
+        } else {
+            dwarning("Cannot open logcat output file [%s]",
+                     android_hw->hw_logcatOutput_path);
+        }
+    }
+
     android::AndroidPipe::Service::add(new LogcatPipe::Service());
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +96,8 @@ AndroidPipe* LogcatPipe::Service::create(void* hwPipe, const char* args) {
 }
 
 AndroidPipe* LogcatPipe::Service::load(void* hwPipe,
-                  const char* args,
-                  android::base::Stream* stream) {
+                                       const char* args,
+                                       android::base::Stream* stream) {
     return new LogcatPipe(hwPipe, this);
 }
 
