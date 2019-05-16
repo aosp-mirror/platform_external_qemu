@@ -1696,6 +1696,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define help_delay_adb NULL
 
 #define help_phone_number NULL
+#define help_monitor_adb NULL
 
 #define help_acpi_config NULL
 #define help_fuchsia NULL

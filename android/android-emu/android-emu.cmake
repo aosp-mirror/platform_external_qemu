@@ -47,6 +47,7 @@ set(android-emu-common
     android/emuctl-client.cpp
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
+    android/emulation/AdbMessageSniffer.cpp
     android/emulation/AdbHostListener.cpp
     android/emulation/AdbHostServer.cpp
     android/emulation/AndroidAsyncMessagePipe.cpp
