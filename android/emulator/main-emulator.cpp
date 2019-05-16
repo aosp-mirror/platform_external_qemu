@@ -722,9 +722,10 @@ int main(int argc, char** argv)
 
     D("Found target-specific %d-bit emulator binary: %s", wantedBitness, emulatorPath);
 
-    if (avdName) {
+    if (avdName || androidOut) {
         /* Save restart parameters before we modify argv */
-        android::base::initializeEmulatorRestartParameters(argc, argv, path_getAvdContentPath(avdName));
+        android::base::initializeEmulatorRestartParameters(argc, argv,
+                avdName ? path_getAvdContentPath(avdName) : androidOut);
     }
 
     /* Replace it in our command-line */

@@ -997,7 +997,7 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
-    if (avdInfo_inAndroidBuild(avd) || opts->read_only) {
+    if (opts->read_only) {
         android::base::disableRestart();
     } else {
         android::base::finalizeEmulatorRestartParameters(avdInfo_getContentPath(avd));
