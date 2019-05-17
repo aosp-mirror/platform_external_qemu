@@ -37,27 +37,28 @@ void PostWorker::post(ColorBuffer* cb) {
     // finally, compute translation values
     float dx = px * fx;
     float dy = py * fy;
-
-    if (mFb->m_displays.size() > 0) {
+    if (mFb->m_displays.size() > 1 ) {
         int totalW, totalH;
-        mFb->getCombinedDisplaySize(&totalW, &totalH, true);
-        s_gles2.glViewport(0, 0, m_viewportWidth * mFb->getWidth() / totalW,
-                           m_viewportHeight * mFb->getHeight() / totalH);
+        mFb->getCombinedDisplaySize(&totalW, &totalH);
+        s_gles2.glViewport(m_viewportWidth * mFb->m_displays[0].pos_x / totalW,
+                           m_viewportHeight * mFb->m_displays[0].pos_y / totalH,
+                           m_viewportWidth * mFb->m_displays[0].width / totalW,
+                           m_viewportHeight * mFb->m_displays[0].height / totalH);
         // render the color buffer to the window and apply the overlay
         cb->postWithOverlay(tex, zRot, dx, dy);
         // then post the multi windows
-        for (auto iter = mFb->m_displays.begin(); iter != mFb->m_displays.end(); ++iter) {
-            if (iter->second.width == 0 || iter->second.height == 0 ||
-                iter->second.cb == 0) {
+        for (const auto& iter : mFb->m_displays) {
+            if (iter.first == 0 || iter.second.width == 0 ||
+                iter.second.height == 0 || iter.second.cb == 0) {
                 continue;
             }
-            s_gles2.glViewport(m_viewportWidth * iter->second.pos_x / totalW,
-                               m_viewportHeight * iter->second.pos_y / totalH,
-                               m_viewportWidth * iter->second.width / totalW,
-                               m_viewportHeight * iter->second.height / totalH);
-            ColorBufferPtr multiDisplayCb = mFb->findColorBuffer(iter->second.cb);
+            s_gles2.glViewport(m_viewportWidth * iter.second.pos_x / totalW,
+                               m_viewportHeight * iter.second.pos_y / totalH,
+                               m_viewportWidth * iter.second.width / totalW,
+                               m_viewportHeight * iter.second.height / totalH);
+            ColorBufferPtr multiDisplayCb = mFb->findColorBuffer(iter.second.cb);
             if (multiDisplayCb == nullptr) {
-                ERR("fail to find cb %d\n", iter->second.cb);
+                ERR("fail to find cb %d\n", iter.second.cb);
             } else {
                 multiDisplayCb->post(multiDisplayCb->getTexture(), zRot, dx, dy);
             }
