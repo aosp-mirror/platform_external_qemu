@@ -66,6 +66,17 @@ using android::HostGoldfishPipeDevice;
 
 static constexpr int kWindowSize = 256;
 
+static const QAndroidEmulatorWindowAgent sMockWindowAgent = {
+        .setMultiDisplay =
+                [](uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h, bool add) {
+                },
+        .getMonitorRect =
+                [](uint32_t* w, uint32_t* h) {
+                    if (w)   *w = 2500;
+                    if (h)   *h = 2500;
+                },
+};
+
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
@@ -138,7 +149,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     android_startOpenglesRenderer(
         kWindowSize, kWindowSize, 1, 28, gQAndroidVmOperations,
-        gQAndroidEmulatorWindowAgent, &maj, &min);
+        &sMockWindowAgent, &maj, &min);
 
     androidSnapshot_initialize(
         gQAndroidVmOperations,
