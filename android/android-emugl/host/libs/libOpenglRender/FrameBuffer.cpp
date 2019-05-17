@@ -43,7 +43,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_NUM_MULTI_DISPLAY 10
+#define MAX_NUM_MULTI_DISPLAY 11
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -647,7 +647,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
-      m_perfStats(!android::base::System::get()->envGet("SHOW_PERF_STATS").empty()),
+      m_perfStats(
+              !android::base::System::get()->envGet("SHOW_PERF_STATS").empty()),
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
@@ -656,7 +657,9 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       }),
       m_postThread([this](FrameBuffer::Post&& post) {
           return postWorkerFunc(post);
-      }) {}
+      }) {
+    m_displays.emplace(0, DisplayInfo(0, 0, 0, m_framebufferWidth, m_framebufferHeight));
+}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -2211,7 +2214,7 @@ void FrameBuffer::onSave(Stream* stream,
     saveProcOwnedCollection(stream, m_procOwnedColorBuffers);
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
-
+    
     saveCollection(
         stream, m_displays,
         [](Stream* s,
@@ -2353,7 +2356,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         const uint32_t pos_y = stream->getBe32();
         const uint32_t width = stream->getBe32();
         const uint32_t height = stream->getBe32();
-        return { idx, { cb, pos_x, pos_y, width, height } };
+        return {idx, {cb, pos_x, pos_y, width, height}};
     });
 
     if (s_egl.eglPostLoadAllImages) {
@@ -2371,13 +2374,12 @@ bool FrameBuffer::onLoad(Stream* stream,
         }
     }
 
-    // Restore multi display state
-    int combinedDisplayWidth = 0;
-    int combinedDisplayHeight = 0;
-
-    if (m_displays.size() == 0) {
+    if (m_displays.size() == 1) {
         return true;
     } else {
+        // Restore multi display state
+        int combinedDisplayWidth = 0;
+        int combinedDisplayHeight = 0;
         getCombinedDisplaySize(
             &combinedDisplayWidth, &combinedDisplayHeight, true);
         emugl::get_emugl_window_operations().setMultiDisplay(
@@ -2385,11 +2387,11 @@ bool FrameBuffer::onLoad(Stream* stream,
             0, combinedDisplayHeight - getHeight(),
             getWidth(), getHeight(), true);
 
-        for (auto iter : m_displays) {
+        for (const auto& iter : m_displays) {
             emugl::get_emugl_window_operations().setMultiDisplay(
                 iter.first,
                 iter.second.pos_x,
-                combinedDisplayHeight - iter.second.height,
+                combinedDisplayHeight - iter.second.pos_y - iter.second.height,
                 iter.second.width,
                 iter.second.height, true);
         }
@@ -2479,18 +2481,17 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
             return 0;
         }
         m_displays.erase(displayId);
-        // shift the displays
-        uint32_t x = 0;
-        for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
-            if (iter->first > displayId) {
-                iter->second.pos_x = x;
-            }
-            x += iter->second.width;
-        }
+        emugl::get_emugl_window_operations().setMultiDisplay(displayId, 0, 0, 0,
+                                                             0, false);
+        resolveLayout();
         getCombinedDisplaySize(&width, &height, true);
     }
     // unlock before calling setUIDisplayRegion
     emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+    Post postCmd;
+    postCmd.cmd = PostCmd::Clear;
+    sendPostWorkerCmd(postCmd);
+
     return 0;
 }
 
@@ -2549,45 +2550,226 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
         if (m_displays.find(displayId) == m_displays.end()) {
             return -1;
         }
+        m_displays[displayId].width = w;
+        m_displays[displayId].height = h;
         if (x == 0 && y ==0) {
-            // ignore x/y, replace display. Assume displays in a row
-            int32_t pos_x, pos_y;
-            getCombinedDisplaySize(&pos_x, &pos_y, true);
-            m_displays[displayId].pos_x = pos_x;
-            m_displays[displayId].pos_y = 0;
-            m_displays[displayId].width = w;
-            m_displays[displayId].height = h;
+            resolveLayout();
         } else {
             m_displays[displayId].pos_x = x;
             m_displays[displayId].pos_y = y;
-            m_displays[displayId].width = w;
-            m_displays[displayId].height = h;
         }
         getCombinedDisplaySize(&width, &height, true);
-        // (0, 0) at left-top for QT window, at left-bottom for FrameBuffer.
-        emugl::get_emugl_window_operations().setMultiDisplay(0, 0, height - getHeight(),
-                                                             getWidth(), getHeight(),
-                                                              true);
-        emugl::get_emugl_window_operations().setMultiDisplay(displayId,
-                                                             m_displays[displayId].pos_x,
-                                                             height - h,
-                                                             w, h, true);
     }
     // unlock before calling setUIDisplayRegion
     emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
 }
 
+
+/*
+    Used only for resolving laytout.
+*/
+struct Rect {
+    uint32_t pos_x;
+    uint32_t pos_y;
+    uint32_t width;
+    uint32_t height;
+    uint32_t id;
+    bool combinedByOthers;
+    std::vector<uint32_t> children;
+    Rect(uint32_t x,
+                    uint32_t y,
+                    uint32_t w,
+                    uint32_t h,
+                    uint32_t i)
+    : pos_x(x), pos_y(y), width(w), height(h), id(i), combinedByOthers(false) {}
+    
+};
+
+/*
+ * Given that there are at most 11 displays, we can iterate through all possible
+ * ways of showing each display in either the first row or the second row. It is
+ * also possible to have an empty row. The best combination is to satisfy the
+ * following two criteria: 1, The combined rectangle which contains all the
+ * displays should have an aspect ratio that is close to the monitor's aspect
+ * ratio. 2, The width of the first row should be close to the width of the
+ * second row.
+ *
+ * Important detail of implementations: the x-offset and y-offset saved in
+ * m_displays is the lower left corner of the rectangle. This coordinates will
+ * be used by glviewport() in Postworker.cpp. However, the x and y offsets saved
+ * by invoking setMultiDisplay() will be the top left corner to be compatible
+ * with the emulator QT window. Thus, input coordinates willl be calculated
+ * correctly when mouse events are captured by QT window.
+ */
+void FrameBuffer::resolveLayout() {
+    double bestScore = 0;
+    int bestScoreBitSet = -1;
+    int monitorW = 0;
+    int monitorH = 0;
+
+    emugl::get_emugl_window_operations().getMonitorRect(&monitorW, &monitorH);
+
+    const double monitorRatio = (double)monitorH / (double)monitorW;
+
+    //Combine smaller rectangles into bigger ones and keep track of combined rectangles in rect.children.
+
+    std::vector<Rect> rectangles;
+    uint32_t maxHeight = 0;
+    for ( const auto& iter : m_displays) {
+        rectangles.emplace_back(0, 0, iter.second.width, iter.second.height, iter.first);
+        maxHeight = std::max(iter.second.height, maxHeight);
+    }
+
+    std::stable_sort(rectangles.begin(), rectangles.end(), [](const Rect& a, const Rect& b) {return a.width < b.width;});
+
+    for(int i = 0; i < rectangles.size(); i++) {
+        for (int j = i+1; j < rectangles.size(); j++) {
+            if (rectangles[i].height + rectangles[j].height <= maxHeight) {
+                rectangles[i].combinedByOthers = true;
+                rectangles[j].children.push_back(rectangles[i].id);
+                if (!rectangles[i].children.empty()) {
+                    for (uint32_t it : rectangles[i].children) {
+                        rectangles[j].children.push_back(it);
+                    }
+                }
+                rectangles[j].height += rectangles[i].height;
+                break;
+            }
+        }
+    }
+
+    for (auto it = rectangles.begin(); it != rectangles.end(); ) {
+        if (it->combinedByOthers) {
+            it = rectangles.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    for (int bitset = 0; bitset < 1 << (rectangles.size() - 1); bitset++) {
+        std::vector<Rect> firstRow, secondRow;
+        uint32_t firstRowWidth = 0;
+        uint32_t secondRowWidth = 0;
+        uint32_t firstRowHeight = 0;
+        uint32_t secondRowHeight = 0;
+        for (int idx = 0; idx < rectangles.size(); idx++) {
+            if ((1 << idx) & bitset) {
+                firstRow.push_back(rectangles[idx]);
+                firstRowWidth += rectangles[idx].width;
+                firstRowHeight =
+                        std::max(firstRowHeight, rectangles[idx].height);
+            } else {
+                secondRow.push_back(rectangles[idx]);
+                secondRowWidth += rectangles[idx].width;
+                secondRowHeight =
+                        std::max(secondRowHeight, rectangles[idx].height);
+            }
+        }
+
+        uint32_t combinedHeight = firstRowHeight + secondRowHeight;
+
+        uint32_t combinedWidth = std::max(firstRowWidth, secondRowWidth);
+        double score = 0.0;
+        if (firstRowWidth == 0 || secondRowWidth == 0) {
+            score = ((double)combinedHeight / (double)combinedWidth -
+                     monitorRatio) *
+                    ((double)combinedHeight / (double)combinedWidth -
+                     monitorRatio);
+        } else {
+            score = (((double)firstRowWidth / (double)secondRowWidth) - 1.0) *
+                            (((double)firstRowWidth / (double)secondRowWidth) -
+                             1.0) +
+                    ((double)combinedHeight / (double)combinedWidth -
+                     monitorRatio) *
+                            ((double)combinedHeight / (double)combinedWidth -
+                             monitorRatio);
+        }
+        if (bestScoreBitSet == -1 || score < bestScore) {
+            bestScoreBitSet = bitset;
+            bestScore = score;
+        }
+    }
+
+    std::vector<Rect> firstRow, secondRow;
+    for (int idx = 0; idx < rectangles.size(); idx++) {
+        if ((1 << idx) & bestScoreBitSet) {
+            firstRow.push_back(rectangles[idx]);
+        } else {
+            secondRow.push_back(rectangles[idx]);
+        }
+    }
+
+    std::stable_sort(firstRow.begin(), firstRow.end(),
+                     [](const Rect& a, const Rect& b) {
+                         return a.height > b.height;
+                     });
+    
+    std::stable_sort(secondRow.begin(), secondRow.end(),
+                     [](const Rect& a, const Rect& b) {
+                         return a.height > b.height;
+                     });
+
+    uint32_t firstRowHeight = (firstRow.empty() ? 0 : firstRow[0].height);
+    uint32_t secondRowHeight = (secondRow.empty() ? 0 : secondRow[0].height);
+
+    uint32_t width = 0;
+    uint32_t yOffset = 0;
+    for (const auto& iter : firstRow) {
+        int displayId = iter.id;
+        m_displays[displayId].pos_x = width;
+        m_displays[displayId].pos_y = yOffset;
+        emugl::get_emugl_window_operations().setMultiDisplay(
+            displayId, m_displays[displayId].pos_x,
+            secondRowHeight + firstRowHeight - m_displays[displayId].height - yOffset,
+            m_displays[displayId].width, m_displays[displayId].height,
+            true);
+        uint32_t cumulativeHeight = m_displays[displayId].height + yOffset;
+        for (uint32_t i : iter.children) {
+            m_displays[i].pos_x = width;
+            m_displays[i].pos_y = cumulativeHeight;
+            cumulativeHeight += m_displays[i].height;
+            emugl::get_emugl_window_operations().setMultiDisplay(
+                i, m_displays[i].pos_x, secondRowHeight + firstRowHeight - cumulativeHeight,
+                m_displays[i].width, m_displays[i].height, true);
+        }
+        width += iter.width;
+    }
+
+    width = 0;
+    yOffset = firstRowHeight;
+    for (const auto& iter : secondRow) {
+        int displayId = iter.id;
+        m_displays[displayId].pos_x = width;
+        m_displays[displayId].pos_y = yOffset;
+
+        emugl::get_emugl_window_operations().setMultiDisplay(
+            displayId, m_displays[displayId].pos_x,
+            secondRowHeight + firstRowHeight - m_displays[displayId].height - yOffset,
+            m_displays[displayId].width, m_displays[displayId].height,
+            true);
+        uint32_t cumulativeHeight = m_displays[displayId].height + yOffset;
+        for (uint32_t i : iter.children) {
+            m_displays[i].pos_x = width;
+            m_displays[i].pos_y = cumulativeHeight;
+            cumulativeHeight += m_displays[i].height;
+
+            emugl::get_emugl_window_operations().setMultiDisplay(
+                i, m_displays[i].pos_x, secondRowHeight + firstRowHeight - cumulativeHeight,
+                m_displays[i].width, m_displays[i].height, true);
+        }
+        width += iter.width;
+    }
+}
+
 void FrameBuffer::getCombinedDisplaySize(int* w, int* h, bool androidWindow) {
     // Simple version, displays in a row
-    int max_h = androidWindow ? getHeight() : 0;
-    int total_w = androidWindow ? getWidth() : 0;
+    uint32_t total_h = androidWindow ? getHeight() : 0;
+    uint32_t total_w = androidWindow ? getWidth() : 0;
     for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
-        if (iter->second.height > max_h) {
-            max_h = iter->second.height;
-        }
-        total_w += iter->second.width;
+        total_h = std::max(total_h, iter->second.height + iter->second.pos_y);
+        total_w = std::max(total_w, iter->second.width + iter->second.pos_x);
     }
-    *w = total_w;
-    *h = max_h;
+    *h = (int)total_h;
+    *w = (int)total_w;
 }
