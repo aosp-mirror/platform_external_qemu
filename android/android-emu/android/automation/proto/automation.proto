@@ -18,6 +18,7 @@ message RecordedEvent {
     oneof stream {
         PhysicalModelEvent physical_model = 50;
         TouchEvent touch = 51;
+        bool empty_event = 52;
     }
 }
 

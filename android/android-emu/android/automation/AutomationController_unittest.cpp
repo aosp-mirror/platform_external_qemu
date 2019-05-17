@@ -151,8 +151,11 @@ TEST_F(AutomationControllerTest, SimpleRecordPlayEmpty) {
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->stopRecording(), IsOk());
 
-    // Playback stops after no commands.
+    // Recordings now always contain a simple final empty event.
     EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
+
+    // Advancing time because of simple end of file event.
+    advanceTimeToNs(secondsToNs(1));
     EXPECT_THAT(mController->stopPlayback(), IsErr(StopError::NotStarted));
 }
 
@@ -324,6 +327,8 @@ TEST_F(AutomationControllerTest, PlaybackWithCallback) {
                         &AutomationControllerTest::onStopCallback),
                 IsOk());
 
+    // Advancing time because of simple end of file event.
+    advanceTimeToNs(secondsToNs(1));
     EXPECT_EQ(sCallbackInt, 1);
 }
 
