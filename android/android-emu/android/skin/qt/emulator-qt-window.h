@@ -261,6 +261,7 @@ public:
     int  getLeftTransparency()   { return mSkinGapLeft; }
     void setMultiDisplay(int id, int x, int y, int w, int h, bool add);
     bool getMultiDisplay(int id, int* x, int* y, int* w, int* h);
+    void getMonitorRect(int* width, int* height);
 
 public slots:
     void rotateSkin(SkinRotation rot);

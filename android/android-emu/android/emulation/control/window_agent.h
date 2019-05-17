@@ -66,7 +66,7 @@ typedef struct QAndroidEmulatorWindowAgent {
     // Inform UI creation/modification/deletion of multi-display window
     void (*setMultiDisplay)(int, int, int, int, int, bool);
     bool (*getMultiDisplay)(int, int*, int*, int*, int*);
-
+    void (*getMonitorRect)(int*, int*);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp

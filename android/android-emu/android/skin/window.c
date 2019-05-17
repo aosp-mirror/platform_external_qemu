@@ -171,7 +171,8 @@ static int adisplay_init(ADisplay* disp,
                                         disp->rect.size.h,
                                         disp->rect.size.w,
                                         disp->rect.size.h);
-    disp->sub_display = NULL;
+    disp->sub_display = malloc(sizeof(SubDisplay));
+    disp->sub_display->id = 0;
 
     return (disp->data == NULL) ? -1 : 0;
 }

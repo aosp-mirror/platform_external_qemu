@@ -45,6 +45,7 @@
 #include "android/skin/qt/screen-mask.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
+#include "android/skin/winsys.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
 #include "android/test/checkboot.h"
@@ -2756,15 +2757,15 @@ void EmulatorQtWindow::setMultiDisplay(int id, int x, int y, int w, int h, bool 
     } else {
         mMultiDisplay.erase(id);
     }
-     SkinEvent* event = new SkinEvent();
-     event->type = kEventSetMultiDisplay;
-     event->u.multi_display.id = id;
-     event->u.multi_display.xOffset = x;
-     event->u.multi_display.yOffset = y;
-     event->u.multi_display.width = w;
-     event->u.multi_display.height = h;
-     event->u.multi_display.add= add;
-     skin_event_add(event);
+    SkinEvent* event = new SkinEvent();
+    event->type = kEventSetMultiDisplay;
+    event->u.multi_display.id = id;
+    event->u.multi_display.xOffset = x;
+    event->u.multi_display.yOffset = y;
+    event->u.multi_display.width = w;
+    event->u.multi_display.height = h;
+    event->u.multi_display.add = add;
+    skin_event_add(event);
 }
 
 bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
@@ -2772,9 +2773,22 @@ bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
     if (mMultiDisplay.find(id) == mMultiDisplay.end()) {
         return false;
     }
-    *x = mMultiDisplay[id].pos_x;
-    *y = mMultiDisplay[id].pos_y;
-    *w = mMultiDisplay[id].width;
-    *h = mMultiDisplay[id].height;
+    if (x)
+        *x = mMultiDisplay[id].pos_x;
+    if (y)
+        *y = mMultiDisplay[id].pos_y;
+    if (w)
+        *w = mMultiDisplay[id].width;
+    if (h)
+        *h = mMultiDisplay[id].height;
     return true;
+}
+
+void EmulatorQtWindow::getMonitorRect(int* width, int* height) {
+    SkinRect monitor;
+    skin_winsys_get_monitor_rect(&monitor);
+    if (width)
+        *width = monitor.size.w;
+    if (height)
+        *height = monitor.size.h;
 }
