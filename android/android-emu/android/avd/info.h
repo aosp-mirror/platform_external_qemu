@@ -432,4 +432,10 @@ AvdInfo* avdInfo_newCustom(
     bool isGoogleApis,
     AvdFlavor flavor);
 
+/* Set a custom content path. Useful for testing. */
+void avdInfo_setCustomContentPath(AvdInfo* info, const char* path);
+
+/* Set a custom core hw ini path. Useful for testing. */
+void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path);
+
 ANDROID_END_HEADER

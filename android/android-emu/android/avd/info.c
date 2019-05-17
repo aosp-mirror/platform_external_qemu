@@ -1968,3 +1968,11 @@ AvdInfo* avdInfo_newCustom(
 
     return i;
 }
+
+void avdInfo_setCustomContentPath(AvdInfo* info, const char* path) {
+    info->contentPath = strdup(path);
+}
+
+void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path) {
+    info->coreHardwareIniPath = strdup(path);
+}
