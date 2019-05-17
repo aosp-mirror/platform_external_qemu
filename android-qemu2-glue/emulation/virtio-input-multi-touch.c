@@ -326,12 +326,11 @@ void android_virtio_kbd_mouse_event(int dx,
                                     int dz,
                                     int buttonsState,
                                     int displayId) {
-    int w, h = 0;
+    uint32_t w, h = 0;
     if (displayId < VIRTIO_INPUT_MAX_NUM && displayId > 0) {
         s_current_virtio_input = s_virtio_input_multi_touch[displayId];
-        uint32_t x, y;
-        gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, &x, &y,
-                                                      (uint32_t*)&w, (uint32_t*)&h);
+        gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, NULL, NULL, &w,
+                                                      &h);
     } else {
         s_current_virtio_input = s_virtio_input_multi_touch[0];
         gQAndroidDisplayAgent->getFrameBuffer(&w, &h, NULL, NULL, NULL);

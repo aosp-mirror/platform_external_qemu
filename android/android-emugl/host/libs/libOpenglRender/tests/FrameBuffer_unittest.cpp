@@ -18,6 +18,7 @@
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
@@ -41,6 +42,34 @@ using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaver;
 
 namespace emugl {
+static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
+        .getEmulatorWindow = nullptr,
+        .rotate90Clockwise = nullptr,
+        .rotate = nullptr,
+        .getRotation = nullptr,
+        .showMessage = nullptr,
+        .showMessageWithDismissCallback = nullptr,
+        .fold = nullptr,
+        .isFolded = nullptr,
+        .setUIDisplayRegion = nullptr,
+        .setMultiDisplay = [](uint32_t id,
+                              uint32_t x,
+                              uint32_t y,
+                              uint32_t w,
+                              uint32_t h,
+                              bool add) {},
+        .getMultiDisplay = nullptr,
+        .getMonitorRect =
+                [](uint32_t* w, uint32_t* h) {
+                    if (w)
+                        *w = 2500;
+                    if (h)
+                        *h = 1600;
+                },
+};
+
+extern "C" const QAndroidEmulatorWindowAgent* const
+        gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;
 
 class FrameBufferTest : public ::testing::Test {
 public:
@@ -54,7 +83,7 @@ protected:
     virtual void SetUp() override {
         setupStandaloneLibrarySearchPaths();
         emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
-
+        emugl::set_emugl_window_operations(*gQAndroidEmulatorWindowAgent);
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         ASSERT_NE(nullptr, egl);
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
