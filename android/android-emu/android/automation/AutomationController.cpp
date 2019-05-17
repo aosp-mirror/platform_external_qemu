@@ -584,10 +584,21 @@ StopResult AutomationControllerImpl::stopRecording() {
         return Err(StopError::NotStarted);
     }
 
-    DurationNs durationNs =
-            mLooper->nowNs(Looper::ClockType::kVirtual) - mStartTimeNs;
+    DurationNs currentTime = mLooper->nowNs(Looper::ClockType::kVirtual);
+    DurationNs durationNs = currentTime - mStartTimeNs;
 
+    DurationNs lastEventTime =
+            mEventSink.getLastEventTimeForStream(mRecordingStream.get());
     mEventSink.unregisterStream(mRecordingStream.get());
+
+    pb::RecordedEvent event;
+    event.set_delay(currentTime - lastEventTime);
+    std::string binaryProto;
+    if (!event.SerializeToString(&binaryProto)) {
+        LOG(WARNING) << "Could not serialize last event.";
+        return;
+    }
+    mRecordingStream->putString(binaryProto);
     mRecordingStream.reset();
 
     addDurationToHeader(durationNs);
