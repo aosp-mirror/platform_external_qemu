@@ -2772,9 +2772,13 @@ bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
     if (mMultiDisplay.find(id) == mMultiDisplay.end()) {
         return false;
     }
-    *x = mMultiDisplay[id].pos_x;
-    *y = mMultiDisplay[id].pos_y;
-    *w = mMultiDisplay[id].width;
-    *h = mMultiDisplay[id].height;
+    if (x)
+        *x = mMultiDisplay[id].pos_x;
+    if (y)
+        *y = mMultiDisplay[id].pos_y;
+    if (w)
+        *w = mMultiDisplay[id].width;
+    if (h)
+        *h = mMultiDisplay[id].height;
     return true;
 }
