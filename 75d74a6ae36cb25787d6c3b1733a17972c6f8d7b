@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f52c800_d5500c33",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-17T23:47:41Z",
+      "side": 1,
+      "message": "Will this work if maxElements \u003c neededCapacity?",
+      "range": {
+        "startLine": 178,
+        "startChar": 40,
+        "endLine": 178,
+        "endChar": 66
+      },
+      "revId": "75d74a6ae36cb25787d6c3b1733a17972c6f8d7b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
