@@ -583,22 +583,7 @@ void RecordMacroPage::stopRecording() {
             LOG(ERROR) << "Renaming file failed.";
             std::remove(oldPath.c_str());
         } else {
-            // Creating new list Item.
-            QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
-            QVariant macroNameData(QString::fromStdString(newName));
-            listItem->setData(Qt::UserRole, macroNameData);
-
-            RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
-            // Real newName will be retrieved from macro metadata.
-            newName = newName.substr(16, newName.length() - 26);
-            std::replace(newName.begin(), newName.end(), '_', ' ');
-            macroSavedItem->setName(newName.c_str());
-
-            listItem->setSizeHint(
-                    QSize(macroSavedItem->sizeHint().width(), 50));
-
-            mUi->macroList->addItem(listItem);
-            mUi->macroList->setItemWidget(listItem, macroSavedItem);
+            createMacroItem(newName, false);
         }
     } else {
         // Delete file.
@@ -736,6 +721,18 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         macroName.append(" (Preset macro)");
     } else {
+        const std::string macrosLocation = getCustomMacrosDirectory();
+        const std::string filePath = PathUtils::join(macrosLocation, macroName);
+        uint64_t durationNs = sAutomationAgent->getDurationNs(filePath);
+        int durationS = durationNs / 1000000000;
+        QString qs = tr("%1:%2%3")
+                             .arg(durationS / 60)
+                             .arg(durationS % 60 > 9 ? "" : "0")
+                             .arg(durationS % 60);
+        mLengths[macroName] = qs;
+
+        macroSavedItem->setDisplayTime(mLengths[macroName]);
+
         macroName = macroName.substr(16, macroName.length() - 26);
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
