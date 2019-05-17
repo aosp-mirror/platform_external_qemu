@@ -122,6 +122,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+        .getMonitorRect = 
+                [](int* w, int* h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMonitorRect(w, h);
+                    }
+                },
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

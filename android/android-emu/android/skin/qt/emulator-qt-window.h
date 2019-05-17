@@ -267,7 +267,7 @@ public:
     bool getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
     void getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h,
                          uint32_t* dpi, uint32_t* flag, bool* enabled);
-    int countEnabledMultiDisplay();
+    void getMonitorRect(int* width, int* height);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -370,6 +370,7 @@ private:
     // depend on AVD info, GPU info, etc.,
     // so they must be collected before the window shows up.
     void checkAdbVersionAndWarn();
+    int countEnabledMultiDisplay();
     void showWin32DeprecationWarning();
     void showAvdArchWarning();
     void checkShouldShowGpuWarning();
