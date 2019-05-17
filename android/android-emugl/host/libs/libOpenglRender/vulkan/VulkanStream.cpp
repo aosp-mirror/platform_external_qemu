@@ -209,6 +209,7 @@ VulkanMemReadingStream::~VulkanMemReadingStream() { }
 void VulkanMemReadingStream::setBuf(uint8_t* buf) {
     mStart = buf;
     mReadPos = 0;
+    resetTrace();
 }
 
 ssize_t VulkanMemReadingStream::read(void* buffer, size_t size) {
@@ -222,6 +223,21 @@ ssize_t VulkanMemReadingStream::write(const void* buffer, size_t size) {
             "%s: FATAL: VulkanMemReadingStream does not support writing\n",
             __func__);
     abort();
+}
+
+uint8_t* VulkanMemReadingStream::beginTrace() {
+    resetTrace();
+    return mTraceStart;
+}
+
+size_t VulkanMemReadingStream::endTrace() {
+    uintptr_t current = (uintptr_t)(mStart + mReadPos);
+    size_t res = (size_t)(current - (uintptr_t)mTraceStart);
+    return res;
+}
+
+void VulkanMemReadingStream::resetTrace() {
+    mTraceStart = mStart + mReadPos;
 }
 
 } // namespace goldfish_vk
