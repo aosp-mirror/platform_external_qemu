@@ -46,7 +46,7 @@ enum class StartError {
 using StartResult = base::Result<void, StartError>;
 std::ostream& operator<<(std::ostream& os, const StartError& value);
 
-enum class StopError { NotStarted };
+enum class StopError { NotStarted, ParseError };
 using StopResult = base::Result<void, StopError>;
 std::ostream& operator<<(std::ostream& os, const StopError& value);
 
