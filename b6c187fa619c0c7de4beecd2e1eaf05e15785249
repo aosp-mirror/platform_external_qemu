@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2e8e0b00_f6b7aaab",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-17T21:18:41Z",
+      "side": 1,
+      "message": "uint64_t, for nanoseconds",
+      "parentUuid": "ea8a909e_6b4de2bf",
+      "range": {
+        "startLine": 397,
+        "startChar": 29,
+        "endLine": 397,
+        "endChar": 33
+      },
+      "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "364a5476_10d7c57f",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "c52b96c0_7d1d3026",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-17T21:18:41Z",
+      "side": 1,
+      "message": "called mLooper",
+      "parentUuid": "364a5476_10d7c57f",
+      "range": {
+        "startLine": 587,
+        "startChar": 4,
+        "endLine": 587,
+        "endChar": 70
+      },
+      "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1150854a_9a3feaeb",
         "filename": "android/android-emu/android/automation/proto/automation.proto",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b2441d64_b06944f3",
+        "filename": "android/android-emu/android/automation/proto/automation.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-17T21:18:41Z",
+      "side": 1,
+      "message": "changed it to nanoseconds",
+      "parentUuid": "1150854a_9a3feaeb",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 35
+      },
+      "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
