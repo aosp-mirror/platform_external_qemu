@@ -359,5 +359,355 @@ TEST(UnpackedComponentManager, IterateLive) {
     EXPECT_EQ(2, count);
 }
 
+// Tests that clearing the component manager makes it forget about
+// its current entries.
+TEST(ComponentManager, Clear) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicComponentManager m;
+    auto componentHandle1 = m.add((BasicComponentManager::EntityHandle)handle1, 3, 1);
+    auto componentHandle2 = m.add((BasicComponentManager::EntityHandle)handle2, 4, 1);
+
+    EXPECT_EQ(handle1, m.getEntityHandle(componentHandle1));
+    EXPECT_EQ(handle2, m.getEntityHandle(componentHandle2));
+
+    auto data1 = m.getByComponent(componentHandle1);
+    auto data2 = m.getByComponent(componentHandle2);
+
+    EXPECT_NE(nullptr, data1);
+    EXPECT_NE(nullptr, data2);
+
+    EXPECT_EQ(3, *data1);
+    EXPECT_EQ(4, *data2);
+
+    m.clear();
+
+    data1 = m.getByComponent(componentHandle1);
+    data2 = m.getByComponent(componentHandle2);
+
+    EXPECT_EQ(nullptr, data1);
+    EXPECT_EQ(nullptr, data2);
+
+    int count = 0;
+    m.forEachComponent(
+        [&count](bool live,
+                 BasicComponentManager::ComponentHandle componentHandle,
+                 BasicEntityManager::EntityHandle h, int& item) {
+        if (live) ++count;
+    });
+
+    EXPECT_EQ(0, count);
+}
+
+// Tests that clearing the unpacked component manager makes it forget about
+// its current entries.
+TEST(UnpackedComponentManager, Clear) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    BasicUnpackedComponentManager m;
+
+    m.add((BasicUnpackedComponentManager::EntityHandle)handle1, 3);
+    m.add((BasicUnpackedComponentManager::EntityHandle)handle2, 4);
+
+    auto data1 = m.get(handle1);
+    auto data2 = m.get(handle2);
+
+    EXPECT_NE(nullptr, data1);
+    EXPECT_NE(nullptr, data2);
+
+    EXPECT_EQ(3, *data1);
+    EXPECT_EQ(4, *data2);
+
+    m.clear();
+
+    data1 = m.get(handle1);
+    data2 = m.get(handle2);
+
+    EXPECT_EQ(nullptr, data1);
+    EXPECT_EQ(nullptr, data2);
+
+    int count = 0;
+
+    m.forEachComponent(
+        [&count](bool live,
+                 BasicComponentManager::ComponentHandle componentHandle,
+                 BasicEntityManager::EntityHandle h, int& item) {
+        if (live) ++count;
+    });
+
+    EXPECT_EQ(0, count);
+}
+
+// Tests adding entries to EntityManagers at fixed addresses.
+TEST(EntityManager, AddFixed) {
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(0, 3, 2);
+
+    BasicEntityManager m;
+
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+
+    EXPECT_EQ(handle1Copy, handle1);
+    EXPECT_EQ(1, *(m.get(handle1Copy)));
+
+    m.clear();
+
+    handle1 =
+        BasicEntityManager::makeHandle(1, 3, 2);
+
+    handle1Copy = m.addFixed(handle1, 1, 5);
+
+    EXPECT_EQ(handle1Copy, handle1);
+    EXPECT_EQ(1, *(m.get(handle1Copy)));
+
+    m.clear();
+
+    handle1 =
+        BasicEntityManager::makeHandle(10, 3, 2);
+
+    handle1Copy = m.addFixed(handle1, 1, 5);
+
+    EXPECT_EQ(handle1Copy, handle1);
+    EXPECT_EQ(1, *(m.get(handle1Copy)));
+}
+
+// Test adding multiple fixed handle entries in order
+// of how they are usually allocated
+TEST(EntityManager, AddFixedMultipleForward) {
+    BasicEntityManager m;
+
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+    auto handle2Copy = m.addFixed(handle2, 2, 5);
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle2Copy, handle2);
+    EXPECT_EQ(handle1Copy, handle1);
+}
+
+// Test adding multiple fixed handle entries in order
+// of how they are usually allocated, starting with 0
+// which is usually the first free handle
+TEST(EntityManager, AddFixedMultipleForwardStartOnZero) {
+    BasicEntityManager m;
+
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+    uint64_t handle0 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+
+    auto handle0Copy = m.addFixed(handle0, 1, 5);
+    auto handle1Copy = m.addFixed(handle1, 2, 5);
+    auto handle2Copy = m.addFixed(handle2, 3, 5);
+
+    EXPECT_EQ(handle0Copy, handle0);
+    EXPECT_EQ(handle1Copy, handle1);
+    EXPECT_EQ(handle2Copy, handle2);
+}
+
+// Test adding multiple fixed handle entries in reverse order
+// of how they are usually allocated
+TEST(EntityManager, AddFixedMultipleReverse) {
+    BasicEntityManager m;
+
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+    auto handle2Copy = m.addFixed(handle2, 2, 5);
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle2Copy, handle2);
+    EXPECT_EQ(handle1Copy, handle1);
+}
+
+// Test adding multiple fixed handle entries 
+// with a turn
+TEST(EntityManager, AddFixedMultipleTurn) {
+    BasicEntityManager m;
+
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+    auto handle2Copy = m.addFixed(handle2, 2, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle1Copy, handle1);
+    EXPECT_EQ(handle2Copy, handle2);
+}
+
+// Test adding multiple fixed handle entries 
+// with a turn on 0 (which is usually the first free index)
+TEST(EntityManager, AddFixedMultipleTurnOnZero) {
+    BasicEntityManager m;
+
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle0 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+    auto handle0Copy = m.addFixed(handle0, 2, 5);
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle0Copy, handle0);
+    EXPECT_EQ(handle1Copy, handle1);
+}
+
+// Test adding multiple fixed handle entries 
+// starting on 0 (which is usually the first free index)
+TEST(EntityManager, AddFixedMultipleStartOnZero) {
+    BasicEntityManager m;
+
+    uint64_t handle0 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle0Copy = m.addFixed(handle0, 2, 5);
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle0Copy, handle0);
+    EXPECT_EQ(handle1Copy, handle1);
+}
+
+// Test adding multiple fixed handle entries while some
+// handles are allocated with the standard method.
+TEST(EntityManager, AddFixedMixedNormal) {
+    BasicEntityManager m;
+
+    uint64_t handle0 =
+        BasicEntityManager::makeHandle(0, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+
+    auto handle1Copy = m.addFixed(handle1, 2, 5);
+    auto handle0Copy = m.addFixed(handle0, 1, 5);
+    auto handle2Copy = m.addFixed(handle2, 3, 5);
+    auto standardHandle0 = m.add(10, 5);
+    auto standardHandle1 = m.add(11, 5);
+
+    EXPECT_EQ(handle0Copy, handle0);
+    EXPECT_EQ(handle1Copy, handle1);
+    EXPECT_EQ(handle2Copy, handle2);
+
+    EXPECT_NE(nullptr, m.get(handle1Copy));
+    EXPECT_NE(nullptr, m.get(handle0Copy));
+    EXPECT_NE(nullptr, m.get(handle2Copy));
+    EXPECT_NE(nullptr, m.get(standardHandle0));
+    EXPECT_NE(nullptr, m.get(standardHandle1));
+
+    EXPECT_EQ(2, *(m.get(handle1Copy)));
+    EXPECT_EQ(1, *(m.get(handle0Copy)));
+    EXPECT_EQ(3, *(m.get(handle2Copy)));
+    EXPECT_EQ(10, *(m.get(standardHandle0)));
+    EXPECT_EQ(11, *(m.get(standardHandle1)));
+}
+
+// Test adding multiple fixed handle entries in order
+// of how they are usually allocated, and also remove
+// a fixed handle, but also put it back at the end.
+TEST(EntityManager, AddFixedMultipleForwardWithRemove) {
+    BasicEntityManager m;
+
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+    auto handle2Copy = m.addFixed(handle2, 2, 5);
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle2Copy, handle2);
+    EXPECT_EQ(handle1Copy, handle1);
+
+    m.remove(handle2Copy);
+
+    EXPECT_EQ(nullptr, m.get(handle2Copy));
+    EXPECT_EQ(1, *(m.get(handle1Copy)));
+    EXPECT_EQ(3, *(m.get(handle3Copy)));
+
+    handle2Copy = m.addFixed(handle2, 2, 5);
+    EXPECT_EQ(handle2Copy, handle2);
+    EXPECT_EQ(2, *(m.get(handle2Copy)));
+}
+
+// Test adding multiple fixed handle entries in order
+// of how they are usually allocated, and also remove
+// them in some other order, but then also put them back.
+TEST(EntityManager, AddFixedMultipleForwardWithRemoveAll) {
+    BasicEntityManager m;
+
+    uint64_t handle3 =
+        BasicEntityManager::makeHandle(3, 1, 2);
+    uint64_t handle2 =
+        BasicEntityManager::makeHandle(2, 1, 2);
+    uint64_t handle1 =
+        BasicEntityManager::makeHandle(1, 1, 2);
+
+    auto handle1Copy = m.addFixed(handle1, 1, 5);
+    auto handle2Copy = m.addFixed(handle2, 2, 5);
+    auto handle3Copy = m.addFixed(handle3, 3, 5);
+
+    EXPECT_EQ(handle3Copy, handle3);
+    EXPECT_EQ(handle2Copy, handle2);
+    EXPECT_EQ(handle1Copy, handle1);
+
+    m.remove(handle2Copy);
+    m.remove(handle1Copy);
+    m.remove(handle3Copy);
+
+    EXPECT_EQ(nullptr, m.get(handle2Copy));
+    EXPECT_EQ(nullptr, m.get(handle1Copy));
+    EXPECT_EQ(nullptr, m.get(handle3Copy));
+
+    handle1Copy = m.addFixed(handle1, 1, 5);
+    handle2Copy = m.addFixed(handle2, 2, 5);
+    handle3Copy = m.addFixed(handle3, 3, 5);
+
+    EXPECT_EQ(1, *(m.get(handle1Copy)));
+    EXPECT_EQ(2, *(m.get(handle2Copy)));
+    EXPECT_EQ(3, *(m.get(handle3Copy)));
+}
+
 }  // namespace base
 }  // namespace android
