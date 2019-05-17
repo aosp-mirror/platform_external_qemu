@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e833cbce_0374cf4a",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 839,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-17T23:53:49Z",
+      "side": 1,
+      "message": "You\u0027ll want to add a special case here and avoid logging.  Ideally this shouldn\u0027t be logged when running the emulator with -debug-automation",
+      "range": {
+        "startLine": 836,
+        "startChar": 8,
+        "endLine": 839,
+        "endChar": 18
+      },
+      "revId": "32445babac41def19947b05d6d769d9d37e4575b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
