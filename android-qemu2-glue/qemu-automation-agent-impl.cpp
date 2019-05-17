@@ -41,13 +41,18 @@ static StartResult start_playback_with_callback(
             filename, onStopCallback);
 }
 
+static int get_duration_s(android::base::StringView filename) {
+    return AutomationController::get().getDurationS(filename);
+}
+
 static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
         .reset = reset,
         .startRecording = start_recording,
         .stopRecording = stop_recording,
         .startPlayback = start_playback,
         .stopPlayback = stop_playback,
-        .startPlaybackWithCallback = start_playback_with_callback};
+        .startPlaybackWithCallback = start_playback_with_callback,
+        .getDurationS = get_duration_s};
 
 extern "C" const QAndroidAutomationAgent* const gQAndroidAutomationAgent =
         &sQAndroidAutomationAgent;
