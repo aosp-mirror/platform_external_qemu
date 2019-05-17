@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea8a909e_6b4de2bf",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-17T20:44:51Z",
+      "side": 1,
+      "message": "I recommend keeping the type the same instead of using an int.  Either uint32_t or uint64_t if this is changed to nanoseconds.",
+      "range": {
+        "startLine": 397,
+        "startChar": 29,
+        "endLine": 397,
+        "endChar": 33
+      },
+      "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "364a5476_10d7c57f",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-17T20:44:51Z",
+      "side": 1,
+      "message": "Let\u0027s use the emulator\u0027s time instead.  The current time is stepped by AutomationController::advanceTime(), how about we extract nowNs out to a member variable and use that for the current time?\n\nAlternatively, we can call mLooper-\u003enowNs(Looper::ClockType::kVirtual)",
+      "range": {
+        "startLine": 587,
+        "startChar": 4,
+        "endLine": 587,
+        "endChar": 70
+      },
+      "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1150854a_9a3feaeb",
+        "filename": "android/android-emu/android/automation/proto/automation.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-17T20:44:51Z",
+      "side": 1,
+      "message": "I think delay below is stored in nanoseconds, maybe this should be as well?  That would allow displaying a more precise progress bar and still round if it necessary.  uint64 duration_ns?",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 35
+      },
+      "revId": "b6c187fa619c0c7de4beecd2e1eaf05e15785249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
