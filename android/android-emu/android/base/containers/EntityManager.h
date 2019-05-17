@@ -121,6 +121,8 @@ public:
         EM_DBG("newIndex/firstFree: %zu type: %zu", newIndex, type);
 
         size_t neededCapacity = newIndex + 1;
+        if (maxElements < neededCapacity) return INVALID_ENTITY_HANDLE;
+
         size_t currentCapacity = mEntries.size();
         size_t nextCapacity = neededCapacity << 1;
         if (nextCapacity > maxElements) nextCapacity = maxElements;
@@ -154,6 +156,106 @@ public:
         return mEntries[newIndex].handle;
     }
 
+    EntityHandle addFixed(EntityHandle fixedHandle, const Item& item, size_t type) {
+        // 3 cases:
+        // 1. handle is not allocated and doesn't correspond to mFirstFreeIndex
+        bool isFreeListNonHead = false;
+        // 2. handle already exists (replace)
+        bool isAlloced = false;
+        // 3. index(handle) == mFirstFreeIndex
+        bool isFreeListHead = false;
+
+        if (!type) return INVALID_ENTITY_HANDLE;
+
+        size_t maxElements = (1ULL << indexBits);
+        if (mLiveEntries == maxElements) return INVALID_ENTITY_HANDLE;
+
+        size_t newIndex = getHandleIndex(fixedHandle);
+
+        EM_DBG("newIndex/firstFree: %zu type: %zu", newIndex, type);
+
+        size_t neededCapacity = newIndex + 1;
+
+        if (maxElements < neededCapacity) return INVALID_ENTITY_HANDLE;
+
+        size_t currentCapacity = mEntries.size();
+        size_t nextCapacity = neededCapacity << 1;
+        if (nextCapacity > maxElements) nextCapacity = maxElements;
+
+        EM_DBG("needed/current/next capacity: %zu %zu %zu",
+               neededCapacity,
+               currentCapacity,
+               nextCapacity);
+
+        if (neededCapacity > mEntries.size()) {
+            mEntries.resize(nextCapacity);
+            for (size_t i = currentCapacity; i < nextCapacity; ++i) {
+                mEntries[i].handle = makeHandle(i, 0, type);
+                mEntries[i].nextFreeIndex = i + 1;
+                EM_DBG("new un-init entry: index %zu nextFree %zu",
+                       i, i + 1);
+            }
+        }
+
+        // Now we ensured that there is enough space to talk about the entry of
+        // this |fixedHandle|.
+        if (mFirstFreeIndex == newIndex) {
+            isFreeListHead = true;
+        } else {
+            auto& entry = mEntries[newIndex];
+            if (entry.liveGeneration == getHandleGeneration(entry.handle)) {
+                isAlloced = true;
+            } else {
+                isFreeListNonHead = true;
+            }
+        }
+
+        mEntries[newIndex].handle = fixedHandle;
+        mEntries[newIndex].liveGeneration = getHandleGeneration(fixedHandle);
+        mEntries[newIndex].item = item;
+
+        EM_DBG("new index: %zu", newIndex);
+
+        if (isFreeListHead) {
+
+            EM_DBG("first free index reset from %zu to %zu",
+                    mFirstFreeIndex, mEntries[newIndex].nextFreeIndex);
+
+            mFirstFreeIndex = mEntries[newIndex].nextFreeIndex;
+
+            ++mLiveEntries;
+
+        } else if (isAlloced) {
+            // Already replaced whatever is there, and since it's already allocated,
+            // no need to update freelist.
+            EM_DBG("entry at %zu already alloced. replacing.", newIndex);
+        } else if (isFreeListNonHead) {
+            // Go through the freelist and skip over the entry we just added.
+            size_t prevEntryIndex = mFirstFreeIndex;
+
+            EM_DBG("in free list but not head. reorganizing freelist. "
+                   "start at %zu -> %zu",
+                   mFirstFreeIndex, mEntries[prevEntryIndex].nextFreeIndex);
+
+            while (mEntries[prevEntryIndex].nextFreeIndex != newIndex) {
+                EM_DBG("next: %zu -> %zu",
+                       prevEntryIndex,
+                       mEntries[prevEntryIndex].nextFreeIndex);
+                prevEntryIndex =
+                    mEntries[prevEntryIndex].nextFreeIndex;
+            }
+
+            EM_DBG("finished. set prev entry %zu to new entry's next, %zu",
+                    prevEntryIndex, mEntries[newIndex].nextFreeIndex);
+
+            mEntries[prevEntryIndex].nextFreeIndex =
+                mEntries[newIndex].nextFreeIndex;
+
+            ++mLiveEntries;
+        }
+
+        return fixedHandle;
+    }
     void remove(EntityHandle h) {
 
         if (get(h) == nullptr) return;
@@ -267,6 +369,11 @@ public:
         return res;
     }
 
+    void clear() {
+        mData.clear();
+        mEntityToComponentMap.clear();
+    }
+
     // If we didn't explicitly track, just fail.
     ComponentHandle getComponentHandle(EntityHandle h) const {
         auto componentHandlePtr = android::base::find(mEntityToComponentMap, h);
@@ -360,6 +467,10 @@ public:
         return h;
     }
 
+    void clear() {
+        mItems.clear();
+    }
+
     void remove(EntityHandle h) {
         size_t index = indexOfEntity(h);
         mItems[index].live = false;
@@ -367,6 +478,12 @@ public:
     }
 
     Data* get(EntityHandle h) {
+        size_t index = indexOfEntity(h);
+
+        if (index + 1 > mItems.size()) {
+            mItems.resize((index + 1) * 2);
+        }
+
         auto item = mItems.data() + indexOfEntity(h);
         if (!item->live) return nullptr;
         return &item->data;
