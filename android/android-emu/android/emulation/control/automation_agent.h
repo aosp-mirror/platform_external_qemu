@@ -38,6 +38,9 @@ typedef struct QAndroidAutomationAgent {
     android::automation::StartResult (*startPlaybackWithCallback)(
             StringView filename,
             void (*onStopCallback)());
+
+    // Get the duration in seconds from a file.
+    int (*getDurationS)(StringView filename);
 } QAndroidAutomationAgent;
 
 ANDROID_END_HEADER
