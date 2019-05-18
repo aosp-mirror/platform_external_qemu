@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0dd3d0a2_3fcca280",
+        "filename": "android/android-emu/android/emulation/MultiDisplayPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-18T01:08:16Z",
+      "side": 1,
+      "message": "is snapshots relevant for this?",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 0
+      },
+      "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
