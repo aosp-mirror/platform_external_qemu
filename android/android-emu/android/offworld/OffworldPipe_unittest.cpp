@@ -212,19 +212,13 @@ protected:
 
     void snapshotSave(void* pipe, base::Stream* stream) {
         RecursiveScopedVmLock lock;
-        auto cStream = reinterpret_cast<::Stream*>(stream);
-        android_pipe_guest_pre_save(cStream);
-        android_pipe_guest_save(pipe, cStream);
-        android_pipe_guest_post_save(cStream);
+        mDevice->saveSnapshot(stream, pipe);
     }
 
     void* snapshotLoad(base::Stream* stream) {
         RecursiveScopedVmLock lock;
-        auto cStream = reinterpret_cast<::Stream*>(stream);
-        android_pipe_guest_pre_load(cStream);
-        void* pipe = mDevice->load(stream);
+        void* pipe = mDevice->loadSnapshotSinglePipe(stream);
         EXPECT_NE(pipe, nullptr);
-        android_pipe_guest_post_load(cStream);
         return pipe;
     }
 
