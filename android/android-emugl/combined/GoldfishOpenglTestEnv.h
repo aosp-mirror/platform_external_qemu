@@ -13,8 +13,33 @@
 // limitations under the License.
 #pragma once
 
+namespace android {
+namespace base {
+
+class Stream;
+
+} // namespace base
+
+namespace snapshot {
+
+class TextureSaver;
+class TextureLoader;
+
+} // namespace snapshot
+
+} // namespace android
+
 class GoldfishOpenglTestEnv {
 public:
     GoldfishOpenglTestEnv();
     ~GoldfishOpenglTestEnv();
+
+    static GoldfishOpenglTestEnv* get();
+
+    void saveSnapshot(android::base::Stream* stream);
+    void loadSnapshot(android::base::Stream* stream);
+
+    android::base::Stream* snapshotStream = nullptr;
+    // android::base::TextureSaver* textureSaver = nullptr;
+    // android::base::TextureLoader* textureLoader = nullptr;
 };
