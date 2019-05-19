@@ -132,6 +132,8 @@ public:
             android::base::StringView filename,
             void (*onStopCallback)()) = 0;
 
+    // Get the duration in nanoseconds from a file.
+    virtual uint64_t getDurationNs(android::base::StringView filename) = 0;
     //
     // Offworld API
     //
