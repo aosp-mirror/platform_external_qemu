@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a1a5ec1_9bb0d74c",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 52
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-20T17:49:54Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 232,
+        "startChar": 0,
+        "endLine": 232,
+        "endChar": 12
+      },
+      "revId": "c9738c3692562106f4118da7ea8bee85d4b739a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbb483a3_ba705d7c",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 53
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-20T17:49:54Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 232,
+        "startChar": 0,
+        "endLine": 232,
+        "endChar": 12
+      },
+      "revId": "cd947e85381d55610da26848bf95914626b74a8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a108efca_08349e34",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 53
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-20T17:49:54Z",
+      "side": 1,
+      "message": "remove debug prints? or is this CL still WIP?",
+      "range": {
+        "startLine": 533,
+        "startChar": 8,
+        "endLine": 533,
+        "endChar": 65
+      },
+      "revId": "cd947e85381d55610da26848bf95914626b74a8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf5bdd5e_de5aa557",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.h",
+        "patchSetId": 53
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-05-20T17:49:54Z",
+      "side": 1,
+      "message": "should we remove mPipes? it looks redundant after we have mHwPipeToPipe",
+      "range": {
+        "startLine": 112,
+        "startChar": 4,
+        "endLine": 112,
+        "endChar": 37
+      },
+      "revId": "cd947e85381d55610da26848bf95914626b74a8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
