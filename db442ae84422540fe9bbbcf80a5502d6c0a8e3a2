@@ -22,6 +22,30 @@
       "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45ebfe88_c55670ce",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-20T18:41:07Z",
+      "side": 0,
+      "message": "Okay. I modified the m_displays to always include display 0 which is the main display. I can change it back so that we don\u0027t have to invoke glviewport() every time. Previously, I didn\u0027t know glviewport is an expensive call.",
+      "parentUuid": "afa955a5_59587836",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 41,
+        "endChar": 37
+      },
+      "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
