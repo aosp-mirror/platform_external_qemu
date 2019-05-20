@@ -116,7 +116,7 @@ void MediaVpxDecoder::flush(void* ptr) {
 }
 
 void static copyYV12FrameToOutputBuffer(size_t outputBufferWidth, size_t outputBufferHeight,
-        size_t mWidth, size_t mHeight, int32_t bpp,
+        size_t imgWidth, size_t imgHeight, int32_t bpp,
         uint8_t *dst, const uint8_t *srcY, const uint8_t *srcU, const uint8_t *srcV,
         size_t srcYStride, size_t srcUStride, size_t srcVStride) {
 
@@ -125,27 +125,26 @@ void static copyYV12FrameToOutputBuffer(size_t outputBufferWidth, size_t outputB
     size_t dstHeight = outputBufferHeight;
     uint8_t *dstStart = dst;
 
-    for (size_t i = 0; i < mHeight; ++i) {
-         memcpy(dst, srcY, mWidth * bpp);
+    for (size_t i = 0; i < imgHeight; ++i) {
+         memcpy(dst, srcY, imgWidth * bpp);
          srcY += srcYStride;
          dst += dstYStride;
     }
 
     dst = dstStart + dstYStride * dstHeight;
-    for (size_t i = 0; i < mHeight / 2; ++i) {
-         memcpy(dst, srcU, mWidth / 2 * bpp);
+    for (size_t i = 0; i < imgHeight / 2; ++i) {
+         memcpy(dst, srcU, imgWidth / 2 * bpp);
          srcU += srcUStride;
          dst += dstUVStride;
     }
 
     dst = dstStart + (5 * dstYStride * dstHeight) / 4;
-    for (size_t i = 0; i < mHeight / 2; ++i) {
-         memcpy(dst, srcV, mWidth / 2 * bpp);
+    for (size_t i = 0; i < imgHeight / 2; ++i) {
+         memcpy(dst, srcV, imgWidth / 2 * bpp);
          srcV += srcVStride;
          dst += dstUVStride;
     }
 }
-
 
 static size_t getOutputBufferWidth(void* ptr) {
     uint8_t * xptr = (uint8_t*)ptr;
@@ -223,6 +222,7 @@ void static copyImgToGuest(vpx_image_t* mImg, void* ptr) {
     size_t mHeight = getmHeight(ptr);
     int32_t bpp = getbpp(ptr);
     uint8_t *dst = getDst(ptr);
+    VPX_DPRINT("*** d_w=%d d_h=%d out_w=%d out_h=%d m_w=%d m_h=%d", mImg->d_w, mImg->d_h, outputBufferWidth, outputBufferHeight, mWidth, mHeight);
 
     const uint8_t *srcY = (const uint8_t *)mImg->planes[VPX_PLANE_Y];
     const uint8_t *srcU = (const uint8_t *)mImg->planes[VPX_PLANE_U];
@@ -231,7 +231,7 @@ void static copyImgToGuest(vpx_image_t* mImg, void* ptr) {
     size_t srcUStride = mImg->stride[VPX_PLANE_U];
     size_t srcVStride = mImg->stride[VPX_PLANE_V];
 
-    copyYV12FrameToOutputBuffer(outputBufferWidth, outputBufferHeight, mWidth, mHeight, bpp,
+    copyYV12FrameToOutputBuffer(outputBufferWidth, outputBufferHeight, mImg->d_w, mImg->d_h, bpp,
             dst, srcY, srcU, srcV, srcYStride, srcUStride, srcVStride);
 }
 
