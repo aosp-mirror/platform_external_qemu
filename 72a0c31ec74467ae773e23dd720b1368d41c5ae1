@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06e1fa91_25703b2a",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-20T19:40:22Z",
+      "side": 1,
+      "message": "I think we can remove the ordering dependency if this loop would output the hwpipe too:\n\nfor (auto it : mPipeToHwPipe) {\n  void* hostpipe \u003d it.first;\n  stream_put_be64(cStream, (uint64_t)(uintptr_t)it.second);  // save hwpipe\n  android_pipe_guest_save(hostpipe, cStream);\n}\n\n(then rebuild both maps when loading)",
+      "range": {
+        "startLine": 172,
+        "startChar": 43,
+        "endLine": 173,
+        "endChar": 55
+      },
+      "revId": "72a0c31ec74467ae773e23dd720b1368d41c5ae1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a4250d2_3a1960bb",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-20T19:40:22Z",
+      "side": 1,
+      "message": "This can be replaced with a map lookup now that we have that map ;-)",
+      "range": {
+        "startLine": 433,
+        "startChar": 4,
+        "endLine": 434,
+        "endChar": 12
+      },
+      "revId": "72a0c31ec74467ae773e23dd720b1368d41c5ae1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ca38c57_a9ff5778",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-20T19:40:22Z",
+      "side": 1,
+      "message": "This could be a LOG(FATAL)",
+      "range": {
+        "startLine": 473,
+        "startChar": 12,
+        "endLine": 474,
+        "endChar": 20
+      },
+      "revId": "72a0c31ec74467ae773e23dd720b1368d41c5ae1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d984b421_068a49d8",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-20T19:40:22Z",
+      "side": 1,
+      "message": "Remove?",
+      "range": {
+        "startLine": 507,
+        "startChar": 4,
+        "endLine": 507,
+        "endChar": 44
+      },
+      "revId": "72a0c31ec74467ae773e23dd720b1368d41c5ae1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc2d6609_1585cc7f",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-20T19:40:22Z",
+      "side": 1,
+      "message": "Would it be possible to remove mPipes now?  IIRC this is also encapsulating pipes that are half-connected, without a corresponding hwpipe.\n\nMaybe encapsulate this in a struct?\n\nstruct HwPipeData {\n   optional\u003cvoid*\u003e hwpipe;\n   void reset;\n};\n\nstd::unordered_map\u003cvoid*, HwPipeData\u003e mPipeToHwPipeData;",
+      "range": {
+        "startLine": 120,
+        "startChar": 4,
+        "endLine": 120,
+        "endChar": 37
+      },
+      "revId": "72a0c31ec74467ae773e23dd720b1368d41c5ae1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
