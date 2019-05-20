@@ -47,9 +47,6 @@ set(libqemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
-set(libqemu2-glue_windows-x86_64_src
-    stubs/win32-stubs.c)
-
 android_add_library(libqemu2-glue)
 android_target_include_directories(libqemu2-glue
                                    all
@@ -76,9 +73,6 @@ target_link_libraries(libqemu2-glue
 set(libqemu2-glue-vm-operations_src
     ${ANDROID_HW_CONFIG_H}
     qemu-vm-operations-impl.cpp)
-
-set(libqemu2-glue-vm-operations_windows-x86_64_src
-    stubs/win32-stubs.c)
 
 android_add_library(libqemu2-glue-vm-operations)
 android_target_include_directories(libqemu2-glue-vm-operations
