@@ -344,7 +344,12 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
         self.cgenHeader = CodeGen()
         self.cgenImpl = CodeGen()
+
         self.variant = variant
+
+        self.currentFeature = None
+        self.apiOpcodes = {}
+
         if self.variant == "guest":
             self.marshalingParams = PARAMETERS_MARSHALING_GUEST
         else:
@@ -390,6 +395,10 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         VulkanWrapperGenerator.onBegin(self)
         self.module.appendImpl(self.cgenImpl.makeFuncDecl(self.extensionMarshalPrototype))
         self.module.appendImpl(self.cgenImpl.makeFuncDecl(self.extensionUnmarshalPrototype))
+
+    def onBeginFeature(self, featureName):
+        VulkanWrapperGenerator.onBeginFeature(self, featureName)
+        self.currentFeature = featureName
 
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
@@ -447,6 +456,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
         self.module.appendHeader(
             "#define OP_%s %d\n" % (name, self.currentOpcode))
+        self.apiOpcodes[name] = (self.currentOpcode, self.currentFeature)
         self.currentOpcode += 1
 
     def onEnd(self,):
@@ -477,3 +487,47 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                     STREAM_RET_TYPE,
                     STRUCT_EXTENSION_PARAM_FOR_WRITE,
                     forEachExtensionUnmarshal)))
+
+        opcode2stringPrototype = \
+            VulkanAPI("api_opcode_to_string",
+                          makeVulkanTypeSimple(True, "char", 1, "none"),
+                          [ makeVulkanTypeSimple(True, "uint32_t", 0, "opcode") ])
+
+        self.module.appendHeader(
+            self.cgenHeader.makeFuncDecl(opcode2stringPrototype))
+
+        def emitOpcode2StringImpl(apiOpcodes, cgen):
+            cgen.line("switch(opcode)")
+            cgen.beginBlock()
+
+            currFeature = None
+
+            for (name, (opcodeNum, feature)) in sorted(apiOpcodes.items(), key = lambda x : x[1][0]):
+                if not currFeature:
+                    cgen.leftline("#ifdef %s" % feature)
+                    currFeature = feature
+
+                if currFeature and feature != currFeature:
+                    cgen.leftline("#endif")
+                    cgen.leftline("#ifdef %s" % feature)
+                    currFeature = feature
+
+                cgen.line("case OP_%s:" % name)
+                cgen.beginBlock()
+                cgen.stmt("return \"OP_%s\"" % name)
+                cgen.endBlock()
+
+            if currFeature:
+                cgen.leftline("#endif")
+
+            cgen.line("default:")
+            cgen.beginBlock()
+            cgen.stmt("return \"OP_UNKNOWN_API_CALL\"")
+            cgen.endBlock()
+
+            cgen.endBlock()
+
+        self.module.appendImpl(
+            self.cgenImpl.makeFuncImpl(
+                opcode2stringPrototype,
+                lambda cgen: emitOpcode2StringImpl(self.apiOpcodes, cgen)))
