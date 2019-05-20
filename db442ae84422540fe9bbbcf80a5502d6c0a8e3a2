@@ -22,6 +22,23 @@
       "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5410da59_38818da4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-20T20:43:30Z",
+      "side": 1,
+      "message": "It seems to me that in functions setMultiDisplay() and setMultiDisplayColorBuffer(), we can directly call into their corresponding functions in FrameBuffer. The functions in RenderWindow.cpp are mostly forwarding parameters.",
+      "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
