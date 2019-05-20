@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88e5e59a_9e01c5cb",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-20T23:06:28Z",
+      "side": 1,
+      "message": "Why can\u0027t we pass ::Stream to saveSnapshot?",
+      "range": {
+        "startLine": 158,
+        "startChar": 19,
+        "endLine": 158,
+        "endChar": 35
+      },
+      "revId": "62e4acfa537ab0111d33f30f3d152ebfcb88b95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
