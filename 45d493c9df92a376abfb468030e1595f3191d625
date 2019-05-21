@@ -22,6 +22,75 @@
       "revId": "45d493c9df92a376abfb468030e1595f3191d625",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af6e171a_99cef8e0",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T16:41:07Z",
+      "side": 1,
+      "message": "std::make_unique",
+      "range": {
+        "startLine": 77,
+        "startChar": 50,
+        "endLine": 77,
+        "endChar": 53
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ada2974f_cc63e2a0",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T16:41:07Z",
+      "side": 1,
+      "message": "std::make_unique",
+      "range": {
+        "startLine": 67,
+        "startChar": 31,
+        "endLine": 67,
+        "endChar": 34
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2523c6c5_59d5bf01",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T16:41:07Z",
+      "side": 1,
+      "message": "magic number",
+      "range": {
+        "startLine": 88,
+        "startChar": 69,
+        "endLine": 88,
+        "endChar": 77
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
