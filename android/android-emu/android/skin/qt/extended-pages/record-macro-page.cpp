@@ -754,8 +754,7 @@ bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
 
 void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
     // Edit options will pop up for the specific list item.
-    std::cout << mUi->macroList->row(findListItemFromWidget(macroItem))
-              << std::endl;
+    deleteMacroItem(macroItem);
 }
 
 QListWidgetItem* RecordMacroPage::findListItemFromWidget(
@@ -767,4 +766,26 @@ QListWidgetItem* RecordMacroPage::findListItemFromWidget(
         }
     }
     return NULL;
+}
+
+void RecordMacroPage::deleteMacroItem(RecordMacroSavedItem* macroItem) {
+    QString macroName = QString::fromStdString(macroItem->getName());
+    QMessageBox msgBox(QMessageBox::Question, tr("Delete macro"),
+                       tr("Do you want to permanently delete<br>macro \"%1\"?")
+                               .arg(macroName),
+                       QMessageBox::Cancel, this);
+    QPushButton* deleteButton = msgBox.addButton(QMessageBox::Ok);
+    deleteButton->setText(tr("Delete"));
+
+    int selection = msgBox.exec();
+    if (selection == QMessageBox::Ok) {
+        QListWidgetItem* listItem = findListItemFromWidget(macroItem);
+        const std::string name = getMacroNameFromItem(listItem);
+        mUi->macroList->model()->removeRow(mUi->macroList->row(listItem));
+        const std::string macrosLocation = getCustomMacrosDirectory();
+        const std::string path = PathUtils::join(macrosLocation, name);
+        if (std::remove(path.c_str()) != 0) {
+            displayErrorBox("Deletion failed.");
+        }
+    }
 }
