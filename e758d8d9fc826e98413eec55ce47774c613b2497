@@ -45,6 +45,29 @@
       "revId": "e758d8d9fc826e98413eec55ce47774c613b2497",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3901451_fcfc223b",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T22:05:04Z",
+      "side": 1,
+      "message": "Can we keep free indexes in a separate stack/queue or something?",
+      "range": {
+        "startLine": 99,
+        "startChar": 15,
+        "endLine": 99,
+        "endChar": 28
+      },
+      "revId": "e758d8d9fc826e98413eec55ce47774c613b2497",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
