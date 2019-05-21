@@ -22,6 +22,30 @@
       "revId": "7f6808969045e55bf2d20f4c8dee287693e1fde8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a3944be_c1772115",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-21T20:01:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9230136d_6d310c22",
+      "range": {
+        "startLine": 83,
+        "startChar": 7,
+        "endLine": 84,
+        "endChar": 32
+      },
+      "revId": "7f6808969045e55bf2d20f4c8dee287693e1fde8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
