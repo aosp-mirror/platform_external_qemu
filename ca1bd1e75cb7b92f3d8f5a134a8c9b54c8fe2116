@@ -22,6 +22,30 @@
       "revId": "ca1bd1e75cb7b92f3d8f5a134a8c9b54c8fe2116",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f91d566_8bcdef7f",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 837,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-21T00:47:20Z",
+      "side": 1,
+      "message": "Yes it works,changed it to STREAM_NOT_SET. I was thinking this was a different case and we wanted to make a specific one for this type of empty events at the end of the files.",
+      "parentUuid": "4cc26503_c99014fe",
+      "range": {
+        "startLine": 837,
+        "startChar": 44,
+        "endLine": 837,
+        "endChar": 55
+      },
+      "revId": "ca1bd1e75cb7b92f3d8f5a134a8c9b54c8fe2116",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
