@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4cc26503_c99014fe",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 837,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-21T00:14:53Z",
+      "side": 1,
+      "message": "I think we can do this without an extra event, there is a StreamCase::STREAM_NOT_SET enum value-- does using that work?",
+      "range": {
+        "startLine": 837,
+        "startChar": 44,
+        "endLine": 837,
+        "endChar": 55
+      },
+      "revId": "ca1bd1e75cb7b92f3d8f5a134a8c9b54c8fe2116",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
