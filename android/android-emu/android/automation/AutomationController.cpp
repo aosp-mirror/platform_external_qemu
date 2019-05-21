@@ -83,6 +83,9 @@ std::ostream& operator<<(std::ostream& os, const StopError& value) {
         case StopError::NotStarted:
             os << "Not started";
             break;
+        case StopError::ParseError:
+            os << "Parse error";
+            break;
             // Default intentionally omitted so that missing statements generate
             // errors.
     }
@@ -584,10 +587,21 @@ StopResult AutomationControllerImpl::stopRecording() {
         return Err(StopError::NotStarted);
     }
 
-    DurationNs durationNs =
-            mLooper->nowNs(Looper::ClockType::kVirtual) - mStartTimeNs;
+    DurationNs currentTime = mLooper->nowNs(Looper::ClockType::kVirtual);
+    DurationNs durationNs = currentTime - mStartTimeNs;
 
+    DurationNs lastEventTime =
+            mEventSink.getLastEventTimeForStream(mRecordingStream.get());
     mEventSink.unregisterStream(mRecordingStream.get());
+
+    pb::RecordedEvent event;
+    event.set_delay(currentTime - lastEventTime);
+    std::string binaryProto;
+    if (!event.SerializeToString(&binaryProto)) {
+        LOG(WARNING) << "Could not serialize last event.";
+        return Err(StopError::ParseError);
+    }
+    mRecordingStream->putString(binaryProto);
     mRecordingStream.reset();
 
     addDurationToHeader(durationNs);
@@ -821,6 +835,9 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
     switch (event.stream_case()) {
         case pb::RecordedEvent::StreamCase::kPhysicalModel:
             physicalModel_replayEvent(mPhysicalModel, event.physical_model());
+            break;
+        case pb::RecordedEvent::StreamCase::STREAM_NOT_SET:
+            // Last event for files to simulate recordings.
             break;
         default:
             VLOG(automation) << "Unhandled stream type: "

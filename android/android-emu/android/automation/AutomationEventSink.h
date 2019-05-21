@@ -63,6 +63,9 @@ public:
     void recordPhysicalModelEvent(uint64_t timeNs,
                                   pb::PhysicalModelEvent& event);
 
+    // Get the last event time for a specific stream.
+    uint64_t getLastEventTimeForStream(android::base::Stream* stream);
+
 private:
     void handleEvent(uint64_t timeNs, const pb::RecordedEvent& event);
 
