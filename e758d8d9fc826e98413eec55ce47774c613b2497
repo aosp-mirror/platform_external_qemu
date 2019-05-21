@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c685d35_1c99cce1",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T21:52:48Z",
+      "side": 1,
+      "message": "static_assert that these folks fit into 64 bits?",
+      "range": {
+        "startLine": 45,
+        "startChar": 9,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "e758d8d9fc826e98413eec55ce47774c613b2497",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a54f2a6_c61fcf4a",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T21:52:48Z",
+      "side": 1,
+      "message": "Or a struct with bitfields?",
+      "range": {
+        "startLine": 51,
+        "startChar": 25,
+        "endLine": 51,
+        "endChar": 33
+      },
+      "revId": "e758d8d9fc826e98413eec55ce47774c613b2497",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
