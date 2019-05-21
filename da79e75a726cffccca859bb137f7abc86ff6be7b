@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0bcab05c_217f65ac",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-21T19:35:29Z",
+      "side": 1,
+      "message": "Or wow I didn\u0027t notice that both of these were for hwpipes, good fix :-)",
+      "range": {
+        "startLine": 426,
+        "startChar": 4,
+        "endLine": 426,
+        "endChar": 18
+      },
+      "revId": "da79e75a726cffccca859bb137f7abc86ff6be7b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
