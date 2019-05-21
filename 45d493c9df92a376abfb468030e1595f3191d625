@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "9b603300_c75dbde4",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-05-21T21:03:58Z",
+      "side": 1,
+      "message": "make_unique is officially a c++14 feature see (https://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique). Unfortunately our mingw compiler is so old that it doesn\u0027t support it :-(",
+      "parentUuid": "af6e171a_99cef8e0",
+      "range": {
+        "startLine": 77,
+        "startChar": 50,
+        "endLine": 77,
+        "endChar": 53
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ada2974f_cc63e2a0",
         "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
         "patchSetId": 5
@@ -59,6 +83,30 @@
       "writtenOn": "2019-05-21T16:41:07Z",
       "side": 1,
       "message": "std::make_unique",
+      "range": {
+        "startLine": 67,
+        "startChar": 31,
+        "endLine": 67,
+        "endChar": 34
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1e72279_25f98ba6",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-05-21T21:03:58Z",
+      "side": 1,
+      "message": "Since gRPC is not supported for mingw, we can use it here (as our clang compilers do include C++14 headers).",
+      "parentUuid": "ada2974f_cc63e2a0",
       "range": {
         "startLine": 67,
         "startChar": 31,
@@ -91,6 +139,30 @@
       "revId": "45d493c9df92a376abfb468030e1595f3191d625",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5aefa8c6_e825ec6d",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-05-21T21:03:58Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2523c6c5_59d5bf01",
+      "range": {
+        "startLine": 88,
+        "startChar": 69,
+        "endLine": 88,
+        "endChar": 77
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
