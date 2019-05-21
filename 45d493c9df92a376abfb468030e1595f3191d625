@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c7392f1_463a8f87",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1240,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T16:30:21Z",
+      "side": 1,
+      "message": "Could you please use std::make_unique and std::unique_ptr to avoid memory leaks?",
+      "range": {
+        "startLine": 1240,
+        "startChar": 19,
+        "endLine": 1240,
+        "endChar": 22
+      },
+      "revId": "45d493c9df92a376abfb468030e1595f3191d625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
