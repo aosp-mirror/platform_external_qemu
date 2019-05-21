@@ -152,7 +152,7 @@ _adjustPartitionSize( const char*  description,
     }
 
     if (inAndroidBuild) {
-        dwarning("%s partition size adjusted to match image file %s\n", description, temp);
+        D("%s partition size adjusted to match image file %s\n", description, temp);
     }
 
     return convertMBToBytes(imageMB);
