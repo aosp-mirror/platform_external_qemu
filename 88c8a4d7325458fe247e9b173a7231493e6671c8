@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "32c611b5_bd773f0d",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-21T19:58:21Z",
+      "side": 1,
+      "message": "I have a linking issue again\n\nqemu/linux-x86_64/qemu-system-aarch64\n../android-qemu2-glue/emulation/android_address_space_device.cpp:42: error: undefined reference to \u0027goldfish_address_space_set_service_ops\u0027",
+      "range": {
+        "startLine": 27,
+        "startChar": 5,
+        "endLine": 27,
+        "endChar": 43
+      },
+      "revId": "88c8a4d7325458fe247e9b173a7231493e6671c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
