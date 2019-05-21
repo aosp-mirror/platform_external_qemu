@@ -89,6 +89,7 @@ private:
     void createMacroItem(std::string& macroName, bool isPreset);
     bool isPreviewAvailable(const std::string& macroName);
     QListWidgetItem* findListItemFromWidget(RecordMacroSavedItem* macroItem);
+    void deleteMacroItem(RecordMacroSavedItem* macroItem);
 
     // Behind feature flag.
     void setRecordState();
