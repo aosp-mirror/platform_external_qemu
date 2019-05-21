@@ -20,6 +20,7 @@
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
+#include  "android/base/Uuid.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -60,12 +61,23 @@ public:
             temp_dir += debugName;
             temp_dir += ".";
         }
-        temp_dir += "XXXXXX";
-        if (mkdtemp(&temp_dir[0])) {
-          // Fix any Win32/Linux naming issues
+
+        #if defined(_MSC_VER) || defined(_WIN32)
+            temp_dir += Uuid::generate().toString();
+            if (android_mkdir(temp_dir.c_str(), 0755) != 0) {
+                fprintf(stderr, "Unable to create %s, falling back to tmp dir", temp_dir.c_str());
+                temp_dir = getTempPath();
+            }
             auto parts = PathUtils::decompose(temp_dir);
             mPath = PathUtils::recompose(parts);
-        }
+        #else
+            temp_dir += "XXXXXX";
+            if (mkdtemp(&temp_dir[0])) {
+            // Fix any Win32/Linux naming issues
+                auto parts = PathUtils::decompose(temp_dir);
+                mPath = PathUtils::recompose(parts);
+            }
+        #endif
     }
 
     // Return the path to the temporary directory, or NULL if it could not

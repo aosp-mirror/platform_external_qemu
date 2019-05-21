@@ -14,20 +14,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import platform
+import shutil
 import sys
+import tempfile
 
-from absl import app
-from absl import flags
-from absl import logging
+from absl import app, flags, logging
 
-from aemu.definitions import get_ctest, get_qemu_root, EXE_POSTFIX
+from aemu.definitions import EXE_POSTFIX, get_ctest, get_qemu_root
 from aemu.process import run
+
+
+class TemporaryDirectory(object):
+    """Creates a temporary directory that will be deleted when moving out of scope"""
+
+    def __enter__(self):
+        self.name = tempfile.mkdtemp()
+        return self.name
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # Unfortunately there are a lot of unicode files that python doesn't handle properly
+        # so we will let windows handle it..
+        if platform.system() == 'Windows':
+            run(['rmdir', '/s', '/q', self.name])
+        else:
+            shutil.rmtree(self.name)
+
 
 def run_tests(out_dir):
     if platform.system() == 'Windows':
@@ -35,7 +50,12 @@ def run_tests(out_dir):
         run_emugen_test(out_dir)
         run_ctest(out_dir)
     else:
-        run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix', 'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose'])
+        with TemporaryDirectory() as tmpdir:
+            logging.info("Running tests with TMPDIR=%s", tmpdir)
+            run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix',
+                              'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose'], out_dir, {
+                'TMPDIR': tmpdir
+            })
 
 
 def run_binary_exists(out_dir):
@@ -45,7 +65,9 @@ def run_binary_exists(out_dir):
 
 def run_ctest(out_dir):
     cmd = [get_ctest(), '--output-on-failure']
-    run(cmd, out_dir)
+    with TemporaryDirectory() as tmpdir:
+        logging.info("Running tests with TMP=%s", tmpdir)
+        run(cmd, out_dir, {'TMP': tmpdir, 'TEMP': tmpdir})
 
 
 def run_emugen_test(out_dir):
@@ -57,4 +79,3 @@ def run_emugen_test(out_dir):
         run(cmd, out_dir)
     else:
         logging.info('gen_tests not supported on windows yet.')
-
