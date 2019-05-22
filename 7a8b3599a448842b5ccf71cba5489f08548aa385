@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba449400_0eb006f1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-22T18:58:04Z",
+      "side": 1,
+      "message": "This will show up as a pop-up when running the emulator from Android Studio too, let\u0027s remove this here.  The Qt dialog should be sufficient.",
+      "range": {
+        "startLine": 789,
+        "startChar": 12,
+        "endLine": 789,
+        "endChar": 51
+      },
+      "revId": "7a8b3599a448842b5ccf71cba5489f08548aa385",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
