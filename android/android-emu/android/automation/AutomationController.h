@@ -132,6 +132,10 @@ public:
             android::base::StringView filename,
             void (*onStopCallback)()) = 0;
 
+    // Set the macro name in the header of a file.
+    virtual void setMacroName(android::base::StringView macroName,
+                              android::base::StringView filename) = 0;
+
     // Get the duration in nanoseconds from a file.
     virtual uint64_t getDurationNs(android::base::StringView filename) = 0;
     //
