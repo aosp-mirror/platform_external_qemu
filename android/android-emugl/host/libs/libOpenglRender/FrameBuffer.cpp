@@ -999,6 +999,8 @@ HandleType FrameBuffer::createColorBufferLocked(int p_width,
                                           p_internalFormat, p_frameworkFormat,
                                           ret, m_colorBufferHelper,
                                           m_fastBlitSupported));
+    fprintf(stderr, "%s: call\n", __func__);
+
     if (cb.get() != NULL) {
         assert(m_colorbuffers.count(ret) == 0);
         // When guest feature flag RefCountPipe is on, no reference counting is
@@ -1006,6 +1008,7 @@ HandleType FrameBuffer::createColorBufferLocked(int p_width,
         // Explicitly set refcount to 1 to avoid the colorbuffer being added to
         // m_colorBufferDelayedCloseList in FrameBuffer::onLoad().
         if (m_refCountPipeEnabled) {
+            fprintf(stderr, "%s: new refcounty cb\n", __func__);
             m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
         } else {
             // Android master default api level is 1000
@@ -1140,10 +1143,12 @@ void FrameBuffer::drainWindowSurface() {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                if (m_refCountPipeEnabled)
+                if (m_refCountPipeEnabled) {
+                    fprintf(stderr, "%s: dec cb ref count\n", __func__);
                     decColorBufferRefCountLocked(oldColorBufferHandle);
-                else
+                } else {
                     closeColorBufferLocked(oldColorBufferHandle);
+                }
                 m_windows.erase(winIt);
             }
         }
@@ -1182,10 +1187,12 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         ScopedBind bind(m_colorBufferHelper);
-        if (m_refCountPipeEnabled)
+        if (m_refCountPipeEnabled) {
+            fprintf(stderr, "%s: dec cb ref count\n", __func__);
             decColorBufferRefCountLocked(w->second.second);
-        else
+        } else {
             closeColorBufferLocked(w->second.second);
+        }
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
@@ -1203,8 +1210,10 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
-    if (m_refCountPipeEnabled)
+    if (m_refCountPipeEnabled) {
+        fprintf(stderr, "%s: cb refcounty\n", __func__);
         return 0;
+    }
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
@@ -1228,10 +1237,14 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    fprintf(stderr, "%s: call\n", __func__);
+
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
-    if (m_refCountPipeEnabled)
+    if (m_refCountPipeEnabled) {
+    fprintf(stderr, "%s: refcount pipe, no count\n", __func__);
         return;
+    }
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
@@ -1255,8 +1268,10 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
                                          bool forced) {
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
-    if (m_refCountPipeEnabled)
+    if (m_refCountPipeEnabled) {
+    fprintf(stderr, "%s: refcount pipe, no count\n", __func__);
         return;
+    }
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -1365,10 +1380,12 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
-                    if (m_refCountPipeEnabled)
+                    if (m_refCountPipeEnabled) {
+                        fprintf(stderr, "%s: dec ref count cb\n", __func__);
                         decColorBufferRefCountLocked(w->second.second);
-                    else
+                    }  else { 
                         closeColorBufferLocked(w->second.second, forced);
+                    }
                     m_windows.erase(w);
                 }
                 m_procOwnedWindowSurfaces.erase(procIte);
@@ -1470,10 +1487,12 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     (*w).second.first->setColorBuffer((*c).second.cb);
     markOpened(&c->second);
     if (w->second.second) {
-        if (m_refCountPipeEnabled)
+        if (m_refCountPipeEnabled) {
+            fprintf(stderr, "%s: dec ref count cb\n", __func__);
             decColorBufferRefCountLocked(w->second.second);
-        else
+        } else {
             closeColorBufferLocked(w->second.second);
+        }
     }
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
@@ -2275,10 +2294,15 @@ bool FrameBuffer::onLoad(Stream* stream,
             }
             performDelayedColorBufferCloseLocked(true);
         }
+            fprintf(stderr, "%s: do delayed close; delayed close list size: %zu\n", __func__, m_colorBufferDelayedCloseList.size());
         m_colorBufferDelayedCloseList.clear();
         assert(m_contexts.empty());
         assert(m_windows.empty());
-        assert(m_colorbuffers.empty());
+        if (!m_colorbuffers.empty()) {
+            fprintf(stderr, "%s: still has colorbuffers: %zu\n", __func__, m_colorbuffers.size());
+            m_colorbuffers.clear();
+        }
+        // assert(m_colorbuffers.empty());
 #ifdef SNAPSHOT_PROFILE
         System::Duration texTime = System::get()->getUnixTimeUs();
 #endif
