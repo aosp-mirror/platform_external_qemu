@@ -31,14 +31,15 @@ toolchain_generate("windows-x86_64")
 
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
+list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/../libgcc_s_seh-1.dll")
 
 # Make sure we add a build-id section for every compiled component.
 add_compile_options(-m64)
 add_compile_options(-mcx16)
 add_compile_options(-falign-functions)
 add_compile_options( -ftracer)
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id -static-libgcc" CACHE STRING "" FORCE)
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--build-id -static-libgcc" CACHE STRING "" FORCE)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id" CACHE STRING "" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--build-id" CACHE STRING "" FORCE)
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
