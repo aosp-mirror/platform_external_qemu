@@ -41,6 +41,11 @@ static StartResult start_playback_with_callback(
             filename, onStopCallback);
 }
 
+static void set_macro_name(android::base::StringView macroName,
+                           android::base::StringView filename) {
+    AutomationController::get().setMacroName(macroName, filename);
+}
+
 static uint64_t get_duration_ns(android::base::StringView filename) {
     return AutomationController::get().getDurationNs(filename);
 }
@@ -52,6 +57,7 @@ static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
         .startPlayback = start_playback,
         .stopPlayback = stop_playback,
         .startPlaybackWithCallback = start_playback_with_callback,
+        .setMacroName = set_macro_name,
         .getDurationNs = get_duration_ns};
 
 extern "C" const QAndroidAutomationAgent* const gQAndroidAutomationAgent =

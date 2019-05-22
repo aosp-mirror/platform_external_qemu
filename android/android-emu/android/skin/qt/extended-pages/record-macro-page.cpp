@@ -577,6 +577,12 @@ void RecordMacroPage::stopRecording() {
             PathUtils::join(macrosLocation, "placeholder_name");
     if (!newName.empty()) {
         // Rename file.
+        sAutomationAgent->setMacroName(newName, oldPath);
+        newName = QDateTime::currentDateTime()
+                          .toString("yyyyMMdd-hhmmss-")
+                          .toUtf8()
+                          .constData() +
+                  newName;
         newName.append(".emu-macro");
         const std::string newPath = PathUtils::join(macrosLocation, newName);
         if (std::rename(oldPath.c_str(), newPath.c_str()) != 0) {
@@ -690,7 +696,6 @@ std::string RecordMacroPage::displayNameMacroBox() {
     if (selection == QDialog::Rejected) {
         return "";
     }
-    newName = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-") + newName;
     return newName.toUtf8().constData();
 }
 

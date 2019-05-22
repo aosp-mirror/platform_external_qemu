@@ -39,6 +39,9 @@ typedef struct QAndroidAutomationAgent {
             StringView filename,
             void (*onStopCallback)());
 
+    // Set the macro name in the header of a file.
+    void (*setMacroName)(StringView macroName, StringView filename);
+
     // Get the duration in nanoseconds from a file.
     uint64_t (*getDurationNs)(StringView filename);
 } QAndroidAutomationAgent;
