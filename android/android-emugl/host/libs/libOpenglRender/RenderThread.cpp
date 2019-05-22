@@ -99,9 +99,14 @@ void RenderThread::save(android::base::Stream* stream) {
     bool success;
     {
         AutoLock lock(mLock);
-        assert(mState == SnapshotState::StartSaving ||
+        if (!(mState == SnapshotState::StartSaving ||
                mState == SnapshotState::InProgress ||
-               mState == SnapshotState::Finished);
+               mState == SnapshotState::Finished)) {
+            fprintf(stderr, "%s: %p wrong renderthread state: 0x%x\n", __func__, this, (uint32_t)mState);
+        }
+        // assert(mState == SnapshotState::StartSaving ||
+               // mState == SnapshotState::InProgress ||
+               // mState == SnapshotState::Finished);
         waitForSnapshotCompletion(&lock);
         success = mState == SnapshotState::Finished;
     }

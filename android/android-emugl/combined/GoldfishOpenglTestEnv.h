@@ -17,6 +17,7 @@ namespace android {
 namespace base {
 
 class Stream;
+class MemStream;
 
 } // namespace base
 
@@ -36,10 +37,10 @@ public:
 
     static GoldfishOpenglTestEnv* get();
 
+    void clear();
+
     void saveSnapshot(android::base::Stream* stream);
     void loadSnapshot(android::base::Stream* stream);
 
-    android::base::Stream* snapshotStream = nullptr;
-    // android::base::TextureSaver* textureSaver = nullptr;
-    // android::base::TextureLoader* textureLoader = nullptr;
+    android::base::MemStream* snapshotStream = nullptr;
 };
