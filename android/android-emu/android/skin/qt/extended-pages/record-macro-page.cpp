@@ -27,6 +27,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QRegExp>
+#include <QSignalMapper>
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #include <iostream>
@@ -725,8 +726,6 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         macroName.append(" (Preset macro)");
-        std::replace(macroName.begin(), macroName.end(), '_', ' ');
-        macroSavedItem->setName(macroName.c_str());
     } else {
         const std::string macrosLocation = getCustomMacrosDirectory();
         const std::string filePath = PathUtils::join(macrosLocation, macroName);
@@ -739,12 +738,13 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         mLengths[macroName] = qs;
 
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-        macroSavedItem->setName(
-                sAutomationAgent->getMacroName(filePath).str().c_str());
+        macroName = sAutomationAgent->getMacroName(filePath).str();
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
     }
+    std::replace(macroName.begin(), macroName.end(), '_', ' ');
+    macroSavedItem->setName(macroName.c_str());
 
     listItem->setSizeHint(QSize(mUi->macroList->width(), 50));
 
@@ -758,8 +758,69 @@ bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
 }
 
 void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
-    // Edit options will pop up for the specific list item.
-    deleteMacroItem(macroItem);
+    QWidget* placeholderWidget = new QWidget;
+    QVBoxLayout* dialogLayout = new QVBoxLayout(placeholderWidget);
+
+    dialogLayout->addWidget(new QLabel(tr("Macro name")));
+    QLineEdit* name = new QLineEdit(this);
+    name->setMaxLength(32);
+    name->setText(QString::fromStdString(macroItem->getName()));
+    name->selectAll();
+    dialogLayout->addWidget(name);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            QDialogButtonBox::Save | QDialogButtonBox::Cancel, Qt::Horizontal);
+    QPushButton* deleteBtn =
+            buttonBox->addButton("Delete", QDialogButtonBox::DestructiveRole);
+    deleteBtn->setIcon(getIconForCurrentTheme("trash"));
+    dialogLayout->addWidget(buttonBox);
+
+    QDialog nameDialog(this);
+
+    connect(buttonBox, SIGNAL(rejected()), &nameDialog, SLOT(reject()));
+    connect(buttonBox, SIGNAL(accepted()), &nameDialog, SLOT(accept()));
+    QSignalMapper* signalMapper = new QSignalMapper(this);
+    const int qDialogDeleted = 2;
+    signalMapper->setMapping(deleteBtn, qDialogDeleted);
+    connect(signalMapper, SIGNAL(mapped(int)), &nameDialog, SLOT(done(int)));
+    connect(deleteBtn, SIGNAL(clicked()), signalMapper, SLOT(map()));
+
+    nameDialog.setWindowTitle(tr("Edit macro"));
+    nameDialog.setLayout(dialogLayout);
+    nameDialog.resize(300, nameDialog.height());
+
+    int selection;
+    QString newName;
+    QRegExp re("\\w+");
+    // Check that name is [a-zA-Z0-9_] after trimming.
+    do {
+        selection = nameDialog.exec();
+        newName = name->text();
+        newName.replace("_", " ");
+        newName = newName.simplified();
+        newName.replace(" ", "_");
+    } while (selection == QDialog::Accepted && !re.exactMatch(newName));
+
+    if (selection == qDialogDeleted) {
+        deleteMacroItem(macroItem);
+    } else if (selection == QDialog::Accepted) {
+        // Update macro item.
+        newName.replace("_", " ");
+        macroItem->setName(newName);
+        newName.replace(" ", "_");
+
+        // Update file header.
+        const std::string macroName = newName.toUtf8().constData();
+        QListWidgetItem* listItem = findListItemFromWidget(macroItem);
+        if (listItem == NULL) {
+            displayErrorBox("Edit failed.");
+            return;
+        }
+        const std::string macrosLocation = getCustomMacrosDirectory();
+        const std::string path =
+                PathUtils::join(macrosLocation, getMacroNameFromItem(listItem));
+        sAutomationAgent->setMacroName(macroName, path);
+    }
 }
 
 QListWidgetItem* RecordMacroPage::findListItemFromWidget(
