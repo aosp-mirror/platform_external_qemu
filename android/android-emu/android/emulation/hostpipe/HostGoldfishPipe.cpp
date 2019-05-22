@@ -157,6 +157,8 @@ void HostGoldfishPipeDevice::saveSnapshot(base::Stream* stream) {
 
     auto cStream = reinterpret_cast<::Stream*>(stream);
 
+    ScopedVmLock lock;
+
     android_pipe_guest_pre_save(cStream);
 
     stream_put_be32(cStream, mHwPipeToPipe.size());
@@ -175,6 +177,8 @@ void HostGoldfishPipeDevice::saveSnapshot(base::Stream* stream) {
 
 void HostGoldfishPipeDevice::loadSnapshot(base::Stream* stream) {
     auto cStream = reinterpret_cast<::Stream*>(stream);
+
+    ScopedVmLock lock;
 
     android_pipe_guest_pre_load(cStream);
 

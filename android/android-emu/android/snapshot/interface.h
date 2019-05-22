@@ -28,6 +28,7 @@ typedef enum {
 
 void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations,
                                 const QAndroidEmulatorWindowAgent* windowAgent);
+void androidSnapshot_setDiskSpaceCheck(bool enable);
 void androidSnapshot_finalize();
 
 AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name);
@@ -102,6 +103,8 @@ AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo();
 
 void androidSnapshot_writeQuickbootChoice(bool save);
 bool androidSnapshot_getQuickbootChoice();
+
+void androidSnapshot_quickbootSetShortRunCheck(bool enable);
 
 void androidSnapshot_setUsingHdd(bool usingHdd);
 bool androidSnapshot_isUsingHdd();

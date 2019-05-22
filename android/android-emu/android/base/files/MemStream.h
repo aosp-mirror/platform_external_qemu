@@ -44,6 +44,8 @@ public:
 
     const Buffer& buffer() const { return mData; }
 
+    void rewind();
+
 private:
     DISALLOW_COPY_AND_ASSIGN(MemStream);
 
