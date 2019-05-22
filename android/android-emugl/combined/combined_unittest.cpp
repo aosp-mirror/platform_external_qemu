@@ -873,3 +873,13 @@ TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
 
     AHardwareBuffer_release(buf);
 }
+
+TEST_F(CombinedGoldfishOpenglTest, GenericSnapshot) {
+    androidSnapshot_save("test_snapshot");
+    androidSnapshot_load("test_snapshot");
+}
+
+TEST_F(CombinedGoldfishOpenglTest, QuickbootSnapshot) {
+    androidSnapshot_quickbootSave("test_snapshot");
+    androidSnapshot_quickbootLoad("test_snapshot");
+}
