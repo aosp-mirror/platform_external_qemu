@@ -725,6 +725,8 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         macroName.append(" (Preset macro)");
+        std::replace(macroName.begin(), macroName.end(), '_', ' ');
+        macroSavedItem->setName(macroName.c_str());
     } else {
         const std::string macrosLocation = getCustomMacrosDirectory();
         const std::string filePath = PathUtils::join(macrosLocation, macroName);
@@ -737,14 +739,12 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         mLengths[macroName] = qs;
 
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-
-        macroName = macroName.substr(16, macroName.length() - 26);
+        macroSavedItem->setName(
+                sAutomationAgent->getMacroName(filePath).str().c_str());
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
     }
-    std::replace(macroName.begin(), macroName.end(), '_', ' ');
-    macroSavedItem->setName(macroName.c_str());
 
     listItem->setSizeHint(QSize(mUi->macroList->width(), 50));
 

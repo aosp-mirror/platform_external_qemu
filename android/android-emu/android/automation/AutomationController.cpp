@@ -372,6 +372,7 @@ public:
 
     // MacroUI helper functions.
     void setMacroName(StringView macroName, StringView filename) override;
+    StringView getMacroName(StringView filename) override;
     uint64_t getDurationNs(StringView filename) override;
 
     ReplayResult replayInitialState(StringView state) override;
@@ -711,6 +712,28 @@ StopResult AutomationControllerImpl::stopPlayback() {
     mPlayingFromFile = false;
     mPlaybackEventSource.reset();
     return Ok();
+}
+
+StringView AutomationControllerImpl::getMacroName(StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+
+    std::unique_ptr<StdioStream> playbackStream(new StdioStream(
+            fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
+
+    const std::string headerStr = playbackStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr) ||
+        !header.has_duration_ns()) {
+        LOG(ERROR) << "Could not load header name";
+        return "";
+    }
+
+    // Cast to std::string before casting to Stringview.
+    const std::string result = header.name();
+    return result;
 }
 
 uint64_t AutomationControllerImpl::getDurationNs(StringView filename) {
