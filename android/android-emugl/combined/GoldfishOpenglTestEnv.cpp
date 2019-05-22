@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/cmdline-option.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
@@ -69,6 +70,8 @@ static GoldfishOpenglTestEnv* sTestEnv = nullptr;
 
 static android::base::TestTempDir* sTestContentDir = nullptr;
 
+static AndroidOptions sTestEnvCmdLineOptions;
+
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     sTestEnv = this;
     sTestContentDir = new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
@@ -88,7 +91,6 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     std::ofstream hwIniPathTouch(customHwIniPath, std::ios::out);
     hwIniPathTouch << "test ini";
     hwIniPathTouch.close();
-
 
     avdInfo_setCustomCoreHwIniPath(android_avdInfo, customHwIniPath.c_str());
 
@@ -138,6 +140,9 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
         gQAndroidVmOperations,
         gQAndroidEmulatorWindowAgent);
 
+    androidSnapshot_setDiskSpaceCheck(false /* do not check disk space > 2 GB */);
+    androidSnapshot_quickbootSetShortRunCheck(false /* do not check if running < 1500 ms */);
+
     char* vendor = nullptr;
     char* renderer = nullptr;
     char* version = nullptr;
@@ -154,6 +159,13 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     android_init_refcount_pipe();
 
+    // Command line options that enable snapshots
+    sTestEnvCmdLineOptions.read_only = 0;
+    sTestEnvCmdLineOptions.no_snapshot = 0;
+    sTestEnvCmdLineOptions.no_snapshot_save = 0;
+    sTestEnvCmdLineOptions.no_snapshot_load = 0;
+
+    android_cmdLineOptions = &sTestEnvCmdLineOptions;
 }
 
 GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
@@ -165,6 +177,10 @@ GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
 // static
 GoldfishOpenglTestEnv* GoldfishOpenglTestEnv::get() {
     return sTestEnv;
+}
+
+void GoldfishOpenglTestEnv::clear() {
+    HostGoldfishPipeDevice::get()->clear();
 }
 
 void GoldfishOpenglTestEnv::saveSnapshot(android::base::Stream* stream) {
@@ -202,6 +218,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         auto testEnv = GoldfishOpenglTestEnv::get();
         testEnv->loadSnapshot(testEnv->snapshotStream);
         sSnapshotCallbacks->ops[SNAPSHOT_LOAD].onEnd(opaque, name, 0);
+        testEnv->snapshotStream->rewind();
         return true;
     },
     .snapshotDelete = [](const char* name, void* opaque, LineConsumerCallback errConsumer) -> bool {

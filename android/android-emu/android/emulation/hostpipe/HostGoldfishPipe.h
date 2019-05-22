@@ -42,6 +42,9 @@ public:
     void* connect(const char* name);
     void close(void* pipe);
 
+    // Closes all pipes and resets to initial state.
+    void clear();
+
     // Gets the host side pipe object corresponding to hwpipe.
     // Not persistent across snapshot save/load.
     void* getHostPipe(void* hwpipe) const;

@@ -454,6 +454,7 @@ private:
             return;
         }
         if ((state & ChannelState::Stopped) != 0) {
+            fprintf(stderr, "%s: close from host!\n", __func__);
             this->closeFromHost();
             return;
         }
