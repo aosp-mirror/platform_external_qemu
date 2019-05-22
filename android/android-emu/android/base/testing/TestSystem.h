@@ -316,8 +316,7 @@ public:
     virtual TestTempDir* getTempRoot() const {
         if (!mTempDir) {
             mTempDir = new TestTempDir("TestSystem");
-            mTempRootPrefix = PathUtils::addTrailingDirSeparator(
-                    std::string(mTempDir->path()));
+            mTempRootPrefix = PathUtils::addTrailingDirSeparator(mTempDir->pathString());
         }
         return mTempDir;
     }
