@@ -456,7 +456,7 @@ bool Quickboot::save(StringView name) {
         return false;
     }
 
-    if (!ranLongEnoughForSaving) {
+    if (mShortRunCheck && !ranLongEnoughForSaving) {
         dwarning(
                 "Not saving state: emulator ran for just %d "
                 "ms (<%d ms)",
@@ -502,6 +502,10 @@ void Quickboot::invalidate(StringView name) {
         name = kDefaultBootSnapshot;
     }
     Snapshotter::get().deleteSnapshot(c_str(name));
+}
+
+void Quickboot::setShortRunCheck(bool enable) {
+    mShortRunCheck = enable;
 }
 
 }  // namespace snapshot
@@ -566,4 +570,8 @@ bool androidSnapshot_getQuickbootChoice() {
 
 extern "C" const char* android_get_quick_boot_name() {
     return android::snapshot::Quickboot::kDefaultBootSnapshot;
+}
+
+void androidSnapshot_quickbootSetShortRunCheck(bool enable) {
+    android::snapshot::Quickboot::get().setShortRunCheck(enable);
 }

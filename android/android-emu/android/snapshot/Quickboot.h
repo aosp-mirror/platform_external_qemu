@@ -38,6 +38,8 @@ public:
     bool save(base::StringView name);
     void invalidate(base::StringView name);
 
+    void setShortRunCheck(bool enable);
+
 private:
     void decideFailureReport(base::StringView name,
                              const base::Optional<FailureReason>& failureReason);
@@ -65,6 +67,8 @@ private:
     OperationStatus mLoadStatus = OperationStatus::NotStarted;
 
     std::unique_ptr<base::Looper::Timer> mLivenessTimer;
+
+    bool mShortRunCheck = true;
 };
 
 }  // namespace snapshot
