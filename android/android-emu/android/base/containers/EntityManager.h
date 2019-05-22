@@ -48,6 +48,10 @@ template<size_t indexBits,
          class Item>
 class EntityManager {
 public:
+
+    static_assert(64 == (indexBits + generationBits + typeBits),
+                  "bits of index, generation, and type must add to 64");
+
     using EntityHandle = uint64_t;
     using IteratorFunc = std::function<void(bool live, EntityHandle h, Item& item)>;
 
@@ -343,6 +347,10 @@ template<size_t indexBits,
          class Data>
 class ComponentManager {
 public:
+
+    static_assert(64 == (indexBits + generationBits + typeBits),
+                  "bits of index, generation, and type must add to 64");
+
     using ComponentHandle = uint64_t;
     using EntityHandle = uint64_t;
     using ComponentIteratorFunc = std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, Data& data)>;
