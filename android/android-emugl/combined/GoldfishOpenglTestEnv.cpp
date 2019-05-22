@@ -89,7 +89,6 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     hwIniPathTouch << "test ini";
     hwIniPathTouch.close();
 
-
     avdInfo_setCustomCoreHwIniPath(android_avdInfo, customHwIniPath.c_str());
 
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
@@ -137,6 +136,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     androidSnapshot_initialize(
         gQAndroidVmOperations,
         gQAndroidEmulatorWindowAgent);
+
+    androidSnapshot_setDiskSpaceCheck(false /* do not check disk space > 2 GB */);
 
     char* vendor = nullptr;
     char* renderer = nullptr;
