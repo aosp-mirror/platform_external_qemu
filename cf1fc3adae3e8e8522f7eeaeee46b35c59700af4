@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8fb31aab_199e7799",
+        "filename": "android/android-emu/android/base/testing/TestTempDir.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:36:43Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 23,
+        "startChar": 8,
+        "endLine": 23,
+        "endChar": 9
+      },
+      "revId": "cf1fc3adae3e8e8522f7eeaeee46b35c59700af4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
