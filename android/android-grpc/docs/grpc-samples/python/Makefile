@@ -37,7 +37,7 @@ clean:
 		rm -f sample/*pb2*
 
 run: protoc
-	python -m sample.core
+	python -m sample.logcat
 
 
 deps:

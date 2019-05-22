@@ -228,8 +228,14 @@ This gets us closer to what is needed to deploy the emulator with gRPC into a pr
 
 # Controlling the emulator with Python
 
-In the python directory you will find an example that aks the emulator about the vm configuration
-after which it will send a series of key events with a 2ms delay.
+In the python directory you will find two examples:
+
+- An example that aks the emulator about the vm configuration after which it
+  will send a series of key events with a 2ms delay. After building you can run this with
+  `python -m sample.keystrokes`
+
+- An example that uses the streaming interface to retrieve the logcat. After
+  building you can run this with `python -m sample.logcat`
 
 Before we can access the emulator we must launch it with the gRPC server enabled.
 
@@ -237,9 +243,9 @@ Before we can access the emulator we must launch it with the gRPC server enabled
   $ emulator @my_avd -grpc 5556 [..other options...]
 ```
 
-Once the emulator is launched you can build and run the sample as follows:
+Once the emulator is launched you can build the samples as follows:
 
 ```sh
-  $ make deps && make run
+  $ make deps
 ```
 

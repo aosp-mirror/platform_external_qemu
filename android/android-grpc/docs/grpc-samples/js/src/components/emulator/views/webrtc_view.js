@@ -15,18 +15,13 @@
  */
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import * as Device from "../../../android_emulation_control/emulator_controller_grpc_web_pb.js";
-import JsepProtocolDriver from "../net/JsepProtocolDriver.js"
+import JsepProtocolDriver from "../net/jsep_protocol_driver.js"
 
 /**
  * A view on the emulator that is using WebRTC. It will use the Jsep protocol over gRPC to
  * establish the video streams.
  */
 export default class EmulatorWebrtcView extends Component {
-
-  constructor() {
-    super()
-  }
 
   static propTypes = {
     uri: PropTypes.string, // gRPC endpoint of the emulator
@@ -40,9 +35,7 @@ export default class EmulatorWebrtcView extends Component {
   };
 
   onDisconnect = () => {
-    // It is possible that we are not displaying the video component (yet)
-    if (this.video)
-      this.video.stop()
+
   }
 
   onConnect = stream => {
@@ -53,17 +46,17 @@ export default class EmulatorWebrtcView extends Component {
   }
 
   onCanPlay = e => {
-      this.video.play().then(_ => {
-          console.log("Automatic playback started!")
-        })
-        .catch(error => {
-          // Autoplay is likely disabled in chrome
-          // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
-          // so we should probably show something useful here.
-          // We explicitly set the video stream to muted, so this shouldn't happen,
-          // but is something you will have to fix once enabling audio.
-          alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
-          })
+    this.video.play().then(_ => {
+      console.log("Automatic playback started!")
+    })
+      .catch(error => {
+        // Autoplay is likely disabled in chrome
+        // https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
+        // so we should probably show something useful here.
+        // We explicitly set the video stream to muted, so this shouldn't happen,
+        // but is something you will have to fix once enabling audio.
+        alert("code: " + error.code + ", msg: " + error.message + ", name: " + error.nane)
+      })
   }
 
   onContextMenu = e => {

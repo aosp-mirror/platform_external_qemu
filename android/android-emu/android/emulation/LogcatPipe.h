@@ -13,6 +13,8 @@
 #include "android/emulation/AndroidPipe.h"
 
 #include <fstream>
+#include <vector>
+#include "android/base/synchronization/Lock.h"
 
 namespace android {
 namespace emulation {
@@ -22,7 +24,6 @@ namespace emulation {
 
 class LogcatPipe final : public AndroidPipe {
 public:
-
     class Service final : public AndroidPipe::Service {
     public:
         Service();
@@ -39,10 +40,9 @@ public:
     unsigned onGuestPoll() const override;
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override;
     int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override;
-    void onGuestWantWakeOn(int flags) override {
-    }
-private:
-    std::ofstream mOutputFile;
+    void onGuestWantWakeOn(int flags) override {}
+
+    static void registerStream(std::ostream* stream);
 };
 
 void registerLogcatPipeService();
