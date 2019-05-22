@@ -34,7 +34,6 @@
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
-#include "android-qemu2-glue/emulation/android_address_space_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
@@ -167,8 +166,6 @@ bool qemu_android_emulation_early_setup() {
     qemu_set_address_space_device_control_ops(
         (struct qemu_address_space_device_control_ops*)
         create_or_get_address_space_device_control_ops());
-
-    qemu_android_address_space_device_init();
 
     androidSnapshot_initialize(gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent);

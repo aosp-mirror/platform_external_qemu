@@ -33,13 +33,8 @@ ANDROID_BEGIN_HEADER
  */
 struct address_block {
     uint64_t offset;
-    union {
-        uint64_t size_available; /* VMSTATE_x does not support bit fields */
-        struct {
-            uint64_t size : 63;
-            uint64_t available : 1;
-        };
-    };
+    uint64_t size : 63;
+    uint64_t available : 1;
 };
 
 /* A dynamic array of address blocks, with the following invariant:

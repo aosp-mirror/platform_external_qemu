@@ -54,30 +54,22 @@ void AddressSpaceHostMemoryAllocatorContext::perform(AddressSpaceDevicePingInfo 
     info->metadata = result;
 }
 
-void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_addr,
-                                                            const uint64_t size) {
+uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePingInfo *info) {
     constexpr uint64_t alignment = 4096;
-    const uint64_t aligned_size = ((size + alignment - 1) / alignment) * alignment;
+    const uint64_t aligned_size = ((info->size + alignment - 1) / alignment) * alignment;
 
-    void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
+    void* host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
+        const uint64_t phys_addr = info->phys_addr;
+
         if (m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
             gQAndroidVmOperations->mapUserBackedRam(phys_addr, host_ptr, aligned_size);
 
-            return host_ptr;
+            return 0;
         } else {
             android::aligned_buf_free(host_ptr);
-            return nullptr;
+            return -1;
         }
-    } else {
-        return nullptr;
-    }
-}
-
-uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePingInfo *info) {
-    void* host_ptr = allocate_impl(info->phys_addr, info->size);
-    if (host_ptr) {
-        return 0;
     } else {
         return -1;
     }
@@ -98,43 +90,6 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::unallocate(AddressSpaceDevicePi
     } else {
         return -1;
     }
-}
-
-AddressSpaceDeviceType AddressSpaceHostMemoryAllocatorContext::getDeviceType() const {
-    return AddressSpaceDeviceType::HostMemoryAllocator;
-}
-
-void AddressSpaceHostMemoryAllocatorContext::save(base::Stream* stream) const {
-    stream->putBe32(m_paddr2ptr.size());
-
-    for (const auto &kv : m_paddr2ptr) {
-        const uint64_t phys_addr = kv.first;
-        const uint64_t size = kv.second.second;
-        const void *mem = kv.second.first;
-
-        stream->putBe64(phys_addr);
-        stream->putBe64(size);
-        stream->write(mem, size);
-    }
-}
-
-bool AddressSpaceHostMemoryAllocatorContext::load(base::Stream* stream) {
-    size_t size = stream->getBe32();
-
-    for (size_t i = 0; i < size; ++i) {
-        uint64_t phys_addr = stream->getBe64();
-        uint64_t size = stream->getBe64();
-        void *mem = allocate_impl(phys_addr, size);
-        if (mem) {
-            if (stream->read(mem, size) != static_cast<ssize_t>(size)) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 }  // namespace emulation
