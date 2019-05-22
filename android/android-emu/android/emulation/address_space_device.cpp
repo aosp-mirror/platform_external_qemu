@@ -25,8 +25,6 @@
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
-using android::base::Stream;
-
 using namespace android::emulation;
 
 #define AS_DEVICE_DEBUG 0
@@ -36,8 +34,6 @@ using namespace android::emulation;
 #else
 #define AS_DEVICE_DPRINT(fmt,...)
 #endif
-
-namespace {
 
 class AddressSpaceDeviceState {
 public:
@@ -64,7 +60,6 @@ public:
         contextDesc.pingInfo =
             (AddressSpaceDevicePingInfo*)
             gQAndroidVmOperations->physicalMemoryGetAddr(gpa);
-        contextDesc.pingInfoGpa = gpa;
         AS_DEVICE_DPRINT("Ping info: gpa 0x%llx @ %p\n", (unsigned long long)gpa,
                          contextDesc.pingInfo);
     }
@@ -96,67 +91,10 @@ public:
         }
     }
 
-    void save(Stream* stream) const {
-        stream->putBe32(mHandleIndex);
-        stream->putBe32(mContexts.size());
-
-        for (const auto &kv : mContexts) {
-            const uint32_t handle = kv.first;
-            const AddressSpaceContextDescription &desc = kv.second;
-            const AddressSpaceDeviceContext *device_context = desc.device_context.get();
-            const AddressSpaceDeviceType device_type = device_context->getDeviceType();
-
-            stream->putBe32(handle);
-            stream->putBe64(desc.pingInfoGpa);
-            stream->putBe32(device_type);
-
-            device_context->save(stream);
-        }
-    }
-
-    bool load(Stream* stream) {
-        const uint32_t handleIndex = stream->getBe32();
-        const size_t size = stream->getBe32();
-
-        Contexts contexts;
-        for (size_t i = 0; i < size; ++i) {
-            const uint32_t handle = stream->getBe32();
-            const uint64_t pingInfoGpa = stream->getBe64();
-            const AddressSpaceDeviceType device_type =
-                static_cast<AddressSpaceDeviceType>(stream->getBe32());
-
-            std::unique_ptr<AddressSpaceDeviceContext> context =
-                buildAddressSpaceDeviceContext(device_type);
-
-            if (context) {
-                if (context->load(stream)) {
-                    auto &desc = contexts[handle];
-                    desc.pingInfo = (AddressSpaceDevicePingInfo*)
-                        gQAndroidVmOperations->physicalMemoryGetAddr(pingInfoGpa);
-                    desc.pingInfoGpa = pingInfoGpa;
-                    desc.device_context = std::move(context);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-
-        {
-           AutoLock lock(mLock);
-           mHandleIndex = handleIndex;
-           mContexts = std::move(contexts);
-        }
-
-        return true;
-    }
-
 private:
     Lock mLock;
     uint32_t mHandleIndex = 0;
-    typedef std::unordered_map<uint32_t, AddressSpaceContextDescription> Contexts;
-    Contexts mContexts;
+    std::unordered_map<uint32_t, AddressSpaceContextDescription> mContexts;
 
     std::unique_ptr<AddressSpaceDeviceContext>
     buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type) {
@@ -181,6 +119,8 @@ private:
         }
     }
 };
+
+namespace {
 
 static LazyInstance<AddressSpaceDeviceState> sAddressSpaceDeviceState =
         LAZY_INSTANCE_INIT;
@@ -225,18 +165,3 @@ create_or_get_address_space_device_control_ops(void) {
 }
 
 } // extern "C"
-
-namespace android {
-namespace emulation {
-
-int goldfish_address_space_memory_state_load(android::base::Stream *stream) {
-    return sAddressSpaceDeviceState->load(stream) ? 0 : 1;
-}
-
-int goldfish_address_space_memory_state_save(android::base::Stream *stream) {
-    sAddressSpaceDeviceState->save(stream);
-    return 0;
-}
-
-}  // namespace emulation
-}  // namespace android

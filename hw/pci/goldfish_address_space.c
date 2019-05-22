@@ -3,30 +3,7 @@
 #include "hw/acpi/goldfish_defs.h"
 #include "hw/sysbus.h"
 #include "hw/pci/pci.h"
-#include "hw/pci/goldfish_address_space.h"
 #include "sysemu/sysemu.h"
-
-static int null_address_space_memory_state_load(QEMUFile *file) {
-    (void)file;
-    return 0;
-}
-
-static int null_address_space_memory_state_save(QEMUFile *file) {
-    (void)file;
-    return 0;
-}
-
-static const GoldfishAddressSpaceOps goldfish_address_space_null_ops = {
-    .load = null_address_space_memory_state_load,
-    .save = null_address_space_memory_state_save,
-};
-
-static const GoldfishAddressSpaceOps *s_goldfish_address_space_ops =
-    &goldfish_address_space_null_ops;
-
-void goldfish_address_space_set_service_ops(const GoldfishAddressSpaceOps *ops) {
-    s_goldfish_address_space_ops = ops ? ops : &goldfish_address_space_null_ops;
-}
 
 #define ANDROID_EMU_ADDRESS_SPACE_ASSERT_FUNC g_assert
 #define ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC g_malloc0
@@ -53,13 +30,8 @@ void goldfish_address_space_set_service_ops(const GoldfishAddressSpaceOps *ops) 
  */
 struct address_block {
     uint64_t offset;
-    union {
-        uint64_t size_available;  /* VMSTATE_x does not support bit fields */
-        struct {
-            uint64_t size : 63;
-            uint64_t available : 1;
-        };
-    };
+    uint64_t size : 63;
+    uint64_t available : 1;
 };
 
 /* A dynamic array of address blocks, with the following invariant:
@@ -68,8 +40,8 @@ struct address_block {
  */
 struct address_space_allocator {
     struct address_block *blocks;
-    int32_t size;
-    int32_t capacity;
+    int size;
+    int capacity;
     uint64_t total_bytes;
 };
 
@@ -721,119 +693,12 @@ static Property address_space_pci_properties[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
-static int
-vmstate_address_space_memory_state_load(QEMUFile *f,
-                                        void *opaque,
-                                        size_t size,
-                                        VMStateField *field) {
-    return s_goldfish_address_space_ops->load(f);
-}
-
-static int
-vmstate_address_space_memory_state_save(QEMUFile *f,
-                                        void *opaque,
-                                        size_t size,
-                                        VMStateField *field,
-                                        QJSON *vmdesc) {
-    return s_goldfish_address_space_ops->save(f);
-}
-
-#define VMSTATE_USER(_name, _version, _info) { \
-    .name         = _name,                                            \
-    .version_id   = (_version),                                       \
-    .size         = 0,                                                \
-    .info         = &(_info),                                         \
-    .flags        = VMS_SINGLE,                                       \
-    .offset       = 0,                                                \
-}
-
-const VMStateInfo vmstate_info_address_space_memory_state = {
-    .name = "vmstate_info_address_space_memory_state",
-    .get = &vmstate_address_space_memory_state_load,
-    .put = &vmstate_address_space_memory_state_save,
-};
-
-static const VMStateDescription vmstate_address_space_registers = {
-    .name = "address_space_registers",
-    .version_id = 1,
-    .minimum_version_id = 1,
-    .fields = (VMStateField[]) {
-        VMSTATE_UINT32(status,              struct address_space_registers),
-        VMSTATE_UINT32(guest_page_size,     struct address_space_registers),
-        VMSTATE_UINT32(size_low,            struct address_space_registers),
-        VMSTATE_UINT32(size_high,           struct address_space_registers),
-        VMSTATE_UINT32(offset_low,          struct address_space_registers),
-        VMSTATE_UINT32(offset_high,         struct address_space_registers),
-        VMSTATE_UINT32(ping,                struct address_space_registers),
-        VMSTATE_UINT32(ping_info_addr_low,  struct address_space_registers),
-        VMSTATE_UINT32(ping_info_addr_high, struct address_space_registers),
-        VMSTATE_UINT32(handle,              struct address_space_registers),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
-static const VMStateDescription vmstate_address_block = {
-    .name = "address_block",
-    .version_id = 1,
-    .minimum_version_id = 1,
-    .fields = (VMStateField[]) {
-        VMSTATE_UINT64(offset,         struct address_block),
-        VMSTATE_UINT64(size_available, struct address_block),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
-static int vmstate_address_space_allocator_pre_load(void *opaque) {
-    struct address_space_allocator *allocator = opaque;
-
-    /* VMS_ALLOC will replace this field */
-    ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC(allocator->blocks);
-}
-
-static const VMStateDescription vmstate_address_space_allocator = {
-    .name = "address_space_allocator",
-    .version_id = 1,
-    .minimum_version_id = 1,
-    .pre_load = &vmstate_address_space_allocator_pre_load,
-    .fields = (VMStateField[]) {
-        VMSTATE_INT32(size,         struct address_space_allocator),
-        VMSTATE_INT32(capacity,     struct address_space_allocator),
-        VMSTATE_UINT64(total_bytes, struct address_space_allocator),
-        VMSTATE_STRUCT_VARRAY_ALLOC(blocks,
-                                    struct address_space_allocator,
-                                    capacity,
-                                    0,
-                                    vmstate_address_block,
-                                    struct address_block),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
-static int vmstate_address_space_pre_save(void *opaque) { return 0; }
-
-static int vmstate_address_space_pre_load(void *opaque) { return 0; }
-
-static int vmstate_address_space_post_load(void *opaque, int version) {
-    return 0;
-}
-
 static const VMStateDescription vmstate_address_space_pci = {
     .name = GOLDFISH_ADDRESS_SPACE_NAME,
     .version_id = 1,
     .minimum_version_id = 1,
-    .pre_save = &vmstate_address_space_pre_save,
-    .pre_load = &vmstate_address_space_pre_load,
-    .post_load = &vmstate_address_space_post_load,
     .fields = (VMStateField[]) {
         VMSTATE_PCI_DEVICE(parent_obj, struct address_space_state),
-        VMSTATE_STRUCT(registers, struct address_space_state, 0,
-                       vmstate_address_space_registers,
-                       struct address_space_registers),
-        VMSTATE_STRUCT(allocator, struct address_space_state, 0,
-                       vmstate_address_space_allocator,
-                       struct address_space_allocator),
-        VMSTATE_USER("memory_state", 0,
-                     vmstate_info_address_space_memory_state),
         VMSTATE_END_OF_LIST()
     }
 };
