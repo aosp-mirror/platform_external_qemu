@@ -577,6 +577,12 @@ void RecordMacroPage::stopRecording() {
             PathUtils::join(macrosLocation, "placeholder_name");
     if (!newName.empty()) {
         // Rename file.
+        sAutomationAgent->setMacroName(newName, oldPath);
+        newName = QDateTime::currentDateTime()
+                          .toString("yyyyMMdd-hhmmss-")
+                          .toUtf8()
+                          .constData() +
+                  newName;
         newName.append(".emu-macro");
         const std::string newPath = PathUtils::join(macrosLocation, newName);
         if (std::rename(oldPath.c_str(), newPath.c_str()) != 0) {
@@ -690,7 +696,6 @@ std::string RecordMacroPage::displayNameMacroBox() {
     if (selection == QDialog::Rejected) {
         return "";
     }
-    newName = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-") + newName;
     return newName.toUtf8().constData();
 }
 
@@ -720,6 +725,8 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         macroName.append(" (Preset macro)");
+        std::replace(macroName.begin(), macroName.end(), '_', ' ');
+        macroSavedItem->setName(macroName.c_str());
     } else {
         const std::string macrosLocation = getCustomMacrosDirectory();
         const std::string filePath = PathUtils::join(macrosLocation, macroName);
@@ -732,14 +739,12 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         mLengths[macroName] = qs;
 
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-
-        macroName = macroName.substr(16, macroName.length() - 26);
+        macroSavedItem->setName(
+                sAutomationAgent->getMacroName(filePath).str().c_str());
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
     }
-    std::replace(macroName.begin(), macroName.end(), '_', ' ');
-    macroSavedItem->setName(macroName.c_str());
 
     listItem->setSizeHint(QSize(mUi->macroList->width(), 50));
 
@@ -754,8 +759,7 @@ bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
 
 void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
     // Edit options will pop up for the specific list item.
-    std::cout << mUi->macroList->row(findListItemFromWidget(macroItem))
-              << std::endl;
+    deleteMacroItem(macroItem);
 }
 
 QListWidgetItem* RecordMacroPage::findListItemFromWidget(
@@ -767,4 +771,26 @@ QListWidgetItem* RecordMacroPage::findListItemFromWidget(
         }
     }
     return NULL;
+}
+
+void RecordMacroPage::deleteMacroItem(RecordMacroSavedItem* macroItem) {
+    QString macroName = QString::fromStdString(macroItem->getName());
+    QMessageBox msgBox(QMessageBox::Question, tr("Delete macro"),
+                       tr("Do you want to permanently delete<br>macro \"%1\"?")
+                               .arg(macroName),
+                       QMessageBox::Cancel, this);
+    QPushButton* deleteButton = msgBox.addButton(QMessageBox::Ok);
+    deleteButton->setText(tr("Delete"));
+
+    int selection = msgBox.exec();
+    if (selection == QMessageBox::Ok) {
+        QListWidgetItem* listItem = findListItemFromWidget(macroItem);
+        const std::string name = getMacroNameFromItem(listItem);
+        mUi->macroList->model()->removeRow(mUi->macroList->row(listItem));
+        const std::string macrosLocation = getCustomMacrosDirectory();
+        const std::string path = PathUtils::join(macrosLocation, name);
+        if (std::remove(path.c_str()) != 0) {
+            displayErrorBox("Deletion failed.");
+        }
+    }
 }

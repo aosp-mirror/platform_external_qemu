@@ -371,6 +371,8 @@ public:
     StopResult stopPlayback() override;
 
     // MacroUI helper functions.
+    void setMacroName(StringView macroName, StringView filename) override;
+    StringView getMacroName(StringView filename) override;
     uint64_t getDurationNs(StringView filename) override;
 
     ReplayResult replayInitialState(StringView state) override;
@@ -398,6 +400,10 @@ private:
 
     // Adds macro duration to header by copying and replacing the file.
     void addDurationToHeader(DurationNs durationNs);
+
+    // Copies remaining events from originalStream to modifiedStream.
+    void copyStreamToStream(std::unique_ptr<StdioStream>&& originalStream,
+                            std::unique_ptr<StdioStream>&& modifiedStream);
 
     AutomationEventSink mEventSink;
     PhysicalModel* const mPhysicalModel;
@@ -708,6 +714,28 @@ StopResult AutomationControllerImpl::stopPlayback() {
     return Ok();
 }
 
+StringView AutomationControllerImpl::getMacroName(StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+
+    std::unique_ptr<StdioStream> playbackStream(new StdioStream(
+            fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
+
+    const std::string headerStr = playbackStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr) ||
+        !header.has_duration_ns()) {
+        LOG(ERROR) << "Could not load header name";
+        return "";
+    }
+
+    // Cast to std::string before casting to Stringview.
+    const std::string result = header.name();
+    return result;
+}
+
 uint64_t AutomationControllerImpl::getDurationNs(StringView filename) {
     std::string path = filename;
     if (!PathUtils::isAbsolute(path)) {
@@ -888,12 +916,56 @@ void AutomationControllerImpl::addDurationToHeader(DurationNs durationNs) {
     }
     header.set_duration_ns(durationNs);
 
-    std::unique_ptr<EventSource> source(
-            new BinaryStreamEventSource(std::move(originalStream)));
+    std::string modifiedHeader;
+    header.SerializeToString(&modifiedHeader);
+    modifiedStream->putString(modifiedHeader);
+
+    copyStreamToStream(std::move(originalStream), std::move(modifiedStream));
+}
+
+void AutomationControllerImpl::setMacroName(StringView macroName,
+                                            StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+    mFilePath = path;
+
+    std::unique_ptr<StdioStream> originalStream(
+            new StdioStream(fsopen(mFilePath.c_str(), "rb", FileShare::Read),
+                            StdioStream::kOwner));
+    const std::string tmpPath = mFilePath + "_tmp";
+
+    LOG(VERBOSE) << "Copy to " << tmpPath;
+    std::unique_ptr<StdioStream> modifiedStream(
+            new StdioStream(fsopen(tmpPath.c_str(), "wb", FileShare::Write),
+                            StdioStream::kOwner));
+
+    const std::string headerStr = originalStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr)) {
+        LOG(ERROR) << "Could not find header.";
+        return;
+    }
+    header.set_name(macroName);
 
     std::string modifiedHeader;
     header.SerializeToString(&modifiedHeader);
     modifiedStream->putString(modifiedHeader);
+
+    copyStreamToStream(std::move(originalStream), std::move(modifiedStream));
+}
+
+void AutomationControllerImpl::copyStreamToStream(
+        std::unique_ptr<StdioStream>&& firstStream,
+        std::unique_ptr<StdioStream>&& secondStream) {
+    assert(firstStream != nullptr && secondStream != nullptr);
+
+    std::unique_ptr<StdioStream> originalStream(std::move(firstStream));
+    std::unique_ptr<StdioStream> modifiedStream(std::move(secondStream));
+
+    std::unique_ptr<EventSource> source(
+            new BinaryStreamEventSource(std::move(originalStream)));
 
     DurationNs nextCommandDelay;
     while (source->getNextCommandDelay(&nextCommandDelay)) {
@@ -909,6 +981,8 @@ void AutomationControllerImpl::addDurationToHeader(DurationNs durationNs) {
     if (std::remove(mFilePath.c_str()) != 0) {
         LOG(WARNING) << "Could not remove original macro-file.";
     }
+
+    const std::string tmpPath = mFilePath + "_tmp";
     if (std::rename(tmpPath.c_str(), mFilePath.c_str()) != 0) {
         LOG(WARNING) << "Could not rename modified macro-file.";
     }
