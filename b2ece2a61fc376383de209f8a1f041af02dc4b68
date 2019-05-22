@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9804c053_553fbd49",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2611,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "space after //",
+      "range": {
+        "startLine": 2611,
+        "startChar": 4,
+        "endLine": 2611,
+        "endChar": 6
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e148e5ce_43332bc1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2617,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "looks like quite some STLy code so i guess you might as well also calculate the max height that way: https://stackoverflow.com/questions/30611709/find-element-with-max-value-from-stdmap",
+      "range": {
+        "startLine": 2617,
+        "startChar": 0,
+        "endLine": 2617,
+        "endChar": 60
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e252d27_11366233",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2620,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "space after {",
+      "range": {
+        "startLine": 2620,
+        "startChar": 92,
+        "endLine": 2620,
+        "endChar": 93
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f507ceb_9fb5385f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2622,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "space after for",
+      "range": {
+        "startLine": 2622,
+        "startChar": 4,
+        "endLine": 2622,
+        "endChar": 7
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "298fc6fc_77a171e3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2623,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "space around +",
+      "range": {
+        "startLine": 2623,
+        "startChar": 22,
+        "endLine": 2623,
+        "endChar": 23
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b07aed35_4217bcb1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2625,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "Please add detailed comments explaining the overall approach and why we choose these conditions to combine rectangles",
+      "range": {
+        "startLine": 2625,
+        "startChar": 16,
+        "endLine": 2625,
+        "endChar": 54
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d375ee_4db3a3cf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2683,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "This also could use an explanatory comment.",
+      "range": {
+        "startLine": 2670,
+        "startChar": 8,
+        "endLine": 2683,
+        "endChar": 9
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7600b2c0_1d7abd3f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2730,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "this can be easier to read if it were a pure function and what we get back is a list of the new display poses to pass to setMultiDisplay",
+      "range": {
+        "startLine": 2728,
+        "startChar": 12,
+        "endLine": 2730,
+        "endChar": 65
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbba87ff_eeb35741",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2756,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-22T01:42:55Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 2742,
+        "startChar": 6,
+        "endLine": 2756,
+        "endChar": 9
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
