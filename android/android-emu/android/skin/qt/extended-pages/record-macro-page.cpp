@@ -17,6 +17,7 @@
 #include "android/emulation/control/automation_agent.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/record-macro-edit-dialog.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
@@ -725,8 +726,6 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
         macroName.append(" (Preset macro)");
-        std::replace(macroName.begin(), macroName.end(), '_', ' ');
-        macroSavedItem->setName(macroName.c_str());
     } else {
         const std::string macrosLocation = getCustomMacrosDirectory();
         const std::string filePath = PathUtils::join(macrosLocation, macroName);
@@ -739,12 +738,13 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         mLengths[macroName] = qs;
 
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-        macroSavedItem->setName(
-                sAutomationAgent->getMacroName(filePath).str().c_str());
+        macroName = sAutomationAgent->getMacroName(filePath).str();
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
     }
+    std::replace(macroName.begin(), macroName.end(), '_', ' ');
+    macroSavedItem->setName(macroName.c_str());
 
     listItem->setSizeHint(QSize(mUi->macroList->width(), 50));
 
@@ -758,8 +758,30 @@ bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
 }
 
 void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
-    // Edit options will pop up for the specific list item.
-    deleteMacroItem(macroItem);
+    RecordMacroEditDialog editDialog(this);
+    editDialog.setCurrentName(QString::fromStdString(macroItem->getName()));
+
+    int selection = editDialog.exec();
+
+    if (selection == ButtonClicked::Delete) {
+        deleteMacroItem(macroItem);
+    } else if (selection == QDialog::Accepted) {
+        // Update macro item.
+        QString newName = editDialog.getNewName();
+        macroItem->setName(newName);
+
+        // Update file header.
+        const std::string macroName = newName.toUtf8().constData();
+        QListWidgetItem* listItem = findListItemFromWidget(macroItem);
+        if (!listItem) {
+            displayErrorBox("Edit failed.");
+            return;
+        }
+        const std::string macrosLocation = getCustomMacrosDirectory();
+        const std::string path =
+                PathUtils::join(macrosLocation, getMacroNameFromItem(listItem));
+        sAutomationAgent->setMacroName(macroName, path);
+    }
 }
 
 QListWidgetItem* RecordMacroPage::findListItemFromWidget(
