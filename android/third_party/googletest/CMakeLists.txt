@@ -13,6 +13,8 @@ if (WINDOWS_MSVC_X86_64)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest/googlemock googlemock)
   if(WINDOWS_MSVC_X86_64)
     # Okay, google test is not happy under msvc compile
+    target_compile_options(gtest PRIVATE "-Wno-sign-conversion")
+    target_compile_options(gmock PRIVATE "-Wno-sign-conversion")
     target_compile_definitions(gmock_main PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
     target_compile_definitions(gmock PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
     target_compile_definitions(gtest PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
