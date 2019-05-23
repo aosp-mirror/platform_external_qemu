@@ -17,7 +17,7 @@
 #include "android/darwinn/darwinn-service.h"
 #include "android/darwinn/proto/darwinnpipe.pb.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/emulation/testing/TestVmLock.h"
 #include "android/utils/looper.h"
 
