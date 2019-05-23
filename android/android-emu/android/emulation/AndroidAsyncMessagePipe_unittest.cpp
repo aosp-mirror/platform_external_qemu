@@ -22,7 +22,7 @@
 #include "android/base/testing/TestLooper.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulation/android_pipe_device.h"
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/emulation/testing/TestVmLock.h"
 
 #include <gmock/gmock.h>
