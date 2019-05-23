@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfa49cae_28888bba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-23T14:31:42Z",
+      "side": 1,
+      "message": "ah, this might totally explain the increased frequency of vcpu shutdown req recently because we added the cpu usage tracker",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 27
+      },
+      "revId": "67a84c39803eef427ababfeb73e6edb20791ccb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
