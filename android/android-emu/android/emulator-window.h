@@ -35,6 +35,7 @@ typedef struct EmulatorScreenMask {
 typedef struct EmulatorWindow {
     const AConfig* aconfig;
     SkinFile*      layout_file;
+    SkinFile*      layout_file_original;
     int            win_x;
     int            win_y;
     SkinUI*        ui;
@@ -96,5 +97,7 @@ bool emulator_window_stop_recording_async(void);
 RecorderState emulator_window_recorder_state_get(void);
 
 void emulator_window_set_screen_mask(int width, int height, const unsigned char* rgbaData);
+
+void emulator_window_set_no_skin();
 
 ANDROID_END_HEADER

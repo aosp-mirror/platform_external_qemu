@@ -145,4 +145,7 @@ bool skin_ui_rotate(SkinUI* ui, SkinRotation rotation);
 // Notifies the UI that the rotation has updated.
 void skin_ui_update_rotation(SkinUI* ui, SkinRotation rotation);
 
+bool skin_ui_update_and_rotate(SkinUI* ui,
+                               struct SkinFile* layout_file,
+                               SkinRotation rotation);
 ANDROID_END_HEADER

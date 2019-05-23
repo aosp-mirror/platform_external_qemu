@@ -306,9 +306,6 @@ SettingsPage::SettingsPage(QWidget* parent)
     mUi->set_multiDisplayPickBox->addItem("Display 8", 8);
     mUi->set_multiDisplayPickBox->addItem("Display 9", 9);
     mUi->set_multiDisplayPickBox->addItem("Display 10", 10);
-    for (int id = 1; id < MAX_DISPLAYS + 1; id++) {
-        mMultiDisplay.emplace(id, MultiDisplay());
-    }
 }
 
 SettingsPage::~SettingsPage() {
@@ -673,16 +670,17 @@ void SettingsPage::on_set_multiDisplay_clicked() {
     uint32_t width = mUi->set_multiDisplayWidth->value();
     uint32_t height = mUi->set_multiDisplayHeight->value();
     uint32_t dpi = mUi->set_multiDisplayDpi->value();
-    MultiDisplay* p = &mMultiDisplay[mCurrentDisplay];
-    if (p->width == width && p->height == height &&
-        p->dpi == dpi && p->enabled == enabled) {
+    uint32_t x, y, w, h, d, f;
+    bool e;
+    EmulatorQtWindow::getInstance()->getMultiDisplay(mCurrentDisplay, &x, &y, &w, &h,
+                                                     &d, &f, &e);
+    if (w == width && h == height && d == dpi && e == enabled) {
         return;
     }
-    p->width = width;
-    p->height = height;
-    p->dpi = dpi;
-    p->enabled = enabled;
-
+    if (enabled) {
+        mUi->set_frameAlways->hide();
+        mUi->set_frameAlwaysTitle->hide();
+    }
     emit enableMultiDisplayChanged(enabled, mCurrentDisplay, width, height, dpi);
 }
 
@@ -692,8 +690,13 @@ void SettingsPage::onMultiDisplayIdChanged(int id) {
         return;
     }
     mCurrentDisplay = id + 1;
-    mUi->set_multiDisplayWidth->setValue(mMultiDisplay[mCurrentDisplay].width);
-    mUi->set_multiDisplayHeight->setValue(mMultiDisplay[mCurrentDisplay].height);
-    mUi->set_multiDisplayDpi->setValue(mMultiDisplay[mCurrentDisplay].dpi);
-    mUi->set_multiDisplayEnabled->setChecked(mMultiDisplay[mCurrentDisplay].enabled);
+
+    uint32_t x, y, w, h, dpi, flag;
+    bool enabled;
+    EmulatorQtWindow::getInstance()->getMultiDisplay(mCurrentDisplay, &x, &y, &w, &h,
+                                                     &dpi, &flag, &enabled);
+    mUi->set_multiDisplayWidth->setValue(w);
+    mUi->set_multiDisplayHeight->setValue(h);
+    mUi->set_multiDisplayDpi->setValue(dpi);
+    mUi->set_multiDisplayEnabled->setChecked(enabled);
 }

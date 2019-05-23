@@ -31,7 +31,6 @@
 
 #include "android/telephony/modem_driver.h"
 
-
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 /* EmulatorWindow structure instance. */
@@ -379,6 +378,13 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
     return fb->bits_per_pixel;
 }
 
+void emulator_window_set_no_skin() {
+    EmulatorWindow* emulator = emulator_window_get();
+    emulator->layout_file_original = emulator->layout_file;
+    emulator->layout_file = skin_file_create_from_display_v1(emulator->layout_file->parts->display);
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
+}
+
 int emulator_window_init(EmulatorWindow* emulator,
                          const AConfig* aconfig,
                          const char* basepath,
@@ -450,7 +456,6 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
    /* this will eventually call sdl_update if the content of the VGA framebuffer
     * has changed */
     qframebuffer_check_updates();
-
     if (emulator->ui && !emulator->done) {
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
