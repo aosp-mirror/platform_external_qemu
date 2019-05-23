@@ -122,8 +122,9 @@ class SymbolFileServer(object):
         resp = self._exec_request_with_retry(oper, url, **kwargs)
         if resp.status_code > 399:
             # Make sure we don't leak secret keys by accident.
-            resp.url = resp.url.replace(
-                urllib.quote(self.api_key), 'XX-HIDDEN-XX')
+            if not self.use_classic_api():
+                resp.url = resp.url.replace(
+                    urllib.quote(self.api_key), 'XX-HIDDEN-XX')
             logging.error('Url: %s, Status: %s, response: "%s", in: %s',
                           resp.url, resp.status_code, resp.text, resp.elapsed)
             resp.raise_for_status()
