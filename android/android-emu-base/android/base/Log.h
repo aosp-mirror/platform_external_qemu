@@ -12,7 +12,6 @@
 #pragma once
 
 #include "android/utils/debug.h"
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stddef.h>
