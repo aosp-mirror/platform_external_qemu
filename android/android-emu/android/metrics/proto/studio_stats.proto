@@ -1412,7 +1412,9 @@ message EmulatorFeatureFlagState {
     MACRO_UI = 42;
     CAR_PROPERTY_TABLE = 43;
     DYNAMIC_PARTITION = 44;
-    // Next tag: 45
+    HWCODEC_VPX = 45;
+    HWCODEC_H264 = 46;
+    // Next tag: 47
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
