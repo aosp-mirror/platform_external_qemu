@@ -12,6 +12,7 @@
 
 #include "android/skin/ui.h"
 
+#include "android/emulator-window.h"
 #include "android/skin/file.h"
 #include "android/skin/generic-event.h"
 #include "android/skin/image.h"
@@ -74,6 +75,7 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
                        const SkinUIFuncs* ui_funcs,
                        const SkinUIParams* ui_params,
                        bool use_emugl_subwindow) {
+
     SkinUI* ui;
 
     ANEW0(ui);
@@ -255,6 +257,13 @@ bool skin_ui_rotate(SkinUI* ui, SkinRotation rotation) {
     return false;
 }
 
+bool skin_ui_update_and_rotate(SkinUI* ui,
+                               SkinFile* layout_file,
+                               SkinRotation rotation) {
+    ui->layout_file = layout_file;
+    skin_ui_rotate(ui, rotation);
+}
+
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
@@ -419,6 +428,9 @@ bool skin_ui_process_events(SkinUI* ui) {
                 skin_window_show_trackball(ui->window, ui->show_trackball);
                 skin_ui_reset_title(ui);
             }
+            break;
+        case kEventSetNoSkin:
+            emulator_window_set_no_skin();
             break;
         }
     }

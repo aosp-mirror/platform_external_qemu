@@ -44,6 +44,7 @@ typedef enum {
     kEventSetDisplayRegion,
     kEventSetDisplayRegionAndUpdate,
     kEventSetMultiDisplay,
+    kEventSetNoSkin,
 } SkinEventType;
 
 typedef enum {

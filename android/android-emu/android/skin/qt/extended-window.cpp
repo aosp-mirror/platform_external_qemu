@@ -89,7 +89,7 @@ ExtendedWindow::ExtendedWindow(
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(enableMultiDisplayChanged(bool, uint32_t, uint32_t, uint32_t, uint32_t)),
-        mToolWindow, SLOT(switchMultiDisplay(bool, uint32_t, uint32_t, uint32_t, uint32_t)));
+        mEmulatorWindow, SLOT(switchMultiDisplay(bool, uint32_t, uint32_t, uint32_t, uint32_t)));
 
     // clang-format off
     mPaneButtonMap = {
