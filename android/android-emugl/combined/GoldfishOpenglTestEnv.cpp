@@ -19,9 +19,12 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
+#include "android/emulation/address_space_device.h"
+#include "android/emulation/address_space_device.hpp"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/hostdevices/HostAddressSpace.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -58,6 +61,7 @@ using aemu::Display;
 using android::AndroidPipe;
 using android::base::pj;
 using android::base::System;
+using android::HostAddressSpaceDevice;
 using android::HostGoldfishPipeDevice;
 
 static constexpr int kWindowSize = 256;
@@ -153,6 +157,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     printf("%s: GL strings; [%s] [%s] [%s].\n", __func__, vendor, renderer,
            version);
 
+    android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
+
     HostGoldfishPipeDevice::get();
 
     android_init_opengles_pipe();
@@ -184,10 +190,12 @@ void GoldfishOpenglTestEnv::clear() {
 }
 
 void GoldfishOpenglTestEnv::saveSnapshot(android::base::Stream* stream) {
+    HostAddressSpaceDevice::get()->saveSnapshot(stream);
     HostGoldfishPipeDevice::get()->saveSnapshot(stream);
 }
 
 void GoldfishOpenglTestEnv::loadSnapshot(android::base::Stream* stream) {
+    HostAddressSpaceDevice::get()->loadSnapshot(stream);
     HostGoldfishPipeDevice::get()->loadSnapshot(stream);
 }
 
@@ -233,8 +241,14 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         fprintf(stderr, "goldfish-opengl vm ops: set snapshot callbacks\n");
         sSnapshotCallbacks = callbacks;
     },
-    .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {},
-    .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {},
+    .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {
+        (void)size;
+        HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa, hva);
+    },
+    .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {
+        (void)size;
+        HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
+    },
     .getVmConfiguration = [](VmConfiguration* out) {
         fprintf(stderr, "goldfish-opengl vm ops: get vm configuration\n");
      },
@@ -249,7 +263,9 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
      },
     .physicalMemoryGetAddr = [](uint64_t gpa) {
         fprintf(stderr, "goldfish-opengl vm ops: physical memory get addr\n");
-        return (void*)(uintptr_t)gpa;
+        void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
+        if (!res) return (void*)(uintptr_t)gpa;
+        return res;
      },
     .isRealAudioAllowed = [](void) {
         fprintf(stderr, "goldfish-opengl vm ops: is real audiop allowed\n");
