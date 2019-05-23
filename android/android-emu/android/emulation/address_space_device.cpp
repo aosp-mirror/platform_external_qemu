@@ -108,6 +108,8 @@ public:
             stream->putBe32(handle);
             stream->putBe64(desc.pingInfoGpa);
 
+            fprintf(stderr, "%s:%d this=%p handle=%u pingInfoGpa=%lx device_context=%p\n", __func__, __LINE__, this, handle, desc.pingInfoGpa, device_context);
+
             if (device_context) {
                 stream->putByte(1);
                 stream->putBe32(device_context->getDeviceType());
@@ -137,6 +139,7 @@ public:
                         static_cast<AddressSpaceDeviceType>(stream->getBe32());
                     context = buildAddressSpaceDeviceContext(device_type);
                     if (!context || !context->load(stream)) {
+                        fprintf(stderr, "%s:%d BAD\n", __func__, __LINE__);
                         return false;
                     }
                 }

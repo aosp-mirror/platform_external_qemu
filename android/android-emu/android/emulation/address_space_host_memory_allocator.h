@@ -31,6 +31,8 @@ public:
     void save(base::Stream* stream) const override;
     bool load(base::Stream* stream) override;
 
+    static void* getHostAddr(uint64_t addr);
+
 private:
     uint64_t allocate(AddressSpaceDevicePingInfo *info);
     uint64_t unallocate(AddressSpaceDevicePingInfo *info);
