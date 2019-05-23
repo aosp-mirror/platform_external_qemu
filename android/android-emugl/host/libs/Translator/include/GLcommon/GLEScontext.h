@@ -99,6 +99,8 @@ struct GLSupport {
     bool GL_OES_RGB8_RGBA8 = false;
 
     bool ext_GL_EXT_color_buffer_float = false;
+    bool ext_GL_EXT_color_buffer_half_float = false;
+    bool ext_GL_EXT_shader_framebuffer_fetch = false;
 
     bool ext_GL_EXT_memory_object = false;
     bool ext_GL_EXT_semaphore = false;
