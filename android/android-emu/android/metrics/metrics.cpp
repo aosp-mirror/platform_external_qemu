@@ -409,6 +409,10 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::MACRO_UI;
         case android::featurecontrol::CarPropertyTable:
             return android_studio::EmulatorFeatureFlagState::CAR_PROPERTY_TABLE;
+        case android::featurecontrol::HWCodecVPX:
+            return android_studio::EmulatorFeatureFlagState::HWCODEC_VPX;
+        case android::featurecontrol::HWCodecH264:
+            return android_studio::EmulatorFeatureFlagState::HWCODEC_H264;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
