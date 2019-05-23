@@ -26,6 +26,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -618,6 +619,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             adbPath = QDir::toNativeSeparators(adbPath);
             (*mAdbInterface)->setCustomAdbPath(adbPath.toStdString());
         }
+    }
+
+    for (int i = 0; i < MAX_MULTIDISPLAYS + 1; i++) {
+        mMultiDisplay.emplace(i, MultiDisplayInfo());
     }
 
     ScreenMask::loadMask((*mAdbInterface));
@@ -2746,15 +2751,15 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
     }
 }
 
-void EmulatorQtWindow::setMultiDisplay(int id, int x, int y, int w, int h, bool add) {
+void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                                       uint32_t h, bool add) {
     AutoLock lock(mMultiDisplayLock);
+    mMultiDisplay[id].enabled = add;
     if (add) {
         mMultiDisplay[id].pos_x = x;
         mMultiDisplay[id].pos_y = y;
         mMultiDisplay[id].width = w;
         mMultiDisplay[id].height = h;
-    } else {
-        mMultiDisplay.erase(id);
     }
      SkinEvent* event = new SkinEvent();
      event->type = kEventSetMultiDisplay;
@@ -2767,9 +2772,23 @@ void EmulatorQtWindow::setMultiDisplay(int id, int x, int y, int w, int h, bool 
      skin_event_add(event);
 }
 
-bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
+void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
+                                       uint32_t h, uint32_t dpi, uint32_t flag,
+                                       bool add) {
     AutoLock lock(mMultiDisplayLock);
-    if (mMultiDisplay.find(id) == mMultiDisplay.end()) {
+    mMultiDisplay[id].pos_x = x;
+    mMultiDisplay[id].pos_y = y;
+    mMultiDisplay[id].width = w;
+    mMultiDisplay[id].height = h;
+    mMultiDisplay[id].dpi= dpi;
+    mMultiDisplay[id].flag = flag;
+    mMultiDisplay[id].enabled = add;
+}
+
+bool EmulatorQtWindow::getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w,
+                                       uint32_t* h) {
+    AutoLock lock(mMultiDisplayLock);
+    if (!mMultiDisplay[id].enabled) {
         return false;
     }
     *x = mMultiDisplay[id].pos_x;
@@ -2777,4 +2796,60 @@ bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
     *w = mMultiDisplay[id].width;
     *h = mMultiDisplay[id].height;
     return true;
+}
+
+void EmulatorQtWindow::getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w,
+                                       uint32_t* h, uint32_t* dpi, uint32_t* flag,
+                                       bool* enabled) {
+    AutoLock lock(mMultiDisplayLock);
+    *x = mMultiDisplay[id].pos_x;
+    *y = mMultiDisplay[id].pos_y;
+    *w = mMultiDisplay[id].width;
+    *h = mMultiDisplay[id].height;
+    *dpi = mMultiDisplay[id].dpi;
+    *flag = mMultiDisplay[id].flag;
+    *enabled = mMultiDisplay[id].enabled;
+}
+
+int EmulatorQtWindow::countEnabledMultiDisplay() {
+    AutoLock lock(mMultiDisplayLock);
+    int cnt = 0;
+    // Not counting 0, the default Android display
+    for (int i = 1; i < MAX_MULTIDISPLAYS + 1; i++) {
+        if (mMultiDisplay[i].enabled) {
+            cnt++;
+        }
+    }
+    return cnt;
+}
+
+static bool multiDisplaySet = false;
+void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
+                                   uint32_t height, uint32_t dpi) {
+    setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
+    char cmd[128];
+    sprintf(cmd, "%s",
+            "am start -n com.android.emulator.multidisplay/com.android.emulator.multidisplay.MainActivity");
+    getAdbInterface()->enqueueCommand({"shell", cmd});
+    if (enabled && !multiDisplaySet) {
+        // disable skin only when multidisplay is set the first time
+        multiDisplaySet = true;
+        char *skinName, *skinDir;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        if (skinDir != NULL) {
+            SkinEvent* event = new SkinEvent();
+            event->type = kEventSetNoSkin;
+            skin_event_add(event);
+        }
+    }
+    if (enabled && countEnabledMultiDisplay() == 1) {
+        mToolWindow->hideRotationButton(true);
+    }
+    // restore skin?
+    if (!enabled && countEnabledMultiDisplay() == 0) {
+        mToolWindow->hideRotationButton(false);
+    }
+    const auto uiAgent = mToolWindow->getUiEmuAgent();
+    uiAgent->multiDisplay->setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
+    setFrameAlways(true);
 }
