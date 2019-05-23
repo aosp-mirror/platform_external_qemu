@@ -77,7 +77,7 @@ set(android-emu-common
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/goldfish_sync.cpp
-    android/emulation/hostpipe/HostGoldfishPipe.cpp
+    android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
@@ -670,7 +670,7 @@ set(android-emu_unittests_src
     android/emulation/CrossSessionSocket_unittest.cpp
     android/emulation/HostMemoryService_unittest.cpp
     android/emulation/Hypervisor_unittest.cpp
-    android/emulation/hostpipe/HostGoldfishPipe_unittest.cpp
+    android/emulation/hostdevices/HostGoldfishPipe_unittest.cpp
     android/emulation/ParameterList_unittest.cpp
     android/emulation/RefcountPipe_unittest.cpp
     android/emulation/serial_line_unittest.cpp

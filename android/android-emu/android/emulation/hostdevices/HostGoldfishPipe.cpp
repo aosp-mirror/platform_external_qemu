@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
-#include "android/emulation/hostpipe/host_goldfish_pipe.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
+#include "android/emulation/hostdevices/host_goldfish_pipe.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/Result.h"
