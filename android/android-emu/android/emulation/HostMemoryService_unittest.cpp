@@ -20,7 +20,7 @@
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulation/android_pipe_device.h"
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/emulation/testing/MockAndroidVmOperations.h"
 #include "android/emulation/testing/TestVmLock.h"
 #include "android/utils/looper.h"

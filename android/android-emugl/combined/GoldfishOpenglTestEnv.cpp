@@ -22,7 +22,7 @@
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
