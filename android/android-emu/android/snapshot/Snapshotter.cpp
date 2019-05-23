@@ -238,6 +238,10 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }  // namespace snapshot
 
+void Snapshotter::setDiskSpaceCheck(bool enable) {
+    mDiskSpaceCheck = enable;
+}
+
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
 static void appendFailedSave(pb::EmulatorSnapshotSaveState state,
@@ -520,7 +524,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     // Snapshots vary in size. They can be close to a GB.
     // Rather than taking all the remaining disk space,
     // save only if we have 2 GB of space available.
-    if (android_avdInfo &&
+    if (mDiskSpaceCheck && android_avdInfo &&
         System::isUnderDiskPressure(avdInfo_getContentPath(android_avdInfo))) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
@@ -977,6 +981,10 @@ void androidSnapshot_initialize(
 
     android::snapshot::sInstance->initialize(*vmOperations, *windowAgent);
     android::snapshot::Quickboot::initialize(*vmOperations, *windowAgent);
+}
+
+void androidSnapshot_setDiskSpaceCheck(bool enable) {
+    android::snapshot::sInstance->setDiskSpaceCheck(enable);
 }
 
 void androidSnapshot_finalize() {

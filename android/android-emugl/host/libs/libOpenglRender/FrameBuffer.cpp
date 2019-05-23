@@ -2278,6 +2278,10 @@ bool FrameBuffer::onLoad(Stream* stream,
         m_colorBufferDelayedCloseList.clear();
         assert(m_contexts.empty());
         assert(m_windows.empty());
+        if (!m_colorbuffers.empty()) {
+            fprintf(stderr, "%s: warning: on load, stale colorbuffers: %zu\n", __func__, m_colorbuffers.size());
+            m_colorbuffers.clear();
+        }
         assert(m_colorbuffers.empty());
 #ifdef SNAPSHOT_PROFILE
         System::Duration texTime = System::get()->getUnixTimeUs();

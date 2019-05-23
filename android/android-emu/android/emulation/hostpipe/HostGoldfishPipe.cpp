@@ -126,6 +126,26 @@ void HostGoldfishPipeDevice::close(void* hwpipe) {
     }
 }
 
+void HostGoldfishPipeDevice::clear() {
+    std::vector<void*> hwPipesToClose;
+
+    {
+        ScopedVmLock lock;
+        for (auto it : mHwPipeToPipe) {
+            hwPipesToClose.push_back(it.first);
+        }
+    }
+
+    for (auto hwpipe : hwPipesToClose) {
+        close(hwpipe);
+    }
+
+    ScopedVmLock lock;
+
+    mHwPipeToPipe.clear();
+    mPipeToHwPipe.clear();
+}
+
 void* HostGoldfishPipeDevice::getHostPipe(void* hwpipe) const {
     void** res = (void**)android::base::find(mHwPipeToPipe, hwpipe);
     if (!res) return nullptr;
@@ -157,6 +177,8 @@ void HostGoldfishPipeDevice::saveSnapshot(base::Stream* stream) {
 
     auto cStream = reinterpret_cast<::Stream*>(stream);
 
+    ScopedVmLock lock;
+
     android_pipe_guest_pre_save(cStream);
 
     stream_put_be32(cStream, mHwPipeToPipe.size());
@@ -175,6 +197,8 @@ void HostGoldfishPipeDevice::saveSnapshot(base::Stream* stream) {
 
 void HostGoldfishPipeDevice::loadSnapshot(base::Stream* stream) {
     auto cStream = reinterpret_cast<::Stream*>(stream);
+
+    ScopedVmLock lock;
 
     android_pipe_guest_pre_load(cStream);
 

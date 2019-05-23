@@ -58,5 +58,9 @@ void MemStream::load(Stream* stream) {
     mReadPos = 0;
 }
 
+void MemStream::rewind() {
+    mReadPos = 0;
+}
+
 }  // namespace base
 }  // namespace android
