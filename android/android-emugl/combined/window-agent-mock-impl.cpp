@@ -64,7 +64,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                            x_offset, y_offset, w, h);
                 },
         .setMultiDisplay =
-                [](int id, int x, int y, int w, int h, bool add) {
+                [](uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h, bool add) {
                     printf("window-agent-mock-impl: .setMultiDisplay id %d %d %d %dx%d %s\n",
                            id, x, y, w, h, add ? "add" : "del");
                 },

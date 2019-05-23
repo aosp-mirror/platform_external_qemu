@@ -259,11 +259,19 @@ public:
     int  getRightTransparency()  { return mSkinGapRight; }
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
-    void setMultiDisplay(int id, int x, int y, int w, int h, bool add);
-    bool getMultiDisplay(int id, int* x, int* y, int* w, int* h);
+    // update multiDisplay info from FrameBuffer.cpp
+    void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h, bool add);
+    // update multiDisplay info from UI config
+    void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h,
+                         uint32_t dpi, uint32_t flag, bool add);
+    bool getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
+    void getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h,
+                         uint32_t* dpi, uint32_t* flag, bool* enabled);
+    int countEnabledMultiDisplay();
 
 public slots:
     void rotateSkin(SkinRotation rot);
+    void switchMultiDisplay(bool enabled, uint32_t id, uint32_t width, uint32_t height, uint32_t dpi);
 
 private slots:
     void slot_adbWarningMessageAccepted();
@@ -518,10 +526,15 @@ private:
         uint32_t pos_y;
         uint32_t width;
         uint32_t height;
-        MultiDisplayInfo() : pos_x(0), pos_y(0), width(0), height(0) {}
+        uint32_t dpi;
+        uint32_t flag;
+        bool     enabled;
+        MultiDisplayInfo() :
+          pos_x(0), pos_y(0), width(1200), height(800), dpi(240), flag(0), enabled(false) {}
     };
-    std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
+    std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
+    static const int MAX_MULTIDISPLAYS = 10;
 };
 
 class SkinSurfaceBitmap {
