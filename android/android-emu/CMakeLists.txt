@@ -26,7 +26,6 @@ add_subdirectory(android/darwinn/external/proto/platforms/darwinn/model/config)
 add_subdirectory(android/darwinn/proto)
 
 # Grab the other libraries.
-include(android-emu-base)
 include(android-emu)
 include(android-libui)
 include(crash-service)
