@@ -26,6 +26,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -2777,4 +2778,30 @@ bool EmulatorQtWindow::getMultiDisplay(int id, int* x, int* y, int* w, int* h) {
     *w = mMultiDisplay[id].width;
     *h = mMultiDisplay[id].height;
     return true;
+}
+
+static bool multiDisplaySet = false;
+void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
+                                   uint32_t height, uint32_t dpi) {
+    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+    if (emuQtWindow == nullptr) return;
+
+    char cmd[128];
+    sprintf(cmd, "%s",
+            "am start -n com.android.emulator.multidisplay/com.android.emulator.multidisplay.MainActivity");
+    emuQtWindow->getAdbInterface()->enqueueCommand({"shell", cmd});
+    const auto uiAgent = mToolWindow->getUiEmuAgent();
+    if (enabled && !multiDisplaySet) {
+        multiDisplaySet = true;
+        char *skinName, *skinDir;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        if (skinDir != NULL) {
+            SkinEvent* event = new SkinEvent();
+            event->type = kEventSetNoSkin;
+            skin_event_add(event);
+        }
+    }
+    // restore skin?
+    uiAgent->multiDisplay->setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
+    setFrameAlways(true);
 }
