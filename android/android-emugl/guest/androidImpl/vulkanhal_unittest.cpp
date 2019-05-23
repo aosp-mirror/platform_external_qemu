@@ -559,6 +559,7 @@ TEST_F(VulkanHalTest, MemoryMapping) {
     void* hostPtr;
     EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
 
+    fprintf(stderr, "%s: hostPtr: %p\n", __func__, hostPtr);
     memset(hostPtr, 0xff, kTestAlloc);
 
     VkMappedMemoryRange toFlush = {

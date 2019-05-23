@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/address_space_host_memory_allocator.h"
+#include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/vm_operations.h"
 #include "android/base/AlignedBuf.h"
 
@@ -29,7 +30,8 @@ enum class HostMemoryAllocatorCommand {
 
 AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext() {
     for (const auto& kv : m_paddr2ptr) {
-        gQAndroidVmOperations->unmapUserBackedRam(kv.first, kv.second.second);
+        goldfish_address_space_get_vm_operations()->
+            unmapUserBackedRam(kv.first, kv.second.second);
         android::aligned_buf_free(kv.second.first);
     }
 }
@@ -62,7 +64,8 @@ void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_
     void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
         if (m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
-            gQAndroidVmOperations->mapUserBackedRam(phys_addr, host_ptr, aligned_size);
+            goldfish_address_space_get_vm_operations()->
+                mapUserBackedRam(phys_addr, host_ptr, aligned_size);
 
             return host_ptr;
         } else {
@@ -90,7 +93,8 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::unallocate(AddressSpaceDevicePi
         void* host_ptr = i->second.first;
         const uint64_t aligned_size = i->second.second;
 
-        gQAndroidVmOperations->unmapUserBackedRam(phys_addr, aligned_size);
+        goldfish_address_space_get_vm_operations()->
+            unmapUserBackedRam(phys_addr, aligned_size);
         android::aligned_buf_free(host_ptr);
         m_paddr2ptr.erase(i);
 
