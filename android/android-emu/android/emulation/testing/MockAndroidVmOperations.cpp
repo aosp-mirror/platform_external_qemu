@@ -66,7 +66,9 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .setFailureReason = nullptr,         // Not currently mocked.
         .setExiting = nullptr,               // Not currently mocked.
         .allowRealAudio = nullptr,           // Not currently mocked.
-        .physicalMemoryGetAddr = nullptr,    // Not currently mocked.
+        .physicalMemoryGetAddr = [](uint64_t gpa) {
+            return (void*)(uintptr_t)gpa;
+         },
         .isRealAudioAllowed = nullptr,       // Not currently mocked.
         .setSkipSnapshotSave =
             [](bool skip) { sSkipSnapshotSave = skip; },

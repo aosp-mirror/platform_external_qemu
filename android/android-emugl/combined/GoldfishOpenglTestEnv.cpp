@@ -19,6 +19,8 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
+#include "android/emulation/address_space_device.h"
+#include "android/emulation/address_space_device.hpp"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
@@ -152,6 +154,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     printf("%s: GL strings; [%s] [%s] [%s].\n", __func__, vendor, renderer,
            version);
+
+    android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
 
     HostGoldfishPipeDevice::get();
 
