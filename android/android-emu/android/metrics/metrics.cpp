@@ -413,6 +413,10 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::IP_DISCONNECT_ON_LOAD;
         case android::featurecontrol::VulkanSnapshots:
             return android_studio::EmulatorFeatureFlagState::VULKAN_SNAPSHOTS;
+        case android::featurecontrol::HWCodecVPX:
+            return android_studio::EmulatorFeatureFlagState::HWCODEC_VPX;
+        case android::featurecontrol::HWCodecH264:
+            return android_studio::EmulatorFeatureFlagState::HWCODEC_H264;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

@@ -232,6 +232,19 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.dalvik.vm.heapsize=%s", temp);
     }
 
+    // HW codecs
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::HWCodecVPX)) {
+        params.addFormat("qemu.hwcodec.vpxdec=1");
+    } else {
+        params.addFormat("qemu.hwcodec.vpxdec=0");
+    }
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::HWCodecH264)) {
+        params.addFormat("qemu.hwcodec.avcdec=1");
+    } else {
+        params.addFormat("qemu.hwcodec.avcdec=0");
+    }
+
+
     // User entered parameters are space separated. Passing false here to prevent
     // parameters from being surrounded by quotes.
     return params.toCStringCopy(false);
