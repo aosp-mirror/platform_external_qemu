@@ -36,7 +36,7 @@ android_add_executable(
       ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp
       TypeFactory.cpp)
 target_include_directories(emugen
-                           PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
+                           PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
 
 # The unit tests
 android_add_test(TARGET emugen_unittests SRC # cmake-format: sortable

@@ -824,7 +824,7 @@ endif()
         ${qemu-img_sources} block/qcow2-bitmap.c
     LINUX scsi/pr-manager.c)
   target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub
-                                         android-qemu-deps android-emu-base)
+                                         android-qemu-deps android-emu)
 
   # Create the qemu targets.
   if(NOT LINUX_AARCH64)
