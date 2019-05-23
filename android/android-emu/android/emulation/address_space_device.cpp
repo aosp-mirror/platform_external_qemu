@@ -164,7 +164,7 @@ public:
 
 private:
     Lock mLock;
-    uint32_t mHandleIndex = 0;
+    uint32_t mHandleIndex = 1;
     typedef std::unordered_map<uint32_t, AddressSpaceContextDescription> Contexts;
     Contexts mContexts;
 
@@ -246,6 +246,14 @@ int goldfish_address_space_memory_state_load(android::base::Stream *stream) {
 int goldfish_address_space_memory_state_save(android::base::Stream *stream) {
     sAddressSpaceDeviceState->save(stream);
     return 0;
+}
+
+void host_goldfish_address_space_memory_state_load(android::base::Stream *stream) {
+    sAddressSpaceDeviceState->load(stream);
+}
+
+void host_goldfish_address_space_memory_state_save(android::base::Stream *stream) {
+    sAddressSpaceDeviceState->save(stream);
 }
 
 }  // namespace emulation

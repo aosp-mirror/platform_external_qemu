@@ -32,4 +32,20 @@ struct address_space_device_control_ops {
 struct address_space_device_control_ops*
 create_or_get_address_space_device_control_ops(void);
 
+namespace android {
+
+namespace base {
+
+class Stream;
+
+} // namespace base
+
+namespace emulation {
+
+void host_goldfish_address_space_memory_state_load(android::base::Stream *stream);
+void host_goldfish_address_space_memory_state_save(android::base::Stream *stream);
+
+} // namespace emulation
+} // namespace android
+
 } // extern "C"
