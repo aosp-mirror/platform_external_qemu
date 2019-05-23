@@ -194,7 +194,7 @@ set(OpenglRender_unittests_src
 android_add_test(OpenglRender_unittests)
 target_link_libraries(OpenglRender_unittests
                               PRIVATE
-                              android-emu-base
+                              android-emu
                               gmock_main
                               OpenglRender_standalone_common)
 android_target_compile_definitions(OpenglRender_unittests windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)

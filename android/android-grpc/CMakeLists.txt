@@ -21,7 +21,7 @@ set(android-grpc_src
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE grpc++ png PUBLIC libprotobuf android-emu-base)
+target_link_libraries(android-grpc PRIVATE grpc++ png PUBLIC libprotobuf android-emu)
 target_include_directories(android-grpc
                            PRIVATE # For Renderer.h
                                    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
@@ -40,4 +40,4 @@ install(FILES android/emulation/control/emulator_controller.proto DESTINATION li
 set(grpc_benchmark_src android/emulation/control/keyboard/KeytranslatePerf.cpp
     android/emulation/control/logcat/RingStreamPerf.cpp)
 android_add_executable(grpc_benchmark)
-target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base emulator-gbench)
+target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu emulator-gbench)

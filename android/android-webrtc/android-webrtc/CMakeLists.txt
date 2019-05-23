@@ -9,4 +9,4 @@ target_link_libraries(android-webrtc PUBLIC android-webrtc-net PRIVATE android-e
 
 set(android-webrtc_unittest_src android/emulation/control/WebRtcBridge_unittest.cpp)
 android_add_test(android-webrtc_unittest)
-target_link_libraries(android-webrtc_unittest PRIVATE android-webrtc android-emu-base gmock_main)
+target_link_libraries(android-webrtc_unittest PRIVATE android-webrtc android-emu gmock_main)

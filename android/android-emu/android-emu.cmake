@@ -527,8 +527,11 @@ target_include_directories(android-emu-shared PUBLIC
                                    # as there are a lot of externs that are actually defined in qemu2-glue.
                                    # this has to be sorted out,
                                    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
+                                   # We rely on the base for headers.
+                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base/
                                    # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                                   )
 
 android_target_compile_options(android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
@@ -564,7 +567,7 @@ android_add_library(android-mock-vm-operations)
 
 android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
 target_include_directories(android-mock-vm-operations PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-mock-vm-operations PRIVATE gmock)
+target_link_libraries(android-mock-vm-operations PRIVATE gmock android-emu-base)
 
 # The unit tests
 set(android-emu_unittests_src
