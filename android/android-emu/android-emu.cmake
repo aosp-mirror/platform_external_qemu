@@ -19,20 +19,9 @@ set(android-emu-common
     android/avd/scanner.c
     android/avd/util.c
     android/avd/util_wrapper.cpp
-    android/base/async/AsyncReader.cpp
     android/base/async/AsyncSocket.cpp
-    android/base/async/AsyncSocketServer.cpp
-    android/base/async/AsyncWriter.cpp
     android/base/async/CallbackRegistry.cpp
-    android/base/async/DefaultLooper.cpp
-    android/base/async/Looper.cpp
-    android/base/async/ScopedSocketWatch.cpp
-    android/base/async/ThreadLooper.cpp
-    android/base/network/Dns.cpp
-    android/base/sockets/SocketDrainer.cpp
-    android/base/sockets/SocketUtils.cpp
-    android/base/sockets/SocketWaiter.cpp
-    android/base/threads/internal/ParallelTaskBase.cpp
+    android/base/LayoutResolver.cpp
     android/boot-properties.c
     android/car-cluster.cpp
     android/car.cpp
@@ -77,6 +66,7 @@ set(android-emu-common
     android/emulation/control/adb/adbkey.cpp
     android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/AgentLogger.cpp
+    android/emulation/control/AndroidAgentFactory.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/EmulatorAdvertisement.cpp
     android/emulation/control/FilePusher.cpp
@@ -256,11 +246,36 @@ set(android-emu-common
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
+    android/utils/aconfig-file.c
+    android/utils/assert.c
+    android/utils/async.cpp
+    android/utils/cbuffer.c
+    android/utils/dll.c
     android/utils/dns.cpp
-    android/utils/looper.cpp
+    android/utils/exec.cpp
+    android/utils/file_data.c
+    android/utils/filelock.cpp
+    android/utils/format.cpp
+    android/utils/host_bitness.cpp
+    android/utils/http_utils.cpp
+    android/utils/ini.cpp
+    android/utils/ini.cpp
+    android/utils/intmap.c
+    android/utils/iolooper.cpp
+    android/utils/ipaddr.cpp
+    android/utils/lineinput.c
+    android/utils/lock.cpp
+    android/utils/mapfile.c
+    android/utils/property_file.c
+    android/utils/property_file.c
     android/utils/Random.cpp
-    android/utils/socket_drainer.cpp
-    android/utils/sockets.c
+    android/utils/reflist.c
+    android/utils/refset.c
+    android/utils/system_wrapper.cpp
+    android/utils/timezone.cpp
+    android/utils/uri.cpp
+    android/utils/utf8_utils.cpp
+    android/utils/vector.c
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
     android/wear-agent/PairUpWearPhone.cpp
@@ -398,6 +413,7 @@ target_link_libraries(
          offworld
          # Prebuilt libraries
          android-net
+         android-emu-base
          breakpad_client
          curl
          ssl
@@ -515,14 +531,6 @@ set(android-emu-min
     android/avd/util.c
     android/avd/util_wrapper.cpp
     android/base/async/CallbackRegistry.cpp
-    android/base/async/DefaultLooper.cpp
-    android/base/async/Looper.cpp
-    android/base/async/ScopedSocketWatch.cpp
-    android/base/async/ScopedSocketWatch.cpp
-    android/base/async/ThreadLooper.cpp
-    android/base/sockets/SocketDrainer.cpp
-    android/base/sockets/SocketUtils.cpp
-    android/base/sockets/SocketWaiter.cpp
     android/cmdline-option.cpp
     android/emulation/address_space_device.cpp
     android/emulation/address_space_graphics.cpp
@@ -602,10 +610,11 @@ set(android-emu-min
     android/snapshot/TextureSaver.cpp
     android/uncompress.cpp
     android/user-config.cpp
-    android/utils/looper.cpp
-    android/utils/Random.cpp
-    android/utils/socket_drainer.cpp
-    android/utils/sockets.c)
+    android/utils/dll.c
+    android/utils/file_data.c
+    android/utils/ini.cpp
+    android/utils/property_file.c
+    android/utils/Random.cpp)
 
 # Shared version of the library. Note that this only has the set of common
 # sources, otherwise you will get a lot of linker errors.
@@ -751,7 +760,7 @@ android_add_library(
       android/emulation/testing/MockAndroidVmOperations.cpp)
 android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
-target_link_libraries(android-emu-test-launcher PRIVATE android-emu-base
+target_link_libraries(android-emu-test-launcher PRIVATE android-emu
                       PUBLIC gmock)
 
 if(NOT LINUX_AARCH64)
@@ -761,86 +770,11 @@ if(NOT LINUX_AARCH64)
       android/automation/AutomationEventSink_unittest.cpp
       android/avd/util_unittest.cpp
       android/avd/util_wrapper_unittest.cpp
-      android/base/AlignedBuf_unittest.cpp
-      android/base/ArraySize_unittest.cpp
-      android/base/async/AsyncSocketServer_unittest.cpp
       # bug: 153381599: disabled until flakiness is addressed
       android/base/async/CallbackRegistry_unittest.cpp
-      android/base/async/Looper_unittest.cpp
-      android/base/async/RecurrentTask_unittest.cpp
-      android/base/async/ScopedSocketWatch_unittest.cpp
-      android/base/async/SubscriberList_unittest.cpp
-      android/base/containers/BufferQueue_unittest.cpp
-      android/base/containers/CircularBuffer_unittest.cpp
-      android/base/containers/EntityManager_unittest.cpp
-      android/base/containers/HybridComponentManager_unittest.cpp
-      android/base/containers/Lookup_unittest.cpp
-      android/base/containers/SmallVector_unittest.cpp
-      android/base/containers/StaticMap_unittest.cpp
-      android/base/ContiguousRangeMapper_unittest.cpp
-      android/base/EintrWrapper_unittest.cpp
-      android/base/files/FileShareOpen_unittest.cpp
-      android/base/files/GzipStreambuf_unittest.cpp
-      android/base/files/IniFile_unittest.cpp
-      android/base/files/InplaceStream_unittest.cpp
-      android/base/files/MemStream_unittest.cpp
-      android/base/files/PathUtils_unittest.cpp
-      android/base/files/ScopedFd_unittest.cpp
-      android/base/files/ScopedStdioFile_unittest.cpp
-      android/base/files/Stream_unittest.cpp
-      android/base/files/StreamSerializing_unittest.cpp
-      android/base/files/TarStream_unittest.cpp
-      android/base/FunctionView_unittest.cpp
       android/base/IOVector_unittest.cpp
-      android/base/JsonWriter_unittest.cpp
       android/base/LayoutResolver_unittest.cpp
-      android/base/Log_unittest.cpp
-      android/base/memory/LazyInstance_unittest.cpp
-      android/base/memory/MallocUsableSize_unittest.cpp
-      android/base/memory/MemoryHints_unittest.cpp
-      android/base/memory/OnDemand_unittest.cpp
-      android/base/memory/ScopedPtr_unittest.cpp
-      android/base/memory/SharedMemory_unittest.cpp
-      android/base/misc/FileUtils_unittest.cpp
-      android/base/misc/HttpUtils_unittest.cpp
-      android/base/misc/IpcPipe_unittest.cpp
-      android/base/misc/StringUtils_unittest.cpp
-      android/base/misc/Utf8Utils_unittest.cpp
-      android/base/network/Dns_unittest.cpp
-      android/base/network/IpAddress_unittest.cpp
-      android/base/network/NetworkUtils_unittest.cpp
-      android/base/Optional_unittest.cpp
-      android/base/perflogger/Benchmark_unittest.cpp
-      android/base/Pool_unittest.cpp
-      android/base/ProcessControl_unittest.cpp
-      android/base/Result_unittest.cpp
-      android/base/ring_buffer_unittest.cpp
-      android/base/sockets/ScopedSocket_unittest.cpp
-      android/base/sockets/SocketDrainer_unittest.cpp
-      android/base/sockets/SocketUtils_unittest.cpp
-      android/base/sockets/SocketWaiter_unittest.cpp
-      android/base/StringFormat_unittest.cpp
-      android/base/StringParse_unittest.cpp
-      android/base/StringView_unittest.cpp
-      android/base/SubAllocator_unittest.cpp
-      android/base/synchronization/ConditionVariable_unittest.cpp
-      android/base/synchronization/Event_unittest.cpp
-      android/base/synchronization/Lock_unittest.cpp
-      android/base/synchronization/MessageChannel_unittest.cpp
-      android/base/synchronization/ReadWriteLock_unittest.cpp
-      android/base/system/System_unittest.cpp
-      android/base/testing/MockUtils_unittest.cpp
       android/base/testing/ProtobufMatchers.cpp
-      android/base/testing/TestEvent_unittest.cpp
-      android/base/threads/Async_unittest.cpp
-      android/base/threads/FunctorThread_unittest.cpp
-      android/base/threads/ParallelTask_unittest.cpp
-      android/base/threads/Thread_unittest.cpp
-      android/base/threads/ThreadStore_unittest.cpp
-      android/base/TypeTraits_unittest.cpp
-      android/base/Uri_unittest.cpp
-      android/base/Uuid_unittest.cpp
-      android/base/Version_unittest.cpp
       android/camera/CameraFormatConverters_unittest.cpp
       android/cmdline-option_unittest.cpp
       android/CommonReportedInfo_unittest.cpp
@@ -934,10 +868,7 @@ if(NOT LINUX_AARCH64)
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
       android/utils/aconfig-file_unittest.cpp
-      android/utils/bufprint_unittest.cpp
-      android/utils/dirscanner_unittest.cpp
       android/utils/dns_unittest.cpp
-      android/utils/eintr_wrapper_unittest.cpp
       android/utils/file_data_unittest.cpp
       android/utils/filelock_unittest.cpp
       android/utils/format_unittest.cpp
@@ -946,8 +877,6 @@ if(NOT LINUX_AARCH64)
       android/utils/property_file_unittest.cpp
       android/utils/Random_unittest.cpp
       android/utils/sockets_unittest.cpp
-      android/utils/string_unittest.cpp
-      android/utils/x86_cpuid_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
       android/videoinjection/VideoInjectionController_unittest.cpp
       android/virtualscene/TextureUtils_unittest.cpp
@@ -968,13 +897,8 @@ if(NOT LINUX_AARCH64)
     SRC # cmake-format: sortable
         ${android-emu_unittests_common}
     WINDOWS # cmake-format: sortable
-            android/base/files/ScopedFileHandle_unittest.cpp
-            android/base/files/ScopedRegKey_unittest.cpp
-            android/base/system/Win32UnicodeString_unittest.cpp
-            android/base/system/Win32Utils_unittest.cpp
             android/utils/win32_cmdline_quote_unittest.cpp
             android/windows_installer_unittest.cpp
-    MSVC android/base/system/WinMsvcSystem_unittest.cpp
     DARWIN # cmake-format: sortable
            android/emulation/control/adb/AdbShellStream_unittest.cpp
            android/emulation/nand_limits_unittest.cpp
@@ -1005,7 +929,8 @@ if(NOT LINUX_AARCH64)
     NODISTRIBUTE TARGET studio_discovery_tester
     SRC # cmake-format: sortable
         android/emulation/control/StudioDiscoveryTester.cpp)
-  target_link_libraries(studio_discovery_tester PRIVATE android-grpc)
+  target_link_libraries(studio_discovery_tester PRIVATE android-grpc
+                                                        android-emu)
   add_dependencies(android-emu_unittests studio_discovery_tester)
 
   list(

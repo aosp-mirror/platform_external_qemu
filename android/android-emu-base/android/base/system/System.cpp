@@ -26,7 +26,6 @@
 #include "android/base/misc/FileUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/threads/Thread.h"
-#include "android/crashreport/crash-handler.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"

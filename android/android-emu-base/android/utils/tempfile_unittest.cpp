@@ -11,6 +11,7 @@
 
 #include "android/utils/tempfile.h"
 
+#include "android/utils/file_io.h"
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
