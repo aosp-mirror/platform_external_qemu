@@ -25,6 +25,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/address_space_device.h"
+#include "android/emulation/address_space_device.hpp"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/snapshot/interface.h"
 
@@ -163,6 +164,9 @@ bool qemu_android_emulation_early_setup() {
     if (!qemu_android_sync_init(vmLock)) {
         return false;
     }
+
+    android::emulation::goldfish_address_space_set_vm_operations(
+        gQAndroidVmOperations);
 
     qemu_set_address_space_device_control_ops(
         (struct qemu_address_space_device_control_ops*)
