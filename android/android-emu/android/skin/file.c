@@ -805,7 +805,6 @@ Fail:
 
 /** SKIN FILE
  **/
-
 static int skin_file_load_from_v1(SkinFile* file,
                                   const AConfig* aconfig,
                                   const char* basepath,
@@ -998,6 +997,74 @@ SkinFile* skin_file_create_from_aconfig(const AConfig* aconfig,
 BAD_FILE:
     skin_file_free( file );
     return NULL;
+}
+
+SkinFile* skin_file_create_from_display_v1(const SkinDisplay* display) {
+    SkinFile*  file;
+    ANEW0(file);
+    SkinPart*      part;
+    SkinLayout*    layout;
+    SkinLayout**   ptail = &file->layouts;
+    SkinLocation*  location;
+    int            nn;
+
+    ANEW0(file->parts);
+    memcpy(file->parts->display, display, sizeof(SkinDisplay));
+    file->parts->rect = display->rect;
+    part = file->parts;
+
+    for (nn = 0; nn < 4; nn++)
+    {
+        ANEW0(layout);
+
+        layout->color = 0xff808080;
+
+        ANEW0(location);
+
+        layout->event_type  = 0x05;  /* close keyboard by default */
+        layout->event_code  = 0;
+        layout->event_value = 0;
+
+        location->part     = part;
+        switch (nn) {
+            case 0:
+                location->anchor.x = 0;
+                location->anchor.y = 0;
+                location->rotation = SKIN_ROTATION_0;
+                layout->size       = part->rect.size;
+                break;
+
+            case 1:
+                location->anchor.x = part->rect.size.h;
+                location->anchor.y = 0;
+                location->rotation = SKIN_ROTATION_90;
+                layout->size.w     = part->rect.size.h;
+                layout->size.h     = part->rect.size.w;
+                break;
+
+            case 2:
+                location->anchor.x = part->rect.size.w;
+                location->anchor.y = part->rect.size.h;
+                location->rotation = SKIN_ROTATION_180;
+                layout->size       = part->rect.size;
+                break;
+
+            default:
+                location->anchor.x = 0;
+                location->anchor.y = part->rect.size.w;
+                location->rotation = SKIN_ROTATION_270;
+                layout->size.w     = part->rect.size.h;
+                layout->size.h     = part->rect.size.w;
+                break;
+        }
+        layout->locations = location;
+        layout->orientation = location->rotation;
+
+        *ptail = layout;
+        ptail  = &layout->next;
+    }
+    file->version = 1;
+    return file;
 }
 
 void

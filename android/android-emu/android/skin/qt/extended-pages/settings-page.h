@@ -99,15 +99,5 @@ private:
     std::unique_ptr<Ui::SettingsPage> mUi;
     std::unique_ptr<PerfStatsPage> mPerfStatsPage;
     bool    mDisableANGLE = false;
-    struct MultiDisplay {
-        int width;
-        int height;
-        int dpi;
-        int flag;
-        bool enabled;
-        MultiDisplay() : width(1200), height(800), dpi(240), flag(0), enabled(false) {};
-    };
-    std::unordered_map<int, MultiDisplay> mMultiDisplay;
     int mCurrentDisplay = -1;
-    const static int MAX_DISPLAYS = 10;
 };
