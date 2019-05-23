@@ -166,7 +166,7 @@ export CTEST_OUTPUT_ON_FAILURE=1
 OLD_DIR=$PWD
 cd $OPT_OUT
 if [ -f build.ninja ]; then
-    ninja test || FAILURES="$FAILURES unittests"
+     ninja test || FAILURES="$FAILURES unittests"
 else
     run make test -j$HOST_NUM_CPUS || FAILURES="$FAILURES unittests"
 fi
@@ -205,7 +205,8 @@ if [ "$TARGET_OS" = "darwin-x86_64" ]; then
         # Make sure we can load all dependencies of every dylib/executable we have.
         find $DISTRIBUTION_DIR \( -type f -and \( -perm +111 -or -name '*.dylib' \) \) -print0 | while read -d $'\0' file; do
             log2 "Checking $file for dependencies"
-            needed=$(otool -L $file | tail -n +2 | awk '{print $1}')
+            # We start looking at the 3rd line, as we
+            needed=$(otool -L $file | tail -n +3 | awk '{print $1}')
             for need in $needed; do
                 log2 "  Looking for $need"
                 case $need in
