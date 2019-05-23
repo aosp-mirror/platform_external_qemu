@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "95be5021_9fc5bff6",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-23T17:48:16Z",
+      "side": 1,
+      "message": "I usually debug with (\"%s:%d: ...\", __func__, __LINE__, ...). It is easier to find where it was printed from.",
+      "range": {
+        "startLine": 108,
+        "startChar": 25,
+        "endLine": 108,
+        "endChar": 28
+      },
+      "revId": "6b4dccf74080f7a1f14ae8c7bb44ab6b6617c68c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b4b44a1_014e0b92",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-23T17:48:16Z",
+      "side": 1,
+      "message": "end",
+      "range": {
+        "startLine": 119,
+        "startChar": 29,
+        "endLine": 119,
+        "endChar": 34
+      },
+      "revId": "6b4dccf74080f7a1f14ae8c7bb44ab6b6617c68c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f323ddfa_81e2a613",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 923,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-23T17:48:16Z",
+      "side": 1,
+      "message": "Can we write to the buffer before saving, make it dirty after saving a to check if load reverted it back?",
+      "range": {
+        "startLine": 923,
+        "startChar": 20,
+        "endLine": 923,
+        "endChar": 26
+      },
+      "revId": "6b4dccf74080f7a1f14ae8c7bb44ab6b6617c68c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "402d6ce4_c0486ae9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2297,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-23T17:48:16Z",
+      "side": 1,
+      "message": "Wrong indent?",
+      "range": {
+        "startLine": 2297,
+        "startChar": 8,
+        "endLine": 2297,
+        "endChar": 12
+      },
+      "revId": "6b4dccf74080f7a1f14ae8c7bb44ab6b6617c68c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abdc5b3c_213716f4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2305,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-23T17:48:16Z",
+      "side": 1,
+      "message": "Do we need this?",
+      "range": {
+        "startLine": 2305,
+        "startChar": 8,
+        "endLine": 2305,
+        "endChar": 17
+      },
+      "revId": "6b4dccf74080f7a1f14ae8c7bb44ab6b6617c68c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b8f8604_c5210408",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-23T17:48:16Z",
+      "side": 1,
+      "message": "Do we need this?",
+      "range": {
+        "startLine": 107,
+        "startChar": 8,
+        "endLine": 107,
+        "endChar": 17
+      },
+      "revId": "6b4dccf74080f7a1f14ae8c7bb44ab6b6617c68c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
