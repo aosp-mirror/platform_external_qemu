@@ -683,6 +683,10 @@ void SettingsPage::on_set_multiDisplay_clicked() {
     p->dpi = dpi;
     p->enabled = enabled;
 
+    if (enabled) {
+        mUi->set_frameAlways->hide();
+        mUi->set_frameAlwaysTitle->hide();
+    }
     emit enableMultiDisplayChanged(enabled, mCurrentDisplay, width, height, dpi);
 }
 

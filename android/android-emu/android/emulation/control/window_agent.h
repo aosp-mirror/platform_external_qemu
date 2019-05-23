@@ -34,6 +34,8 @@ typedef struct QAndroidEmulatorWindowAgent {
     // Get a pointer to the emulator window structure.
     EmulatorWindow* (*getEmulatorWindow)();
 
+    void (*resetNoSkin)();
+
     // Rotate the screen clockwise by 90 degrees.
     // Returns true on success, false otherwise.
     bool (*rotate90Clockwise)(void);

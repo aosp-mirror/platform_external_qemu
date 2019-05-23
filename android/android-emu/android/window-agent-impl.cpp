@@ -31,6 +31,7 @@ static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
+        .resetNoSkin = emulator_window_set_no_skin,
         .rotate90Clockwise =
                 [] {
                     return emulator_window_rotate_90(true);

@@ -1085,18 +1085,6 @@ void ToolWindow::notifySwitchOnTop() {
 #endif
 }
 
-void ToolWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
-                                   uint32_t height, uint32_t dpi) {
-    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
-    if (emuQtWindow == nullptr) return;
-
-    char cmd[128];
-    sprintf(cmd, "%s",
-            "am start -n com.android.emulator.multidisplay/com.android.emulator.multidisplay.MainActivity");
-    emuQtWindow->getAdbInterface()->enqueueCommand({"shell", cmd});
-    sUiEmuAgent->multiDisplay->setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
-}
-
 void ToolWindow::touchExtendedWindow() {
     mExtendedWindow.get();
 }
