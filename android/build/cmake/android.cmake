@@ -717,11 +717,8 @@ function(android_upload_symbols TGT)
   if(NOT ANDROID_EXTRACT_SYMBOLS)
     return()
   endif()
-  set(STDOUT "/dev/stdout")
-  if (WINDOWS_MSVC_X86_64 AND NOT CROSSCOMPILE)
-    set(STDOUT "CON")
-  endif()
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
+  set(LOG "${ANDROID_SYMBOL_DIR}/${TGT}.log")
   install(
     CODE
     # Upload the symbols, with warnings/error logging only.
@@ -730,8 +727,11 @@ function(android_upload_symbols TGT)
                              \"-v\" \"0\"
                              \"--symbol_file\" \"${DEST}\"
                              \"--environment\" \"${OPTION_CRASHUPLOAD}\"
-                             OUTPUT_FILE ${STDOUT}
-                             ERROR_FILE ${STDOUT})"
+                             OUTPUT_FILE ${LOG}
+                             ERROR_FILE ${LOG})\n
+    FILE(READ ${LOG} contents)\n
+    STRING(STRIP \$\{contents\} contents)\n
+    MESSAGE(STATUS \$\{contents\})\n"
   )
 endfunction()
 
