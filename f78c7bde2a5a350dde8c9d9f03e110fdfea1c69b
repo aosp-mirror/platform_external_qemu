@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2b7e145_10de6021",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-24T00:22:13Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the underscore thing be limited to predefined macros?",
+      "range": {
+        "startLine": 746,
+        "startChar": 4,
+        "endLine": 747,
+        "endChar": 47
+      },
+      "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65b2d5e1_600c62f6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-24T00:22:13Z",
+      "side": 1,
+      "message": "Can we define this in a .ui file and a class?  Maybe RecordMacroEditDialog",
+      "range": {
+        "startLine": 764,
+        "startChar": 4,
+        "endLine": 764,
+        "endChar": 16
+      },
+      "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c87a78a4_9ab84e09",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-05-24T00:22:13Z",
+      "side": 1,
+      "message": "We can probably remove this check now that the filename isn\u0027t directly associated with the name.",
+      "range": {
+        "startLine": 794,
+        "startChar": 23,
+        "endLine": 803,
+        "endChar": 0
+      },
+      "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
