@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "a8873537_8acfde65",
+        "filename": "android/android-emu/android/emulation/address_space_device.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T17:23:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1831aa8e_6509a91b",
+      "range": {
+        "startLine": 169,
+        "startChar": 28,
+        "endLine": 169,
+        "endChar": 29
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d00cbdce_3ced663e",
         "filename": "android/android-emu/android/emulation/address_space_device.h",
         "patchSetId": 6
@@ -119,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "05d48319_a3772b45",
+        "filename": "android/android-emu/android/emulation/address_space_device.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T17:23:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d00cbdce_3ced663e",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 15
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee23c167_621f90ae",
         "filename": "android/android-emu/android/emulation/hostdevices/HostAddressSpace.cpp",
         "patchSetId": 6
@@ -139,6 +187,30 @@
       "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b027c61_5ddfb467",
+        "filename": "android/android-emu/android/emulation/hostdevices/HostAddressSpace.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T17:23:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee23c167_621f90ae",
+      "range": {
+        "startLine": 156,
+        "startChar": 32,
+        "endLine": 156,
+        "endChar": 38
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
