@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f068a54a_d2818d10",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-24T22:35:11Z",
+      "side": 1,
+      "message": "It will be just for preset macros. Right now, names are stored with underscores because of the first file naming (moment of creation). I will work on making it more consistent, but for now, we will need this.",
+      "parentUuid": "d2b7e145_10de6021",
+      "range": {
+        "startLine": 746,
+        "startChar": 4,
+        "endLine": 747,
+        "endChar": 47
+      },
+      "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "65b2d5e1_600c62f6",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "c39ea8d7_a3e64183",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-24T22:35:11Z",
+      "side": 1,
+      "message": "Yeah, it will make it more clear.",
+      "parentUuid": "65b2d5e1_600c62f6",
+      "range": {
+        "startLine": 764,
+        "startChar": 4,
+        "endLine": 764,
+        "endChar": 16
+      },
+      "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c87a78a4_9ab84e09",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac844f79_803b618f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-05-24T22:35:11Z",
+      "side": 1,
+      "message": "I will remove it for now. But we might want a security check for the proto files. I\u0027m thinking of an accidental \"SQLinjection-esque\" error being possible.",
+      "parentUuid": "c87a78a4_9ab84e09",
+      "range": {
+        "startLine": 794,
+        "startChar": 23,
+        "endLine": 803,
+        "endChar": 0
+      },
+      "revId": "f78c7bde2a5a350dde8c9d9f03e110fdfea1c69b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
