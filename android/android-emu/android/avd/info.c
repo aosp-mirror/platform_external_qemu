@@ -1363,6 +1363,7 @@ const char* const arm_device_id[] = {
     "a003a00",
     "a003800",
     "a003600",
+    "a003400",
 };
 
 const char* const mips_device_id[] = {
@@ -1419,6 +1420,9 @@ char* get_device_path(const AvdInfo* info, const char* image)
     }
     if (has_vendor(info)) {
         device_table[i++] = "vendor";
+    }
+    if (has_encryption(info)) {
+        device_table[i++] = "encryption";
     }
     device_table[i++] = "userdata";
     device_table[i++] = "cache";
