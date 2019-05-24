@@ -18,6 +18,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
@@ -189,6 +190,8 @@ private:
                                        mDisplay.getDevicePixelRatio(), 0, false);
             mDisplay.loop();
         }
+
+        android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
 
         HostGoldfishPipeDevice::get();
 
