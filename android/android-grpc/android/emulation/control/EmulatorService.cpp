@@ -87,6 +87,7 @@ public:
             // When streaming, block at most 5 seconds before sending any status
             // This also makes sure we check that the clients is still around at
             // least once every 5 seconds.
+            LOG(VERBOSE) << log.DebugString();
             auto message =
                     mLogcatBuffer.bufferAtOffset(log.next(), k5SecondsWait);
             log.set_start(message.first);
@@ -332,8 +333,8 @@ private:
     RtcBridge* mRtcBridge;
     RingStreambuf mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
-    const uint16_t k128KB = (128 * 1024) - 1;
-    const uint16_t k5SecondsWait = 5 * 1000;
+    static constexpr uint16_t k128KB = (128 * 1024) - 1;
+    static constexpr uint16_t k5SecondsWait = 5 * 1000;
     const uint16_t kNoWait = 0;
 };
 
