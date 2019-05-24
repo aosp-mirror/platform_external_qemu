@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7cba9d96_c21fe833",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T17:50:37Z",
+      "side": 1,
+      "message": "this is going to cause name conflicts when running the actual emulator",
+      "range": {
+        "startLine": 367,
+        "startChar": 30,
+        "endLine": 367,
+        "endChar": 56
+      },
+      "revId": "d941b25158f33d8c9dbafad87a37310e8908a9e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c045694b_65cc6cf4",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T17:50:37Z",
+      "side": 1,
+      "message": "cause name conflicts with emugl combined unittests",
+      "range": {
+        "startLine": 459,
+        "startChar": 30,
+        "endLine": 459,
+        "endChar": 56
+      },
+      "revId": "d941b25158f33d8c9dbafad87a37310e8908a9e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
