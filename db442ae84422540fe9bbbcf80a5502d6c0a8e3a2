@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d495dc70_81c524a9",
+        "filename": "android/android-emu/android/emulation/MultiDisplayPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-24T21:58:17Z",
+      "side": 1,
+      "message": "maybe no. when loading from snapshot, host will read all displays config and resend to the guest if necessary.",
+      "parentUuid": "0dd3d0a2_3fcca280",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 0
+      },
+      "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5410da59_38818da4",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
         "patchSetId": 7
@@ -39,6 +63,24 @@
       "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "713d7b05_03413acd",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-24T21:58:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5410da59_38818da4",
+      "revId": "db442ae84422540fe9bbbcf80a5502d6c0a8e3a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
