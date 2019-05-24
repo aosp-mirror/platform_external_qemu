@@ -1414,7 +1414,9 @@ message EmulatorFeatureFlagState {
     DYNAMIC_PARTITION = 44;
     IP_DISCONNECT_ON_LOAD = 45;
     VULKAN_SNAPSHOTS = 46;
-    // Next tag: 47
+    VIRTIO_INPUT = 47;
+    MULTI_DISPLAY = 48;
+    // Next tag: 49
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
