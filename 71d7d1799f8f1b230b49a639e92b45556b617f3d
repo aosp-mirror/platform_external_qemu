@@ -22,6 +22,30 @@
       "revId": "71d7d1799f8f1b230b49a639e92b45556b617f3d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9101d105_6a2dc6f7",
+        "filename": "android/android-emu/android/emulation/address_space_device.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T17:41:44Z",
+      "side": 1,
+      "message": "I think we might be ok there since mHandleIndex starts at 1",
+      "parentUuid": "cad37669_33138f10",
+      "range": {
+        "startLine": 54,
+        "startChar": 15,
+        "endLine": 54,
+        "endChar": 18
+      },
+      "revId": "71d7d1799f8f1b230b49a639e92b45556b617f3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
