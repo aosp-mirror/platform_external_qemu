@@ -37,6 +37,8 @@ using namespace android::emulation;
 #define AS_DEVICE_DPRINT(fmt,...)
 #endif
 
+const QAndroidVmOperations* sVmOps = nullptr;
+
 namespace {
 
 class AddressSpaceDeviceState {
@@ -46,8 +48,16 @@ public:
 
     uint32_t genHandle() {
         AutoLock lock(mLock);
+
         auto res = mHandleIndex;
-        ++mHandleIndex;
+
+        if (!res) {
+            ++res;
+            mHandleIndex += 2;
+        } else {
+            ++mHandleIndex;
+        }
+
         AS_DEVICE_DPRINT("new handle: %u", res);
         return res;
     }
@@ -63,7 +73,7 @@ public:
         auto& contextDesc = mContexts[handle];
         contextDesc.pingInfo =
             (AddressSpaceDevicePingInfo*)
-            gQAndroidVmOperations->physicalMemoryGetAddr(gpa);
+            sVmOps->physicalMemoryGetAddr(gpa);
         contextDesc.pingInfoGpa = gpa;
         AS_DEVICE_DPRINT("Ping info: gpa 0x%llx @ %p\n", (unsigned long long)gpa,
                          contextDesc.pingInfo);
@@ -81,7 +91,7 @@ public:
         AS_DEVICE_DPRINT(
                 "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
                 (unsigned long long)phys_addr,
-                gQAndroidVmOperations->physicalMemoryGetAddr(phys_addr),
+                sVmOps->physicalMemoryGetAddr(phys_addr),
                 (unsigned long long)size, (unsigned long long)metadata);
 
         AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
@@ -149,7 +159,7 @@ public:
             auto &desc = contexts[handle];
             desc.pingInfoGpa = pingInfoGpa;
             desc.pingInfo = (AddressSpaceDevicePingInfo*)
-                gQAndroidVmOperations->physicalMemoryGetAddr(pingInfoGpa);
+                sVmOps->physicalMemoryGetAddr(pingInfoGpa);
             desc.device_context = std::move(context);
         }
 
@@ -164,7 +174,7 @@ public:
 
 private:
     Lock mLock;
-    uint32_t mHandleIndex = 0;
+    uint32_t mHandleIndex = 1;
     typedef std::unordered_map<uint32_t, AddressSpaceContextDescription> Contexts;
     Contexts mContexts;
 
@@ -239,6 +249,14 @@ create_or_get_address_space_device_control_ops(void) {
 namespace android {
 namespace emulation {
 
+void goldfish_address_space_set_vm_operations(const QAndroidVmOperations* vmops) {
+    sVmOps = vmops;
+}
+
+const QAndroidVmOperations* goldfish_address_space_get_vm_operations() {
+    return sVmOps;
+}
+
 int goldfish_address_space_memory_state_load(android::base::Stream *stream) {
     return sAddressSpaceDeviceState->load(stream) ? 0 : 1;
 }
@@ -246,6 +264,14 @@ int goldfish_address_space_memory_state_load(android::base::Stream *stream) {
 int goldfish_address_space_memory_state_save(android::base::Stream *stream) {
     sAddressSpaceDeviceState->save(stream);
     return 0;
+}
+
+void host_goldfish_address_space_memory_state_load(android::base::Stream *stream) {
+    sAddressSpaceDeviceState->load(stream);
+}
+
+void host_goldfish_address_space_memory_state_save(android::base::Stream *stream) {
+    sAddressSpaceDeviceState->save(stream);
 }
 
 }  // namespace emulation
