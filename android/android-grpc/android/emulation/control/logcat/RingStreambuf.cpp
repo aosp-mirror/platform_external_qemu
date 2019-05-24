@@ -41,6 +41,7 @@ std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
         memcpy(mRingbuffer.data(), s + n - capacity, capacity);
         mHead = capacity;
         mTail = 0;
+        mHeadOffset += n;
         mCanRead.signal();
         return n;
     }
