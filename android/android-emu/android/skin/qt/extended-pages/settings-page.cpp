@@ -289,23 +289,36 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     connect(mUi->set_multiDisplayPickBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(onMultiDisplayIdChanged(int)));
-    mUi->set_multiDisplayWidth->setMinValue(0);
-    mUi->set_multiDisplayWidth->setMaxValue(9999);
-    mUi->set_multiDisplayHeight->setMinValue(0);
-    mUi->set_multiDisplayHeight->setMaxValue(9999);
-    mUi->set_multiDisplayDpi->setMinValue(0);
-    mUi->set_multiDisplayDpi->setMaxValue(999);
-    mUi->set_multiDisplayEnabled->setChecked(false);
-    mUi->set_multiDisplayPickBox->addItem("Display 1", 1);
-    mUi->set_multiDisplayPickBox->addItem("Display 2", 2);
-    mUi->set_multiDisplayPickBox->addItem("Display 3", 3);
-    mUi->set_multiDisplayPickBox->addItem("Display 4", 4);
-    mUi->set_multiDisplayPickBox->addItem("Display 5", 5);
-    mUi->set_multiDisplayPickBox->addItem("Display 6", 6);
-    mUi->set_multiDisplayPickBox->addItem("Display 7", 7);
-    mUi->set_multiDisplayPickBox->addItem("Display 8", 8);
-    mUi->set_multiDisplayPickBox->addItem("Display 9", 9);
-    mUi->set_multiDisplayPickBox->addItem("Display 10", 10);
+    if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+        mUi->set_multiDisplayWidth->setMinValue(0);
+        mUi->set_multiDisplayWidth->setMaxValue(9999);
+        mUi->set_multiDisplayHeight->setMinValue(0);
+        mUi->set_multiDisplayHeight->setMaxValue(9999);
+        mUi->set_multiDisplayDpi->setMinValue(0);
+        mUi->set_multiDisplayDpi->setMaxValue(999);
+        mUi->set_multiDisplayEnabled->setChecked(false);
+        mUi->set_multiDisplayPickBox->addItem("Display 1", 1);
+        mUi->set_multiDisplayPickBox->addItem("Display 2", 2);
+        mUi->set_multiDisplayPickBox->addItem("Display 3", 3);
+        mUi->set_multiDisplayPickBox->addItem("Display 4", 4);
+        mUi->set_multiDisplayPickBox->addItem("Display 5", 5);
+        mUi->set_multiDisplayPickBox->addItem("Display 6", 6);
+        mUi->set_multiDisplayPickBox->addItem("Display 7", 7);
+        mUi->set_multiDisplayPickBox->addItem("Display 8", 8);
+        mUi->set_multiDisplayPickBox->addItem("Display 9", 9);
+        mUi->set_multiDisplayPickBox->addItem("Display 10", 10);
+    } else {
+        mUi->set_multiDisplayTitle->hide();
+        mUi->set_multiDisplayPickBox->hide();
+        mUi->set_multiDisplayWidthTitle->hide();
+        mUi->set_multiDisplayWidth->hide();
+        mUi->set_multiDisplayHeightTitle->hide();
+        mUi->set_multiDisplayHeight->hide();
+        mUi->set_multiDisplayDpiTitle->hide();
+        mUi->set_multiDisplayDpi->hide();
+        mUi->set_multiDisplayEnabled->hide();
+        mUi->set_multiDisplay->hide();
+    }
 }
 
 SettingsPage::~SettingsPage() {
