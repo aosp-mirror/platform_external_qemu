@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d944e5f_d5dc2046",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-24T16:26:50Z",
+      "side": 1,
+      "message": "Should we pass gQAndroidVmOperations below to qemu_android_address_space_device_init?",
+      "range": {
+        "startLine": 169,
+        "startChar": 8,
+        "endLine": 169,
+        "endChar": 29
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58cdd76d_849128d9",
+        "filename": "android/android-emu/android/emulation/address_space_device.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-24T16:26:50Z",
+      "side": 1,
+      "message": "Is there a strong reason for this?",
+      "range": {
+        "startLine": 169,
+        "startChar": 28,
+        "endLine": 169,
+        "endChar": 29
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d00cbdce_3ced663e",
+        "filename": "android/android-emu/android/emulation/address_space_device.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-24T16:26:50Z",
+      "side": 1,
+      "message": "Maybe just revert this file?",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 15
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee23c167_621f90ae",
+        "filename": "android/android-emu/android/emulation/hostdevices/HostAddressSpace.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-24T16:26:50Z",
+      "side": 1,
+      "message": "Could you please call it otherwise, it sound like it will allocate memory (above, \"16ULL * 1024ULL * 1048576ULL\"), not addresses.",
+      "range": {
+        "startLine": 156,
+        "startChar": 32,
+        "endLine": 156,
+        "endChar": 38
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
