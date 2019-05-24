@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8f1ec764_80a381ed",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-24T16:46:26Z",
+      "side": 1,
+      "message": "Was thinking of that, but qemu_android_address_space_device_init would be difficult to use from test contexts as it is in the android qemu2 glue code.\n\nI guess we should make android qemu2 glue code unit testable at some point w/ gtest",
+      "parentUuid": "3d944e5f_d5dc2046",
+      "range": {
+        "startLine": 169,
+        "startChar": 8,
+        "endLine": 169,
+        "endChar": 29
+      },
+      "revId": "fd78ac8a576f0ff3e36f8e50c8483175d2614d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "58cdd76d_849128d9",
         "filename": "android/android-emu/android/emulation/address_space_device.cpp",
         "patchSetId": 6
