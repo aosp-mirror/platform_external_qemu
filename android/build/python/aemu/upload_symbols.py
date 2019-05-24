@@ -39,7 +39,6 @@ flags.register_validator('environment', lambda value: value.lower() == 'prod' or
                          'staging', message='--environment should be either prod or staging (case insensitive).')
 flags.mark_flag_as_required('symbol_file')
 
-
 class SymbolFileServer(object):
     """Class to verify and upload symbols to the crash symbol api v1."""
 
@@ -177,7 +176,8 @@ class SymbolFileServer(object):
                                     '{}/uploads:create'.format(self.api_url))
         self._exec_request('put',
                            upload['uploadUrl'],
-                           data=open(symbol_file, 'r'))
+                           data=open(symbol_file, 'rb'), stream=True)
+
         status = self._exec_request('post',
                                     '{}/uploads/{}:complete'.format(
                                         self.api_url, upload['uploadKey']),
