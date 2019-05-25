@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0f9678a5_8b7bbda5",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2847,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-25T04:19:55Z",
+      "side": 1,
+      "message": "That is good.",
+      "parentUuid": "a5b42e40_ea00abde",
+      "range": {
+        "startLine": 2847,
+        "startChar": 4,
+        "endLine": 2847,
+        "endChar": 20
+      },
+      "revId": "7a583764bbf431b118d4cd92e9cc1d87ee1f4908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6c347a24_f02ae370",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "7a583764bbf431b118d4cd92e9cc1d87ee1f4908",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10dc5e86_ced1241c",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1106,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-25T04:19:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6c347a24_f02ae370",
+      "range": {
+        "startLine": 1099,
+        "startChar": 0,
+        "endLine": 1106,
+        "endChar": 5
+      },
+      "revId": "7a583764bbf431b118d4cd92e9cc1d87ee1f4908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
