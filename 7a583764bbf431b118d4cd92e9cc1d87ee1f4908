@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5b42e40_ea00abde",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2847,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-25T00:27:59Z",
+      "side": 1,
+      "message": "for v1, maybe we make it optional to restore the skin. dont worry about it if its 2 hard",
+      "range": {
+        "startLine": 2847,
+        "startChar": 4,
+        "endLine": 2847,
+        "endChar": 20
+      },
+      "revId": "7a583764bbf431b118d4cd92e9cc1d87ee1f4908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c347a24_f02ae370",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-25T00:27:59Z",
+      "side": 1,
+      "message": "setHidden(hide) could be shorter maybe?",
+      "range": {
+        "startLine": 1099,
+        "startChar": 0,
+        "endLine": 1106,
+        "endChar": 5
+      },
+      "revId": "7a583764bbf431b118d4cd92e9cc1d87ee1f4908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
