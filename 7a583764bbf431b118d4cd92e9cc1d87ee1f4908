@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c2703d2c_f868260a",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2847,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-25T04:20:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f9678a5_8b7bbda5",
+      "range": {
+        "startLine": 2847,
+        "startChar": 4,
+        "endLine": 2847,
+        "endChar": 20
+      },
+      "revId": "7a583764bbf431b118d4cd92e9cc1d87ee1f4908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6c347a24_f02ae370",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 6
