@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "26e2daa5_96070f20",
+        "filename": "android/android-emu/android/skin/file.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 808,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-28T22:13:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "66d9699f_9d6b45f4",
+      "range": {
+        "startLine": 808,
+        "startChar": 7,
+        "endLine": 808,
+        "endChar": 10
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "160928d3_84fcbfa8",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "4a8a9f94_4493b0cd",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-28T22:13:01Z",
+      "side": 1,
+      "message": "Yes, 0 are primary one. We includes it here for usage in the mouse click x/y calculation.",
+      "parentUuid": "160928d3_84fcbfa8",
+      "range": {
+        "startLine": 624,
+        "startChar": 41,
+        "endLine": 624,
+        "endChar": 45
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b264edd_888426b4",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2019-05-28T21:34:21Z",
       "side": 1,
       "message": "Should this be \u003e\u003d 1 ?",
+      "range": {
+        "startLine": 2844,
+        "startChar": 46,
+        "endLine": 2844,
+        "endChar": 50
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b44bc11_7da2d465",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2844,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-28T22:13:01Z",
+      "side": 1,
+      "message": "\u003e\u003d1 is also fine, \u003d\u003d1 maybe better because it removes repeated hide() operations when more than one displays are added.",
+      "parentUuid": "2b264edd_888426b4",
       "range": {
         "startLine": 2844,
         "startChar": 46,
@@ -91,6 +163,30 @@
       "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f51ac31_aae9e9c9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-28T22:13:01Z",
+      "side": 1,
+      "message": "hide() should be enough so far.",
+      "parentUuid": "ca110b37_e1fd2581",
+      "range": {
+        "startLine": 681,
+        "startChar": 30,
+        "endLine": 681,
+        "endChar": 34
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
