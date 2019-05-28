@@ -270,6 +270,15 @@ int main(int argc, char** argv)
             argv[argc] = nullptr;
             break;
         }
+        // quick check for qemu1
+        if (!strcmp(opt, "-engine") && nn + 1 < argc && !strcmp(argv[nn + 1], "classic")) {
+            std::string qemu1path = std::string(path_dirname(argv[0])) + PATH_SEP + "qemu1"
+                + PATH_SEP + "emulator";
+            if (path_exists(qemu1path.c_str())) {
+                qemu_top_dir = "qemu1";
+                break;
+            }
+        }
     }
     if (qemu_top_dir) {
         char mybuf[1024];
