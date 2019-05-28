@@ -1555,6 +1555,7 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
+    memset(&prop, 0, sizeof(WHV_PARTITION_PROPERTY));
     prop.ExtendedVmExits.X64MsrExit = 1;
     prop.ExtendedVmExits.X64CpuidExit = 1;
     hr = whp_dispatch.WHvSetPartitionProperty(
