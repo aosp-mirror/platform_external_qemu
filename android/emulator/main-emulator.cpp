@@ -257,6 +257,51 @@ int main(int argc, char** argv)
     int restartPid = -1;
     bool doDeleteTempDir = false;
 
+    const char* qemu_top_dir = nullptr;
+    for (int nn = 1; nn < argc; nn++) {
+        const char* opt = argv[nn];
+        if (!strcmp(opt, "-qemu-top-dir") && nn + 1 < argc) {
+            qemu_top_dir = argv[nn + 1];
+            // shuffle up the arguments
+            for (int jj = nn + 2; jj < argc; nn++, jj++) {
+                argv[nn] = argv[jj];
+            }
+            argc -= 2;
+            argv[argc] = nullptr;
+            break;
+        }
+        // quick check for qemu1
+        if (!strcmp(opt, "-engine") && nn + 1 < argc && !strcmp(argv[nn + 1], "classic")) {
+            std::string qemu1path = std::string(path_dirname(argv[0])) + PATH_SEP + "qemu1"
+                + PATH_SEP + "emulator";
+            if (path_exists(qemu1path.c_str())) {
+                qemu_top_dir = "qemu1";
+                break;
+            }
+        }
+    }
+    if (qemu_top_dir) {
+        char mybuf[1024];
+        char* c_argv0_dir_name = path_dirname(argv[0]);
+        snprintf(mybuf, sizeof(mybuf), "%s" PATH_SEP "%s" PATH_SEP "emulator",
+                c_argv0_dir_name, qemu_top_dir);
+        char* emulatorPath = mybuf;
+        if (!path_exists(emulatorPath)) {
+            // try absolute path
+            snprintf(mybuf, sizeof(mybuf), "%s" PATH_SEP "emulator", qemu_top_dir);
+            emulatorPath = mybuf;
+            if (!path_exists(emulatorPath)) {
+                fprintf(stderr, "emulator: Cannot find %s\n", emulatorPath);
+                return -1;
+            }
+        }
+        argv[0] = emulatorPath;
+        printf("emulator: INFO: launch %s ... \n", emulatorPath);
+        fflush(stdout);
+        safe_execv(emulatorPath, argv);
+        return errno;
+    }
+
     /* Test-only actions */
     bool isLauncherTest = false;
     const char* launcherTestArg = nullptr;
