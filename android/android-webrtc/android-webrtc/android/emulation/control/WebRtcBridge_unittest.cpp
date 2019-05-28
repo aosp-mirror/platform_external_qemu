@@ -36,7 +36,7 @@ class TestAsyncSocketAdapter : public AsyncSocketAdapter {
 public:
     TestAsyncSocketAdapter(std::vector<std::string> recv) : mRecv(recv) {
         // Let's not get chatty during unit tests.
-        base::setMinLogLevel(base::LOG_FATAL);
+        base::setMinLogLevel(base::LOG_ERROR);
     }
     ~TestAsyncSocketAdapter() = default;
     void close() override {
@@ -310,16 +310,21 @@ TEST(WebRtcBridge, deliverWithoutLoss) {
     // Connect with id moi
     bridge.connect("moi");
 
+    // Let's not push more message into our buffer than we can handle. Some build bots
+    // are very overworked and can get into a state where the reader thread is not scheduled
+    // in time.
+    const int maxMessageToPush = WebRtcBridge::kMaxMessageQueueLen - 1;
+
     // No messages during timeout will be empty string..
     base::FunctorThread messagePusher([&socket] {
         json jsmsg = {{"topic", "moi"}, {"msg", "hello"}};
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < maxMessageToPush; i++) {
             jsmsg["msg"] = std::to_string(i);
             socket->signalRecv(jsmsg.dump());
         }
     });
     base::FunctorThread messageRec([&bridge] {
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < maxMessageToPush; i++) {
             std::string msg;
             std::string expected = std::to_string(i);
             bool fetch = bridge.nextMessage("moi", &msg, 1000);
