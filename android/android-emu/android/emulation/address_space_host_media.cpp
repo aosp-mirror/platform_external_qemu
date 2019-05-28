@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "android/emulation/address_space_host_media.h"
+
+#include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/vm_operations.h"
 #include "android/base/AlignedBuf.h"
 
@@ -50,7 +52,7 @@ bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
 
 void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pages) {
     void* myptr = android::aligned_buf_alloc(kAlignment, num_pages * 4096);
-    gQAndroidVmOperations->mapUserBackedRam(phys_addr, myptr, num_pages * 4096);
+    goldfish_address_space_get_vm_operations()->mapUserBackedRam(phys_addr, myptr, num_pages * 4096);
     AS_DEVICE_DPRINT("Allocating host memory for media context: guest_addr 0x%11x, 0x%11x",
                      phys_addr, myptr);
 }
@@ -108,7 +110,7 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
 
 // static
 void* AddressSpaceHostMediaContext::getHostAddress(uint64_t guest_phys_addr) {
-    void* ptr = gQAndroidVmOperations->physicalMemoryGetAddr(guest_phys_addr);
+    void* ptr = goldfish_address_space_get_vm_operations()->physicalMemoryGetAddr(guest_phys_addr);
     return ptr;
 }
 
