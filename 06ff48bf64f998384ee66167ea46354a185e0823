@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66d9699f_9d6b45f4",
+        "filename": "android/android-emu/android/skin/file.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 808,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-05-28T21:34:21Z",
+      "side": 1,
+      "message": "Seems like this could return void",
+      "range": {
+        "startLine": 808,
+        "startChar": 7,
+        "endLine": 808,
+        "endChar": 10
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "160928d3_84fcbfa8",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-05-28T21:34:21Z",
+      "side": 1,
+      "message": "Is this right? You emplace 0..10, not 0..9?\nOr maybe 0 is the primary and 1..10 are the multi displays?",
+      "range": {
+        "startLine": 624,
+        "startChar": 41,
+        "endLine": 624,
+        "endChar": 45
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b264edd_888426b4",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2844,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-05-28T21:34:21Z",
+      "side": 1,
+      "message": "Should this be \u003e\u003d 1 ?",
+      "range": {
+        "startLine": 2844,
+        "startChar": 46,
+        "endLine": 2844,
+        "endChar": 50
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca110b37_e1fd2581",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-05-28T21:34:21Z",
+      "side": 1,
+      "message": "Do you want to hide it or just disable it?",
+      "range": {
+        "startLine": 681,
+        "startChar": 30,
+        "endLine": 681,
+        "endChar": 34
+      },
+      "revId": "06ff48bf64f998384ee66167ea46354a185e0823",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
