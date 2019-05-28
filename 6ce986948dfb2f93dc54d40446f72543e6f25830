@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5925f09_5fe88ea2",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/WebRtcBridge_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-28T18:35:41Z",
+      "side": 1,
+      "message": "Do we need a reference here?",
+      "range": {
+        "startLine": 319,
+        "startChar": 48,
+        "endLine": 319,
+        "endChar": 49
+      },
+      "revId": "6ce986948dfb2f93dc54d40446f72543e6f25830",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
