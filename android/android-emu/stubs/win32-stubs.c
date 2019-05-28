@@ -1,9 +1,10 @@
-#include "qemu/osdep.h"
 
-#include "android/utils/win32_unicode.h"
-
+#include <stdlib.h>
+#include <wchar.h>
 #include <direct.h>
 #include <windows.h>
+
+#include "android/utils/win32_unicode.h"
 
 HANDLE win32CreateFile(
         LPCTSTR               lpFileName,

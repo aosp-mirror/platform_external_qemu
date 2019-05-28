@@ -113,7 +113,8 @@ set(android-emu-base_windows_src
     android/base/system/Win32Utils.cpp
     android/base/system/Win32UnicodeString.cpp
     android/utils/win32_cmdline_quote.cpp
-    android/utils/win32_unicode.cpp)
+    android/utils/win32_unicode.cpp
+    stubs/win32-stubs.c)
 
 # Mac specific sources, only included in the darwin build.
 set(android-emu-base_darwin-x86_64_src android/base/memory/SharedMemory_posix.cpp

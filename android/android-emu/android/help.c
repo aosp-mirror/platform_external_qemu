@@ -1138,6 +1138,25 @@ help_grpc(stralloc_t*  out)
 }
 
 static void
+help_turncfg(stralloc_t*  out)
+{
+    PRINTF(
+    "  Execute the given command to obtain turn configuration..\n\n"
+    "    <cmd> is the command to execute\n\n"
+    "  This command must do the following:\n\n"
+    "  - Produce a result on stdout.\n"
+    "  - Produce a result within 1000 ms.\n"
+    "  - Produce a valid JSON RTCConfiguration object "
+    " (See https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection).\n"
+    "  - That contain at least an \"iceServers\" array.\n"
+    "  - The exit value should be 0 on success\n\n"
+    "  For example:\n\n"
+    "  -turncfg \"curl -s -X POST https://networktraversal.googleapis.com/v1alpha/iceconfig?key=MySec\""
+    );
+}
+
+
+static void
 help_onion(stralloc_t*  out)
 {
     PRINTF(
@@ -1677,6 +1696,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define help_delay_adb NULL
 
 #define help_phone_number NULL
+#define help_monitor_adb NULL
 
 #define help_acpi_config NULL
 #define help_fuchsia NULL

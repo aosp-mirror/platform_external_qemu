@@ -32,10 +32,7 @@ using webrtc::Switchboard;
 // Binds to a port and listens for incoming emulator connections.
 class EmulatorConnection : public sigslot::has_slots<> {
 public:
-    // TODO(jansene): The shared memory handle should come in via the
-    // socket, otherwise one video bridge can only handle one emulator
-    // as the shared memory region is fixed!
-    EmulatorConnection(int port, std::string handle);
+    EmulatorConnection(int port, std::string handle, std::string turnconfig);
     ~EmulatorConnection();
 
     bool listen(bool fork);
@@ -52,6 +49,7 @@ private:
     std::unique_ptr<rtc::AutoSocketServerThread> mThread;
     std::unique_ptr<rtc::AsyncSocket> mSocket;
     std::string mHandle;
+    std::string mTurnConfig;
     int mPort;
 };
 }  // namespace net

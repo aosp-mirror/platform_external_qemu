@@ -488,7 +488,7 @@ static void
 _qemu_client_reply_payload(QemudClient* qc, size_t payload_size)
 {
     char payload_size_str[9];
-    snprintf(payload_size_str, sizeof(payload_size_str), "%08zx", payload_size);
+    snprintf(payload_size_str, sizeof(payload_size_str), "%08x", (uint32_t)payload_size);
     qemud_client_send(qc, (const uint8_t*)payload_size_str, 8);
 }
 

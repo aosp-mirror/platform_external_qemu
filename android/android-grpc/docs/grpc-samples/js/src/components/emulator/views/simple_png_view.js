@@ -62,7 +62,7 @@ export default class EmulatorPngView extends Component {
     /* eslint-disable */
     var request = new proto.google.protobuf.Empty();
     var self = this;
-    var call = this.emulatorService.getScreenshot(request, {}, function(
+    var call = this.emulatorService.getScreenshot(request, {}, function (
       err,
       response
     ) {
@@ -77,9 +77,6 @@ export default class EmulatorPngView extends Component {
           png: "data:image/jpeg;base64," + response.getImage_asB64()
         });
       }
-    });
-    call.on("status", function(status) {
-      console.log("Status: " + JSON.stringify(status))
     });
   }
 

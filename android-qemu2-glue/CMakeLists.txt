@@ -15,6 +15,7 @@ set(libqemu2-glue_src
     display.cpp
     drive-share.cpp
     emulation/android_pipe_device.cpp
+    emulation/android_address_space_device.cpp
     emulation/charpipe.c
     emulation/CharSerialLine.cpp
     emulation/DmaMap.cpp
@@ -42,16 +43,10 @@ set(libqemu2-glue_src
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
-    qemu-vm-operations-impl.cpp
     dtb.cpp
     snapshot_compression.cpp
     telephony/modem_init.c
     utils/stream.cpp)
-
-if (NOT WINDOWS_MSVC_X86_64)
-  set(libqemu2-glue_windows_src
-      stubs/win32-stubs.c)
-endif()
 
 android_add_library(libqemu2-glue)
 android_target_include_directories(libqemu2-glue
@@ -75,3 +70,16 @@ target_link_libraries(libqemu2-glue
                               emulator-libdtb
                               ssl
                               crypto)
+
+set(libqemu2-glue-vm-operations_src
+    ${ANDROID_HW_CONFIG_H}
+    qemu-vm-operations-impl.cpp)
+
+android_add_library(libqemu2-glue-vm-operations)
+android_target_include_directories(libqemu2-glue-vm-operations
+                                   all
+                                   PRIVATE
+                                   ..
+                                   ../include
+                                   ../qemu2-auto-generated)
+target_link_libraries(libqemu2-glue-vm-operations PRIVATE android-emu GLIB2::GLIB2)

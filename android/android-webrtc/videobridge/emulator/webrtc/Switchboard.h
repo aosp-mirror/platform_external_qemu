@@ -19,6 +19,7 @@
 #include "emulator/net/AsyncSocketAdapter.h"
 #include "emulator/net/EmulatorConnection.h"
 #include "emulator/net/JsonProtocol.h"
+
 namespace emulator {
 
 namespace net {
@@ -44,7 +45,8 @@ using net::State;
 // 4. Participants that are no longer streaming need to be finalized.
 class Switchboard : public JsonReceiver {
 public:
-    Switchboard(std::string handle,
+    Switchboard(const std::string handle,
+                const std::string& turnconfig,
                 AsyncSocketAdapter* connection,
                 EmulatorConnection* parent);
     ~Switchboard();
@@ -62,13 +64,17 @@ public:
     void finalizeConnections();
 
 private:
+    // We want the turn config delivered in under a second.
+    const int kMaxTurnConfigTime = 1000;
     std::map<std::string, rtc::scoped_refptr<Participant> > mConnections;
     std::map<std::string, std::string> mIdentityMap;
 
     std::vector<std::string> mDroppedConnections;  // Connections that need to
                                                    // be garbage collected.
-    std::string mHandle = "video0";  // Handle to shared memory region
-    int32_t mFps = 24;               // Desired fps
+    const std::string mHandle = "video0";  // Handle to shared memory region
+    std::vector<std::string>
+            mTurnConfig;  // Process to invoke to retrieve turn config.
+    int32_t mFps = 24;    // Desired fps
 
     // Network/communication things.
     JsonProtocol mProtocol;

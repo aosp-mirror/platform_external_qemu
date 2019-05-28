@@ -42,8 +42,20 @@ public:
     void* connect(const char* name);
     void close(void* pipe);
 
-    // Loads a pipe from a stream, returns null if the pipe can't be loaded.
+    // Gets the host side pipe object corresponding to hwpipe.
+    // Not persistent across snapshot save/load.
+    void* getHostPipe(void* hwpipe) const;
+
+    // Loads a single pipe from a stream, returns null if the pipe can't be loaded.
     void* load(base::Stream* stream);
+
+    // Saves/loads the entire set of pipes including pre/post save/load.
+    void saveSnapshot(base::Stream* stream);
+    void loadSnapshot(base::Stream* stream);
+
+    // Save/load the device, but only for a particular hwpipe.
+    void saveSnapshot(base::Stream* stream, void* hwpipe);
+    void* loadSnapshotSinglePipe(base::Stream* stream);
 
     // Read/write for a particular pipe, along with C++ versions.
     ssize_t read(void* pipe, void* buffer, size_t len);
@@ -64,6 +76,7 @@ public:
     static void resetPipeCallback(void* hwpipe, void* internal_pipe);
     static void closeFromHostCallback(void* hwpipe);
     static void signalWakeCallback(void* hwpipe, unsigned wakes);
+
 private:
     void initialize();
     // Opens a new pipe connection, returns a pointer to the host connector
@@ -96,9 +109,9 @@ private:
     bool mInitialized = false;
     int mErrno = 0;
     void* mCurrentPipeWantingConnection = nullptr;
-    std::unordered_set<void*> mPipes;
     std::unordered_map<void*, void*> mResettedPipes;
     std::unordered_map<void*, void*> mPipeToHwPipe;
+    std::unordered_map<void*, void*> mHwPipeToPipe;
     std::unordered_map<void*, std::function<void(int)>> mHwPipeWakeCallbacks;
 };
 

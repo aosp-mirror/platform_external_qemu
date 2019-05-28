@@ -348,11 +348,12 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
 
-set(ANDROID_QEMU_COMMON_DEVICES "hw/pci/goldfish_address_space.c;hw/i386/pc_piix.c")
+set(ANDROID_QEMU_ARM_DEVICES "hw/pci/goldfish_address_space.c")
+set(ANDROID_QEMU_COMMON_DEVICES "${ANDROID_QEMU_ARM_DEVICES};hw/i386/pc_piix.c")
 
 # Darwin definitions
 set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64 "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
-set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 target_compile_definitions(android-qemu-deps INTERFACE "-DANDROID_IO")
 android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
                                # Emit extra code to check for buffer overflows, such as stack smashing
@@ -376,11 +377,11 @@ android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE "-D
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework IOKit" "-framework CoreFoundation")
 
 # Windows x86 definitions
-set(ANDROID_QEMU_arm_DEVICES_windows-x86 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_arm_DEVICES_windows-x86 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows-x86 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
-set(ANDROID_QEMU_arm_DEVICES_windows-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_arm_DEVICES_windows-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
-set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 android_target_compile_options(android-qemu-deps
                                windows_msvc
@@ -411,7 +412,7 @@ android_target_compile_definitions(android-qemu-deps
 # Linux settings
 set(ANDROID_QEMU_i386_DEVICES_linux-x86_64
     "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
-set(ANDROID_QEMU_arm_DEVICES_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_arm_DEVICES_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE linux-headers)
 android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                # Emit extra code to check for buffer overflows, such as stack smashing
@@ -471,7 +472,7 @@ target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
 set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
 set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
 android_add_executable(qemu-img)
-target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps)
+target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps android-emu-base)
 android_install_exe(qemu-img .)
 
 # Create the qemu targets.
@@ -479,6 +480,7 @@ android_add_qemu_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_T
 android_add_qemu_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+android_add_qemu_headless_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_headless_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_headless_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 

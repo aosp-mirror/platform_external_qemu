@@ -67,25 +67,11 @@ static void _hwCarClusterClient_recv(void* opaque,
 }
 
 static void _hwCarClusterClient_close(void* opaque) {
-    // TODO: handle close
-}
-
-static void _hwCarClusterClient_save(Stream* f, QemudClient* client, void* opaque) {
-    // TODO
-}
-
-static int _hwCarClusterClient_load(Stream* f, QemudClient* client, void* opaque) {
-    // TODO
-    return 0;
-}
-
-static void _hwCarCluster_save(Stream* f, QemudService* sv, void* opaque) {
-    // TODO
-}
-
-static int _hwCarCluster_load(Stream* f, QemudService* s, void* opaque) {
-    // TODO
-    return 0;
+    auto cl = static_cast<HwCarCluster*>(opaque);
+    if (cl->client != nullptr) {
+        qemud_client_close(cl->client);
+        cl->client = NULL;
+    }
 }
 
 static QemudClient* _hwCarCluster_connect(void* opaque,
@@ -98,17 +84,20 @@ static QemudClient* _hwCarCluster_connect(void* opaque,
     if (carCluster->client != nullptr) {
         qemud_client_close(carCluster->client);
     }
+
     carCluster->client = qemud_client_new(
             service, channel, client_param, opaque, _hwCarClusterClient_recv,
-            _hwCarClusterClient_close, _hwCarClusterClient_save, _hwCarClusterClient_load);
+            _hwCarClusterClient_close, NULL, NULL);
     return carCluster->client;
 }
 
 void android_car_cluster_init(void) {
     HwCarCluster* carCluster = _carCluster;
     if (carCluster->service == nullptr) {
-        carCluster->service = qemud_service_register("carCluster", 0, carCluster,
-                                _hwCarCluster_connect, _hwCarCluster_save, _hwCarCluster_load);
+        // Car Cluster service have nothing to save and load
+        // The callback won't change
+        carCluster->service = qemud_service_register(
+                "carCluster", 0, carCluster, _hwCarCluster_connect, NULL, NULL);
         D("%s: carCluster qemud service initialized", __func__);
     } else {
         D("%s: carCluster qemud service already initialized", __func__);

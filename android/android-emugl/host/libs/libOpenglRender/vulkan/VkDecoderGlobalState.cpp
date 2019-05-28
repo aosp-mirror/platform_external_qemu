@@ -3310,7 +3310,8 @@ private:
             vk->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
                                   decompPipeline);
 
-            PushConstant pushConstant = {compFormat, baseLayer};
+            PushConstant pushConstant = {.compFormat = compFormat,
+                                         .baseLayer = baseLayer};
             int dispatchZ = _layerCount;
             if (extent.depth > 1) {
                 // 3D texture
@@ -3329,35 +3330,6 @@ private:
 
                 vk->vkCmdDispatch(commandBuffer, sizeCompMipmapWidth(i),
                                   sizeCompMipmapHeight(i), dispatchZ);
-
-                VkImageMemoryBarrier barrier = {};
-                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                barrier.image = decompImg;
-                barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                barrier.subresourceRange.baseArrayLayer = baseLayer;
-                barrier.subresourceRange.layerCount = _layerCount;
-                barrier.subresourceRange.baseMipLevel = 0;
-                barrier.subresourceRange.levelCount = 1;
-
-                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-                barrier.dstAccessMask = dstAccessMask;
-                barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-                barrier.newLayout = newLayout;
-                barrier.image = decompImg;
-                vk->vkCmdPipelineBarrier(
-                        commandBuffer,
-                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,  // srcStageMask
-                        dstStageMask,                          // dstStageMask
-                        0,        // dependencyFlags
-                        0,        // memoryBarrierCount
-                        nullptr,  // pMemoryBarriers
-                        0,        // bufferMemoryBarrierCount
-                        nullptr,  // pBufferMemoryBarriers
-                        1,        // imageMemoryBarrierCount
-                        &barrier  // pImageMemoryBarriers
-                );
             }
         }
     };

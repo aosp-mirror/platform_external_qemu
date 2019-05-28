@@ -69,7 +69,7 @@ def get_system_env():
     _CACHED_ENV = local_env
     return local_env
 
-def run(cmd, cwd=None):
+def run(cmd, cwd=None, extra_env=None):
     if cwd:
         cwd = os.path.abspath(cwd)
 
@@ -77,6 +77,8 @@ def run(cmd, cwd=None):
     # otherwise we don't, since we will experience cmake invocation errors.
     use_shell = (platform.system() == 'Windows')
     local_env = get_system_env()
+    if extra_env:
+        local_env.update(extra_env)
 
     logging.info('Running: %s in %s', ' '.join(cmd), cwd)
     proc = subprocess.Popen(

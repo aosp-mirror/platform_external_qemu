@@ -118,7 +118,12 @@ curl -H "Accept: application/json" -X POST -d '{"key": "30"}' http://localhost:8
 For more details on the endpoints look at
 $AOSP/android/android-grpc/android/emulation/control/api_config.yaml
 
-### Troubleshooting:
+### Troubleshooting/Known Issues:
+
+- I see TypeError: ...
+
+  Our Makefiles are very simplisitic and are not detecting changes to the .proto files. You might have to
+  run ```make clean``` before trying again.
 
 - I see the following json:
 
@@ -201,10 +206,36 @@ You can stop all the components by running:
 
 *Note: this will just kill npm and the proxy*
 
+## Launch the emulator in a release like environment with envoy and docker.
+
+The recommended proxy for gRPC on the web is [Envoy](https://www.envoyproxy.io/). Envoy is an L7 proxy and communication bus designed for large modern service oriented architectures. It basically can handle a few things for us:
+
+- Serve TLS.
+- Add [External Authorization](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/ext_authz_filter)
+- Add [JWT Authentication](https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/jwt_authn_filter#config-http-filters-jwt-authn)
+- Acts a s gRPC proxy
+- Redirect http -> https
+- Redirect serving of static pages to nginx.
+
+This gets us closer to what is needed to deploy the emulator with gRPC into a production environment. A sample is added that uses docker to configure a simple production like environment with the following characteristics:
+
+- An nginx container that will serve production build of the javascript example
+- An envoy gRPC proxy
+- A http -> https redirect
+- A TLS endpoint using self signed certificates.
+
+*Do not deploy this in a real production environment without adding some authorization filters, as anyone who can make an https connection will be able to control your emulator.*
+
 # Controlling the emulator with Python
 
-In the python directory you will find an example that aks the emulator about the vm configuration
-after which it will send a series of key events with a 2ms delay.
+In the python directory you will find two examples:
+
+- An example that aks the emulator about the vm configuration after which it
+  will send a series of key events with a 2ms delay. After building you can run this with
+  `python -m sample.keystrokes`
+
+- An example that uses the streaming interface to retrieve the logcat. After
+  building you can run this with `python -m sample.logcat`
 
 Before we can access the emulator we must launch it with the gRPC server enabled.
 
@@ -212,9 +243,9 @@ Before we can access the emulator we must launch it with the gRPC server enabled
   $ emulator @my_avd -grpc 5556 [..other options...]
 ```
 
-Once the emulator is launched you can build and run the sample as follows:
+Once the emulator is launched you can build the samples as follows:
 
 ```sh
-  $ make deps && make run
+  $ make deps
 ```
 

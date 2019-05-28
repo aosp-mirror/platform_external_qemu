@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
+#include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
 
@@ -60,12 +61,24 @@ public:
             temp_dir += debugName;
             temp_dir += ".";
         }
+
+#if defined(_MSC_VER) || defined(_WIN32)
+        temp_dir += Uuid::generate().toString();
+        if (android_mkdir(temp_dir.c_str(), 0755) != 0) {
+            fprintf(stderr, "Unable to create %s, falling back to tmp dir",
+                    temp_dir.c_str());
+            temp_dir = getTempPath();
+        }
+        auto parts = PathUtils::decompose(temp_dir);
+        mPath = PathUtils::recompose(parts);
+#else
         temp_dir += "XXXXXX";
         if (mkdtemp(&temp_dir[0])) {
-          // Fix any Win32/Linux naming issues
+            // Fix any Win32/Linux naming issues
             auto parts = PathUtils::decompose(temp_dir);
             mPath = PathUtils::recompose(parts);
         }
+#endif
     }
 
     // Return the path to the temporary directory, or NULL if it could not
@@ -102,7 +115,7 @@ public:
     // Create an empty file under the temporary directory.
     bool makeSubFile(StringView file) {
         std::string path = makeSubPath(file);
-        int fd = ::android_open(path.c_str(), O_WRONLY|O_CREAT, 0744);
+        int fd = ::android_open(path.c_str(), O_WRONLY | O_CREAT, 0744);
         if (fd < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
@@ -129,17 +142,17 @@ private:
             std::string entry_path = StringFormat("%s/%s", path, entry->d_name);
 #ifdef _WIN32
             struct _stati64 stats;
-            android_lstat(entry_path.c_str(), reinterpret_cast<struct stat*>(&stats));
+            android_lstat(entry_path.c_str(),
+                          reinterpret_cast<struct stat*>(&stats));
 #else
             struct stat stats;
             android_lstat(entry_path.c_str(), &stats);
 #endif
 
-
             if (S_ISDIR(stats.st_mode)) {
                 DeleteRecursive(entry_path);
             } else {
-               android_unlink(entry_path.c_str());
+                android_unlink(entry_path.c_str());
             }
         }
         closedir(dir);
@@ -175,7 +188,7 @@ private:
             int ret;
             *sep = '\0';  // temporarily zero-terminate the dirname.
             ret = android_stat(path, reinterpret_cast<struct stat*>(&st));
-            *sep = '/';   // restore full path.
+            *sep = '/';  // restore full path.
             if (ret < 0) {
                 return NULL;
             }
@@ -214,17 +227,17 @@ private:
         }
         // Otherwise use P_tmpdir, which defaults to /tmp
         if (result.empty()) {
-#  ifndef P_tmpdir
-#  define P_tmpdir "/tmp"
-#  endif
+#ifndef P_tmpdir
+#define P_tmpdir "/tmp"
+#endif
             result = P_tmpdir;
         }
         // Check that it exists and is a directory.
         struct stat st;
         int ret = android_stat(result.c_str(), &st);
         if (ret < 0 || !S_ISDIR(st.st_mode)) {
-            LOG(FATAL) << "Can't find temporary path: ["
-                    << result.c_str() << "]";
+            LOG(FATAL) << "Can't find temporary path: [" << result.c_str()
+                       << "]";
         }
         // Ensure there is a trailing directory separator.
         if (result.size() && result[result.size() - 1] != '/') {

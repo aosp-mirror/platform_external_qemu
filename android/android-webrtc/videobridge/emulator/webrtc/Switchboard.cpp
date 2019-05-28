@@ -13,7 +13,12 @@
 // limitations under the License.
 #include "Switchboard.h"
 
+#include "android/base/Optional.h"
+#include "android/base/misc/StringUtils.h"
+#include "android/base/system/System.h"
 #include "rtc_base/logging.h"
+
+using namespace android::base;
 
 namespace emulator {
 namespace webrtc {
@@ -44,13 +49,20 @@ void Switchboard::stateConnectionChange(SocketTransport* connection,
 
 Switchboard::~Switchboard() {}
 
-Switchboard::Switchboard(std::string handle,
+Switchboard::Switchboard(const std::string handle,
+                         const std::string& turnConfig,
                          AsyncSocketAdapter* connection,
                          net::EmulatorConnection* parent)
     : mHandle(handle),
       mProtocol(this),
       mTransport(&mProtocol, connection),
-      mEmulator(parent) {}
+      mEmulator(parent) {
+    split(turnConfig, " ", [this](StringView str) {
+        if (!str.empty()) {
+            mTurnConfig.push_back(str);
+        }
+    });
+}
 
 void Switchboard::rtcConnectionDropped(std::string participant) {
     rtc::CritScope cs(&mCleanupCS);
@@ -107,12 +119,26 @@ void Switchboard::received(SocketTransport* transport, const json object) {
         // where we should send the turn config to the client.
         // Turn is really only needed when your server is
         // locked down pretty well. (Google gce environment for example)
+        json turnConfig = "{}"_json;
+        if (mTurnConfig.size() > 0) {
+            System::ProcessExitCode exitCode;
+            Optional<std::string> turn = System::get()->runCommandWithResult(
+                    mTurnConfig, kMaxTurnConfigTime, &exitCode);
+            if (exitCode == 0 && turn && json::accept(*turn)) {
+                json config = json::parse(*turn, nullptr, false);
+                if (config.count("iceServers")) {
+                    turnConfig = config;
+                } else {
+                    RTC_LOG(LS_ERROR) << "Unusable turn config: " << turn;
+                }
+            }
+        }
 
         // The format is json: {"start" : RTCPeerConnection config}
         // (i.e. result from
         // https://networktraversal.googleapis.com/v1alpha/iceconfig?key=....)
-        json start = "{ \"start\" : {} }"_json;
-        // start["start"] = {};
+        json start;
+        start["start"] = turnConfig;
         send(from, start);
 
         rtc::scoped_refptr<Participant> stream(

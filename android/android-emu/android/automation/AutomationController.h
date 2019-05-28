@@ -46,7 +46,7 @@ enum class StartError {
 using StartResult = base::Result<void, StartError>;
 std::ostream& operator<<(std::ostream& os, const StartError& value);
 
-enum class StopError { NotStarted };
+enum class StopError { NotStarted, ParseError };
 using StopResult = base::Result<void, StopError>;
 std::ostream& operator<<(std::ostream& os, const StopError& value);
 
@@ -132,6 +132,16 @@ public:
             android::base::StringView filename,
             void (*onStopCallback)()) = 0;
 
+    // Set the macro name in the header of a file.
+    virtual void setMacroName(android::base::StringView macroName,
+                              android::base::StringView filename) = 0;
+
+    // Get the macro name from the header of a file.
+    virtual android::base::StringView getMacroName(
+            android::base::StringView filename) = 0;
+
+    // Get the duration in nanoseconds from a file.
+    virtual uint64_t getDurationNs(android::base::StringView filename) = 0;
     //
     // Offworld API
     //

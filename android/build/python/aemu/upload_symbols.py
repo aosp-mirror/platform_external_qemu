@@ -13,20 +13,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import json
 import os
-import requests
 import sys
 import time
 import urllib
 
-from absl import app
-from absl import flags
-from absl import logging
+import requests
+from absl import app, flags, logging
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('environment', 'prod',
@@ -68,6 +66,9 @@ class SymbolFileServer(object):
     # seconds (more precisely, if no bytes have been received on the underlying socket for timeout seconds).
     DEFAULT_TIMEOUT = 30
 
+    # Number of times we will attempt to make the call, including waiting between calls.
+    MAX_RETRY = 5
+
     def __init__(self, environment='prod', api_key=None):
         endpoint = SymbolFileServer.API_URL if api_key else SymbolFileServer.CLASSIC_API_URL
         self.api_url = endpoint[environment.lower()]
@@ -92,6 +93,21 @@ class SymbolFileServer(object):
         _, os, arch, dbg_id, dbg_file = info
         return os, arch, dbg_id, dbg_file
 
+    def _exec_request_with_retry(self, oper, url, **kwargs):
+        '''Makes a web request with default timeout, returning the response.
+
+           The request will be tried multiple times, with exponential backoff:
+           sleep 1 * (2 ^ ({number of total retries} - 1))
+        '''
+        retries = Retry(total=SymbolFileServer.MAX_RETRY,
+                        backoff_factor=1, status_forcelist=[502, 503, 504])
+        with requests.Session() as s:
+            s.mount('https://', HTTPAdapter(max_retries=retries))
+            s.mount('http://', HTTPAdapter(max_retries=retries))
+
+            return s.request(
+                oper, url, params={'key': self.api_key}, timeout=SymbolFileServer.DEFAULT_TIMEOUT, **kwargs)
+
     def _exec_request(self, oper, url, **kwargs):
         '''Makes a web request with default timeout, returning the json result.
 
@@ -103,9 +119,7 @@ class SymbolFileServer(object):
            Note: If you are using verbose logging it is entirely possible that the subsystem will
            write your api key to the logs!
         '''
-        resp = requests.request(
-            oper, url, params={'key': self.api_key}, timeout=SymbolFileServer.DEFAULT_TIMEOUT, **kwargs)
-
+        resp = self._exec_request_with_retry(oper, url, **kwargs)
         if resp.status_code > 399:
             # Make sure we don't leak secret keys by accident.
             resp.url = resp.url.replace(
@@ -174,9 +188,12 @@ class SymbolFileServer(object):
 
 def main(args):
     # The lower level enging will log individual requests!
-    logging.debug("-----------------------------------------------------------")
-    logging.debug("- WARNING!! You are likely going to leak your api key    --")
-    logging.debug("-----------------------------------------------------------")
+    logging.debug(
+        "-----------------------------------------------------------")
+    logging.debug(
+        "- WARNING!! You are likely going to leak your api key    --")
+    logging.debug(
+        "-----------------------------------------------------------")
 
     api_key = FLAGS.api_key
     if not api_key:
