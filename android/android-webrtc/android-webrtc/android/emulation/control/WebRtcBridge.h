@@ -87,10 +87,11 @@ public:
     static const int kMaxFPS = 24;
     static const std::string kVideoBridgeExe;
 
+    // Maximum number of messages we are willing to queue, before we start dropping them.
+    static const uint16_t kMaxMessageQueueLen = 128;
 private:
     void received(std::string msg);
 
-    const uint16_t kMaxMessageQueueLen = 128;
     int mFps = kMaxFPS;
     int mVideoBridgePort;
     System::Pid mBridgePid;
