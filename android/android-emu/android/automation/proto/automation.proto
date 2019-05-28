@@ -5,6 +5,8 @@ package emulator_automation;
 message FileHeader {
     optional uint32 version = 1;
     optional InitialState initial_state = 2;
+    optional uint64 duration_ns = 3;
+    optional string name = 4;
 }
 
 message InitialState {

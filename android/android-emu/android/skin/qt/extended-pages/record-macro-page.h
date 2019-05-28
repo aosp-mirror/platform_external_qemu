@@ -52,6 +52,7 @@ private slots:
     void updatePreviewVideoView();
     void previewVideoPlayingFinished();
     void updateElapsedTime();
+    void editButtonClicked(RecordMacroSavedItem* macroItem);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
@@ -66,12 +67,12 @@ private:
     void setMacroUiState(MacroUiState state);
     void playButtonClicked(QListWidgetItem* listItem);
     void stopButtonClicked(QListWidgetItem* listItem);
-    void showPreview(const std::string& previewName);
+    void showPreview(const std::string& macroName);
     RecordMacroSavedItem* getItemWidget(QListWidgetItem* listItem);
     void disableMacroItemsExcept(QListWidgetItem* listItem);
     void disableMacroItems();
     void enableMacroItems();
-    void showPreviewFrame(const std::string& previewName);
+    void showPreviewFrame(const std::string& macroName);
     std::string getMacroNameFromItem(QListWidgetItem* listItem);
     QString getTimerString(int seconds);
     void reportMacroPlayed();
@@ -84,6 +85,11 @@ private:
     std::string getCustomMacrosDirectory();
     void displayErrorBox(const std::string& errorStr);
     std::string displayNameMacroBox();
+    void loadCustomMacros();
+    void createMacroItem(std::string& macroName, bool isPreset);
+    bool isPreviewAvailable(const std::string& macroName);
+    QListWidgetItem* findListItemFromWidget(RecordMacroSavedItem* macroItem);
+    void deleteMacroItem(RecordMacroSavedItem* macroItem);
 
     // Behind feature flag.
     void setRecordState();

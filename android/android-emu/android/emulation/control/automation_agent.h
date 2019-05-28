@@ -38,6 +38,15 @@ typedef struct QAndroidAutomationAgent {
     android::automation::StartResult (*startPlaybackWithCallback)(
             StringView filename,
             void (*onStopCallback)());
+
+    // Set the macro name in the header of a file.
+    void (*setMacroName)(StringView macroName, StringView filename);
+
+    // Get the macro name from the header of a file.
+    StringView (*getMacroName)(StringView filename);
+
+    // Get the duration in nanoseconds from a file.
+    uint64_t (*getDurationNs)(StringView filename);
 } QAndroidAutomationAgent;
 
 ANDROID_END_HEADER

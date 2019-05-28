@@ -83,6 +83,9 @@ std::ostream& operator<<(std::ostream& os, const StopError& value) {
         case StopError::NotStarted:
             os << "Not started";
             break;
+        case StopError::ParseError:
+            os << "Parse error";
+            break;
             // Default intentionally omitted so that missing statements generate
             // errors.
     }
@@ -367,6 +370,11 @@ public:
                                           void (*onStopCallback)()) override;
     StopResult stopPlayback() override;
 
+    // MacroUI helper functions.
+    void setMacroName(StringView macroName, StringView filename) override;
+    StringView getMacroName(StringView filename) override;
+    uint64_t getDurationNs(StringView filename) override;
+
     ReplayResult replayInitialState(StringView state) override;
 
     ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
@@ -390,6 +398,13 @@ private:
     // Reset velocity, used during snapshot load and canceling playback.
     void resetVelocity();
 
+    // Adds macro duration to header by copying and replacing the file.
+    void addDurationToHeader(DurationNs durationNs);
+
+    // Copies remaining events from originalStream to modifiedStream.
+    void copyStreamToStream(std::unique_ptr<StdioStream>&& originalStream,
+                            std::unique_ptr<StdioStream>&& modifiedStream);
+
     AutomationEventSink mEventSink;
     PhysicalModel* const mPhysicalModel;
     base::Looper* const mLooper;
@@ -405,6 +420,10 @@ private:
 
     // After replay callback.
     std::function<void()> mOnStopCallback;
+
+    // After recording time placing.
+    DurationNs mStartTimeNs;
+    std::string mFilePath;
 
     // Offworld state.
     OffworldEventSource* mOffworldEventSource = nullptr;
@@ -530,6 +549,7 @@ StartResult AutomationControllerImpl::startRecording(StringView filename) {
     if (mRecordingStream) {
         return Err(StartError::AlreadyStarted);
     }
+    mFilePath = path;
 
     pb::InitialState initialState;
     const int saveStateResult =
@@ -562,6 +582,8 @@ StartResult AutomationControllerImpl::startRecording(StringView filename) {
     mEventSink.registerStream(mRecordingStream.get(),
                               StreamEncoding::BinaryPbChunks);
 
+    mStartTimeNs = mLooper->nowNs(Looper::ClockType::kVirtual);
+
     return Ok();
 }
 
@@ -571,8 +593,25 @@ StopResult AutomationControllerImpl::stopRecording() {
         return Err(StopError::NotStarted);
     }
 
+    DurationNs currentTime = mLooper->nowNs(Looper::ClockType::kVirtual);
+    DurationNs durationNs = currentTime - mStartTimeNs;
+
+    DurationNs lastEventTime =
+            mEventSink.getLastEventTimeForStream(mRecordingStream.get());
     mEventSink.unregisterStream(mRecordingStream.get());
+
+    pb::RecordedEvent event;
+    event.set_delay(currentTime - lastEventTime);
+    std::string binaryProto;
+    if (!event.SerializeToString(&binaryProto)) {
+        LOG(WARNING) << "Could not serialize last event.";
+        return Err(StopError::ParseError);
+    }
+    mRecordingStream->putString(binaryProto);
     mRecordingStream.reset();
+
+    addDurationToHeader(durationNs);
+
     return Ok();
 }
 
@@ -673,6 +712,47 @@ StopResult AutomationControllerImpl::stopPlayback() {
     mPlayingFromFile = false;
     mPlaybackEventSource.reset();
     return Ok();
+}
+
+StringView AutomationControllerImpl::getMacroName(StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+
+    std::unique_ptr<StdioStream> playbackStream(new StdioStream(
+            fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
+
+    const std::string headerStr = playbackStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr) ||
+        !header.has_duration_ns()) {
+        LOG(ERROR) << "Could not load header name";
+        return "";
+    }
+
+    // Cast to std::string before casting to Stringview.
+    const std::string result = header.name();
+    return result;
+}
+
+uint64_t AutomationControllerImpl::getDurationNs(StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+
+    std::unique_ptr<StdioStream> playbackStream(new StdioStream(
+            fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
+
+    const std::string headerStr = playbackStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr) ||
+        !header.has_duration_ns()) {
+        LOG(ERROR) << "Could not load header duration";
+        return 0;
+    }
+    return header.duration_ns();
 }
 
 ReplayResult AutomationControllerImpl::replayInitialState(
@@ -784,6 +864,9 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         case pb::RecordedEvent::StreamCase::kPhysicalModel:
             physicalModel_replayEvent(mPhysicalModel, event.physical_model());
             break;
+        case pb::RecordedEvent::StreamCase::STREAM_NOT_SET:
+            // Last event for files to simulate recordings.
+            break;
         default:
             VLOG(automation) << "Unhandled stream type: "
                              << static_cast<uint32_t>(event.stream_case());
@@ -812,6 +895,97 @@ void AutomationControllerImpl::resetVelocity() {
                                     PHYSICAL_INTERPOLATION_SMOOTH);
     physicalModel_setTargetAmbientMotion(mPhysicalModel, 0.0f,
                                          PHYSICAL_INTERPOLATION_SMOOTH);
+}
+
+void AutomationControllerImpl::addDurationToHeader(DurationNs durationNs) {
+    std::unique_ptr<StdioStream> originalStream(
+            new StdioStream(fsopen(mFilePath.c_str(), "rb", FileShare::Read),
+                            StdioStream::kOwner));
+    const std::string tmpPath = mFilePath + "_tmp";
+
+    LOG(VERBOSE) << "Copy to " << tmpPath;
+    std::unique_ptr<StdioStream> modifiedStream(
+            new StdioStream(fsopen(tmpPath.c_str(), "wb", FileShare::Write),
+                            StdioStream::kOwner));
+
+    const std::string headerStr = originalStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr)) {
+        LOG(ERROR) << "Could not find header.";
+        return;
+    }
+    header.set_duration_ns(durationNs);
+
+    std::string modifiedHeader;
+    header.SerializeToString(&modifiedHeader);
+    modifiedStream->putString(modifiedHeader);
+
+    copyStreamToStream(std::move(originalStream), std::move(modifiedStream));
+}
+
+void AutomationControllerImpl::setMacroName(StringView macroName,
+                                            StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+    mFilePath = path;
+
+    std::unique_ptr<StdioStream> originalStream(
+            new StdioStream(fsopen(mFilePath.c_str(), "rb", FileShare::Read),
+                            StdioStream::kOwner));
+    const std::string tmpPath = mFilePath + "_tmp";
+
+    LOG(VERBOSE) << "Copy to " << tmpPath;
+    std::unique_ptr<StdioStream> modifiedStream(
+            new StdioStream(fsopen(tmpPath.c_str(), "wb", FileShare::Write),
+                            StdioStream::kOwner));
+
+    const std::string headerStr = originalStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr)) {
+        LOG(ERROR) << "Could not find header.";
+        return;
+    }
+    header.set_name(macroName);
+
+    std::string modifiedHeader;
+    header.SerializeToString(&modifiedHeader);
+    modifiedStream->putString(modifiedHeader);
+
+    copyStreamToStream(std::move(originalStream), std::move(modifiedStream));
+}
+
+void AutomationControllerImpl::copyStreamToStream(
+        std::unique_ptr<StdioStream>&& firstStream,
+        std::unique_ptr<StdioStream>&& secondStream) {
+    assert(firstStream != nullptr && secondStream != nullptr);
+
+    std::unique_ptr<StdioStream> originalStream(std::move(firstStream));
+    std::unique_ptr<StdioStream> modifiedStream(std::move(secondStream));
+
+    std::unique_ptr<EventSource> source(
+            new BinaryStreamEventSource(std::move(originalStream)));
+
+    DurationNs nextCommandDelay;
+    while (source->getNextCommandDelay(&nextCommandDelay)) {
+        pb::RecordedEvent modifiedEvent = source->consumeNextCommand();
+        std::string binaryProto;
+        if (!modifiedEvent.SerializeToString(&binaryProto)) {
+            LOG(WARNING) << "Could not serialize event.";
+            return;
+        }
+        modifiedStream->putString(binaryProto);
+    }
+
+    if (std::remove(mFilePath.c_str()) != 0) {
+        LOG(WARNING) << "Could not remove original macro-file.";
+    }
+
+    const std::string tmpPath = mFilePath + "_tmp";
+    if (std::rename(tmpPath.c_str(), mFilePath.c_str()) != 0) {
+        LOG(WARNING) << "Could not rename modified macro-file.";
+    }
 }
 
 }  // namespace automation

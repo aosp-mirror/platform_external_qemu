@@ -33,7 +33,7 @@ const size_t kKeycodeMapEntries =
 
 // This is just to get multiple measurements, we do not rely on input size.
 #define BASIC_BENCHMARK_TEST(x) \
-    BENCHMARK(x)->RangeMultiplier(2)->Range(1<<10, 1<<14)->Complexity()
+    BENCHMARK(x)->Complexity()
 
 
 std::map<android::emulation::control::keyboard::DomCode, uint32_t> gLookup;
