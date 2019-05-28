@@ -102,7 +102,9 @@ public:
         AutoLock lock(mLock);
 
         // TODO: bug 129484301
-        get_emugl_vm_operations().setSkipSnapshotSave(true /* skip saving */);
+        get_emugl_vm_operations().setSkipSnapshotSave(
+            !emugl::emugl_feature_is_enabled(
+                android::featurecontrol::VulkanSnapshots));
 
         InstanceInfo info;
         for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;

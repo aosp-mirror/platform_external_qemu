@@ -1412,7 +1412,9 @@ message EmulatorFeatureFlagState {
     MACRO_UI = 42;
     CAR_PROPERTY_TABLE = 43;
     DYNAMIC_PARTITION = 44;
-    // Next tag: 45
+    IP_DISCONNECT_ON_LOAD = 45;
+    VULKAN_SNAPSHOTS = 46;
+    // Next tag: 47
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
