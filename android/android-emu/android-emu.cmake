@@ -1,5 +1,6 @@
 # This file defines android-emu library
 prebuilt(VPX)
+
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 android_generate_hw_config()
@@ -82,9 +83,9 @@ set(android-emu-common
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
-    android/emulation/MediaVpxDecoder.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
+    android/emulation/MediaVpxDecoder.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
@@ -384,6 +385,8 @@ android_target_link_libraries(android-emu
                               "-framework Accelerate" # Of course, our camera needs it!
                               "-framework CoreMedia" # Also for the camera.
                               "-framework CoreVideo" # Also for the camera.
+                              "-framework VideoToolbox" # For HW codec acceleration on mac
+                              "-framework VideoDecodeAcceleration" # For HW codec acceleration on mac
                               "-framework IOKit"
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
@@ -443,6 +446,7 @@ set(android-emu-shared_windows_src android/opengl/NativeGpuInfo_windows.cpp andr
 
 # Mac specific sources, these will only be included when building for darwin
 set(android-emu-shared_darwin-x86_64_src
+    android/emulation/MediaH264Decoder_darwin.cpp
     android/opengl/NativeGpuInfo_darwin.cpp
     android/snapshot/MemoryWatch_darwin.cpp
     android/opengl/macTouchOpenGL.m
@@ -458,6 +462,7 @@ android_add_shared_library(android-emu-shared)
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
                               PRIVATE
+                              VPX::VPX
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
@@ -522,6 +527,11 @@ android_target_link_libraries(android-emu-shared
                               darwin-x86_64
                               PRIVATE
                               "-framework AppKit"
+                              "-framework VideoToolbox" # For HW codec acceleration on mac
+                              #"-framework VideoDecodeAcceleration" # For HW codec acceleration on mac
+                              #"-framework AVFoundation" # For HW codec acceleration on mac
+                              "-framework CoreMedia" # For HW codec acceleration on mac
+                              "-framework CoreVideo" # Also for the camera.
 )
 
 target_include_directories(android-emu-shared PUBLIC
