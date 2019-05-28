@@ -11,8 +11,10 @@
 
 #include "android/skin/qt/extended-pages/telephony-page.h"
 
+#include "android/avd/info.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/VmLock.h"
+#include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -60,6 +62,14 @@ TelephonyPage::TelephonyPage(QWidget *parent) :
         // telephone state changes
         sTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
     }
+
+    //Disable sms button for Automotive, since it's not supported
+    if ((android_avdInfo && (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO))){
+        SettingsTheme theme = getSelectedTheme();
+        setButtonEnabled(mUi->sms_sendButton, theme, false);
+        mUi->sms_messageBox->setReadOnly(true);
+    }
+
 }
 
 TelephonyPage::~TelephonyPage() {
