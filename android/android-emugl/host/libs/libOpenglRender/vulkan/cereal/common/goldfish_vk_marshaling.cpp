@@ -14769,5 +14769,1447 @@ void unmarshal_extension_struct(
     }
 }
 
+const char* api_opcode_to_string(
+    const uint32_t opcode)
+{
+    switch(opcode)
+    {
+#ifdef VK_VERSION_1_0
+        case OP_vkCreateInstance:
+        {
+            return "OP_vkCreateInstance";
+        }
+        case OP_vkDestroyInstance:
+        {
+            return "OP_vkDestroyInstance";
+        }
+        case OP_vkEnumeratePhysicalDevices:
+        {
+            return "OP_vkEnumeratePhysicalDevices";
+        }
+        case OP_vkGetPhysicalDeviceFeatures:
+        {
+            return "OP_vkGetPhysicalDeviceFeatures";
+        }
+        case OP_vkGetPhysicalDeviceFormatProperties:
+        {
+            return "OP_vkGetPhysicalDeviceFormatProperties";
+        }
+        case OP_vkGetPhysicalDeviceImageFormatProperties:
+        {
+            return "OP_vkGetPhysicalDeviceImageFormatProperties";
+        }
+        case OP_vkGetPhysicalDeviceProperties:
+        {
+            return "OP_vkGetPhysicalDeviceProperties";
+        }
+        case OP_vkGetPhysicalDeviceQueueFamilyProperties:
+        {
+            return "OP_vkGetPhysicalDeviceQueueFamilyProperties";
+        }
+        case OP_vkGetPhysicalDeviceMemoryProperties:
+        {
+            return "OP_vkGetPhysicalDeviceMemoryProperties";
+        }
+        case OP_vkGetInstanceProcAddr:
+        {
+            return "OP_vkGetInstanceProcAddr";
+        }
+        case OP_vkGetDeviceProcAddr:
+        {
+            return "OP_vkGetDeviceProcAddr";
+        }
+        case OP_vkCreateDevice:
+        {
+            return "OP_vkCreateDevice";
+        }
+        case OP_vkDestroyDevice:
+        {
+            return "OP_vkDestroyDevice";
+        }
+        case OP_vkEnumerateInstanceExtensionProperties:
+        {
+            return "OP_vkEnumerateInstanceExtensionProperties";
+        }
+        case OP_vkEnumerateDeviceExtensionProperties:
+        {
+            return "OP_vkEnumerateDeviceExtensionProperties";
+        }
+        case OP_vkEnumerateInstanceLayerProperties:
+        {
+            return "OP_vkEnumerateInstanceLayerProperties";
+        }
+        case OP_vkEnumerateDeviceLayerProperties:
+        {
+            return "OP_vkEnumerateDeviceLayerProperties";
+        }
+        case OP_vkGetDeviceQueue:
+        {
+            return "OP_vkGetDeviceQueue";
+        }
+        case OP_vkQueueSubmit:
+        {
+            return "OP_vkQueueSubmit";
+        }
+        case OP_vkQueueWaitIdle:
+        {
+            return "OP_vkQueueWaitIdle";
+        }
+        case OP_vkDeviceWaitIdle:
+        {
+            return "OP_vkDeviceWaitIdle";
+        }
+        case OP_vkAllocateMemory:
+        {
+            return "OP_vkAllocateMemory";
+        }
+        case OP_vkFreeMemory:
+        {
+            return "OP_vkFreeMemory";
+        }
+        case OP_vkMapMemory:
+        {
+            return "OP_vkMapMemory";
+        }
+        case OP_vkUnmapMemory:
+        {
+            return "OP_vkUnmapMemory";
+        }
+        case OP_vkFlushMappedMemoryRanges:
+        {
+            return "OP_vkFlushMappedMemoryRanges";
+        }
+        case OP_vkInvalidateMappedMemoryRanges:
+        {
+            return "OP_vkInvalidateMappedMemoryRanges";
+        }
+        case OP_vkGetDeviceMemoryCommitment:
+        {
+            return "OP_vkGetDeviceMemoryCommitment";
+        }
+        case OP_vkBindBufferMemory:
+        {
+            return "OP_vkBindBufferMemory";
+        }
+        case OP_vkBindImageMemory:
+        {
+            return "OP_vkBindImageMemory";
+        }
+        case OP_vkGetBufferMemoryRequirements:
+        {
+            return "OP_vkGetBufferMemoryRequirements";
+        }
+        case OP_vkGetImageMemoryRequirements:
+        {
+            return "OP_vkGetImageMemoryRequirements";
+        }
+        case OP_vkGetImageSparseMemoryRequirements:
+        {
+            return "OP_vkGetImageSparseMemoryRequirements";
+        }
+        case OP_vkGetPhysicalDeviceSparseImageFormatProperties:
+        {
+            return "OP_vkGetPhysicalDeviceSparseImageFormatProperties";
+        }
+        case OP_vkQueueBindSparse:
+        {
+            return "OP_vkQueueBindSparse";
+        }
+        case OP_vkCreateFence:
+        {
+            return "OP_vkCreateFence";
+        }
+        case OP_vkDestroyFence:
+        {
+            return "OP_vkDestroyFence";
+        }
+        case OP_vkResetFences:
+        {
+            return "OP_vkResetFences";
+        }
+        case OP_vkGetFenceStatus:
+        {
+            return "OP_vkGetFenceStatus";
+        }
+        case OP_vkWaitForFences:
+        {
+            return "OP_vkWaitForFences";
+        }
+        case OP_vkCreateSemaphore:
+        {
+            return "OP_vkCreateSemaphore";
+        }
+        case OP_vkDestroySemaphore:
+        {
+            return "OP_vkDestroySemaphore";
+        }
+        case OP_vkCreateEvent:
+        {
+            return "OP_vkCreateEvent";
+        }
+        case OP_vkDestroyEvent:
+        {
+            return "OP_vkDestroyEvent";
+        }
+        case OP_vkGetEventStatus:
+        {
+            return "OP_vkGetEventStatus";
+        }
+        case OP_vkSetEvent:
+        {
+            return "OP_vkSetEvent";
+        }
+        case OP_vkResetEvent:
+        {
+            return "OP_vkResetEvent";
+        }
+        case OP_vkCreateQueryPool:
+        {
+            return "OP_vkCreateQueryPool";
+        }
+        case OP_vkDestroyQueryPool:
+        {
+            return "OP_vkDestroyQueryPool";
+        }
+        case OP_vkGetQueryPoolResults:
+        {
+            return "OP_vkGetQueryPoolResults";
+        }
+        case OP_vkCreateBuffer:
+        {
+            return "OP_vkCreateBuffer";
+        }
+        case OP_vkDestroyBuffer:
+        {
+            return "OP_vkDestroyBuffer";
+        }
+        case OP_vkCreateBufferView:
+        {
+            return "OP_vkCreateBufferView";
+        }
+        case OP_vkDestroyBufferView:
+        {
+            return "OP_vkDestroyBufferView";
+        }
+        case OP_vkCreateImage:
+        {
+            return "OP_vkCreateImage";
+        }
+        case OP_vkDestroyImage:
+        {
+            return "OP_vkDestroyImage";
+        }
+        case OP_vkGetImageSubresourceLayout:
+        {
+            return "OP_vkGetImageSubresourceLayout";
+        }
+        case OP_vkCreateImageView:
+        {
+            return "OP_vkCreateImageView";
+        }
+        case OP_vkDestroyImageView:
+        {
+            return "OP_vkDestroyImageView";
+        }
+        case OP_vkCreateShaderModule:
+        {
+            return "OP_vkCreateShaderModule";
+        }
+        case OP_vkDestroyShaderModule:
+        {
+            return "OP_vkDestroyShaderModule";
+        }
+        case OP_vkCreatePipelineCache:
+        {
+            return "OP_vkCreatePipelineCache";
+        }
+        case OP_vkDestroyPipelineCache:
+        {
+            return "OP_vkDestroyPipelineCache";
+        }
+        case OP_vkGetPipelineCacheData:
+        {
+            return "OP_vkGetPipelineCacheData";
+        }
+        case OP_vkMergePipelineCaches:
+        {
+            return "OP_vkMergePipelineCaches";
+        }
+        case OP_vkCreateGraphicsPipelines:
+        {
+            return "OP_vkCreateGraphicsPipelines";
+        }
+        case OP_vkCreateComputePipelines:
+        {
+            return "OP_vkCreateComputePipelines";
+        }
+        case OP_vkDestroyPipeline:
+        {
+            return "OP_vkDestroyPipeline";
+        }
+        case OP_vkCreatePipelineLayout:
+        {
+            return "OP_vkCreatePipelineLayout";
+        }
+        case OP_vkDestroyPipelineLayout:
+        {
+            return "OP_vkDestroyPipelineLayout";
+        }
+        case OP_vkCreateSampler:
+        {
+            return "OP_vkCreateSampler";
+        }
+        case OP_vkDestroySampler:
+        {
+            return "OP_vkDestroySampler";
+        }
+        case OP_vkCreateDescriptorSetLayout:
+        {
+            return "OP_vkCreateDescriptorSetLayout";
+        }
+        case OP_vkDestroyDescriptorSetLayout:
+        {
+            return "OP_vkDestroyDescriptorSetLayout";
+        }
+        case OP_vkCreateDescriptorPool:
+        {
+            return "OP_vkCreateDescriptorPool";
+        }
+        case OP_vkDestroyDescriptorPool:
+        {
+            return "OP_vkDestroyDescriptorPool";
+        }
+        case OP_vkResetDescriptorPool:
+        {
+            return "OP_vkResetDescriptorPool";
+        }
+        case OP_vkAllocateDescriptorSets:
+        {
+            return "OP_vkAllocateDescriptorSets";
+        }
+        case OP_vkFreeDescriptorSets:
+        {
+            return "OP_vkFreeDescriptorSets";
+        }
+        case OP_vkUpdateDescriptorSets:
+        {
+            return "OP_vkUpdateDescriptorSets";
+        }
+        case OP_vkCreateFramebuffer:
+        {
+            return "OP_vkCreateFramebuffer";
+        }
+        case OP_vkDestroyFramebuffer:
+        {
+            return "OP_vkDestroyFramebuffer";
+        }
+        case OP_vkCreateRenderPass:
+        {
+            return "OP_vkCreateRenderPass";
+        }
+        case OP_vkDestroyRenderPass:
+        {
+            return "OP_vkDestroyRenderPass";
+        }
+        case OP_vkGetRenderAreaGranularity:
+        {
+            return "OP_vkGetRenderAreaGranularity";
+        }
+        case OP_vkCreateCommandPool:
+        {
+            return "OP_vkCreateCommandPool";
+        }
+        case OP_vkDestroyCommandPool:
+        {
+            return "OP_vkDestroyCommandPool";
+        }
+        case OP_vkResetCommandPool:
+        {
+            return "OP_vkResetCommandPool";
+        }
+        case OP_vkAllocateCommandBuffers:
+        {
+            return "OP_vkAllocateCommandBuffers";
+        }
+        case OP_vkFreeCommandBuffers:
+        {
+            return "OP_vkFreeCommandBuffers";
+        }
+        case OP_vkBeginCommandBuffer:
+        {
+            return "OP_vkBeginCommandBuffer";
+        }
+        case OP_vkEndCommandBuffer:
+        {
+            return "OP_vkEndCommandBuffer";
+        }
+        case OP_vkResetCommandBuffer:
+        {
+            return "OP_vkResetCommandBuffer";
+        }
+        case OP_vkCmdBindPipeline:
+        {
+            return "OP_vkCmdBindPipeline";
+        }
+        case OP_vkCmdSetViewport:
+        {
+            return "OP_vkCmdSetViewport";
+        }
+        case OP_vkCmdSetScissor:
+        {
+            return "OP_vkCmdSetScissor";
+        }
+        case OP_vkCmdSetLineWidth:
+        {
+            return "OP_vkCmdSetLineWidth";
+        }
+        case OP_vkCmdSetDepthBias:
+        {
+            return "OP_vkCmdSetDepthBias";
+        }
+        case OP_vkCmdSetBlendConstants:
+        {
+            return "OP_vkCmdSetBlendConstants";
+        }
+        case OP_vkCmdSetDepthBounds:
+        {
+            return "OP_vkCmdSetDepthBounds";
+        }
+        case OP_vkCmdSetStencilCompareMask:
+        {
+            return "OP_vkCmdSetStencilCompareMask";
+        }
+        case OP_vkCmdSetStencilWriteMask:
+        {
+            return "OP_vkCmdSetStencilWriteMask";
+        }
+        case OP_vkCmdSetStencilReference:
+        {
+            return "OP_vkCmdSetStencilReference";
+        }
+        case OP_vkCmdBindDescriptorSets:
+        {
+            return "OP_vkCmdBindDescriptorSets";
+        }
+        case OP_vkCmdBindIndexBuffer:
+        {
+            return "OP_vkCmdBindIndexBuffer";
+        }
+        case OP_vkCmdBindVertexBuffers:
+        {
+            return "OP_vkCmdBindVertexBuffers";
+        }
+        case OP_vkCmdDraw:
+        {
+            return "OP_vkCmdDraw";
+        }
+        case OP_vkCmdDrawIndexed:
+        {
+            return "OP_vkCmdDrawIndexed";
+        }
+        case OP_vkCmdDrawIndirect:
+        {
+            return "OP_vkCmdDrawIndirect";
+        }
+        case OP_vkCmdDrawIndexedIndirect:
+        {
+            return "OP_vkCmdDrawIndexedIndirect";
+        }
+        case OP_vkCmdDispatch:
+        {
+            return "OP_vkCmdDispatch";
+        }
+        case OP_vkCmdDispatchIndirect:
+        {
+            return "OP_vkCmdDispatchIndirect";
+        }
+        case OP_vkCmdCopyBuffer:
+        {
+            return "OP_vkCmdCopyBuffer";
+        }
+        case OP_vkCmdCopyImage:
+        {
+            return "OP_vkCmdCopyImage";
+        }
+        case OP_vkCmdBlitImage:
+        {
+            return "OP_vkCmdBlitImage";
+        }
+        case OP_vkCmdCopyBufferToImage:
+        {
+            return "OP_vkCmdCopyBufferToImage";
+        }
+        case OP_vkCmdCopyImageToBuffer:
+        {
+            return "OP_vkCmdCopyImageToBuffer";
+        }
+        case OP_vkCmdUpdateBuffer:
+        {
+            return "OP_vkCmdUpdateBuffer";
+        }
+        case OP_vkCmdFillBuffer:
+        {
+            return "OP_vkCmdFillBuffer";
+        }
+        case OP_vkCmdClearColorImage:
+        {
+            return "OP_vkCmdClearColorImage";
+        }
+        case OP_vkCmdClearDepthStencilImage:
+        {
+            return "OP_vkCmdClearDepthStencilImage";
+        }
+        case OP_vkCmdClearAttachments:
+        {
+            return "OP_vkCmdClearAttachments";
+        }
+        case OP_vkCmdResolveImage:
+        {
+            return "OP_vkCmdResolveImage";
+        }
+        case OP_vkCmdSetEvent:
+        {
+            return "OP_vkCmdSetEvent";
+        }
+        case OP_vkCmdResetEvent:
+        {
+            return "OP_vkCmdResetEvent";
+        }
+        case OP_vkCmdWaitEvents:
+        {
+            return "OP_vkCmdWaitEvents";
+        }
+        case OP_vkCmdPipelineBarrier:
+        {
+            return "OP_vkCmdPipelineBarrier";
+        }
+        case OP_vkCmdBeginQuery:
+        {
+            return "OP_vkCmdBeginQuery";
+        }
+        case OP_vkCmdEndQuery:
+        {
+            return "OP_vkCmdEndQuery";
+        }
+        case OP_vkCmdResetQueryPool:
+        {
+            return "OP_vkCmdResetQueryPool";
+        }
+        case OP_vkCmdWriteTimestamp:
+        {
+            return "OP_vkCmdWriteTimestamp";
+        }
+        case OP_vkCmdCopyQueryPoolResults:
+        {
+            return "OP_vkCmdCopyQueryPoolResults";
+        }
+        case OP_vkCmdPushConstants:
+        {
+            return "OP_vkCmdPushConstants";
+        }
+        case OP_vkCmdBeginRenderPass:
+        {
+            return "OP_vkCmdBeginRenderPass";
+        }
+        case OP_vkCmdNextSubpass:
+        {
+            return "OP_vkCmdNextSubpass";
+        }
+        case OP_vkCmdEndRenderPass:
+        {
+            return "OP_vkCmdEndRenderPass";
+        }
+        case OP_vkCmdExecuteCommands:
+        {
+            return "OP_vkCmdExecuteCommands";
+        }
+#endif
+#ifdef VK_VERSION_1_1
+        case OP_vkEnumerateInstanceVersion:
+        {
+            return "OP_vkEnumerateInstanceVersion";
+        }
+        case OP_vkBindBufferMemory2:
+        {
+            return "OP_vkBindBufferMemory2";
+        }
+        case OP_vkBindImageMemory2:
+        {
+            return "OP_vkBindImageMemory2";
+        }
+        case OP_vkGetDeviceGroupPeerMemoryFeatures:
+        {
+            return "OP_vkGetDeviceGroupPeerMemoryFeatures";
+        }
+        case OP_vkCmdSetDeviceMask:
+        {
+            return "OP_vkCmdSetDeviceMask";
+        }
+        case OP_vkCmdDispatchBase:
+        {
+            return "OP_vkCmdDispatchBase";
+        }
+        case OP_vkEnumeratePhysicalDeviceGroups:
+        {
+            return "OP_vkEnumeratePhysicalDeviceGroups";
+        }
+        case OP_vkGetImageMemoryRequirements2:
+        {
+            return "OP_vkGetImageMemoryRequirements2";
+        }
+        case OP_vkGetBufferMemoryRequirements2:
+        {
+            return "OP_vkGetBufferMemoryRequirements2";
+        }
+        case OP_vkGetImageSparseMemoryRequirements2:
+        {
+            return "OP_vkGetImageSparseMemoryRequirements2";
+        }
+        case OP_vkGetPhysicalDeviceFeatures2:
+        {
+            return "OP_vkGetPhysicalDeviceFeatures2";
+        }
+        case OP_vkGetPhysicalDeviceProperties2:
+        {
+            return "OP_vkGetPhysicalDeviceProperties2";
+        }
+        case OP_vkGetPhysicalDeviceFormatProperties2:
+        {
+            return "OP_vkGetPhysicalDeviceFormatProperties2";
+        }
+        case OP_vkGetPhysicalDeviceImageFormatProperties2:
+        {
+            return "OP_vkGetPhysicalDeviceImageFormatProperties2";
+        }
+        case OP_vkGetPhysicalDeviceQueueFamilyProperties2:
+        {
+            return "OP_vkGetPhysicalDeviceQueueFamilyProperties2";
+        }
+        case OP_vkGetPhysicalDeviceMemoryProperties2:
+        {
+            return "OP_vkGetPhysicalDeviceMemoryProperties2";
+        }
+        case OP_vkGetPhysicalDeviceSparseImageFormatProperties2:
+        {
+            return "OP_vkGetPhysicalDeviceSparseImageFormatProperties2";
+        }
+        case OP_vkTrimCommandPool:
+        {
+            return "OP_vkTrimCommandPool";
+        }
+        case OP_vkGetDeviceQueue2:
+        {
+            return "OP_vkGetDeviceQueue2";
+        }
+        case OP_vkCreateSamplerYcbcrConversion:
+        {
+            return "OP_vkCreateSamplerYcbcrConversion";
+        }
+        case OP_vkDestroySamplerYcbcrConversion:
+        {
+            return "OP_vkDestroySamplerYcbcrConversion";
+        }
+        case OP_vkCreateDescriptorUpdateTemplate:
+        {
+            return "OP_vkCreateDescriptorUpdateTemplate";
+        }
+        case OP_vkDestroyDescriptorUpdateTemplate:
+        {
+            return "OP_vkDestroyDescriptorUpdateTemplate";
+        }
+        case OP_vkUpdateDescriptorSetWithTemplate:
+        {
+            return "OP_vkUpdateDescriptorSetWithTemplate";
+        }
+        case OP_vkGetPhysicalDeviceExternalBufferProperties:
+        {
+            return "OP_vkGetPhysicalDeviceExternalBufferProperties";
+        }
+        case OP_vkGetPhysicalDeviceExternalFenceProperties:
+        {
+            return "OP_vkGetPhysicalDeviceExternalFenceProperties";
+        }
+        case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
+        {
+            return "OP_vkGetPhysicalDeviceExternalSemaphoreProperties";
+        }
+        case OP_vkGetDescriptorSetLayoutSupport:
+        {
+            return "OP_vkGetDescriptorSetLayoutSupport";
+        }
+#endif
+#ifdef VK_KHR_surface
+        case OP_vkDestroySurfaceKHR:
+        {
+            return "OP_vkDestroySurfaceKHR";
+        }
+        case OP_vkGetPhysicalDeviceSurfaceSupportKHR:
+        {
+            return "OP_vkGetPhysicalDeviceSurfaceSupportKHR";
+        }
+        case OP_vkGetPhysicalDeviceSurfaceCapabilitiesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceSurfaceCapabilitiesKHR";
+        }
+        case OP_vkGetPhysicalDeviceSurfaceFormatsKHR:
+        {
+            return "OP_vkGetPhysicalDeviceSurfaceFormatsKHR";
+        }
+        case OP_vkGetPhysicalDeviceSurfacePresentModesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceSurfacePresentModesKHR";
+        }
+#endif
+#ifdef VK_KHR_swapchain
+        case OP_vkCreateSwapchainKHR:
+        {
+            return "OP_vkCreateSwapchainKHR";
+        }
+        case OP_vkDestroySwapchainKHR:
+        {
+            return "OP_vkDestroySwapchainKHR";
+        }
+        case OP_vkGetSwapchainImagesKHR:
+        {
+            return "OP_vkGetSwapchainImagesKHR";
+        }
+        case OP_vkAcquireNextImageKHR:
+        {
+            return "OP_vkAcquireNextImageKHR";
+        }
+        case OP_vkQueuePresentKHR:
+        {
+            return "OP_vkQueuePresentKHR";
+        }
+        case OP_vkGetDeviceGroupPresentCapabilitiesKHR:
+        {
+            return "OP_vkGetDeviceGroupPresentCapabilitiesKHR";
+        }
+        case OP_vkGetDeviceGroupSurfacePresentModesKHR:
+        {
+            return "OP_vkGetDeviceGroupSurfacePresentModesKHR";
+        }
+        case OP_vkGetPhysicalDevicePresentRectanglesKHR:
+        {
+            return "OP_vkGetPhysicalDevicePresentRectanglesKHR";
+        }
+        case OP_vkAcquireNextImage2KHR:
+        {
+            return "OP_vkAcquireNextImage2KHR";
+        }
+#endif
+#ifdef VK_KHR_display
+        case OP_vkGetPhysicalDeviceDisplayPropertiesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceDisplayPropertiesKHR";
+        }
+        case OP_vkGetPhysicalDeviceDisplayPlanePropertiesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceDisplayPlanePropertiesKHR";
+        }
+        case OP_vkGetDisplayPlaneSupportedDisplaysKHR:
+        {
+            return "OP_vkGetDisplayPlaneSupportedDisplaysKHR";
+        }
+        case OP_vkGetDisplayModePropertiesKHR:
+        {
+            return "OP_vkGetDisplayModePropertiesKHR";
+        }
+        case OP_vkCreateDisplayModeKHR:
+        {
+            return "OP_vkCreateDisplayModeKHR";
+        }
+        case OP_vkGetDisplayPlaneCapabilitiesKHR:
+        {
+            return "OP_vkGetDisplayPlaneCapabilitiesKHR";
+        }
+        case OP_vkCreateDisplayPlaneSurfaceKHR:
+        {
+            return "OP_vkCreateDisplayPlaneSurfaceKHR";
+        }
+#endif
+#ifdef VK_KHR_display_swapchain
+        case OP_vkCreateSharedSwapchainsKHR:
+        {
+            return "OP_vkCreateSharedSwapchainsKHR";
+        }
+#endif
+#ifdef VK_KHR_xlib_surface
+        case OP_vkCreateXlibSurfaceKHR:
+        {
+            return "OP_vkCreateXlibSurfaceKHR";
+        }
+        case OP_vkGetPhysicalDeviceXlibPresentationSupportKHR:
+        {
+            return "OP_vkGetPhysicalDeviceXlibPresentationSupportKHR";
+        }
+#endif
+#ifdef VK_KHR_xcb_surface
+        case OP_vkCreateXcbSurfaceKHR:
+        {
+            return "OP_vkCreateXcbSurfaceKHR";
+        }
+        case OP_vkGetPhysicalDeviceXcbPresentationSupportKHR:
+        {
+            return "OP_vkGetPhysicalDeviceXcbPresentationSupportKHR";
+        }
+#endif
+#ifdef VK_KHR_wayland_surface
+        case OP_vkCreateWaylandSurfaceKHR:
+        {
+            return "OP_vkCreateWaylandSurfaceKHR";
+        }
+        case OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR:
+        {
+            return "OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR";
+        }
+#endif
+#ifdef VK_KHR_mir_surface
+        case OP_vkCreateMirSurfaceKHR:
+        {
+            return "OP_vkCreateMirSurfaceKHR";
+        }
+        case OP_vkGetPhysicalDeviceMirPresentationSupportKHR:
+        {
+            return "OP_vkGetPhysicalDeviceMirPresentationSupportKHR";
+        }
+#endif
+#ifdef VK_KHR_android_surface
+        case OP_vkCreateAndroidSurfaceKHR:
+        {
+            return "OP_vkCreateAndroidSurfaceKHR";
+        }
+#endif
+#ifdef VK_KHR_win32_surface
+        case OP_vkCreateWin32SurfaceKHR:
+        {
+            return "OP_vkCreateWin32SurfaceKHR";
+        }
+        case OP_vkGetPhysicalDeviceWin32PresentationSupportKHR:
+        {
+            return "OP_vkGetPhysicalDeviceWin32PresentationSupportKHR";
+        }
+#endif
+#ifdef VK_KHR_get_physical_device_properties2
+        case OP_vkGetPhysicalDeviceFeatures2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceFeatures2KHR";
+        }
+        case OP_vkGetPhysicalDeviceProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceProperties2KHR";
+        }
+        case OP_vkGetPhysicalDeviceFormatProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceFormatProperties2KHR";
+        }
+        case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceImageFormatProperties2KHR";
+        }
+        case OP_vkGetPhysicalDeviceQueueFamilyProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceQueueFamilyProperties2KHR";
+        }
+        case OP_vkGetPhysicalDeviceMemoryProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceMemoryProperties2KHR";
+        }
+        case OP_vkGetPhysicalDeviceSparseImageFormatProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceSparseImageFormatProperties2KHR";
+        }
+#endif
+#ifdef VK_KHR_device_group
+        case OP_vkGetDeviceGroupPeerMemoryFeaturesKHR:
+        {
+            return "OP_vkGetDeviceGroupPeerMemoryFeaturesKHR";
+        }
+        case OP_vkCmdSetDeviceMaskKHR:
+        {
+            return "OP_vkCmdSetDeviceMaskKHR";
+        }
+        case OP_vkCmdDispatchBaseKHR:
+        {
+            return "OP_vkCmdDispatchBaseKHR";
+        }
+#endif
+#ifdef VK_KHR_maintenance1
+        case OP_vkTrimCommandPoolKHR:
+        {
+            return "OP_vkTrimCommandPoolKHR";
+        }
+#endif
+#ifdef VK_KHR_device_group_creation
+        case OP_vkEnumeratePhysicalDeviceGroupsKHR:
+        {
+            return "OP_vkEnumeratePhysicalDeviceGroupsKHR";
+        }
+#endif
+#ifdef VK_KHR_external_memory_capabilities
+        case OP_vkGetPhysicalDeviceExternalBufferPropertiesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceExternalBufferPropertiesKHR";
+        }
+#endif
+#ifdef VK_KHR_external_memory_win32
+        case OP_vkGetMemoryWin32HandleKHR:
+        {
+            return "OP_vkGetMemoryWin32HandleKHR";
+        }
+        case OP_vkGetMemoryWin32HandlePropertiesKHR:
+        {
+            return "OP_vkGetMemoryWin32HandlePropertiesKHR";
+        }
+#endif
+#ifdef VK_KHR_external_memory_fd
+        case OP_vkGetMemoryFdKHR:
+        {
+            return "OP_vkGetMemoryFdKHR";
+        }
+        case OP_vkGetMemoryFdPropertiesKHR:
+        {
+            return "OP_vkGetMemoryFdPropertiesKHR";
+        }
+#endif
+#ifdef VK_KHR_external_semaphore_capabilities
+        case OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR";
+        }
+#endif
+#ifdef VK_KHR_external_semaphore_win32
+        case OP_vkImportSemaphoreWin32HandleKHR:
+        {
+            return "OP_vkImportSemaphoreWin32HandleKHR";
+        }
+        case OP_vkGetSemaphoreWin32HandleKHR:
+        {
+            return "OP_vkGetSemaphoreWin32HandleKHR";
+        }
+#endif
+#ifdef VK_KHR_external_semaphore_fd
+        case OP_vkImportSemaphoreFdKHR:
+        {
+            return "OP_vkImportSemaphoreFdKHR";
+        }
+        case OP_vkGetSemaphoreFdKHR:
+        {
+            return "OP_vkGetSemaphoreFdKHR";
+        }
+#endif
+#ifdef VK_KHR_push_descriptor
+        case OP_vkCmdPushDescriptorSetKHR:
+        {
+            return "OP_vkCmdPushDescriptorSetKHR";
+        }
+        case OP_vkCmdPushDescriptorSetWithTemplateKHR:
+        {
+            return "OP_vkCmdPushDescriptorSetWithTemplateKHR";
+        }
+#endif
+#ifdef VK_KHR_descriptor_update_template
+        case OP_vkCreateDescriptorUpdateTemplateKHR:
+        {
+            return "OP_vkCreateDescriptorUpdateTemplateKHR";
+        }
+        case OP_vkDestroyDescriptorUpdateTemplateKHR:
+        {
+            return "OP_vkDestroyDescriptorUpdateTemplateKHR";
+        }
+        case OP_vkUpdateDescriptorSetWithTemplateKHR:
+        {
+            return "OP_vkUpdateDescriptorSetWithTemplateKHR";
+        }
+#endif
+#ifdef VK_KHR_create_renderpass2
+        case OP_vkCreateRenderPass2KHR:
+        {
+            return "OP_vkCreateRenderPass2KHR";
+        }
+        case OP_vkCmdBeginRenderPass2KHR:
+        {
+            return "OP_vkCmdBeginRenderPass2KHR";
+        }
+        case OP_vkCmdNextSubpass2KHR:
+        {
+            return "OP_vkCmdNextSubpass2KHR";
+        }
+        case OP_vkCmdEndRenderPass2KHR:
+        {
+            return "OP_vkCmdEndRenderPass2KHR";
+        }
+#endif
+#ifdef VK_KHR_shared_presentable_image
+        case OP_vkGetSwapchainStatusKHR:
+        {
+            return "OP_vkGetSwapchainStatusKHR";
+        }
+#endif
+#ifdef VK_KHR_external_fence_capabilities
+        case OP_vkGetPhysicalDeviceExternalFencePropertiesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceExternalFencePropertiesKHR";
+        }
+#endif
+#ifdef VK_KHR_external_fence_win32
+        case OP_vkImportFenceWin32HandleKHR:
+        {
+            return "OP_vkImportFenceWin32HandleKHR";
+        }
+        case OP_vkGetFenceWin32HandleKHR:
+        {
+            return "OP_vkGetFenceWin32HandleKHR";
+        }
+#endif
+#ifdef VK_KHR_external_fence_fd
+        case OP_vkImportFenceFdKHR:
+        {
+            return "OP_vkImportFenceFdKHR";
+        }
+        case OP_vkGetFenceFdKHR:
+        {
+            return "OP_vkGetFenceFdKHR";
+        }
+#endif
+#ifdef VK_KHR_get_surface_capabilities2
+        case OP_vkGetPhysicalDeviceSurfaceCapabilities2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceSurfaceCapabilities2KHR";
+        }
+        case OP_vkGetPhysicalDeviceSurfaceFormats2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceSurfaceFormats2KHR";
+        }
+#endif
+#ifdef VK_KHR_get_display_properties2
+        case OP_vkGetPhysicalDeviceDisplayProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceDisplayProperties2KHR";
+        }
+        case OP_vkGetPhysicalDeviceDisplayPlaneProperties2KHR:
+        {
+            return "OP_vkGetPhysicalDeviceDisplayPlaneProperties2KHR";
+        }
+        case OP_vkGetDisplayModeProperties2KHR:
+        {
+            return "OP_vkGetDisplayModeProperties2KHR";
+        }
+        case OP_vkGetDisplayPlaneCapabilities2KHR:
+        {
+            return "OP_vkGetDisplayPlaneCapabilities2KHR";
+        }
+#endif
+#ifdef VK_KHR_get_memory_requirements2
+        case OP_vkGetImageMemoryRequirements2KHR:
+        {
+            return "OP_vkGetImageMemoryRequirements2KHR";
+        }
+        case OP_vkGetBufferMemoryRequirements2KHR:
+        {
+            return "OP_vkGetBufferMemoryRequirements2KHR";
+        }
+        case OP_vkGetImageSparseMemoryRequirements2KHR:
+        {
+            return "OP_vkGetImageSparseMemoryRequirements2KHR";
+        }
+#endif
+#ifdef VK_KHR_sampler_ycbcr_conversion
+        case OP_vkCreateSamplerYcbcrConversionKHR:
+        {
+            return "OP_vkCreateSamplerYcbcrConversionKHR";
+        }
+        case OP_vkDestroySamplerYcbcrConversionKHR:
+        {
+            return "OP_vkDestroySamplerYcbcrConversionKHR";
+        }
+#endif
+#ifdef VK_KHR_bind_memory2
+        case OP_vkBindBufferMemory2KHR:
+        {
+            return "OP_vkBindBufferMemory2KHR";
+        }
+        case OP_vkBindImageMemory2KHR:
+        {
+            return "OP_vkBindImageMemory2KHR";
+        }
+#endif
+#ifdef VK_KHR_maintenance3
+        case OP_vkGetDescriptorSetLayoutSupportKHR:
+        {
+            return "OP_vkGetDescriptorSetLayoutSupportKHR";
+        }
+#endif
+#ifdef VK_KHR_draw_indirect_count
+        case OP_vkCmdDrawIndirectCountKHR:
+        {
+            return "OP_vkCmdDrawIndirectCountKHR";
+        }
+        case OP_vkCmdDrawIndexedIndirectCountKHR:
+        {
+            return "OP_vkCmdDrawIndexedIndirectCountKHR";
+        }
+#endif
+#ifdef VK_ANDROID_native_buffer
+        case OP_vkGetSwapchainGrallocUsageANDROID:
+        {
+            return "OP_vkGetSwapchainGrallocUsageANDROID";
+        }
+        case OP_vkAcquireImageANDROID:
+        {
+            return "OP_vkAcquireImageANDROID";
+        }
+        case OP_vkQueueSignalReleaseImageANDROID:
+        {
+            return "OP_vkQueueSignalReleaseImageANDROID";
+        }
+#endif
+#ifdef VK_EXT_debug_report
+        case OP_vkCreateDebugReportCallbackEXT:
+        {
+            return "OP_vkCreateDebugReportCallbackEXT";
+        }
+        case OP_vkDestroyDebugReportCallbackEXT:
+        {
+            return "OP_vkDestroyDebugReportCallbackEXT";
+        }
+        case OP_vkDebugReportMessageEXT:
+        {
+            return "OP_vkDebugReportMessageEXT";
+        }
+#endif
+#ifdef VK_EXT_debug_marker
+        case OP_vkDebugMarkerSetObjectTagEXT:
+        {
+            return "OP_vkDebugMarkerSetObjectTagEXT";
+        }
+        case OP_vkDebugMarkerSetObjectNameEXT:
+        {
+            return "OP_vkDebugMarkerSetObjectNameEXT";
+        }
+        case OP_vkCmdDebugMarkerBeginEXT:
+        {
+            return "OP_vkCmdDebugMarkerBeginEXT";
+        }
+        case OP_vkCmdDebugMarkerEndEXT:
+        {
+            return "OP_vkCmdDebugMarkerEndEXT";
+        }
+        case OP_vkCmdDebugMarkerInsertEXT:
+        {
+            return "OP_vkCmdDebugMarkerInsertEXT";
+        }
+#endif
+#ifdef VK_AMD_draw_indirect_count
+        case OP_vkCmdDrawIndirectCountAMD:
+        {
+            return "OP_vkCmdDrawIndirectCountAMD";
+        }
+        case OP_vkCmdDrawIndexedIndirectCountAMD:
+        {
+            return "OP_vkCmdDrawIndexedIndirectCountAMD";
+        }
+#endif
+#ifdef VK_AMD_shader_info
+        case OP_vkGetShaderInfoAMD:
+        {
+            return "OP_vkGetShaderInfoAMD";
+        }
+#endif
+#ifdef VK_NV_external_memory_capabilities
+        case OP_vkGetPhysicalDeviceExternalImageFormatPropertiesNV:
+        {
+            return "OP_vkGetPhysicalDeviceExternalImageFormatPropertiesNV";
+        }
+#endif
+#ifdef VK_NV_external_memory_win32
+        case OP_vkGetMemoryWin32HandleNV:
+        {
+            return "OP_vkGetMemoryWin32HandleNV";
+        }
+#endif
+#ifdef VK_NN_vi_surface
+        case OP_vkCreateViSurfaceNN:
+        {
+            return "OP_vkCreateViSurfaceNN";
+        }
+#endif
+#ifdef VK_EXT_conditional_rendering
+        case OP_vkCmdBeginConditionalRenderingEXT:
+        {
+            return "OP_vkCmdBeginConditionalRenderingEXT";
+        }
+        case OP_vkCmdEndConditionalRenderingEXT:
+        {
+            return "OP_vkCmdEndConditionalRenderingEXT";
+        }
+#endif
+#ifdef VK_NVX_device_generated_commands
+        case OP_vkCmdProcessCommandsNVX:
+        {
+            return "OP_vkCmdProcessCommandsNVX";
+        }
+        case OP_vkCmdReserveSpaceForCommandsNVX:
+        {
+            return "OP_vkCmdReserveSpaceForCommandsNVX";
+        }
+        case OP_vkCreateIndirectCommandsLayoutNVX:
+        {
+            return "OP_vkCreateIndirectCommandsLayoutNVX";
+        }
+        case OP_vkDestroyIndirectCommandsLayoutNVX:
+        {
+            return "OP_vkDestroyIndirectCommandsLayoutNVX";
+        }
+        case OP_vkCreateObjectTableNVX:
+        {
+            return "OP_vkCreateObjectTableNVX";
+        }
+        case OP_vkDestroyObjectTableNVX:
+        {
+            return "OP_vkDestroyObjectTableNVX";
+        }
+        case OP_vkRegisterObjectsNVX:
+        {
+            return "OP_vkRegisterObjectsNVX";
+        }
+        case OP_vkUnregisterObjectsNVX:
+        {
+            return "OP_vkUnregisterObjectsNVX";
+        }
+        case OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX:
+        {
+            return "OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX";
+        }
+#endif
+#ifdef VK_NV_clip_space_w_scaling
+        case OP_vkCmdSetViewportWScalingNV:
+        {
+            return "OP_vkCmdSetViewportWScalingNV";
+        }
+#endif
+#ifdef VK_EXT_direct_mode_display
+        case OP_vkReleaseDisplayEXT:
+        {
+            return "OP_vkReleaseDisplayEXT";
+        }
+#endif
+#ifdef VK_EXT_acquire_xlib_display
+        case OP_vkAcquireXlibDisplayEXT:
+        {
+            return "OP_vkAcquireXlibDisplayEXT";
+        }
+        case OP_vkGetRandROutputDisplayEXT:
+        {
+            return "OP_vkGetRandROutputDisplayEXT";
+        }
+#endif
+#ifdef VK_EXT_display_surface_counter
+        case OP_vkGetPhysicalDeviceSurfaceCapabilities2EXT:
+        {
+            return "OP_vkGetPhysicalDeviceSurfaceCapabilities2EXT";
+        }
+#endif
+#ifdef VK_EXT_display_control
+        case OP_vkDisplayPowerControlEXT:
+        {
+            return "OP_vkDisplayPowerControlEXT";
+        }
+        case OP_vkRegisterDeviceEventEXT:
+        {
+            return "OP_vkRegisterDeviceEventEXT";
+        }
+        case OP_vkRegisterDisplayEventEXT:
+        {
+            return "OP_vkRegisterDisplayEventEXT";
+        }
+        case OP_vkGetSwapchainCounterEXT:
+        {
+            return "OP_vkGetSwapchainCounterEXT";
+        }
+#endif
+#ifdef VK_GOOGLE_display_timing
+        case OP_vkGetRefreshCycleDurationGOOGLE:
+        {
+            return "OP_vkGetRefreshCycleDurationGOOGLE";
+        }
+        case OP_vkGetPastPresentationTimingGOOGLE:
+        {
+            return "OP_vkGetPastPresentationTimingGOOGLE";
+        }
+#endif
+#ifdef VK_EXT_discard_rectangles
+        case OP_vkCmdSetDiscardRectangleEXT:
+        {
+            return "OP_vkCmdSetDiscardRectangleEXT";
+        }
+#endif
+#ifdef VK_EXT_hdr_metadata
+        case OP_vkSetHdrMetadataEXT:
+        {
+            return "OP_vkSetHdrMetadataEXT";
+        }
+#endif
+#ifdef VK_MVK_ios_surface
+        case OP_vkCreateIOSSurfaceMVK:
+        {
+            return "OP_vkCreateIOSSurfaceMVK";
+        }
+#endif
+#ifdef VK_MVK_macos_surface
+        case OP_vkCreateMacOSSurfaceMVK:
+        {
+            return "OP_vkCreateMacOSSurfaceMVK";
+        }
+#endif
+#ifdef VK_EXT_debug_utils
+        case OP_vkSetDebugUtilsObjectNameEXT:
+        {
+            return "OP_vkSetDebugUtilsObjectNameEXT";
+        }
+        case OP_vkSetDebugUtilsObjectTagEXT:
+        {
+            return "OP_vkSetDebugUtilsObjectTagEXT";
+        }
+        case OP_vkQueueBeginDebugUtilsLabelEXT:
+        {
+            return "OP_vkQueueBeginDebugUtilsLabelEXT";
+        }
+        case OP_vkQueueEndDebugUtilsLabelEXT:
+        {
+            return "OP_vkQueueEndDebugUtilsLabelEXT";
+        }
+        case OP_vkQueueInsertDebugUtilsLabelEXT:
+        {
+            return "OP_vkQueueInsertDebugUtilsLabelEXT";
+        }
+        case OP_vkCmdBeginDebugUtilsLabelEXT:
+        {
+            return "OP_vkCmdBeginDebugUtilsLabelEXT";
+        }
+        case OP_vkCmdEndDebugUtilsLabelEXT:
+        {
+            return "OP_vkCmdEndDebugUtilsLabelEXT";
+        }
+        case OP_vkCmdInsertDebugUtilsLabelEXT:
+        {
+            return "OP_vkCmdInsertDebugUtilsLabelEXT";
+        }
+        case OP_vkCreateDebugUtilsMessengerEXT:
+        {
+            return "OP_vkCreateDebugUtilsMessengerEXT";
+        }
+        case OP_vkDestroyDebugUtilsMessengerEXT:
+        {
+            return "OP_vkDestroyDebugUtilsMessengerEXT";
+        }
+        case OP_vkSubmitDebugUtilsMessageEXT:
+        {
+            return "OP_vkSubmitDebugUtilsMessageEXT";
+        }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+        case OP_vkGetAndroidHardwareBufferPropertiesANDROID:
+        {
+            return "OP_vkGetAndroidHardwareBufferPropertiesANDROID";
+        }
+        case OP_vkGetMemoryAndroidHardwareBufferANDROID:
+        {
+            return "OP_vkGetMemoryAndroidHardwareBufferANDROID";
+        }
+#endif
+#ifdef VK_EXT_sample_locations
+        case OP_vkCmdSetSampleLocationsEXT:
+        {
+            return "OP_vkCmdSetSampleLocationsEXT";
+        }
+        case OP_vkGetPhysicalDeviceMultisamplePropertiesEXT:
+        {
+            return "OP_vkGetPhysicalDeviceMultisamplePropertiesEXT";
+        }
+#endif
+#ifdef VK_EXT_validation_cache
+        case OP_vkCreateValidationCacheEXT:
+        {
+            return "OP_vkCreateValidationCacheEXT";
+        }
+        case OP_vkDestroyValidationCacheEXT:
+        {
+            return "OP_vkDestroyValidationCacheEXT";
+        }
+        case OP_vkMergeValidationCachesEXT:
+        {
+            return "OP_vkMergeValidationCachesEXT";
+        }
+        case OP_vkGetValidationCacheDataEXT:
+        {
+            return "OP_vkGetValidationCacheDataEXT";
+        }
+#endif
+#ifdef VK_EXT_external_memory_host
+        case OP_vkGetMemoryHostPointerPropertiesEXT:
+        {
+            return "OP_vkGetMemoryHostPointerPropertiesEXT";
+        }
+#endif
+#ifdef VK_AMD_buffer_marker
+        case OP_vkCmdWriteBufferMarkerAMD:
+        {
+            return "OP_vkCmdWriteBufferMarkerAMD";
+        }
+#endif
+#ifdef VK_NV_device_diagnostic_checkpoints
+        case OP_vkCmdSetCheckpointNV:
+        {
+            return "OP_vkCmdSetCheckpointNV";
+        }
+        case OP_vkGetQueueCheckpointDataNV:
+        {
+            return "OP_vkGetQueueCheckpointDataNV";
+        }
+#endif
+#ifdef VK_GOOGLE_address_space
+        case OP_vkMapMemoryIntoAddressSpaceGOOGLE:
+        {
+            return "OP_vkMapMemoryIntoAddressSpaceGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_color_buffer
+        case OP_vkRegisterImageColorBufferGOOGLE:
+        {
+            return "OP_vkRegisterImageColorBufferGOOGLE";
+        }
+        case OP_vkRegisterBufferColorBufferGOOGLE:
+        {
+            return "OP_vkRegisterBufferColorBufferGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+        case OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE:
+        {
+            return "OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+        case OP_vkBeginCommandBufferAsyncGOOGLE:
+        {
+            return "OP_vkBeginCommandBufferAsyncGOOGLE";
+        }
+        case OP_vkEndCommandBufferAsyncGOOGLE:
+        {
+            return "OP_vkEndCommandBufferAsyncGOOGLE";
+        }
+        case OP_vkResetCommandBufferAsyncGOOGLE:
+        {
+            return "OP_vkResetCommandBufferAsyncGOOGLE";
+        }
+#endif
+        default:
+        {
+            return "OP_UNKNOWN_API_CALL";
+        }
+    }
+}
+
 
 } // namespace goldfish_vk

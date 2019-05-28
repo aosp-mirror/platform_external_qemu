@@ -83,6 +83,7 @@ CFG_FLAG ( no_cache, "disable the cache partition" )
 CFG_FLAG ( nocache,  "same as -no-cache" )
 OPT_PARAM( sdcard, "<file>", "SD card image (default <datadir>/sdcard.img")
 CFG_PARAM( quit_after_boot, "<timeout>", "qeuit emulator after guest boots completely, or after timeout in seconds" )
+CFG_PARAM( monitor_adb, "<verbose_level>", "monitor the adb messages between guest and host, default not" )
 OPT_PARAM( snapstorage,    "<file>", "file that contains all state snapshots (default <datadir>/snapshots.img)")
 OPT_FLAG ( no_snapstorage, "do not mount a snapshot storage file (this disables all snapshot functionality)" )
 OPT_PARAM( snapshot,       "<name>", "name of snapshot within storage file for auto-start and auto-save (default 'default-boot')" )
@@ -219,7 +220,13 @@ OPT_FLAG(restart_when_stalled, "Allows restarting guest when it is stalled.")
 
 OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the background and write output to specified file.")
 
-OPT_PARAM( grpc, "<port>", "TCP ports used for the gRPC bridge" )
+#ifdef ANDROID_GRPC
+OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge" )
+#endif
+
+#ifdef ANDROID_WEBRTC
+OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc video bridge")
+#endif
 
 #undef CFG_FLAG
 #undef CFG_PARAM

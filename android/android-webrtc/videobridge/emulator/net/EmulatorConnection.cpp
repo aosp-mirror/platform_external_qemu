@@ -21,8 +21,8 @@
 namespace emulator {
 namespace net {
 
-EmulatorConnection::EmulatorConnection(int port, std::string handle)
-    : mPort(port), mHandle(handle) {}
+EmulatorConnection::EmulatorConnection(int port, std::string handle, std::string turnConfig)
+    : mPort(port), mHandle(handle), mTurnConfig(turnConfig) {}
 
 EmulatorConnection::~EmulatorConnection() {}
 
@@ -44,6 +44,7 @@ bool EmulatorConnection::listen(bool fork) {
         return false;
     }
 
+#ifndef _WIN32
     if (fork) {
         pid_t pid = ::fork();
         if (pid != 0) {
@@ -52,6 +53,7 @@ bool EmulatorConnection::listen(bool fork) {
             return true;
         }
     }
+#endif
 
     if (socket->Listen(32) != 0) {
         RTC_LOG(LERROR) << "Failed to listen for incoming sockets.";
@@ -72,7 +74,7 @@ void EmulatorConnection::OnRead(rtc::AsyncSocket* socket) {
     while (AsyncSocket* incoming = socket->Accept(&accept_addr)) {
         RtcAsyncSocketAdapter* adapter = new RtcAsyncSocketAdapter(incoming);
         std::unique_ptr<Switchboard> board(
-                new webrtc::Switchboard(mHandle, adapter, this));
+                new webrtc::Switchboard(mHandle, mTurnConfig, adapter, this));
         mConnections.push_back(std::move(board));
         RTC_LOG(INFO) << "New switchboard registered for incoming emulator.";
     }

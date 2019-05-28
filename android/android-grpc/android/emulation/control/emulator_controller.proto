@@ -42,6 +42,13 @@ service EmulatorController {
 
     rpc getScreenshot(ImageFormat) returns (Image) {}
 
+    // Returns the last 128Kb of logcat output from the emulator
+    rpc getLogcat(LogMessage) returns (LogMessage) {}
+
+    // Streams the logcat output from the emulator. The first call
+    // can retrieve up to 128Kb. This call will not return.
+    rpc streamLogcat(LogMessage) returns (stream LogMessage) {}
+
     rpc usePhone(TelephoneOperation) returns (TelephoneResponse) {}
 
     // The following endpoints are needed to establish the webrtc protocol
@@ -108,6 +115,19 @@ message JsepMsg {
     //        to that can be assigned to a
     //        (RTCSessionDescription)[https://developer.mozilla.org/en-US/docs/Web/API/RTCSessionDescription]
     string message = 2;
+}
+
+message LogMessage {
+    // [Output Only] The contents of the log output.
+    string contents = 1;
+    // The starting byte position of the output that was returned. This should
+    // match the start parameter sent with the request. If the serial console
+    // output exceeds the size of the buffer, older output will be overwritten
+    // by newer content and the start values will be mismatched.
+    int64 start = 2;
+    //[Output Only] The position of the next byte of content from the serial
+    //console output. Use this value in the next request as the start parameter.
+    int64 next = 3;
 }
 
 message VmConfiguration {
@@ -180,7 +200,6 @@ message KeyboardEvent {
     // Type of keycode contained in the keyCode field.
     KeyCodeType codeType = 1;
 
-
     // The type of keyboard event that should be sent to the emulator
     KeyEventType eventType = 2;
 
@@ -198,14 +217,14 @@ message KeyboardEvent {
     // layout. This follows the  w3c standard used in browsers.
     // You can find an accurate description of valid values
     // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
-    // The values in text, keyCode, eventType and codeType will be ignored and a keypress
-    // event will be delivered to the emulator.
+    // The values in text, keyCode, eventType and codeType will be ignored and a
+    // keypress event will be delivered to the emulator.
     string key = 4;
 
     // Series of utf8 encoded characters to send to the emulator. Every
     // character will be translated to an EvDev event type and send to the
-    // emulator as a keypress event. The values in keyCode, eventType, codeType and
-    // key will be ignored.
+    // emulator as a keypress event. The values in keyCode, eventType, codeType
+    // and key will be ignored.
     string text = 5;
 }
 

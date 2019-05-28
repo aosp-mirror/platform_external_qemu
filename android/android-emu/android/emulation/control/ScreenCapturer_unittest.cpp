@@ -368,8 +368,9 @@ TEST_F(ScreenCapturerTest, saveAndLoadRotation270) {
 TEST_F(ScreenCapturerTest, pbFileSuccess) {
     MockRenderer renderer(true);
     // Create a temporary file with a .pb extension.
+
     const std::string tmp_file = PathUtils::join(
-            System::get()->getTempDir(), "normal_file.pb");
+                mTestSystem.getTempRoot()->path(), "normal_file.pb");
     FILE* file = std::fopen(tmp_file.c_str(), "w");
     EXPECT_THAT(file, testing::NotNull()) << "Failed to open " << tmp_file;
     EXPECT_THAT(std::fclose(file), testing::Eq(0));

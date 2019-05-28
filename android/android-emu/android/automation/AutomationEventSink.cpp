@@ -120,5 +120,9 @@ void AutomationEventSink::handleEvent(uint64_t timeNs,
     }
 }
 
+uint64_t AutomationEventSink::getLastEventTimeForStream(Stream* stream) {
+    return mLastEventTime[stream];
+}
+
 }  // namespace automation
 }  // namespace android

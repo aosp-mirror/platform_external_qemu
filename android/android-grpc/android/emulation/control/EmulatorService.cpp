@@ -24,9 +24,11 @@
 #include "android/base/Uuid.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
+#include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/emulator_controller.grpc.pb.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/logcat/RingStreambuf.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
 
@@ -59,7 +61,40 @@ class EmulatorControllerImpl final : public EmulatorController::Service {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents,
                            RtcBridge* rtcBridge)
-        : mAgents(agents), mRtcBridge(rtcBridge) {}
+        : mAgents(agents), mRtcBridge(rtcBridge), mLogcatBuffer(k128KB) {
+        // the logcat pipe will take ownership of the created stream, and writes
+        // to our buffer.
+        LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
+    }
+
+    Status getLogcat(ServerContext* context,
+                     const LogMessage* request,
+                     LogMessage* reply) override {
+        LOG(VERBOSE) << "getLogcat: offset: " << request->start();
+        auto message = mLogcatBuffer.bufferAtOffset(request->start(), kNoWait);
+        reply->set_start(message.first);
+        reply->set_contents(message.second);
+        reply->set_next(message.first + message.second.size());
+        return Status::OK;
+    }
+
+    Status streamLogcat(ServerContext* context,
+                        const LogMessage* request,
+                        ServerWriter<LogMessage>* writer) override {
+        LogMessage log;
+        log.set_next(request->start());
+        do {
+            // When streaming, block at most 5 seconds before sending any status
+            // This also makes sure we check that the clients is still around at
+            // least once every 5 seconds.
+            auto message =
+                    mLogcatBuffer.bufferAtOffset(log.next(), k5SecondsWait);
+            log.set_start(message.first);
+            log.set_contents(message.second);
+            log.set_next(message.first + message.second.size());
+        } while (writer->Write(log));
+        return Status::OK;
+    }
 
     Status setRotation(ServerContext* context,
                        const Rotation* request,
@@ -285,7 +320,7 @@ public:
         std::string id = request->guid();
 
         // Block and wait for at most 5 seconds.
-        mRtcBridge->nextMessage(id, &msg, 5000);
+        mRtcBridge->nextMessage(id, &msg, k5SecondsWait);
         reply->mutable_id()->set_guid(request->guid());
         reply->set_message(msg);
         LOG(INFO) << "receiveJsepMessage id: " << id << ", msg: " << msg;
@@ -295,6 +330,11 @@ public:
 private:
     const AndroidConsoleAgents* mAgents;
     RtcBridge* mRtcBridge;
+    RingStreambuf mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+
+    const uint16_t k128KB = (128 * 1024) - 1;
+    const uint16_t k5SecondsWait = 5 * 1000;
+    const uint16_t kNoWait = 0;
 };
 
 using Builder = EmulatorControllerService::Builder;
@@ -336,11 +376,11 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
-    // TODO(jansene): It seems that we can easily overload the server with touch
-    // events. if the gRPC server runs out of threads to serve requests it
-    // appears to terminate ungoing requests. If one of those requests happens
-    // to have the event lock we will lock up the emulator. This is a work
-    // around until we have a proper solution.
+    // TODO(jansene): It seems that we can easily overload the server with
+    // touch events. if the gRPC server runs out of threads to serve
+    // requests it appears to terminate ungoing requests. If one of those
+    // requests happens to have the event lock we will lock up the emulator.
+    // This is a work around until we have a proper solution.
     builder.SetSyncServerOption(ServerBuilder::MAX_POLLERS, 1024);
 
     // TODO(janene): Enable tls & auth.

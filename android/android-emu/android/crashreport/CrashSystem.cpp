@@ -211,12 +211,9 @@ bool CrashSystem::validatePaths() {
     std::string caBundlePath = getCaBundlePath();
     std::string crashServicePath = getCrashServicePath();
     if (!System::get()->pathIsFile(caBundlePath)) {
-        W("Couldn't find file %s\n", caBundlePath.c_str());
         valid = false;
     }
     if (!System::get()->pathIsFile(crashServicePath)) {
-        W("Couldn't find crash service executable %s\n",
-          crashServicePath.c_str());
         valid = false;
     }
     return valid;

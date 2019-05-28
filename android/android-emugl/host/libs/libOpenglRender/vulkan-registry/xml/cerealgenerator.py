@@ -76,6 +76,21 @@ def banner_command(argv):
 
     return ' '.join(map(makeRelative, argv))
 
+suppressEnabled = False
+suppressExceptModule = None
+
+def init_suppress_option():
+    global suppressEnabled
+    global suppressExceptModule
+
+    if "ANDROID_EMU_VK_CEREAL_SUPPRESS" in os.environ:
+        option = os.environ["ANDROID_EMU_VK_CEREAL_SUPPRESS"]
+
+        if option != "":
+            suppressExceptModule = option
+            suppressEnabled = True
+            print("suppressEnabled: %s" % suppressExceptModule)
+
 # ---- methods overriding base class ----
 # beginFile(genOpts)
 # endFile()
@@ -93,6 +108,8 @@ class CerealGenerator(OutputGenerator):
                        warnFile = sys.stderr,
                        diagFile = sys.stdout):
         OutputGenerator.__init__(self, errFile, warnFile, diagFile)
+
+        init_suppress_option()
 
         self.typeInfo = cereal.VulkanTypeInfo()
 
@@ -644,32 +661,40 @@ class Pool;
 ## Overrides####################################################################
 
     def beginFile(self, genOpts):
-        OutputGenerator.beginFile(self, genOpts)
+        OutputGenerator.beginFile(self, genOpts, suppressEnabled)
 
-        write(self.host_cmake_generator(self.hostCMakeCppFiles),
-              file = self.outFile)
+        if suppressEnabled:
+            def enableSuppression(m):
+                m.suppress = True;
+            self.forEachModule(enableSuppression)
+            self.forEachProto(enableSuppression)
+            self.modules[suppressExceptModule].suppress = False
 
-        self.outProtoFile = open(
-            os.path.join(
-                self.host_abs_proto_destination,
-                "CMakeLists.txt"), "w", encoding="utf-8")
+        if not suppressEnabled:
+            write(self.host_cmake_generator(self.hostCMakeCppFiles),
+                  file = self.outFile)
 
-        write(self.host_cmake_proto_generator(self.hostCMakeProtoFiles),
-              file = self.outProtoFile)
+            self.outProtoFile = open(
+                os.path.join(
+                    self.host_abs_proto_destination,
+                    "CMakeLists.txt"), "w", encoding="utf-8")
 
-        self.outProtoFile.close()
+            write(self.host_cmake_proto_generator(self.hostCMakeProtoFiles),
+                  file = self.outProtoFile)
 
-        guestEncoderAndroidMkPath = \
-            os.path.join( \
-                self.guest_abs_encoder_destination,
-                "Android.mk")
+            self.outProtoFile.close()
 
-        guestAndroidMkFile = open(guestEncoderAndroidMkPath, "w", encoding="utf-8")
+            guestEncoderAndroidMkPath = \
+                os.path.join( \
+                    self.guest_abs_encoder_destination,
+                    "Android.mk")
 
-        write(self.guest_android_mk_generator(self.guestAndroidMkCppFiles),
-              file = guestAndroidMkFile)
+            guestAndroidMkFile = open(guestEncoderAndroidMkPath, "w", encoding="utf-8")
 
-        guestAndroidMkFile.close()
+            write(self.guest_android_mk_generator(self.guestAndroidMkCppFiles),
+                  file = guestAndroidMkFile)
+
+            guestAndroidMkFile.close()
 
         self.forEachModule(lambda m: m.begin(self.genOpts.directory))
         self.forEachProto(lambda m: m.begin(self.genOpts.directory))

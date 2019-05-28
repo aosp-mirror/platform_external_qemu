@@ -395,6 +395,8 @@ TEST(WebRtcBridge, startStopWebRtcModule) {
     EXPECT_FALSE(gRtcRunning);
     EXPECT_FALSE(socket->connected());
 }
+
+
 #ifndef NDEBUG
 TEST(WebRtcBridge, DISABLED_connectDisconnectParty) {
 #else

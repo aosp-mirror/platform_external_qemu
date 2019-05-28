@@ -7,8 +7,8 @@
 
 #include <memory>
 #include <nlohmann/json.hpp>
-
 #include "android/base/ArraySize.h"
+#include "android/base/Optional.h"
 #include "android/base/Uuid.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/misc/StringUtils.h"
@@ -42,12 +42,14 @@ static std::string generateUniqueVideoHandle() {
 WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
                            const QAndroidRecordScreenAgent* const screenAgent,
                            int fps,
-                           int videoBridgePort)
+                           int videoBridgePort,
+                           std::string turncfg)
     : mProtocol(this),
       mTransport(&mProtocol, socket),
       mScreenAgent(screenAgent),
       mFps(fps),
-      mVideoBridgePort(videoBridgePort) {
+      mVideoBridgePort(videoBridgePort),
+      mTurnConfig(turncfg) {
     mVideoModule = generateUniqueVideoHandle();
 }
 
@@ -221,6 +223,68 @@ void WebRtcBridge::stateConnectionChange(SocketTransport* connection,
     }
 }
 
+static Optional<System::Pid> launchAsDaemon(std::string executable,
+                                            int port,
+                                            std::string videomodule,
+                                            std::string turnConfig) {
+    std::vector<std::string> cmdArgs{executable, "--daemon",
+                                     "--logdir", System::get()->getTempDir(),
+                                     "--port",   std::to_string(port),
+                                     "--handle", videomodule,
+                                     "--turn",   turnConfig};
+
+    System::Pid bridgePid;
+    std::string invoke = "";
+    for (auto arg : cmdArgs) {
+        invoke += arg + " ";
+    }
+
+    // This either works or not.. We are not waiting around.
+    const System::Duration kHalfSecond = 500;
+    System::ProcessExitCode exitCode;
+    auto pidStr = System::get()->runCommandWithResult(cmdArgs, kHalfSecond,
+                                                      &exitCode);
+
+    if (exitCode != 0 || !pidStr) {
+        // Failed to start video bridge! Mission abort!
+        // Failed to start video bridge! Mission abort!
+        LOG(INFO) << "Failed to start " << invoke;
+        return {};
+    }
+    sscanf(pidStr->c_str(), "%d", &bridgePid);
+    LOG(INFO) << "Launched " << invoke << ", pid:" << bridgePid;
+    return bridgePid;
+}  // namespace control
+
+static Optional<System::Pid> launchInBackground(std::string executable,
+                                                int port,
+                                                std::string videomodule,
+                                                std::string turnConfig) {
+    std::vector<std::string> cmdArgs{executable,
+                                     "--logdir",
+                                     System::get()->getTempDir(),
+                                     "--port",
+                                     std::to_string(port),
+                                     "--handle",
+                                     videomodule,
+                                     "--turn",
+                                     turnConfig};
+    System::Pid bridgePid;
+    std::string invoke = "";
+    for (auto arg : cmdArgs) {
+        invoke += arg + " ";
+    }
+
+    if (!System::get()->runCommand(cmdArgs, RunOptions::DontWait,
+                                   System::kInfinite, nullptr, &bridgePid)) {
+        // Failed to start video bridge! Mission abort!
+        LOG(INFO) << "Failed to start " << invoke;
+        return {};
+    }
+
+    return bridgePid;
+}
+
 bool WebRtcBridge::start() {
     mState = BridgeState::Pending;
     std::string executable =
@@ -239,32 +303,25 @@ bool WebRtcBridge::start() {
                    << ", no video available.";
         return false;
     }
-    std::vector<std::string> cmdArgs{
-            executable, "--daemon",
-            "--logdir", System::get()->getTempDir(),
-            "--port",   std::to_string(mVideoBridgePort),
-            "--handle", mVideoModule};
 
-    std::string invoke = "";
-    for (auto arg : cmdArgs) {
-        invoke += arg + " ";
-    }
+// Daemonized version is only properly supported on Linux
+#ifdef __linux__
+    Optional<System::Pid> bridgePid = launchAsDaemon(
+            executable, mVideoBridgePort, mVideoModule, mTurnConfig);
+#else
+    // Windows does not have fork, darwin has security requirements that are
+    // not easily met
+    Optional<System::Pid> bridgePid = launchInBackground(
+            executable, mVideoBridgePort, mVideoModule, mTurnConfig);
+#endif
 
-    // This either works or not.. We are not waiting around.
-    const System::Duration kHalfSecond = 500;
-    System::ProcessExitCode exitCode;
-    auto pidStr = System::get()->runCommandWithResult(cmdArgs, kHalfSecond,
-                                                      &exitCode);
-
-    if (exitCode != 0 || !pidStr) {
-        // Failed to start video bridge! Mission abort!
-        LOG(ERROR) << "Failed to start video bridge, WebRTC disabled, tried:" << invoke;
+    if (!bridgePid.hasValue()) {
+        LOG(ERROR) << "WebRTC bridge disabled";
         terminate();
         return false;
     }
-    sscanf(pidStr->c_str(), "%d", &mBridgePid);
-    LOG(INFO) << "Launched " << invoke << ", pid:" << mBridgePid;
 
+    mBridgePid = *bridgePid;
     // Let's connect the socket transport if needed.
     if (mTransport.state() == State::CONNECTED) {
         mState = BridgeState::Connected;
@@ -272,9 +329,9 @@ bool WebRtcBridge::start() {
     return mTransport.connect();
 }
 
-RtcBridge* WebRtcBridge::create(
-        int port,
-        const AndroidConsoleAgents* const consoleAgents) {
+RtcBridge* WebRtcBridge::create(int port,
+                                const AndroidConsoleAgents* const consoleAgents,
+                                std::string turncfg) {
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
     if (executable.empty()) {
@@ -285,7 +342,7 @@ RtcBridge* WebRtcBridge::create(
     Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
     return new WebRtcBridge(socket, consoleAgents->record,
-                            WebRtcBridge::kMaxFPS, port);
+                            WebRtcBridge::kMaxFPS, port, turncfg);
 }
 }  // namespace control
 }  // namespace emulation

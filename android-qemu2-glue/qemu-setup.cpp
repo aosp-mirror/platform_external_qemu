@@ -34,6 +34,7 @@
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
+#include "android-qemu2-glue/emulation/android_address_space_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
@@ -167,6 +168,8 @@ bool qemu_android_emulation_early_setup() {
         (struct qemu_address_space_device_control_ops*)
         create_or_get_address_space_device_control_ops());
 
+    qemu_android_address_space_device_init();
+
     androidSnapshot_initialize(gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent);
     qemu_snapshot_compression_setup();
@@ -253,7 +256,11 @@ bool qemu_android_emulation_setup() {
     int grpc = -1;
     if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
         #ifdef ANDROID_WEBRTC
-            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents()));
+            std::string turn = "";
+            if (android_cmdLineOptions->turncfg) {
+                turn = android_cmdLineOptions->turncfg;
+            }
+            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents(), turn));
         #else
             rtcBridge.reset(new android::emulation::control::NopRtcBridge());
         #endif

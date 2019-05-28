@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include "android/emulation/control/window_agent.h"
 
+static bool sIsFolded = false;
+
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow =
                 [](void) {
@@ -46,6 +48,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    void (*func)(void*), int timeoutMs) {
                     printf("window-agent-mock-impl: .showMessageWithDismissCallback %s\n", message);
                 },
+        .fold =
+                [](bool is_fold) {
+                    printf("window-agent-mock-impl: .fold %d\n", is_fold);
+                    sIsFolded = is_fold;
+                },
+        .isFolded =
+                [](void) -> bool {
+                    printf("window-agent-mock-impl: .isFolded ? %d\n", sIsFolded);
+                    return sIsFolded;
+                },
         .setUIDisplayRegion =
                 [](int x_offset, int y_offset, int w, int h) {
                     printf("window-agent-mock-impl: .setUIDisplayRegion %d %d %dx%d\n",
@@ -55,7 +67,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 [](int id, int x, int y, int w, int h, bool add) {
                     printf("window-agent-mock-impl: .setMultiDisplay id %d %d %d %dx%d %s\n",
                            id, x, y, w, h, add ? "add" : "del");
-                }
+                },
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
