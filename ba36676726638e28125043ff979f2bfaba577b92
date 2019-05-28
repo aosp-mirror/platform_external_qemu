@@ -22,6 +22,30 @@
       "revId": "ba36676726638e28125043ff979f2bfaba577b92",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b84bfc73_533c6479",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-28T18:57:10Z",
+      "side": 1,
+      "message": "should we add the new option in the standard way, like https://android-review.googlesource.com/c/platform/external/qemu/+/575453/12/android/android-emu/android/cmdline-options.h",
+      "parentUuid": "126f7a5e_172caad7",
+      "range": {
+        "startLine": 262,
+        "startChar": 37,
+        "endLine": 262,
+        "endChar": 43
+      },
+      "revId": "ba36676726638e28125043ff979f2bfaba577b92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
