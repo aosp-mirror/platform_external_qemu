@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92afa7f6_987fbbff",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-29T00:11:53Z",
+      "side": 1,
+      "message": "This will require incrementing our snapshot version and leaving as is will make snapshots incomplete.",
+      "range": {
+        "startLine": 42,
+        "startChar": 35,
+        "endLine": 42,
+        "endChar": 39
+      },
+      "revId": "14fc031b1214107d4de8b8ef7d3a9a0fd26ba285",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
