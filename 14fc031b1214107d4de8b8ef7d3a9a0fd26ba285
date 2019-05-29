@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "085e9000_d52b94e7",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 21
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-29T01:14:07Z",
+      "side": 1,
+      "message": "You might be able to unit test the host media subdevice via the HostAddressSpace class. See https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/emulation/hostdevices/HostAddressSpace_unittest.cpp",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 54
+      },
+      "revId": "14fc031b1214107d4de8b8ef7d3a9a0fd26ba285",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "92afa7f6_987fbbff",
         "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
         "patchSetId": 21
