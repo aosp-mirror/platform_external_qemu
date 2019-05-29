@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0702600f_309ae710",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2611,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-29T20:13:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9804c053_553fbd49",
+      "range": {
+        "startLine": 2611,
+        "startChar": 4,
+        "endLine": 2611,
+        "endChar": 6
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e148e5ce_43332bc1",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2019-05-22T01:42:55Z",
       "side": 1,
       "message": "looks like quite some STLy code so i guess you might as well also calculate the max height that way: https://stackoverflow.com/questions/30611709/find-element-with-max-value-from-stdmap",
+      "range": {
+        "startLine": 2617,
+        "startChar": 0,
+        "endLine": 2617,
+        "endChar": 60
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a915bb2d_7f4f61eb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2617,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-29T20:13:12Z",
+      "side": 1,
+      "message": "ok, i didn\u0027t see much difference. probably a bit cleaner if we use max_element instead.",
+      "parentUuid": "e148e5ce_43332bc1",
       "range": {
         "startLine": 2617,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "528bafdf_301498c9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2620,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-29T20:13:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e252d27_11366233",
+      "range": {
+        "startLine": 2620,
+        "startChar": 92,
+        "endLine": 2620,
+        "endChar": 93
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5f507ceb_9fb5385f",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 5
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "214107a2_7316ea5f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2622,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-29T20:13:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f507ceb_9fb5385f",
+      "range": {
+        "startLine": 2622,
+        "startChar": 4,
+        "endLine": 2622,
+        "endChar": 7
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "298fc6fc_77a171e3",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 5
@@ -114,6 +210,30 @@
       "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11e9d2f6_e7ac42c1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2623,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-05-29T20:13:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "298fc6fc_77a171e3",
+      "range": {
+        "startLine": 2623,
+        "startChar": 22,
+        "endLine": 2623,
+        "endChar": 23
+      },
+      "revId": "b2ece2a61fc376383de209f8a1f041af02dc4b68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
