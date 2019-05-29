@@ -2874,7 +2874,7 @@ public:
 
     enum BoxedHandleTypeTag {
         Tag_Invalid = 0,
-        GOLDFISH_VK_LIST_HANDLE_TYPES(DEFINE_BOXED_HANDLE_TYPE_TAG)
+        GOLDFISH_VK_LIST_HANDLE_TYPES_BY_STAGE(DEFINE_BOXED_HANDLE_TYPE_TAG)
     };
 
     uint64_t newGlobalHandle(const DispatchableHandleInfo<uint64_t>& item, BoxedHandleTypeTag typeTag) {
