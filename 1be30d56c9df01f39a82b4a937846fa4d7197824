@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfb3ff23_c9134350",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-05-29T23:50:43Z",
+      "side": 1,
+      "message": "Please sync to the latest other CLs in this topic. Then merge your changes.",
+      "revId": "1be30d56c9df01f39a82b4a937846fa4d7197824",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
