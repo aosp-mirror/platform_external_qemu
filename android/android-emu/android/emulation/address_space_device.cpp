@@ -227,21 +227,15 @@ static void sAddressSpaceDevicePing(uint32_t handle) {
 
 extern "C" {
 
-static struct address_space_device_control_ops* sAddressSpaceDeviceOps =
-    nullptr;
+static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
+    &sAddressSpaceDeviceGenHandle,           // gen_handle
+    &sAddressSpaceDeviceDestroyHandle,       // destroy_handle
+    &sAddressSpaceDeviceTellPingInfo,        // tell_ping_info
+    &sAddressSpaceDevicePing                 // ping
+};
 
-struct address_space_device_control_ops*
-create_or_get_address_space_device_control_ops(void) {
-    if (sAddressSpaceDeviceOps) return sAddressSpaceDeviceOps;
-
-    sAddressSpaceDeviceOps = new address_space_device_control_ops;
-
-    sAddressSpaceDeviceOps->gen_handle = sAddressSpaceDeviceGenHandle;
-    sAddressSpaceDeviceOps->destroy_handle = sAddressSpaceDeviceDestroyHandle;
-    sAddressSpaceDeviceOps->tell_ping_info = sAddressSpaceDeviceTellPingInfo;
-    sAddressSpaceDeviceOps->ping = sAddressSpaceDevicePing;
-
-    return sAddressSpaceDeviceOps;
+struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
+    return &sAddressSpaceDeviceOps;
 }
 
 } // extern "C"
