@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6143e3bd_70c7ef6b",
+        "filename": "android/android-emu/android/emulation/address_space_device.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-29T23:43:43Z",
+      "side": 1,
+      "message": "I can land it as a separate change if you ok with this.",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 36
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
