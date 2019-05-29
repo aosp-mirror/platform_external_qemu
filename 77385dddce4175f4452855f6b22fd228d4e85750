@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d50b2659_344db4bc",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-29T20:05:29Z",
+      "side": 1,
+      "message": "Is the same swiftshader still used for mingw?",
+      "range": {
+        "startLine": 239,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 215
+      },
+      "revId": "77385dddce4175f4452855f6b22fd228d4e85750",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "914335b3_ad428c74",
+        "filename": "android/scripts/build-swifshader.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-29T20:05:29Z",
+      "side": 1,
+      "message": "Not the source of truth. https://swiftshader-review.googlesource.com/c/SwiftShader/+/11128",
+      "range": {
+        "startLine": 118,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 0
+      },
+      "revId": "77385dddce4175f4452855f6b22fd228d4e85750",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
