@@ -32,7 +32,7 @@ namespace android {
 
 class HostAddressSpaceDevice::Impl {
 public:
-    Impl() : mControlOps(create_or_get_address_space_device_control_ops()),
+    Impl() : mControlOps(get_address_space_device_control_ops()),
              mPhysicalOffsetAllocator(0, 16ULL * 1024ULL * 1048576ULL, 4096) { }
 
     uint32_t open() {

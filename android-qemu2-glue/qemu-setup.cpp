@@ -170,7 +170,7 @@ bool qemu_android_emulation_early_setup() {
 
     qemu_set_address_space_device_control_ops(
         (struct qemu_address_space_device_control_ops*)
-        create_or_get_address_space_device_control_ops());
+        get_address_space_device_control_ops());
 
     qemu_android_address_space_device_init();
 
