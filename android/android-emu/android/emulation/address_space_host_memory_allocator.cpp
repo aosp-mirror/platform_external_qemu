@@ -28,11 +28,22 @@ enum class HostMemoryAllocatorCommand {
 
 }  // namespace
 
+AddressSpaceHostMemoryAllocatorContext::AddressSpaceHostMemoryAllocatorContext(
+    const address_space_device_control_ops *ops)
+  : m_ops(ops) {
+}
+
 AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext() {
     for (const auto& kv : m_paddr2ptr) {
-        goldfish_address_space_get_vm_operations()->
-            unmapUserBackedRam(kv.first, kv.second.second);
-        android::aligned_buf_free(kv.second.first);
+        uint64_t phys_addr = kv.first;
+        void *host_ptr = kv.second.first;
+        size_t size = kv.second.second;
+
+        if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
+            android::aligned_buf_free(host_ptr);
+        } else {
+            ::abort();
+        }
     }
 }
 
@@ -63,10 +74,7 @@ void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_
 
     void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
-        if (m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
-            goldfish_address_space_get_vm_operations()->
-                mapUserBackedRam(phys_addr, host_ptr, aligned_size);
-
+        if (m_ops->add_memory_mapping(phys_addr, host_ptr, aligned_size)) {
             return host_ptr;
         } else {
             android::aligned_buf_free(host_ptr);
@@ -93,12 +101,13 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::unallocate(AddressSpaceDevicePi
         void* host_ptr = i->second.first;
         const uint64_t aligned_size = i->second.second;
 
-        goldfish_address_space_get_vm_operations()->
-            unmapUserBackedRam(phys_addr, aligned_size);
-        android::aligned_buf_free(host_ptr);
-        m_paddr2ptr.erase(i);
-
-        return 0;
+        if (m_ops->remove_memory_mapping(phys_addr, host_ptr, aligned_size)) {
+            android::aligned_buf_free(host_ptr);
+            m_paddr2ptr.erase(i);
+            return 0;
+        } else {
+            ::abort();
+        }
     } else {
         return -1;
     }
