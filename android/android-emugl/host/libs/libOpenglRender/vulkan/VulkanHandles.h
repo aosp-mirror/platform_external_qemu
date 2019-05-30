@@ -62,3 +62,41 @@
 #define GOLDFISH_VK_LIST_HANDLE_TYPES(f) \
     GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(f) \
     GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(f)
+
+#define GOLDFISH_VK_LIST_HANDLE_TYPES_BY_STAGE(f) \
+    f(VkInstance) \
+    f(VkPhysicalDevice) \
+    f(VkDevice) \
+    f(VkQueue) \
+    f(VkBuffer) \
+    f(VkImage) \
+    f(VkDeviceMemory) \
+    f(VkBufferView) \
+    f(VkImageView) \
+    f(VkShaderModule) \
+    f(VkDescriptorSetLayout) \
+    f(VkDescriptorPool) \
+    f(VkDescriptorSet) \
+    f(VkSampler) \
+    f(VkSamplerYcbcrConversion) \
+    f(VkDescriptorUpdateTemplate) \
+    f(VkRenderPass) \
+    f(VkFramebuffer) \
+    f(VkPipelineLayout) \
+    f(VkPipelineCache) \
+    f(VkPipeline) \
+    f(VkFence) \
+    f(VkSemaphore) \
+    f(VkEvent) \
+    f(VkQueryPool) \
+    f(VkSurfaceKHR) \
+    f(VkSwapchainKHR) \
+    f(VkDisplayKHR) \
+    f(VkDisplayModeKHR) \
+    f(VkObjectTableNVX) \
+    f(VkIndirectCommandsLayoutNVX) \
+    f(VkValidationCacheEXT) \
+    f(VkDebugReportCallbackEXT) \
+    f(VkDebugUtilsMessengerEXT) \
+    f(VkCommandPool) \
+    f(VkCommandBuffer)
