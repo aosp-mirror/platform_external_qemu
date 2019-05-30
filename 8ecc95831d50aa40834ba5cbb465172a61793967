@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a955926e_591cd9eb",
+        "filename": "android/android-emu/android/emulation/address_space_device.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-30T16:17:09Z",
+      "side": 1,
+      "message": "Can we run ping for mutating memoryMappings and DMA is looking for a memory pointer at the same time?",
+      "parentUuid": "a7d3e7de_3173b966",
+      "range": {
+        "startLine": 239,
+        "startChar": 10,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6143e3bd_70c7ef6b",
         "filename": "android/android-emu/android/emulation/address_space_device.h",
         "patchSetId": 1
