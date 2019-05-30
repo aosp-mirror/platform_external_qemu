@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5371ab00_8bdde4f0",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd0211d4_45f4ef7f",
+      "range": {
+        "startLine": 44,
+        "startChar": 32,
+        "endLine": 44,
+        "endChar": 33
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a197513c_03a6069c",
         "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
         "patchSetId": 17
@@ -39,6 +63,24 @@
       "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd4ab140_f4ef26da",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a197513c_03a6069c",
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "f97be8ba_8a488bb4",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34723462_7873c37c",
+      "range": {
+        "startLine": 73,
+        "startChar": 29,
+        "endLine": 73,
+        "endChar": 46
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b95ed52_f929b45b",
         "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
         "patchSetId": 17
@@ -76,6 +142,30 @@
       "writtenOn": "2019-04-02T23:55:20Z",
       "side": 1,
       "message": "Where does this number come from?",
+      "range": {
+        "startLine": 104,
+        "startChar": 41,
+        "endLine": 104,
+        "endChar": 43
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07f01db8_e5cb574f",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "The guest is passing the parameters at 8-byte intervals. I\u0027m thinking we\u0027ll need to do something similar to emugen here instead, and also move this code into goldfish-opengl.",
+      "parentUuid": "6b95ed52_f929b45b",
       "range": {
         "startLine": 104,
         "startChar": 41,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "cce70dd8_2dea29ae",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "727fb308_969c2e68",
+      "range": {
+        "startLine": 48,
+        "startChar": 20,
+        "endLine": 48,
+        "endChar": 21
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "65b0c4c9_08458caf",
         "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
         "patchSetId": 17
@@ -131,6 +245,30 @@
       "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60ab3dc0_ae79be9e",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "65b0c4c9_08458caf",
+      "range": {
+        "startLine": 39,
+        "startChar": 10,
+        "endLine": 39,
+        "endChar": 15
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "a60e5ae7_29cfd61f",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd22a9c3_9b6f1382",
+      "range": {
+        "startLine": 47,
+        "startChar": 27,
+        "endLine": 47,
+        "endChar": 55
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "387a7375_48c45da2",
         "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
         "patchSetId": 17
@@ -177,6 +339,30 @@
       "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "281eff63_725655c5",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-05-30T21:33:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "387a7375_48c45da2",
+      "range": {
+        "startLine": 51,
+        "startChar": 36,
+        "endLine": 51,
+        "endChar": 50
+      },
+      "revId": "7a682b438cea009cd52d1c8f4f6946efb682e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
