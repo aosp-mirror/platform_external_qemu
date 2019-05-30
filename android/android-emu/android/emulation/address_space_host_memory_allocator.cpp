@@ -16,6 +16,7 @@
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/vm_operations.h"
 #include "android/base/AlignedBuf.h"
+#include "android/crashreport/crash-handler.h"
 
 namespace android {
 namespace emulation {
@@ -28,11 +29,23 @@ enum class HostMemoryAllocatorCommand {
 
 }  // namespace
 
+AddressSpaceHostMemoryAllocatorContext::AddressSpaceHostMemoryAllocatorContext(
+    const address_space_device_control_ops *ops)
+  : m_ops(ops) {
+}
+
 AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext() {
     for (const auto& kv : m_paddr2ptr) {
-        goldfish_address_space_get_vm_operations()->
-            unmapUserBackedRam(kv.first, kv.second.second);
-        android::aligned_buf_free(kv.second.first);
+        uint64_t phys_addr = kv.first;
+        void *host_ptr = kv.second.first;
+        size_t size = kv.second.second;
+
+        if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
+            android::aligned_buf_free(host_ptr);
+        } else {
+            crashhandler_die("Failed remove a memory mapping {phys_addr=%lx, host_ptr=%p, size=%lu}",
+                             phys_addr, host_ptr, size);
+        }
     }
 }
 
@@ -64,10 +77,12 @@ void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_
     void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
         if (m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
-            goldfish_address_space_get_vm_operations()->
-                mapUserBackedRam(phys_addr, host_ptr, aligned_size);
-
-            return host_ptr;
+            if (m_ops->add_memory_mapping(phys_addr, host_ptr, aligned_size)) {
+                return host_ptr;
+            } else {
+                android::aligned_buf_free(host_ptr);
+                return nullptr;
+            }
         } else {
             android::aligned_buf_free(host_ptr);
             return nullptr;
@@ -91,14 +106,16 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::unallocate(AddressSpaceDevicePi
     const auto i = m_paddr2ptr.find(phys_addr);
     if (i != m_paddr2ptr.end()) {
         void* host_ptr = i->second.first;
-        const uint64_t aligned_size = i->second.second;
+        const uint64_t size = i->second.second;
 
-        goldfish_address_space_get_vm_operations()->
-            unmapUserBackedRam(phys_addr, aligned_size);
-        android::aligned_buf_free(host_ptr);
-        m_paddr2ptr.erase(i);
-
-        return 0;
+        if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
+            android::aligned_buf_free(host_ptr);
+            m_paddr2ptr.erase(i);
+            return 0;
+        } else {
+            crashhandler_die("Failed remove a memory mapping {phys_addr=%lx, host_ptr=%p, size=%lu}",
+                             phys_addr, host_ptr, size);
+        }
     } else {
         return -1;
     }
