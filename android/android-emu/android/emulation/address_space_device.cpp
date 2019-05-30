@@ -260,13 +260,5 @@ int goldfish_address_space_memory_state_save(android::base::Stream *stream) {
     return 0;
 }
 
-void host_goldfish_address_space_memory_state_load(android::base::Stream *stream) {
-    sAddressSpaceDeviceState->load(stream);
-}
-
-void host_goldfish_address_space_memory_state_save(android::base::Stream *stream) {
-    sAddressSpaceDeviceState->save(stream);
-}
-
 }  // namespace emulation
 }  // namespace android
