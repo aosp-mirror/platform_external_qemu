@@ -30,6 +30,6 @@ struct address_space_device_control_ops {
 };
 
 struct address_space_device_control_ops*
-create_or_get_address_space_device_control_ops(void);
+get_address_space_device_control_ops(void);
 
 } // extern "C"
