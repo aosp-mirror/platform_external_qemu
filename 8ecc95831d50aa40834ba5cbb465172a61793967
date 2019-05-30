@@ -191,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "293f4230_0033833c",
+        "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-30T18:15:30Z",
+      "side": 1,
+      "message": "crashhandler_die",
+      "parentUuid": "0f55d3a2_4617ce38",
+      "range": {
+        "startLine": 45,
+        "startChar": 12,
+        "endLine": 45,
+        "endChar": 22
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2384cb8b_7e03b231",
         "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
         "patchSetId": 1
