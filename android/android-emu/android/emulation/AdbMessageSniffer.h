@@ -16,6 +16,7 @@
 
 #include <map>
 #include <vector>
+#include <set>
 
 namespace android {
 namespace emulation {
@@ -52,10 +53,11 @@ private:
     uint8_t* mBuffer;
     uint8_t* mBufferP;
     const char* mName;
+    std::set<unsigned> mDummyShellArg0;
 
     void grow_buffer_if_needed(int count);
     int getAllowedBytesToPrint(int bytes);
-    void checkForShellExit();
+    bool checkForDummyShellCommand();
     int getPayloadSize();
     void copyFromBuffer(int count);
     int readPayload(int dataSize);
