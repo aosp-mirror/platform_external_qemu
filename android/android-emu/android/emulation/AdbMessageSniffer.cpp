@@ -94,7 +94,6 @@ int AdbMessageSniffer::readHeader(int dataSize) {
         return dataSize;
     } else {
         copyFromBuffer(need);
-        updateCtsHeartBeatCount();
         printMessage();
         mState = 1;
         return need;
@@ -105,22 +104,27 @@ void AdbMessageSniffer::updateCtsHeartBeatCount() {
     amessage & msg = mPacket.mesg;
     // OKAY is usually from logcat, ignore it
     if (msg.command != ADB_OKAY) {
-        host_cts_heart_beat_count += 1;
+        if (!checkForDummyShellCommand()) {
+            host_cts_heart_beat_count += 1;
+        }
     }
 }
 
-void AdbMessageSniffer::checkForShellExit() {
+bool AdbMessageSniffer::checkForDummyShellCommand() {
     amessage & msg = mPacket.mesg;
     if (msg.command == ADB_OPEN) {
         mPacket.data[msg.data_length] = '\0';
         const char *purpose = (char*)(mPacket.data);
         if (strncmp(purpose, "shell", 5)==0) {
             if (strstr(purpose, ":exit") != NULL) {
-                //found shell exit
-                printf("found shell %s\n", purpose);
+                return true;
+            }
+            if (strstr(purpose, ":getprop") != NULL) {
+                return true;
             }
         }
     }
+    return false;
 }
 
 int AdbMessageSniffer::readPayload(int dataSize) {
@@ -131,7 +135,7 @@ int AdbMessageSniffer::readPayload(int dataSize) {
         return dataSize;
     } else {
         copyFromBuffer(need);
-        checkForShellExit();
+        updateCtsHeartBeatCount();
         printPayload();
         startNewMessage();
         return need;
