@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "136fd1a9_0504ed7f",
+        "filename": "android/android-emu/android/emulation/address_space_device.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-30T18:15:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d91fb30_388bf411",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 36
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea041a95_5df1b58b",
         "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
         "patchSetId": 1
@@ -131,6 +155,30 @@
       "writtenOn": "2019-05-30T15:41:10Z",
       "side": 1,
       "message": "print error message here?",
+      "range": {
+        "startLine": 45,
+        "startChar": 12,
+        "endLine": 45,
+        "endChar": 22
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f55d3a2_4617ce38",
+        "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-30T18:15:03Z",
+      "side": 1,
+      "message": "Do we have a macro/function that prints an error and crashes?",
+      "parentUuid": "ea041a95_5df1b58b",
       "range": {
         "startLine": 45,
         "startChar": 12,
