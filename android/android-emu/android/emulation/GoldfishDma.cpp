@@ -4,6 +4,7 @@
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/DmaMap.h"
 
+#include "android/emulation/address_space_device.h"
 #include "android/emulation/android_pipe_host.h"
 #include "android/utils/assert.h"
 #include "android/utils/debug.h"
@@ -18,6 +19,13 @@ static void android_goldfish_dma_remove_buffer(uint64_t guest_paddr) {
 }
 
 static void* android_goldfish_dma_get_host_addr(uint64_t guest_paddr) {
+    void *host_ptr;
+
+    host_ptr = get_address_space_device_control_ops()->get_host_ptr(guest_paddr);
+    if (host_ptr) {
+        return host_ptr;
+    }
+
     return android::DmaMap::get()->getHostAddr(guest_paddr);
 }
 
@@ -27,7 +35,14 @@ static void android_goldfish_dma_invalidate_host_mappings() {
 
 static void android_goldfish_dma_unlock(uint64_t guest_paddr) {
     void* hwpipe = android::DmaMap::get()->getPipeInstance(guest_paddr);
-    android_pipe_host_signal_wake(hwpipe, PIPE_WAKE_UNLOCK_DMA);
+
+    if (hwpipe) {
+        /*
+         * DMA regions allocated with AddressSpaceHostMemoryAllocatorContext
+         * don't have hwpipe associated with them.
+         */
+        android_pipe_host_signal_wake(hwpipe, PIPE_WAKE_UNLOCK_DMA);
+    }
 }
 
 static void android_goldfish_dma_reset_host_mappings() {
