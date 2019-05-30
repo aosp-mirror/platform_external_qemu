@@ -11,6 +11,7 @@
 
 #include "android/emulation/AdbMessageSniffer.h"
 
+#include "android/base/ArraySize.h"
 #include "android/globals.h"
 
 #include <atomic>
@@ -94,8 +95,11 @@ int AdbMessageSniffer::readHeader(int dataSize) {
         return dataSize;
     } else {
         copyFromBuffer(need);
-        updateCtsHeartBeatCount();
         printMessage();
+        amessage & msg = mPacket.mesg;
+        if (msg.command == ADB_CLSE) {
+            mDummyShellArg0.erase(msg.arg0);
+        }
         mState = 1;
         return need;
     }
@@ -104,23 +108,49 @@ int AdbMessageSniffer::readHeader(int dataSize) {
 void AdbMessageSniffer::updateCtsHeartBeatCount() {
     amessage & msg = mPacket.mesg;
     // OKAY is usually from logcat, ignore it
-    if (msg.command != ADB_OKAY) {
-        host_cts_heart_beat_count += 1;
+    if (msg.command != ADB_OKAY && msg.command != ADB_CLSE) {
+        if (!checkForDummyShellCommand()) {
+            host_cts_heart_beat_count += 1;
+            if (android_hw->test_monitorAdb >= 2 ) {
+                printf("emulator: cts heartbeat %d\n", host_cts_heart_beat_count.load());
+                fflush(stdout);
+            }
+        }
     }
 }
 
-void AdbMessageSniffer::checkForShellExit() {
+
+bool AdbMessageSniffer::checkForDummyShellCommand() {
     amessage & msg = mPacket.mesg;
     if (msg.command == ADB_OPEN) {
         mPacket.data[msg.data_length] = '\0';
         const char *purpose = (char*)(mPacket.data);
-        if (strncmp(purpose, "shell", 5)==0) {
-            if (strstr(purpose, ":exit") != NULL) {
-                //found shell exit
-                printf("found shell %s\n", purpose);
+        const char* s_dummy_shell_commands[] = {"shell:exit", "shell:getprop"};
+        // older version
+        // shell:getprop
+        for (int ii = 0; ii < ARRAY_SIZE(s_dummy_shell_commands); ++ ii) {
+            const char* dummy = s_dummy_shell_commands[ii];
+            if ( strncmp(purpose, dummy, strlen(dummy)) == 0) {
+                mDummyShellArg0.insert(msg.arg0);
+                return true;
             }
         }
+        // newer version
+        // shell,v2,TERM=xterm-256color,raw:getprop
+        const char* s_dummy_patterns[] = {",raw:exit", ",raw:getprop"};
+        if (strncmp(purpose, "shell,", 6) == 0) {
+            for (int jj = 0; jj < ARRAY_SIZE(s_dummy_patterns); ++ jj) {
+                const char* dummy = s_dummy_patterns[jj];
+                if ( strstr(purpose, dummy) != NULL) {
+                    mDummyShellArg0.insert(msg.arg0);
+                    return true;
+                }
+            }
+        }
+    } else if (msg.command == ADB_WRTE && mDummyShellArg0.find(msg.arg0) != mDummyShellArg0.end()) {
+        return true;
     }
+    return false;
 }
 
 int AdbMessageSniffer::readPayload(int dataSize) {
@@ -131,7 +161,7 @@ int AdbMessageSniffer::readPayload(int dataSize) {
         return dataSize;
     } else {
         copyFromBuffer(need);
-        checkForShellExit();
+        updateCtsHeartBeatCount();
         printPayload();
         startNewMessage();
         return need;
@@ -167,14 +197,12 @@ int AdbMessageSniffer::getAllowedBytesToPrint(int bytes) {
 }
 
 void AdbMessageSniffer::printPayload() {
-    if (android_hw->test_monitorAdb< 2 ) {
+    if (android_hw->test_monitorAdb < 2 ) {
         return;
     }
     amessage & msg = mPacket.mesg;
-    if (   msg.command == ADB_OKAY
-        || msg.command == ADB_WRTE) {
-        return;
-    }
+    if (msg.command == ADB_OKAY) return;
+    if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
     int length = msg.data_length;
     length = getAllowedBytesToPrint(length);
     if (length <= 0 ) return;
@@ -220,11 +248,10 @@ void AdbMessageSniffer::printMessage() {
     if (android_hw->test_monitorAdb < 2 ) {
         return;
     }
+
     amessage & msg = mPacket.mesg;
-    if (   msg.command == ADB_OKAY
-        || msg.command == ADB_WRTE) {
-        return;
-    }
+    if (msg.command == ADB_OKAY) return;
+    if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
 
     printf("%s:command: %s ", mName, getCommandName(msg.command));
     printf("arg0: %d ", msg.arg0);
