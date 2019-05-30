@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "a7d3e7de_3173b966",
+        "filename": "android/android-emu/android/emulation/address_space_device.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-30T15:41:10Z",
+      "side": 1,
+      "message": "what is the situation on access from multiple threads?",
+      "range": {
+        "startLine": 239,
+        "startChar": 10,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6143e3bd_70c7ef6b",
         "filename": "android/android-emu/android/emulation/address_space_device.h",
         "patchSetId": 1
@@ -18,6 +41,76 @@
         "startChar": 0,
         "endLine": 39,
         "endChar": 36
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d91fb30_388bf411",
+        "filename": "android/android-emu/android/emulation/address_space_device.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-30T15:41:10Z",
+      "side": 1,
+      "message": "It\u0027s fine either way",
+      "parentUuid": "6143e3bd_70c7ef6b",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 36
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea041a95_5df1b58b",
+        "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-30T15:41:10Z",
+      "side": 1,
+      "message": "print error message here?",
+      "range": {
+        "startLine": 45,
+        "startChar": 12,
+        "endLine": 45,
+        "endChar": 22
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2384cb8b_7e03b231",
+        "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-05-30T15:41:10Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 109,
+        "startChar": 12,
+        "endLine": 109,
+        "endChar": 22
       },
       "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
