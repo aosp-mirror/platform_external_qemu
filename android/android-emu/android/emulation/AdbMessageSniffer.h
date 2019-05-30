@@ -55,7 +55,7 @@ private:
 
     void grow_buffer_if_needed(int count);
     int getAllowedBytesToPrint(int bytes);
-    void checkForShellExit();
+    bool checkForDummyShellCommand();
     int getPayloadSize();
     void copyFromBuffer(int count);
     int readPayload(int dataSize);
