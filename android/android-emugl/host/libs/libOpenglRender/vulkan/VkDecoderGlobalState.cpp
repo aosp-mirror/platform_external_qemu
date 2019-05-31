@@ -1925,7 +1925,8 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
              PAGE_BITS) << PAGE_BITS;
 
-        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+        printf("%s: map: %p %p -> [0x%llx 0x%llx]\n", __func__,
+                info->ptr,
                 info->pageAlignedHva,
                 (unsigned long long)info->guestPhysAddr,
                 (unsigned long long)info->guestPhysAddr + info->sizeToPage);
