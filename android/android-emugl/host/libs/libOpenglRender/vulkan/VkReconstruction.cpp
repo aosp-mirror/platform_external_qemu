@@ -50,6 +50,10 @@ std::vector<uint64_t> typeTagSortedHandles(const std::vector<uint64_t>& handles)
 void VkReconstruction::save(android::base::Stream* stream) {
     DEBUG_RECON("start")
 
+#if DEBUG_RECON
+    dump();
+#endif
+
     std::unordered_map<uint64_t, uint64_t> backDeps;
 
     mHandleReconstructions.forEachLiveComponent(
@@ -112,6 +116,39 @@ void VkReconstruction::save(android::base::Stream* stream) {
         topoOrder = next;
         ++topoLevel;
     }
+
+    std::vector<HandleModification> orderedModifies;
+
+    // Now add all handle modifications to the trace, ordered by the .order field.
+    mHandleModifications.forEachLiveComponent(
+        [this, &orderedModifies](bool live, uint64_t componentHandle, uint64_t entityHandle, HandleModification& mod) {
+        for (auto apiHandle : mod.apiRefs) {
+            auto apiInfo = mApiTrace.get(apiHandle);
+            const char* apiName = apiInfo ? goldfish_vk::api_opcode_to_string(apiInfo->opCode) : "unalloced";
+            fprintf(stderr, "VkReconstruction::%s: add modify 0x%llx: %s\n", __func__, (unsigned long long)apiHandle, apiName);
+        }
+        orderedModifies.push_back(mod);
+    });
+
+    std::sort(orderedModifies.begin(), orderedModifies.end(),
+        [](const HandleModification& lhs, const HandleModification& rhs) {
+        return lhs.order < rhs.order;
+    });
+
+    std::unordered_set<uint64_t> usedModifyApis;
+    std::vector<uint64_t> orderedUniqueModifyApis;
+
+    for (const auto& mod : orderedModifies) {
+        for (auto apiRef : mod.apiRefs) {
+            if (usedModifyApis.find(apiRef) == usedModifyApis.end()) {
+                orderedUniqueModifyApis.push_back(apiRef);
+                usedModifyApis.insert(apiRef);
+            }
+        }
+    }
+
+    uniqApiRefsByTopoOrder[topoLevel] = orderedUniqueModifyApis;
+    ++topoLevel;
 
     size_t totalApiTraceSize = 0; // 4 bytes to store size of created handles
 
@@ -304,6 +341,15 @@ void VkReconstruction::dump() {
         }
     });
 
+    mHandleModifications.forEachLiveComponent([this](bool live, uint64_t componentHandle, uint64_t entityHandle, HandleModification& modification) {
+        fprintf(stderr, "VkReconstruction::%s: mod: %p handle 0x%llx api refs:\n", __func__, this, (unsigned long long)entityHandle);
+        for (auto apiHandle : modification.apiRefs) {
+            auto apiInfo = mApiTrace.get(apiHandle);
+            const char* apiName = apiInfo ? goldfish_vk::api_opcode_to_string(apiInfo->opCode) : "unalloced";
+            fprintf(stderr, "VkReconstruction::%s: mod:     0x%llx: %s\n", __func__, (unsigned long long)apiHandle, apiName);
+        }
+    });
+
     fprintf(stderr, "%s: total trace bytes: %zu\n", __func__, traceBytesTotal);
 }
 
@@ -352,7 +398,9 @@ void VkReconstruction::forEachHandleDeleteApi(const uint64_t* toProcess, uint32_
 
     for (uint32_t i = 0; i < count; ++i) {
 
-        auto item = mHandleReconstructions.get((uint64_t)(uintptr_t)toProcess[i]);
+        uint64_t toProcess64 = (uint64_t)(uintptr_t)toProcess[i];
+
+        auto item = mHandleReconstructions.get(toProcess64);
 
         if (!item) continue;
 
@@ -361,6 +409,12 @@ void VkReconstruction::forEachHandleDeleteApi(const uint64_t* toProcess, uint32_
         }
 
         item->apiRefs.clear();
+
+        auto modifyItem = mHandleModifications.get(toProcess64);
+
+        if (!modifyItem) continue;
+
+        modifyItem->apiRefs.clear();
     }
 }
 
@@ -385,5 +439,20 @@ void VkReconstruction::setCreatedHandlesForApi(uint64_t apiHandle, const uint64_
 
     for (uint32_t i = 0; i < count; ++i) {
         item->createdHandles.push_back(created[i]);
+    }
+}
+
+void VkReconstruction::forEachHandleAddModifyApi(const uint64_t* toProcess, uint32_t count, uint64_t apiHandle) {
+    if (!toProcess) return;
+
+    for (uint32_t i = 0; i < count; ++i) {
+        mHandleModifications.add((uint64_t)(uintptr_t)toProcess[i], HandleModification());
+
+        auto item = mHandleModifications.get((uint64_t)(uintptr_t)toProcess[i]);
+        fprintf(stderr, "%s: add\n", __func__);
+
+        if (!item) continue;
+
+        item->apiRefs.push_back(apiHandle);
     }
 }

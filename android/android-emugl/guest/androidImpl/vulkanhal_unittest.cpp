@@ -1006,11 +1006,11 @@ TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
     VkDeviceMemory mem;
     EXPECT_EQ(VK_SUCCESS, vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &mem));
 
+    void* hostPtr;
+    EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
     androidSnapshot_save("test_snapshot");
     androidSnapshot_load("test_snapshot");
 
-    void* hostPtr;
-    EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
 
     memset(hostPtr, 0xff, kTestAlloc);
 
