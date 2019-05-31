@@ -104,6 +104,10 @@ specialCaseDependencyExtractors = {
     "vkAllocateCommandBuffers" : extract_deps_vkAllocateCommandBuffers,
 }
 
+apiSequences = {
+    "vkAllocateMemory" : ["vkAllocateMemory", "vkMapMemoryIntoAddressSpaceGOOGLE"]
+}
+
 def emit_impl(typeInfo, api, cgen):
 
     cgen.line("// TODO: Implement")

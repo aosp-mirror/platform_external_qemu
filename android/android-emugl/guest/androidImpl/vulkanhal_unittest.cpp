@@ -996,7 +996,7 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
 // remapping of virtual addrs and is functionality that does not exist on
 // Linux/macOS. It would ironically require a hypervisor (or an OS that
 // supports freer ways of mapping memory) in order to test properly.
-TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
+TEST_F(VulkanHalTest, SnapshotSaveLoadHostVisibleMemory) {
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
@@ -1006,11 +1006,18 @@ TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
     VkDeviceMemory mem;
     EXPECT_EQ(VK_SUCCESS, vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &mem));
 
-    androidSnapshot_save("test_snapshot");
-    androidSnapshot_load("test_snapshot");
-
     void* hostPtr;
     EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
+
+    fprintf(stderr, "%s: host ptr: %p\n", __func__, hostPtr);
+
+    fprintf(stderr, "%s: SAVE SNAPSHOT\n", __func__);
+    androidSnapshot_save("test_snapshot");
+    fprintf(stderr, "%s: LOAD SNAPSHOT\n", __func__);
+    androidSnapshot_load("test_snapshot");
+    fprintf(stderr, "%s: AFTER LOADING\n", __func__);
+
+    fprintf(stderr, "%s: host ptr: %p\n", __func__, hostPtr);
 
     memset(hostPtr, 0xff, kTestAlloc);
 
@@ -1024,6 +1031,7 @@ TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
 
     vk->vkUnmapMemory(mDevice, mem);
     vk->vkFreeMemory(mDevice, mem, nullptr);
+    fprintf(stderr, "%s: AFTER LOADING (done)\n", __func__);
 }
 
 // Tests save/load of a dispatchable handle, such as VkCommandBuffer.
