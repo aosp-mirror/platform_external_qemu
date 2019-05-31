@@ -54,6 +54,7 @@ public:
 
     using EntityHandle = uint64_t;
     using IteratorFunc = std::function<void(bool live, EntityHandle h, Item& item)>;
+    using ConstIteratorFunc = std::function<void(bool live, EntityHandle h, const Item& item)>;
 
     static size_t getHandleIndex(EntityHandle h) {
         return static_cast<size_t>(h & ((1ULL << indexBits) - 1ULL));
@@ -327,6 +328,18 @@ public:
         }
     }
 
+    void forEachLiveEntry_const(ConstIteratorFunc func) const {
+        for (auto& entry: mEntries) {
+            auto handle = entry.handle;
+            bool live = isLive(handle);
+
+            if (!live) continue;
+
+            const auto& item = entry.item;
+            func(live, handle, item);
+        }
+    }
+
 private:
     EntityManager(size_t initialItems) :
         mEntries(initialItems),
@@ -354,6 +367,7 @@ public:
     using ComponentHandle = uint64_t;
     using EntityHandle = uint64_t;
     using ComponentIteratorFunc = std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, Data& data)>;
+    using ConstComponentIteratorFunc = std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, const Data& data)>;
 
     // Adds the given |data| and associates it with EntityHandle.
     // We can also opt-in to immediately tracking the handle in the reverse mapping,
@@ -433,6 +447,13 @@ public:
         });
     }
 
+    void forEachLiveComponent_const(ConstComponentIteratorFunc func) const {
+        mData.forEachLiveEntry_const(
+            [func](bool live, typename InternalEntityManager::EntityHandle componentHandle, const InternalItem& item) {
+                func(live, componentHandle, item.entityHandle, item.data);
+        });
+    }
+
 private:
     struct InternalItem {
         EntityHandle entityHandle;
@@ -459,6 +480,8 @@ public:
     using EntityHandle = uint64_t;
     using ComponentIteratorFunc =
         std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, Data& data)>;
+    using ConstComponentIteratorFunc =
+        std::function<void(bool, ComponentHandle componentHandle, EntityHandle entityHandle, const Data& data)>;
 
     EntityHandle add(EntityHandle h, const Data& data) {
 
@@ -504,6 +527,12 @@ public:
     }
 
     void forEachLiveComponent(ComponentIteratorFunc func) {
+        for (auto& item : mItems) {
+            if (item.live) func(item.live, item.handle, item.handle, item.data);
+        }
+    }
+
+    void forEachLiveComponent_const(ConstComponentIteratorFunc func) const {
         for (auto& item : mItems) {
             if (item.live) func(item.live, item.handle, item.handle, item.data);
         }

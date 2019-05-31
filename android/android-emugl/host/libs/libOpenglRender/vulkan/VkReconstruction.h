@@ -55,6 +55,14 @@ public:
     using HandleReconstructions =
         android::base::UnpackedComponentManager<32, 16, 16, HandleReconstruction>;
 
+    struct HandleModification {
+        std::vector<ApiHandle> apiRefs;
+        uint32_t order = 0;
+    };
+
+    using HandleModifications =
+        android::base::UnpackedComponentManager<32, 16, 16, HandleModification>;
+
     ApiHandle createApiInfo();
     void destroyApiInfo(ApiHandle h);
 
@@ -66,6 +74,7 @@ public:
 
     void addHandles(const uint64_t* toAdd, uint32_t count);
     void removeHandles(const uint64_t* toRemove, uint32_t count);
+
     void forEachHandleAddApi(const uint64_t* toProcess, uint32_t count, uint64_t apiHandle);
     void forEachHandleDeleteApi(const uint64_t* toProcess, uint32_t count);
 
@@ -73,11 +82,17 @@ public:
 
     void setCreatedHandlesForApi(uint64_t apiHandle, const uint64_t* created, uint32_t count);
 
+    void forEachHandleAddModifyApi(const uint64_t* toProcess, uint32_t count, uint64_t apiHandle);
+
+    void setModifiedHandlesForApi(uint64_t apiHandle, const uint64_t* modified, uint32_t count);
 private:
+
+    std::vector<uint64_t> getOrderedUniqueModifyApis() const;
 
     ApiTrace mApiTrace;
 
     HandleReconstructions mHandleReconstructions;
+    HandleModifications mHandleModifications;
 
     std::vector<uint8_t> mLoadedTrace;
 };
