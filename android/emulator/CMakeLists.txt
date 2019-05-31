@@ -32,8 +32,17 @@ add_dependencies(emulator
                  qemu-system-x86_64
                  qemu-system-armel
                  qemu-system-aarch64
-                 emulator-crash-service)
+                 emulator-crash-service
+                 )
 add_dependencies(emulator-headless qemu-system-x86_64-headless qemu-system-aarch64-headless emulator-crash-service)
+
+# We are using prebuilts in for swiftshader in mingw.
+if (WINDOWS_X86_64)
+  android_target_dependency(emulator all SWIFTSHADER_DEPENDENCIES)
+  android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
+else()
+  add_dependencies(emulator libGLES_CM libEGL libGLESv2)
+endif()
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
@@ -61,7 +70,6 @@ android_target_dependency(emulator all MESA_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_KEYMAP_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_BIOS_DEPENDENCIES)
-android_target_dependency(emulator all SWIFTSHADER_DEPENDENCIES)
 android_target_dependency(emulator all RUNTIME_OS_DEPENDENCIES)
 android_target_dependency(emulator all E2FSPROGS_DEPENDENCIES)
 android_target_dependency(emulator all CERT_DEPEPENDENCIES)
@@ -81,7 +89,6 @@ android_install_dependency(all MESA_DEPENDENCIES)
 android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
 android_install_dependency(all EMULATOR_BIOS_DEPENDENCIES)
-android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
 android_install_dependency(all RUNTIME_OS_DEPENDENCIES)
 android_install_dependency_force_exec(all E2FSPROGS_DEPENDENCIES)
 android_install_dependency(all CERT_DEPEPENDENCIES)
