@@ -1240,8 +1240,11 @@ extern "C" int main(int argc, char** argv) {
 
     if (opts->logcat) {
         dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
-        auto str = new std::ostream(std::cout.rdbuf());
-        android::emulation::LogcatPipe::registerStream(str);
+        // Output to std out if no file is provided.
+        if (!opts->logcat_output) {
+            auto str = new std::ostream(std::cout.rdbuf());
+            android::emulation::LogcatPipe::registerStream(str);
+        }
     }
 
     // Always setup a single serial port, that can be connected
