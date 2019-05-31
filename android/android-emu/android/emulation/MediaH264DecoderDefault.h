@@ -34,6 +34,10 @@ public:
     // This is the entry point
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
+    // For snapshots
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
 private:
     std::mutex mIdLock{};
     std::mutex mMapLock{};
