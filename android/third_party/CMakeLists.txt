@@ -46,6 +46,13 @@ add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
 
+if(NOT WINDOWS_X86_64)
+  add_subdirectory(swiftshader)
+else()
+  # We will use prebuilts on for mingw, as our compiler is too old to handle llvm.
+  PREBUILT(swiftshader)
+endif()
+
 # Old windows & linux version will use old breakpad version, until we track down
 # crash detection bugs under linux.
 if (WINDOWS_X86_64 OR LINUX_X86_64)
