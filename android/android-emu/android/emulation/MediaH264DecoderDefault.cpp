@@ -214,6 +214,15 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
     }
 }
 
+void MediaH264DecoderDefault::save(base::Stream* stream) const {
+    // NOT IMPLEMENTED
+}
+
+bool MediaH264DecoderDefault::load(base::Stream* stream) {
+    // NOT IMPLEMENTED
+    return true;
+}
+
 }  // namespace emulation
 }  // namespace android
 

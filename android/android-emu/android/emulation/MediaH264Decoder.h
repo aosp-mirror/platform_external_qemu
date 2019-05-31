@@ -41,6 +41,9 @@ public:
         NALUIgnored = -4, // Can happen if we receive picture data w/o the SPS/PPS NALUs.
     };
 
+    // For snapshots
+    virtual void save(base::Stream* stream) const = 0;
+    virtual bool load(base::Stream* stream) = 0;
 protected:
     MediaH264Decoder() = default;
 };

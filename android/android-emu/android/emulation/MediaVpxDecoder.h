@@ -36,6 +36,8 @@ public:
 public:
     // this is the entry point
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
 
 private:
     void initVpxContext(void *ptr, MediaCodecType type);
