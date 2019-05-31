@@ -2535,6 +2535,7 @@ int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, ui
 
 int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
     int width, height;
+
     {
         AutoLock mutex(m_lock);
         if (m_displays.find(displayId) == m_displays.end()) {
@@ -2564,6 +2565,7 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
                                                              height - h,
                                                              w, h, true);
     }
+
     // unlock before calling setUIDisplayRegion
     emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
