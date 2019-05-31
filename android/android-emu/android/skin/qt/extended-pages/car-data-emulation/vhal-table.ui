@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>VhalTable</class>
+  <widget class="QWidget" name="VhalTable">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>600</width>
+        <height>550</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>Form</string>
+    </property>
+    <widget class="QFrame" name="search_frame">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>10</y>
+          <width>280</width>
+          <height>35</height>
+        </rect>
+      </property>
+      <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>VhalTableSearchFrame</string>
+      </property>
+    </widget>
+
+    <widget class="QLineEdit" name="property_search">
+      <property name="geometry">
+        <rect>
+          <x>25</x>
+          <y>15</y>
+          <width>270</width>
+          <height>23</height>
+        </rect>
+      </property>
+      <property name="placeholderText">
+        <string>Search </string>
+      </property>
+    </widget>
+
+    <widget class="QListWidget" name="property_list">
+      <property name="geometry">
+        <rect>
+          <x>20</x>
+          <y>40</y>
+          <width>280</width>
+          <height>500</height>
+        </rect>
+      </property>
+      <property name="sortingEnabled">
+        <bool>false</bool>
+      </property>
+      <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+    </widget>
+
+    <widget class="QFrame" name="property_frame">
+      <property name="geometry">
+        <rect>
+          <x>299</x>
+          <y>10</y>
+          <width>280</width>
+          <height>530</height>
+        </rect>
+      </property>
+      <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>VhalTablePropertyFrame</string>
+      </property>
+    </widget>
+
+    <widget class="QLabel" name="title">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>20</y>
+          <width>200</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+      <property name="text">
+        <string>Property description</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="property_name">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>70</y>
+          <width>200</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+      </property>
+      <property name="text">
+        <string>Property name</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="property_name_value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>90</y>
+          <width>200</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="text">
+        <string>TextLabel</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="editable">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>140</y>
+          <width>59</width>
+          <height>15</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Editable?</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="editable_value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>160</y>
+          <width>160</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="text">
+        <string>TextLabel</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>210</y>
+          <width>59</width>
+          <height>15</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Value</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="value_value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>230</y>
+          <width>200</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="text">
+        <string>TextLabel</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="editButton">
+      <property name="geometry">
+        <rect>
+          <x>520</x>
+          <y>210</y>
+          <width>36</width>
+          <height>36</height>
+        </rect>
+      </property>
+      <property name="accessibleDescription">
+        <string>Edit</string>
+      </property>
+      <property name="text">
+        <string/>
+      </property>
+      <property name="icon">
+        <iconset resource="../resources.qrc">
+          <normaloff>:/dark/edit</normaloff>:/dark/edit</iconset>
+      </property>
+      <property name="iconSize">
+        <size>
+          <width>24</width>
+          <height>24</height>
+        </size>
+      </property>
+      <property name="flat">
+        <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+        <string>edit</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Button</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+        <bool>false</bool>
+      </property>
+      <property name="themeIconName_disabled" stdset="0">
+        <string>edit_disabled</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="area">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>280</y>
+          <width>59</width>
+          <height>15</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Area</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="area_value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>300</y>
+          <width>200</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+      <property name="text">
+        <string>TextLabel</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="property_id">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>350</y>
+          <width>111</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+      </property>
+      <property name="text">
+        <string>Property ID</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="property_id_value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>370</y>
+          <width>160</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+      <property name="text">
+        <string>propertyid_value</string>
+      </property>
+    </widget>
+
+    <zorder>search_frame</zorder>
+    <zorder>property_list</zorder>
+    <zorder>property_frame</zorder>
+    <zorder>property_search</zorder>
+    <zorder>title</zorder>
+    <zorder>property_name</zorder>
+    <zorder>property_name_value</zorder>
+    <zorder>editable</zorder>
+    <zorder>editable_value</zorder>
+    <zorder>value</zorder>
+    <zorder>value_value</zorder>
+    <zorder>editButton</zorder>
+    <zorder>area</zorder>
+    <zorder>area_value</zorder>
+    <zorder>property_id</zorder>
+    <zorder>property_id_value</zorder>
+
+
+  </widget>
+  <customwidgets>
+    <customwidget>
+      <class>RaisedMaterialButton</class>
+      <extends>QPushButton</extends>
+      <header>android/skin/qt/raised-material-button.h</header>
+    </customwidget>
+  </customwidgets>
+  <resources/>
+  <connections/>
+</ui>
+
