@@ -19,7 +19,7 @@
      <x>0</x>
      <y>10</y>
      <width>630</width>
-     <height>381</height>
+     <height>600</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -40,6 +40,12 @@
      <string>Car properties</string>
     </attribute>
    </widget>
+   <!-- Car Property Table Tab -->
+   <widget class="VhalTable" name="vhal_table">
+    <attribute name="title">
+     <string>Vhal properties</string>
+    </attribute>
+   </widget>
   </widget>
   <!-- Add more tabs here -->
  </widget>
@@ -53,6 +59,11 @@
    <class>CarPropertyTable</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/car-data-emulation/car-property-table.h</header>
+  </customwidget>
+  <customwidget>
+   <class>VhalTable</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/car-data-emulation/vhal-table.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
