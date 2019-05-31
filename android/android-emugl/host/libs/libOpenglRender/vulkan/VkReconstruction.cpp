@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#define DEBUG_RECONSTRUCTION 0
+#define DEBUG_RECONSTRUCTION 1
 
 #if DEBUG_RECONSTRUCTION
 
@@ -112,6 +112,34 @@ void VkReconstruction::save(android::base::Stream* stream) {
         topoOrder = next;
         ++topoLevel;
     }
+
+    std::vector<HandleModification> orderedModifies;
+
+    // Now add all handle modifications to the trace, ordered by the .order field.
+    mHandleModifications.forEachLiveComponent(
+        [this, &modifyApiHandles](bool live, uint64_t componentHandle, uint64_t entityHandle, HandleModification& mod) {
+        orderedModifies.push_back(mod);
+    });
+
+    std::sort(orderedModifies.begin(), orderedModifies.end(),
+        [](const HandleModification& lhs, const HandleModification& rhs) {
+        return lhs.order < rhs.order;
+    });
+
+    std::unordered_set<uint64_t> usedModifyApis;
+    std::vector<uint64_t> orderedUniqueModifyApis;
+
+    for (const auto& mod : orderedModifies) {
+        for (auto apiRef : mod.apiRefs) {
+            if (usedModifyApis.find(apiRef) == usedModifyApis.end()) {
+                orderedUniqueModifyApis.push_back(apiRef);
+                usedModifyApis.insert(apiRef);
+            }
+        }
+    }
+
+    uniqApiRefsToTopoOrder[topoLevel] = orderedUniqueModifyApis;
+    ++topoLevel;
 
     size_t totalApiTraceSize = 0; // 4 bytes to store size of created handles
 
@@ -352,7 +380,9 @@ void VkReconstruction::forEachHandleDeleteApi(const uint64_t* toProcess, uint32_
 
     for (uint32_t i = 0; i < count; ++i) {
 
-        auto item = mHandleReconstructions.get((uint64_t)(uintptr_t)toProcess[i]);
+        uint64_t toProcess64 = (uint64_t)(uintptr_t)toProcess[i];
+
+        auto item = mHandleReconstructions.get(toProcess64);
 
         if (!item) continue;
 
@@ -361,6 +391,12 @@ void VkReconstruction::forEachHandleDeleteApi(const uint64_t* toProcess, uint32_
         }
 
         item->apiRefs.clear();
+
+        auto modifyItem = mHandleModifications.get(toProcess64);
+
+        if (!modifyItem) continue;
+
+        modifyItem->apiRefs.clear();
     }
 }
 
@@ -385,5 +421,17 @@ void VkReconstruction::setCreatedHandlesForApi(uint64_t apiHandle, const uint64_
 
     for (uint32_t i = 0; i < count; ++i) {
         item->createdHandles.push_back(created[i]);
+    }
+}
+
+void VkReconstruction::forEachHandleAddModifyApi(const uint64_t* toProcess, uint32_t count, uint64_t apiHandle) {
+    if (!toProcess) return;
+
+    for (uint32_t i = 0; i < count; ++i) {
+        auto item = mHandleModifications.get((uint64_t)(uintptr_t)toProcess[i]);
+
+        if (!item) continue;
+
+        item->apiRefs.push_back(apiHandle);
     }
 }
