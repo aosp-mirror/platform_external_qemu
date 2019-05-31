@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>VhalItem</class>
+  <widget class="QWidget" name="VhalItem">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>250</width>
+        <height>56</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>Form</string>
+    </property>
+    <widget class="QLabel" name="name">
+      <property name="geometry">
+        <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>250</width>
+          <height>15</height>
+        </rect>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>ListItem</string>
+      </property>
+      <property name="text">
+        <string>TextLabel</string>
+      </property>
+    </widget>
+    <widget class="QLabel" name="proid">
+      <property name="geometry">
+        <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>250</width>
+          <height>15</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>TextLabel</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>ListSubitem</string>
+      </property>
+    </widget>
+  </widget>
+  <resources/>
+  <connections/>
+</ui>

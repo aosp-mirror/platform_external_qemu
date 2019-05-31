@@ -56,6 +56,14 @@
     background: %%SNAPSHOT_INFO_BKG%%;
     border: 1px solid %%TREE_WIDGET_BORDER%%;
 }
+/*VhalTableSearchFrame and VhalTablePropertyFrame are used in VhalTable, their boder color always same as LIST_WIDGET_BORDER*/
+*[ColorGroup="VhalTableSearchFrame"] {
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+}
+*[ColorGroup="VhalTablePropertyFrame"] {
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+    background: %%VHAL_PROPERTY_BKG%%;
+}
 *[ColorGroup="Countdown"] {
     color: #CA4644;
 }
