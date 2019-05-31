@@ -37,6 +37,7 @@ CarDataPage::CarDataPage(QWidget* parent)
         sendCarEmulatorMessageLogged(msg, log);
     };
     mUi->tab_sensor->setSendEmulatorMsgCallback(sendFunc);
+    mUi->vhal_table->setSendEmulatorMsgCallback(sendFunc);
     if (feature_is_enabled(kFeature_CarPropertyTable)) {
         mUi->car_property_table->setSendEmulatorMsgCallback(sendFunc);
     } else {
@@ -73,7 +74,11 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
         printMsg = "Received raw string: " + protoStr;
     }
     mUi->car_property_table->processMsg(emulatorMsg);
+<<<<<<< HEAD
     mUi->tab_sensor->processMsg(emulatorMsg);
+=======
+    mUi->vhal_table->processMsg(emulatorMsg);
+>>>>>>> 505eeaf45a... create new property table
     D(printMsg.c_str());
 }
 
