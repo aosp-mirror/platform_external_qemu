@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "daabe910_d39f787c",
+        "filename": "android/android-emu/android/emulation/address_space_device.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-31T01:46:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ca9a7542_719be2ef",
+      "range": {
+        "startLine": 239,
+        "startChar": 10,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6143e3bd_70c7ef6b",
         "filename": "android/android-emu/android/emulation/address_space_device.h",
         "patchSetId": 1
@@ -259,6 +283,30 @@
       "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a54836c3_b9d11d0e",
+        "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-31T01:46:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2384cb8b_7e03b231",
+      "range": {
+        "startLine": 109,
+        "startChar": 12,
+        "endLine": 109,
+        "endChar": 22
+      },
+      "revId": "8ecc95831d50aa40834ba5cbb465172a61793967",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
