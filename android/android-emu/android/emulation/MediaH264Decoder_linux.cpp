@@ -35,6 +35,9 @@ public:
     // This is the entry point
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
 private:
     virtual void initH264Context(unsigned int width,
                                  unsigned int height,
@@ -51,6 +54,14 @@ MediaH264DecoderImpl::~MediaH264DecoderImpl() {
 }
 
 void MediaH264DecoderImpl::handlePing(MediaCodecType type, MediaOperation op, void* ptr) {
+    H264_DPRINT("NOT IMPLEMENTED");
+}
+
+void MediaH264DecoderImpl::save(base::Stream* stream) const {
+    H264_DPRINT("NOT IMPLEMENTED");
+}
+
+bool MediaH264DecoderImpl::load(base::Stream* stream) {
     H264_DPRINT("NOT IMPLEMENTED");
 }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/files/Stream.h"
 #include "android/emulation/GoldfishMediaDefs.h"
 
 namespace android {
@@ -25,6 +26,10 @@ public:
 
     // Handler called from the guest media device.
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) = 0;
+
+    // For snapshots
+    virtual void save(base::Stream* stream) const = 0;
+    virtual bool load(base::Stream* stream) = 0;
 };
 
 }  // namespace emulation

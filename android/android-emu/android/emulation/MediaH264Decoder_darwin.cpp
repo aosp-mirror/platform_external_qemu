@@ -29,7 +29,7 @@
 #define kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder CFSTR("RequireHardwareAcceleratedVideoDecoder")
 #endif
 
-#define MEDIA_H264_DEBUG 1
+#define MEDIA_H264_DEBUG 0
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt,...) fprintf(stderr, "h264-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -51,6 +51,8 @@ public:
     // This is the entry point
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
 private:
     // Passes the Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) to the
     // videotoolbox decoder
@@ -318,6 +320,15 @@ void MediaH264DecoderImpl::handlePing(MediaCodecType type, MediaOperation op, vo
             H264_DPRINT("Unknown command %u\n", (unsigned int)op);
             break;
     }
+}
+
+void MediaH264DecoderImpl::save(base::Stream* stream) const {
+    // NOT IMPLEMENTED
+}
+
+bool MediaH264DecoderImpl::load(base::Stream* stream) {
+    // NOT IMPLEMENTED
+    return false;
 }
 
 void MediaH264DecoderImpl::initH264Context(unsigned int width,
