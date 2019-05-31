@@ -45,6 +45,7 @@ add_subdirectory(libkeymaster3)
 add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
+add_subdirectory(swiftshader)
 
 # Old windows & linux version will use old breakpad version, until we track down
 # crash detection bugs under linux.
