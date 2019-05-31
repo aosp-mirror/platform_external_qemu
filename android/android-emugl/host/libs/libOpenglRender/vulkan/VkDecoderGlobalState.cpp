@@ -1925,7 +1925,8 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
              PAGE_BITS) << PAGE_BITS;
 
-        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+        printf("%s: map: %p %p -> [0x%llx 0x%llx]\n", __func__,
+                info->ptr,
                 info->pageAlignedHva,
                 (unsigned long long)info->guestPhysAddr,
                 (unsigned long long)info->guestPhysAddr + info->sizeToPage);
@@ -2118,6 +2119,10 @@ public:
         if (mapResult != VK_SUCCESS) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+        
+        fprintf(stderr, "%s: mapped a new host visible memory. range: [%p %p]\n", __func__,
+                mapInfo.ptr, ((uint8_t*)mapInfo.ptr) + mapInfo.size);
+
 
         *pMemory = new_boxed_non_dispatchable_VkDeviceMemory(*pMemory);
 
