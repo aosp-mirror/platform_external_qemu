@@ -26,6 +26,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/clipboard_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -1086,6 +1087,18 @@ void ToolWindow::notifySwitchOnTop() {
 
 void ToolWindow::touchExtendedWindow() {
     mExtendedWindow.get();
+}
+
+void ToolWindow::hideRotationButton(bool hide) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO ||
+        android_hw->hw_arc) {
+        // already hide, do not bother its settings
+        return;
+    } else {
+        mToolsUi->prev_layout_button->setHidden(hide);
+        mToolsUi->next_layout_button->setHidden(hide);
+    }
 }
 
 //static

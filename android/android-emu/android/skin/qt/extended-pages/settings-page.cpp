@@ -286,6 +286,39 @@ SettingsPage::SettingsPage(QWidget* parent)
         settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
     mUi->set_disableMouseWheel->setChecked(disableMouseWheel);
     on_set_disableMouseWheel_toggled(disableMouseWheel);
+
+    connect(mUi->set_multiDisplayPickBox, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(onMultiDisplayIdChanged(int)));
+    if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+        mUi->set_multiDisplayWidth->setMinValue(0);
+        mUi->set_multiDisplayWidth->setMaxValue(9999);
+        mUi->set_multiDisplayHeight->setMinValue(0);
+        mUi->set_multiDisplayHeight->setMaxValue(9999);
+        mUi->set_multiDisplayDpi->setMinValue(0);
+        mUi->set_multiDisplayDpi->setMaxValue(999);
+        mUi->set_multiDisplayEnabled->setChecked(false);
+        mUi->set_multiDisplayPickBox->addItem("Display 1", 1);
+        mUi->set_multiDisplayPickBox->addItem("Display 2", 2);
+        mUi->set_multiDisplayPickBox->addItem("Display 3", 3);
+        mUi->set_multiDisplayPickBox->addItem("Display 4", 4);
+        mUi->set_multiDisplayPickBox->addItem("Display 5", 5);
+        mUi->set_multiDisplayPickBox->addItem("Display 6", 6);
+        mUi->set_multiDisplayPickBox->addItem("Display 7", 7);
+        mUi->set_multiDisplayPickBox->addItem("Display 8", 8);
+        mUi->set_multiDisplayPickBox->addItem("Display 9", 9);
+        mUi->set_multiDisplayPickBox->addItem("Display 10", 10);
+    } else {
+        mUi->set_multiDisplayTitle->hide();
+        mUi->set_multiDisplayPickBox->hide();
+        mUi->set_multiDisplayWidthTitle->hide();
+        mUi->set_multiDisplayWidth->hide();
+        mUi->set_multiDisplayHeightTitle->hide();
+        mUi->set_multiDisplayHeight->hide();
+        mUi->set_multiDisplayDpiTitle->hide();
+        mUi->set_multiDisplayDpi->hide();
+        mUi->set_multiDisplayEnabled->hide();
+        mUi->set_multiDisplay->hide();
+    }
 }
 
 SettingsPage::~SettingsPage() {
@@ -643,4 +676,40 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::on_set_multiDisplay_clicked() {
+    bool enabled = mUi->set_multiDisplayEnabled->isChecked();
+    uint32_t width = mUi->set_multiDisplayWidth->value();
+    uint32_t height = mUi->set_multiDisplayHeight->value();
+    uint32_t dpi = mUi->set_multiDisplayDpi->value();
+    uint32_t x, y, w, h, d, f;
+    bool e;
+    EmulatorQtWindow::getInstance()->getMultiDisplay(mCurrentDisplay, &x, &y, &w, &h,
+                                                     &d, &f, &e);
+    if (w == width && h == height && d == dpi && e == enabled) {
+        return;
+    }
+    if (enabled) {
+        mUi->set_frameAlways->hide();
+        mUi->set_frameAlwaysTitle->hide();
+    }
+    emit enableMultiDisplayChanged(enabled, mCurrentDisplay, width, height, dpi);
+}
+
+void SettingsPage::onMultiDisplayIdChanged(int id) {
+    if (mCurrentDisplay == id + 1) {
+        // id 0 reserved for the main android display
+        return;
+    }
+    mCurrentDisplay = id + 1;
+
+    uint32_t x, y, w, h, dpi, flag;
+    bool enabled;
+    EmulatorQtWindow::getInstance()->getMultiDisplay(mCurrentDisplay, &x, &y, &w, &h,
+                                                     &dpi, &flag, &enabled);
+    mUi->set_multiDisplayWidth->setValue(w);
+    mUi->set_multiDisplayHeight->setValue(h);
+    mUi->set_multiDisplayDpi->setValue(dpi);
+    mUi->set_multiDisplayEnabled->setChecked(enabled);
 }

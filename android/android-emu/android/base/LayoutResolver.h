@@ -13,18 +13,15 @@
 // limitations under the License.
 
 #pragma once
+#include <unordered_map>
+#include <utility>
 
-#include "android/utils/compiler.h"
+namespace android {
+namespace base {
 
-ANDROID_BEGIN_HEADER
+std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rect,
+        const double monitorAspectRatio);
 
-/* Maximum number of virtio input devices*/
-#define VIRTIO_INPUT_MAX_NUM 11
-
-extern int android_virtio_input_send(int type, int code, int value);
-extern void android_virtio_kbd_mouse_event(int dx,
-                                           int dy,
-                                           int dz,
-                                           int buttonsState,
-                                           int displayId);
-ANDROID_END_HEADER
+}  // namespace base
+}  // namespace android

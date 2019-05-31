@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <stdint.h>
 #include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
@@ -64,9 +65,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     // Set the UI display region
     void (*setUIDisplayRegion)(int, int, int, int);
     // Inform UI creation/modification/deletion of multi-display window
-    void (*setMultiDisplay)(int, int, int, int, int, bool);
-    bool (*getMultiDisplay)(int, int*, int*, int*, int*);
-
+    void (*setMultiDisplay)(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, bool);
+    bool (*getMultiDisplay)(uint32_t, uint32_t*, uint32_t*, uint32_t*, uint32_t*);
+    void (*getMonitorRect)(uint32_t*, uint32_t*);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp

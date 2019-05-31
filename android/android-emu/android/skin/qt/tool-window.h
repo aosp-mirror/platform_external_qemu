@@ -115,6 +115,7 @@ public:
         handleUICommand(cmd, true);
         handleUICommand(cmd, false);
     }
+    void hideRotationButton(bool hide);
 
 signals:
     void guestClipboardChanged(QString text);

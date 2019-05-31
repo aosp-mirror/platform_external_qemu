@@ -152,5 +152,5 @@ extern SkinFile* skin_file_create_from_aconfig(
         const AConfig* aconfig,
         const char* basepath,
         const SkinFramebufferFuncs* fb_funcs);
-
+extern SkinFile* skin_file_create_from_display_v1(const SkinDisplay* display);
 extern void       skin_file_free( SkinFile*  file );

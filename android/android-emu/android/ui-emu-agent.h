@@ -30,5 +30,6 @@ typedef struct UiEmuAgent {
     const struct QAndroidUserEventAgent* userEvents;
     const struct QAndroidVirtualSceneAgent* virtualScene;
     const struct QCarDataAgent* car;
+    const struct QAndroidMultiDisplayAgent* multiDisplay;
     const struct SettingsAgent* settings;
 } UiEmuAgent;

@@ -27,6 +27,7 @@
 #include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
+#include "android/base/LayoutResolver.h"
 #include "android/base/CpuUsage.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
@@ -43,7 +44,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_NUM_MULTI_DISPLAY 10
+#define MAX_NUM_MULTI_DISPLAY 11
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -647,7 +648,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
-      m_perfStats(!android::base::System::get()->envGet("SHOW_PERF_STATS").empty()),
+      m_perfStats(
+              !android::base::System::get()->envGet("SHOW_PERF_STATS").empty()),
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
@@ -656,7 +658,13 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       }),
       m_postThread([this](FrameBuffer::Post&& post) {
           return postWorkerFunc(post);
-      }) {}
+      }) {
+    m_displays.emplace(0, DisplayInfo(0, 0, 0, m_framebufferWidth, m_framebufferHeight));
+    uint32_t w, h;
+    emugl::get_emugl_window_operations().getMonitorRect(&w, &h);
+    emugl::get_emugl_window_operations().setMultiDisplay(0, 0, 0, getWidth(), getHeight(), true);
+    m_monitorAspectRatio = (double) h / (double) w;
+}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -2374,7 +2382,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedColorBuffers);
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
-
+    m_displays.clear();
     loadCollection(stream, &m_displays,
                    [this](Stream* stream) -> std::unordered_map<uint32_t, DisplayInfo>::value_type {
         const uint32_t idx = stream->getBe32();
@@ -2383,7 +2391,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         const uint32_t pos_y = stream->getBe32();
         const uint32_t width = stream->getBe32();
         const uint32_t height = stream->getBe32();
-        return { idx, { cb, pos_x, pos_y, width, height } };
+        return {idx, {cb, pos_x, pos_y, width, height}};
     });
 
     if (s_egl.eglPostLoadAllImages) {
@@ -2411,25 +2419,16 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     }
 
-    // Restore multi display state
-    int combinedDisplayWidth = 0;
-    int combinedDisplayHeight = 0;
-
-    if (m_displays.size() == 0) {
-        return true;
-    } else {
-        getCombinedDisplaySize(
-            &combinedDisplayWidth, &combinedDisplayHeight, true);
-        emugl::get_emugl_window_operations().setMultiDisplay(
-            0,
-            0, combinedDisplayHeight - getHeight(),
-            getWidth(), getHeight(), true);
-
-        for (auto iter : m_displays) {
+    if (m_displays.size() != 1 || m_displays.find(0) == m_displays.end()) {
+        // Restore multi display state
+        int combinedDisplayWidth = 0;
+        int combinedDisplayHeight = 0;
+        getCombinedDisplaySize(&combinedDisplayWidth, &combinedDisplayHeight);
+        for (const auto& iter : m_displays) {
             emugl::get_emugl_window_operations().setMultiDisplay(
                 iter.first,
                 iter.second.pos_x,
-                combinedDisplayHeight - iter.second.height,
+                combinedDisplayHeight - iter.second.pos_y - iter.second.height,
                 iter.second.width,
                 iter.second.height, true);
         }
@@ -2499,7 +2498,13 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
             __FUNCTION__, MAX_NUM_MULTI_DISPLAY);
         return -1;
     }
-    *displayId = s_nextDisplayId++;
+    if (m_displays.find(*displayId) != m_displays.end()) {
+        return 0;
+    }
+
+    if (*displayId == 0) {
+        *displayId = s_nextDisplayId++;
+    }
     m_displays.emplace(*displayId, DisplayInfo());
     DBG("create display %d\n", *displayId);
     return 0;
@@ -2509,19 +2514,21 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
     int width, height;
     {
         AutoLock mutex(m_lock);
-        m_displays.erase(displayId);
-        // shift the displays
-        uint32_t x = 0;
-        for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
-            if (iter->first > displayId) {
-                iter->second.pos_x = x;
-            }
-            x += iter->second.width;
+        if (m_displays.find(displayId) == m_displays.end()) {
+            return 0;
         }
-        getCombinedDisplaySize(&width, &height, true);
+        m_displays.erase(displayId);
+        emugl::get_emugl_window_operations().setMultiDisplay(displayId, 0, 0, 0,
+                                                             0, false);
+        resolveLayout();
+        getCombinedDisplaySize(&width, &height);
     }
     // unlock before calling setUIDisplayRegion
     emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+    Post postCmd;
+    postCmd.cmd = PostCmd::Clear;
+    sendPostWorkerCmd(postCmd);
+
     return 0;
 }
 
@@ -2581,29 +2588,15 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
         if (m_displays.find(displayId) == m_displays.end()) {
             return -1;
         }
+        m_displays[displayId].width = w;
+        m_displays[displayId].height = h;
         if (x == 0 && y ==0) {
-            // ignore x/y, replace display. Assume displays in a row
-            int32_t pos_x, pos_y;
-            getCombinedDisplaySize(&pos_x, &pos_y, true);
-            m_displays[displayId].pos_x = pos_x;
-            m_displays[displayId].pos_y = 0;
-            m_displays[displayId].width = w;
-            m_displays[displayId].height = h;
+            resolveLayout();
         } else {
             m_displays[displayId].pos_x = x;
             m_displays[displayId].pos_y = y;
-            m_displays[displayId].width = w;
-            m_displays[displayId].height = h;
         }
-        getCombinedDisplaySize(&width, &height, true);
-        // (0, 0) at left-top for QT window, at left-bottom for FrameBuffer.
-        emugl::get_emugl_window_operations().setMultiDisplay(0, 0, height - getHeight(),
-                                                             getWidth(), getHeight(),
-                                                              true);
-        emugl::get_emugl_window_operations().setMultiDisplay(displayId,
-                                                             m_displays[displayId].pos_x,
-                                                             height - h,
-                                                             w, h, true);
+        getCombinedDisplaySize(&width, &height);
     }
 
     // unlock before calling setUIDisplayRegion
@@ -2611,16 +2604,61 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
     return 0;
 }
 
-void FrameBuffer::getCombinedDisplaySize(int* w, int* h, bool androidWindow) {
-    // Simple version, displays in a row
-    int max_h = androidWindow ? getHeight() : 0;
-    int total_w = androidWindow ? getWidth() : 0;
-    for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
-        if (iter->second.height > max_h) {
-            max_h = iter->second.height;
-        }
-        total_w += iter->second.width;
+/*
+ * Given that there are at most 11 displays, we can iterate through all possible
+ * ways of showing each display in either the first row or the second row. It is
+ * also possible to have an empty row. The best combination is to satisfy the
+ * following two criteria: 1, The combined rectangle which contains all the
+ * displays should have an aspect ratio that is close to the monitor's aspect
+ * ratio. 2, The width of the first row should be close to the width of the
+ * second row.
+ *
+ * Important detail of implementations: the x and y offsets saved in
+ * m_displays use the bottom-left corner as origin. This coordinates will
+ * be used by glviewport() in Postworker.cpp. However, the x and y offsets saved
+ * by invoking setMultiDisplay() will be using top-left corner as origin. Thus,
+ * input coordinates willl be calculated correctly when mouse events are
+ * captured by QT window.
+ */
+void FrameBuffer::resolveLayout() {
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
+    for (const auto& iter : m_displays) {
+        rectangles[iter.first] =
+                std::make_pair(iter.second.width, iter.second.height);
     }
-    *w = total_w;
-    *h = max_h;
+    for (const auto& iter :
+         android::base::resolveLayout(rectangles, m_monitorAspectRatio)) {
+        m_displays[iter.first].pos_x = iter.second.first;
+        m_displays[iter.first].pos_y = iter.second.second;
+    }
+    int totalHeight = 0;
+    getCombinedDisplaySize(nullptr, &totalHeight);
+
+    // QT window uses the top left corner as the origin.
+    // So we need to transform the (x, y) coordinates from
+    // bottom left corner to top left corner.
+
+    for (const auto& iter : m_displays) {
+        uint32_t displayId = iter.first;
+        emugl::get_emugl_window_operations().setMultiDisplay(
+                displayId, m_displays[displayId].pos_x,
+                totalHeight - m_displays[displayId].height -
+                        m_displays[displayId].pos_y,
+                m_displays[displayId].width, m_displays[displayId].height,
+                true);
+    }
+
+}
+
+void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
+    uint32_t total_h = 0;
+    uint32_t total_w = 0;
+    for (const auto& iter : m_displays) {
+        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+    }
+    if (h)
+        *h = (int)total_h;
+    if (w)
+        *w = (int)total_w;
 }
