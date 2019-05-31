@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f3b4ba1_280fb3fb",
+        "filename": "android/android-emu/android/emulation/address_space_host_memory_allocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-31T00:28:10Z",
+      "side": 1,
+      "message": "I removed this thing by accident.",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 30
+      },
+      "revId": "ef92584e69a375a3a210256862eaff1b6ec7c33d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
