@@ -47,6 +47,7 @@ class VkDecoder {
 public:
     VkDecoder();
     ~VkDecoder();
+    void setForSnapshotLoad(bool forSnapshotLoad);
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 private:
     class Impl;

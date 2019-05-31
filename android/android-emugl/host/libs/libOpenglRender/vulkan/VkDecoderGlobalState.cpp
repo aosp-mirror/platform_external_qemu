@@ -31,6 +31,7 @@
 #include "android/base/containers/EntityManager.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "common/goldfish_vk_deepcopy.h"
@@ -44,6 +45,14 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::Optional;
+
+#define VKDGS_DEBUG 0
+
+#if VKDGS_DEBUG
+#define VKDGS_LOG(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define VKDGS_LOG(fmt,...)
+#endif
 
 namespace goldfish_vk {
 
@@ -70,22 +79,63 @@ public:
         m_emu(getGlobalVkEmulation()) { }
     ~Impl() = default;
 
-    size_t setCreatedHandlesForSnapshotLoad(const unsigned char* buffer) {
-        fprintf(stderr, "%s: %p\n", __func__, this);
+    // Resets all internal tracking info.
+    // Assumes that the heavyweight cleanup operations
+    // have already happened.
+    void clear() {
+        mInstanceInfo.clear();
+        mPhysdevInfo.clear();
+        mDeviceInfo.clear();
+        mImageInfo.clear();
+        mImageViewInfo.clear();
+        mSamplerInfo.clear();
+        mCmdBufferInfo.clear();
+        mCmdPoolInfo.clear();
 
+        mDeviceToPhysicalDevice.clear();
+        mPhysicalDeviceToInstance.clear();
+        mQueueInfo.clear();
+        mBufferInfo.clear();
+        mMapInfo.clear();
+        mSemaphoreInfo.clear();
+#ifdef _WIN32
+        mSemaphoreId = 1;
+        mExternalSemaphoresById.clear();
+#endif
+        mDescriptorUpdateTemplateInfo.clear();
+
+        mCreatedHandlesForSnapshotLoad.clear();
+        mCreatedHandlesForSnapshotLoadIndex = 0;
+
+        mGlobalHandleStore.clear();
+    }
+
+    void save(android::base::Stream* stream) {
+        snapshot()->save(stream);
+    }
+
+    void load(android::base::Stream* stream) {
+        // assume that we already destroyed all instances
+        // from FrameBuffer's onLoad method.
+
+        // destroy all current internal data structures
+        clear();
+
+        // this part will replay in the decoder
+        snapshot()->load(stream);
+    }
+
+    size_t setCreatedHandlesForSnapshotLoad(const unsigned char* buffer) {
         size_t consumed = 0;
 
         if (!buffer) return consumed;
 
         uint32_t bufferSize = *(uint32_t*)buffer;
 
-        fprintf(stderr, "%s: bufferSize: %u\n", __func__, bufferSize);
-
         consumed += 4;
 
         uint32_t handleCount = bufferSize / 8;
-
-        fprintf(stderr, "%s: handleCount: %u\n", __func__, handleCount);
+        VKDGS_LOG("incoming handle count: %u", handleCount);
 
         uint64_t* handles = (uint64_t*)(buffer + 4);
 
@@ -93,7 +143,7 @@ public:
         mCreatedHandlesForSnapshotLoadIndex = 0;
 
         for (uint32_t i = 0; i < handleCount; ++i) {
-            fprintf(stderr, "%s: handle: %p\n", __func__, handles[i]);
+            VKDGS_LOG("handle to load: 0x%llx", (unsigned long long)(uintptr_t)handles[i]);
             mCreatedHandlesForSnapshotLoad.push_back(handles[i]);
             consumed += 8;
         }
@@ -2546,7 +2596,8 @@ public:
                 if (cmdPoolInfoIt != mCmdPoolInfo.end()) {
                     cmdPoolInfoIt->second.cmdBuffers.erase(pCommandBuffers[i]);
                 }
-                delete_boxed_VkCommandBuffer(cmdBufferInfoIt->second.boxed);
+                // Done in decoder
+                // delete_boxed_VkCommandBuffer(cmdBufferInfoIt->second.boxed);
                 mCmdBufferInfo.erase(cmdBufferInfoIt);
             }
         }
@@ -3963,53 +4014,58 @@ private:
     };
 
     template <class T>
-        class BoxedHandleManager {
-            public:
-                using Store = android::base::EntityManager<32, 16, 16, T>;
+    class BoxedHandleManager {
+    public:
+        using Store = android::base::EntityManager<32, 16, 16, T>;
 
-                Lock lock;
-                Store store;
-                std::unordered_map<uint64_t, uint64_t> reverseMap;
+        Lock lock;
+        Store store;
+        std::unordered_map<uint64_t, uint64_t> reverseMap;
 
-                uint64_t add(const T& item, BoxedHandleTypeTag tag) {
-                    AutoLock l(lock);
-                    auto res = (uint64_t)store.add(item, (size_t)tag);
-                    reverseMap[(uint64_t)(item.underlying)] = res;
-                    return res;
-                }
+        void clear() {
+            reverseMap.clear();
+            store.clear();
+        }
 
-                uint64_t addFixed(uint64_t handle, const T& item, BoxedHandleTypeTag tag) {
-                    AutoLock l(lock);
-                    auto res = (uint64_t)store.addFixed(handle, item, (size_t)tag);
-                    reverseMap[(uint64_t)(item.underlying)] = res;
-                    return res;
-                }
+        uint64_t add(const T& item, BoxedHandleTypeTag tag) {
+            AutoLock l(lock);
+            auto res = (uint64_t)store.add(item, (size_t)tag);
+            reverseMap[(uint64_t)(item.underlying)] = res;
+            return res;
+        }
 
-                void remove(uint64_t h) {
-                    AutoLock l(lock);
-                    auto item = getLocked(h);
-                    if (item) {
-                        reverseMap.erase((uint64_t)(item->underlying));
-                    }
-                    store.remove(h);
-                }
+        uint64_t addFixed(uint64_t handle, const T& item, BoxedHandleTypeTag tag) {
+            AutoLock l(lock);
+            auto res = (uint64_t)store.addFixed(handle, item, (size_t)tag);
+            reverseMap[(uint64_t)(item.underlying)] = res;
+            return res;
+        }
 
-                T* getLocked(uint64_t h) {
-                    return store.get(h);
-                }
+        void remove(uint64_t h) {
+            AutoLock l(lock);
+            auto item = getLocked(h);
+            if (item) {
+                reverseMap.erase((uint64_t)(item->underlying));
+            }
+            store.remove(h);
+        }
 
-                uint64_t getBoxedFromUnboxedLocked(uint64_t unboxed) {
-                    auto res = android::base::find(reverseMap, unboxed);
-                    if (!res) return 0;
-                    return *res;
-                }
-        };
+        T* getLocked(uint64_t h) {
+            return store.get(h);
+        }
+
+        uint64_t getBoxedFromUnboxedLocked(uint64_t unboxed) {
+            auto res = android::base::find(reverseMap, unboxed);
+            if (!res) return 0;
+            return *res;
+        }
+    };
 
     template <class T>
-        class NonDispatchableHandleInfo {
-            public:
-                T underlying;
-        };
+    class NonDispatchableHandleInfo {
+    public:
+        T underlying;
+    };
 
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
@@ -4061,15 +4117,24 @@ private:
 VkDecoderGlobalState::VkDecoderGlobalState()
     : mImpl(new VkDecoderGlobalState::Impl()) {}
 
-    VkDecoderGlobalState::~VkDecoderGlobalState() = default;
+VkDecoderGlobalState::~VkDecoderGlobalState() = default;
 
-    static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
-    LAZY_INSTANCE_INIT;
+static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
+        LAZY_INSTANCE_INIT;
 
-    // static
-    VkDecoderGlobalState* VkDecoderGlobalState::get() {
-        return sGlobalDecoderState.ptr();
-    }
+// static
+VkDecoderGlobalState* VkDecoderGlobalState::get() {
+    return sGlobalDecoderState.ptr();
+}
+
+// Snapshots
+void VkDecoderGlobalState::save(android::base::Stream* stream) {
+    mImpl->save(stream);
+}
+
+void VkDecoderGlobalState::load(android::base::Stream* stream) {
+    mImpl->load(stream);
+}
 
 size_t VkDecoderGlobalState::setCreatedHandlesForSnapshotLoad(const unsigned char* buffer) {
     return mImpl->setCreatedHandlesForSnapshotLoad(buffer);
@@ -4912,5 +4977,63 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
 GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
+
+void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::setup(android::base::Pool* pool, uint64_t** bufPtr) {
+    mPool = pool;
+    mPreserveBufPtr = bufPtr;
+}
+
+void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::allocPreserve(size_t count) {
+    *mPreserveBufPtr = (uint64_t*)mPool->alloc(count * sizeof(uint64_t));
+}
+
+#define BOXED_DISPATCHABLE_HANDLE_UNWRAP_AND_DELETE_PRESERVE_BOXED_IMPL(type_name) \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name(type_name* handles, size_t count) { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            (*mPreserveBufPtr)[i] = (uint64_t)(handles[i]); \
+            if (handles[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_##type_name(handles[i]); } else { handles[i] = nullptr; } ; \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name##_u64(const type_name* handles, uint64_t* handle_u64s, size_t count) { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            (*mPreserveBufPtr)[i] = (uint64_t)(handle_u64s[i]); \
+            if (handles[i]) { handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unbox_##type_name(handles[i]); } else { handle_u64s[i] = 0; } \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_u64_##type_name(const uint64_t* handle_u64s, type_name* handles, size_t count) { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            (*mPreserveBufPtr)[i] = (uint64_t)(handle_u64s[i]); \
+            if (handle_u64s[i]) { handles[i] = VkDecoderGlobalState::get()->unbox_##type_name((type_name)(uintptr_t)handle_u64s[i]); } else { handles[i] = nullptr; } \
+        } \
+    } \
+
+#define BOXED_NON_DISPATCHABLE_HANDLE_UNWRAP_AND_DELETE_PRESERVE_BOXED_IMPL(type_name) \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name(type_name* handles, size_t count) { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            (*mPreserveBufPtr)[i] = (uint64_t)(handles[i]); \
+            if (handles[i]) { auto boxed = handles[i]; handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); delete_boxed_non_dispatchable_##type_name(boxed); } else { handles[i] = nullptr; }; \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_##type_name##_u64(const type_name* handles, uint64_t* handle_u64s, size_t count) { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            (*mPreserveBufPtr)[i] = (uint64_t)(handle_u64s[i]); \
+            if (handles[i]) { auto boxed = handles[i]; handle_u64s[i] = (uint64_t)VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name(handles[i]); delete_boxed_non_dispatchable_##type_name(boxed); } else { handle_u64s[i] = 0; } \
+        } \
+    } \
+    void BoxedHandleUnwrapAndDeletePreserveBoxedMapping::mapHandles_u64_##type_name(const uint64_t* handle_u64s, type_name* handles, size_t count) { \
+        allocPreserve(count); \
+        for (size_t i = 0; i < count; ++i) { \
+            (*mPreserveBufPtr)[i] = (uint64_t)(handle_u64s[i]); \
+            if (handle_u64s[i]) { auto boxed = (type_name)(uintptr_t)handle_u64s[i]; handles[i] = VkDecoderGlobalState::get()->unbox_non_dispatchable_##type_name((type_name)(uintptr_t)handle_u64s[i]); delete_boxed_non_dispatchable_##type_name(boxed); } else { handles[i] = nullptr; } \
+        } \
+    } \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(BOXED_DISPATCHABLE_HANDLE_UNWRAP_AND_DELETE_PRESERVE_BOXED_IMPL)
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(BOXED_NON_DISPATCHABLE_HANDLE_UNWRAP_AND_DELETE_PRESERVE_BOXED_IMPL)
 
 }  // namespace goldfish_vk

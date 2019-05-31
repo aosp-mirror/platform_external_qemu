@@ -32,11 +32,12 @@ set(OpenglRender_vulkan_src
     vulkan/VkDecoder.cpp
     vulkan/VkDecoderGlobalState.cpp
     vulkan/VkDecoderSnapshot.cpp
+    vulkan/VkReconstruction.cpp
     vulkan/VulkanDispatch.cpp
     vulkan/VulkanHandleMapping.cpp
     vulkan/VulkanStream.cpp)
 android_add_library(OpenglRender_vulkan)
-target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common PRIVATE emugl_base OpenglRender_vulkan_cereal OpenglRender_vulkan_cereal_proto GLcommon)
+target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal PRIVATE emugl_base GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden)
 target_include_directories(
@@ -205,7 +206,7 @@ set(OpenglRender_vulkan_unittests_src
     vulkan/VulkanStream_unittest.cpp
     vulkan/VulkanProtobuf_unittest.cpp)
 android_add_test(OpenglRender_vulkan_unittests)
-target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base OpenglRender_vulkan_cereal_proto)
+target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_unittests
                               PUBLIC
                               OpenglRender_standalone_common
