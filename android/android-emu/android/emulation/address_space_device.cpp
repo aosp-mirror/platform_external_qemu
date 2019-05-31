@@ -19,6 +19,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <map>
 #include <unordered_map>
 #include <memory>
 
@@ -47,7 +48,7 @@ public:
     ~AddressSpaceDeviceState() = default;
 
     uint32_t genHandle() {
-        AutoLock lock(mLock);
+        AutoLock lock(mContextsLock);
 
         auto res = mHandleIndex;
 
@@ -64,12 +65,12 @@ public:
 
     void destroyHandle(uint32_t handle) {
         AS_DEVICE_DPRINT("erase handle: %u", handle);
-        AutoLock lock(mLock);
+        AutoLock lock(mContextsLock);
         mContexts.erase(handle);
     }
 
     void tellPingInfo(uint32_t handle, uint64_t gpa) {
-        AutoLock lock(mLock);
+        AutoLock lock(mContextsLock);
         auto& contextDesc = mContexts[handle];
         contextDesc.pingInfo =
             (AddressSpaceDevicePingInfo*)
@@ -80,7 +81,7 @@ public:
     }
 
     void ping(uint32_t handle) {
-        AutoLock lock(mLock);
+        AutoLock lock(mContextsLock);
         auto& contextDesc = mContexts[handle];
         AddressSpaceDevicePingInfo* pingInfo = contextDesc.pingInfo;
 
@@ -164,7 +165,7 @@ public:
         }
 
         {
-           AutoLock lock(mLock);
+           AutoLock lock(mContextsLock);
            mHandleIndex = handleIndex;
            mContexts = std::move(contexts);
         }
@@ -172,8 +173,23 @@ public:
         return true;
     }
 
+    bool addMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
+        AutoLock lock(mMemoryMappingsLock);
+        return addMemoryMappingLocked(gpa, ptr, size);
+    }
+
+    bool removeMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
+        AutoLock lock(mMemoryMappingsLock);
+        return removeMemoryMappingLocked(gpa, ptr, size);
+    }
+
+    void *getHostPtr(uint64_t gpa) const {
+        AutoLock lock(mMemoryMappingsLock);
+        return getHostPtrLocked(gpa);
+    }
+
 private:
-    Lock mLock;
+    mutable Lock mContextsLock;
     uint32_t mHandleIndex = 1;
     typedef std::unordered_map<uint32_t, AddressSpaceContextDescription> Contexts;
     Contexts mContexts;
@@ -194,12 +210,54 @@ private:
         case AddressSpaceDeviceType::GenericPipe:
             return nullptr;
         case AddressSpaceDeviceType::HostMemoryAllocator:
-            return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext);
+            return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext(
+                get_address_space_device_control_ops()));
 
         default:
             return nullptr;
         }
     }
+
+    bool addMemoryMappingLocked(uint64_t gpa, void *ptr, uint64_t size) {
+        if (mMemoryMappings.insert({gpa, {ptr, size}}).second) {
+            sVmOps->mapUserBackedRam(gpa, ptr, size);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool removeMemoryMappingLocked(uint64_t gpa, void *ptr, uint64_t size) {
+        if (mMemoryMappings.erase(gpa) > 0) {
+            sVmOps->unmapUserBackedRam(gpa, size);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void *getHostPtrLocked(uint64_t gpa) const {
+        auto i = mMemoryMappings.lower_bound(gpa);
+        if (i == mMemoryMappings.end()) {
+            return nullptr;
+        } else if (i->first == gpa) {
+            return i->second.first;  // gpa is exactly the beginning of the range
+        } else {
+            // gpa points into the range or between ranges, `i` points to the next range
+            --i;  // go the previous range
+            if (i == mMemoryMappings.begin()) {
+                return nullptr;  // there is no previous range
+            } else if ((i->first + i->second.second) > gpa) {
+                // move the host ptr by +(gpa-base)
+                return static_cast<char *>(i->second.first) + (gpa - i->first);
+            } else {
+                return nullptr;  // the previous range does not cover gpa
+            }
+        }
+    }
+
+    mutable Lock mMemoryMappingsLock;
+    std::map<uint64_t, std::pair<void *, uint64_t>> mMemoryMappings;  // do not save/load
 };
 
 static LazyInstance<AddressSpaceDeviceState> sAddressSpaceDeviceState =
@@ -223,6 +281,18 @@ static void sAddressSpaceDevicePing(uint32_t handle) {
     sAddressSpaceDeviceState->ping(handle);
 }
 
+int sAddressSpaceDeviceAddMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
+    return sAddressSpaceDeviceState->addMemoryMapping(gpa, ptr, size) ? 1 : 0;
+}
+
+int sAddressSpaceDeviceRemoveMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
+    return sAddressSpaceDeviceState->removeMemoryMapping(gpa, ptr, size) ? 1 : 0;
+}
+
+void* sAddressSpaceDeviceGetHostPtr(uint64_t gpa) {
+    return sAddressSpaceDeviceState->getHostPtr(gpa);
+}
+
 } // namespace
 
 extern "C" {
@@ -231,7 +301,10 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceGenHandle,           // gen_handle
     &sAddressSpaceDeviceDestroyHandle,       // destroy_handle
     &sAddressSpaceDeviceTellPingInfo,        // tell_ping_info
-    &sAddressSpaceDevicePing                 // ping
+    &sAddressSpaceDevicePing,                // ping
+    &sAddressSpaceDeviceAddMemoryMapping,    // add_memory_mapping
+    &sAddressSpaceDeviceRemoveMemoryMapping, // remove_memory_mapping
+    &sAddressSpaceDeviceGetHostPtr           // get_host_ptr
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
