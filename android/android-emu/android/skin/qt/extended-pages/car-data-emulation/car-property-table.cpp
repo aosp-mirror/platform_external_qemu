@@ -283,6 +283,7 @@ void CarPropertyTable::on_table_cellClicked(int row, int column) {
 
     mSendEmulatorMsg(writeMsg, writeLog);
     EmulatorMessage getMsg = makeGetPropMsg(prop, areaId);
+    printf("car table area: %d\n", areaId);
     string getLog = "Sending get request for " + getLabel(row).toStdString();
     mSendEmulatorMsg(getMsg, getLog);
 }
