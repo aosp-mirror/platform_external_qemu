@@ -4291,6 +4291,16 @@ void vkMapMemoryIntoAddressSpaceGOOGLE(
     uint64_t* pAddress)
 {
     // TODO: Implement
+    android::base::AutoLock lock(mLock);
+    // memory modify
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    mReconstruction.setApiTrace(apiInfo, OP_vkMapMemoryIntoAddressSpaceGOOGLE, snapshotTraceBegin, snapshotTraceBytes);
+    for (uint32_t i = 0; i < 1; ++i)
+    {
+        VkDeviceMemory boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkDeviceMemory((&memory)[i]);
+        mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle);
+    }
 }
 #endif
 #ifdef VK_GOOGLE_color_buffer

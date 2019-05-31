@@ -104,6 +104,20 @@ specialCaseDependencyExtractors = {
     "vkAllocateCommandBuffers" : extract_deps_vkAllocateCommandBuffers,
 }
 
+apiSequences = {
+    "vkAllocateMemory" : ["vkAllocateMemory", "vkMapMemoryIntoAddressSpaceGOOGLE"]
+}
+
+apiModifies = {
+    "vkMapMemoryIntoAddressSpaceGOOGLE" : ["memory"],
+}
+
+def is_modify_operation(api, param):
+    if api.name in apiModifies:
+        if param.paramName in apiModifies[api.name]:
+            return True
+    return False
+
 def emit_impl(typeInfo, api, cgen):
 
     cgen.line("// TODO: Implement")
@@ -143,6 +157,20 @@ def emit_impl(typeInfo, api, cgen):
             cgen.stmt("android::base::AutoLock lock(mLock)")
             cgen.line("// %s destroy" % p.paramName)
             cgen.stmt("mReconstruction.removeHandles((const uint64_t*)%s, %s)" % (access, lenExpr));
+
+        if is_modify_operation(api, p):
+            cgen.stmt("android::base::AutoLock lock(mLock)")
+            cgen.line("// %s modify" % p.paramName)
+            cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
+            cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
+            cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
+            cgen.beginFor("uint32_t i = 0", "i < %s" % lenExpr, "++i")
+            if p.isNonDispatchableHandleType():
+                cgen.stmt("%s boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_%s(%s[i])" % (p.typeName, p.typeName, access))
+            else:
+                cgen.stmt("%s boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_%s(%s[i])" % (p.typeName, p.typeName, access))
+            cgen.stmt("mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle)")
+            cgen.endFor()
 
     if traceCreate:
         cgen.stmt("if (!%s) return" % access)
