@@ -1925,7 +1925,8 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
              PAGE_BITS) << PAGE_BITS;
 
-        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+        printf("%s: map: %p %p -> [0x%llx 0x%llx]\n", __func__,
+                info->ptr,
                 info->pageAlignedHva,
                 (unsigned long long)info->guestPhysAddr,
                 (unsigned long long)info->guestPhysAddr + info->sizeToPage);
@@ -1934,6 +1935,7 @@ public:
                 info->pageAlignedHva,
                 info->sizeToPage);
 
+        fprintf(stderr, "%s: info for %p\n", __func__, memory);
         info->directMapped = true;
 
         return true;
@@ -2118,6 +2120,10 @@ public:
         if (mapResult != VK_SUCCESS) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+        
+        fprintf(stderr, "%s: mapped a new host visible memory. range: [%p %p]\n", __func__,
+                mapInfo.ptr, ((uint8_t*)mapInfo.ptr) + mapInfo.size);
+
 
         *pMemory = new_boxed_non_dispatchable_VkDeviceMemory(*pMemory);
 
@@ -2133,9 +2139,12 @@ public:
         auto info = android::base::find(mMapInfo, memory);
 
         if (!info) {
+            fprintf(stderr, "%s: no info\n", __func__);
             // Invalid usage.
             return;
         }
+
+        fprintf(stderr, "%s: info for %p\n", __func__, memory);
 
         if (info->directMapped) {
             printf("%s: unmap: [0x%llx 0x%llx]\n", __func__,
@@ -2144,6 +2153,8 @@ public:
             get_emugl_vm_operations().unmapUserBackedRam(
                     info->guestPhysAddr,
                     info->sizeToPage);
+        } else {
+            fprintf(stderr, "%s: Not direct map\n", __func__);
         }
 
         if (info->ptr) {

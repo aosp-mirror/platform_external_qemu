@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#define DEBUG_RECONSTRUCTION 0
+#define DEBUG_RECONSTRUCTION 1
 
 #if DEBUG_RECONSTRUCTION
 
