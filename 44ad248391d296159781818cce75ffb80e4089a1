@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4c816f4_ba44b0ec",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-05-31T16:31:57Z",
+      "side": 1,
+      "message": "Please see how this is done in go/aog/973186. This will allow access to these allocations on the guest.",
+      "range": {
+        "startLine": 35,
+        "startChar": 16,
+        "endLine": 35,
+        "endChar": 56
+      },
+      "revId": "44ad248391d296159781818cce75ffb80e4089a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
