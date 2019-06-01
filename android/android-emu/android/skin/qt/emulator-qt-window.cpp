@@ -2833,8 +2833,7 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t wi
                                    uint32_t height, uint32_t dpi) {
     setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
     char cmd[128];
-    sprintf(cmd, "%s",
-            "am start -n com.android.emulator.multidisplay/com.android.emulator.multidisplay.MainActivity");
+    sprintf(cmd, "%s", "am broadcast -a com.android.emulator.multidisplay.START -n com.android.emulator.multidisplay/.MultiDisplayServiceReceiver");
     getAdbInterface()->enqueueCommand({"shell", cmd});
     if (enabled && !multiDisplaySet) {
         // disable skin only when multidisplay is set the first time
