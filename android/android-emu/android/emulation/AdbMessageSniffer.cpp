@@ -125,7 +125,8 @@ bool AdbMessageSniffer::checkForDummyShellCommand() {
     if (msg.command == ADB_OPEN) {
         mPacket.data[msg.data_length] = '\0';
         const char *purpose = (char*)(mPacket.data);
-        const char* s_dummy_shell_commands[] = {"shell:exit", "shell:getprop"};
+        const char* s_dummy_shell_commands[] = {"shell:exit", "shell:getprop",
+        "shell:cat /sys/class/power_supply/*/capacity", "framebuffer"};
         // older version
         // shell:getprop
         for (int ii = 0; ii < ARRAY_SIZE(s_dummy_shell_commands); ++ ii) {
@@ -137,7 +138,8 @@ bool AdbMessageSniffer::checkForDummyShellCommand() {
         }
         // newer version
         // shell,v2,TERM=xterm-256color,raw:getprop
-        const char* s_dummy_patterns[] = {",raw:exit", ",raw:getprop"};
+        const char* s_dummy_patterns[] = {",raw:exit", ",raw:getprop",
+        ",raw:cat /sys/class/power_supply/*/capacity"};
         if (strncmp(purpose, "shell,", 6) == 0) {
             for (int jj = 0; jj < ARRAY_SIZE(s_dummy_patterns); ++ jj) {
                 const char* dummy = s_dummy_patterns[jj];
