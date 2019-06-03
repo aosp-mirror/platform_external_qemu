@@ -1046,6 +1046,11 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
 
     s_glInitTexImage3D(target, level, internalFormat, width, height, depth,
             border, format, type);
+    // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+    if (!isGles2Gles() && type == GL_UNSIGNED_BYTE && format == GL_BGRA_EXT &&
+        internalFormat == GL_BGRA_EXT) {
+        internalFormat = GL_RGBA;
+    }
 
     if (isCoreProfile()) {
         GLEScontext::prepareCoreProfileEmulatedTexture(
