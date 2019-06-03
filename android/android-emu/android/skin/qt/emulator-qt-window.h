@@ -269,6 +269,7 @@ public:
                          uint32_t* dpi, uint32_t* flag, bool* enabled);
     int countEnabledMultiDisplay();
     void getMonitorRect(uint32_t* width, uint32_t* height);
+    void showClusterWindow();
 
 public slots:
     void rotateSkin(SkinRotation rot);
