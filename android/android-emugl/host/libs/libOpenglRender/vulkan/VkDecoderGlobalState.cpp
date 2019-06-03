@@ -2848,8 +2848,7 @@ public:
         }
     }
 
-    // TODO: Support more than one kind of guest external memory handle type
-#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
+#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
 
@@ -2866,7 +2865,7 @@ public:
         VkExternalMemoryProperties* mut =
             (VkExternalMemoryProperties*)props;
         for (uint32_t i = 0; i < count; ++i) {
-            mut[i] = transformExternalMemoryProperties_fromhost(mut[i], GUEST_EXTERNAL_MEMORY_HANDLE_TYPE);
+            mut[i] = transformExternalMemoryProperties_fromhost(mut[i], GUEST_EXTERNAL_MEMORY_HANDLE_TYPES);
         }
     }
 
@@ -2884,7 +2883,7 @@ public:
         for (uint32_t i = 0; i < count; ++i) { \
             mut[i].field = (VkExternalMemoryHandleTypeFlagBits) \
             transformExternalMemoryHandleTypeFlags_fromhost( \
-                    mut[i].field, GUEST_EXTERNAL_MEMORY_HANDLE_TYPE); \
+                    mut[i].field, GUEST_EXTERNAL_MEMORY_HANDLE_TYPES); \
         } \
     } \
 
@@ -2900,7 +2899,7 @@ public:
         type* mut = (type*)props; \
         for (uint32_t i = 0; i < count; ++i) { \
             mut[i].externalMemoryProperties = transformExternalMemoryProperties_fromhost( \
-                    mut[i].externalMemoryProperties, GUEST_EXTERNAL_MEMORY_HANDLE_TYPE); \
+                    mut[i].externalMemoryProperties, GUEST_EXTERNAL_MEMORY_HANDLE_TYPES); \
         } \
     } \
 
@@ -3018,7 +3017,8 @@ private:
                 if (!isEmulatedExtension(extName)) {
                     res.push_back(extName);
                 }
-                if (!strcmp("VK_ANDROID_external_memory_android_hardware_buffer", extName)) {
+                if (!strcmp("VK_ANDROID_external_memory_android_hardware_buffer", extName) ||
+                    !strcmp("VK_FUCHSIA_external_memory", extName)) {
 #ifdef _WIN32
                     res.push_back("VK_KHR_external_memory_win32");
 #else
@@ -3027,7 +3027,8 @@ private:
                 }
                 // External semaphore maps to the win32 version on windows,
                 // continues with external semaphore fd on non-windows
-                if (!strcmp("VK_KHR_external_semaphore_fd", extName)) {
+                if (!strcmp("VK_KHR_external_semaphore_fd", extName) ||
+                    !strcmp("VK_FUCHSIA_external_semaphore", extName)) {
 #ifdef _WIN32
                     res.push_back("VK_KHR_external_semaphore_win32");
 #else

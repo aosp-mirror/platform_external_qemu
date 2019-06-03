@@ -1629,7 +1629,7 @@ transformExternalMemoryHandleTypeFlags_tohost(
 
     VkExternalMemoryHandleTypeFlags res = bits;
 
-    // Transform Android/Linux bits to host bits.
+    // Transform Android/Fuchsia/Linux bits to host bits.
     if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT) {
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
         res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
@@ -1637,6 +1637,11 @@ transformExternalMemoryHandleTypeFlags_tohost(
 
     if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID) {
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
+        res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
+    }
+
+    if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA) {
+        res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
         res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
     }
     return res;
