@@ -75,4 +75,6 @@ enum Feature {
     CarPropertyTable = 43;
 
     DynamicPartition = 44;
+
+    CarClusterEntryPoint = 49;
 }
