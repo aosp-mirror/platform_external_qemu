@@ -1912,7 +1912,7 @@ skin_window_set_multi_display(SkinWindow* window,
 {
     // Set sub display on the Android display
     SubDisplay* sub_display = window->layout.displays[0].sub_display;
-    SubDisplay* prev = sub_display;
+    SubDisplay* prev = NULL;
     SubDisplay** head = &window->layout.displays[0].sub_display;
 
     // Locate by id
@@ -1920,8 +1920,8 @@ skin_window_set_multi_display(SkinWindow* window,
         if (sub_display->id == id) {
             break;
         }
-        sub_display = sub_display->next;
         prev = sub_display;
+        sub_display = sub_display->next;
     }
 
     if (add) {
@@ -1933,7 +1933,7 @@ skin_window_set_multi_display(SkinWindow* window,
             sub_display->rect.size.h = height;
         } else {
             // add
-            SubDisplay* sub_display = malloc(sizeof(SubDisplay));
+            sub_display = malloc(sizeof(SubDisplay));
             sub_display->rect.pos.x = xOffset;
             sub_display->rect.pos.y = yOffset;
             sub_display->rect.size.w = width;
@@ -1945,10 +1945,10 @@ skin_window_set_multi_display(SkinWindow* window,
     } else {
         if (sub_display) {
             // delete
-            if (prev == *head) {
-                *head = sub_display->next;
-            } else {
+            if (prev) {
                 prev->next = sub_display->next;
+            } else {
+                *head = sub_display->next;
             }
             free(sub_display);
         }
