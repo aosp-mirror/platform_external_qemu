@@ -59,6 +59,7 @@ enum class QtUICommand {
     VIRTUAL_SCENE_CONTROL,
     FOLD,
     UNFOLD,
+    CLUSTER,
 };
 
 enum class QtKeyEventSource {

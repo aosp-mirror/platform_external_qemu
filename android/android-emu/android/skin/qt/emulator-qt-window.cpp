@@ -2866,3 +2866,16 @@ void EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
     if (height)
         *height = monitor.size.h;
 }
+
+
+void EmulatorQtWindow::showClusterWindow() {
+    if(mCarClusterWindow->isDismissed()){
+        delete mCarClusterWindow;
+        delete mCarClusterConnector;
+        mCarClusterWindow = new CarClusterWindow(this, &mContainer);
+        mCarClusterConnector = new CarClusterConnector(mCarClusterWindow);
+        if (mCarClusterWindow) {
+            mCarClusterConnector->startSendingStartRequest();
+        }
+    }
+}

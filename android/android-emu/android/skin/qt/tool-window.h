@@ -186,6 +186,7 @@ private slots:
     void on_back_button_pressed();
     void on_back_button_released();
     void on_close_button_clicked();
+    void on_cluster_button_clicked();
     void on_home_button_pressed();
     void on_home_button_released();
     void on_minimize_button_clicked();
