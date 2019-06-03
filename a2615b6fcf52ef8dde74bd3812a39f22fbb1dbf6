@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ba74c10_41a0ae36",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2877,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-03T22:52:03Z",
+      "side": 1,
+      "message": "mCarClusterWindow can never be null at this point.",
+      "revId": "a2615b6fcf52ef8dde74bd3812a39f22fbb1dbf6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c499a6c_e052fed0",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2878,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-03T22:52:03Z",
+      "side": 1,
+      "message": "Not part of this CL, but: instead of calling to \"startSendingStartRequest()\" it would be better if \"CarClusterConnector\" would have an \"initialize()\" or \"start()\" method, and have that method call \"startSendingStartRequest()\"\n\nHiding \"startSendingStartRequest()\" improves the encapsulation of the class, so others don\u0027t need to know what it takes to initialize a CarClusterConnector. If someone in the future needs to add more initialization logic, they won\u0027t need to find all the places where the class is instantiated.",
+      "revId": "a2615b6fcf52ef8dde74bd3812a39f22fbb1dbf6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6c1a864_b61c4c0e",
+        "filename": "android/android-emu/android/skin/qt/images/dark/ic_cluster_678_48px.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-03T22:52:03Z",
+      "side": 1,
+      "message": "Please, include someone from UX/VisD from the emulator team to review these assets.",
+      "revId": "a2615b6fcf52ef8dde74bd3812a39f22fbb1dbf6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53a8827a_962f1930",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-03T22:52:03Z",
+      "side": 1,
+      "message": "Does emulator code-base has the concept of \"feature flags\". I wonder if there is a way to be able to enable this without having to recompile the emulator.",
+      "revId": "a2615b6fcf52ef8dde74bd3812a39f22fbb1dbf6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
