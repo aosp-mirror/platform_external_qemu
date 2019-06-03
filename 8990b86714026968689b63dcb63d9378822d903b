@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77afd22b_233f7309",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-03T23:01:58Z",
+      "side": 1,
+      "message": "We have getCoreProfileEmulatedFormat below, will it overwrite this value?",
+      "range": {
+        "startLine": 906,
+        "startChar": 12,
+        "endLine": 906,
+        "endChar": 23
+      },
+      "revId": "8990b86714026968689b63dcb63d9378822d903b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
