@@ -244,7 +244,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->back_button->setHidden(true);
         mToolsUi->overview_button->setHidden(true);
-    }
+    } 
+
+    //TODO: show the entry point for car cluster when car cluster is ready
+    mToolsUi->cluster_button->setHidden(true);
 
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
@@ -507,6 +510,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::PAN_UP:
             if (down) {
                 mEmulatorWindow->panVertical(true);
+            }
+            break;
+        case QtUICommand::CLUSTER:
+            if (down) {
+                mEmulatorWindow->showClusterWindow();
             }
             break;
         case QtUICommand::PAN_DOWN:
@@ -930,6 +938,10 @@ void ToolWindow::on_close_button_clicked() {
         return;
     }
     shouldClose();
+}
+
+void ToolWindow::on_cluster_button_clicked() {
+    handleUICommand(QtUICommand::CLUSTER, true);
 }
 
 void ToolWindow::on_home_button_pressed() {
