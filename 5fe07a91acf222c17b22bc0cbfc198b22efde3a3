@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "778c7fcb_84817959",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-edit-dialog.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-03T20:48:04Z",
+      "side": 1,
+      "message": "It looks like QSignalMapper is deprecated.  This article recommends using lambdas instead: https://medium.com/genymobile/how-c-lambda-expressions-can-improve-your-qt-code-8cd524f4ed9f\n\nconnect(mi-\u003edeleteButton, SIGNAL(clicked()), [this]() {\n   // ... emit the other event?\n});",
+      "range": {
+        "startLine": 23,
+        "startChar": 33,
+        "endLine": 23,
+        "endChar": 58
+      },
+      "revId": "5fe07a91acf222c17b22bc0cbfc198b22efde3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e31ffd72_c561e5b7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-edit-dialog.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-03T20:48:04Z",
+      "side": 1,
+      "message": "Prefer enum class when possible, and since this is going to be cast to an int you should be able to use the enum class inherit syntax:\n\nenum class ButtonClass : int {\n  // ...\n}\n\nYou may need to add a cast or two, though",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 18
+      },
+      "revId": "5fe07a91acf222c17b22bc0cbfc198b22efde3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27f6b2bf_ca9e9525",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-03T20:48:04Z",
+      "side": 1,
+      "message": "Nit: I recommend against checking against null, it is cleaner to do a boolean check:\n\nif (!listItem) or if (listItem)\n\nAdditionally, for C++ code prefer nullptr instead of NULL",
+      "range": {
+        "startLine": 776,
+        "startChar": 12,
+        "endLine": 776,
+        "endChar": 28
+      },
+      "revId": "5fe07a91acf222c17b22bc0cbfc198b22efde3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
