@@ -14,11 +14,15 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include "android/skin/qt/tool-window.h"
+
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QPushButton>
 #include <QSettings>
 #include <QtWidgets>
+#include <cassert>
+#include <string>
 
 #include "android/android.h"
 #include "android/avd/info.h"
@@ -29,6 +33,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -41,21 +46,15 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/location-page.h"
-#include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/tool-window.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
-
-#include <cassert>
-#include <string>
-
 
 namespace {
 
@@ -244,6 +243,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->back_button->setHidden(true);
         mToolsUi->overview_button->setHidden(true);
+    }
+
+    // TODO: remove the feature check when car cluster is ready
+    if (!feature_is_enabled(kFeature_CarClusterEntryPoint) ||
+        (avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO)) {
+        mToolsUi->cluster_button->setHidden(true);
     }
 
 #ifndef Q_OS_MAC
@@ -507,6 +512,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::PAN_UP:
             if (down) {
                 mEmulatorWindow->panVertical(true);
+            }
+            break;
+        case QtUICommand::CLUSTER:
+            if (down) {
+                mEmulatorWindow->showClusterWindow();
             }
             break;
         case QtUICommand::PAN_DOWN:
@@ -930,6 +940,10 @@ void ToolWindow::on_close_button_clicked() {
         return;
     }
     shouldClose();
+}
+
+void ToolWindow::on_cluster_button_clicked() {
+    handleUICommand(QtUICommand::CLUSTER, true);
 }
 
 void ToolWindow::on_home_button_pressed() {
