@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98205924_c8952478",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3264,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-04T00:01:20Z",
+      "side": 1,
+      "message": "Could you please use .empty() instead?",
+      "range": {
+        "startLine": 3264,
+        "startChar": 16,
+        "endLine": 3264,
+        "endChar": 20
+      },
+      "revId": "0a285abc1f1154099efb9d85294dde002f126ece",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
