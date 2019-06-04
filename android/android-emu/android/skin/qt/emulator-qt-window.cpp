@@ -1255,7 +1255,7 @@ void EmulatorQtWindow::show() {
     QFrame::show();
     mToolWindow->show();
     if (mCarClusterWindow) {
-        mCarClusterConnector->startSendingStartRequest();
+        mCarClusterConnector->start();
     }
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
@@ -2873,6 +2873,6 @@ void EmulatorQtWindow::showClusterWindow() {
         delete mCarClusterConnector;
         mCarClusterWindow = new CarClusterWindow(this, &mContainer);
         mCarClusterConnector = new CarClusterConnector(mCarClusterWindow);
-        mCarClusterConnector->startSendingStartRequest();
+        mCarClusterConnector->start();
     }
 }
