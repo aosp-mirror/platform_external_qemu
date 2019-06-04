@@ -186,3 +186,7 @@ void CarClusterConnector::stopSendingStartRequest() {
 System::Duration CarClusterConnector::nextRefreshAbsolute() {
     return System::get()->getUnixTimeUs() + REFRESH_INTERVEL;
 }
+
+void CarClusterConnector::start() {
+    startSendingStartRequest();
+}

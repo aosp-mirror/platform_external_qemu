@@ -1255,7 +1255,7 @@ void EmulatorQtWindow::show() {
     QFrame::show();
     mToolWindow->show();
     if (mCarClusterWindow) {
-        mCarClusterConnector->startSendingStartRequest();
+        mCarClusterConnector->start();
     }
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
