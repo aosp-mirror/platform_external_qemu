@@ -71,13 +71,11 @@ struct GVMState
     int intx_set_mask;
     unsigned int sigmask_len;
     GHashTable *gsimap;
-#ifdef GVM_CAP_IRQ_ROUTING
     struct gvm_irq_routing *irq_routes;
     int nr_allocated_irq_routes;
     unsigned long *used_gsi_bitmap;
     unsigned int gsi_count;
     QTAILQ_HEAD(msi_hashtab, GVMMSIRoute) msi_hashtab[GVM_MSI_HASHTAB_SIZE];
-#endif
     GVMMemoryListener memory_listener;
     QLIST_HEAD(, GVMParkedVcpu) gvm_parked_vcpus;
 };
@@ -752,7 +750,6 @@ int gvm_set_irq(GVMState *s, int irq, int level)
     return event.status;
 }
 
-#ifdef GVM_CAP_IRQ_ROUTING
 typedef struct GVMMSIRoute {
     struct gvm_irq_routing_entry kroute;
     QTAILQ_ENTRY(GVMMSIRoute) entry;
@@ -1046,32 +1043,6 @@ int gvm_irqchip_update_msi_route(GVMState *s, int virq, MSIMessage msg,
 
     return gvm_update_routing_entry(s, &kroute);
 }
-
-#else /* !GVM_CAP_IRQ_ROUTING */
-
-void gvm_init_irq_routing(GVMState *s)
-{
-}
-
-void gvm_irqchip_release_virq(GVMState *s, int virq)
-{
-}
-
-int gvm_irqchip_send_msi(GVMState *s, MSIMessage msg)
-{
-    abort();
-}
-
-int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
-{
-    return -ENOSYS;
-}
-
-int gvm_irqchip_update_msi_route(GVMState *s, int virq, MSIMessage msg)
-{
-    return -ENOSYS;
-}
-#endif /* !GVM_CAP_IRQ_ROUTING */
 
 void gvm_irqchip_set_qemuirq_gsi(GVMState *s, qemu_irq irq, int gsi)
 {
@@ -1604,15 +1575,6 @@ int gvm_has_robust_singlestep(void)
 int gvm_has_debugregs(void)
 {
     return gvm_state->debugregs;
-}
-
-int gvm_has_gsi_routing(void)
-{
-#ifdef GVM_CAP_IRQ_ROUTING
-    return gvm_check_extension(gvm_state, GVM_CAP_IRQ_ROUTING);
-#else
-    return false;
-#endif
 }
 
 int gvm_has_intx_set_mask(void)
