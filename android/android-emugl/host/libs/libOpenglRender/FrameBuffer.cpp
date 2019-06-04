@@ -2420,6 +2420,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     }
 
     if (m_displays.size() != 1 || m_displays.find(0) == m_displays.end()) {
+        emugl::get_emugl_window_operations().setNoSkin();
         // Restore multi display state
         int combinedDisplayWidth = 0;
         int combinedDisplayHeight = 0;
@@ -2504,6 +2505,9 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
 
     if (*displayId == 0) {
         *displayId = s_nextDisplayId++;
+    }
+    if (m_displays.size() == 1) {
+        emugl::get_emugl_window_operations().setNoSkin();
     }
     m_displays.emplace(*displayId, DisplayInfo());
     DBG("create display %d\n", *displayId);

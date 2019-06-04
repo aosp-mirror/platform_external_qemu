@@ -31,17 +31,16 @@ static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
-        .rotate90Clockwise =
-                [] {
-                    return emulator_window_rotate_90(true);
-                },
+        .rotate90Clockwise = [] { return emulator_window_rotate_90(true); },
         .rotate = emulator_window_rotate,
         .getRotation =
                 [] {
                     EmulatorWindow* window = emulator_window_get();
-                    if (!window) return SKIN_ROTATION_0;
+                    if (!window)
+                        return SKIN_ROTATION_0;
                     SkinLayout* layout = emulator_window_get_layout(window);
-                    if (!layout) return SKIN_ROTATION_0;
+                    if (!layout)
+                        return SKIN_ROTATION_0;
                     return layout->orientation;
                 },
         .showMessage =
@@ -62,9 +61,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .showMessageWithDismissCallback =
-                [](const char* message, WindowMessageType type,
-                   const char* dismissText, void* context,
-                   void (*func)(void*), int timeoutMs) {
+                [](const char* message,
+                   WindowMessageType type,
+                   const char* dismissText,
+                   void* context,
+                   void (*func)(void*),
+                   int timeoutMs) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->showMessageWithDismissCallback(
                                 QString::fromUtf8(message),
@@ -85,14 +87,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .fold =
-              [](bool is_fold) {
-                  if (const auto win = EmulatorQtWindow::getInstance()) {
-                      QtUICommand cmd = is_fold ? QtUICommand::FOLD : QtUICommand::UNFOLD;
-                      win->runOnUiThread([win, cmd]() {
-                          win->toolWindow()->handleUICommand(cmd);
-                      });
-                  }
-              },
+                [](bool is_fold) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        QtUICommand cmd = is_fold ? QtUICommand::FOLD
+                                                  : QtUICommand::UNFOLD;
+                        win->runOnUiThread([win, cmd]() {
+                            win->toolWindow()->handleUICommand(cmd);
+                        });
+                    }
+                },
         .isFolded =
                 [] {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -110,13 +113,22 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .setMultiDisplay =
-                [](uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h, bool add) {
+                [](uint32_t id,
+                   uint32_t x,
+                   uint32_t y,
+                   uint32_t w,
+                   uint32_t h,
+                   bool add) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->setMultiDisplay(id, x, y, w, h, add);
                     }
                 },
         .getMultiDisplay =
-                [](uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+                [](uint32_t id,
+                   uint32_t* x,
+                   uint32_t* y,
+                   uint32_t* w,
+                   uint32_t* h) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         return win->getMultiDisplay(id, x, y, w, h);
                     }
@@ -128,7 +140,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return win->getMonitorRect(w, h);
                     }
                 },
-};
+        .setNoSkin =
+                []() {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->setNoSkin();
+                    }
+                }};
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
         &sQAndroidEmulatorWindowAgent;
