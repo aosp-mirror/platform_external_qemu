@@ -783,7 +783,7 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         mLengths[macroName] = qs;
 
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-        macroName = sAutomationAgent->getMacroName(filePath).str();
+        macroName = sAutomationAgent->getMacroName(filePath);
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
