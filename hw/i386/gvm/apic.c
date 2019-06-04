@@ -190,9 +190,7 @@ static void gvm_apic_realize(DeviceState *dev, Error **errp)
     memory_region_init_io(&s->io_memory, OBJECT(s), &gvm_apic_io_ops, s,
                           "gvm-apic-msi", APIC_SPACE_SIZE);
 
-    if (gvm_has_gsi_routing()) {
-        msi_nonbroken = true;
-    }
+    msi_nonbroken = true;
 }
 
 static void gvm_apic_unrealize(DeviceState *dev, Error **errp)

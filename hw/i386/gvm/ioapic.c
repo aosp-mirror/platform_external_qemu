@@ -24,27 +24,25 @@ void gvm_pc_setup_irq_routing(bool pci_enabled)
     GVMState *s = gvm_state;
     int i;
 
-    if (gvm_check_extension(s, GVM_CAP_IRQ_ROUTING)) {
-        for (i = 0; i < 8; ++i) {
-            if (i == 2) {
-                continue;
-            }
-            gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_PIC_MASTER, i);
+    for (i = 0; i < 8; ++i) {
+        if (i == 2) {
+            continue;
         }
-        for (i = 8; i < 16; ++i) {
-            gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_PIC_SLAVE, i - 8);
-        }
-        if (pci_enabled) {
-            for (i = 0; i < 24; ++i) {
-                if (i == 0) {
-                    gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_IOAPIC, 2);
-                } else if (i != 2) {
-                    gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_IOAPIC, i);
-                }
-            }
-        }
-        gvm_irqchip_commit_routes(s);
+        gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_PIC_MASTER, i);
     }
+    for (i = 8; i < 16; ++i) {
+        gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_PIC_SLAVE, i - 8);
+    }
+    if (pci_enabled) {
+        for (i = 0; i < 24; ++i) {
+            if (i == 0) {
+                gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_IOAPIC, 2);
+            } else if (i != 2) {
+                gvm_irqchip_add_irq_route(s, i, GVM_IRQCHIP_IOAPIC, i);
+            }
+        }
+    }
+    gvm_irqchip_commit_routes(s);
 }
 
 void gvm_pc_gsi_handler(void *opaque, int n, int level)

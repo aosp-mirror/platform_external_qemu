@@ -95,7 +95,7 @@ bool gvm_has_smm(void)
 
 bool gvm_allows_irq0_override(void)
 {
-    return !gvm_irqchip_in_kernel() || gvm_has_gsi_routing();
+    return true;
 }
 
 static int gvm_get_tsc(CPUState *cs)

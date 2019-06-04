@@ -695,8 +695,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_X2APIC_API 129
 #define GVM_CAP_MSI_DEVID 131
 
-#ifdef GVM_CAP_IRQ_ROUTING
-
 struct gvm_irq_routing_irqchip {
 	__u32 irqchip;
 	__u32 pin;
@@ -740,8 +738,6 @@ struct gvm_irq_routing {
 	__u32 flags;
 	struct gvm_irq_routing_entry entries[0];
 };
-
-#endif
 
 /* For GVM_CAP_SW_TLB */
 
