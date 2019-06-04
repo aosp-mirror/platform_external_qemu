@@ -27,6 +27,19 @@ static MultiDisplayPipe* sMultiDisplayPipeInstance = nullptr;
 static base::Lock mLock;
 static std::vector<uint8_t> sData;
 
+void MultiDisplayPipe::Service::preSave(android::base::Stream* stream) {
+    AndroidAsyncMessagePipe::Service<MultiDisplayPipe>::preSave(stream);
+    stream->putBe32(sData.size());
+    stream->putString(reinterpret_cast<const char*>(sData.data()), sData.size());
+}
+
+void MultiDisplayPipe::Service::preLoad(android::base::Stream* stream) {
+    AndroidAsyncMessagePipe::Service<MultiDisplayPipe>::preLoad(stream);
+    int length = stream->getBe32();
+    const std::string dataStr = stream->getString();
+    sData = std::vector<uint8_t>(dataStr.begin(), dataStr.end());
+}
+
 MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
   : AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {
     if (sMultiDisplayPipeInstance) {
@@ -98,5 +111,5 @@ void MultiDisplayPipe::fillData(std::vector<uint8_t>& data, uint32_t id, uint32_
 
 void android_init_multi_display_pipe() {
     android::AndroidPipe::Service::add(
-        new android::AndroidAsyncMessagePipe::Service<android::MultiDisplayPipe>("multidisplay"));
+        new android::MultiDisplayPipe::Service("multidisplay"));
 }
