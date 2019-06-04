@@ -2752,6 +2752,7 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
     }
 }
 
+static bool multiDisplaySet = false;
 void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
                                        uint32_t h, bool add) {
     AutoLock lock(mMultiDisplayLock);
@@ -2761,6 +2762,17 @@ void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint
         mMultiDisplay[id].pos_y = y;
         mMultiDisplay[id].width = w;
         mMultiDisplay[id].height = h;
+    }
+    if (add && !multiDisplaySet) {
+        // disable skin only when multidisplay is set the first time
+        multiDisplaySet = true;
+        char *skinName, *skinDir;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        if (skinDir != NULL) {
+            SkinEvent* event = new SkinEvent();
+            event->type = kEventSetNoSkin;
+            skin_event_add(event);
+        }
     }
     SkinEvent* event = new SkinEvent();
     event->type = kEventSetMultiDisplay;
@@ -2828,24 +2840,12 @@ int EmulatorQtWindow::countEnabledMultiDisplay() {
     return cnt;
 }
 
-static bool multiDisplaySet = false;
 void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
                                    uint32_t height, uint32_t dpi) {
     setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
     char cmd[128];
     sprintf(cmd, "%s", "am broadcast -a com.android.emulator.multidisplay.START -n com.android.emulator.multidisplay/.MultiDisplayServiceReceiver");
     getAdbInterface()->enqueueCommand({"shell", cmd});
-    if (enabled && !multiDisplaySet) {
-        // disable skin only when multidisplay is set the first time
-        multiDisplaySet = true;
-        char *skinName, *skinDir;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        if (skinDir != NULL) {
-            SkinEvent* event = new SkinEvent();
-            event->type = kEventSetNoSkin;
-            skin_event_add(event);
-        }
-    }
     if (enabled && countEnabledMultiDisplay() == 1) {
         mToolWindow->hideRotationButton(true);
     }
