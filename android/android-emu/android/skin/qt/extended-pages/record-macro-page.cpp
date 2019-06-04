@@ -33,6 +33,8 @@
 #include <iostream>
 #include <sstream>
 
+static const char SECONDS_RECORDING[] = "%1s Recording...";
+
 using android::metrics::MetricsReporter;
 using android_studio::EmulatorAutomation;
 using EmulatorAutomationPresetMacro =
@@ -451,7 +453,12 @@ std::string RecordMacroPage::getMacroNameFromItem(QListWidgetItem* listItem) {
 
 void RecordMacroPage::updateElapsedTime() {
     mSec++;
-    mMacroItemPlaying->setDisplayTime(getTimerString(mSec));
+    if (mRecording) {
+        QString qs = tr(SECONDS_RECORDING).arg(mSec);
+        mUi->recordingLabel->setText(qs);
+    } else {
+        mMacroItemPlaying->setDisplayTime(getTimerString(mSec));
+    }
     mTimer.start(1000);
 }
 
@@ -560,6 +567,7 @@ void RecordMacroPage::startRecording() {
 }
 
 void RecordMacroPage::stopRecording() {
+    mTimer.stop();
     enableMacroItems();
     mRecording = false;
 
@@ -606,6 +614,7 @@ void RecordMacroPage::setRecordState() {
         mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
         mUi->recButton->setProperty("themeIconName", "recordCircle");
     }
+    mUi->stackedWidget->setCurrentIndex(0);
 
     switch (mState) {
         case MacroUiState::Waiting: {
@@ -627,9 +636,14 @@ void RecordMacroPage::setRecordState() {
             break;
         }
         case MacroUiState::Recording: {
+            mUi->stackedWidget->setCurrentIndex(1);
             mUi->recButton->setIcon(getIconForCurrentTheme("stop_red"));
             mUi->recButton->setProperty("themeIconName", "stop_red");
             mUi->recButton->setText(tr("STOP RECORDING "));
+            // Update every second
+            mUi->recordingLabel->setText(tr(SECONDS_RECORDING).arg(0));
+            mSec = 0;
+            mTimer.start(1000);
             break;
         }
     }
@@ -746,7 +760,7 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
     std::replace(macroName.begin(), macroName.end(), '_', ' ');
     macroSavedItem->setName(macroName.c_str());
 
-    listItem->setSizeHint(QSize(mUi->macroList->width(), 50));
+    listItem->setSizeHint(QSize(0, 50));
 
     mUi->macroList->addItem(listItem);
     mUi->macroList->setItemWidget(listItem, macroSavedItem);
