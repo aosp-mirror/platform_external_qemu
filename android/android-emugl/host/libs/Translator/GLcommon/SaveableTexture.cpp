@@ -900,7 +900,11 @@ void SaveableTexture::restore() {
                 m_maxMipmapLevel + 1;
         GLint resultInternalFormat = m_internalFormat;
         GLenum resultFormat = m_format;
-        if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
+        // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+        if (!isGles2Gles() && m_type == GL_UNSIGNED_BYTE && m_format == GL_BGRA_EXT &&
+            resultInternalFormat == GL_BGRA_EXT) {
+            resultInternalFormat = GL_RGBA;
+        } else if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
             resultInternalFormat = getCoreProfileEmulatedInternalFormat(
                     m_format, m_type);
             resultFormat = getCoreProfileEmulatedFormat(m_format);

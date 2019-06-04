@@ -1046,6 +1046,11 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
 
     s_glInitTexImage3D(target, level, internalFormat, width, height, depth,
             border, format, type);
+    // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+    if (!isGles2Gles() && type == GL_UNSIGNED_BYTE && format == GL_BGRA_EXT &&
+        internalFormat == GL_BGRA_EXT) {
+        internalFormat = GL_RGBA;
+    }
 
     if (isCoreProfile()) {
         GLEScontext::prepareCoreProfileEmulatedTexture(
@@ -1064,6 +1069,11 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
     s_glInitTexImage3D(target, 0, internalformat, width, height, depth, 0,
             format, type);
+    // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+    if (!isGles2Gles() && type == GL_UNSIGNED_BYTE && format == GL_BGRA_EXT &&
+        internalformat == GL_BGRA8_EXT) {
+        internalformat = GL_RGBA8;
+    }
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
     ctx->dispatcher().glTexStorage3D(target, levels, internalformat, width, height, depth);
