@@ -168,12 +168,10 @@ static void pc_q35_init(MachineState *machine)
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);
         pcms->gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
                                        GSI_NUM_PINS);
-#if 0 // Disable in-kernel irqchip til hypervisor side is ready
     } else if (gvm_ioapic_in_kernel()) {
         gvm_pc_setup_irq_routing(pcmc->pci_enabled);
         pcms->gsi = qemu_allocate_irqs(gvm_pc_gsi_handler, gsi_state,
                                        GSI_NUM_PINS);
-#endif
     } else {
         pcms->gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
     }

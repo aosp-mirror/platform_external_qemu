@@ -2493,13 +2493,7 @@ void gvm_arch_init_irq_routing(GVMState *s)
      * irqchip, so we can use irqfds, and on x86 we know
      * we can use msi via irqfd and GSI routing.
      */
-    // Disable in-kernel irq chip related codes til hypervisor side
-    // is ready. However, we may completely remove the following
-    // since it is unlikely to implement split irqchip for gvm at
-    // the moment.
-#if 0
     gvm_gsi_routing_allowed = true;
-#endif
 }
 
 int gvm_arch_irqchip_create(MachineState *ms, GVMState *s)

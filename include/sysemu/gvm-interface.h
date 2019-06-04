@@ -657,8 +657,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_SET_GUEST_DEBUG 23
 #endif
 #define GVM_CAP_IRQ_ROUTING 25
-#define GVM_CAP_IRQ_INJECT_STATUS 26
-#define GVM_CAP_ASSIGN_DEV_IRQ 29
 #define GVM_CAP_SET_BOOT_CPU_ID 34
 #define GVM_CAP_SET_IDENTITY_MAP_ADDR 37
 #ifdef __GVM_HAVE_VCPU_EVENTS
@@ -677,8 +675,6 @@ struct gvm_enable_cap {
 #ifdef __GVM_HAVE_XCRS
 #define GVM_CAP_XCRS 56
 #endif
-#define GVM_CAP_ASYNC_PF 59
-#define GVM_CAP_TSC_CONTROL 60
 #define GVM_CAP_MAX_VCPUS 66       /* returns max vcpus per vm */
 #define GVM_CAP_SW_TLB 69
 #define GVM_CAP_SYNC_REGS 74
@@ -694,8 +690,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_MULTI_ADDRESS_SPACE 118
 #define GVM_CAP_GUEST_DEBUG_HW_BPS 119
 #define GVM_CAP_GUEST_DEBUG_HW_WPS 120
-#define GVM_CAP_SPLIT_IRQCHIP 121
-#define GVM_CAP_IOEVENTFD_ANY_LENGTH 122
 #define GVM_CAP_VCPU_ATTRIBUTES 127
 #define GVM_CAP_MAX_VCPU_ID 128
 #define GVM_CAP_X2APIC_API 129
@@ -835,7 +829,6 @@ struct gvm_msi {
 
 /* Device model IOC */
 #define GVM_CREATE_IRQCHIP        __IO(GVMIO,   0x60)
-#define GVM_IRQ_LINE              __IOW(GVMIO,  0x61, struct gvm_irq_level)
 #define GVM_GET_IRQCHIP           __IOWR(GVMIO, 0x62, struct gvm_irqchip)
 #define GVM_SET_IRQCHIP           __IOR(GVMIO,  0x63, struct gvm_irqchip)
 #define GVM_IRQ_LINE_STATUS       __IOWR(GVMIO, 0x67, struct gvm_irq_level)

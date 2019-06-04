@@ -69,10 +69,6 @@ struct GVMState
     struct gvm_sw_breakpoint_head gvm_sw_breakpoints;
 #endif
     int intx_set_mask;
-    /* The man page (and posix) say ioctl numbers are signed int, but
-     * they're not.  Linux, glibc and *BSD all treat ioctl numbers as
-     * unsigned, and treating them as signed here can break things */
-    unsigned irq_set_ioctl;
     unsigned int sigmask_len;
     GHashTable *gsimap;
 #ifdef GVM_CAP_IRQ_ROUTING
@@ -745,14 +741,15 @@ int gvm_set_irq(GVMState *s, int irq, int level)
 
     event.level = level;
     event.irq = irq;
-    ret = gvm_vm_ioctl(s, s->irq_set_ioctl,
+    ret = gvm_vm_ioctl(s, GVM_IRQ_LINE_STATUS,
             &event, sizeof(event), NULL, 0);
+
     if (ret < 0) {
         perror("gvm_set_irq");
         abort();
     }
 
-    return (s->irq_set_ioctl == GVM_IRQ_LINE) ? 1 : event.status;
+    return event.status;
 }
 
 #ifdef GVM_CAP_IRQ_ROUTING
@@ -795,6 +792,7 @@ void gvm_init_irq_routing(GVMState *s)
 void gvm_irqchip_commit_routes(GVMState *s)
 {
     int ret;
+    size_t irq_routing_size;
 
     if (gvm_gsi_direct_mapping()) {
         return;
@@ -805,8 +803,10 @@ void gvm_irqchip_commit_routes(GVMState *s)
     }
 
     s->irq_routes->flags = 0;
+    irq_routing_size = sizeof(struct gvm_irq_routing) +
+                       s->irq_routes->nr * sizeof(struct gvm_irq_routing_entry);
     ret = gvm_vm_ioctl(s, GVM_SET_GSI_ROUTING,
-            s->irq_routes, sizeof(*s->irq_routes), NULL, 0);
+            s->irq_routes, irq_routing_size, NULL, 0);
     assert(ret == 0);
 }
 
@@ -1255,11 +1255,6 @@ static int gvm_init(MachineState *ms)
 #endif
 
     s->intx_set_mask = gvm_check_extension(s, GVM_CAP_PCI_2_3);
-
-    s->irq_set_ioctl = GVM_IRQ_LINE;
-    if (gvm_check_extension(s, GVM_CAP_IRQ_INJECT_STATUS)) {
-        s->irq_set_ioctl = GVM_IRQ_LINE_STATUS;
-    }
 
 #ifdef GVM_CAP_READONLY_MEM
     gvm_readonly_mem_allowed =
