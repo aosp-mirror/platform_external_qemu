@@ -21,6 +21,14 @@
 namespace android {
 class MultiDisplayPipe : public AndroidAsyncMessagePipe {
 public:
+    class Service : public AndroidAsyncMessagePipe::Service<MultiDisplayPipe> {
+    public:
+        Service(const char* serviceName)
+          : AndroidAsyncMessagePipe::Service<MultiDisplayPipe>(serviceName) {}
+        virtual void preSave(android::base::Stream* stream) override;
+        virtual void preLoad(android::base::Stream* stream) override;
+    };
+
     MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs);
     virtual ~MultiDisplayPipe();
 
