@@ -31,7 +31,14 @@ class RecordMacroPage : public QWidget {
     Q_OBJECT
 
 public:
-    enum class MacroUiState { Waiting, Selected, PreviewFinished, Playing, Recording };
+    enum class MacroUiState {
+        Waiting,
+        Selected,
+        PreviewFinished,
+        Playing,
+        PreRecording,
+        Recording
+    };
 
     explicit RecordMacroPage(QWidget* parent = 0);
     ~RecordMacroPage();
@@ -49,6 +56,7 @@ private slots:
     void on_macroList_itemPressed(QListWidgetItem* listItem);
     void on_macroList_itemSelectionChanged();
     void on_recButton_clicked();
+    void on_cancelButton_clicked();
     void updatePreviewVideoView();
     void previewVideoPlayingFinished();
     void updateElapsedTime();
