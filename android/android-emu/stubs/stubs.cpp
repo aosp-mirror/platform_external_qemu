@@ -18,3 +18,8 @@
 
 int guest_data_partition_mounted = 0;
 int guest_boot_completed = 0;
+
+int changing_language_country_locale = 0;
+const char* to_set_language = 0;
+const char* to_set_country = 0;
+const char* to_set_locale = 0;
