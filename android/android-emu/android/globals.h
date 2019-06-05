@@ -55,4 +55,10 @@ extern int android_snapshot_update_timer;
 /* remove this flag once we deprecate qemu1 on both dev and release branches. */
 extern int engine_supports_snapshot;
 
+/* are we changing the language, country, or locale? */
+extern int changing_language_country_locale;
+extern const char* to_set_language;
+extern const char* to_set_country;
+extern const char* to_set_locale;
+
 ANDROID_END_HEADER

@@ -1224,6 +1224,38 @@ help_timezone(stralloc_t*  out)
     );
 }
 
+static void
+help_change_language(stralloc_t* out)
+{
+    PRINTF(
+    "  Change the device's language to the language code specified.\n"
+    "  The emulator will cold boot and then restart the framework again for\n"
+    "  the setting to take effect.\n"
+    "  Note that when doing so, the Quickboot snapshot will be overwritten\n"
+    "  unless -no-snapshot-save is also issued.");
+}
+
+static void
+help_change_country(stralloc_t* out)
+{
+    PRINTF(
+    "  Change the device's country to the country code specified.\n"
+    "  The emulator will cold boot and then restart the framework again for\n"
+    "  the setting to take effect.\n"
+    "  Note that when doing so, the Quickboot snapshot will be overwritten\n"
+    "  unless -no-snapshot-save is also issued.");
+}
+
+static void
+help_change_locale(stralloc_t* out)
+{
+    PRINTF(
+    "  Change the device's locale to the locale code specified.\n"
+    "  The emulator will cold boot and then restart the framework again for\n"
+    "  the setting to take effect.\n"
+    "  Note that when doing so, the Quickboot snapshot will be overwritten\n"
+    "  unless -no-snapshot-save is also issued.");
+}
 
 static void
 help_dns_server(stralloc_t*  out)
