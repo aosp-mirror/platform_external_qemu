@@ -22,6 +22,30 @@
       "revId": "b76603b1ca74dbb354820d8b8f5227a163db42e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dc85914_64453d4b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1178,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-06-05T19:43:04Z",
+      "side": 1,
+      "message": "Mostly because we currently rely on the boot complete signal to see when it\u0027s safe to send the adb cmds, and if we load form a snapshot, we do not get this signal. It is totally working to send over the adb commands after a snapshot load, though (though even then a framework restart is still needed)",
+      "parentUuid": "451f112f_93d0c05c",
+      "range": {
+        "startLine": 1178,
+        "startChar": 64,
+        "endLine": 1178,
+        "endChar": 84
+      },
+      "revId": "b76603b1ca74dbb354820d8b8f5227a163db42e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
