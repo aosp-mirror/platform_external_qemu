@@ -46,6 +46,30 @@
       "revId": "b76603b1ca74dbb354820d8b8f5227a163db42e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29302d4f_baf6949c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1178,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-05T19:50:54Z",
+      "side": 1,
+      "message": "Does assigning 1 to changing_language_country_locale prevent snapshots from loading?",
+      "parentUuid": "0dc85914_64453d4b",
+      "range": {
+        "startLine": 1178,
+        "startChar": 64,
+        "endLine": 1178,
+        "endChar": 84
+      },
+      "revId": "b76603b1ca74dbb354820d8b8f5227a163db42e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
