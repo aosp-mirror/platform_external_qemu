@@ -41,6 +41,7 @@ public:
 
 private:
     void composeLayer(ComposeLayer* l);
+    void fillMultiDisplayPostStruct(ComposeLayer* l, int idx, ColorBuffer* cb);
 
 private:
     EGLContext mContext;
