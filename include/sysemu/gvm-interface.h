@@ -822,6 +822,7 @@ struct gvm_msi {
 					struct gvm_userspace_memory_region)
 #define GVM_SET_TSS_ADDR          __IO(GVMIO,   0x47)
 #define GVM_SET_IDENTITY_MAP_ADDR __IOW(GVMIO,  0x48, __u64)
+#define GVM_KICK_VCPU             __IO(GVMIO,   0x49)
 
 /* Device model IOC */
 #define GVM_CREATE_IRQCHIP        __IO(GVMIO,   0x60)

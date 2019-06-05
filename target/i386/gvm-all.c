@@ -1309,11 +1309,14 @@ static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
 
 void gvm_raise_event(CPUState *cpu)
 {
+    GVMState *s = gvm_state;
     struct gvm_run *run = cpu->gvm_run;
+    unsigned long vcpu_id = gvm_arch_vcpu_id(cpu);
 
     if (!run)
         return;
     run->user_event_pending = 1;
+    gvm_vm_ioctl(s, GVM_KICK_VCPU, &vcpu_id, sizeof(vcpu_id), NULL, 0);
 }
 
 static void do_gvm_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
@@ -1426,6 +1429,10 @@ int gvm_cpu_exec(CPUState *cpu)
             break;
         case GVM_EXIT_IRQ_WINDOW_OPEN:
             DPRINTF("irq_window_open\n");
+            ret = EXCP_INTERRUPT;
+            break;
+        case GVM_EXIT_INTR:
+            DPRINTF("gvm raise event exiting\n");
             ret = EXCP_INTERRUPT;
             break;
         case GVM_EXIT_SHUTDOWN:
