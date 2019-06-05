@@ -177,6 +177,61 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
                 std::thread{watchHostCtsFunction, 10}.detach();
             }
+
+            if (changing_language_country_locale) {
+                printf("Changing language, country or locale...\n");
+                if (to_set_language) {
+                    printf("Changing language to %s\n", to_set_language);
+                    adbInterface->enqueueCommand(
+                        { "shell", "su", "0",
+                          "setprop", "persist.sys.language", to_set_language });
+                }
+
+                if (to_set_country) {
+                    printf("Changing country to %s\n", to_set_country);
+                    adbInterface->enqueueCommand(
+                        { "shell", "su", "0",
+                          "setprop", "persist.sys.country", to_set_country });
+                }
+
+                if (to_set_locale) {
+                    printf("Changing locale to %s\n", to_set_locale);
+                    adbInterface->enqueueCommand(
+                        { "shell", "su", "0",
+                          "setprop", "persist.sys.locale", to_set_locale });
+                }
+
+                // On changing language or country, we need to set locale as well,
+                // otherwise the 2nd time and later after it's done once,
+                // the option has no effect!
+                if (!to_set_locale &&
+                    !to_set_country &&
+                    to_set_language) {
+                    adbInterface->enqueueCommand(
+                        { "shell", "su", "0",
+                          "setprop", "persist.sys.locale", to_set_language });
+                }
+
+                if (!to_set_locale &&
+                    to_set_country &&
+                    to_set_language) {
+                    std::string languageCountry(to_set_language);
+                    languageCountry += "-";
+                    languageCountry += to_set_country;
+                    adbInterface->enqueueCommand(
+                        { "shell", "su", "0",
+                          "setprop", "persist.sys.locale", languageCountry.c_str() });
+                }
+
+
+                printf("Restarting framework.\n");
+
+                adbInterface->enqueueCommand(
+                    { "shell", "su", "0",
+                      "setprop", "ctl.restart", "zygote" });
+
+                changing_language_country_locale = 0;
+            }
         }
 
         return;

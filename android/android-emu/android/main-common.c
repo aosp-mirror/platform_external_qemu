@@ -90,6 +90,11 @@ int min_config_qemu_mode = 0;
 
 bool emulator_has_network_option = false;
 
+int changing_language_country_locale = 0;
+const char* to_set_language = 0;
+const char* to_set_country = 0;
+const char* to_set_locale = 0;
+
 #define ONE_MB (1024 * 1024)
 
 unsigned convertBytesToMB( uint64_t  size )

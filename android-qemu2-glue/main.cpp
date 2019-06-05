@@ -1174,6 +1174,20 @@ extern "C" int main(int argc, char** argv) {
             }
         }
         // 2. TODO
+
+        // If we are changing the language, country, or locale, do not load snapshot.
+        if (opts->change_language ||
+            opts->change_country ||
+            opts->change_locale) {
+
+            changing_language_country_locale = 1;
+
+            to_set_language = opts->change_language;
+            to_set_country = opts->change_country;
+            to_set_locale = opts->change_locale;
+
+            opts->no_snapshot_load = true;
+        }
     }
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
