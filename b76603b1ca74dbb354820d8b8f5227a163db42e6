@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "451f112f_93d0c05c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1178,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-05T19:34:54Z",
+      "side": 1,
+      "message": "Is this because an existing snapshot could be created with different options? Does this removes the snapshots feature if users decide to provide these options every time?",
+      "range": {
+        "startLine": 1178,
+        "startChar": 64,
+        "endLine": 1178,
+        "endChar": 84
+      },
+      "revId": "b76603b1ca74dbb354820d8b8f5227a163db42e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
