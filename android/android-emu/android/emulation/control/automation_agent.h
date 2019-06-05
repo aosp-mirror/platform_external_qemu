@@ -43,7 +43,7 @@ typedef struct QAndroidAutomationAgent {
     void (*setMacroName)(StringView macroName, StringView filename);
 
     // Get the macro name from the header of a file.
-    StringView (*getMacroName)(StringView filename);
+    std::string (*getMacroName)(StringView filename);
 
     // Get the duration in nanoseconds from a file.
     uint64_t (*getDurationNs)(StringView filename);

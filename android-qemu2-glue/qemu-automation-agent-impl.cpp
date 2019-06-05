@@ -46,8 +46,7 @@ static void set_macro_name(android::base::StringView macroName,
     AutomationController::get().setMacroName(macroName, filename);
 }
 
-static android::base::StringView get_macro_name(
-        android::base::StringView filename) {
+static std::string get_macro_name(android::base::StringView filename) {
     return AutomationController::get().getMacroName(filename);
 }
 

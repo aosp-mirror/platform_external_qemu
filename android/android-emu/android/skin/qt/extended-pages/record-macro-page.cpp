@@ -247,12 +247,13 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->playStopButton->setEnabled(true);
             break;
         }
-        case MacroUiState::Recording: {
-            mUi->previewLabel->setText(tr("Macro recording ongoing"));
-            mUi->previewLabel->show();
-            mUi->previewOverlay->show();
-            mUi->replayIcon->hide();
+        case MacroUiState::PreRecording: {
             mUi->playStopButton->setEnabled(false);
+            break;
+        }
+        case MacroUiState::Recording: {
+            mUi->playStopButton->setEnabled(false);
+            break;
         }
     }
 
@@ -453,11 +454,26 @@ std::string RecordMacroPage::getMacroNameFromItem(QListWidgetItem* listItem) {
 
 void RecordMacroPage::updateElapsedTime() {
     mSec++;
-    if (mRecording) {
-        QString qs = tr(SECONDS_RECORDING).arg(mSec);
-        mUi->recordingLabel->setText(qs);
-    } else {
-        mMacroItemPlaying->setDisplayTime(getTimerString(mSec));
+    switch (mState) {
+        case MacroUiState::PreRecording: {
+            // Countdown from 3 to 0.
+            QString qs = tr("%1").arg(3 - mSec);
+            mUi->countLabel->setText(qs);
+            if (mSec == 3) {
+                startRecording();
+                return;
+            }
+            break;
+        }
+        case MacroUiState::Recording: {
+            QString qs = tr(SECONDS_RECORDING).arg(mSec);
+            mUi->recordingLabel->setText(qs);
+            break;
+        }
+        default: {
+            mMacroItemPlaying->setDisplayTime(getTimerString(mSec));
+            break;
+        }
     }
     mTimer.start(1000);
 }
@@ -538,7 +554,7 @@ void RecordMacroPage::reportAllMetrics() {
 
 void RecordMacroPage::on_recButton_clicked() {
     if (!mRecording) {
-        startRecording();
+        setMacroUiState(MacroUiState::PreRecording);
     } else {
         stopRecording();
     }
@@ -635,8 +651,23 @@ void RecordMacroPage::setRecordState() {
             mUi->recButton->setEnabled(false);
             break;
         }
+        case MacroUiState::PreRecording: {
+            mUi->stackedWidget->setCurrentIndex(1);
+            mUi->recButton->setEnabled(false);
+            mUi->recordingLabel->setText(tr("Recording will start in"));
+            mUi->cancelButton->show();
+            // Update every second
+            mUi->countLabel->show();
+            mUi->countLabel->setText(tr("3"));
+            mSec = 0;
+            mTimer.start(1000);
+            break;
+        }
         case MacroUiState::Recording: {
             mUi->stackedWidget->setCurrentIndex(1);
+            mUi->countLabel->hide();
+            mUi->cancelButton->hide();
+            mUi->recButton->setEnabled(true);
             mUi->recButton->setIcon(getIconForCurrentTheme("stop_red"));
             mUi->recButton->setProperty("themeIconName", "stop_red");
             mUi->recButton->setText(tr("STOP RECORDING "));
@@ -752,7 +783,7 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         mLengths[macroName] = qs;
 
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-        macroName = sAutomationAgent->getMacroName(filePath).str();
+        macroName = sAutomationAgent->getMacroName(filePath);
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
@@ -829,4 +860,10 @@ void RecordMacroPage::deleteMacroItem(RecordMacroSavedItem* macroItem) {
             displayErrorBox("Deletion failed.");
         }
     }
+}
+
+void RecordMacroPage::on_cancelButton_clicked() {
+    mTimer.stop();
+    enableMacroItems();
+    setMacroUiState(MacroUiState::Waiting);
 }
