@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfa4d146_848bdf85",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-06-05T23:45:22Z",
+      "side": 1,
+      "message": "I think we need to add this line here \"\n        mFb-\u003egetTextureDraw()-\u003eprepareForDrawLayer();\"\nto get rid of the error outputs.",
+      "revId": "8da7d7ff5f239fd32a1df64c415aa69b71388cba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
