@@ -554,6 +554,9 @@ void RecordMacroPage::reportAllMetrics() {
 
 void RecordMacroPage::on_recButton_clicked() {
     if (!mRecording) {
+        if (mVideoPlayer && mVideoPlayer->isRunning()) {
+            mVideoPlayer->stop();
+        }
         setMacroUiState(MacroUiState::PreRecording);
     } else {
         stopRecording();
@@ -561,9 +564,6 @@ void RecordMacroPage::on_recButton_clicked() {
 }
 
 void RecordMacroPage::startRecording() {
-    if (mVideoPlayer && mVideoPlayer->isRunning()) {
-        mVideoPlayer->stop();
-    }
     disableMacroItems();
     mRecording = true;
 
