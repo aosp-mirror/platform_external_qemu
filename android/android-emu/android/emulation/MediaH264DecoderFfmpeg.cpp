@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt,...) fprintf(stderr, "h264-ffmpeg-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -74,11 +74,7 @@ void MediaH264DecoderFfmpeg::initH264ContextInternal(unsigned int width,
 
     mIsInFlush = false;
 
-    if (mDecodedFrame) {
-      delete [] mDecodedFrame;
-    }
-
-    mDecodedFrame = new uint8_t[mOutBufferSize];
+    mDecodedFrame.resize(mOutBufferSize);
 
     // standard ffmpeg codec stuff
     avcodec_register_all();
@@ -143,10 +139,6 @@ void MediaH264DecoderFfmpeg::destroyH264Context() {
         av_frame_free(&mFrame);
         mFrame = NULL;
     }
-    if (mDecodedFrame) {
-      delete [] mDecodedFrame;
-      mDecodedFrame = nullptr;
-    }
 }
 
 void MediaH264DecoderFfmpeg::resetDecoder() {
@@ -155,6 +147,62 @@ void MediaH264DecoderFfmpeg::resetDecoder() {
     av_free(mCodecCtx);
     mCodecCtx = avcodec_alloc_context3(mCodec);
     avcodec_open2(mCodecCtx, mCodec, 0);
+}
+
+bool MediaH264DecoderFfmpeg::checkSpsFrame(const uint8_t* frame,
+                                           size_t szBytes) {
+    const uint8_t* currNalu =
+            H264NaluParser::getNextStartCodeHeader(frame, szBytes);
+    if (currNalu == nullptr) {
+        return false;
+    }
+
+    size_t remaining = szBytes - (currNalu - frame);
+    size_t currNaluSize = remaining;
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(currNalu, currNaluSize, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::SPS) {
+        return false;
+    }
+    H264_DPRINT("found sps");
+    return true;
+}
+
+bool MediaH264DecoderFfmpeg::checkIFrame(const uint8_t* frame, size_t szBytes) {
+    const uint8_t* currNalu =
+            H264NaluParser::getNextStartCodeHeader(frame, szBytes);
+    if (currNalu == nullptr) {
+        return false;
+    }
+
+    size_t remaining = szBytes - (currNalu - frame);
+    size_t currNaluSize = remaining;
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(currNalu, currNaluSize, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::CodedSliceIDR) {
+        return false;
+    }
+    H264_DPRINT("found i frame");
+    return true;
+}
+
+bool MediaH264DecoderFfmpeg::checkPpsFrame(const uint8_t* frame,
+                                           size_t szBytes) {
+    const uint8_t* currNalu =
+            H264NaluParser::getNextStartCodeHeader(frame, szBytes);
+    if (currNalu == nullptr) {
+        return false;
+    }
+
+    size_t remaining = szBytes - (currNalu - frame);
+    size_t currNaluSize = remaining;
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(currNalu, currNaluSize, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::PPS) {
+        return false;
+    }
+    H264_DPRINT("found pps");
+    return true;
 }
 
 bool MediaH264DecoderFfmpeg::checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes) {
@@ -225,6 +273,32 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
     size_t* retSzBytes = param.pConsumedBytes;
     int32_t* retErr = param.pDecoderErrorCode;
 
+    const bool enableSnapshot = true;
+    if (enableSnapshot) {
+        std::vector<uint8_t> v;
+        v.assign(frame, frame + szBytes);
+        bool hasSps = checkSpsFrame(frame, szBytes);
+        if (hasSps) {
+            SnapshotState tmp{};
+            std::swap(tmp, mSnapshotState);
+            mSnapshotState.saveSps(v);
+        } else {
+            bool hasPps = checkPpsFrame(frame, szBytes);
+            if (hasPps) {
+                mSnapshotState.savePps(v);
+                mSnapshotState.savedPackets.clear();
+            } else {
+                bool isIFrame = checkIFrame(frame, szBytes);
+                if (isIFrame) {
+                    mSnapshotState.savedPackets.clear();
+                }
+            }
+            mSnapshotState.savePacket(std::move(v));
+            H264_DPRINT("saving packet; total is %d",
+                        (int)(mSnapshotState.savedPackets.size()));
+        }
+    }
+
     if (!mIsSoftwareDecoder) {
         bool configChanged = checkWhetherConfigChanged(frame, szBytes);
         if (configChanged) {
@@ -270,29 +344,32 @@ void MediaH264DecoderFfmpeg::copyFrame() {
     if (w != mOutputWidth || h != mOutputHeight) {
         mOutputWidth = w;
         mOutputHeight= h;
-        delete [] mDecodedFrame;
         mOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
-        mDecodedFrame = new uint8_t[mOutBufferSize];
+        mDecodedFrame.resize(mOutBufferSize);
     }
     H264_DPRINT("w %d h %d Y line size %d U line size %d V line size %d", w, h,
             mFrame->linesize[0], mFrame->linesize[1], mFrame->linesize[2]);
     for (int i = 0; i < h; ++i) {
-      memcpy(mDecodedFrame + i * w, mFrame->data[0] + i * mFrame->linesize[0], w);
+        memcpy(mDecodedFrame.data() + i * w,
+               mFrame->data[0] + i * mFrame->linesize[0], w);
     }
     H264_DPRINT("format is %d and NV21 is %d  12 is %d", mFrame->format, (int)AV_PIX_FMT_NV21,
             (int)AV_PIX_FMT_NV12);
     if (mFrame->format == AV_PIX_FMT_NV12) {
         for (int i=0; i < h / 2; ++i) {
-            memcpy(w * h + mDecodedFrame + i * w, mFrame->data[1] + i * mFrame->linesize[1], w);
+            memcpy(w * h + mDecodedFrame.data() + i * w,
+                   mFrame->data[1] + i * mFrame->linesize[1], w);
         }
         YuvConverter<uint8_t> convert8(mOutputWidth, mOutputHeight);
-        convert8.UVInterleavedToPlanar(mDecodedFrame);
+        convert8.UVInterleavedToPlanar(mDecodedFrame.data());
     } else {
         for (int i=0; i < h / 2; ++i) {
-            memcpy(w * h + mDecodedFrame + i * w/2, mFrame->data[1] + i * mFrame->linesize[1], w / 2);
+            memcpy(w * h + mDecodedFrame.data() + i * w / 2,
+                   mFrame->data[1] + i * mFrame->linesize[1], w / 2);
         }
         for (int i=0; i < h / 2; ++i) {
-            memcpy(w * h + w * h / 4 + mDecodedFrame + i * w/2, mFrame->data[2] + i * mFrame->linesize[2], w / 2);
+            memcpy(w * h + w * h / 4 + mDecodedFrame.data() + i * w / 2,
+                   mFrame->data[2] + i * mFrame->linesize[2], w / 2);
         }
     }
     mColorPrimaries = mFrame->color_primaries;
@@ -326,11 +403,6 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
 
     static int numbers=0;
     //H264_DPRINT("calling getImage %d", numbers++);
-    if (!mDecodedFrame) {
-        H264_DPRINT("%s: frame is null", __func__);
-        *retErr = static_cast<int>(Err::NoDecodedFrame);
-        return;
-    }
     if (!mImageReady) {
         if (mFrameFormatChanged) {
             *retWidth = mOutputWidth;
@@ -378,19 +450,49 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
 
     if (mParser.version() == 100) {
         uint8_t* dst = param.pDecodedFrame;
-        memcpy(dst, mDecodedFrame, mOutBufferSize);
+        memcpy(dst, mDecodedFrame.data(), mOutBufferSize);
     } else if (mParser.version() == 200) {
         if (param.hostColorBufferId >= 0) {
-            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, mOutputWidth,
-                                          mOutputHeight, mDecodedFrame);
+            mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+                                              mOutputWidth, mOutputHeight,
+                                              mDecodedFrame.data());
         } else {
             uint8_t* dst = param.pDecodedFrame;
-            memcpy(dst, mDecodedFrame, mOutBufferSize);
+            memcpy(dst, mDecodedFrame.data(), mOutBufferSize);
         }
     }
 
     mImageReady = false;
     *retErr = mOutBufferSize;
+}
+
+void MediaH264DecoderFfmpeg::save(base::Stream* stream) const {
+    stream->putBe64(mOutputPts);
+
+    mSnapshotState.id = mId;
+    mSnapshotState.width = mOutputWidth;
+    mSnapshotState.height = mOutputHeight;
+
+    if (mImageReady) {
+        mSnapshotState.saveDecodedFrame(mDecodedFrame);
+    }
+    mSnapshotState.save(stream);
+}
+
+bool MediaH264DecoderFfmpeg::load(base::Stream* stream) {
+    mOutputPts = stream->getBe64();
+    mSnapshotState.load(stream);
+
+    mId = mSnapshotState.id;
+    mOutputWidth = mSnapshotState.width;
+    mOutputHeight = mSnapshotState.height;
+    if (mSnapshotState.savedDecodedFrame.size() > 0) {
+        mDecodedFrame = mSnapshotState.savedDecodedFrame;
+        mImageReady = true;
+    } else {
+        mImageReady = false;
+    }
+    return true;
 }
 
 }  // namespace emulation
