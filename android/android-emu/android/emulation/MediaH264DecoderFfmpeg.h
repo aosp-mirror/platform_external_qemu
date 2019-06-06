@@ -59,8 +59,13 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
     explicit MediaH264DecoderFfmpeg(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderFfmpeg();
+
+    virtual int type() const override { return PLUGIN_TYPE_FFMPEG; }
 
     friend MediaH264DecoderDefault;
 
@@ -88,6 +93,8 @@ private:
     bool mIsInFlush = false;
     bool mFrameFormatChanged = false;
     static constexpr int kBPP = 2; // YUV420 is 2 bytes per pixel
+    unsigned int mWidth = 0;
+    unsigned int mHeight = 0;
     unsigned int mOutputHeight = 0;
     unsigned int mOutputWidth = 0;
     unsigned int mColorPrimaries = 2;
@@ -108,9 +115,7 @@ private:
     // and output address is only available in getImage().
     // TODO: this should be set to the output address to avoid
     // extra copying
-    uint8_t *mDecodedFrame = nullptr;
-
-
+    std::vector<uint8_t> mDecodedFrame;
 
     // ffmpeg stuff
     AVCodec *mCodec = nullptr;;
@@ -119,10 +124,18 @@ private:
     AVPacket mPacket;
 
 private:
+    mutable SnapshotState mSnapshotState;
+
+private:
     void copyFrame();
     void resetDecoder();
     bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
 
+    bool checkSpsFrame(const uint8_t* frame, size_t szBytes);
+    bool checkPpsFrame(const uint8_t* frame, size_t szBytes);
+    bool checkIFrame(const uint8_t* frame, size_t szBytes);
+
+    void oneShotDecode(std::vector<uint8_t>& data, uint64_t pts);
 };  // MediaH264DecoderFfmpeg
 
 

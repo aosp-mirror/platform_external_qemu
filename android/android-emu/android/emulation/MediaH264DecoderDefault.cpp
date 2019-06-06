@@ -215,11 +215,30 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
 }
 
 void MediaH264DecoderDefault::save(base::Stream* stream) const {
-    // NOT IMPLEMENTED
+    stream->putBe64(mId);
+    int size = mDecoders.size();
+    stream->putBe32(size);
+    for (auto item : mDecoders) {
+        stream->putBe64(item.first);
+        stream->putBe32(item.second->type());
+        item.second->save(stream);
+    }
 }
 
 bool MediaH264DecoderDefault::load(base::Stream* stream) {
-    // NOT IMPLEMENTED
+    mId = stream->getBe64();
+    int size = stream->getBe32();
+    for (int i = 0; i < size; ++i) {
+        // this is hacky; but we have to know the plugin type
+        uint64_t id = stream->getBe64();
+        int type = stream->getBe32();
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_FFMPEG) {  // ffmpeg
+            MediaH264DecoderFfmpeg* decoder =
+                    new MediaH264DecoderFfmpeg(id, H264PingInfoParser(100));
+            decoder->load(stream);
+            mDecoders[id] = decoder;
+        }
+    }
     return true;
 }
 
