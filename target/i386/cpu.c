@@ -4945,14 +4945,72 @@ static const TypeInfo x86_base_cpu_type_info = {
         .class_init = x86_cpu_base_class_init,
 };
 
+const X86CPUDefinition *x86_cpu_find_tmpl(const X86CPUDefinition *cpu,
+                                          int n,
+                                          const char *name)
+{
+    for (; n > 0; ++cpu, --n) {
+        if (!strcmp(cpu->name, name)) {
+            return cpu;
+        }
+    }
+
+    return NULL;
+}
+
+void x86_cpu_build_from_features(const X86CPUDefinition *base_cpu,
+                                 X86CPUDefinition *new_cpu,
+                                 const char *new_cpu_name,
+                                 uint32_t extra_ecx,
+                                 uint32_t extra_edx)
+{
+    *new_cpu = *base_cpu;
+    new_cpu->name = new_cpu_name;
+    new_cpu->features[FEAT_1_ECX] |= extra_ecx;
+    new_cpu->features[FEAT_1_EDX] |= extra_edx;
+}
+
+static void x86_cpu_init_android_cpus(const X86CPUDefinition *cpus,
+                                      int cpus_size,
+                                      const char *cpu_name,
+                                      const char *new_cpu_name,
+                                      uint32_t extra_ecx,
+                                      uint32_t extra_edx,
+                                      X86CPUDefinition *new_cpu)
+
+{
+    const X86CPUDefinition *base_cpu = x86_cpu_find_tmpl(cpus, cpus_size, cpu_name);
+    if (base_cpu) {
+        uint32_t eax, ebx, ecx, edx;
+        host_cpuid(1, 0, &eax, &ebx, &ecx, &edx);
+
+        x86_cpu_build_from_features(base_cpu, new_cpu, new_cpu_name,
+                                    ecx & extra_ecx, edx & extra_edx);
+    }
+}
+
+static X86CPUDefinition android64_cpu_whitelist;
+
 static void x86_cpu_register_types(void)
 {
     int i;
+    x86_cpu_init_android_cpus(builtin_x86_defs,
+                              ARRAY_SIZE(builtin_x86_defs),
+                              "android64",
+                              "android64-whitelist",
+                              CPUID_EXT_AES, /* extra ecx */
+                              0,             /* extra edx */
+                              &android64_cpu_whitelist);
 
     type_register_static(&x86_cpu_type_info);
     for (i = 0; i < ARRAY_SIZE(builtin_x86_defs); i++) {
         x86_register_cpudef_type(&builtin_x86_defs[i]);
     }
+
+    if (android64_cpu_whitelist.name) {
+        x86_register_cpudef_type(&android64_cpu_whitelist);
+    }
+
     type_register_static(&max_x86_cpu_type_info);
     type_register_static(&x86_base_cpu_type_info);
 #ifdef CONFIG_KVM
