@@ -93,6 +93,7 @@ public:
 
 public:
     explicit H264PingInfoParser(void* ptr);
+    H264PingInfoParser(uint32_t version);
     ~H264PingInfoParser() = default;
 
     uint32_t version() const { return mVersion; }
