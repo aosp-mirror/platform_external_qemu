@@ -49,7 +49,7 @@ public:
     ~CarClusterConnector();
 
     static void processFrame(const uint8_t* frame, int frameSize);
-    void startSendingStartRequest();
+    void start();
 
 private:
     CarClusterWindow* mCarClusterWindow;
@@ -76,6 +76,7 @@ private:
     android::base::MessageChannel<int, 2> mRefreshMsg;
 
     void stopSendingStartRequest();
+    void startSendingStartRequest();
 
     QPixmap mPixmap;
 
