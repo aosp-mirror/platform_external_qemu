@@ -831,6 +831,20 @@ public:
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
+        auto memIt = mMapInfo.begin();
+
+        while (memIt != mMapInfo.end()) {
+            if (memIt->second.device == device) {
+                auto mem = memIt->first;
+                freeMemoryLocked(
+                    dispatch_VkDevice(it->second.boxed),
+                        device, mem, nullptr);
+                memIt = mMapInfo.erase(memIt);
+            } else {
+                ++memIt;
+            }
+        }
+
         auto eraseIt = mQueueInfo.begin();
         for(; eraseIt != mQueueInfo.end();) {
             if (eraseIt->second.device == device) {
@@ -2141,6 +2155,9 @@ public:
             memoryProperties
             .memoryTypes[allocInfo.memoryTypeIndex]
             .propertyFlags;
+        mapInfo.dispatch = vk;
+        mapInfo.propertyFlags = flags;
+        mapInfo.memoryTypeIndex = allocInfo.memoryTypeIndex;
 
         bool hostVisible =
             flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
@@ -3045,7 +3062,15 @@ public:
     GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_IMPL)
         GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_IMPL)
 
-        VkDecoderSnapshot* snapshot() { return &mSnapshot; }
+    VkDecoderSnapshot* snapshot() { return &mSnapshot; }
+
+    void forEachDeviceMemory(VkDecoderGlobalState::DeviceMemoryCallback cb) {
+        for (auto it : mMapInfo) {
+            const auto& info = it.second;
+            cb(info.dispatch, info.device, (uint64_t)unboxed_to_boxed_non_dispatchable_VkDeviceMemory(it.first),
+               it.first, info.size, info.propertyFlags, info.memoryTypeIndex, (uint8_t*)info.ptr, info.guestPhysAddr);
+        }
+    }
 
 private:
     bool isEmulatedExtension(const char* name) const {
@@ -3810,21 +3835,6 @@ private:
         }
 
         for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
-            auto it = mMapInfo.begin();
-            while (it != mMapInfo.end()) {
-                if (it->second.device == devicesToDestroy[i]) {
-                    auto mem = it->first;
-                    freeMemoryLocked(devicesToDestroyDispatches[i],
-                            devicesToDestroy[i],
-                            mem, nullptr);
-                    it = mMapInfo.erase(it);
-                } else {
-                    ++it;
-                }
-            }
-        }
-
-        for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
             destroyDeviceLocked(devicesToDestroy[i], nullptr);
             mDeviceInfo.erase(devicesToDestroy[i]);
             mDeviceToPhysicalDevice.erase(devicesToDestroy[i]);
@@ -4028,8 +4038,15 @@ private:
         uint64_t guestPhysAddr = 0;
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
-        VkDevice device = VK_NULL_HANDLE;
+        // For MoltenVK
         IOSurfaceRef ioSurface = nullptr;
+        // A redundant but convenient way to get the
+        // VulkanDispatch, VkDevice, property flags,
+        // and memory type index.
+        VkDevice device = VK_NULL_HANDLE;
+        VulkanDispatch* dispatch = nullptr;
+        VkMemoryPropertyFlags propertyFlags = 0;
+        uint32_t memoryTypeIndex = 0;
     };
 
     struct InstanceInfo {
@@ -4978,6 +4995,10 @@ void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
 
 VkDecoderSnapshot* VkDecoderGlobalState::snapshot() {
     return mImpl->snapshot();
+}
+
+void VkDecoderGlobalState::forEachDeviceMemory(VkDecoderGlobalState::DeviceMemoryCallback cb) {
+    mImpl->forEachDeviceMemory(cb);
 }
 
 #define DEFINE_TRANSFORMED_TYPE_IMPL(type) \
