@@ -393,6 +393,12 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     *retErr = mOutBufferSize;
 }
 
+void MediaH264DecoderFfmpeg::save(base::Stream* stream) const {}
+
+bool MediaH264DecoderFfmpeg::load(base::Stream* stream) {
+    return true;
+}
+
 }  // namespace emulation
 }  // namespace android
 

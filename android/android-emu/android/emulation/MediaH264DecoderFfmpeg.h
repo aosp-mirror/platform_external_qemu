@@ -59,6 +59,9 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
     explicit MediaH264DecoderFfmpeg(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderFfmpeg();
 
@@ -117,6 +120,9 @@ private:
     AVCodecContext *mCodecCtx = nullptr;
     AVFrame *mFrame = nullptr;
     AVPacket mPacket;
+
+private:
+    SnapshotState mSnapshotState;
 
 private:
     void copyFrame();
