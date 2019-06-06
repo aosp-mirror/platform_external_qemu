@@ -47,6 +47,9 @@ typedef struct QAndroidAutomationAgent {
 
     // Get the duration in nanoseconds from a file.
     uint64_t (*getDurationNs)(StringView filename);
+
+    // Get the timestamp in milliseconds from a file.
+    uint64_t (*getTimestampMs)(StringView filename);
 } QAndroidAutomationAgent;
 
 ANDROID_END_HEADER

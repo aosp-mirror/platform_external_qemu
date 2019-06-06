@@ -774,6 +774,8 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
     } else {
         const std::string macrosLocation = getCustomMacrosDirectory();
         const std::string filePath = PathUtils::join(macrosLocation, macroName);
+
+        // Duration
         uint64_t durationNs = sAutomationAgent->getDurationNs(filePath);
         int durationS = durationNs / 1000000000;
         QString qs = tr("%1:%2%3")
@@ -782,7 +784,13 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
                              .arg(durationS % 60);
         mLengths[macroName] = qs;
 
+        // Description
+        QDateTime dt;
+        dt.setMSecsSinceEpoch(sAutomationAgent->getTimestampMs(filePath));
+        mDescriptions[macroName] = dt.toString("MM-dd-yyyy hh:mm::ss");
+
         macroSavedItem->setDisplayTime(mLengths[macroName]);
+        macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroName = sAutomationAgent->getMacroName(filePath);
         connect(macroSavedItem,
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
