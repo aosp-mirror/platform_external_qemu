@@ -7,6 +7,7 @@ message FileHeader {
     optional InitialState initial_state = 2;
     optional uint64 duration_ns = 3;
     optional string name = 4;
+    optional uint64 record_datetime = 5;
 }
 
 message InitialState {

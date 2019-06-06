@@ -139,8 +139,10 @@ public:
     // Get the macro name from the header of a file.
     virtual std::string getMacroName(android::base::StringView filename) = 0;
 
-    // Get the duration in nanoseconds from a file.
-    virtual uint64_t getDurationNs(android::base::StringView filename) = 0;
+    // Get the duration in ns and datetime in ms from a file.
+    virtual std::pair<uint64_t, uint64_t> getMetadata(
+            android::base::StringView filename) = 0;
+
     //
     // Offworld API
     //
