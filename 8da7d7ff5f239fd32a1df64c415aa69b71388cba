@@ -16,6 +16,24 @@
       "revId": "8da7d7ff5f239fd32a1df64c415aa69b71388cba",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "040ec81f_9c4e4bfb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-06-06T16:31:27Z",
+      "side": 1,
+      "message": "Actually, this function prepareForDrawLayer() probably only needs to be called once",
+      "parentUuid": "cfa4d146_848bdf85",
+      "revId": "8da7d7ff5f239fd32a1df64c415aa69b71388cba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
