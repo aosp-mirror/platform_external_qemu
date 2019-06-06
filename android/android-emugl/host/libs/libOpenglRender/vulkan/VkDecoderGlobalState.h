@@ -18,6 +18,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include <functional>
 #include <memory>
 
 #include "cereal/common/goldfish_vk_private_defs.h"
@@ -594,6 +595,9 @@ public:
 
     // Snapshot access
     VkDecoderSnapshot* snapshot();
+    using DeviceMemoryCallback =
+        std::function<void(uint64_t, VkDeviceMemory, VkDeviceSize, VkMemoryPropertyFlags, uint32_t, uint8_t*)>;
+    void forEachDeviceMemory(DeviceMemoryCallback cb);
 
 #define DEFINE_TRANSFORMED_TYPE_PROTOTYPE(type) \
     void transformImpl_##type##_tohost(const type*, uint32_t); \

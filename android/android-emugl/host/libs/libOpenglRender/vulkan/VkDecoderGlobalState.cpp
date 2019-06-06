@@ -2102,6 +2102,8 @@ public:
             memoryProperties
             .memoryTypes[allocInfo.memoryTypeIndex]
             .propertyFlags;
+        mapInfo.propertyFlags = flags;
+        mapInfo.memoryTypeIndex = allocInfo.memoryTypeIndex;
 
         bool hostVisible =
             flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
@@ -2998,7 +3000,14 @@ public:
     GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_API_IMPL)
         GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_IMPL)
 
-        VkDecoderSnapshot* snapshot() { return &mSnapshot; }
+    VkDecoderSnapshot* snapshot() { return &mSnapshot; }
+
+    void forEachDeviceMemory(VkDecoderGlobalState::DeviceMemoryCallback cb) {
+        for (auto it : mMapInfo) {
+            VkDeviceMemory mem = it.first;
+
+        }
+    }
 
 private:
     bool isEmulatedExtension(const char* name) const {
@@ -3963,6 +3972,10 @@ private:
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
         VkDevice device = VK_NULL_HANDLE;
+        // A redundant but convenient way to get the property flags
+        // and memory type index.
+        VkMemoryPropertyFlags propertyFlags = 0;
+        uint32_t memoryTypeIndex = 0;
     };
 
     struct InstanceInfo {
@@ -4911,6 +4924,10 @@ void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
 
 VkDecoderSnapshot* VkDecoderGlobalState::snapshot() {
     return mImpl->snapshot();
+}
+
+void VkDecoderGlobalState::forEachDeviceMemory(VkDecoderGlobalState::DeviceMemoryCallback cb) {
+    mImpl->forEachDeviceMemory(cb);
 }
 
 #define DEFINE_TRANSFORMED_TYPE_IMPL(type) \
