@@ -59,6 +59,9 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
     explicit MediaH264DecoderFfmpeg(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderFfmpeg();
 
@@ -119,9 +122,14 @@ private:
     AVPacket mPacket;
 
 private:
+    mutable SnapshotState mSnapshotState;
+
+private:
     void copyFrame();
     void resetDecoder();
     bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
+
+    bool checkSpsFrame(const uint8_t* frame, size_t szBytes);
 
 };  // MediaH264DecoderFfmpeg
 

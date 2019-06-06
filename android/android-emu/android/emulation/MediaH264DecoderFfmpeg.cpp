@@ -157,6 +157,24 @@ void MediaH264DecoderFfmpeg::resetDecoder() {
     avcodec_open2(mCodecCtx, mCodec, 0);
 }
 
+bool MediaH264DecoderFfmpeg::checkSpsFrame(const uint8_t* frame,
+                                           size_t szBytes) {
+    const uint8_t* currNalu =
+            H264NaluParser::getNextStartCodeHeader(frame, szBytes);
+    if (currNalu == nullptr) {
+        return false;
+    }
+
+    size_t remaining = szBytes - (currNalu - frame);
+    size_t currNaluSize = remaining;
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(currNalu, currNaluSize, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::SPS) {
+        return false;
+    }
+    return true;
+}
+
 bool MediaH264DecoderFfmpeg::checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes) {
     // get frame type
     // if the frame is none SPS/PPS, return false
@@ -224,6 +242,20 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
     // Second return parameter is the error code
     size_t* retSzBytes = param.pConsumedBytes;
     int32_t* retErr = param.pDecoderErrorCode;
+
+    const bool enableSnapshot = true;
+    if (enableSnapshot) {
+        std::vector<uint8_t> v;
+        v.assign(frame, frame + szBytes);
+        bool hasSps = checkSpsFrame(frame, szBytes);
+        if (hasSps) {
+            SnapshotState tmp{};
+            std::swap(tmp, mSnapshotState);
+            mSnapshotState.saveSps(v);
+        } else {
+            mSnapshotState.savePacket(std::move(v));
+        }
+    }
 
     if (!mIsSoftwareDecoder) {
         bool configChanged = checkWhetherConfigChanged(frame, szBytes);
@@ -391,6 +423,20 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
 
     mImageReady = false;
     *retErr = mOutBufferSize;
+}
+
+void MediaH264DecoderFfmpeg::save(base::Stream* stream) const {
+    if (mImageReady) {
+        std::vector<uint8_t> v;
+        v.assign(mDecodedFrame, mDecodedFrame + mOutBufferSize);
+        mSnapshotState.saveDecodedFrame(std::move(v));
+    }
+    mSnapshotState.save(stream);
+}
+
+bool MediaH264DecoderFfmpeg::load(base::Stream* stream) {
+    mSnapshotState.load(stream);
+    return true;
 }
 
 }  // namespace emulation
