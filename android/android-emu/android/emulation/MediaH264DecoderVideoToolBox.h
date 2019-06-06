@@ -50,6 +50,9 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
     explicit MediaH264DecoderVideoToolBox(uint64_t id,
                                           H264PingInfoParser parser);
     virtual ~MediaH264DecoderVideoToolBox();
@@ -127,6 +130,16 @@ private:
     std::vector<uint8_t> mPPS; // pps NALU
 
     bool mIsInFlush = false;
+private:
+    struct SnapshotState {
+        std::vector<uint8_t> sps; // sps NALU
+        std::vector<uint8_t> pps; // pps NALU
+        std::vector<std::vector<uint8_t>> savedPackets;
+        std::vector<uint8_t> savedDecodedFrame; // only one or nothing
+    };
+
+    SnapshotState  mSnapshotState;
+
 }; // MediaH264DecoderVideoToolBox
 
 
