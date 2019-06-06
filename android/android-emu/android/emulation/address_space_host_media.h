@@ -26,7 +26,7 @@ namespace emulation {
 
 class AddressSpaceHostMediaContext : public AddressSpaceDeviceContext {
 public:
-    AddressSpaceHostMediaContext(uint64_t phys_addr);
+    AddressSpaceHostMediaContext(uint64_t phys_addr, bool fromSnapshot);
     void perform(AddressSpaceDevicePingInfo *info) override;
 
     AddressSpaceDeviceType getDeviceType() const override;
@@ -34,7 +34,7 @@ public:
     bool load(base::Stream* stream) override;
 
 private:
-    void allocatePages(uint64_t phys_addr, int num_pages);
+    static void* allocatePages(uint64_t phys_addr, int num_pages);
     void handleMediaRequest(AddressSpaceDevicePingInfo *info);
     static MediaCodecType getMediaCodecType(uint64_t metadata);
     static MediaOperation getMediaOperation(uint64_t metadata);
@@ -42,9 +42,11 @@ private:
     static constexpr int kAlignment = 4096;
     static constexpr int kNumPages = 1 + 4096 * 2; // 32M + 4k
     bool isMemoryAllocated = false;
-    MediaVpxDecoder mVpxDecoder;
+    std::unique_ptr<MediaVpxDecoder> mVpxDecoder;
     std::unique_ptr<MediaH264Decoder> mH264Decoder;
+    int mNumActiveDecoders = 0;
     void* mPhysAddr = nullptr;
+    uint64_t mGuestAddr = 0;
 };
 
 }  // namespace emulation

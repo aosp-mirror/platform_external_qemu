@@ -18,7 +18,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/base/AlignedBuf.h"
 
-#define AS_DEVICE_DEBUG 0
+#define AS_DEVICE_DEBUG 1
 
 #if AS_DEVICE_DEBUG
 #define AS_DEVICE_DPRINT(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -31,6 +31,11 @@ namespace emulation {
 
 namespace {
 
+enum class DecoderType : uint8_t {
+    Vpx = 0,
+    H264 = 1,
+};
+
 void* getHostAddress(uint64_t guest_phys_addr) {
     void* ptr = goldfish_address_space_get_vm_operations()->physicalMemoryGetAddr(guest_phys_addr);
     return ptr;
@@ -38,8 +43,12 @@ void* getHostAddress(uint64_t guest_phys_addr) {
 
 };  // namespace
 
-AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr) {
-    allocatePages(phys_addr, kNumPages);
+AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, bool fromSnapshot) {
+    // The memory is allocated in the snapshot load if called from a snapshot load().
+    if (!fromSnapshot) {
+        mGuestAddr = phys_addr;
+        mPhysAddr = allocatePages(phys_addr, kNumPages);
+    }
 }
 
 void AddressSpaceHostMediaContext::perform(AddressSpaceDevicePingInfo *info) {
@@ -51,22 +60,54 @@ AddressSpaceDeviceType AddressSpaceHostMediaContext::getDeviceType() const {
 }
 
 void AddressSpaceHostMediaContext::save(base::Stream* stream) const {
-    mVpxDecoder.save(stream);
+    AS_DEVICE_DPRINT("Saving Host Media snapshot");
+    stream->putBe64(mGuestAddr);
+    stream->putBe32(mNumActiveDecoders);
+    if (mVpxDecoder != nullptr) {
+        AS_DEVICE_DPRINT("Saving VpxDecoder snapshot");
+        stream->putBe32((uint32_t)DecoderType::Vpx);
+        mVpxDecoder->save(stream);
+    }
     if (mH264Decoder != nullptr) {
+        AS_DEVICE_DPRINT("Saving H264Decoder snapshot");
+        stream->putBe32((uint32_t)DecoderType::H264);
         mH264Decoder->save(stream);
     }
 }
 
 bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
-    // TODO: NOT IMPLEMENTED
-    return false;
+    AS_DEVICE_DPRINT("Loading Host Media snapshot");
+    mGuestAddr = stream->getBe64();
+    mPhysAddr = allocatePages(mGuestAddr, kNumPages);
+
+    mNumActiveDecoders = stream->getBe32();
+    for (int i = 0; i < mNumActiveDecoders; ++i) {
+        DecoderType t = (DecoderType)stream->getBe32();
+        switch (t) {
+        case DecoderType::Vpx:
+            AS_DEVICE_DPRINT("Loading VpxDecoder snapshot");
+            mVpxDecoder.reset(new MediaVpxDecoder);
+            mVpxDecoder->load(stream);
+            break;
+        case DecoderType::H264:
+            AS_DEVICE_DPRINT("Loading H264Decoder snapshot");
+            mH264Decoder.reset(MediaH264Decoder::create());
+            mH264Decoder->load(stream);
+            break;
+        default:
+            break;
+        }
+    }
+    return true;
 }
 
-void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pages) {
-    mPhysAddr = android::aligned_buf_alloc(kAlignment, num_pages * 4096);
-    goldfish_address_space_get_vm_operations()->mapUserBackedRam(phys_addr, mPhysAddr, num_pages * 4096);
+// static
+void* AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pages) {
+    void* hostPhysAddr = android::aligned_buf_alloc(kAlignment, num_pages * kAlignment);
+    goldfish_address_space_get_vm_operations()->mapUserBackedRam(phys_addr, hostPhysAddr, num_pages * kAlignment);
     AS_DEVICE_DPRINT("Allocating host memory for media context: guest_addr 0x%11x, 0x%11x",
-                     phys_addr, mPhysAddr);
+                     phys_addr, hostPhysAddr);
+    return hostPhysAddr;
 }
 
 // static
@@ -105,13 +146,18 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
     switch (codecType) {
         case MediaCodecType::VP8Codec:
         case MediaCodecType::VP9Codec:
-            mVpxDecoder.handlePing(codecType,
+            if (!mVpxDecoder) {
+                mVpxDecoder.reset(new MediaVpxDecoder);
+                ++mNumActiveDecoders;
+            }
+            mVpxDecoder->handlePing(codecType,
                                    op,
                                    getHostAddress(info->phys_addr));
             break;
         case MediaCodecType::H264Codec:
             if (!mH264Decoder) {
                 mH264Decoder.reset(MediaH264Decoder::create());
+                ++mNumActiveDecoders;
             }
             mH264Decoder->handlePing(codecType,
                                      op,

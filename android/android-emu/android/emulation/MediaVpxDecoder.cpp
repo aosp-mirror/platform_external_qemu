@@ -58,7 +58,7 @@ void MediaVpxDecoder::save(base::Stream* stream) const {
 
 bool MediaVpxDecoder::load(base::Stream* stream) {
     // NOT IMPLEMENTED
-    return false;
+    return true;
 }
 
 void MediaVpxDecoder::initVpxContext(void* ptr, MediaCodecType type) {
