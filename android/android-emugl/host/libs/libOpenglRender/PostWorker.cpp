@@ -11,6 +11,21 @@ PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mFb(FrameBuffer::getFB()),
     mBindSubwin(cb) {}
 
+void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l, int idx, ColorBuffer* cb) {
+    l->composeMode = HWC2_COMPOSITION_DEVICE;
+    l->blendMode = HWC2_BLEND_MODE_NONE;
+    l->transform = (hwc_transform_t)0;
+    l->alpha = 1.0;
+    l->displayFrame.left = mFb->m_displays[idx].pos_x;
+    l->displayFrame.top = mFb->m_displays[idx].pos_y;
+    l->displayFrame.right = mFb->m_displays[idx].pos_x + mFb->m_displays[idx].width;
+    l->displayFrame.bottom =  mFb->m_displays[idx].pos_y + mFb->m_displays[idx].height;
+    l->crop.left = 0.0;
+    l->crop.top = (float)cb->getHeight();
+    l->crop.right = (float)cb->getWidth();
+    l->crop.bottom = 0.0;
+}
+
 void PostWorker::post(ColorBuffer* cb) {
     // bind the subwindow eglSurface
     if (!m_initialized) {
@@ -25,7 +40,6 @@ void PostWorker::post(ColorBuffer* cb) {
     int zRot = mFb->getZrot();
 
     cb->waitSync();
-    GLuint tex = cb->scale();
 
     // Find the x and y values at the origin when "fully scrolled."
     // Multiply by 2 because the texture goes from -1 to 1, not 0 to 1.
@@ -37,34 +51,29 @@ void PostWorker::post(ColorBuffer* cb) {
     // finally, compute translation values
     float dx = px * fx;
     float dy = py * fy;
+
     if (mFb->m_displays.size() > 1 ) {
-        int totalW, totalH;
-        mFb->getCombinedDisplaySize(&totalW, &totalH);
-        s_gles2.glViewport(m_viewportWidth * mFb->m_displays[0].pos_x / totalW,
-                           m_viewportHeight * mFb->m_displays[0].pos_y / totalH,
-                           m_viewportWidth * mFb->m_displays[0].width / totalW,
-                           m_viewportHeight * mFb->m_displays[0].height / totalH);
-        // render the color buffer to the window and apply the overlay
-        cb->postWithOverlay(tex, zRot, dx, dy);
-        // then post the multi windows
+        int combinedW, combinedH;
+        mFb->getCombinedDisplaySize(&combinedW, &combinedH);
+        mFb->getTextureDraw()->prepareForDrawLayer();
         for (const auto& iter : mFb->m_displays) {
-            if (iter.first == 0 || iter.second.width == 0 ||
-                iter.second.height == 0 || iter.second.cb == 0) {
+            if ((iter.first != 0) &&
+                (iter.second.width == 0 || iter.second.height == 0 || iter.second.cb == 0)) {
                 continue;
             }
-            s_gles2.glViewport(m_viewportWidth * iter.second.pos_x / totalW,
-                               m_viewportHeight * iter.second.pos_y / totalH,
-                               m_viewportWidth * iter.second.width / totalW,
-                               m_viewportHeight * iter.second.height / totalH);
-            ColorBufferPtr multiDisplayCb = mFb->findColorBuffer(iter.second.cb);
+            ColorBuffer* multiDisplayCb = iter.first == 0 ? cb :
+                mFb->findColorBuffer(iter.second.cb).get();
             if (multiDisplayCb == nullptr) {
                 ERR("fail to find cb %d\n", iter.second.cb);
-            } else {
-                multiDisplayCb->post(multiDisplayCb->getTexture(), zRot, dx, dy);
+                continue;
             }
+            ComposeLayer l;
+            fillMultiDisplayPostStruct(&l, iter.first, multiDisplayCb);
+            multiDisplayCb->postLayer(&l, combinedW, combinedH);
         }
     } else {
         // render the color buffer to the window and apply the overlay
+        GLuint tex = cb->scale();
         cb->postWithOverlay(tex, zRot, dx, dy);
     }
 
