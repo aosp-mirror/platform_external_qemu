@@ -996,7 +996,7 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
 // remapping of virtual addrs and is functionality that does not exist on
 // Linux/macOS. It would ironically require a hypervisor (or an OS that
 // supports freer ways of mapping memory) in order to test properly.
-TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
+TEST_F(VulkanHalTest, SnapshotSaveLoadHostVisibleMemory) {
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
