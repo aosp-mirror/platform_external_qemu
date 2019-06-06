@@ -56,6 +56,9 @@
     background: %%SNAPSHOT_INFO_BKG%%;
     border: 1px solid %%TREE_WIDGET_BORDER%%;
 }
+*[ColorGroup="Countdown"] {
+    color: #CA4644;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;

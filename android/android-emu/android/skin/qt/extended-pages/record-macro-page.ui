@@ -319,18 +319,43 @@
            </item>
            <item>
             <widget class="QLabel" name="countLabel">
+             <property name="font">
+              <font>
+               <family>Roboto</family>
+              </font>
+             </property>
              <property name="text">
               <string>3</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
+             <property name="ColorGroup" stdset="0">
+              <string>Countdown</string>
+             </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="cancelButton">
+            <widget class="RaisedMaterialButton" name="cancelButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Roboto</family>
+               <pointsize>10</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
-              <string>Cancel</string>
+              <string>CANCEL</string>
+             </property>
+             <property name="ColorGroup" stdset="0">
+              <string>Button</string>
              </property>
             </widget>
            </item>
