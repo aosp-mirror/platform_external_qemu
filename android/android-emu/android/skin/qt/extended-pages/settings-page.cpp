@@ -40,6 +40,10 @@ using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using android::metrics::MetricsReporter;
 
+// Allow at most 5 reports every 60 seconds.
+static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
+static constexpr uint32_t kMaxReportsPerWindow = 5;
+
 namespace pb = android_studio;
 
 static SaveSnapshotOnExit getSaveOnExitChoice();
@@ -694,6 +698,10 @@ void SettingsPage::on_set_multiDisplay_clicked() {
         mUi->set_frameAlways->hide();
         mUi->set_frameAlwaysTitle->hide();
     }
+    mApplyCnt++;
+    if (enabled != e) {
+        mMaxDisplayCnt = enabled ? mMaxDisplayCnt + 1 : mMaxDisplayCnt - 1;
+    }
     emit enableMultiDisplayChanged(enabled, mCurrentDisplay, width, height, dpi);
 }
 
@@ -712,4 +720,33 @@ void SettingsPage::onMultiDisplayIdChanged(int id) {
     mUi->set_multiDisplayHeight->setValue(h);
     mUi->set_multiDisplayDpi->setValue(dpi);
     mUi->set_multiDisplayEnabled->setChecked(enabled);
+}
+
+void SettingsPage::hideEvent(QHideEvent* event) {
+    QWidget::hide();
+
+    const uint64_t now = android::base::System::get()->getHighResTimeUs();
+
+    // Reset the metrics reporting limiter if enough time has passed.
+    if (mReportWindowStartUs + kReportWindowDurationUs < now) {
+        mReportWindowStartUs = now;
+        mReportWindowCount = 0;
+    }
+
+    if (mReportWindowCount > kMaxReportsPerWindow) {
+        LOG(INFO) << "Dropping metrics, too many recent reports.";
+        return;
+    }
+
+    ++mReportWindowCount;
+
+    android_studio::EmulatorMultiDisplay metrics;
+    metrics.set_apply_count(mApplyCnt++);
+    metrics.set_max_displays(mMaxDisplayCnt);
+    android::metrics::MetricsReporter::get().report(
+            [metrics](android_studio::AndroidStudioEvent* event) {
+                event->mutable_emulator_details()
+                        ->mutable_multi_display()
+                        ->CopyFrom(metrics);
+            });
 }
