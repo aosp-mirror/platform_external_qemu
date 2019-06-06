@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "VkReconstruction.h"
 
+#include "VkDecoderGlobalState.h"
+
 #include "android/base/containers/EntityManager.h"
 
 #include "VkDecoder.h"
@@ -173,6 +175,41 @@ void VkReconstruction::save(android::base::Stream* stream) {
 
     android::base::saveBufferRaw(stream, (char*)(createdHandleBuffer.data()), createdHandleBuffer.size() * sizeof(uint64_t));
     android::base::saveBufferRaw(stream, (char*)(apiTraceBuffer.data()), apiTraceBuffer.size());
+
+    {
+        uint64_t currentOffset = 0;
+        std::vector<uint64_t> memories;
+        std::vector<uint64_t> memoriesContentOffsets;
+        std::vector<uint8_t> memoriesContents;
+
+        // Save contents of all memory
+        // TODO: for external memory, reconstruct the export/import graph
+        goldfish_vk::VkDecoderGlobalState::get()->forEachDeviceMemory(
+            [&memories,
+             &memoriesContentOffsets,
+             &memoriesContents](
+               VulkanDispatch* vk,
+               VkDevice device,
+               uint64_t boxed_memory,
+               VkDeviceMemory unboxed_memory,
+               VkDeviceSize allocationSize,
+               VkMemoryPropertyFlags propertyFlags,
+               uint32_t typeIndex,
+               uint8_t* hostPtr,
+               uint64_t guestPhysAddr) {
+
+             fprintf(stderr, "%s: save device emmory with size 0x%llx\n", __func__, (unsigned long long)allocationSize);
+
+             if (propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+                fprintf(stderr, "%s: is host visible. hostPtr %p gpa 0x%llx\n", __func__,
+                        hostPtr, guestPhysAddr);
+             } else if (propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+                fprintf(stderr, "%s: is device local.\n", __func__);
+             } else {
+                fprintf(stderr, "%s: some other memory type (?)\n", __func__);
+             }
+        });
+    }
 }
 
 class TrivialStream : public IOStream {
