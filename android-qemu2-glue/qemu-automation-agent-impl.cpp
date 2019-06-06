@@ -50,8 +50,9 @@ static std::string get_macro_name(android::base::StringView filename) {
     return AutomationController::get().getMacroName(filename);
 }
 
-static uint64_t get_duration_ns(android::base::StringView filename) {
-    return AutomationController::get().getDurationNs(filename);
+static std::pair<uint64_t, uint64_t> get_metadata(
+        android::base::StringView filename) {
+    return AutomationController::get().getMetadata(filename);
 }
 
 static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
@@ -63,7 +64,7 @@ static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
         .startPlaybackWithCallback = start_playback_with_callback,
         .setMacroName = set_macro_name,
         .getMacroName = get_macro_name,
-        .getDurationNs = get_duration_ns};
+        .getMetadata = get_metadata};
 
 extern "C" const QAndroidAutomationAgent* const gQAndroidAutomationAgent =
         &sQAndroidAutomationAgent;
