@@ -311,6 +311,34 @@ typedef struct gralloc_module_t {
             int l, int t, int w, int h,
             struct android_ycbcr *ycbcr, int fenceFd);
 
+    /* getTransportSize(..., outNumFds, outNumInts)
+     * This function is mandatory on devices running IMapper2.1 or higher.
+     *
+     * Get the transport size of a buffer. An imported buffer handle is a raw
+     * buffer handle with the process-local runtime data appended. This
+     * function, for example, allows a caller to omit the process-local
+     * runtime data at the tail when serializing the imported buffer handle.
+     *
+     * Note that a client might or might not omit the process-local runtime
+     * data when sending an imported buffer handle. The mapper must support
+     * both cases on the receiving end.
+     */
+    int32_t (*getTransportSize)(
+            struct gralloc_module_t const* module, buffer_handle_t handle, uint32_t *outNumFds,
+            uint32_t *outNumInts);
+    /* validateBufferSize(..., w, h, format, usage, stride)
+     * This function is mandatory on devices running IMapper2.1 or higher.
+     *
+     * Validate that the buffer can be safely accessed by a caller who assumes
+     * the specified width, height, format, usage, and stride. This must at least validate
+     * that the buffer size is large enough. Validating the buffer against
+     * individual buffer attributes is optional.
+     */
+    int32_t (*validateBufferSize)(
+            struct gralloc_module_t const* device, buffer_handle_t handle,
+            uint32_t w, uint32_t h, int32_t format, int usage,
+            uint32_t stride);
+
     /* reserved for future use */
     void* reserved_proc[3];
 } gralloc_module_t;
