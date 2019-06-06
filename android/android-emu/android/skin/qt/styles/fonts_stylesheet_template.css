@@ -35,6 +35,9 @@ QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBo
     font-weight: regular;
     font-size: %%FONT_MEDIUM%%;
 }
+*[ColorGroup="Countdown"] {
+    font-size: 48px;
+}
 * {
     font-size: %%FONT_MEDIUM%%;
 }
