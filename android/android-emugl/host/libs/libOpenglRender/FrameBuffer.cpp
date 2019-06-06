@@ -549,8 +549,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
 
-    fb->m_vulkanInteropSupported =
-        s_egl.eglQueryVulkanInteropSupportANDROID();
+    if (s_egl.eglQueryVulkanInteropSupportANDROID) {
+        fb->m_vulkanInteropSupported =
+            s_egl.eglQueryVulkanInteropSupportANDROID();
+    }
+
     //
     // Keep the singleton framebuffer pointer
     //
