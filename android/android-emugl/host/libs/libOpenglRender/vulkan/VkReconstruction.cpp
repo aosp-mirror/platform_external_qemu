@@ -13,7 +13,10 @@
 // limitations under the License.
 #include "VkReconstruction.h"
 
+#include "VkDecoderGlobalState.h"
+
 #include "android/base/containers/EntityManager.h"
+#include "android/base/containers/Lookup.h"
 
 #include "VkDecoder.h"
 #include "IOStream.h"
@@ -173,6 +176,54 @@ void VkReconstruction::save(android::base::Stream* stream) {
 
     android::base::saveBufferRaw(stream, (char*)(createdHandleBuffer.data()), createdHandleBuffer.size() * sizeof(uint64_t));
     android::base::saveBufferRaw(stream, (char*)(apiTraceBuffer.data()), apiTraceBuffer.size());
+
+    {
+        uint64_t currentOffset = 0;
+        std::vector<uint64_t> memories;
+        std::vector<uint64_t> memoriesContentOffsets;
+        std::vector<uint8_t> memoriesContents;
+
+        // Save contents of all memory
+        // TODO: for external memory, reconstruct the export/import graph
+        goldfish_vk::VkDecoderGlobalState::get()->forEachDeviceMemory(
+            [&currentOffset,
+             &memories,
+             &memoriesContentOffsets,
+             &memoriesContents](
+               VulkanDispatch* vk,
+               VkDevice device,
+               uint64_t boxed_memory,
+               VkDeviceMemory unboxed_memory,
+               VkDeviceSize allocationSize,
+               VkMemoryPropertyFlags propertyFlags,
+               uint32_t typeIndex,
+               uint8_t* hostPtr,
+               uint64_t guestPhysAddr) {
+
+             if (propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+                fprintf(stderr, "%s: 0x%llx is host visible. hostPtr %p gpa 0x%llx\n", __func__,
+                        boxed_memory, hostPtr, guestPhysAddr);
+
+                memories.push_back(boxed_memory);
+                memoriesContentOffsets.push_back(currentOffset);
+                memoriesContents.resize(currentOffset + allocationSize);
+                memcpy(memoriesContents.data() + currentOffset, hostPtr, allocationSize);
+
+                currentOffset += allocationSize;
+
+             } else if (propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+                // due to possible usage by optimal tiling, maybe we shold save those from the image
+                fprintf(stderr, "%s: is device local.\n", __func__);
+             } else {
+                fprintf(stderr, "%s: some other memory type (?)\n", __func__);
+             }
+
+        });
+
+        android::base::saveBufferRaw(stream, (char*)(memories.data()), memories.size() * sizeof(uint64_t));
+        android::base::saveBufferRaw(stream, (char*)(memoriesContentOffsets.data()), memories.size() * sizeof(uint64_t));
+        android::base::saveBufferRaw(stream, (char*)(memoriesContents.data()), memoriesContents.size());
+    }
 }
 
 class TrivialStream : public IOStream {
@@ -235,6 +286,24 @@ void VkReconstruction::load(android::base::Stream* stream) {
     android::base::loadBuffer(stream, &createdHandleBuffer);
     android::base::loadBuffer(stream, &apiTraceBuffer);
 
+    std::vector<uint8_t> memoriesToLoad;
+    std::vector<uint8_t> memoriesContentOffsetsToLoad;
+    std::vector<uint8_t> memoriesContentsToLoad;
+
+    android::base::loadBuffer(stream, &memoriesToLoad);
+    android::base::loadBuffer(stream, &memoriesContentOffsetsToLoad);
+    android::base::loadBuffer(stream, &memoriesContentsToLoad);
+
+    std::unordered_map<uint64_t, uint8_t*> hostVisibleMemoriesToRestore;
+
+    for (size_t i = 0; i < memoriesToLoad.size() / sizeof(uint64_t); ++i) {
+        uint64_t* boxedMemoriesToLoad = (uint64_t*)memoriesToLoad.data();
+        fprintf(stderr, "%s: memories to load, found 0x%llx\n", __func__,
+                (unsigned long long)boxedMemoriesToLoad[i]);
+        hostVisibleMemoriesToRestore[boxedMemoriesToLoad[i]] =
+            (memoriesContentsToLoad.data() + memoriesContentOffsetsToLoad[i]);
+    }
+
     DEBUG_RECON(
         "created handle buffer size: %zu trace: %zu",
         createdHandleBuffer.size(), apiTraceBuffer.size());
@@ -261,6 +330,38 @@ void VkReconstruction::load(android::base::Stream* stream) {
     decoderForLoading.decode(mLoadedTrace.data(), mLoadedTrace.size(), &trivialStream);
 
     DEBUG_RECON("finished decoding trace");
+
+        goldfish_vk::VkDecoderGlobalState::get()->forEachDeviceMemory(
+            [&hostVisibleMemoriesToRestore](
+               VulkanDispatch* vk,
+               VkDevice device,
+               uint64_t boxed_memory,
+               VkDeviceMemory unboxed_memory,
+               VkDeviceSize allocationSize,
+               VkMemoryPropertyFlags propertyFlags,
+               uint32_t typeIndex,
+               uint8_t* hostPtr,
+               uint64_t guestPhysAddr) {
+
+
+             if (propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+                fprintf(stderr, "%s: 0x%llx is host visible. hostPtr %p gpa 0x%llx\n", __func__,
+                        boxed_memory, hostPtr, guestPhysAddr);
+
+            auto info = android::base::find(hostVisibleMemoriesToRestore, boxed_memory);
+            if (!info) { fprintf(stderr, "%s: wtf preb contents not defined!\n", __func__); } else {
+            fprintf(stderr, "%s: copying\n", __func__);
+            memcpy(hostPtr, *info, allocationSize);
+            }
+
+             } else if (propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+                // due to possible usage by optimal tiling, maybe we shold save those from the image
+                fprintf(stderr, "%s: is device local.\n", __func__);
+             } else {
+                fprintf(stderr, "%s: some other memory type (?)\n", __func__);
+             }
+
+        });
 }
 
 VkReconstruction::ApiHandle VkReconstruction::createApiInfo() {
