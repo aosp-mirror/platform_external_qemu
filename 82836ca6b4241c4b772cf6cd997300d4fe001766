@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e7e0107_ff0189b6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkReconstruction.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-06T17:43:00Z",
+      "side": 1,
+      "message": "Is this just to printf apiHandle?",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 11
+      },
+      "revId": "82836ca6b4241c4b772cf6cd997300d4fe001766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fac2857c_21aac15c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkReconstruction.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-06T17:43:00Z",
+      "side": 1,
+      "message": "Will this be like lambdarandomgarbageline124?",
+      "range": {
+        "startLine": 128,
+        "startChar": 77,
+        "endLine": 128,
+        "endChar": 85
+      },
+      "revId": "82836ca6b4241c4b772cf6cd997300d4fe001766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80296968_42d81f76",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkReconstruction.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-06T17:43:00Z",
+      "side": 1,
+      "message": "Could you please put a comment why order is important here?",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 133,
+        "endChar": 13
+      },
+      "revId": "82836ca6b4241c4b772cf6cd997300d4fe001766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6474c382_53cb3076",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkReconstruction.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-06T17:43:00Z",
+      "side": 1,
+      "message": "Could you please move this to a separate method(s)? Like collecting HandleModification and building the ordered something from them?",
+      "range": {
+        "startLine": 150,
+        "startChar": 38,
+        "endLine": 150,
+        "endChar": 39
+      },
+      "revId": "82836ca6b4241c4b772cf6cd997300d4fe001766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19ecf815_1b2e4f14",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkReconstruction.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-06T17:43:00Z",
+      "side": 1,
+      "message": "I think we need to invent ptr_to_uint64.",
+      "range": {
+        "startLine": 401,
+        "startChar": 31,
+        "endLine": 401,
+        "endChar": 52
+      },
+      "revId": "82836ca6b4241c4b772cf6cd997300d4fe001766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
