@@ -59,6 +59,9 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
     explicit MediaH264DecoderFfmpeg(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderFfmpeg();
 
@@ -108,9 +111,7 @@ private:
     // and output address is only available in getImage().
     // TODO: this should be set to the output address to avoid
     // extra copying
-    uint8_t *mDecodedFrame = nullptr;
-
-
+    std::vector<uint8_t> mDecodedFrame;
 
     // ffmpeg stuff
     AVCodec *mCodec = nullptr;;
@@ -119,9 +120,14 @@ private:
     AVPacket mPacket;
 
 private:
+    mutable SnapshotState mSnapshotState;
+
+private:
     void copyFrame();
     void resetDecoder();
     bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
+
+    bool checkSpsFrame(const uint8_t* frame, size_t szBytes);
 
 };  // MediaH264DecoderFfmpeg
 
