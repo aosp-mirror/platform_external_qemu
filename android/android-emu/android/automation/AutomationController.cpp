@@ -31,6 +31,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/text_format.h>
 
+#include <chrono>
 #include <deque>
 #include <ostream>
 
@@ -374,6 +375,7 @@ public:
     void setMacroName(StringView macroName, StringView filename) override;
     std::string getMacroName(StringView filename) override;
     uint64_t getDurationNs(StringView filename) override;
+    uint64_t getTimestampMs(StringView filename) override;
 
     ReplayResult replayInitialState(StringView state) override;
 
@@ -753,6 +755,25 @@ uint64_t AutomationControllerImpl::getDurationNs(StringView filename) {
     return header.duration_ns();
 }
 
+uint64_t AutomationControllerImpl::getTimestampMs(StringView filename) {
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+
+    std::unique_ptr<StdioStream> playbackStream(new StdioStream(
+            fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
+
+    const std::string headerStr = playbackStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr) ||
+        !header.has_timestamp_ms()) {
+        LOG(ERROR) << "Could not load header timestamp";
+        return 0;
+    }
+    return header.timestamp_ms();
+}
+
 ReplayResult AutomationControllerImpl::replayInitialState(
         android::base::StringView state) {
     if (mPlayingFromFile) {
@@ -913,6 +934,12 @@ void AutomationControllerImpl::addDurationToHeader(DurationNs durationNs) {
         return;
     }
     header.set_duration_ns(durationNs);
+
+    // Add timestamp in ms since 1970.
+    uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          std::chrono::system_clock::now().time_since_epoch())
+                          .count();
+    header.set_timestamp_ms(ms);
 
     std::string modifiedHeader;
     header.SerializeToString(&modifiedHeader);

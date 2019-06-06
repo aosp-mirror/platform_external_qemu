@@ -141,6 +141,10 @@ public:
 
     // Get the duration in nanoseconds from a file.
     virtual uint64_t getDurationNs(android::base::StringView filename) = 0;
+
+    // Get the timestamp in milliseconds from a file.
+    virtual uint64_t getTimestampMs(android::base::StringView filename) = 0;
+
     //
     // Offworld API
     //
