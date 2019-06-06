@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "725a80e2_85d48d92",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 758,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-06T21:23:21Z",
+      "side": 1,
+      "message": "Can we aggregate this together into a single getMetadata?  That way we could return a struct with both the duration and timestamp.",
+      "range": {
+        "startLine": 758,
+        "startChar": 9,
+        "endLine": 758,
+        "endChar": 70
+      },
+      "revId": "ff5c4847f643f848758926db87f919c93ec27b17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00d6575d_1fc58051",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-06T21:23:21Z",
+      "side": 1,
+      "message": "I\u0027d call this record_datetime",
+      "range": {
+        "startLine": 942,
+        "startChar": 11,
+        "endLine": 942,
+        "endChar": 27
+      },
+      "revId": "ff5c4847f643f848758926db87f919c93ec27b17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
