@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a66b31d_1b0f23b7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-06T21:24:18Z",
+      "side": 1,
+      "message": "Why two colons?",
+      "range": {
+        "startLine": 790,
+        "startChar": 65,
+        "endLine": 790,
+        "endChar": 66
+      },
+      "revId": "cd79f8d8d2a6feedd33ac04d08ab8d2157f2603d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
