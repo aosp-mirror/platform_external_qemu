@@ -1013,9 +1013,6 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_swiftshader");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
 
     bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle");
     D("Adding library search path: '%s'", fullPath);
@@ -1026,6 +1023,11 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
     add_library_search_dir(fullPath);
 
     bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle11");
+    D("Adding library search path: '%s'", fullPath);
+    add_library_search_dir(fullPath);
+
+    // We add this last so Win32 can resolve LIBGLESV2 from swiftshader for QT5GUI
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_swiftshader");
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
