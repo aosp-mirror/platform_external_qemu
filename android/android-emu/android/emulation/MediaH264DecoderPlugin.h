@@ -18,9 +18,12 @@
 #include "android/emulation/MediaH264Decoder.h"
 
 #include <stddef.h>
+#include <vector>
 
 namespace android {
 namespace emulation {
+
+class MediaH264DecoderDefault;
 
 // this is an interface for platform specific implementations
 // such as VideoToolBox, CUVID, etc
@@ -37,8 +40,90 @@ public:
     virtual void flush(void* ptr) = 0;
     virtual void getImage(void* ptr) = 0;
 
+    virtual void save(base::Stream* stream) const {};
+    virtual bool load(base::Stream* stream) {return true;};
+
     MediaH264DecoderPlugin() = default;
     virtual ~MediaH264DecoderPlugin() = default;
+
+protected:
+    // solely for snapshot save load purpose
+    enum {
+        PLUGIN_TYPE_NONE = 0,
+        PLUGIN_TYPE_FFMPEG = 1,
+        PLUGIN_TYPE_CUVID = 2,
+        PLUGIN_TYPE_VIDEO_TOOL_BOX = 3,
+        PLUGIN_TYPE_VIDEO_TOOL_BOX_PROXY = 4,
+
+    };
+
+    // this is required by save/load
+    virtual int type() const { return PLUGIN_TYPE_NONE; }
+
+    friend MediaH264DecoderDefault;
+
+public:
+    struct SnapshotState {
+        uint64_t id;
+        int width;
+        int height;
+        std::vector<uint8_t> sps;  // sps NALU
+        std::vector<uint8_t> pps;  // pps NALU
+        std::vector<std::vector<uint8_t>> savedPackets;
+        std::vector<uint8_t> savedDecodedFrame;  // only one or nothing
+
+        void saveSps(std::vector<uint8_t> xsps) { sps = std::move(xsps); }
+
+        void savePps(std::vector<uint8_t> xpps) { pps = std::move(xpps); }
+        void savePacket(std::vector<uint8_t> xpacket) {
+            savedPackets.push_back(std::move(xpacket));
+        }
+
+        void saveDecodedFrame(std::vector<uint8_t> frame) {
+            savedDecodedFrame = std::move(frame);
+        }
+
+        void saveVec(base::Stream* stream,
+                     const std::vector<uint8_t>& vec) const {
+            stream->putBe32(vec.size());
+            if (!vec.empty()) {
+                stream->write(vec.data(), vec.size());
+            }
+        }
+        void save(base::Stream* stream) const {
+            stream->putBe64(id);
+            stream->putBe32(width);
+            stream->putBe32(height);
+            saveVec(stream, sps);
+            saveVec(stream, pps);
+            stream->putBe32(savedPackets.size());
+            for (size_t i = 0; i < savedPackets.size(); ++i) {
+                saveVec(stream, savedPackets[i]);
+            }
+            saveVec(stream, savedDecodedFrame);
+        }
+
+        void loadVec(base::Stream* stream, std::vector<uint8_t>& vec) {
+            int size = stream->getBe32();
+            vec.resize(size);
+            if (size > 0) {
+                stream->read(vec.data(), size);
+            }
+        }
+        void load(base::Stream* stream) {
+            id = stream->getBe64();
+            width = stream->getBe32();
+            height = stream->getBe32();
+            loadVec(stream, sps);
+            loadVec(stream, pps);
+            int count = stream->getBe32();
+            savedPackets.resize(count);
+            for (int i = 0; i < count; ++i) {
+                loadVec(stream, savedPackets[i]);
+            }
+            loadVec(stream, savedDecodedFrame);
+        }
+    };
 };
 
 }  // namespace emulation
