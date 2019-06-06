@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d3e4794a_3903fc1b",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 758,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-06T22:22:03Z",
+      "side": 1,
+      "message": "struct would be a bit better, since it is easier to add fields to that later (and it\u0027s closer to C).  However, it\u0027s up to you.",
+      "parentUuid": "22b94b82_9924852d",
+      "range": {
+        "startLine": 758,
+        "startChar": 9,
+        "endLine": 758,
+        "endChar": 70
+      },
+      "revId": "ff5c4847f643f848758926db87f919c93ec27b17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "00d6575d_1fc58051",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 1
