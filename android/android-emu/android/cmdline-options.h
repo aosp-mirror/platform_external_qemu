@@ -218,6 +218,8 @@ CFG_PARAM(acpi_config, "<file>", "specify acpi device proprerties (hierarchical 
 
 OPT_FLAG(fuchsia, "Run Fuchsia image. Bypasses android-specific setup; args after are treated as standard QEMU args")
 
+OPT_PARAM(window_size, "<size>", "Set window size for when bypassing android-specific setup.")
+
 OPT_FLAG(allow_host_audio, "Allows sending of audio from audio input devices. Otherwise, zeroes out audio.")
 
 OPT_FLAG(restart_when_stalled, "Allows restarting guest when it is stalled.")

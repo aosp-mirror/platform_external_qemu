@@ -960,15 +960,25 @@ extern "C" int main(int argc, char** argv) {
                 fc::setEnabledOverride(fc::GLDirectMem, true);
                 fc::setEnabledOverride(fc::VirtioInput, true);
 
+                int lcdWidth = 1280;
+                int lcdHeight = 720;
+                if (opts->window_size) {
+                    if (sscanf(opts->window_size, "%dx%d", &lcdWidth, &lcdHeight) != 2) {
+                        fprintf(stderr, "%s: invalid window size: %s\n",
+                                __func__, opts->window_size);
+                        return -1;
+                    }
+                }
+
                 initialize_virtio_input_devs(args, hw);
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
                     "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
                     // TODO: Have a way to communicate GPU mode via plain QEMU command line args
-                    "host", opts->no_window,
-                    // LCD width, height, DPI, orientation
-                    1280, 720, 96, "landscape",
+                    "host", opts->no_window, lcdWidth, lcdHeight,
+                    // LCD DPI, orientation
+                    96, "landscape",
                     opts, hw, &android_avdInfo);
 
             } else {
