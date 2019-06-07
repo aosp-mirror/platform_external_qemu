@@ -31,6 +31,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/text_format.h>
 
+#include <chrono>
 #include <deque>
 #include <ostream>
 
@@ -373,7 +374,7 @@ public:
     // MacroUI helper functions.
     void setMacroName(StringView macroName, StringView filename) override;
     std::string getMacroName(StringView filename) override;
-    uint64_t getDurationNs(StringView filename) override;
+    std::pair<uint64_t, uint64_t> getMetadata(StringView filename) override;
 
     ReplayResult replayInitialState(StringView state) override;
 
@@ -398,8 +399,9 @@ private:
     // Reset velocity, used during snapshot load and canceling playback.
     void resetVelocity();
 
-    // Adds macro duration to header by copying and replacing the file.
-    void addDurationToHeader(DurationNs durationNs);
+    // Adds macro duration and datetime to header by copying and replacing the
+    // file.
+    void addMetadataToHeader(DurationNs durationNs);
 
     // Copies remaining events from originalStream to modifiedStream.
     void copyStreamToStream(std::unique_ptr<StdioStream>&& originalStream,
@@ -610,7 +612,7 @@ StopResult AutomationControllerImpl::stopRecording() {
     mRecordingStream->putString(binaryProto);
     mRecordingStream.reset();
 
-    addDurationToHeader(durationNs);
+    addMetadataToHeader(durationNs);
 
     return Ok();
 }
@@ -734,7 +736,8 @@ std::string AutomationControllerImpl::getMacroName(StringView filename) {
     return header.name();
 }
 
-uint64_t AutomationControllerImpl::getDurationNs(StringView filename) {
+std::pair<uint64_t, uint64_t> AutomationControllerImpl::getMetadata(
+        StringView filename) {
     std::string path = filename;
     if (!PathUtils::isAbsolute(path)) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename);
@@ -746,11 +749,11 @@ uint64_t AutomationControllerImpl::getDurationNs(StringView filename) {
     const std::string headerStr = playbackStream->getString();
     pb::FileHeader header;
     if (headerStr.empty() || !header.ParseFromString(headerStr) ||
-        !header.has_duration_ns()) {
-        LOG(ERROR) << "Could not load header duration";
-        return 0;
+        !header.has_duration_ns() || !header.has_record_datetime()) {
+        LOG(ERROR) << "Could not load header";
+        return std::make_pair(0, 0);
     }
-    return header.duration_ns();
+    return std::make_pair(header.duration_ns(), header.record_datetime());
 }
 
 ReplayResult AutomationControllerImpl::replayInitialState(
@@ -895,7 +898,7 @@ void AutomationControllerImpl::resetVelocity() {
                                          PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
-void AutomationControllerImpl::addDurationToHeader(DurationNs durationNs) {
+void AutomationControllerImpl::addMetadataToHeader(DurationNs durationNs) {
     std::unique_ptr<StdioStream> originalStream(
             new StdioStream(fsopen(mFilePath.c_str(), "rb", FileShare::Read),
                             StdioStream::kOwner));
@@ -913,6 +916,12 @@ void AutomationControllerImpl::addDurationToHeader(DurationNs durationNs) {
         return;
     }
     header.set_duration_ns(durationNs);
+
+    // Add timestamp in ms since 1970.
+    uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          std::chrono::system_clock::now().time_since_epoch())
+                          .count();
+    header.set_record_datetime(ms);
 
     std::string modifiedHeader;
     header.SerializeToString(&modifiedHeader);
