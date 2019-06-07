@@ -268,7 +268,7 @@ public:
     void getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h,
                          uint32_t* dpi, uint32_t* flag, bool* enabled);
     int countEnabledMultiDisplayLocked();
-    void getMonitorRect(uint32_t* width, uint32_t* height);
+    bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
 public slots:
     void rotateSkin(SkinRotation rot);

@@ -2852,13 +2852,14 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t wi
     uiAgent->multiDisplay->setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
 }
 
-void EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
+bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
     SkinRect monitor;
     skin_winsys_get_monitor_rect(&monitor);
     if (width)
         *width = monitor.size.w;
     if (height)
         *height = monitor.size.h;
+    return true;
 }
 
 void EmulatorQtWindow::setNoSkin() {

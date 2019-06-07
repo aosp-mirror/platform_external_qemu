@@ -664,9 +664,10 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       }) {
     m_displays.emplace(0, DisplayInfo(0, 0, 0, m_framebufferWidth, m_framebufferHeight));
     uint32_t w, h;
-    emugl::get_emugl_window_operations().getMonitorRect(&w, &h);
+    if (emugl::get_emugl_window_operations().getMonitorRect(&w, &h) && w != 0 && h != 0) {
+        m_monitorAspectRatio = (double) h / (double) w;
+    }
     emugl::get_emugl_window_operations().setMultiDisplay(0, 0, 0, getWidth(), getHeight(), true);
-    m_monitorAspectRatio = (double) h / (double) w;
 }
 
 FrameBuffer::~FrameBuffer() {

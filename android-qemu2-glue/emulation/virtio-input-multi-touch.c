@@ -333,7 +333,7 @@ void android_virtio_kbd_mouse_event(int dx,
                                                       &h);
     } else {
         s_current_virtio_input = s_virtio_input_multi_touch[0];
-        gQAndroidDisplayAgent->getFrameBuffer(&w, &h, NULL, NULL, NULL);
+        gQAndroidDisplayAgent->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL, NULL);
     }
     dx = qemu_input_scale_axis(dx, 0, w, INPUT_EVENT_ABS_MIN,
                                INPUT_EVENT_ABS_MAX);
