@@ -1925,10 +1925,11 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
              PAGE_BITS) << PAGE_BITS;
 
-        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
-                info->pageAlignedHva,
-                (unsigned long long)info->guestPhysAddr,
-                (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+        VKDGS_LOG("map: %p, %p -> [0x%llx 0x%llx]\n",
+                  info->ptr,
+                  info->pageAlignedHva,
+                  (unsigned long long)info->guestPhysAddr,
+                  (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         get_emugl_vm_operations().mapUserBackedRam(
                 info->guestPhysAddr,
                 info->pageAlignedHva,
@@ -2138,9 +2139,10 @@ public:
         }
 
         if (info->directMapped) {
-            printf("%s: unmap: [0x%llx 0x%llx]\n", __func__,
-                    (unsigned long long)info->guestPhysAddr,
-                    (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+            VKDGS_LOG("unmap: %p, [0x%llx 0x%llx]\n",
+                      info->ptr,
+                      (unsigned long long)info->guestPhysAddr,
+                      (unsigned long long)info->guestPhysAddr + info->sizeToPage);
             get_emugl_vm_operations().unmapUserBackedRam(
                     info->guestPhysAddr,
                     info->sizeToPage);

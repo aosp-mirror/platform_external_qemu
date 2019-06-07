@@ -419,7 +419,6 @@ void VkReconstruction::forEachHandleAddModifyApi(const uint64_t* toProcess, uint
         mHandleModifications.add(toProcess[i], HandleModification());
 
         auto item = mHandleModifications.get(toProcess[i]);
-        fprintf(stderr, "%s: add\n", __func__);
 
         if (!item) continue;
 
