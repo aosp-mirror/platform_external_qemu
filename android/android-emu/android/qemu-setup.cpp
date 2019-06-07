@@ -443,12 +443,14 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
         android_ports_setup(agents, isQemu2);
     }
 
-    /* send a simple message to the ADB host server to tell it we just started.
-    * it should be listening on port 5037. if we can't reach it, don't bother
-    */
-    android_adb_server_notify(android_adb_port);
+    if (android_qemu_mode) {
+        /* send a simple message to the ADB host server to tell it we just started.
+        * it should be listening on port 5037. if we can't reach it, don't bother
+        */
+        android_adb_server_notify(android_adb_port);
 
-    android_validate_ports(android_base_port, android_adb_port);
+        android_validate_ports(android_base_port, android_adb_port);
+    }
 
     if (android_op_report_console) {
         if (report_console(android_op_report_console, android_base_port) < 0) {
