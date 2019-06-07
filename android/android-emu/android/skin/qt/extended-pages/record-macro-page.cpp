@@ -792,13 +792,14 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
                 SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
                 SLOT(editButtonClicked(RecordMacroSavedItem*)));
     }
-    std::replace(macroName.begin(), macroName.end(), '_', ' ');
-    macroSavedItem->setName(macroName.c_str());
-
+    
     listItem->setSizeHint(QSize(0, 50));
-
     mUi->macroList->addItem(listItem);
     mUi->macroList->setItemWidget(listItem, macroSavedItem);
+
+    // Set name after item widget is placed for correct elided text.
+    std::replace(macroName.begin(), macroName.end(), '_', ' ');
+    macroSavedItem->setName(macroName.c_str());
 }
 
 bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
