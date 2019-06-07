@@ -72,6 +72,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 [](uint32_t* w, uint32_t* h) {
                     if (w) *w = 2500;
                     if (h) *h = 1600;
+                    return true;
                 }
 };
 
