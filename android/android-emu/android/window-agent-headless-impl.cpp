@@ -72,7 +72,30 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return win->isFolded();
                     }
                     return false;
-                }
+                },
+        .setUIDisplayRegion =
+                [](int x, int y, int w, int h) {},
+        .setMultiDisplay =
+                [](uint32_t id,
+                   uint32_t x,
+                   uint32_t y,
+                   uint32_t w,
+                   uint32_t h,
+                   bool add) {},
+        .getMultiDisplay =
+                [](uint32_t id,
+                   uint32_t* x,
+                   uint32_t* y,
+                   uint32_t* w,
+                   uint32_t* h) {
+                    return false;
+                },
+        .getMonitorRect =
+                [](uint32_t* w, uint32_t* h) {
+                        return false;   
+                },
+        .setNoSkin =
+                []() {}
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
