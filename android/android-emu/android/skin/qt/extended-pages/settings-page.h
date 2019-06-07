@@ -33,6 +33,7 @@ public:
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
     static void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
+    void hideEvent(QHideEvent* event) override;
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
@@ -100,4 +101,8 @@ private:
     std::unique_ptr<PerfStatsPage> mPerfStatsPage;
     bool    mDisableANGLE = false;
     int mCurrentDisplay = -1;
+    uint64_t mReportWindowStartUs = 0;
+    uint32_t mReportWindowCount = 0;
+    uint32_t mApplyCnt = 0;
+    uint32_t mMaxDisplayCnt = 0;
 };

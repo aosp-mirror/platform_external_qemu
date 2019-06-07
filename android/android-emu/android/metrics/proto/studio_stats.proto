@@ -1830,6 +1830,14 @@ message EmulatorAutomation {
   repeated EmulatorAutomationPresetMacro played_preset_macro = 4;
 }
 
+// Metrics for multi-display details
+message EmulatorMultiDisplay {
+  // Count for add/modify/delete displays
+  optional uint32 apply_count = 1;
+  // Max displays created
+  optional uint32 max_displays = 2;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1888,7 +1896,9 @@ message EmulatorDetails {
   optional EmulatorBootInfo boot_info = 29;
   // Metrics for automation/macros.
   optional EmulatorAutomation automation = 30;
-  // Next tag: 31
+  // Metrics for multi-display
+  optional EmulatorMultiDisplay multi_display = 31;
+  // Next tag: 32
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
