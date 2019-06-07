@@ -2859,6 +2859,7 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
         *width = monitor.size.w;
     if (height)
         *height = monitor.size.h;
+    return true;
 }
 
 void EmulatorQtWindow::setNoSkin() {
