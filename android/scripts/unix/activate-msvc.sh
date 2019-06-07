@@ -14,11 +14,15 @@
 # limitations under the License.
 source gbash.sh || (echo "This script is only supported/needed in the Google environment" && exit 1)
 source module lib/colors.sh
+PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+export PATH=$PATH:$PROGDIR/../../third_party/chromium/depot_tools
 
 PROGRAM_DESCRIPTION=\
 "Installs the windows sdk in /mnt/msvc so you can start cross building windows MSVC."
 
+DEFINE_enum fs --enum="jfs,ciopfs" "jfs" "Underlying filesystem used to provide case insensitive file system."
 DEFINE_string ciopfs "/mnt/ciopfs" "Source location of the case insensitive file system, this will contain the win sdk source. An overlay user mounted filesystem will be created on top of this."
+DEFINE_string jfs  "/mnt/windows-sdk.img" "The jfs image that will contain the win sdk source. A loopback filesystem will be mounted on top of this"
 
 gbash::init_google "$@"
 
@@ -40,7 +44,38 @@ function approve() {
     fi
 }
 
-function fetch_dependencies_msvc() {
+function download_sdk() {
+    local MOUNT_POINT=$1
+
+    echo "Downloading to $MOUNT_POINT"
+
+    # Download the windows sdk
+    local DEPOT_TOOLS="android/third_party/chromium/depot_tools"
+    # This is the hash of the msvc version we are using (VS 2017)
+    local MSVC_HASH="3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c"
+
+    [[ -d $DEPOT_TOOLS ]] || gbash::die "Cannot find depot tools: $DEPOT_TOOLS, are you running the script for {aosp}/external/qemu ?"
+
+    LOG INFO "Looking to get tools version: ${MSVC_HASH}"
+    LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
+    rm ${HOME}/.boto.bak
+    ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
+    if [ $? -ne 0 ]; then
+      echo "${RED}Likely not authenticated... Trying to authenticate${RESET}"
+      echo "${RED}Please follow the instructions below. ${RESET}"
+      echo "${RED}Your project code is 0.${RESET}"
+
+
+      ${DEPOT_TOOLS}/download_from_google_storage --config
+      LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
+      ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH || gbash::die "Unable to fetch toolchain"
+    fi
+
+    # Setup the symlink to a well known location for the build system.
+    ln -sf $MOUNT_POINT/vs_files/$MSVC_HASH $MOUNT_POINT/win8sdk
+}
+
+function setup_ciopfs() {
     # Takes two parameters:
     # $1: The path to the mount point for ciopfs,
     # $2: The path to the data directory for ciopfs
@@ -68,35 +103,14 @@ function fetch_dependencies_msvc() {
     [[ -d ${MOUNT_POINT} ]] || gbash::die "Mount point ${MOUNT_POINT} does not exist."
     [[ -d ${DATA_POINT} ]] || gbash::die "Data source ${DATA_POINT} does not exist."
 
-    # Download the windows sdk
-    local DEPOT_TOOLS="android/third_party/chromium/depot_tools"
-    # This is the hash of the msvc version we are using (VS 2017)
-    local MSVC_HASH="3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c"
-
-    [[ -d $DEPOT_TOOLS ]] || gbash::die "Cannot find depot tools: $DEPOT_TOOLS, are you running the script for {aosp}/external/qemu ?"
-
     LOG INFO "User mounting $DATA_POINT under $MOUNT_POINT"
     $CIOPFS -o use_ino $DATA_POINT $MOUNT_POINT
-    LOG INFO "Looking to get tools version: ${MSVC_HASH}"
-    LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
-    ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
-    if [ $? -ne 0 ]; then
-      echo "${RED}Likely not authenticated... Trying to authenticate${RESET}"
-      echo "${RED}Please follow the instructions below. ${RESET}"
-      echo "${RED}Your project code is 0.${RESET}"
-      
-      
-      ${DEPOT_TOOLS}/download_from_google_storage --config
-      LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
-      ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH || gbash::die "Unable to fetch toolchain"
-    fi
 
-    # Setup the symlink to a well known location for the build system.
-    ln -sf $MOUNT_POINT/vs_files/$MSVC_HASH $MOUNT_POINT/win8sdk
+    download_sdk $MOUNT_POINT
 }
 
 
-function config_fstab() {
+function config_fstab_ciopfs() {
     # Where the windows sdk is actually stored in ciopfs
     local DATA_POINT="$1"
     local CIOPFS="../../prebuilts/android-emulator-build/common/ciopfs/linux-x86_64/ciopfs"
@@ -115,12 +129,53 @@ function config_fstab() {
 }
 
 
+function config_fstab_jfs() {
+    local DATA_POINT="$1"
+    local FSTAB="${DATA_POINT}   /mnt/msvc        jfs loop"
+
+    echo "add the lines below to /etc/fstab if you wish to automount upon restarts"
+    echo "${GREEN}# Automount case insensitive fs for android emulator builds.${RESET}"
+    echo "${GREEN}${FSTAB}${RESET}"
+}
+
+function setup_jfs() {
+    # Takes two parameters:
+    # $1: The disk location of the file system
+    local DISK_LOC="$1"
+
+    # Make sure we have JFS
+    sudo apt-get install -y jfsutils
+    sudo mkdir -p /mnt/msvc
+
+    # Create a OS/2 case insensitive loopback fs.
+    echo "Creating empty img in /tmp/jfs.img"
+    dd if=/dev/zero of=/tmp/jfs.img bs=1M count=4096
+    chmod a+rwx /tmp/jfs.img
+    echo "Making filesystem"
+    mkfs.jfs -q -O /tmp/jfs.img
+    sudo mv /tmp/jfs.img ${DISK_LOC}
+
+    # Mount it, and download all the things!
+    sudo mount ${DISK_LOC} /mnt/msvc -t jfs -o loop
+    sudo chmod a+rwx /mnt/msvc
+    download_sdk /mnt/msvc
+}
+
 echo "This script will install windows sdk in ${FLAGS_ciopfs} and create a mount point in /mnt/msvc"
-echo "It will install androids version of ciopfs and will suggest you modify fstab to automount /mnt/msvc"
+echo "It will install jfs, or androids version of ciopfs and will suggest you modify fstab to automount /mnt/msvc"
 echo "Note that getting the sdk is likely an interactive process, as you will need to obtain some permissions."
-echo "${RED}Install of ciopfs requires sudo privileges"
-echo "You will still need to modify fstab yourself, or mount the filesystem manually under /mnt/msvc${RESET}"
+echo "${RED}Installation requires sudo privileges"
+echo "You will still need to modify fstab yourself, or mount the filesystem manually under /mnt/msvc upon reboots${RESET}"
+echo ""
 approve
 
-fetch_dependencies_msvc "/mnt/msvc" ${FLAGS_ciopfs}
-config_fstab ${FLAGS_ciopfs}
+sudo umount /mnt/msvc
+if [ "${FLAGS_fs}" == "jfs" ]; then
+   setup_jfs ${FLAGS_jfs}
+   config_fstab_jfs ${FLAGS_jfs}
+else
+  echo "${RED}WARNING! Users have reported concurrency issues using ciopfs, it is recommended to use jfs instead!${RESET}"
+  approve
+  setup_ciopfs "/mnt/msvc" ${FLAGS_ciopfs}
+  config_fstab_ciopfs ${FLAGS_ciopfs}
+fi
