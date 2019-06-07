@@ -103,7 +103,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
-
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -138,6 +137,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 [](uint32_t* w, uint32_t* h) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         return win->getMonitorRect(w, h);
+                    } else {
+                        return false;
                     }
                 },
         .setNoSkin =
