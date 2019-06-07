@@ -65,7 +65,9 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         *w = 2500;
                     if (h)
                         *h = 1600;
+                    return true;
                 },
+        .setNoSkin = nullptr,
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const
