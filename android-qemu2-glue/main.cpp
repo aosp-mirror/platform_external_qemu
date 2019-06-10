@@ -970,9 +970,10 @@ extern "C" int main(int argc, char** argv) {
                     args.add(argv[n]);
                 }
 
-                fc::setEnabledOverride(fc::Vulkan, true);
-                fc::setEnabledOverride(fc::GLDirectMem, true);
-                fc::setEnabledOverride(fc::VirtioInput, true);
+                fc::setIfNotOverriden(fc::Vulkan, true);
+                fc::setIfNotOverriden(fc::GLDirectMem, true);
+                fc::setIfNotOverriden(fc::VirtioInput, true);
+                fc::setIfNotOverriden(fc::RefCountPipe, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
