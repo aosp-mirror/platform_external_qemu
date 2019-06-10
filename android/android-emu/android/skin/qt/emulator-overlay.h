@@ -48,7 +48,7 @@ public:
     void hideForFlash();
     void showAsFlash();
 
-    void showForMultitouch(bool centerTouches);
+    void showForMultitouch(bool centerTouches, QPoint centerPosition);
     void showForResize(int whichCorner);
     void paintForResize(int mouseX, int mouseY);
 
