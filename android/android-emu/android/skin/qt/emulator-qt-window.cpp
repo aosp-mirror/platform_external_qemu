@@ -2261,8 +2261,37 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
             (event->modifiers() == Qt::ControlModifier ||
              event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier) )) {
         if (type == kEventKeyDown) {
-            raise();
-            mOverlay.showForMultitouch(event->modifiers() == Qt::ControlModifier);
+            if (countEnabledMultiDisplayLocked() == 0) {
+                raise();
+                D("%s: Using default display for multi touch\n", __FUNCTION__);
+                mOverlay.showForMultitouch(
+                        event->modifiers() == Qt::ControlModifier,
+                        deviceGeometry().center());
+            } else {
+                QPoint mousePosition = mapFromGlobal(QCursor::pos());
+                uint32_t w = 0;
+                uint32_t h = 0;
+                getCombinedDisplaySize(&w, &h);
+                double widthRatio = (double)geometry().width() / (double)w;
+                double heightRatio = (double)geometry().height() / (double)h;
+                for (const auto& iter : mMultiDisplay) {
+                    if (!iter.second.enabled) {
+                        continue;
+                    }
+                    QRect r(static_cast<int>(iter.second.pos_x * widthRatio),
+                            static_cast<int>(iter.second.pos_y * heightRatio),
+                            static_cast<int>(iter.second.width * widthRatio),
+                            static_cast<int>(iter.second.height * heightRatio));
+                    if (r.contains(mousePosition, true)) {
+                        D("%s: using display %d for multi touch\n",
+                          __FUNCTION__, iter.first);
+                        mOverlay.showForMultitouch(
+                                event->modifiers() == Qt::ControlModifier,
+                                r.center());
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -2807,14 +2836,18 @@ bool EmulatorQtWindow::getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, ui
     if (!mMultiDisplay[id].enabled) {
         return false;
     }
-    if (x)
+    if (x) {
         *x = mMultiDisplay[id].pos_x;
-    if (y)
+    }
+    if (y) {
         *y = mMultiDisplay[id].pos_y;
-    if (w)
+    }
+    if (w) {
         *w = mMultiDisplay[id].width;
-    if (h)
+    }
+    if (h) {
         *h = mMultiDisplay[id].height;
+    }
     return true;
 }
 
@@ -2832,14 +2865,13 @@ void EmulatorQtWindow::getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, ui
 }
 
 int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
-    int cnt = 0;
     // Not counting 0, the default Android display
-    for (int i = 1; i < MAX_MULTIDISPLAYS + 1; i++) {
-        if (mMultiDisplay[i].enabled) {
-            cnt++;
-        }
-    }
-    return cnt;
+    return std::count_if(
+            mMultiDisplay.begin(), mMultiDisplay.end(),
+            [this](const std::unordered_map<
+                    uint32_t, MultiDisplayInfo>::value_type& entry) {
+                return entry.first != 0 && entry.second.enabled;
+            });
 }
 
 void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
@@ -2855,10 +2887,12 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t wi
 bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
     SkinRect monitor;
     skin_winsys_get_monitor_rect(&monitor);
-    if (width)
+    if (width) {
         *width = monitor.size.w;
-    if (height)
+    }
+    if (height) {
         *height = monitor.size.h;
+    }
     return true;
 }
 
@@ -2869,5 +2903,20 @@ void EmulatorQtWindow::setNoSkin() {
         SkinEvent* event = new SkinEvent();
         event->type = kEventSetNoSkin;
         skin_event_add(event);
+    }
+}
+
+void EmulatorQtWindow::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
+    uint32_t total_h = 0;
+    uint32_t total_w = 0;
+    for (const auto& iter : mMultiDisplay) {
+        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+    }
+    if (h) {
+        *h = total_h;
+    }
+    if (w) {
+        *w = total_w;
     }
 }
