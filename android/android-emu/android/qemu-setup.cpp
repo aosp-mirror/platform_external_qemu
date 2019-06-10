@@ -425,8 +425,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
         android::network::registerWifiForwardPipeService(mode, port);
     }
 
-    //TODO: add feature control
-    android_init_multi_display_pipe();
+    if (fc::isEnabled(fc::MultiDisplay)) {
+        android_init_multi_display_pipe();
+    }
 
 #ifndef _WIN32
     // bug: 70566718
