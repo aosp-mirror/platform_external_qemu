@@ -2261,8 +2261,39 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
             (event->modifiers() == Qt::ControlModifier ||
              event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier) )) {
         if (type == kEventKeyDown) {
-            raise();
-            mOverlay.showForMultitouch(event->modifiers() == Qt::ControlModifier);
+            if (countEnabledMultiDisplayLocked() == 0) {
+                raise();
+                D("%s: Using default display for multi touch\n", __FUNCTION__);
+                mOverlay.showForMultitouch(
+                        event->modifiers() == Qt::ControlModifier,
+                        deviceGeometry().center());
+            } else {
+                QPoint mousePosition = mapFromGlobal(QCursor::pos());
+
+                uint32_t w = 0;
+                getCombinedDisplaySize(&w, nullptr);
+                double ratio = (double)geometry().width() / (double)w;
+                bool found = false;
+                for (const auto& iter : mMultiDisplay) {
+                    if (!iter.second.enabled) {
+                        continue;
+                    }
+                    QRect r(static_cast<int>(iter.second.pos_x * ratio),
+                            static_cast<int>(iter.second.pos_y * ratio),
+                            static_cast<int>(iter.second.width * ratio),
+                            static_cast<int>(iter.second.height * ratio));
+                    if (r.contains(mousePosition, true)) {
+                        D("%s: using display %d for multi touch\n",
+                          __FUNCTION__, iter.first);
+                        mOverlay.showForMultitouch(
+                                event->modifiers() == Qt::ControlModifier,
+                                r.center());
+                        found = true;
+                    }
+                    if (found)
+                        break;
+                }
+            }
         }
     }
 
@@ -2832,14 +2863,13 @@ void EmulatorQtWindow::getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, ui
 }
 
 int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
-    int cnt = 0;
     // Not counting 0, the default Android display
-    for (int i = 1; i < MAX_MULTIDISPLAYS + 1; i++) {
-        if (mMultiDisplay[i].enabled) {
-            cnt++;
-        }
-    }
-    return cnt;
+    return std::count_if(
+            mMultiDisplay.begin(), mMultiDisplay.end(),
+            [this](const std::unordered_map<
+                    uint32_t, MultiDisplayInfo>::value_type& entry) {
+                return entry.first != 0 && entry.second.enabled;
+            });
 }
 
 void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
@@ -2870,4 +2900,17 @@ void EmulatorQtWindow::setNoSkin() {
         event->type = kEventSetNoSkin;
         skin_event_add(event);
     }
+}
+
+void EmulatorQtWindow::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
+    uint32_t total_h = 0;
+    uint32_t total_w = 0;
+    for (const auto& iter : mMultiDisplay) {
+        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+    }
+    if (h)
+        *h = total_h;
+    if (w)
+        *w = total_w;
 }
