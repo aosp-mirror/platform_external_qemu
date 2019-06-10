@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae0ee9cc_7a5996b5",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-06-10T23:56:02Z",
+      "side": 1,
+      "message": "bracket? or put it in one line? sometimes clang-format will mess it up for you",
+      "range": {
+        "startLine": 429,
+        "startChar": 8,
+        "endLine": 429,
+        "endChar": 42
+      },
+      "revId": "10111adf3dbf43328ad03ac701cc0250b896ca56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
