@@ -331,6 +331,7 @@ void RecordMacroPage::showPreview(const std::string& macroName) {
         mUi->previewLabel->show();
         mUi->previewOverlay->show();
         mUi->replayIcon->hide();
+        showPreviewFrame("Reset_position");
         return;
     }
 
