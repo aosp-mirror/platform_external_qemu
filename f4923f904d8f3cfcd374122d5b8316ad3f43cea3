@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78968d97_a2ffe9c5",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2284,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-06-10T21:43:55Z",
+      "side": 1,
+      "message": "is it ok for height to use the same ratio as width?",
+      "range": {
+        "startLine": 2284,
+        "startChar": 66,
+        "endLine": 2284,
+        "endChar": 71
+      },
+      "revId": "f4923f904d8f3cfcd374122d5b8316ad3f43cea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d912c84_a298a370",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2291,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-06-10T21:43:55Z",
+      "side": 1,
+      "message": "just break here? no need to use found",
+      "range": {
+        "startLine": 2291,
+        "startChar": 24,
+        "endLine": 2291,
+        "endChar": 37
+      },
+      "revId": "f4923f904d8f3cfcd374122d5b8316ad3f43cea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf6ba2f2_cf93cb7b",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2913,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-06-10T21:43:55Z",
+      "side": 1,
+      "message": "add brackets for if?",
+      "range": {
+        "startLine": 2913,
+        "startChar": 8,
+        "endLine": 2913,
+        "endChar": 21
+      },
+      "revId": "f4923f904d8f3cfcd374122d5b8316ad3f43cea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
