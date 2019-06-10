@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "17f39804_37fa7850",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2284,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-06-10T22:07:07Z",
+      "side": 1,
+      "message": "I think both height and width are resized with the same ratio.",
+      "parentUuid": "78968d97_a2ffe9c5",
+      "range": {
+        "startLine": 2284,
+        "startChar": 66,
+        "endLine": 2284,
+        "endChar": 71
+      },
+      "revId": "f4923f904d8f3cfcd374122d5b8316ad3f43cea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5d912c84_a298a370",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -68,6 +92,30 @@
       "revId": "f4923f904d8f3cfcd374122d5b8316ad3f43cea3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f52fc855_21bd4184",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2913,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-06-10T22:07:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "cf6ba2f2_cf93cb7b",
+      "range": {
+        "startLine": 2913,
+        "startChar": 8,
+        "endLine": 2913,
+        "endChar": 21
+      },
+      "revId": "f4923f904d8f3cfcd374122d5b8316ad3f43cea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
