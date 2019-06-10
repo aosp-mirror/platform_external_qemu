@@ -110,13 +110,7 @@ void RecordMacroPage::loadUi() {
                 {"Track_horizontal_plane", tr("0:16")},
                 {"Track_vertical_plane", tr("0:12")},
                 {"Walk_to_image_room", tr("0:14")}};
-
-    // Descriptions as QStrings have to be initialized here to use tr().
-    mDescriptions = {
-            {"Reset_position", tr("Resets sensors to default.")},
-            {"Track_horizontal_plane", tr("Circles around the rug.")},
-            {"Track_vertical_plane", tr("Looks at the wall next to the tv.")},
-            {"Walk_to_image_room", tr("Moves to the dining room.")}};
+    mDescriptions.clear();
 
     const std::string macrosPath = getMacrosDirectory();
     std::vector<std::string> macroFileNames =
@@ -768,9 +762,9 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
     if (isPreset) {
         macroSavedItem->editEnabled(false);
         macroSavedItem->setIsPreset(true);
+        mDescriptions[macroName] = tr("Preset macro");
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroSavedItem->setDisplayTime(mLengths[macroName]);
-        macroName.append(" (Preset macro)");
     } else {
         const std::string macrosLocation = getCustomMacrosDirectory();
         const std::string filePath = PathUtils::join(macrosLocation, macroName);
