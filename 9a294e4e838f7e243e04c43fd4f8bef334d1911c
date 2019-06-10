@@ -1,0 +1,327 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ef88ff3_5e312e5d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-item.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Some doc explaining what a VhalItem is?",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "44e84a30_c56cda27",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-item.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Let\u0027s document what these parameters mean.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "342af16a_a25e04b4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Nit: whoever reads this comment won\u0027t know what the \"original property table\" is (as you are actually replacing it ;-)). I would remove the reference. If there is something we want to copy from the original documentation here, I would just copy it.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54b014f7_4c614a51",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be a member of \"VhalTable\"? \nWhat would happen if we had the VhalTable widget in two windows?\nAlso: I think static members should start with \"s\" (if this follows anything similar to the old Android coding guidelines).",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d47959d9_38d2f219",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Nit: typo in \"PAUSE\"",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19383234_78d12f51",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Typo in \"INTERVAL\".\nI would also rename this to include the unit of time used. E.g.: \"REFRESH_INTERVAL_MILLISECONDS\" or something similar.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a15bfc52_2e64c16f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "I would move this block of code to a method, as this makes the constructor hard to read.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b07ee29d_295b6386",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Why do you check for \"current\" here? I think checking for \"previous\" should be fine.\nAlso, you already have a \"selectedKey\". Why do you need the caller to pass \"previous\"?\nWhat happens if the caller passes the wrong \"previous\" item? You might end up with 2 items \"selected\".\nWouldn\u0027t make more sense do this work in \"on_property_list_itemClicked\"?\n\n(maybe I\u0027m missing the idea).",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c12b5dfc_af8b6618",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Could it ever happen that \"selectedKey\" refers to a non-existing item?\nFor example: I see that showEvent contains a \"vHalpropertyMap.clear()\".",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c899edc_49a9f2e2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Nit: you could inline the \"log\" message.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c952133_d78c82d1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Just for my own learning: why do you use std::move here?",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11d59e25_65a089a3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Nit: \"fram\" -\u003e \"frame\".",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb69e15f_03b8686b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Can\u0027t this be done in the xml files?",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34f8fabc_82376330",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Can this values be obtained from some xml file?",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3976ba4c_ff5016cf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Nit: it would be nice to extract the above code to a \"QString getPropName(VehiclePropValue\u0026)\" method.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bdf9972_8363798e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Can the above be reduced to?:\n\nmUi-\u003eeditButton-\u003esetEnabled(propDesc.writable)",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bffad22_6d980abb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Let\u0027s add some documentation about what a VhalTable is.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7359dbf_25c4819d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Are these values coming from some other file? \nIf a developer were to come here and change this value, is there anywhere else these values should be modified as well?",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7bce5a49_d4cff521",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-06-10T21:29:32Z",
+      "side": 1,
+      "message": "Nit: remove extra empty lines.",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
