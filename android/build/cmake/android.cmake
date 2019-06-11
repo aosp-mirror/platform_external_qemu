@@ -327,8 +327,10 @@ endfunction()
 function(android_add_test name)
   android_add_executable(${name})
 
-  # We cannot run tests when we are cross compiling.
+  # We cannot run tests when we are cross compiling
   if(CROSSCOMPILE)
+    # Only build them when user explicitly asks for it.
+    set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     return()
   endif()
 
