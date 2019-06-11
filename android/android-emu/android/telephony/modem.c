@@ -382,8 +382,10 @@ void amodem_set_notification_callback(AModem modem,
                                       ModemCallback* callback_func,
                                       void* user_data)
 {
-    modem->notify_call_back = callback_func;
-    modem->notify_user_data = user_data;
+    if (modem) {
+      modem->notify_call_back = callback_func;
+      modem->notify_user_data = user_data;
+    }
 }
 
 static bool parseHexCharsToBuffer(const char* str, int length, char* output) {
