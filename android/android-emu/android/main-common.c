@@ -1510,13 +1510,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    android_cmdLineOptions = opts;
+
     if (opts->fuchsia) {
         android_qemu_mode = 0;
         *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
         return false;
     }
-
-    android_cmdLineOptions = opts;
 
     opts->ranchu = is_qemu2;
 
