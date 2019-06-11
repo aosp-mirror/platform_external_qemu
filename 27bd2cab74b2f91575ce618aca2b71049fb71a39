@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce8bda90_8c1c4b06",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2019-06-11T23:08:51Z",
+      "side": 1,
+      "message": "nit: move this check to android-qemu2-glue/qemu-telephony-agent-impl.c as I don\u0027t think it makes sense for a caller to call this with null modem",
+      "revId": "27bd2cab74b2f91575ce618aca2b71049fb71a39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
