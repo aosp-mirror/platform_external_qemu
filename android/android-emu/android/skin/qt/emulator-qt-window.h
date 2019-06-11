@@ -267,9 +267,9 @@ public:
     bool getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
     void getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h,
                          uint32_t* dpi, uint32_t* flag, bool* enabled);
-    int countEnabledMultiDisplayLocked();
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
+
 public slots:
     void rotateSkin(SkinRotation rot);
     void switchMultiDisplay(bool enabled, uint32_t id, uint32_t width, uint32_t height, uint32_t dpi);
@@ -399,6 +399,8 @@ private:
     void runAdbShellPowerDownAndQuit();
     void setVisibleExtent(QBitmap bitMap);
     void getSkinPixmap(); // For masking the skin when frameless
+    int countEnabledMultiDisplayLocked();
+    void getCombinedDisplaySize(uint32_t* w, uint32_t* h);
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
