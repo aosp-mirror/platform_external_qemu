@@ -22,6 +22,30 @@
       "revId": "10111adf3dbf43328ad03ac701cc0250b896ca56",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd87935e_81fde141",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-06-11T00:18:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ae0ee9cc_7a5996b5",
+      "range": {
+        "startLine": 429,
+        "startChar": 8,
+        "endLine": 429,
+        "endChar": 42
+      },
+      "revId": "10111adf3dbf43328ad03ac701cc0250b896ca56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
