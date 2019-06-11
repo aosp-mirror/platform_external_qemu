@@ -3260,15 +3260,18 @@ private:
             }
             using android::base::pj;
             using android::base::System;
-            const std::string fullPath =
-                pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+            std::string fullPath =
+                pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
                         "shaders", shaderSrcFileName);
             std::vector<char> shaderSource = loadShaderSource(fullPath.c_str());
             if (shaderSource.empty()) {
-                // Shader source read error
-                // b:133745819
-                // TODO: yahan@ figure out why
-                return VK_ERROR_OUT_OF_HOST_MEMORY;
+                fullPath =
+                    pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+                            "shaders", shaderSrcFileName);
+                shaderSource = loadShaderSource(fullPath.c_str());
+                if (shaderSource.empty()) {
+                    return VK_ERROR_OUT_OF_HOST_MEMORY;
+                }
             }
             VkShaderModuleCreateInfo shaderInfo = {};
             shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
