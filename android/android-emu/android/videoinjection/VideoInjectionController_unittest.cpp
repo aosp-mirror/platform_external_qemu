@@ -220,3 +220,25 @@ TEST_F(VideoInjectionControllerTest, Reset) {
     EXPECT_FALSE(mController->getNextRequest(android::base::Ok()));
     testing::Mock::VerifyAndClearExpectations(this);
 }
+
+TEST_F(VideoInjectionControllerTest, sendErrorAsyncResponse) {
+    android::AsyncMessagePipeHandle pipe;
+    pipe.id = 123;
+
+    offworld::VideoInjectionRequest request;
+    request.set_sequence_id(100);
+    request.mutable_display_default_frame();
+
+    mController->handleRequest(pipe, request, 1);
+    mController->handleRequest(pipe, request, 2);
+
+    EXPECT_CALL(*this, offworldSendResponse).Times(2);
+    mController->getNextRequest(android::base::Ok());
+    mController->getNextRequest(android::base::Ok());
+    mController->sendErrorAsyncResponse(1, VideoInjectionError::InvalidRequest);
+
+    testing::Mock::VerifyAndClearExpectations(this);
+
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+    mController->sendErrorAsyncResponse(3, VideoInjectionError::InvalidRequest);
+}
