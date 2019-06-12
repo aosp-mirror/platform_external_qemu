@@ -2874,14 +2874,16 @@ int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
             });
 }
 
-void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t width,
-                                   uint32_t height, uint32_t dpi) {
-    setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
+void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t x,
+                                          uint32_t y, uint32_t width,
+                                          uint32_t height, uint32_t dpi,
+                                          uint32_t flag) {
+    setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
     char cmd[128];
     sprintf(cmd, "%s", "am broadcast -a com.android.emulator.multidisplay.START -n com.android.emulator.multidisplay/.MultiDisplayServiceReceiver");
     getAdbInterface()->enqueueCommand({"shell", cmd});
     const auto uiAgent = mToolWindow->getUiEmuAgent();
-    uiAgent->multiDisplay->setMultiDisplay(id, 0, 0, width, height, dpi, 0, enabled);
+    uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
 }
 
 bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {

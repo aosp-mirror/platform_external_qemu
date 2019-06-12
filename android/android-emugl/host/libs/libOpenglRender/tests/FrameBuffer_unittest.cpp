@@ -68,6 +68,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .setNoSkin = nullptr,
+        .switchMultiDisplay = nullptr,
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const

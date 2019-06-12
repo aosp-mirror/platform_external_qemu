@@ -702,7 +702,7 @@ void SettingsPage::on_set_multiDisplay_clicked() {
     if (enabled != e) {
         mMaxDisplayCnt = enabled ? mMaxDisplayCnt + 1 : mMaxDisplayCnt - 1;
     }
-    emit enableMultiDisplayChanged(enabled, mCurrentDisplay, width, height, dpi);
+    emit enableMultiDisplayChanged(enabled, mCurrentDisplay, 0, 0, width, height, dpi, 0);
 }
 
 void SettingsPage::onMultiDisplayIdChanged(int id) {

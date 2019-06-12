@@ -272,7 +272,7 @@ public:
 
 public slots:
     void rotateSkin(SkinRotation rot);
-    void switchMultiDisplay(bool enabled, uint32_t id, uint32_t width, uint32_t height, uint32_t dpi);
+    void switchMultiDisplay(bool enabled, uint32_t id, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t dpi, uint32_t flag);
 
 private slots:
     void slot_adbWarningMessageAccepted();

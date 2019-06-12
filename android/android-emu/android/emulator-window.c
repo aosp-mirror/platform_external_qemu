@@ -380,6 +380,9 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
 
 void emulator_window_set_no_skin() {
     EmulatorWindow* emulator = emulator_window_get();
+    if (emulator->layout_file_original) {
+        return;
+    }
     emulator->layout_file_original = emulator->layout_file;
     emulator->layout_file = skin_file_create_from_display_v1(emulator->layout_file->parts->display);
     skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);

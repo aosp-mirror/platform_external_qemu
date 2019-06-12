@@ -88,8 +88,8 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
 
     connect(
-        mExtendedUi->settingsPage, SIGNAL(enableMultiDisplayChanged(bool, uint32_t, uint32_t, uint32_t, uint32_t)),
-        mEmulatorWindow, SLOT(switchMultiDisplay(bool, uint32_t, uint32_t, uint32_t, uint32_t)));
+        mExtendedUi->settingsPage, SIGNAL(enableMultiDisplayChanged(bool, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)),
+        mEmulatorWindow, SLOT(switchMultiDisplay(bool, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)));
 
     // clang-format off
     mPaneButtonMap = {

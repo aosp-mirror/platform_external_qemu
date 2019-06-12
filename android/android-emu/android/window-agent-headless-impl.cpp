@@ -89,6 +89,14 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                               uint32_t* h) { return false; },
         .getMonitorRect = [](uint32_t* w, uint32_t* h) { return false; },
         .setNoSkin = []() {},
+        .switchMultiDisplay = [](bool add,
+                                 uint32_t id,
+                                 uint32_t x,
+                                 uint32_t y,
+                                 uint32_t w,
+                                 uint32_t h,
+                                 uint32_t dpi,
+                                 uint32_t flag) {},
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

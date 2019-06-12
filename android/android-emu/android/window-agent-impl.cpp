@@ -146,6 +146,19 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         return win->setNoSkin();
                     }
+                },
+        .switchMultiDisplay =
+                [](bool add,
+                   uint32_t id,
+                   uint32_t x,
+                   uint32_t y,
+                   uint32_t w,
+                   uint32_t h,
+                   uint32_t dpi,
+                   uint32_t flag) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->switchMultiDisplay(add, id, x, y, w, h, dpi, flag);
+                    }
                 }};
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
