@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c52f393_97ef05a7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1767,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-12T19:34:40Z",
+      "side": -1,
+      "message": "Why this change?",
+      "range": {
+        "startLine": 1766,
+        "startChar": 4,
+        "endLine": 1767,
+        "endChar": 64
+      },
+      "revId": "005a64f4075b027ec0ff4f0860ac90e3999feb18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
