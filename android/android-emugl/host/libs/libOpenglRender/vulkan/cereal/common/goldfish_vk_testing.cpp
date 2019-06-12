@@ -47,16 +47,24 @@ void checkEqual_VkApplicationInfo(
     {
         checkEqual_extension_struct(a->pNext, b->pNext, onFail);
     }
-    if (!((!(a->pApplicationName) && !(b->pApplicationName)) || ((a->pApplicationName) && (b->pApplicationName)))) { onFail("a->pApplicationName (Error: Mismatch in string pointer nullness)"); };
-    if ((a->pApplicationName) && (b->pApplicationName))
+    if (!((!(a->pApplicationName) && !(b->pApplicationName)) || ((a->pApplicationName) && (b->pApplicationName)))) { onFail("a->pApplicationName (Error: Mismatch in optional field)"); };
+    if (a->pApplicationName && b->pApplicationName)
     {
-        if (!((strcmp(a->pApplicationName, b->pApplicationName) == 0))) { onFail("a->pApplicationName (Error: Unequal strings)"); };
+        if (!((!(a->pApplicationName) && !(b->pApplicationName)) || ((a->pApplicationName) && (b->pApplicationName)))) { onFail("a->pApplicationName (Error: Mismatch in string pointer nullness)"); };
+        if ((a->pApplicationName) && (b->pApplicationName))
+        {
+            if (!((strcmp(a->pApplicationName, b->pApplicationName) == 0))) { onFail("a->pApplicationName (Error: Unequal strings)"); };
+        }
     }
     if (!((a->applicationVersion) == (b->applicationVersion))) { onFail("a->applicationVersion (Error: Value not equal)"); };
-    if (!((!(a->pEngineName) && !(b->pEngineName)) || ((a->pEngineName) && (b->pEngineName)))) { onFail("a->pEngineName (Error: Mismatch in string pointer nullness)"); };
-    if ((a->pEngineName) && (b->pEngineName))
+    if (!((!(a->pEngineName) && !(b->pEngineName)) || ((a->pEngineName) && (b->pEngineName)))) { onFail("a->pEngineName (Error: Mismatch in optional field)"); };
+    if (a->pEngineName && b->pEngineName)
     {
-        if (!((strcmp(a->pEngineName, b->pEngineName) == 0))) { onFail("a->pEngineName (Error: Unequal strings)"); };
+        if (!((!(a->pEngineName) && !(b->pEngineName)) || ((a->pEngineName) && (b->pEngineName)))) { onFail("a->pEngineName (Error: Mismatch in string pointer nullness)"); };
+        if ((a->pEngineName) && (b->pEngineName))
+        {
+            if (!((strcmp(a->pEngineName, b->pEngineName) == 0))) { onFail("a->pEngineName (Error: Unequal strings)"); };
+        }
     }
     if (!((a->engineVersion) == (b->engineVersion))) { onFail("a->engineVersion (Error: Value not equal)"); };
     if (!((a->apiVersion) == (b->apiVersion))) { onFail("a->apiVersion (Error: Value not equal)"); };
@@ -5433,10 +5441,14 @@ void checkEqual_VkDebugUtilsObjectNameInfoEXT(
     }
     if (!((a->objectType) == (b->objectType))) { onFail("a->objectType (Error: Value not equal)"); };
     if (!((a->objectHandle) == (b->objectHandle))) { onFail("a->objectHandle (Error: Value not equal)"); };
-    if (!((!(a->pObjectName) && !(b->pObjectName)) || ((a->pObjectName) && (b->pObjectName)))) { onFail("a->pObjectName (Error: Mismatch in string pointer nullness)"); };
-    if ((a->pObjectName) && (b->pObjectName))
+    if (!((!(a->pObjectName) && !(b->pObjectName)) || ((a->pObjectName) && (b->pObjectName)))) { onFail("a->pObjectName (Error: Mismatch in optional field)"); };
+    if (a->pObjectName && b->pObjectName)
     {
-        if (!((strcmp(a->pObjectName, b->pObjectName) == 0))) { onFail("a->pObjectName (Error: Unequal strings)"); };
+        if (!((!(a->pObjectName) && !(b->pObjectName)) || ((a->pObjectName) && (b->pObjectName)))) { onFail("a->pObjectName (Error: Mismatch in string pointer nullness)"); };
+        if ((a->pObjectName) && (b->pObjectName))
+        {
+            if (!((strcmp(a->pObjectName, b->pObjectName) == 0))) { onFail("a->pObjectName (Error: Unequal strings)"); };
+        }
     }
 }
 
@@ -5485,10 +5497,14 @@ void checkEqual_VkDebugUtilsMessengerCallbackDataEXT(
         checkEqual_extension_struct(a->pNext, b->pNext, onFail);
     }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
-    if (!((!(a->pMessageIdName) && !(b->pMessageIdName)) || ((a->pMessageIdName) && (b->pMessageIdName)))) { onFail("a->pMessageIdName (Error: Mismatch in string pointer nullness)"); };
-    if ((a->pMessageIdName) && (b->pMessageIdName))
+    if (!((!(a->pMessageIdName) && !(b->pMessageIdName)) || ((a->pMessageIdName) && (b->pMessageIdName)))) { onFail("a->pMessageIdName (Error: Mismatch in optional field)"); };
+    if (a->pMessageIdName && b->pMessageIdName)
     {
-        if (!((strcmp(a->pMessageIdName, b->pMessageIdName) == 0))) { onFail("a->pMessageIdName (Error: Unequal strings)"); };
+        if (!((!(a->pMessageIdName) && !(b->pMessageIdName)) || ((a->pMessageIdName) && (b->pMessageIdName)))) { onFail("a->pMessageIdName (Error: Mismatch in string pointer nullness)"); };
+        if ((a->pMessageIdName) && (b->pMessageIdName))
+        {
+            if (!((strcmp(a->pMessageIdName, b->pMessageIdName) == 0))) { onFail("a->pMessageIdName (Error: Unequal strings)"); };
+        }
     }
     if (!((a->messageIdNumber) == (b->messageIdNumber))) { onFail("a->messageIdNumber (Error: Value not equal)"); };
     if (!((!(a->pMessage) && !(b->pMessage)) || ((a->pMessage) && (b->pMessage)))) { onFail("a->pMessage (Error: Mismatch in string pointer nullness)"); };
