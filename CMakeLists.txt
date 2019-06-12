@@ -22,6 +22,7 @@ set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any")
 set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
+set(OPTION_TIME_INFO FALSE CACHE BOOL "True if you wish to collect compile time statistics")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
 if ((NOT CROSSCOMPILE) AND LINUX_X86_64)
 set(GRPC TRUE CACHE BOOL "True if the emulator should be build with GRPC support. Defaults on for Linux.")
@@ -62,6 +63,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
 # So we are using some C++14 features..
 set(CMAKE_CXX_STANDARD 14)
+
+# Gather compile time statistics
+if (OPTION_TIME_INFO)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
+endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
