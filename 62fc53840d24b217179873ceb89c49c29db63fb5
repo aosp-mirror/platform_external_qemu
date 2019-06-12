@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d94eb64_35c9d22f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1916,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2019-06-12T19:48:41Z",
+      "side": 0,
+      "message": "Fyi, I had to rename this as it was causing a conflict with the CoreFoundation.h include on macos above.",
+      "range": {
+        "startLine": 1916,
+        "startChar": 25,
+        "endLine": 1916,
+        "endChar": 34
+      },
+      "revId": "62fc53840d24b217179873ceb89c49c29db63fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
