@@ -994,7 +994,7 @@ int VideoPlayerImpl::play() {
 
     PacketQueue::init();
 
-    AVFormatContext* inputCtx;
+    AVFormatContext* inputCtx = nullptr;
     if (avformat_open_input(&inputCtx, filename, NULL, NULL) != 0) {
         LOG(ERROR) << __func__ << ": Failed to open input context";
         return -1;
