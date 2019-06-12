@@ -100,6 +100,10 @@ static void initIcdPaths(bool forTesting) {
 
 #endif
 static std::string getLoaderPath(bool forTesting) {
+    auto path = System::get()->envGet("ANDROID_EMU_VK_LOADER_PATH");
+    if (!path.empty()) {
+        return path;
+    }
     if (forTesting) {
 
         auto path = pj(System::get()->getProgramDirectory(), "testlib64",
