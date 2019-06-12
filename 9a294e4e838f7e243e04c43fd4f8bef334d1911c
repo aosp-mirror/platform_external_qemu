@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c80bd6c9_995b7c1c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-item.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ef88ff3_5e312e5d",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "44e84a30_c56cda27",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-item.h",
         "patchSetId": 10
@@ -33,6 +51,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a849a4e_77ffe8a1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-item.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "44e84a30_c56cda27",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7cb3ae64_32b39101",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "342af16a_a25e04b4",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54b014f7_4c614a51",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -67,6 +121,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc0afc1e_b29fa7dc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Change them to member of vhaltable and make it non-static, so different widget can have different selectedkey.",
+      "parentUuid": "54b014f7_4c614a51",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "85af01c8_9e905b6c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d47959d9_38d2f219",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19383234_78d12f51",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -101,6 +191,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b7ad33d_a89c990a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19383234_78d12f51",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "8d9009a0_15f7eebf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a15bfc52_2e64c16f",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b07ee29d_295b6386",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -135,6 +261,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37d8b880_54a3a02d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "This part of code comes from record-macro-page.cpp. Keep the check in case there is an unknown edge case.\nThis slot is to set the selected item text color to white and set the previous selected item text color back to un-selected state. If I don\u0027t have \"previous\", it would be complicated to set the color.\nThis slot is an official slot, I would assume it always does the right thing.",
+      "parentUuid": "b07ee29d_295b6386",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "00c83e8d_cf36e86d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Add a check here and also clean the selectedkey in showEvent, but selectedKey is always created with existing item.",
+      "parentUuid": "c12b5dfc_af8b6618",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c899edc_49a9f2e2",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -169,6 +331,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5a1e05c_80b69c41",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c899edc_49a9f2e2",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "9e8c0817_a131ebe8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "it\u0027s a way to pass callback lambda, when don\u0027t need to keep a reference.",
+      "parentUuid": "6c952133_d78c82d1",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11d59e25_65a089a3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -203,6 +401,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b1b35a2_e8e8f281",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11d59e25_65a089a3",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "6843da06_f3210505",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb69e15f_03b8686b",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34f8fabc_82376330",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -237,6 +471,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf481f36_a06f59ec",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34f8fabc_82376330",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "12a78694_461a60fa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3976ba4c_ff5016cf",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9bdf9972_8363798e",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
         "patchSetId": 10
@@ -271,6 +541,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe578e42_a22c393a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9bdf9972_8363798e",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "565919cb_212f549a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bffad22_6d980abb",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e7359dbf_25c4819d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
         "patchSetId": 10
@@ -308,6 +614,24 @@
     },
     {
       "key": {
+        "uuid": "62ccf10d_6b868c35",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "These values are used here as keys to the property/area/key value, I found them in QlistWidgetItem doc. Remove since I found a better way.",
+      "parentUuid": "e7359dbf_25c4819d",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7bce5a49_d4cff521",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
         "patchSetId": 10
@@ -322,6 +646,24 @@
       "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "475240e4_44becdb6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-12T01:31:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7bce5a49_d4cff521",
+      "revId": "9a294e4e838f7e243e04c43fd4f8bef334d1911c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
