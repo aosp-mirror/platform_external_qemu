@@ -46,5 +46,6 @@ private:
     void loadUi();
 
     bool mIsPreset = false;
+    QString mName;
     std::unique_ptr<Ui::RecordMacroSavedItem> mUi;
 };
