@@ -773,7 +773,11 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
 
         if vulkanType.isString():
 
+            if needCheck:
+                forEachType.onCheck(vulkanType)
             forEachType.onString(vulkanType)
+            if needCheck:
+                forEachType.endCheck(vulkanType)
 
         elif vulkanType.isArrayOfStrings():
 

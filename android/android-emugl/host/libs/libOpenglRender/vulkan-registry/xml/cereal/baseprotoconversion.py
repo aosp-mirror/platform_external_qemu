@@ -245,10 +245,10 @@ class VulkanProtoToStructCodegen(VulkanTypeIterator):
 
         protoInfo = VulkanTypeProtobufInfo(self.typeInfo, self.structInfo, vulkanType)
 
-        if protoInfo.lengthInfo is not None:
-            self.cgen.beginIf("%s->%s_size()" % (self.inputVarName, vulkanType.paramName.lower()))
-        else:
+        if protoInfo.isString or protoInfo.lengthInfo is None:
             self.cgen.beginIf("%s->has_%s()" % (self.inputVarName, vulkanType.paramName.lower()))
+        else:
+            self.cgen.beginIf("%s->%s_size()" % (self.inputVarName, vulkanType.paramName.lower()))
 
     def endCheck(self, vulkanType):
         if self.checked:
