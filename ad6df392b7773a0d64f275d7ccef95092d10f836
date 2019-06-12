@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e13838e_d47feed4",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-12T23:11:29Z",
+      "side": 1,
+      "message": "Do we care about the ordering of the keys? Otherwise, we can just use std::unordered_map here.",
+      "range": {
+        "startLine": 128,
+        "startChar": 3,
+        "endLine": 128,
+        "endChar": 12
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d34e7886_0ea60f9e",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-12T23:11:29Z",
+      "side": 1,
+      "message": "consider using std::make_pair, although you will need to make sure it will properly build on all platforms.",
+      "range": {
+        "startLine": 247,
+        "startChar": 40,
+        "endLine": 247,
+        "endChar": 75
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22304a05_bebc9b85",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-12T23:11:29Z",
+      "side": 1,
+      "message": "Move this into the else block, so that it\u0027s closer to the location where it\u0027s being used.",
+      "range": {
+        "startLine": 267,
+        "startChar": 0,
+        "endLine": 267,
+        "endChar": 39
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
