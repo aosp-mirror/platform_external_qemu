@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "android/base/Optional.h"
 #include "android/base/Result.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
@@ -92,6 +94,11 @@ public:
 
     // Called on pipe close, to cancel any pending operations.
     virtual void pipeClosed(android::AsyncMessagePipeHandle pipe) = 0;
+
+    // Send async response containing error message to java video injection
+    // controller.
+    virtual void sendErrorAsyncResponse(uint32_t async_id,
+                                        const VideoInjectionError& error) = 0;
 };
 
 }  // namespace videoinjection
