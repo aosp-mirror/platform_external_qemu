@@ -174,6 +174,8 @@ ExtendedWindow::ExtendedWindow(
 
         if (macroUi) {
             mExtendedUi->recordAndPlaybackPage->enableCustomMacros();
+        } else {
+            mExtendedUi->recordAndPlaybackPage->removeSettingsTab();
         }
     }
 

@@ -23,3 +23,7 @@ void RecordAndPlaybackPage::updateTheme() {
 void RecordAndPlaybackPage::enableCustomMacros() {
     mUi->tabWidget->setTabText(1, tr("Macro Record"));
 }
+
+void RecordAndPlaybackPage::removeSettingsTab() {
+    mUi->tabWidget->removeTab(2);
+}
