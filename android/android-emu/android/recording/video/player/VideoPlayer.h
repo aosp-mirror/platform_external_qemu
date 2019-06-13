@@ -40,6 +40,12 @@
 namespace android {
 namespace videoplayer {
 
+struct PlayConfig {
+    bool looping;
+
+    PlayConfig(bool looping_ = false) : looping(looping_) {}
+};
+
 // public APIs of the video player
 class VideoPlayer {
 protected:
@@ -56,7 +62,7 @@ public:
             VideoPlayerRenderTarget* widget,
             std::unique_ptr<VideoPlayerNotifier> notifier);
 
-    virtual void start() = 0;
+    virtual void start(const PlayConfig& playConfig = PlayConfig()) = 0;
     virtual void stop() = 0;
     virtual bool isRunning() const = 0;
     virtual void videoRefresh() = 0;
