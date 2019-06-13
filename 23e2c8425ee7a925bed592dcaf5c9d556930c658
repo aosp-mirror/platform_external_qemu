@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8319521_ac66b7ee",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3498,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-06-13T00:15:22Z",
+      "side": 1,
+      "message": "clang-format this file?",
+      "revId": "23e2c8425ee7a925bed592dcaf5c9d556930c658",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
