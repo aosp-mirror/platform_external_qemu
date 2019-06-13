@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "62ab2743_c2591531",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "I think we should have a sendOkAsyncResponse too, and use that instead of getNextRequest passing in the previousResult.",
+      "range": {
+        "startLine": 117,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 75
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5e13838e_d47feed4",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 1
@@ -18,6 +41,52 @@
         "startChar": 3,
         "endLine": 128,
         "endChar": 12
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25d9cf3a_c32a45b5",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "This should be mAsyncRequestContextMap, per the emulator style guide.",
+      "range": {
+        "startLine": 128,
+        "startChar": 39,
+        "endLine": 128,
+        "endChar": 63
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20d55656_ef27e19b",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "This will create an async response that sets complete\u003dtrue, which indicates that there are no further responses.  If we send another response for that pipe after this, the client won\u0027t expect it.",
+      "range": {
+        "startLine": 241,
+        "startChar": 40,
+        "endLine": 241,
+        "endChar": 59
       },
       "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -48,6 +117,52 @@
     },
     {
       "key": {
+        "uuid": "14b83876_c492db0b",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "This should probably happen in handleRequest() instead.",
+      "range": {
+        "startLine": 247,
+        "startChar": 8,
+        "endLine": 248,
+        "endChar": 57
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "202161b0_e813f062",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "auto itr \u003d mAsyncRequestContextMap.find(async_id);",
+      "range": {
+        "startLine": 265,
+        "startChar": 4,
+        "endLine": 266,
+        "endChar": 50
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "22304a05_bebc9b85",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 1
@@ -64,6 +179,52 @@
         "startChar": 0,
         "endLine": 267,
         "endChar": 39
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c70f0f10_9aa56dbd",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "This should remove from the map too",
+      "range": {
+        "startLine": 272,
+        "startChar": 6,
+        "endLine": 272,
+        "endChar": 10
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c047999_cabbdc33",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T00:17:58Z",
+      "side": 1,
+      "message": "You can omit the std:: here",
+      "range": {
+        "startLine": 100,
+        "startChar": 40,
+        "endLine": 100,
+        "endChar": 45
       },
       "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
