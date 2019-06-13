@@ -17,48 +17,22 @@
 #include "MultiDisplayPipe.h"
 #include "android/opengles.h"
 
-#define ADD 1
-#define DEL 2
-#define CMD_SIZE 21
-
 namespace android {
 
 static MultiDisplayPipe* sMultiDisplayPipeInstance = nullptr;
-static base::Lock mLock;
-static std::vector<uint8_t> sData;
-
-void MultiDisplayPipe::Service::preSave(android::base::Stream* stream) {
-    AndroidAsyncMessagePipe::Service<MultiDisplayPipe>::preSave(stream);
-    stream->putBe32(sData.size());
-    stream->putString(reinterpret_cast<const char*>(sData.data()), sData.size());
-}
-
-void MultiDisplayPipe::Service::preLoad(android::base::Stream* stream) {
-    AndroidAsyncMessagePipe::Service<MultiDisplayPipe>::preLoad(stream);
-    int length = stream->getBe32();
-    const std::string dataStr = stream->getString();
-    sData = std::vector<uint8_t>(dataStr.begin(), dataStr.end());
-}
+const uint8_t MultiDisplayPipe::ADD = 1;
+const uint8_t MultiDisplayPipe::DEL = 2;
+const uint8_t MultiDisplayPipe::QUERY = 3;
+const uint8_t MultiDisplayPipe::BIND = 4;
+const uint8_t MultiDisplayPipe::MAX_DISPLAYS = 10;
 
 MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
-  : AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {
+  : AndroidAsyncMessagePipe(service, std::move(pipeArgs)),
+    mService(static_cast<Service*>(service)) {
     if (sMultiDisplayPipeInstance) {
         LOG(ERROR) << "MultiDisplayPipe already created";
     }
     sMultiDisplayPipeInstance = this;
-    {
-        android::base::AutoLock lock(mLock);
-        if (sData.size() == 0) {
-            return;
-        }
-        for (int i = 0; i < sData.size(); i += CMD_SIZE) {
-            std::vector<uint8_t> data(sData.begin() + i,
-                                      sData.begin() + i + CMD_SIZE);
-            LOG(VERBOSE) << "send buffered cmd " << data[0];
-            send(std::move(data));
-        }
-        sData.clear();
-    }
 }
 
 MultiDisplayPipe::~MultiDisplayPipe() {
@@ -66,15 +40,29 @@ MultiDisplayPipe::~MultiDisplayPipe() {
 }
 
 void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
-    // Expected data is {displayId, colorBufferId}
-    if (data.size() != 8) {
-        LOG(ERROR) << "Wrong msg for MultiDisplayPipe cb binding";
-        return;
+    uint8_t cmd = data[0];
+    switch (cmd) {
+        case QUERY:
+            for (uint32_t i = 1; i < MAX_DISPLAYS + 1; i++) {
+                uint32_t w, h, dpi, flag;
+                if (mService->mWindowAgent->getMultiDisplay(i, NULL, NULL, &w, &h,
+                                                            &dpi, &flag, NULL)) {
+                  std::vector<uint8_t> buf;
+                  fillData(buf, i, w, h, dpi, flag, true);
+                  send(std::move(buf));
+                }
+            }
+            break;
+        case BIND: {
+            uint32_t id = *(uint32_t*)&(data[1]);
+            uint32_t cb = *(uint32_t*)&(data[5]);
+            android_setMultiDisplayColorBuffer(id, cb);
+            break;
+        }
+        default:
+            LOG(WARNING) << "unexpected cmommand " << cmd;
     }
-    uint32_t id = *(uint32_t*)&(data[0]);
-    uint32_t cb = *(uint32_t*)&(data[4]);
 
-    android_setMultiDisplayColorBuffer(id, cb);
 }
 
 //static
@@ -84,10 +72,6 @@ void MultiDisplayPipe::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint
         std::vector<uint8_t> data;
         fillData(data, id, w, h, dpi, flag, add);
         sMultiDisplayPipeInstance->send(std::move(data));
-    } else {
-        //buffer the data, send it later when pipe connected
-        android::base::AutoLock lock(mLock);
-        fillData(sData, id, w, h, dpi, flag, add);
     }
     // adjust the host window
     android_setMultiDisplay(id, x, y, w, h, dpi, add);
@@ -109,7 +93,8 @@ void MultiDisplayPipe::fillData(std::vector<uint8_t>& data, uint32_t id, uint32_
 
 } // namespace android
 
-void android_init_multi_display_pipe() {
+void android_init_multi_display_pipe(const QAndroidEmulatorWindowAgent* const agent) {
     android::AndroidPipe::Service::add(
-        new android::MultiDisplayPipe::Service("multidisplay"));
+        new android::MultiDisplayPipe::Service("multidisplay", agent));
 }
+
