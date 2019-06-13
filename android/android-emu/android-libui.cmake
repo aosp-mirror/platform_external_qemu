@@ -105,6 +105,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/record-macro-page.cpp
     android/skin/qt/extended-pages/record-macro-saved-item.cpp
     android/skin/qt/extended-pages/record-screen-page.cpp
+    android/skin/qt/extended-pages/record-settings-page.cpp
     android/skin/qt/extended-pages/rotary-input-dial.cpp
     android/skin/qt/extended-pages/rotary-input-page.cpp
     android/skin/qt/extended-pages/settings-page-proxy.cpp
@@ -177,6 +178,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/record-macro-page.ui
     android/skin/qt/extended-pages/record-macro-saved-item.ui
     android/skin/qt/extended-pages/record-screen-page.ui
+    android/skin/qt/extended-pages/record-settings-page.ui
     android/skin/qt/extended-pages/rotary-input-page.ui
     android/skin/qt/extended-pages/settings-page.ui
     android/skin/qt/extended-pages/snapshot-page.ui
@@ -219,6 +221,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/record-macro-saved-item.h
     android/skin/qt/extended-pages/record-screen-page-tasks.h
     android/skin/qt/extended-pages/record-screen-page.h
+    android/skin/qt/extended-pages/record-settings-page.h
     android/skin/qt/extended-pages/rotary-input-dial.h
     android/skin/qt/extended-pages/rotary-input-page.h
     android/skin/qt/extended-pages/settings-page.h
