@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "43aa804f_faaf86c4",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-13T22:54:18Z",
+      "side": 1,
+      "message": "inject this dependency in, instead of creating/instantiating one here.",
+      "range": {
+        "startLine": 183,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 54
+      },
+      "revId": "2e93a652e82521434869788ad3d688e42e0a3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "164df4a9_7fc5d90c",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayerFactory.h",
         "patchSetId": 1
