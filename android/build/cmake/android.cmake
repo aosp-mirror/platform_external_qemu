@@ -731,9 +731,13 @@ function(android_upload_symbols TGT)
                              \"--environment\" \"${OPTION_CRASHUPLOAD}\"
                              OUTPUT_FILE ${LOG}
                              ERROR_FILE ${LOG})\n
-    FILE(READ ${LOG} contents)\n
-    STRING(STRIP \$\{contents\} contents)\n
-    MESSAGE(STATUS \$\{contents\})\n"
+    if (EXISTS ${LOG})
+      FILE(READ ${LOG} contents)
+      STRING(STRIP \$\{contents\} contents)
+    else()
+        SET(contents \"No logfile in ${LOG} for ${DEST} was created\")
+    endif()
+    MESSAGE(STATUS \$\{contents\})"
   )
 endfunction()
 
