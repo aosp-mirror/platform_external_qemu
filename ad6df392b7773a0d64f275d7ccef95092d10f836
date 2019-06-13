@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5f4a65cf_f5f80fe2",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-13T22:40:25Z",
+      "side": 1,
+      "message": "Please revert the auto-formatting change. It makes harder to do code review.\nI don\u0027t they look right. For example a space is needed between () and {\nThanks",
+      "range": {
+        "startLine": 97,
+        "startChar": 9,
+        "endLine": 102,
+        "endChar": 38
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "62ab2743_c2591531",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 1
@@ -164,6 +187,30 @@
       "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aacabce6_1c9ab460",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-13T22:40:25Z",
+      "side": 1,
+      "message": "?",
+      "parentUuid": "9b0f0bb4_b0a03d4b",
+      "range": {
+        "startLine": 128,
+        "startChar": 39,
+        "endLine": 128,
+        "endChar": 63
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     },
     {
       "key": {
