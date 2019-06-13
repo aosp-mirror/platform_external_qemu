@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "164df4a9_7fc5d90c",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayerFactory.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-13T21:50:58Z",
+      "side": 1,
+      "message": "This *kinda* defeats the purpose of having a factory. Ideally we want our code under test to not care what kind of video player it gets back after we call the create() method. As it stands, we will need to call the createMock() method in order to get a mock for testing. Looking forward, your code will need to be designed around this quirk, which may or may not make for interesting architecture.\n\nOn the other hand, doing it in true Abstract Factory fashion will mean a lot of the classes that use video player will need to add a VideoPlayerFactory as an explicit dependency, which may not be what we want either.",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 52
+      },
+      "revId": "2e93a652e82521434869788ad3d688e42e0a3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
