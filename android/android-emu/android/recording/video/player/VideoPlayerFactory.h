@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -31,30 +31,28 @@
 
 #pragma once
 
+#include "android/recording/video/player/MockedVideoPlayer.h"
+#include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
-#include "android/utils/compiler.h"
 
 #include <memory>
 
 namespace android {
 namespace videoplayer {
 
-// public APIs of the video player
-class VideoPlayer {
-protected:
-    VideoPlayer() = default;
-
+class VideoPlayerFactory {
 public:
-    virtual ~VideoPlayer() = default;
+    // create a video player instance the input video file, the output widget to
+    // display, and the notifier to receive updates
+    static std::unique_ptr<VideoPlayer> create(
+            std::string videoFile,
+            VideoPlayerRenderTarget* widget,
+            std::unique_ptr<VideoPlayerNotifier> notifier);
 
-public:
-    virtual void start() = 0;
-    virtual void stop() = 0;
-    virtual bool isRunning() const = 0;
-    virtual void videoRefresh() = 0;
-    virtual void scheduleRefresh(int delayMs) = 0;
+    // create a mocked instance of video player
+    static std::unique_ptr<VideoPlayer> createMock() { return std::make_unique<MockedVideoPlayer>(); }
 };
 
-}  // namespace videoplayer
-}  // namespace android
+}
+}

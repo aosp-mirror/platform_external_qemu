@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -31,30 +31,26 @@
 
 #pragma once
 
-#include "android/recording/video/player/VideoPlayerNotifier.h"
-#include "android/recording/video/player/VideoPlayerRenderTarget.h"
-#include "android/utils/compiler.h"
+#include "android/recording/video/player/VideoPlayer.h"
 
 #include <memory>
 
 namespace android {
 namespace videoplayer {
 
-// public APIs of the video player
-class VideoPlayer {
-protected:
-    VideoPlayer() = default;
-
+// Mocked video player for testing
+class MockedVideoPlayer : public VideoPlayer {
 public:
-    virtual ~VideoPlayer() = default;
-
-public:
-    virtual void start() = 0;
-    virtual void stop() = 0;
-    virtual bool isRunning() const = 0;
-    virtual void videoRefresh() = 0;
-    virtual void scheduleRefresh(int delayMs) = 0;
+    MockedVideoPlayer() = default;
+    ~MockedVideoPlayer() = default;
+    void start() { mRunning = true; }
+    void stop() { mRunning = false; }
+    bool isRunning() const { return mRunning; }
+    void videoRefresh() {}
+    void scheduleRefresh(int delayMs) {}
+private:
+    bool mRunning;
 };
 
-}  // namespace videoplayer
-}  // namespace android
+}
+}
