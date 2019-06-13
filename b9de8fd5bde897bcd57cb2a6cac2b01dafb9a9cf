@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0c6d952_2495e67c",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-13T16:40:55Z",
+      "side": 1,
+      "message": "nit: } else {",
+      "range": {
+        "startLine": 149,
+        "startChar": 1,
+        "endLine": 150,
+        "endChar": 22
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf93305d_23b55d74",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-13T16:40:55Z",
+      "side": 1,
+      "message": "Could you create a data structure for this, like PlayConfig or Something,which contains looping and can be extended in the future. Thanks!",
+      "range": {
+        "startLine": 172,
+        "startChar": 23,
+        "endLine": 172,
+        "endChar": 35
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5003c852_81e9102e",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-13T16:40:55Z",
+      "side": 1,
+      "message": "I am not sure if C++ has some keyword like volatile, which prevent caching the value in the thread.",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 25
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
