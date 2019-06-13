@@ -68,6 +68,30 @@
       "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "63d5d883_6035007d",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-13T16:46:19Z",
+      "side": 1,
+      "message": "The C++11 standard would have the above variables (or the suggested PlayConfig) be of the type \"volatile std::atomic\u003cT\u003e\". It might be worth giving it a shot. We can use the build bot to see if std::atomic is supported on all target platforms.",
+      "parentUuid": "5003c852_81e9102e",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 25
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
