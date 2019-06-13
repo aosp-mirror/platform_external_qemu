@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f78903a9_07a7f1df",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-13T16:34:30Z",
+      "side": 1,
+      "message": "+1 to this. Wei, are you planning on eliminating the dummy previousResult from getNextRequest in a future change?",
+      "parentUuid": "62ab2743_c2591531",
+      "range": {
+        "startLine": 117,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 75
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5e13838e_d47feed4",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 1
