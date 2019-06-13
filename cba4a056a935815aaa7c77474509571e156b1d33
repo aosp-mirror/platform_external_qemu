@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21be2967_0ec1d581",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T19:14:12Z",
+      "side": 1,
+      "message": "Would it be possible to make this dynamic so that the widget can be resized?  (not blocking this cl)",
+      "range": {
+        "startLine": 19,
+        "startChar": 10,
+        "endLine": 19,
+        "endChar": 25
+      },
+      "revId": "cba4a056a935815aaa7c77474509571e156b1d33",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
