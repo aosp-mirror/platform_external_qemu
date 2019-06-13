@@ -17,16 +17,17 @@
 #pragma once
 
 #include "AndroidAsyncMessagePipe.h"
+#include "android/emulation/control/window_agent.h"
 
 namespace android {
 class MultiDisplayPipe : public AndroidAsyncMessagePipe {
 public:
     class Service : public AndroidAsyncMessagePipe::Service<MultiDisplayPipe> {
     public:
-        Service(const char* serviceName)
-          : AndroidAsyncMessagePipe::Service<MultiDisplayPipe>(serviceName) {}
-        virtual void preSave(android::base::Stream* stream) override;
-        virtual void preLoad(android::base::Stream* stream) override;
+        Service(const char* serviceName, const QAndroidEmulatorWindowAgent* const agent)
+          : AndroidAsyncMessagePipe::Service<MultiDisplayPipe>(serviceName),
+            mWindowAgent(agent) {}
+        const QAndroidEmulatorWindowAgent* const mWindowAgent;
     };
 
     MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs);
@@ -38,7 +39,13 @@ public:
 private:
     static void fillData(std::vector<uint8_t>& data, uint32_t id, uint32_t w, uint32_t h,
                   uint32_t dpi, uint32_t flag, bool add);
+    Service* const mService;
+    const static uint8_t ADD = 1;
+    const static uint8_t DEL = 2;
+    const static uint8_t QUERY = 3;
+    const static uint8_t BIND = 4;
+    const static uint8_t MAX_DISPLAYS = 10;
 };
 }
 
-void android_init_multi_display_pipe();
+void android_init_multi_display_pipe(const QAndroidEmulatorWindowAgent* const agent);
