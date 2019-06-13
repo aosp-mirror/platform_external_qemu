@@ -166,9 +166,15 @@ ExtendedWindow::ExtendedWindow(
 
     const bool screenRecording = android::featurecontrol::isEnabled(
             android::featurecontrol::ScreenRecording);
+    const bool macroUi = android::featurecontrol::isEnabled(
+            android::featurecontrol::MacroUi);
     if (screenRecording) {
         mSidebarButtons.addButton(mExtendedUi->recordButton);
         mExtendedUi->recordButton->setVisible(true);
+
+        if (macroUi) {
+            mExtendedUi->recordAndPlaybackPage->enableCustomMacros();
+        }
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
