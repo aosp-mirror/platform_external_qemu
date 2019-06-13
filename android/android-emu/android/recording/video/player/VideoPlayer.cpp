@@ -169,7 +169,7 @@ public:
                     std::unique_ptr<VideoPlayerNotifier> notifier);
     virtual ~VideoPlayerImpl();
 
-    virtual void start();
+    virtual void start(const PlayConfig& playConfig);
     virtual void stop();
     virtual bool isRunning() const { return mRunning; }
     virtual void scheduleRefresh(int delayMs);
@@ -236,6 +236,10 @@ private:
     bool mRunning = false;
     bool mPaused = false;
 
+    std::atomic<PlayConfig> mPlayConfig;
+
+    android::base::Lock mLock;
+
     // pixel width and height of the video display window
     int mWindowWidth = 0;
     int mWindowHeight = 0;
@@ -297,7 +301,7 @@ private:
     bool mForceRefresh = false;
 
     // A separate worker thread for the player
-    base::FunctorThread mWorkerThread;
+    std::unique_ptr<base::FunctorThread> mWorkerThread;
 };
 
 // Decoder implementations
@@ -606,7 +610,7 @@ VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
       mRenderTarget(renderTarget),
       mNotifier(std::move(notifier)),
       mRunning(true),
-      mWorkerThread([this]() { workerThreadFunc(); }) {
+      mWorkerThread() {
     mNotifier->setVideoPlayer(this);
     mNotifier->initTimer();
 }
@@ -619,7 +623,9 @@ VideoPlayerImpl::~VideoPlayerImpl() {
     if (mAudioDecoder) {
         mAudioDecoder->wait();
     }
-    mWorkerThread.wait();
+    if (mWorkerThread) {
+        mWorkerThread->wait();
+    }
 }
 
 // adjust window size to fit the video apect ratio
@@ -1014,8 +1020,6 @@ int VideoPlayerImpl::play() {
     // dump video format
     av_dump_format(mFormatCtx.get(), 0, filename, false);
 
-    mRunning = true;
-
     // Find the first audio/video stream
     int audioStream = -1;
     int videoStream = -1;
@@ -1245,12 +1249,9 @@ int VideoPlayerImpl::play() {
         mVideoDecoder.reset();
     }
 
-    const bool wasRunning = mRunning;
-    mRunning = false;
-
     cleanup();
 
-    if (wasRunning) {
+    if (mRunning) {
         mNotifier->emitVideoStopped();
     }
     mNotifier->emitVideoFinished();
@@ -1259,8 +1260,18 @@ int VideoPlayerImpl::play() {
 }
 
 void VideoPlayerImpl::workerThreadFunc() {
-    int rc = play();
-    (void)rc;
+    mLock.lock();
+    mRunning = true;
+    do {
+        mLock.unlock();
+        int rc = play();
+        mLock.lock();
+        if (rc) {  // play() returned error
+            break;
+        }
+    } while (mPlayConfig.load().looping);
+    mRunning = false;
+    mLock.unlock();
 }
 
 // get an audio frame from the decoded queue, and convert it to buffer
@@ -1365,12 +1376,22 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
     }
 }
 
-void VideoPlayerImpl::start() {
-    mWorkerThread.start();
+void VideoPlayerImpl::start(const PlayConfig& playConfig) {
+    mPlayConfig = playConfig;
+
+    mLock.lock();
+    if (!mRunning) {
+        mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
+        mLock.unlock();
+        mWorkerThread->start();
+    } else {
+        mLock.unlock();
+    }
 }
 
 void VideoPlayerImpl::stop() {
     mRunning = false;
+    mPlayConfig = PlayConfig();
 
     mNotifier->stopTimer();
 
