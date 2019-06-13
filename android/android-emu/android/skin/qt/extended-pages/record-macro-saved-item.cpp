@@ -16,6 +16,7 @@
 #include <QGraphicsOpacityEffect>
 
 const double kDisplayInfoOpacity = 0.66f;
+const int kNameLabelWidth = 200;
 
 RecordMacroSavedItem::RecordMacroSavedItem(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordMacroSavedItem()) {
@@ -25,11 +26,15 @@ RecordMacroSavedItem::RecordMacroSavedItem(QWidget* parent)
 }
 
 void RecordMacroSavedItem::setName(QString name) {
-    mUi->name->setText(name);
+    mName = name;
+    QFontMetrics metrix(mUi->name->font());
+    QString clippedName = 
+            metrix.elidedText(name, Qt::ElideRight, kNameLabelWidth);
+    mUi->name->setText(clippedName);
 }
 
 std::string RecordMacroSavedItem::getName() const {
-    return mUi->name->text().toUtf8().constData();
+    return mName.toUtf8().constData();
 }
 
 void RecordMacroSavedItem::setDisplayInfo(QString displayInfo) {
