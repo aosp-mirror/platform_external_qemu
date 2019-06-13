@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "6aa0cfd2_efdccc17",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T19:11:12Z",
+      "side": 1,
+      "message": "There\u0027s a race condition here, if the video stops playing at the same time changePlayConfig is called.\n\nThread 1: Checks isRunning() -\u003e true\nThread 2: Exits out of play() loop.\nThread 1: Calls changePlayConfig(true), setting mLooping to true\n\nSince the thread has already exited, the video doesn\u0027t loop.  I think the functionality to play/restart should be within the start function under lock, or make it so that we can\u0027t change the looping parameter while the video is playing.",
+      "range": {
+        "startLine": 147,
+        "startChar": 16,
+        "endLine": 152,
+        "endChar": 17
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bf93305d_23b55d74",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -88,6 +111,53 @@
         "startChar": 4,
         "endLine": 239,
         "endChar": 25
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "958bb5ce_50372a6e",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T19:11:12Z",
+      "side": 1,
+      "message": "std::atomic\u003cbool\u003e would make sense here",
+      "parentUuid": "63d5d883_6035007d",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 25
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ecb83d1_3b90cc0f",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1378,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-13T19:11:12Z",
+      "side": 1,
+      "message": "This may have unexpected behavior if the worker thread is already running, because it will block and wait for the thread to complete first.",
+      "range": {
+        "startLine": 1378,
+        "startChar": 4,
+        "endLine": 1378,
+        "endChar": 17
       },
       "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
