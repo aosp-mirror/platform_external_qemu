@@ -24,6 +24,7 @@ public:
 
     void updateTheme();
     void enableCustomMacros();
+    void removeSettingsTab();
 
     std::unique_ptr<Ui::RecordAndPlaybackPage> mUi;
     QTabBar* mTabBar = nullptr;

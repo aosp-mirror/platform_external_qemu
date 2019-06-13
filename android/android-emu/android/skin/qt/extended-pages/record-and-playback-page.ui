@@ -38,6 +38,11 @@
      <string>Macro Playback</string>
     </attribute>
    </widget>
+   <widget class="QWidget" name="recordSettings">
+    <attribute name="title">
+     <string>Settings</string>
+    </attribute>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
