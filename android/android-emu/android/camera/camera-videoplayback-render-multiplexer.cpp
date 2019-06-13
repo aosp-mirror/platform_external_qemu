@@ -25,6 +25,7 @@
 #include "android/base/files/ScopedFd.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/offworld/proto/offworld.pb.h"
+#include "android/recording/video/player/VideoPlayerFactory.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/utils/tempfile.h"
 
@@ -179,7 +180,7 @@ void RenderMultiplexer::loadVideo(const std::string& video_data) {
         return;
     }
 
-    mPlayer = videoplayer::VideoPlayer::create(
+    mPlayer = videoplayer::VideoPlayerFactory::create(
             path, mVideoRenderer->renderTarget(),
             std::unique_ptr<videoplayer::VideoPlayerNotifier>(
                     new VideoplaybackNotifier()));
