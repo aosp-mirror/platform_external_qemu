@@ -56,9 +56,10 @@ public:
             VideoPlayerRenderTarget* widget,
             std::unique_ptr<VideoPlayerNotifier> notifier);
 
-    virtual void start() = 0;
+    virtual void start(bool looping = 0) = 0;
     virtual void stop() = 0;
     virtual bool isRunning() const = 0;
+    virtual void changePlayConfig(bool looping) = 0;
     virtual void videoRefresh() = 0;
     virtual void scheduleRefresh(int delayMs) = 0;
 };

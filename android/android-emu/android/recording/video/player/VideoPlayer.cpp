@@ -169,9 +169,10 @@ public:
                     std::unique_ptr<VideoPlayerNotifier> notifier);
     virtual ~VideoPlayerImpl();
 
-    virtual void start();
+    virtual void start(bool looping);
     virtual void stop();
     virtual bool isRunning() const { return mRunning; }
+    virtual void changePlayConfig(bool looping) { mLooping = looping; }
     virtual void scheduleRefresh(int delayMs);
     virtual void videoRefresh();
 
@@ -235,6 +236,7 @@ private:
 
     bool mRunning = false;
     bool mPaused = false;
+    bool mLooping = false;
 
     // pixel width and height of the video display window
     int mWindowWidth = 0;
@@ -297,7 +299,7 @@ private:
     bool mForceRefresh = false;
 
     // A separate worker thread for the player
-    base::FunctorThread mWorkerThread;
+    std::unique_ptr<base::FunctorThread> mWorkerThread;
 };
 
 // Decoder implementations
@@ -606,7 +608,7 @@ VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
       mRenderTarget(renderTarget),
       mNotifier(std::move(notifier)),
       mRunning(true),
-      mWorkerThread([this]() { workerThreadFunc(); }) {
+      mWorkerThread() {
     mNotifier->setVideoPlayer(this);
     mNotifier->initTimer();
 }
@@ -619,7 +621,9 @@ VideoPlayerImpl::~VideoPlayerImpl() {
     if (mAudioDecoder) {
         mAudioDecoder->wait();
     }
-    mWorkerThread.wait();
+    if (mWorkerThread) {
+        mWorkerThread->wait();
+    }
 }
 
 // adjust window size to fit the video apect ratio
@@ -1259,8 +1263,12 @@ int VideoPlayerImpl::play() {
 }
 
 void VideoPlayerImpl::workerThreadFunc() {
-    int rc = play();
-    (void)rc;
+    do {
+        int rc = play();
+        if (rc) {  // play() returned error
+            break;
+        }
+    } while (mLooping);
 }
 
 // get an audio frame from the decoded queue, and convert it to buffer
@@ -1365,12 +1373,15 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
     }
 }
 
-void VideoPlayerImpl::start() {
-    mWorkerThread.start();
+void VideoPlayerImpl::start(bool looping = false) {
+    mLooping = looping;
+    mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
+    mWorkerThread->start();
 }
 
 void VideoPlayerImpl::stop() {
     mRunning = false;
+    mLooping = false;
 
     mNotifier->stopTimer();
 

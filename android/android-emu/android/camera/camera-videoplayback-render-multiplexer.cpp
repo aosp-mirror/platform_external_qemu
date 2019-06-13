@@ -144,7 +144,12 @@ int64_t RenderMultiplexer::render() {
                     return -1;
                 }
                 switchRenderer(mVideoRenderer.get());
-                mPlayer->start();
+                if (!mPlayer->isRunning()) {
+                    mPlayer->start(maybe_next_request->play().looping());
+                }
+                else {
+                    mPlayer->changePlayConfig(maybe_next_request->play().looping());
+                }
                 break;
             case ::offworld::VideoInjectionRequest::kStop:
                 if (mPlayer == nullptr) {
