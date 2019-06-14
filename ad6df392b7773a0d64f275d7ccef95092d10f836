@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "80e439ea_5138040a",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-14T00:20:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f4a65cf_f5f80fe2",
+      "range": {
+        "startLine": 97,
+        "startChar": 9,
+        "endLine": 102,
+        "endChar": 38
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62ab2743_c2591531",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 1
@@ -211,6 +235,30 @@
       "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03e0e7ea_a9a5495b",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-14T00:20:42Z",
+      "side": 1,
+      "message": "Mistake uploading the latest patch, should be done it.",
+      "parentUuid": "aacabce6_1c9ab460",
+      "range": {
+        "startLine": 128,
+        "startChar": 39,
+        "endLine": 128,
+        "endChar": 63
+      },
+      "revId": "ad6df392b7773a0d64f275d7ccef95092d10f836",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
