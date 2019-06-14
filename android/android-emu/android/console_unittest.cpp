@@ -88,6 +88,7 @@ static void ping_test() {
     char buff[BUFF_SIZE];
     int sock[2];
 
+    EXPECT_GT(BUFF_SIZE, PING_SIZE);
     ASSERT_EQ(0, socketCreatePair(&sock[0], &sock[1]));
 
     // Create a fake client that will send the output through this socket
@@ -98,18 +99,23 @@ static void ping_test() {
 
     // Read back the output
     memset(buff, 0, BUFF_SIZE);
-    bool hasRecvAll = socketRecvAll(sock[0], buff, BUFF_SIZE);
+    bool hasRecvAll = socketRecvAll(sock[0], buff, PING_SIZE);
+
+    // All the ping bytes should have been received.
+    EXPECT_TRUE(hasRecvAll);
+
+    // There should not be an errors. errno will contain a unix error code
+    // even when running on windows.
+    EXPECT_EQ(0, errno);
 
     test_control_client_close(opaque);
     socketClose(sock[1]);
     socketClose(sock[0]);
 
-    // Studio buffer size check
-    EXPECT_FALSE(hasRecvAll);
     // Ping size check
     EXPECT_EQ(PING_SIZE, strlen(buff));
     // Ping string comparison check
-    EXPECT_EQ(0, strncmp(buff, EXPECTED_PING_RESPONSE, PING_SIZE));
+    EXPECT_STREQ(buff, EXPECTED_PING_RESPONSE);
 }
 
 }  // namespace console
