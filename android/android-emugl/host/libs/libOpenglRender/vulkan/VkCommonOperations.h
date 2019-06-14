@@ -18,6 +18,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "cereal/common/goldfish_vk_private_defs.h"
+
 namespace goldfish_vk {
 
 class VulkanDispatch;
@@ -76,6 +78,10 @@ struct VkEmulation {
     bool instanceSupportsExternalMemoryCapabilities = false;
     PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
             getImageFormatProperties2Func = nullptr;
+
+    bool instanceSupportsMoltenVK = false;
+    PFN_vkUseIOSurfaceMVK useIOSurfaceFunc = nullptr;
+    PFN_vkGetIOSurfaceMVK getIOSurfaceFunc = nullptr;
 
     // Queue, command pool, and command buffer
     // for running commands to sync stuff system-wide.
@@ -224,6 +230,8 @@ struct VkEmulation {
         bool glExported = false;
 
         VulkanMode vulkanMode = VulkanMode::Default;
+
+        IOSurfaceRef ioSurface = nullptr;
     };
 
     // Track what is supported on whatever device was selected.
@@ -295,6 +303,7 @@ VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
 bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
+IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
 
 VkExternalMemoryHandleTypeFlags

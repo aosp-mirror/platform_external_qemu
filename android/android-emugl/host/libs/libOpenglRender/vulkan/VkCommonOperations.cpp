@@ -41,6 +41,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::StaticLock;
@@ -438,6 +442,10 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         "VK_KHR_get_physical_device_properties2",
     };
 
+    std::vector<const char*> moltenVKInstanceExtNames = {
+        "VK_MVK_moltenvk",
+    };
+
     std::vector<const char*> externalMemoryDeviceExtNames = {
         "VK_KHR_dedicated_allocation",
         "VK_KHR_get_memory_requirements2",
@@ -456,6 +464,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     bool externalMemoryCapabilitiesSupported =
         extensionsSupported(exts, externalMemoryInstanceExtNames);
+    bool moltenVKSupported =
+        extensionsSupported(exts, moltenVKInstanceExtNames);
 
     VkInstanceCreateInfo instCi = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -470,6 +480,16 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             externalMemoryInstanceExtNames.data();
     }
 
+    if (moltenVKSupported) {
+        // We don't need both moltenVK and external memory. Disable
+        // external memory if moltenVK is supported.
+        externalMemoryCapabilitiesSupported = false;
+        instCi.enabledExtensionCount =
+            moltenVKInstanceExtNames.size();
+        instCi.ppEnabledExtensionNames =
+            moltenVKInstanceExtNames.data();
+   }
+
     VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
 
     if (res != VK_SUCCESS) {
@@ -479,6 +499,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     sVkEmulation->instanceSupportsExternalMemoryCapabilities =
         externalMemoryCapabilitiesSupported;
+    sVkEmulation->instanceSupportsMoltenVK = moltenVKSupported;
 
     // Postcondition: sVkEmulation instance has been created and ext memory caps known.
 
@@ -495,6 +516,24 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                 ivk->vkGetInstanceProcAddr(
                         sVkEmulation->instance,
                         "vkGetPhysicalDeviceImageFormatProperties2KHR"));
+    }
+
+    if (sVkEmulation->instanceSupportsMoltenVK) {
+        sVkEmulation->useIOSurfaceFunc = reinterpret_cast<PFN_vkUseIOSurfaceMVK>(
+                vk->vkGetInstanceProcAddr(
+                        sVkEmulation->instance, "vkUseIOSurfaceMVK"));
+        if (!sVkEmulation->useIOSurfaceFunc) {
+            LOG(ERROR) << "Cannot find vkUseIOSurfaceMVK";
+            return sVkEmulation;
+        }
+        sVkEmulation->getIOSurfaceFunc = reinterpret_cast<PFN_vkGetIOSurfaceMVK>(
+                ivk->vkGetInstanceProcAddr(
+                        sVkEmulation->instance, "vkGetIOSurfaceMVK"));
+        if (!sVkEmulation->getIOSurfaceFunc) {
+            LOG(ERROR) << "Cannot find vkGetIOSurfaceMVK";
+            return sVkEmulation;
+        }
+        LOG(VERBOSE) << "Instance supports VK_MVK_moltenvk.";
     }
 
     uint32_t physdevCount = 0;
@@ -1226,6 +1265,25 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
         return bindImageMemoryRes;
     }
 
+    if (sVkEmulation->instanceSupportsMoltenVK) {
+        // Create IOSurface by passing null surface argument.
+        VkResult useIOSurfaceRes = sVkEmulation->useIOSurfaceFunc(res.image, nullptr);
+        if (useIOSurfaceRes != VK_SUCCESS) {
+            fprintf(stderr, "%s: Failed to create IOSurface. %d\n", __func__,
+                    useIOSurfaceRes);
+            return false;
+        }
+        // Retrieve a reference to the IOSurface created above.
+        sVkEmulation->getIOSurfaceFunc(res.image, &res.ioSurface);
+        if (!res.ioSurface) {
+            fprintf(stderr, "%s: Failed to get IOSurface.\n", __func__);
+            return false;
+        }
+#ifdef __APPLE__
+        CFRetain(res.ioSurface);
+#endif
+    }
+
     if (sVkEmulation->deviceInfo.supportsExternalMemory &&
         sVkEmulation->deviceInfo.glInteropSupported &&
         FrameBuffer::getFB()->importMemoryToColorBuffer(
@@ -1261,6 +1319,12 @@ bool teardownVkColorBuffer(uint32_t colorBufferHandle) {
 
     vk->vkDestroyImage(sVkEmulation->device, info.image, nullptr);
     freeExternalMemory(vk, &info.memory);
+
+#ifdef __APPLE__
+    if (info.ioSurface) {
+        CFRelease(info.ioSurface);
+    }
+#endif
 
     sVkEmulation->colorBuffers.erase(colorBufferHandle);
 
@@ -1621,6 +1685,24 @@ bool setColorBufferVulkanMode(uint32_t colorBuffer, uint32_t vulkanMode) {
     infoPtr->vulkanMode = static_cast<VkEmulation::ColorBufferInfo::VulkanMode>(vulkanMode);
 
     return true;
+}
+
+IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
+    if (!sVkEmulation || !sVkEmulation->live) return nullptr;
+
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBuffer);
+
+    if (!infoPtr) {
+        // Color buffer not found; this is usually OK.
+        return nullptr;
+    }
+
+#ifdef __APPLE__
+    CFRetain(infoPtr->ioSurface);
+#endif
+    return infoPtr->ioSurface;
 }
 
 VkExternalMemoryHandleTypeFlags

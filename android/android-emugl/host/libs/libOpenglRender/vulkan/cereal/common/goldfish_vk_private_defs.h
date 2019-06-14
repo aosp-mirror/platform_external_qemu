@@ -172,6 +172,18 @@ typedef struct VkMemoryGetZirconHandleInfoFUCHSIA {
     ((VkExternalMemoryHandleTypeFlagBits)0x00100000)
 #endif  // VK_FUCHSIA_external_memory
 
+#ifndef VK_MVK_moltenvk
+#define VK_MVK_moltenvk 1
+#define VK_MVK_MOLTENVK_SPEC_VERSION            3
+#define VK_MVK_MOLTENVK_EXTENSION_NAME          "VK_MVK_moltenvk"
+
+typedef struct __IOSurface *IOSurfaceRef;
+
+typedef VkResult (VKAPI_PTR *PFN_vkUseIOSurfaceMVK)(VkImage image, IOSurfaceRef ioSurface);
+typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, IOSurfaceRef* pIOSurface);
+
+#endif  // VK_MVK_moltenvk
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

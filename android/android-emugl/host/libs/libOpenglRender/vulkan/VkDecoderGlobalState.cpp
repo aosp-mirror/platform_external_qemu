@@ -41,6 +41,10 @@
 #include "emugl/common/vm_operations.h"
 #include "vk_util.h"
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
@@ -60,12 +64,16 @@ namespace goldfish_vk {
 // These will mainly include Vulkan features that we emulate ourselves.
 static constexpr const char* const
 kEmulatedExtensions[] = {
-    "VK_ANDROID_native_buffer",
     "VK_ANDROID_external_memory_android_hardware_buffer",
+    "VK_ANDROID_native_buffer",
+    "VK_FUCHSIA_buffer_collection",
     "VK_FUCHSIA_external_memory",
     "VK_FUCHSIA_external_semaphore",
+    "VK_KHR_external_memory",
+    "VK_KHR_external_memory_capabilities",
+    "VK_KHR_external_semaphore",
+    "VK_KHR_external_semaphore_capabilities",
     "VK_KHR_external_semaphore_fd",
-    "VK_FUCHSIA_buffer_collection",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
@@ -177,6 +185,11 @@ public:
                     pCreateInfo->enabledExtensionCount,
                     pCreateInfo->ppEnabledExtensionNames);
 
+        // Always include VK_MVK_moltenvk when supported.
+        if (m_emu->instanceSupportsMoltenVK) {
+            finalExts.push_back("VK_MVK_moltenvk");
+        }
+
         VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
@@ -205,6 +218,15 @@ public:
                 m_vk, *pInstance,
                 dispatch_VkInstance(boxed));
         info.boxed = boxed;
+
+        if (m_emu->instanceSupportsMoltenVK) {
+            m_useIOSurfaceFunc = reinterpret_cast<PFN_vkUseIOSurfaceMVK>(
+                m_vk->vkGetInstanceProcAddr(*pInstance, "vkUseIOSurfaceMVK"));
+            if (!m_useIOSurfaceFunc) {
+                fprintf(stderr, "Cannot find vkUseIOSurfaceMVK\n");
+                abort();
+            }
+        }
 
         mInstanceInfo[*pInstance] = info;
 
@@ -1125,6 +1147,17 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+        auto mapInfoIt = mMapInfo.find(memory);
+        if (mapInfoIt == mMapInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        if (mapInfoIt->second.ioSurface) {
+            result = m_useIOSurfaceFunc(image, mapInfoIt->second.ioSurface);
+            if (result != VK_SUCCESS) {
+                fprintf(stderr, "vkUseIOSurfaceMVK failed\n");
+                return VK_ERROR_OUT_OF_HOST_MEMORY;
+            }
+        }
         if (!deviceInfoIt->second.emulateTextureEtc2) {
             return VK_SUCCESS;
         }
@@ -1912,18 +1945,18 @@ public:
 
         info->guestPhysAddr = physAddr;
 
-        constexpr size_t PAGE_BITS = 12;
-        constexpr size_t PAGE_SIZE = 1u << PAGE_BITS;
-        constexpr size_t PAGE_OFFSET_MASK = PAGE_SIZE - 1;
+        constexpr size_t kPageBits = 12;
+        constexpr size_t kPageSize = 1u << kPageBits;
+        constexpr size_t kPageOffsetMask = kPageSize - 1;
 
         uintptr_t addr = reinterpret_cast<uintptr_t>(info->ptr);
-        uintptr_t pageOffset = addr & PAGE_OFFSET_MASK;
+        uintptr_t pageOffset = addr & kPageOffsetMask;
 
         info->pageAlignedHva =
             reinterpret_cast<void*>(addr - pageOffset);
         info->sizeToPage =
-            ((info->size + pageOffset + PAGE_SIZE - 1) >>
-             PAGE_BITS) << PAGE_BITS;
+            ((info->size + pageOffset + kPageSize - 1) >>
+             kPageBits) << kPageBits;
 
         VKDGS_LOG("map: %p, %p -> [0x%llx 0x%llx]\n",
                   info->ptr,
@@ -2029,28 +2062,30 @@ public:
                     // Modify the allocation size to suit the resulting image memory size.
                     &allocInfo.allocationSize);
 
-            VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
-                getColorBufferExtMemoryHandle(importCbInfoPtr->colorBuffer);
+            if (m_emu->instanceSupportsExternalMemoryCapabilities) {
+                VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
+                    getColorBufferExtMemoryHandle(importCbInfoPtr->colorBuffer);
 
-            if (cbExtMemoryHandle == VK_EXT_MEMORY_HANDLE_INVALID) {
-                fprintf(stderr,
-                        "%s: VK_ERROR_OUT_OF_DEVICE_MEMORY: "
-                        "colorBuffer 0x%x does not have Vulkan external memory backing\n", __func__,
-                        importCbInfoPtr->colorBuffer);
-                return VK_ERROR_OUT_OF_DEVICE_MEMORY;
-            }
+                if (cbExtMemoryHandle == VK_EXT_MEMORY_HANDLE_INVALID) {
+                    fprintf(stderr,
+                            "%s: VK_ERROR_OUT_OF_DEVICE_MEMORY: "
+                            "colorBuffer 0x%x does not have Vulkan external memory backing\n", __func__,
+                            importCbInfoPtr->colorBuffer);
+                    return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+                }
 
-            cbExtMemoryHandle = dupExternalMemory(cbExtMemoryHandle);
+                cbExtMemoryHandle = dupExternalMemory(cbExtMemoryHandle);
 
 #ifdef _WIN32
-            importInfo.handle = cbExtMemoryHandle;
+                importInfo.handle = cbExtMemoryHandle;
 #else
-            importInfo.fd = cbExtMemoryHandle;
+                importInfo.fd = cbExtMemoryHandle;
 #endif
-            structChain =
-                vk_append_struct(
-                        (vk_struct_common*)structChain,
-                        (vk_struct_common*)&importInfo);
+                structChain =
+                    vk_append_struct(
+                            (vk_struct_common*)structChain,
+                            (vk_struct_common*)&importInfo);
+            }
         }
 
         VkResult result =
@@ -2097,6 +2132,9 @@ public:
         auto& mapInfo = mMapInfo[*pMemory];
         mapInfo.size = allocInfo.allocationSize;
         mapInfo.device = device;
+        if (importCbInfoPtr && m_emu->instanceSupportsMoltenVK) {
+            mapInfo.ioSurface = getColorBufferIOSurface(importCbInfoPtr->colorBuffer);
+        }
 
         VkMemoryPropertyFlags flags =
             physdevInfo->
@@ -2137,6 +2175,13 @@ public:
             // Invalid usage.
             return;
         }
+
+#ifdef __APPLE__
+        if (info->ioSurface) {
+            CFRelease(info->ioSurface);
+            info->ioSurface = nullptr;
+        }
+#endif
 
         if (info->directMapped) {
             VKDGS_LOG("unmap: %p, [0x%llx 0x%llx]\n",
@@ -3018,6 +3063,21 @@ private:
                 auto extName = extNames[i];
                 if (!isEmulatedExtension(extName)) {
                     res.push_back(extName);
+                }
+                if (m_emu->instanceSupportsMoltenVK) {
+                    continue;
+                }
+                if (!strcmp("VK_KHR_external_memory_capabilities", extName)) {
+                    res.push_back("VK_KHR_external_memory_capabilities");
+                }
+                if (!strcmp("VK_KHR_external_memory", extName)) {
+                    res.push_back("VK_KHR_external_memory");
+                }
+                if (!strcmp("VK_KHR_external_semaphore_capabilities", extName)) {
+                    res.push_back("VK_KHR_external_semaphore_capabilities");
+                }
+                if (!strcmp("VK_KHR_external_semaphore", extName)) {
+                    res.push_back("VK_KHR_external_semaphore");
                 }
                 if (!strcmp("VK_ANDROID_external_memory_android_hardware_buffer", extName) ||
                     !strcmp("VK_FUCHSIA_external_memory", extName)) {
@@ -3951,6 +4011,7 @@ private:
 
     VulkanDispatch* m_vk;
     VkEmulation* m_emu;
+    PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
 
@@ -3968,6 +4029,7 @@ private:
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
         VkDevice device = VK_NULL_HANDLE;
+        IOSurfaceRef ioSurface = nullptr;
     };
 
     struct InstanceInfo {
