@@ -282,6 +282,30 @@
       "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "861375ab_13028cd2",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1378,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-06-14T15:37:06Z",
+      "side": 1,
+      "message": "Could be, though I\u0027m wondering if it is possible to keep a single fixed thread all the time instead of having to switch them around. Can we always keep a thread active, and use a MessageChannel with \"command\" objects to control stuff like looping, pause, seek, etc.?",
+      "parentUuid": "1529776f_ee77eb03",
+      "range": {
+        "startLine": 1378,
+        "startChar": 4,
+        "endLine": 1378,
+        "endChar": 17
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
