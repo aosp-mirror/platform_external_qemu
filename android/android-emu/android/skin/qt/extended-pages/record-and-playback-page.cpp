@@ -26,4 +26,5 @@ void RecordAndPlaybackPage::enableCustomMacros() {
 
 void RecordAndPlaybackPage::removeSettingsTab() {
     mUi->tabWidget->removeTab(2);
+    mUi->recordSettings->setMacroPageInstance(mUi->recordMacro);
 }

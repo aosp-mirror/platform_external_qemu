@@ -873,3 +873,13 @@ void RecordMacroPage::on_cancelButton_clicked() {
     enableMacroItems();
     setMacroUiState(MacroUiState::Waiting);
 }
+
+void RecordMacroPage::enablePresetMacros(bool enable) {
+    if (enable) {
+        loadUi();
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            mUi->macroList->takeItem(i);
+        }
+    }
+}

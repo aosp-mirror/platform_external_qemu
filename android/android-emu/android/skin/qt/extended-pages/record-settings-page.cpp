@@ -16,3 +16,11 @@ RecordSettingsPage::RecordSettingsPage(QWidget *parent) :
     mUi(new Ui::RecordSettingsPage()) {
     mUi->setupUi(this);
 }
+
+void RecordSettingsPage::setMacroPageInstance(RecordMacroPage* instance) {
+    mRecordMacroPageInstance = instance;
+}
+
+void RecordSettingsPage::on_toggleMacros_toggled(bool value) {
+    mRecordMacroPageInstance->enablePresetMacros(value);
+}
