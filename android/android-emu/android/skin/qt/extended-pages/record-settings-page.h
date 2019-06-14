@@ -14,6 +14,7 @@
 #include "ui_record-settings-page.h"
 
 #include <QWidget>
+#include <memory>
 
 namespace Ui {
 class RecordSettingsPage;
@@ -24,6 +25,9 @@ class RecordSettingsPage : public QWidget {
 
 public:
     explicit RecordSettingsPage(QWidget *parent = 0);
+
+signals:
+    void on_toggleMacros_toggled(bool value);
 
 private:
     std::unique_ptr<Ui::RecordSettingsPage> mUi;
