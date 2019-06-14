@@ -40,7 +40,6 @@
 #include "android/recording/video/player/Clock.h"
 #include "android/recording/video/player/FrameQueue.h"
 #include "android/recording/video/player/PacketQueue.h"
-#include "android/recording/video/player/VideoPlayerFactory.h"
 #include "android/recording/AVScopedPtr.h"
 #include "android/utils/debug.h"
 
@@ -584,7 +583,7 @@ void VideoDecoder::workerThreadFunc() {
 
 // create a video player instance the input video file, the output renderTarget to
 // display, and the notifier to receive updates
-std::unique_ptr<VideoPlayer> VideoPlayerFactory::create(
+std::unique_ptr<VideoPlayer> VideoPlayer::create(
         std::string videoFile,
         VideoPlayerRenderTarget* renderTarget,
         std::unique_ptr<VideoPlayerNotifier> notifier) {

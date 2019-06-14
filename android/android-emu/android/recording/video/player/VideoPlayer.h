@@ -49,6 +49,13 @@ public:
     virtual ~VideoPlayer() = default;
 
 public:
+    // create a video player instance the input video file, the output widget to
+    // display, and the notifier to receive updates
+    static std::unique_ptr<VideoPlayer> create(
+            std::string videoFile,
+            VideoPlayerRenderTarget* widget,
+            std::unique_ptr<VideoPlayerNotifier> notifier);
+
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual bool isRunning() const = 0;

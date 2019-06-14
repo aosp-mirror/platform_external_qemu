@@ -16,7 +16,6 @@
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/recording/video/player/VideoPlayerFactory.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-macro-edit-dialog.h"
 #include "android/skin/qt/qt-settings.h"
@@ -346,7 +345,7 @@ void RecordMacroPage::showPreview(const std::string& macroName) {
             SLOT(updatePreviewVideoView()));
     connect(videoPlayerNotifier.get(), SIGNAL(videoStopped()), this,
             SLOT(previewVideoPlayingFinished()));
-    mVideoPlayer = android::videoplayer::VideoPlayerFactory::create(
+    mVideoPlayer = android::videoplayer::VideoPlayer::create(
             previewPath, mUi->videoWidget, std::move(videoPlayerNotifier));
 
     mVideoPlayer->scheduleRefresh(20);

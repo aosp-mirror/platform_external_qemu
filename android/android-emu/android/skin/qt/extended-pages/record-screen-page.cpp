@@ -15,7 +15,6 @@
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/globals.h"
 #include "android/recording/GifConverter.h"
-#include "android/recording/video/player/VideoPlayerFactory.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
@@ -227,7 +226,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
                 SLOT(updateVideoView()));
         connect(videoPlayerNotifier.get(), SIGNAL(videoFinished()), this,
                 SLOT(videoPlayingFinished()));
-        mVideoPlayer = android::videoplayer::VideoPlayerFactory::create(
+        mVideoPlayer = android::videoplayer::VideoPlayer::create(
                 mTmpFilePath, mUi->videoWidget,
                 std::move(videoPlayerNotifier));
 
