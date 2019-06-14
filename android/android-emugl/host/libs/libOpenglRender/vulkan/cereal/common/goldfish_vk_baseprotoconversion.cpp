@@ -56,9 +56,17 @@ void to_proto_VkApplicationInfo(
     {
         to_proto_extension_struct(handleMapping, input->pNext, output->mutable_pnext());
     }
-    output->set_papplicationname(input->pApplicationName);
+    // WARNING PTR CHECK
+    if (input->pApplicationName)
+    {
+        output->set_papplicationname(input->pApplicationName);
+    }
     output->set_applicationversion((uint32_t)input->applicationVersion);
-    output->set_penginename(input->pEngineName);
+    // WARNING PTR CHECK
+    if (input->pEngineName)
+    {
+        output->set_penginename(input->pEngineName);
+    }
     output->set_engineversion((uint32_t)input->engineVersion);
     output->set_apiversion((uint32_t)input->apiVersion);
 }
@@ -78,9 +86,17 @@ void from_proto_VkApplicationInfo(
         *(VkStructureType*)output->pNext = structType;
         from_proto_extension_struct(pool, handleMapping, input->mutable_pnext(), (void*)(output->pNext));
     }
-    *(const char**)(&output->pApplicationName) = input->papplicationname().c_str();
+    // WARNING PTR CHECK
+    if (input->has_papplicationname())
+    {
+        *(const char**)(&output->pApplicationName) = input->papplicationname().c_str();
+    }
     output->applicationVersion = (uint32_t)input->applicationversion();
-    *(const char**)(&output->pEngineName) = input->penginename().c_str();
+    // WARNING PTR CHECK
+    if (input->has_penginename())
+    {
+        *(const char**)(&output->pEngineName) = input->penginename().c_str();
+    }
     output->engineVersion = (uint32_t)input->engineversion();
     output->apiVersion = (uint32_t)input->apiversion();
 }
@@ -12137,7 +12153,11 @@ void to_proto_VkDebugUtilsObjectNameInfoEXT(
     }
     output->set_objecttype((uint32_t)input->objectType);
     output->set_objecthandle((uint64_t)input->objectHandle);
-    output->set_pobjectname(input->pObjectName);
+    // WARNING PTR CHECK
+    if (input->pObjectName)
+    {
+        output->set_pobjectname(input->pObjectName);
+    }
 }
 
 void from_proto_VkDebugUtilsObjectNameInfoEXT(
@@ -12157,7 +12177,11 @@ void from_proto_VkDebugUtilsObjectNameInfoEXT(
     }
     output->objectType = (VkObjectType)input->objecttype();
     output->objectHandle = (uint64_t)input->objecthandle();
-    *(const char**)(&output->pObjectName) = input->pobjectname().c_str();
+    // WARNING PTR CHECK
+    if (input->has_pobjectname())
+    {
+        *(const char**)(&output->pObjectName) = input->pobjectname().c_str();
+    }
 }
 
 void to_proto_VkDebugUtilsObjectTagInfoEXT(
@@ -12255,7 +12279,11 @@ void to_proto_VkDebugUtilsMessengerCallbackDataEXT(
         to_proto_extension_struct(handleMapping, input->pNext, output->mutable_pnext());
     }
     output->set_flags((uint32_t)input->flags);
-    output->set_pmessageidname(input->pMessageIdName);
+    // WARNING PTR CHECK
+    if (input->pMessageIdName)
+    {
+        output->set_pmessageidname(input->pMessageIdName);
+    }
     output->set_messageidnumber((int32_t)input->messageIdNumber);
     output->set_pmessage(input->pMessage);
     output->set_queuelabelcount((uint32_t)input->queueLabelCount);
@@ -12303,7 +12331,11 @@ void from_proto_VkDebugUtilsMessengerCallbackDataEXT(
         from_proto_extension_struct(pool, handleMapping, input->mutable_pnext(), (void*)(output->pNext));
     }
     output->flags = (VkDebugUtilsMessengerCallbackDataFlagsEXT)input->flags();
-    *(const char**)(&output->pMessageIdName) = input->pmessageidname().c_str();
+    // WARNING PTR CHECK
+    if (input->has_pmessageidname())
+    {
+        *(const char**)(&output->pMessageIdName) = input->pmessageidname().c_str();
+    }
     output->messageIdNumber = (int32_t)input->messageidnumber();
     *(const char**)(&output->pMessage) = input->pmessage().c_str();
     output->queueLabelCount = (uint32_t)input->queuelabelcount();
