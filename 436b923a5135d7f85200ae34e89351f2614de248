@@ -22,6 +22,30 @@
       "revId": "436b923a5135d7f85200ae34e89351f2614de248",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e549532_e937f4e2",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-14T00:18:26Z",
+      "side": 1,
+      "message": "Done. Looks like this got addressed in patchset 5",
+      "parentUuid": "a9ac0c76_991e6f1f",
+      "range": {
+        "startLine": 112,
+        "startChar": 22,
+        "endLine": 112,
+        "endChar": 23
+      },
+      "revId": "436b923a5135d7f85200ae34e89351f2614de248",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
