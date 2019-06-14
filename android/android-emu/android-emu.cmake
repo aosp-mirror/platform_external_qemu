@@ -27,6 +27,7 @@ set(android-emu-common
     android/base/async/ScopedSocketWatch.cpp
     android/base/async/ThreadLooper.cpp
     android/base/network/Dns.cpp
+    android/base/sockets/AsyncSocket.cpp
     android/base/sockets/SocketDrainer.cpp
     android/base/sockets/SocketUtils.cpp
     android/base/sockets/SocketWaiter.cpp
@@ -327,6 +328,7 @@ target_link_libraries(android-emu
                               emulator-murmurhash
                               emulator-tinyepoxy
                               emulator-libyuv
+                              android-base-net
                               picosha2
                               # Protobuf dependencies
                               metrics
@@ -466,6 +468,7 @@ target_link_libraries(android-emu-shared
                               emulator-murmurhash
                               emulator-tinyepoxy
                               emulator-libyuv
+                              android-base-net
                               picosha2
                               # Protobuf dependencies
                               metrics

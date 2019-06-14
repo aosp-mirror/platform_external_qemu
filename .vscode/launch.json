@@ -62,9 +62,9 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--verbose"
+               // "--verbose"
                // "--gtest_break_on_failure",
-               // "--gtest_filter=WebRtcBridge.deliverWithoutLoss",
+                "--gtest_filter=WaterfallService.socket_pair_with_forwarder"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -84,23 +84,31 @@
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                     "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
-                    "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
+                    "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan",
+                },
+                "args" : [
+                    "@M",
+                    "-unix-pipe", "sockets/h2o",
+                    "-grpc",
+                    "5556"
                 ]
-            }
+            },
             "osx": {
                 "args": [
-                    "@28_X64",
-                    "-verbose",
+                    "@M",
+                    "-unix-pipe", "sockets/h2o",
                     "-grpc",
                     "5556",
                     "-feature",
-                    "-HVF",
+                    "+HVF",
                     "-feature",
-                    "+HAXM",
+                    "-HAXM",
                 ]
             },
             "postRunCommands": [
-                "pro handle -p true -s false SIGUSR1"
+                "pro handle -p true -s false SIGUSR1",
+                "pro handle -p true -s false SIGUSR2",
+                "g",
             ],
             "cwd": "${workspaceFolder}",
             "env": {

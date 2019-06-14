@@ -25,71 +25,15 @@
 #include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
 #include "android/base/Optional.h"
+#include "emulator/net/testing/TestAsynSocketAdapter.h"
 
 namespace android {
 namespace emulation {
 namespace control {
 
 using base::Optional;
+using emulator::net::TestAsyncSocketAdapter;
 
-class TestAsyncSocketAdapter : public AsyncSocketAdapter {
-public:
-    TestAsyncSocketAdapter(std::vector<std::string> recv) : mRecv(recv) {
-        // Let's not get chatty during unit tests.
-        base::setMinLogLevel(base::LOG_ERROR);
-    }
-    ~TestAsyncSocketAdapter() = default;
-    void close() override {
-        if (mListener)
-            mListener->onClose(this, 123);
-        mConnected = false;
-    }
-
-    uint64_t recv(char* buffer, uint64_t bufferSize) override {
-        base::AutoLock lock(mReadLock);
-        if (mRecv.empty()) {
-            return 0;
-        }
-        std::string msg = mRecv.front();
-        // Note that c_str() is guaranteed to be 0 terminated, so we always
-        // have size() + 1 of in our string.
-        uint64_t buflen = std::min<uint64_t>(bufferSize, msg.size() + 1);
-        memcpy(buffer, msg.c_str(), buflen);
-        mRecv.erase(mRecv.begin(), mRecv.begin() + 1);
-        return buflen;
-    }
-    uint64_t send(const char* buffer, uint64_t bufferSize) override {
-        base::AutoLock sendLock(mSendLock);
-        std::string msg(buffer, bufferSize);
-        mSend.push_back(msg);
-        return bufferSize;
-    }
-
-    bool connect() override {
-        mConnected = true;
-        return true;
-    }
-
-    bool connected() override { return mConnected; }
-
-    // This will push out all the messages.
-    void signalRecv() { mListener->onRead(this); }
-
-    // Signal the arrival of a new message..
-    void signalRecv(std::string msg) {
-        {
-            base::AutoLock lock(mReadLock);
-            mRecv.push_back(msg);
-        }
-        signalRecv();
-    }
-
-    std::vector<std::string> mSend;
-    std::vector<std::string> mRecv;
-    bool mConnected = true;
-    Lock mReadLock;
-    Lock mSendLock;
-};
 
 const char* gModule = nullptr;
 int gFps = 0;
@@ -154,6 +98,9 @@ class TestBridge : public WebRtcBridge {
 public:
     TestBridge(TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({}))
         : WebRtcBridge(socket, gQAndroidRecordScreenAgent, 24, 1234) {
+        // Let's not get chatty during unit tests.
+        base::setMinLogLevel(base::LOG_ERROR);
+
         // Let's not get weird behavior due to our locks immediately expiring.
         testSys.setLiveUnixTime(true);
         // Make sure we can find goldfish-videobridge

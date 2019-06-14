@@ -27,14 +27,11 @@ uint64_t RtcAsyncSocketAdapter::send(const char* buffer, uint64_t bufferSize) {
 }
 
 void RtcAsyncSocketAdapter::onRead(rtc::AsyncSocket* socket) {
-    if (mListener) {
-        mListener->onRead(this);
-    }
+    notify(Notification::Read);
 }
+
 void RtcAsyncSocketAdapter::onClose(rtc::AsyncSocket* socket, int err) {
-    if (mListener) {
-        mListener->onClose(this, err);
-    }
+    notify(Notification::Close, err);
 }
 
 bool RtcAsyncSocketAdapter::connect() {

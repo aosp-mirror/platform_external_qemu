@@ -16,9 +16,8 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/window_agent.h"
-#include "emulator/net/AsyncSocket.h"
+#include "android/base/sockets/AsyncSocket.h"
 
-using emulator::net::AsyncSocket;
 using nlohmann::json;
 
 namespace android {
