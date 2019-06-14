@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9ac0c76_991e6f1f",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-06-14T00:15:10Z",
+      "side": 1,
+      "message": "You accidentally introduced some extraneous trailing whitespace. Please fix.",
+      "range": {
+        "startLine": 112,
+        "startChar": 22,
+        "endLine": 112,
+        "endChar": 23
+      },
+      "revId": "436b923a5135d7f85200ae34e89351f2614de248",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
