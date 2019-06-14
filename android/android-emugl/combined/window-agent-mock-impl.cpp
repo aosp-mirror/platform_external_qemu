@@ -76,6 +76,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .setNoSkin = [](void){
                 },
+        .switchMultiDisplay =
+                [](bool add, uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h,
+                   uint32_t dpi, uint32_t flag) {
+                    printf("window-agent-mock-impl: .switchMultiDisplay id %d %d %d %dx%d "
+                           "dpi %d flag %d %s\n",
+                           id, x, y, w, h, dpi, flag, add ? "add" : "del");
+                }
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

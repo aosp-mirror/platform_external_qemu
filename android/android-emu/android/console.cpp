@@ -3505,6 +3505,94 @@ static const CommandDefRec  qemu_commands[] =
                 NULL, NULL, sub_commands                                    \
     }
 
+static int
+do_multi_display_add( ControlClient  client, char*  args ) {
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    const int kMaxArgs = 5;
+
+    // Count number of arguments
+    std::vector<std::string> splitArgs;
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    if (splitArgs.size() < kMaxArgs) {
+        control_write(client, "KO: not enough arguments\r\n");
+        return -1;
+    }
+
+    int id = std::stoi(splitArgs[0]);
+    if (id < 1 || id > 10) {
+        control_write(client, "KO: invalid display id\r\n");
+        return -1;
+    }
+
+    int width = std::stoi(splitArgs[1]);
+    int height = std::stoi(splitArgs[2]);
+    int dpi = std::stoi(splitArgs[3]);
+    int flag = std::stoi(splitArgs[4]);
+
+    client->global->emu_agent->switchMultiDisplay(true, id, 0, 0, width, height,
+                                                  dpi, flag);
+    return 0;
+}
+
+static int
+do_multi_display_del( ControlClient  client, char*  args ) {
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    const int kMaxArgs = 1;
+
+    // Count number of arguments
+    std::vector<std::string> splitArgs;
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    if (splitArgs.size() < kMaxArgs) {
+        control_write(client, "KO: not enough arguments\r\n");
+        return -1;
+    }
+    int id = std::stoi(splitArgs[0]);
+    if (id < 1 || id > 10) {
+        control_write(client, "KO: invalid display id\r\n");
+        return -1;
+    }
+
+    client->global->emu_agent->switchMultiDisplay(false, id, 0, 0, 0, 0, 0, 0);
+    return 0;
+}
+
+static const CommandDefRec  multi_display_commands[] =
+{
+    { "add",  "add new or modify existing display",
+    "add a new or modify existing display, arguments must be:\r\n\r\n"
+            "  multidisplay add <display-id>:<width>:<height>:<dpi>:<flag>\r\n\r\n"
+            "where:   <display-id>   a number within [1, 10]\r\n"
+            "         <width>        display width\r\n"
+            "         <height>       display height\r\n"
+            "         <dpi>          display dpi\r\n"
+            "         <flag>         display flag, 0 for default flag\r\n\r\n"
+         "as an example,\r\n"
+         "'multidisplay add 1 1200 800 240 0' will create/modify display 1 with "
+         "dimension 1200x800,\r\n"
+         " dpi 240 and the default flag\r\n",
+    NULL,
+    do_multi_display_add, NULL },
+
+    { "del",  "remove existing display",
+    "remove existing display, arguments must be:\r\n\r\n"
+            "  multidisplay  del <display-id>\r\n\r\n"
+            "where:   <display-id>   a number within [1, 10]\r\n",
+    NULL,
+    do_multi_display_del, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
@@ -3686,6 +3774,15 @@ extern const CommandDefRec main_commands[] = {
         {"fold", "fold the device", NULL, NULL, do_fold, NULL},
 
         {"unfold", "unfold the device", NULL, NULL, do_unfold, NULL},
+
+        {"multidisplay", "configure the multi-display",
+         "allows you to create/modify/delete displays besides the default "
+         "android display, as an example,\r\n"
+         "'multidisplay add 1 1200 800 240 0' will create/modify display 1 with "
+         "dimension 1200x800,\r\n"
+         " dpi 240 and the default flag\r\n"
+         "'multidisplay del 1' will delete the display 1\r\n",
+         NULL, NULL, multi_display_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
