@@ -65,6 +65,7 @@ cd $PROGDIR/../../..
 
 QEMU2_TOP_DIR=${AOSP_DIR}/external/qemu
 HOST_OS=$(get_build_os)
+CTEST=${AOSP_DIR}/prebuilts/cmake/${HOST_OS}-x86/bin/ctest
 CONFIG_MAKE=${OPT_OUT}/target.tag
 # Extract the target os from target.tag
 echo "current_dir=$PWD"
@@ -165,11 +166,7 @@ esac
 export CTEST_OUTPUT_ON_FAILURE=1
 OLD_DIR=$PWD
 cd $OPT_OUT
-if [ -f build.ninja ]; then
-     ninja test || FAILURES="$FAILURES unittests"
-else
-    run make test -j$HOST_NUM_CPUS || FAILURES="$FAILURES unittests"
-fi
+${CTEST} -j ${NUM_JOBS}  --output-on-failure || ${CTEST} --rerun-failed --output-on-failure || FAILURES="$FAILURES unittests"
 cd ..
 
 log "Checking for 'emulator' launcher program."

@@ -27,7 +27,6 @@ from absl import app, flags, logging
 from aemu.definitions import EXE_POSTFIX, get_ctest, get_qemu_root
 from aemu.process import run
 
-
 class TemporaryDirectory(object):
     """Creates a temporary directory that will be deleted when moving out of scope"""
 
@@ -44,16 +43,16 @@ class TemporaryDirectory(object):
             shutil.rmtree(self.name)
 
 
-def run_tests(out_dir):
+def run_tests(out_dir, jobs):
     if platform.system() == 'Windows':
         run_binary_exists(out_dir)
         run_emugen_test(out_dir)
-        run_ctest(out_dir)
+        run_ctest(out_dir, jobs)
     else:
         with TemporaryDirectory() as tmpdir:
             logging.info("Running tests with TMPDIR=%s", tmpdir)
             run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix',
-                              'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose'], out_dir, {
+                              'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose',  '-j', jobs], out_dir, {
                 'TMPDIR': tmpdir
             })
 
@@ -63,12 +62,11 @@ def run_binary_exists(out_dir):
         raise Exception('Emulator binary is missing')
 
 
-def run_ctest(out_dir):
-    cmd = [get_ctest(), '--output-on-failure']
+def run_ctest(out_dir, jos):
+    cmd = [get_ctest(), '-j', jobs, '--output-on-failure']
     with TemporaryDirectory() as tmpdir:
         logging.info("Running tests with TMP=%s", tmpdir)
         run(cmd, out_dir, {'TMP': tmpdir, 'TEMP': tmpdir})
-
 
 def run_emugen_test(out_dir):
     emugen = os.path.abspath(os.path.join(out_dir, 'emugen%s' % EXE_POSTFIX))
