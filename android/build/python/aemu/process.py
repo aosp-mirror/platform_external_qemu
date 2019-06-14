@@ -73,8 +73,6 @@ def run(cmd, cwd=None, extra_env=None):
     if cwd:
         cwd = os.path.abspath(cwd)
 
-    cmd = [str(c) for c in cmd]
-
     # We need to use a shell under windows, to set environment parameters.
     # otherwise we don't, since we will experience cmake invocation errors.
     use_shell = (platform.system() == 'Windows')

@@ -165,7 +165,11 @@ esac
 export CTEST_OUTPUT_ON_FAILURE=1
 OLD_DIR=$PWD
 cd $OPT_OUT
-ctest -j ${NUM_JOBS}  --output-on-failure || ctest --rerun-failed --output-on-failure || FAILURES="$FAILURES unittests"
+if [ -f build.ninja ]; then
+     ninja test || FAILURES="$FAILURES unittests"
+else
+    run make test -j$HOST_NUM_CPUS || FAILURES="$FAILURES unittests"
+fi
 cd ..
 
 log "Checking for 'emulator' launcher program."
