@@ -57,8 +57,12 @@ public:
                     GuestReadbackWorker::create(dpyAgent, mFbWidth, mFbHeight);
             mFormat.videoFormat = mGuestReadbackWorker->getPixelFormat();
         } else {
-            // The host framebuffer is always using RGBA8888.
-            mFormat.videoFormat = VideoFormat::RGBA8888;
+            // The host framebuffer is expected to always be using RGBA8888
+            // unless ANDROID_EMU_VP_BGRA is set.
+            // TODO: Detect host framebuffer format.
+            auto bgra = base::System::get()->envGet("ANDROID_EMU_VP_BGRA");
+            mFormat.videoFormat =
+                bgra.empty() ? VideoFormat::RGBA8888 : VideoFormat::BGRA8888;
         }
 
         // Prefill the free queue with empty frames
