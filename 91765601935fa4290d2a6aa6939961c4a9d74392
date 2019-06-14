@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed8590c9_d4c3e725",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-06-14T22:59:33Z",
+      "side": 1,
+      "message": "just one character? Their versioning is fun...",
+      "range": {
+        "startLine": 25,
+        "startChar": 31,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "91765601935fa4290d2a6aa6939961c4a9d74392",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
