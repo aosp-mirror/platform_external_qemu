@@ -45,6 +45,7 @@ public:
 
     static void setAutomationAgent(const QAndroidAutomationAgent* agent);
     static void stopCurrentMacro();
+    static void changePresetStatus(bool enable);
 
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
@@ -61,12 +62,14 @@ private slots:
     void previewVideoPlayingFinished();
     void updateElapsedTime();
     void editButtonClicked(RecordMacroSavedItem* macroItem);
+    void enablePresetMacros(bool enable);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
 
 signals:
     void playbackFinishedSignal();
+    void presetsEnabledSignal(bool enable);
 
 private:
     void loadUi();
@@ -102,6 +105,7 @@ private:
     // Behind feature flag.
     void setRecordState();
     bool mRecordEnabled = false;
+    void emitEnablePresetsSignal(bool enable);
 
     bool mRecording = false;
     bool mMacroPlaying = false;

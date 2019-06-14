@@ -131,6 +131,9 @@ void RecordMacroPage::loadUi() {
     QObject::connect(this, &RecordMacroPage::playbackFinishedSignal, this,
                      &RecordMacroPage::playbackFinished);
 
+    QObject::connect(this, &RecordMacroPage::presetsEnabledSignal,
+                     this, &RecordMacroPage::enablePresetMacros);
+
     setMacroUiState(MacroUiState::Waiting);
 }
 
@@ -872,4 +875,33 @@ void RecordMacroPage::on_cancelButton_clicked() {
     mTimer.stop();
     enableMacroItems();
     setMacroUiState(MacroUiState::Waiting);
+}
+
+void RecordMacroPage::enablePresetMacros(bool enable) {
+    sAutomationAgent->stopPlayback();
+    if (mVideoPlayer && mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
+
+    setMacroUiState(MacroUiState::Waiting);
+    if (enable) {
+        loadUi();
+    } else {
+        for (int i = mUi->macroList->count() - 1; i >= 0; --i) {
+            QListWidgetItem* item = mUi->macroList->item(i);
+            RecordMacroSavedItem* macroItem = getItemWidget(item);
+            if (macroItem->getIsPreset()) {
+                mUi->macroList->takeItem(i);
+            }
+        }
+    }
+}
+
+void RecordMacroPage::emitEnablePresetsSignal(bool enable) {
+    emit presetsEnabledSignal(enable);
+}
+
+// static
+void RecordMacroPage::changePresetStatus(bool enable) {
+    sInstance->emitEnablePresetsSignal(enable);
 }
