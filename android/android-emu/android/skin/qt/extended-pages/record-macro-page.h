@@ -45,6 +45,7 @@ public:
 
     static void setAutomationAgent(const QAndroidAutomationAgent* agent);
     static void stopCurrentMacro();
+    void enablePresetMacros(bool enable);
 
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;

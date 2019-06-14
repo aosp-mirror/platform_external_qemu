@@ -13,6 +13,8 @@
 
 #include "ui_record-settings-page.h"
 
+#include "record-macro-page.h"
+
 #include <QWidget>
 
 namespace Ui {
@@ -24,7 +26,12 @@ class RecordSettingsPage : public QWidget {
 
 public:
     explicit RecordSettingsPage(QWidget *parent = 0);
+    void setMacroPageInstance(RecordMacroPage* instance);
+
+private slots:
+    void on_toggleMacros_toggled(bool value);
 
 private:
+    RecordMacroPage* mRecordMacroPageInstance = nullptr;
     std::unique_ptr<Ui::RecordSettingsPage> mUi;
 };

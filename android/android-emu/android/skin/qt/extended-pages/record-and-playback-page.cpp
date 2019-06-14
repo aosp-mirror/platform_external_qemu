@@ -22,6 +22,7 @@ void RecordAndPlaybackPage::updateTheme() {
 
 void RecordAndPlaybackPage::enableCustomMacros() {
     mUi->tabWidget->setTabText(1, tr("Macro Record"));
+    mUi->recordSettings->setMacroPageInstance(mUi->recordMacro);
 }
 
 void RecordAndPlaybackPage::removeSettingsTab() {
