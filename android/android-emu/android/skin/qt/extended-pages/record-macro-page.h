@@ -61,6 +61,7 @@ private slots:
     void previewVideoPlayingFinished();
     void updateElapsedTime();
     void editButtonClicked(RecordMacroSavedItem* macroItem);
+    void enablePresetMacros(bool enable);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
