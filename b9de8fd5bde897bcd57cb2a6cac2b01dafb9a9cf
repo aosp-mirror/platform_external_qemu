@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fc9f0b24_666a189e",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-06-14T00:38:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0c6d952_2495e67c",
+      "range": {
+        "startLine": 149,
+        "startChar": 1,
+        "endLine": 150,
+        "endChar": 22
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6aa0cfd2_efdccc17",
         "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2019-06-13T19:11:12Z",
       "side": 1,
       "message": "There\u0027s a race condition here, if the video stops playing at the same time changePlayConfig is called.\n\nThread 1: Checks isRunning() -\u003e true\nThread 2: Exits out of play() loop.\nThread 1: Calls changePlayConfig(true), setting mLooping to true\n\nSince the thread has already exited, the video doesn\u0027t loop.  I think the functionality to play/restart should be within the start function under lock, or make it so that we can\u0027t change the looping parameter while the video is playing.",
+      "range": {
+        "startLine": 147,
+        "startChar": 16,
+        "endLine": 152,
+        "endChar": 17
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d5a2a15_4e0441ae",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-06-14T00:38:41Z",
+      "side": 1,
+      "message": "Good point, thanks! Moved condition checking into start() and added lock to prevent such interleaving.",
+      "parentUuid": "6aa0cfd2_efdccc17",
       "range": {
         "startLine": 147,
         "startChar": 16,
@@ -68,6 +116,30 @@
       "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c5218c7_dc2f8395",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-06-14T00:38:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf93305d_23b55d74",
+      "range": {
+        "startLine": 172,
+        "startChar": 23,
+        "endLine": 172,
+        "endChar": 35
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -142,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "378d37d1_42cb97da",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-06-14T00:38:41Z",
+      "side": 1,
+      "message": "Thanks! Used std::atomic\u003cPlayConfig\u003e here. I checked that std::atomic would suffice, and volatile shouldn\u0027t be used with std::atomic.",
+      "parentUuid": "958bb5ce_50372a6e",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 25
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0ecb83d1_3b90cc0f",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -153,6 +249,30 @@
       "writtenOn": "2019-06-13T19:11:12Z",
       "side": 1,
       "message": "This may have unexpected behavior if the worker thread is already running, because it will block and wait for the thread to complete first.",
+      "range": {
+        "startLine": 1378,
+        "startChar": 4,
+        "endLine": 1378,
+        "endChar": 17
+      },
+      "revId": "b9de8fd5bde897bcd57cb2a6cac2b01dafb9a9cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1529776f_ee77eb03",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1378,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-06-14T00:38:41Z",
+      "side": 1,
+      "message": "This should not happen because the caller should never call reset() if the worker thread is already running, right?",
+      "parentUuid": "0ecb83d1_3b90cc0f",
       "range": {
         "startLine": 1378,
         "startChar": 4,
