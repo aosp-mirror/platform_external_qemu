@@ -22,6 +22,30 @@
       "revId": "91765601935fa4290d2a6aa6939961c4a9d74392",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b80b16c_5eab8739",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2019-06-14T23:08:02Z",
+      "side": 1,
+      "message": "The \u0027d\u0027 build is an incremental build with cherry-picks on top of upstream\u0027s r353983.  When we update to a new version, we\u0027ll update to the new revision number.",
+      "parentUuid": "ed8590c9_d4c3e725",
+      "range": {
+        "startLine": 25,
+        "startChar": 31,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "91765601935fa4290d2a6aa6939961c4a9d74392",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
