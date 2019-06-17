@@ -723,7 +723,11 @@ void ColorBuffer::readback(unsigned char* img) {
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, img);
+        // The actual internal format for BGRA8 is RGBA8 but RED and BLUE
+        // components are swizzled. We use BGRA here as read back format in
+        // order to retrieve RGBA pixels.
+        GLenum format = m_sizedInternalFormat == GL_BGRA8_EXT ? GL_BGRA_EXT : GL_RGBA;
+        s_gles2.glReadPixels(0, 0, m_width, m_height, format, GL_UNSIGNED_BYTE, img);
         unbindFbo();
     }
 }
@@ -738,7 +742,8 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
 
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, m_asyncReadbackType, 0);
+        GLenum format = m_sizedInternalFormat == GL_BGRA8_EXT ? GL_BGRA_EXT : GL_RGBA;
+        s_gles2.glReadPixels(0, 0, m_width, m_height, format, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         unbindFbo();
     }
