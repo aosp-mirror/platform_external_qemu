@@ -779,7 +779,13 @@ void VideoPlayerImpl::displayVideoFrame(Frame* vp) {
     frameInfo.headerlen = vp->headerlen;
     frameInfo.width = vp->width;
     frameInfo.height = vp->height;
-    mRenderTarget->setPixelBuffer(frameInfo, vp->buf, vp->len);
+    // A paused video should still display the last displayed frame, but a
+    // stopped video should not be showing a video frame.
+    if (mRunning || mPaused) {
+      mRenderTarget->setPixelBuffer(frameInfo, vp->buf, vp->len);
+    } else {
+      mRenderTarget->setPixelBuffer(frameInfo, nullptr, 0);
+    }
 
     mNotifier->emitUpdateWidget();
 }
@@ -1407,6 +1413,9 @@ void VideoPlayerImpl::internalStop() {
         mVideoFrameQueue->signalWait();
         // mVideoFrameQueue.reset();
     }
+
+    VideoPlayerRenderTarget::FrameInfo dummyInfo;
+    mRenderTarget->setPixelBuffer(dummyInfo, nullptr, 0);
 }
 
 void VideoPlayerImpl::cleanup() {
@@ -1427,9 +1436,6 @@ void VideoPlayerImpl::cleanup() {
         mVideoFrameQueue->signalWait();
         // mVideoFrameQueue.reset();
     }
-
-    VideoPlayerRenderTarget::FrameInfo dummyInfo;
-    mRenderTarget->setPixelBuffer(dummyInfo, nullptr, 0);
 
     if (mImgConvertCtx != nullptr) {
         sws_freeContext(mImgConvertCtx);
