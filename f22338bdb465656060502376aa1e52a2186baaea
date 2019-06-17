@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54043043_3cf5f9b9",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "Please run clang-format on all of these files.  There\u0027s a helper called \"git clang-format\" that you can run on staged changes, but it doesn\u0027t work for already-submitted changes easily",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 5
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96b7ca93_6548dc72",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "__func__ is redundant for LOG, since that is implicitly logged.",
+      "range": {
+        "startLine": 50,
+        "startChar": 30,
+        "endLine": 50,
+        "endChar": 38
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65e0da39_98ed179f",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "I\u0027d like to remove as many of these SENSORS_LIST usages as possible, since it makes the code difficult to read.  Instead of having a separate packet queue for everything, can we define a map of stream index to sensor type?\n\nWe should also aggregate location with sensor data and not treat it as separate.  To process location data, that should go into AutomationController (which would be extended to support that as well)",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 12
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc99f8b2_e962407d",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "Can we combine all of these into one packet queue, or remove this entirely and create a custom EventSource instead?",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 14
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c9c8659_8f8f09ab",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "Move this to the top, change it to:\n\nconstexpr const size_t kMaxQueueSize \u003d 15 * 1024 * 1024;  // 15mb",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 41
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "373fb23d_4ab533b2",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "We don\u0027t really need to worry about max queue size with sensors/location, the main bounding factor is audio/video",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 142,
+        "endChar": 14
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

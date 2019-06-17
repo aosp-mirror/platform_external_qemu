@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ceaaee6_a6cba05d",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "How is this different than Mp4Dataset?  Why is there so much duplicated functionality with the packet queues and main loop?",
+      "range": {
+        "startLine": 20,
+        "startChar": 6,
+        "endLine": 20,
+        "endChar": 20
+      },
+      "revId": "47f6dfd66defee42e97c803c65dd772ccb547b52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

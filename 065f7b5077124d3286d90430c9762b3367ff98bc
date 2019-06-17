@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7769e325_89e389b7",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T21:53:47Z",
+      "side": 1,
+      "message": "Newer emulator files use UpperCamelCase for filenames.  This should be MP4Dataset and MP4Demuxer",
+      "range": {
+        "startLine": 6,
+        "startChar": 16,
+        "endLine": 6,
+        "endChar": 27
+      },
+      "revId": "065f7b5077124d3286d90430c9762b3367ff98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
