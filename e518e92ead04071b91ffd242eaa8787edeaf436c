@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59529eb9_da6da869",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vhal-table.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-06-17T14:10:45Z",
+      "side": 1,
+      "message": "#pragma once",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 19
+      },
+      "revId": "e518e92ead04071b91ffd242eaa8787edeaf436c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
