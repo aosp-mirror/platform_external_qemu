@@ -16,6 +16,8 @@ class VkEncoder {
 public:
     VkEncoder(IOStream* stream);
     ~VkEncoder();
+
+    void flush(); // Cross-thread flushing!!!111
 """
 
 encoder_decl_postamble = """
@@ -31,6 +33,8 @@ using namespace goldfish_vk;
 
 using android::aligned_buf_alloc;
 using android::aligned_buf_free;
+using android::base::guest::AutoLock;
+using android::base::guest::Lock;
 using android::base::Pool;
 
 class VkEncoder::Impl {
@@ -52,6 +56,14 @@ public:
         if (!m_logEncodes) return;
         ALOGD(\"encoder log: %%s\", text);
     }
+
+    void flush() {
+        AutoLock encoderLock(lock);
+        m_stream.flush();
+    }
+
+    Lock lock;
+
 private:
     VulkanCountingStream m_countingStream;
     %s m_stream;
@@ -63,6 +75,10 @@ private:
 
 VkEncoder::VkEncoder(IOStream *stream) :
     mImpl(new VkEncoder::Impl(stream)) { }
+
+void VkEncoder::flush() {
+    mImpl->flush();
+}
 
 #define VALIDATE_RET(retType, success, validate) \\
     retType goldfish_vk_validateResult = validate; \\
@@ -147,21 +163,25 @@ def emit_custom_pre_validate(typeInfo, api, cgen):
 
 def emit_custom_resource_preprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_PREPROCESS:
+        cgen.stmt("encoderLock.unlock()")
         cgen.stmt( \
             make_event_handler_call( \
                 "mImpl->resources()", api,
                 ENCODER_THIS_PARAM,
                 SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                 cgen, suffix="_pre"))
+        cgen.stmt("encoderLock.lock()")
 
 def emit_custom_resource_postprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_POSTPROCESS:
+        cgen.stmt("encoderLock.unlock()")
         cgen.stmt(make_event_handler_call( \
             "mImpl->resources()",
             api,
             ENCODER_THIS_PARAM,
             api.getRetVarExpr(),
             cgen))
+        cgen.stmt("encoderLock.lock()")
 
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
@@ -259,6 +279,7 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
+    cgen.stmt("AutoLock encoderLock(mImpl->lock)")
     cgen.stmt("AEMU_SCOPED_TRACE(\"%s encode\")" % api.name)
 
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)
