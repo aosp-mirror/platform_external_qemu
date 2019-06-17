@@ -23,6 +23,13 @@
 #include <algorithm>
 #include <vector>
 
+// Store two textures: a texture that contains video frames being drawn, and a
+// texture that is empty. This way the render target can just switch between
+// textures to display video and empty frames respectively.
+constexpr size_t kNumTextures = 2;
+constexpr size_t kVideoFrameTextureIdx = 0;
+constexpr size_t kEmptyFrameTextureIdx = 1;
+
 namespace android {
 namespace videoplayback {
 
@@ -138,8 +145,9 @@ bool VideoplaybackRenderTarget::initialize() {
     mGles2->glViewport(0, 0, mRenderWidth, mRenderHeight);
     mGles2->glFrontFace(GL_CW);
 
-    mGles2->glGenTextures(1, &mTexture);
-    mGles2->glBindTexture(GL_TEXTURE_2D, mTexture);
+    mTextures = new GLuint[2];
+    mGles2->glGenTextures(2, mTextures);
+    mGles2->glBindTexture(GL_TEXTURE_2D, mTextures[kVideoFrameTextureIdx]);
 
     mGles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mRenderWidth, mRenderHeight,
                          0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -194,7 +202,7 @@ void VideoplaybackRenderTarget::uninitialize() {
     mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     mGles2->glBindTexture(GL_TEXTURE_2D, 0);
     mGles2->glDeleteVertexArrays(1, &mVao);
-    mGles2->glDeleteTextures(1, &mTexture);
+    mGles2->glDeleteTextures(2, mTextures);
     mGles2->glDeleteBuffers(1, &mVertexBuffer);
     mGles2->glDeleteBuffers(1, &mElementBuffer);
     mGles2->glDetachShader(mProgram, mVertexShader);
@@ -202,20 +210,35 @@ void VideoplaybackRenderTarget::uninitialize() {
     mGles2->glDeleteShader(mVertexShader);
     mGles2->glDeleteShader(mFragmentShader);
     mGles2->glDeleteProgram(mProgram);
+    delete[] mTextures;
     mInitialized = false;
 }
 
 void VideoplaybackRenderTarget::renderBuffer() {
     if (!mInitialized) {
-      LOG(ERROR) << "Videoplayback Render Target is not initialized.";
-      return;
+        LOG(ERROR) << "Videoplayback Render Target is not initialized.";
+        return;
     }
-    if (mBuffer == nullptr) {
+    if (mBufferLen > 0 && mBuffer == nullptr) {
+        LOG(ERROR) << "VideoplaybackRenderTarget: Frame buffer length is "
+                   << mBufferLen
+                   << ", but the buffer is null";
         return;
     }
 
+    if (mBufferLen > 0) {
+        renderVideoFrame();
+    } else {
+        renderEmptyFrame();
+    }
+
+    mGles2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void VideoplaybackRenderTarget::renderVideoFrame() {
     const unsigned char* frameBuf = &mBuffer[mFrameInfo.headerlen];
 
+    mGles2->glBindTexture(GL_TEXTURE_2D, mTextures[kVideoFrameTextureIdx]);
     mGles2->glBindVertexArray(mVao);
 
     // Load the processed frame into the texture.
@@ -233,8 +256,10 @@ void VideoplaybackRenderTarget::renderBuffer() {
         mRenderWidth = std::max(mRenderWidth, mFrameInfo.width);
         mRenderHeight = std::max(mRenderHeight, mFrameInfo.height);
     }
+}
 
-    mGles2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+void VideoplaybackRenderTarget::renderEmptyFrame() {
+    mGles2->glBindTexture(GL_TEXTURE_2D, mTextures[kEmptyFrameTextureIdx]);
 }
 
 }  // namespace videoplayback

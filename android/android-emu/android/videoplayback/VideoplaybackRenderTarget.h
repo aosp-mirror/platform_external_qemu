@@ -43,6 +43,8 @@ public:
     void renderBuffer();
 
 private:
+    void renderVideoFrame();
+    void renderEmptyFrame();
     const unsigned char* mBuffer = nullptr;
     size_t mBufferLen;
     FrameInfo mFrameInfo;
@@ -53,11 +55,11 @@ private:
 
     GLuint mVertexBuffer;
     GLuint mElementBuffer;
-    GLuint mTexture;
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;
     GLuint mVao;
+    GLuint* mTextures;
 };
 
 }  // namespace videoplayback
