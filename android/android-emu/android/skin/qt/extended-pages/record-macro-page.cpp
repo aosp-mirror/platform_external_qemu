@@ -624,6 +624,7 @@ void RecordMacroPage::setRecordState() {
         mUi->recButton->setText(tr("RECORD NEW "));
         mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
         mUi->recButton->setProperty("themeIconName", "recordCircle");
+        mUi->recButton->setIconSize(QSize(30, 20));
     }
     mUi->stackedWidget->setCurrentIndex(0);
 
