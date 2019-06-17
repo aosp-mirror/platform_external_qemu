@@ -10,7 +10,6 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/QemuMiscPipe.h"
-#include "android/adb-server.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/ProcessControl.h"
 #include "android/emulation/control/AdbInterface.h"
@@ -114,11 +113,10 @@ static void watchHostCtsFunction(int sleep_minutes) {
         fflush(stdout);
         if (current > 0 && now <= current && restart_when_stalled) {
             // reboot
-            printf("emulator: host cts seems stalled, reset adb now.\n");
+            printf("emulator: host cts seems stalled, reboot now.\n");
             fflush(stdout);
-            //android::base::restartEmulator();
-            current = now;
-            android_adb_reset_connection();
+            android::base::restartEmulator();
+            break;
         } else {
             current = now;
         }
