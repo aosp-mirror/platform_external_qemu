@@ -19,3 +19,7 @@ RecordAndPlaybackPage::RecordAndPlaybackPage(QWidget* parent)
 void RecordAndPlaybackPage::updateTheme() {
     mUi->recordScreen->updateTheme();
 }
+
+void RecordAndPlaybackPage::enableCustomMacros() {
+    mUi->tabWidget->setTabText(1, tr("Macro Record"));
+}
