@@ -66,21 +66,22 @@ static void initIcdPaths(bool forTesting) {
     } else {
         LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
                      << androidIcd << "]";
-        // Mac: Use gfx-rs libportability-icd by default,
-        // and switch between that, its debug variant,
-        // and MoltenVK depending on the environment variable setting.
+        // Mac: Use MoltenVK by default unless GPU mode is set to swiftshader,
+        // and switch between that and gfx-rs libportability-icd depending on
+        // the environment variable setting.
 #ifdef __APPLE__
-        if (androidIcd == "moltenvk") {
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
-        } else if (androidIcd == "portability") {
+        if (androidIcd == "portability") {
             setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
         } else if (androidIcd == "portability-debug") {
             setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos-debug.json"));
-        } else if (androidIcd == "swiftshader") {
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         } else {
-            // go/ab likes swiftshader better
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
+            if (androidIcd == "swiftshader" ||
+                emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
+                emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+                setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
+            } else {
+                setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
+            }
         }
 #else
         // By default, on other platforms, just use whatever the system
@@ -115,6 +116,17 @@ static std::string getLoaderPath(bool forTesting) {
         LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
         return VULKAN_LOADER_FILENAME;
 #else
+#ifdef __APPLE__
+        // Skip loader when using MoltenVK as this gives us access to VK_MVK_moltenvk,
+        // which is required for external memory support.
+        auto icdPath = System::get()->envSet("VK_ICD_FILENAMES", path);
+        if (icdPath == icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json")) {
+          auto path = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+                         "libMoltenVK.dylib");
+            LOG(VERBOSE) << "Skipping loader and using ICD directly: " << path;
+            return path;
+        }
+#endif
         auto path = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
                   VULKAN_LOADER_FILENAME);
         LOG(VERBOSE) << "Not in test environment. Using loader: " << path;
