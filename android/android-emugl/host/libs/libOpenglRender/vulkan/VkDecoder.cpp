@@ -120,10 +120,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_VERSION_1_0
             case OP_vkCreateInstance:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateInstance\n");;
-                }
                 const VkInstanceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkInstance* pInstance;
@@ -152,6 +148,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateInstance 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pInstance);
+                }
                 VkResult vkCreateInstance_VkResult_return = (VkResult)0;
                 vkCreateInstance_VkResult_return = m_state->on_vkCreateInstance(&m_pool, pCreateInfo, pAllocator, pInstance);
                 vkStream->unsetHandleMapping();
@@ -169,10 +169,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyInstance:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyInstance\n");;
-                }
                 VkInstance instance;
                 const VkAllocationCallbacks* pAllocator;
                 // Begin manual dispatchable handle unboxing for instance;
@@ -195,6 +191,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyInstance 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pAllocator);
+                }
                 m_state->on_vkDestroyInstance(&m_pool, instance, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -206,10 +206,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumeratePhysicalDevices:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEnumeratePhysicalDevices\n");;
-                }
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceCount;
                 VkPhysicalDevice* pPhysicalDevices;
@@ -250,6 +246,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pPhysicalDevices;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumeratePhysicalDevices 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pPhysicalDeviceCount, (unsigned long long)pPhysicalDevices);
+                }
                 VkResult vkEnumeratePhysicalDevices_VkResult_return = (VkResult)0;
                 vkEnumeratePhysicalDevices_VkResult_return = m_state->on_vkEnumeratePhysicalDevices(&m_pool, instance, pPhysicalDeviceCount, pPhysicalDevices);
                 vkStream->unsetHandleMapping();
@@ -284,10 +284,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFeatures:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures* pFeatures;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -309,6 +305,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkPhysicalDeviceFeatures(m_state, (VkPhysicalDeviceFeatures*)(pFeatures));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceFeatures 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pFeatures);
+                }
                 m_state->on_vkGetPhysicalDeviceFeatures(&m_pool, physicalDevice, pFeatures);
                 vkStream->unsetHandleMapping();
                 if (pFeatures)
@@ -325,10 +325,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties* pFormatProperties;
@@ -352,6 +348,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFormatProperties(m_state, (VkFormatProperties*)(pFormatProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceFormatProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)pFormatProperties);
+                }
                 m_state->on_vkGetPhysicalDeviceFormatProperties(&m_pool, physicalDevice, format, pFormatProperties);
                 vkStream->unsetHandleMapping();
                 if (pFormatProperties)
@@ -368,10 +368,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -403,6 +399,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceImageFormatProperties 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)type, (unsigned long long)tiling, (unsigned long long)usage, (unsigned long long)flags, (unsigned long long)pImageFormatProperties);
+                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceImageFormatProperties_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties(&m_pool, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 vkStream->unsetHandleMapping();
@@ -421,10 +421,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceProperties\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties* pProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -445,6 +441,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pProperties)
                 {
                     transform_tohost_VkPhysicalDeviceProperties(m_state, (VkPhysicalDeviceProperties*)(pProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceProperties 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pProperties);
                 }
                 m_state->on_vkGetPhysicalDeviceProperties(&m_pool, physicalDevice, pProperties);
                 vkStream->unsetHandleMapping();
@@ -506,6 +506,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkQueueFamilyProperties(m_state, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceQueueFamilyProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pQueueFamilyPropertyCount, (unsigned long long)pQueueFamilyProperties);
+                }
                 vk->vkGetPhysicalDeviceQueueFamilyProperties(unboxed_physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -541,10 +545,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceMemoryProperties\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties* pMemoryProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -565,6 +565,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryProperties)
                 {
                     transform_tohost_VkPhysicalDeviceMemoryProperties(m_state, (VkPhysicalDeviceMemoryProperties*)(pMemoryProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceMemoryProperties 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pMemoryProperties);
                 }
                 m_state->on_vkGetPhysicalDeviceMemoryProperties(&m_pool, physicalDevice, pMemoryProperties);
                 vkStream->unsetHandleMapping();
@@ -594,6 +598,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->loadStringInPlace((char**)&pName);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetInstanceProcAddr 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pName);
+                }
                 PFN_vkVoidFunction vkGetInstanceProcAddr_PFN_vkVoidFunction_return = (PFN_vkVoidFunction)0;
                 vkGetInstanceProcAddr_PFN_vkVoidFunction_return = vk->vkGetInstanceProcAddr(unboxed_instance, pName);
                 vkStream->unsetHandleMapping();
@@ -619,6 +627,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->loadStringInPlace((char**)&pName);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceProcAddr 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pName);
+                }
                 PFN_vkVoidFunction vkGetDeviceProcAddr_PFN_vkVoidFunction_return = (PFN_vkVoidFunction)0;
                 vkGetDeviceProcAddr_PFN_vkVoidFunction_return = vk->vkGetDeviceProcAddr(unboxed_device, pName);
                 vkStream->unsetHandleMapping();
@@ -632,10 +644,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDevice:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateDevice\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 const VkDeviceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -674,6 +682,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDevice 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pDevice);
+                }
                 VkResult vkCreateDevice_VkResult_return = (VkResult)0;
                 vkCreateDevice_VkResult_return = m_state->on_vkCreateDevice(&m_pool, physicalDevice, pCreateInfo, pAllocator, pDevice);
                 vkStream->unsetHandleMapping();
@@ -691,10 +703,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyDevice:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyDevice\n");;
-                }
                 VkDevice device;
                 const VkAllocationCallbacks* pAllocator;
                 // Begin manual dispatchable handle unboxing for device;
@@ -716,6 +724,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDevice 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroyDevice(&m_pool, device, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -768,6 +780,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumerateInstanceExtensionProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)pLayerName, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
                 }
                 VkResult vkEnumerateInstanceExtensionProperties_VkResult_return = (VkResult)0;
                 vkEnumerateInstanceExtensionProperties_VkResult_return = vk->vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, pProperties);
@@ -857,6 +873,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumerateDeviceExtensionProperties 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pLayerName, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 VkResult vkEnumerateDeviceExtensionProperties_VkResult_return = (VkResult)0;
                 vkEnumerateDeviceExtensionProperties_VkResult_return = vk->vkEnumerateDeviceExtensionProperties(unboxed_physicalDevice, pLayerName, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
@@ -927,6 +947,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumerateInstanceLayerProperties 0x%llx 0x%llx \n", ioStream, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
                 }
                 VkResult vkEnumerateInstanceLayerProperties_VkResult_return = (VkResult)0;
                 vkEnumerateInstanceLayerProperties_VkResult_return = vk->vkEnumerateInstanceLayerProperties(pPropertyCount, pProperties);
@@ -1009,6 +1033,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumerateDeviceLayerProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 VkResult vkEnumerateDeviceLayerProperties_VkResult_return = (VkResult)0;
                 vkEnumerateDeviceLayerProperties_VkResult_return = vk->vkEnumerateDeviceLayerProperties(unboxed_physicalDevice, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
@@ -1046,10 +1074,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceQueue:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetDeviceQueue\n");;
-                }
                 VkDevice device;
                 uint32_t queueFamilyIndex;
                 uint32_t queueIndex;
@@ -1073,6 +1097,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_51, (VkQueue*)pQueue, 1);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pQueue;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceQueue 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)queueFamilyIndex, (unsigned long long)queueIndex, (unsigned long long)pQueue);
+                }
                 m_state->on_vkGetDeviceQueue(&m_pool, device, queueFamilyIndex, queueIndex, pQueue);
                 vkStream->unsetHandleMapping();
                 uint64_t cgen_var_52;
@@ -1088,10 +1116,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueSubmit:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkQueueSubmit\n");;
-                }
                 VkQueue queue;
                 uint32_t submitCount;
                 const VkSubmitInfo* pSubmits;
@@ -1121,6 +1145,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkSubmitInfo(m_state, (VkSubmitInfo*)(pSubmits + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueSubmit 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)submitCount, (unsigned long long)pSubmits, (unsigned long long)fence);
+                }
                 VkResult vkQueueSubmit_VkResult_return = (VkResult)0;
                 vkQueueSubmit_VkResult_return = m_state->on_vkQueueSubmit(&m_pool, queue, submitCount, pSubmits, fence);
                 vkStream->unsetHandleMapping();
@@ -1144,6 +1172,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkQueue(queue);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueWaitIdle 0x%llx \n", ioStream, (unsigned long long)queue);
+                }
                 VkResult vkQueueWaitIdle_VkResult_return = (VkResult)0;
                 vkQueueWaitIdle_VkResult_return = vk->vkQueueWaitIdle(unboxed_queue);
                 vkStream->unsetHandleMapping();
@@ -1167,6 +1199,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkDevice(device);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDeviceWaitIdle 0x%llx \n", ioStream, (unsigned long long)device);
+                }
                 VkResult vkDeviceWaitIdle_VkResult_return = (VkResult)0;
                 vkDeviceWaitIdle_VkResult_return = vk->vkDeviceWaitIdle(unboxed_device);
                 vkStream->unsetHandleMapping();
@@ -1180,10 +1216,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateMemory:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkAllocateMemory\n");;
-                }
                 VkDevice device;
                 const VkMemoryAllocateInfo* pAllocateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -1222,6 +1254,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAllocateMemory 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAllocateInfo, (unsigned long long)pAllocator, (unsigned long long)pMemory);
+                }
                 VkResult vkAllocateMemory_VkResult_return = (VkResult)0;
                 vkAllocateMemory_VkResult_return = m_state->on_vkAllocateMemory(&m_pool, device, pAllocateInfo, pAllocator, pMemory);
                 vkStream->unsetHandleMapping();
@@ -1243,10 +1279,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFreeMemory:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkFreeMemory\n");;
-                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 const VkAllocationCallbacks* pAllocator;
@@ -1279,6 +1311,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkFreeMemory 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pAllocator);
+                }
                 m_state->on_vkFreeMemory(&m_pool, device, memory, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -1290,10 +1326,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkMapMemory:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkMapMemory\n");;
-                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 VkDeviceSize offset;
@@ -1326,6 +1358,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for ppData;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkMapMemory 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)offset, (unsigned long long)size, (unsigned long long)flags, (unsigned long long)ppData);
+                }
                 VkResult vkMapMemory_VkResult_return = (VkResult)0;
                 vkMapMemory_VkResult_return = m_state->on_vkMapMemory(&m_pool, device, memory, offset, size, flags, ppData);
                 vkStream->unsetHandleMapping();
@@ -1346,10 +1382,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkUnmapMemory:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkUnmapMemory\n");;
-                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 // Begin manual dispatchable handle unboxing for device;
@@ -1364,6 +1396,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_69;
                 vkReadStream->read((uint64_t*)&cgen_var_69, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_69, (VkDeviceMemory*)&memory, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUnmapMemory 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory);
+                }
                 m_state->on_vkUnmapMemory(&m_pool, device, memory);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -1375,10 +1411,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFlushMappedMemoryRanges:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkFlushMappedMemoryRanges\n");;
-                }
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
@@ -1403,6 +1435,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkMappedMemoryRange(m_state, (VkMappedMemoryRange*)(pMemoryRanges + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkFlushMappedMemoryRanges 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memoryRangeCount, (unsigned long long)pMemoryRanges);
                 }
                 if (!m_state->usingDirectMapping())
                 {
@@ -1434,10 +1470,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkInvalidateMappedMemoryRanges:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkInvalidateMappedMemoryRanges\n");;
-                }
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
@@ -1462,6 +1494,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkMappedMemoryRange(m_state, (VkMappedMemoryRange*)(pMemoryRanges + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkInvalidateMappedMemoryRanges 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memoryRangeCount, (unsigned long long)pMemoryRanges);
                 }
                 VkResult vkInvalidateMappedMemoryRanges_VkResult_return = (VkResult)0;
                 vkInvalidateMappedMemoryRanges_VkResult_return = vk->vkInvalidateMappedMemoryRanges(unboxed_device, memoryRangeCount, pMemoryRanges);
@@ -1515,6 +1551,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)pCommittedMemoryInBytes, sizeof(VkDeviceSize));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pCommittedMemoryInBytes;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceMemoryCommitment 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pCommittedMemoryInBytes);
+                }
                 vk->vkGetDeviceMemoryCommitment(unboxed_device, memory, pCommittedMemoryInBytes);
                 vkStream->unsetHandleMapping();
                 vkStream->write((VkDeviceSize*)pCommittedMemoryInBytes, sizeof(VkDeviceSize));
@@ -1527,10 +1567,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindBufferMemory:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindBufferMemory\n");;
-                }
                 VkDevice device;
                 VkBuffer buffer;
                 VkDeviceMemory memory;
@@ -1551,6 +1587,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_76, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_76, (VkDeviceMemory*)&memory, 1);
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBindBufferMemory 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)buffer, (unsigned long long)memory, (unsigned long long)memoryOffset);
+                }
                 VkResult vkBindBufferMemory_VkResult_return = (VkResult)0;
                 vkBindBufferMemory_VkResult_return = m_state->on_vkBindBufferMemory(&m_pool, device, buffer, memory, memoryOffset);
                 vkStream->unsetHandleMapping();
@@ -1564,10 +1604,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindImageMemory\n");;
-                }
                 VkDevice device;
                 VkImage image;
                 VkDeviceMemory memory;
@@ -1588,6 +1624,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_79, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_79, (VkDeviceMemory*)&memory, 1);
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBindImageMemory 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)memory, (unsigned long long)memoryOffset);
+                }
                 VkResult vkBindImageMemory_VkResult_return = (VkResult)0;
                 vkBindImageMemory_VkResult_return = m_state->on_vkBindImageMemory(&m_pool, device, image, memory, memoryOffset);
                 vkStream->unsetHandleMapping();
@@ -1626,6 +1666,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetBufferMemoryRequirements 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)buffer, (unsigned long long)pMemoryRequirements);
+                }
                 vk->vkGetBufferMemoryRequirements(unboxed_device, buffer, pMemoryRequirements);
                 vkStream->unsetHandleMapping();
                 if (pMemoryRequirements)
@@ -1642,10 +1686,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageMemoryRequirements:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetImageMemoryRequirements\n");;
-                }
                 VkDevice device;
                 VkImage image;
                 VkMemoryRequirements* pMemoryRequirements;
@@ -1670,6 +1710,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageMemoryRequirements 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)pMemoryRequirements);
                 }
                 m_state->on_vkGetImageMemoryRequirements(&m_pool, device, image, pMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -1734,6 +1778,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkSparseImageMemoryRequirements(m_state, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageSparseMemoryRequirements 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)pSparseMemoryRequirementCount, (unsigned long long)pSparseMemoryRequirements);
                 }
                 vk->vkGetImageSparseMemoryRequirements(unboxed_device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -1824,6 +1872,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkSparseImageFormatProperties(m_state, (VkSparseImageFormatProperties*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSparseImageFormatProperties 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)type, (unsigned long long)samples, (unsigned long long)usage, (unsigned long long)tiling, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 vk->vkGetPhysicalDeviceSparseImageFormatProperties(unboxed_physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -1888,6 +1940,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBindSparseInfo(m_state, (VkBindSparseInfo*)(pBindInfo + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueBindSparse 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)bindInfoCount, (unsigned long long)pBindInfo, (unsigned long long)fence);
+                }
                 VkResult vkQueueBindSparse_VkResult_return = (VkResult)0;
                 vkQueueBindSparse_VkResult_return = vk->vkQueueBindSparse(unboxed_queue, bindInfoCount, pBindInfo, fence);
                 vkStream->unsetHandleMapping();
@@ -1938,6 +1994,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateFence 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pFence);
                 }
                 VkResult vkCreateFence_VkResult_return = (VkResult)0;
                 vkCreateFence_VkResult_return = vk->vkCreateFence(unboxed_device, pCreateInfo, pAllocator, pFence);
@@ -1992,6 +2052,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyFence 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fence, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyFence(unboxed_device, fence, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -2024,6 +2088,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->read((uint64_t*)cgen_var_105, ((fenceCount)) * 8);
                     vkReadStream->handleMapping()->mapHandles_u64_VkFence(cgen_var_105, (VkFence*)pFences, ((fenceCount)));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkResetFences 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fenceCount, (unsigned long long)pFences);
+                }
                 VkResult vkResetFences_VkResult_return = (VkResult)0;
                 vkResetFences_VkResult_return = vk->vkResetFences(unboxed_device, fenceCount, pFences);
                 vkStream->unsetHandleMapping();
@@ -2051,6 +2119,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_107;
                 vkReadStream->read((uint64_t*)&cgen_var_107, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_107, (VkFence*)&fence, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetFenceStatus 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fence);
+                }
                 VkResult vkGetFenceStatus_VkResult_return = (VkResult)0;
                 vkGetFenceStatus_VkResult_return = vk->vkGetFenceStatus(unboxed_device, fence);
                 vkStream->unsetHandleMapping();
@@ -2089,6 +2161,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->read((VkBool32*)&waitAll, sizeof(VkBool32));
                 vkReadStream->read((uint64_t*)&timeout, sizeof(uint64_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkWaitForFences 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fenceCount, (unsigned long long)pFences, (unsigned long long)waitAll, (unsigned long long)timeout);
+                }
                 VkResult vkWaitForFences_VkResult_return = (VkResult)0;
                 vkWaitForFences_VkResult_return = vk->vkWaitForFences(unboxed_device, fenceCount, pFences, waitAll, timeout);
                 vkStream->unsetHandleMapping();
@@ -2102,10 +2178,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSemaphore:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateSemaphore\n");;
-                }
                 VkDevice device;
                 const VkSemaphoreCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2144,6 +2216,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateSemaphore 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSemaphore);
+                }
                 VkResult vkCreateSemaphore_VkResult_return = (VkResult)0;
                 vkCreateSemaphore_VkResult_return = m_state->on_vkCreateSemaphore(&m_pool, device, pCreateInfo, pAllocator, pSemaphore);
                 vkStream->unsetHandleMapping();
@@ -2165,10 +2241,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroySemaphore:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroySemaphore\n");;
-                }
                 VkDevice device;
                 VkSemaphore semaphore;
                 const VkAllocationCallbacks* pAllocator;
@@ -2200,6 +2272,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroySemaphore 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)semaphore, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroySemaphore(&m_pool, device, semaphore, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -2249,6 +2325,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateEvent 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pEvent);
                 }
                 VkResult vkCreateEvent_VkResult_return = (VkResult)0;
                 vkCreateEvent_VkResult_return = vk->vkCreateEvent(unboxed_device, pCreateInfo, pAllocator, pEvent);
@@ -2303,6 +2383,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyEvent 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyEvent(unboxed_device, event, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -2328,6 +2412,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_125;
                 vkReadStream->read((uint64_t*)&cgen_var_125, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_125, (VkEvent*)&event, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetEventStatus 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event);
+                }
                 VkResult vkGetEventStatus_VkResult_return = (VkResult)0;
                 vkGetEventStatus_VkResult_return = vk->vkGetEventStatus(unboxed_device, event);
                 vkStream->unsetHandleMapping();
@@ -2355,6 +2443,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_127;
                 vkReadStream->read((uint64_t*)&cgen_var_127, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_127, (VkEvent*)&event, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSetEvent 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event);
+                }
                 VkResult vkSetEvent_VkResult_return = (VkResult)0;
                 vkSetEvent_VkResult_return = vk->vkSetEvent(unboxed_device, event);
                 vkStream->unsetHandleMapping();
@@ -2382,6 +2474,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_129;
                 vkReadStream->read((uint64_t*)&cgen_var_129, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_129, (VkEvent*)&event, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkResetEvent 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event);
+                }
                 VkResult vkResetEvent_VkResult_return = (VkResult)0;
                 vkResetEvent_VkResult_return = vk->vkResetEvent(unboxed_device, event);
                 vkStream->unsetHandleMapping();
@@ -2432,6 +2528,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateQueryPool 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pQueryPool);
                 }
                 VkResult vkCreateQueryPool_VkResult_return = (VkResult)0;
                 vkCreateQueryPool_VkResult_return = vk->vkCreateQueryPool(unboxed_device, pCreateInfo, pAllocator, pQueryPool);
@@ -2486,6 +2586,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyQueryPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)queryPool, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyQueryPool(unboxed_device, queryPool, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -2528,6 +2632,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for pData;
                 vkReadStream->read((VkDeviceSize*)&stride, sizeof(VkDeviceSize));
                 vkReadStream->read((VkQueryResultFlags*)&flags, sizeof(VkQueryResultFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetQueryPoolResults 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)queryPool, (unsigned long long)firstQuery, (unsigned long long)queryCount, (unsigned long long)dataSize, (unsigned long long)pData, (unsigned long long)stride, (unsigned long long)flags);
+                }
                 VkResult vkGetQueryPoolResults_VkResult_return = (VkResult)0;
                 vkGetQueryPoolResults_VkResult_return = vk->vkGetQueryPoolResults(unboxed_device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
                 vkStream->unsetHandleMapping();
@@ -2542,10 +2650,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateBuffer:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateBuffer\n");;
-                }
                 VkDevice device;
                 const VkBufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2584,6 +2688,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateBuffer 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pBuffer);
+                }
                 VkResult vkCreateBuffer_VkResult_return = (VkResult)0;
                 vkCreateBuffer_VkResult_return = m_state->on_vkCreateBuffer(&m_pool, device, pCreateInfo, pAllocator, pBuffer);
                 vkStream->unsetHandleMapping();
@@ -2605,10 +2713,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyBuffer:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyBuffer\n");;
-                }
                 VkDevice device;
                 VkBuffer buffer;
                 const VkAllocationCallbacks* pAllocator;
@@ -2640,6 +2744,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyBuffer 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)buffer, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroyBuffer(&m_pool, device, buffer, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -2689,6 +2797,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateBufferView 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pView);
                 }
                 VkResult vkCreateBufferView_VkResult_return = (VkResult)0;
                 vkCreateBufferView_VkResult_return = vk->vkCreateBufferView(unboxed_device, pCreateInfo, pAllocator, pView);
@@ -2743,6 +2855,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyBufferView 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)bufferView, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyBufferView(unboxed_device, bufferView, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -2754,10 +2870,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateImage:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateImage\n");;
-                }
                 VkDevice device;
                 const VkImageCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2796,6 +2908,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateImage 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pImage);
+                }
                 VkResult vkCreateImage_VkResult_return = (VkResult)0;
                 vkCreateImage_VkResult_return = m_state->on_vkCreateImage(&m_pool, device, pCreateInfo, pAllocator, pImage);
                 vkStream->unsetHandleMapping();
@@ -2817,10 +2933,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyImage:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyImage\n");;
-                }
                 VkDevice device;
                 VkImage image;
                 const VkAllocationCallbacks* pAllocator;
@@ -2852,6 +2964,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyImage 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroyImage(&m_pool, device, image, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -2896,6 +3012,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSubresourceLayout(m_state, (VkSubresourceLayout*)(pLayout));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageSubresourceLayout 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)pSubresource, (unsigned long long)pLayout);
+                }
                 vk->vkGetImageSubresourceLayout(unboxed_device, image, pSubresource, pLayout);
                 vkStream->unsetHandleMapping();
                 if (pLayout)
@@ -2912,10 +3032,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateImageView:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateImageView\n");;
-                }
                 VkDevice device;
                 const VkImageViewCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2954,6 +3070,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateImageView 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pView);
+                }
                 VkResult vkCreateImageView_VkResult_return = (VkResult)0;
                 vkCreateImageView_VkResult_return = m_state->on_vkCreateImageView(&m_pool, device, pCreateInfo, pAllocator, pView);
                 vkStream->unsetHandleMapping();
@@ -2975,10 +3095,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyImageView:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyImageView\n");;
-                }
                 VkDevice device;
                 VkImageView imageView;
                 const VkAllocationCallbacks* pAllocator;
@@ -3010,6 +3126,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyImageView 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)imageView, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroyImageView(&m_pool, device, imageView, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -3059,6 +3179,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateShaderModule 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pShaderModule);
                 }
                 VkResult vkCreateShaderModule_VkResult_return = (VkResult)0;
                 vkCreateShaderModule_VkResult_return = vk->vkCreateShaderModule(unboxed_device, pCreateInfo, pAllocator, pShaderModule);
@@ -3113,6 +3237,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyShaderModule 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)shaderModule, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyShaderModule(unboxed_device, shaderModule, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -3161,6 +3289,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreatePipelineCache 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pPipelineCache);
                 }
                 VkResult vkCreatePipelineCache_VkResult_return = (VkResult)0;
                 vkCreatePipelineCache_VkResult_return = vk->vkCreatePipelineCache(unboxed_device, pCreateInfo, pAllocator, pPipelineCache);
@@ -3215,6 +3347,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyPipelineCache 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyPipelineCache(unboxed_device, pipelineCache, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -3264,6 +3400,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pData;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPipelineCacheData 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)pDataSize, (unsigned long long)pData);
+                }
                 VkResult vkGetPipelineCacheData_VkResult_return = (VkResult)0;
                 vkGetPipelineCacheData_VkResult_return = vk->vkGetPipelineCacheData(unboxed_device, pipelineCache, pDataSize, pData);
                 vkStream->unsetHandleMapping();
@@ -3316,6 +3456,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_194, ((srcCacheCount)) * 8);
                     vkReadStream->read((uint64_t*)cgen_var_194, ((srcCacheCount)) * 8);
                     vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(cgen_var_194, (VkPipelineCache*)pSrcCaches, ((srcCacheCount)));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkMergePipelineCaches 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)dstCache, (unsigned long long)srcCacheCount, (unsigned long long)pSrcCaches);
                 }
                 VkResult vkMergePipelineCaches_VkResult_return = (VkResult)0;
                 vkMergePipelineCaches_VkResult_return = vk->vkMergePipelineCaches(unboxed_device, dstCache, srcCacheCount, pSrcCaches);
@@ -3383,6 +3527,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateGraphicsPipelines 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)createInfoCount, (unsigned long long)pCreateInfos, (unsigned long long)pAllocator, (unsigned long long)pPipelines);
                 }
                 VkResult vkCreateGraphicsPipelines_VkResult_return = (VkResult)0;
                 vkCreateGraphicsPipelines_VkResult_return = vk->vkCreateGraphicsPipelines(unboxed_device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
@@ -3463,6 +3611,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateComputePipelines 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)createInfoCount, (unsigned long long)pCreateInfos, (unsigned long long)pAllocator, (unsigned long long)pPipelines);
+                }
                 VkResult vkCreateComputePipelines_VkResult_return = (VkResult)0;
                 vkCreateComputePipelines_VkResult_return = vk->vkCreateComputePipelines(unboxed_device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 vkStream->unsetHandleMapping();
@@ -3520,6 +3672,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyPipeline 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipeline, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyPipeline(unboxed_device, pipeline, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -3568,6 +3724,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreatePipelineLayout 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pPipelineLayout);
                 }
                 VkResult vkCreatePipelineLayout_VkResult_return = (VkResult)0;
                 vkCreatePipelineLayout_VkResult_return = vk->vkCreatePipelineLayout(unboxed_device, pCreateInfo, pAllocator, pPipelineLayout);
@@ -3622,6 +3782,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyPipelineLayout 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineLayout, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyPipelineLayout(unboxed_device, pipelineLayout, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -3633,10 +3797,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSampler:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateSampler\n");;
-                }
                 VkDevice device;
                 const VkSamplerCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3675,6 +3835,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateSampler 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSampler);
+                }
                 VkResult vkCreateSampler_VkResult_return = (VkResult)0;
                 vkCreateSampler_VkResult_return = m_state->on_vkCreateSampler(&m_pool, device, pCreateInfo, pAllocator, pSampler);
                 vkStream->unsetHandleMapping();
@@ -3696,10 +3860,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroySampler:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroySampler\n");;
-                }
                 VkDevice device;
                 VkSampler sampler;
                 const VkAllocationCallbacks* pAllocator;
@@ -3731,6 +3891,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroySampler 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)sampler, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroySampler(&m_pool, device, sampler, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -3780,6 +3944,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDescriptorSetLayout 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSetLayout);
                 }
                 VkResult vkCreateDescriptorSetLayout_VkResult_return = (VkResult)0;
                 vkCreateDescriptorSetLayout_VkResult_return = vk->vkCreateDescriptorSetLayout(unboxed_device, pCreateInfo, pAllocator, pSetLayout);
@@ -3834,6 +4002,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDescriptorSetLayout 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorSetLayout, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyDescriptorSetLayout(unboxed_device, descriptorSetLayout, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -3882,6 +4054,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDescriptorPool 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pDescriptorPool);
                 }
                 VkResult vkCreateDescriptorPool_VkResult_return = (VkResult)0;
                 vkCreateDescriptorPool_VkResult_return = vk->vkCreateDescriptorPool(unboxed_device, pCreateInfo, pAllocator, pDescriptorPool);
@@ -3936,6 +4112,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDescriptorPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyDescriptorPool(unboxed_device, descriptorPool, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -3963,6 +4143,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_237, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorPool(&cgen_var_237, (VkDescriptorPool*)&descriptorPool, 1);
                 vkReadStream->read((VkDescriptorPoolResetFlags*)&flags, sizeof(VkDescriptorPoolResetFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkResetDescriptorPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)flags);
+                }
                 VkResult vkResetDescriptorPool_VkResult_return = (VkResult)0;
                 vkResetDescriptorPool_VkResult_return = vk->vkResetDescriptorPool(unboxed_device, descriptorPool, flags);
                 vkStream->unsetHandleMapping();
@@ -4005,6 +4189,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocateInfo)
                 {
                     transform_tohost_VkDescriptorSetAllocateInfo(m_state, (VkDescriptorSetAllocateInfo*)(pAllocateInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAllocateDescriptorSets 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAllocateInfo, (unsigned long long)pDescriptorSets);
                 }
                 VkResult vkAllocateDescriptorSets_VkResult_return = (VkResult)0;
                 vkAllocateDescriptorSets_VkResult_return = vk->vkAllocateDescriptorSets(unboxed_device, pAllocateInfo, pDescriptorSets);
@@ -4067,6 +4255,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for pDescriptorSets;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkFreeDescriptorSets 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)descriptorSetCount, (unsigned long long)pDescriptorSets);
+                }
                 VkResult vkFreeDescriptorSets_VkResult_return = (VkResult)0;
                 vkFreeDescriptorSets_VkResult_return = vk->vkFreeDescriptorSets(unboxed_device, descriptorPool, descriptorSetCount, pDescriptorSets);
                 vkStream->unsetHandleMapping();
@@ -4080,10 +4272,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkUpdateDescriptorSets:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkUpdateDescriptorSets\n");;
-                }
                 VkDevice device;
                 uint32_t descriptorWriteCount;
                 const VkWriteDescriptorSet* pDescriptorWrites;
@@ -4123,6 +4311,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkCopyDescriptorSet(m_state, (VkCopyDescriptorSet*)(pDescriptorCopies + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUpdateDescriptorSets 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorWriteCount, (unsigned long long)pDescriptorWrites, (unsigned long long)descriptorCopyCount, (unsigned long long)pDescriptorCopies);
                 }
                 m_state->on_vkUpdateDescriptorSets(&m_pool, device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
                 vkStream->unsetHandleMapping();
@@ -4172,6 +4364,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateFramebuffer 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pFramebuffer);
                 }
                 VkResult vkCreateFramebuffer_VkResult_return = (VkResult)0;
                 vkCreateFramebuffer_VkResult_return = vk->vkCreateFramebuffer(unboxed_device, pCreateInfo, pAllocator, pFramebuffer);
@@ -4226,6 +4422,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyFramebuffer 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)framebuffer, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyFramebuffer(unboxed_device, framebuffer, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4274,6 +4474,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateRenderPass 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pRenderPass);
                 }
                 VkResult vkCreateRenderPass_VkResult_return = (VkResult)0;
                 vkCreateRenderPass_VkResult_return = vk->vkCreateRenderPass(unboxed_device, pCreateInfo, pAllocator, pRenderPass);
@@ -4328,6 +4532,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyRenderPass 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)renderPass, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyRenderPass(unboxed_device, renderPass, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4364,6 +4572,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExtent2D(m_state, (VkExtent2D*)(pGranularity));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetRenderAreaGranularity 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)renderPass, (unsigned long long)pGranularity);
+                }
                 vk->vkGetRenderAreaGranularity(unboxed_device, renderPass, pGranularity);
                 vkStream->unsetHandleMapping();
                 if (pGranularity)
@@ -4380,10 +4592,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateCommandPool:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateCommandPool\n");;
-                }
                 VkDevice device;
                 const VkCommandPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -4422,6 +4630,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateCommandPool 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pCommandPool);
+                }
                 VkResult vkCreateCommandPool_VkResult_return = (VkResult)0;
                 vkCreateCommandPool_VkResult_return = m_state->on_vkCreateCommandPool(&m_pool, device, pCreateInfo, pAllocator, pCommandPool);
                 vkStream->unsetHandleMapping();
@@ -4443,10 +4655,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyCommandPool:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyCommandPool\n");;
-                }
                 VkDevice device;
                 VkCommandPool commandPool;
                 const VkAllocationCallbacks* pAllocator;
@@ -4479,6 +4687,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyCommandPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)commandPool, (unsigned long long)pAllocator);
+                }
                 m_state->on_vkDestroyCommandPool(&m_pool, device, commandPool, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4490,10 +4702,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetCommandPool:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkResetCommandPool\n");;
-                }
                 VkDevice device;
                 VkCommandPool commandPool;
                 VkCommandPoolResetFlags flags;
@@ -4510,6 +4718,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_270, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_270, (VkCommandPool*)&commandPool, 1);
                 vkReadStream->read((VkCommandPoolResetFlags*)&flags, sizeof(VkCommandPoolResetFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkResetCommandPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)commandPool, (unsigned long long)flags);
+                }
                 VkResult vkResetCommandPool_VkResult_return = (VkResult)0;
                 vkResetCommandPool_VkResult_return = m_state->on_vkResetCommandPool(&m_pool, device, commandPool, flags);
                 vkStream->unsetHandleMapping();
@@ -4523,10 +4735,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateCommandBuffers:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkAllocateCommandBuffers\n");;
-                }
                 VkDevice device;
                 const VkCommandBufferAllocateInfo* pAllocateInfo;
                 VkCommandBuffer* pCommandBuffers;
@@ -4557,6 +4765,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkCommandBufferAllocateInfo(m_state, (VkCommandBufferAllocateInfo*)(pAllocateInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAllocateCommandBuffers 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAllocateInfo, (unsigned long long)pCommandBuffers);
+                }
                 VkResult vkAllocateCommandBuffers_VkResult_return = (VkResult)0;
                 vkAllocateCommandBuffers_VkResult_return = m_state->on_vkAllocateCommandBuffers(&m_pool, device, pAllocateInfo, pCommandBuffers);
                 vkStream->unsetHandleMapping();
@@ -4578,10 +4790,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFreeCommandBuffers:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkFreeCommandBuffers\n");;
-                }
                 VkDevice device;
                 VkCommandPool commandPool;
                 uint32_t commandBufferCount;
@@ -4616,6 +4824,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_277, (VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkFreeCommandBuffers 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)commandPool, (unsigned long long)commandBufferCount, (unsigned long long)pCommandBuffers);
+                }
                 m_state->on_vkFreeCommandBuffers(&m_pool, device, commandPool, commandBufferCount, pCommandBuffers);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4627,10 +4839,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBeginCommandBuffer:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBeginCommandBuffer\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -4647,6 +4855,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pBeginInfo)
                 {
                     transform_tohost_VkCommandBufferBeginInfo(m_state, (VkCommandBufferBeginInfo*)(pBeginInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBeginCommandBuffer 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pBeginInfo);
                 }
                 VkResult vkBeginCommandBuffer_VkResult_return = (VkResult)0;
                 vkBeginCommandBuffer_VkResult_return = m_state->on_vkBeginCommandBuffer(&m_pool, commandBuffer, pBeginInfo);
@@ -4671,6 +4883,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEndCommandBuffer 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                }
                 VkResult vkEndCommandBuffer_VkResult_return = (VkResult)0;
                 vkEndCommandBuffer_VkResult_return = vk->vkEndCommandBuffer(unboxed_commandBuffer);
                 vkStream->unsetHandleMapping();
@@ -4684,10 +4900,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetCommandBuffer:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkResetCommandBuffer\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -4700,6 +4912,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkCommandBufferResetFlags*)&flags, sizeof(VkCommandBufferResetFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkResetCommandBuffer 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)flags);
+                }
                 VkResult vkResetCommandBuffer_VkResult_return = (VkResult)0;
                 vkResetCommandBuffer_VkResult_return = m_state->on_vkResetCommandBuffer(&m_pool, commandBuffer, flags);
                 vkStream->unsetHandleMapping();
@@ -4713,10 +4929,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindPipeline:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdBindPipeline\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipeline pipeline;
@@ -4733,6 +4945,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_282;
                 vkReadStream->read((uint64_t*)&cgen_var_282, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_282, (VkPipeline*)&pipeline, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBindPipeline 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pipelineBindPoint, (unsigned long long)pipeline);
+                }
                 m_state->on_vkCmdBindPipeline(&m_pool, commandBuffer, pipelineBindPoint, pipeline);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4770,6 +4986,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkViewport(m_state, (VkViewport*)(pViewports + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetViewport 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)firstViewport, (unsigned long long)viewportCount, (unsigned long long)pViewports);
                 }
                 vk->vkCmdSetViewport(unboxed_commandBuffer, firstViewport, viewportCount, pViewports);
                 vkStream->unsetHandleMapping();
@@ -4809,6 +5029,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkRect2D(m_state, (VkRect2D*)(pScissors + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetScissor 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)firstScissor, (unsigned long long)scissorCount, (unsigned long long)pScissors);
+                }
                 vk->vkCmdSetScissor(unboxed_commandBuffer, firstScissor, scissorCount, pScissors);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4832,6 +5056,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((float*)&lineWidth, sizeof(float));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetLineWidth 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)lineWidth);
+                }
                 vk->vkCmdSetLineWidth(unboxed_commandBuffer, lineWidth);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4859,6 +5087,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((float*)&depthBiasConstantFactor, sizeof(float));
                 vkReadStream->read((float*)&depthBiasClamp, sizeof(float));
                 vkReadStream->read((float*)&depthBiasSlopeFactor, sizeof(float));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetDepthBias 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)depthBiasConstantFactor, (unsigned long long)depthBiasClamp, (unsigned long long)depthBiasSlopeFactor);
+                }
                 vk->vkCmdSetDepthBias(unboxed_commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4882,6 +5114,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((float*)&blendConstants, 4 * sizeof(const float));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetBlendConstants 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)blendConstants);
+                }
                 vk->vkCmdSetBlendConstants(unboxed_commandBuffer, blendConstants);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4907,6 +5143,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((float*)&minDepthBounds, sizeof(float));
                 vkReadStream->read((float*)&maxDepthBounds, sizeof(float));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetDepthBounds 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)minDepthBounds, (unsigned long long)maxDepthBounds);
+                }
                 vk->vkCmdSetDepthBounds(unboxed_commandBuffer, minDepthBounds, maxDepthBounds);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4932,6 +5172,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkStencilFaceFlags*)&faceMask, sizeof(VkStencilFaceFlags));
                 vkReadStream->read((uint32_t*)&compareMask, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetStencilCompareMask 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)faceMask, (unsigned long long)compareMask);
+                }
                 vk->vkCmdSetStencilCompareMask(unboxed_commandBuffer, faceMask, compareMask);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4957,6 +5201,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkStencilFaceFlags*)&faceMask, sizeof(VkStencilFaceFlags));
                 vkReadStream->read((uint32_t*)&writeMask, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetStencilWriteMask 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)faceMask, (unsigned long long)writeMask);
+                }
                 vk->vkCmdSetStencilWriteMask(unboxed_commandBuffer, faceMask, writeMask);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4982,6 +5230,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkStencilFaceFlags*)&faceMask, sizeof(VkStencilFaceFlags));
                 vkReadStream->read((uint32_t*)&reference, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetStencilReference 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)faceMask, (unsigned long long)reference);
+                }
                 vk->vkCmdSetStencilReference(unboxed_commandBuffer, faceMask, reference);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -4993,10 +5245,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdBindDescriptorSets:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdBindDescriptorSets\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipelineLayout layout;
@@ -5031,6 +5279,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&dynamicOffsetCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBindDescriptorSets 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pipelineBindPoint, (unsigned long long)layout, (unsigned long long)firstSet, (unsigned long long)descriptorSetCount, (unsigned long long)pDescriptorSets, (unsigned long long)dynamicOffsetCount, (unsigned long long)pDynamicOffsets);
+                }
                 m_state->on_vkCmdBindDescriptorSets(&m_pool, commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5060,6 +5312,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_296, (VkBuffer*)&buffer, 1);
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
                 vkReadStream->read((VkIndexType*)&indexType, sizeof(VkIndexType));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBindIndexBuffer 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)indexType);
+                }
                 vk->vkCmdBindIndexBuffer(unboxed_commandBuffer, buffer, offset, indexType);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5097,6 +5353,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBindVertexBuffers 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)firstBinding, (unsigned long long)bindingCount, (unsigned long long)pBuffers, (unsigned long long)pOffsets);
+                }
                 vk->vkCmdBindVertexBuffers(unboxed_commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5126,6 +5386,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&instanceCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&firstVertex, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&firstInstance, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDraw 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)vertexCount, (unsigned long long)instanceCount, (unsigned long long)firstVertex, (unsigned long long)firstInstance);
+                }
                 vk->vkCmdDraw(unboxed_commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5157,6 +5421,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&firstIndex, sizeof(uint32_t));
                 vkReadStream->read((int32_t*)&vertexOffset, sizeof(int32_t));
                 vkReadStream->read((uint32_t*)&firstInstance, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndexed 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)indexCount, (unsigned long long)instanceCount, (unsigned long long)firstIndex, (unsigned long long)vertexOffset, (unsigned long long)firstInstance);
+                }
                 vk->vkCmdDrawIndexed(unboxed_commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5188,6 +5456,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&drawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndirect 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)drawCount, (unsigned long long)stride);
+                }
                 vk->vkCmdDrawIndirect(unboxed_commandBuffer, buffer, offset, drawCount, stride);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5219,6 +5491,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&drawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndexedIndirect 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)drawCount, (unsigned long long)stride);
+                }
                 vk->vkCmdDrawIndexedIndirect(unboxed_commandBuffer, buffer, offset, drawCount, stride);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5246,6 +5522,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&groupCountX, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountY, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountZ, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDispatch 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)groupCountX, (unsigned long long)groupCountY, (unsigned long long)groupCountZ);
+                }
                 vk->vkCmdDispatch(unboxed_commandBuffer, groupCountX, groupCountY, groupCountZ);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5273,6 +5553,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_307, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_307, (VkBuffer*)&buffer, 1);
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDispatchIndirect 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset);
+                }
                 vk->vkCmdDispatchIndirect(unboxed_commandBuffer, buffer, offset);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5316,6 +5600,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkBufferCopy(m_state, (VkBufferCopy*)(pRegions + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdCopyBuffer 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcBuffer, (unsigned long long)dstBuffer, (unsigned long long)regionCount, (unsigned long long)pRegions);
                 }
                 vk->vkCmdCopyBuffer(unboxed_commandBuffer, srcBuffer, dstBuffer, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
@@ -5364,6 +5652,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkImageCopy(m_state, (VkImageCopy*)(pRegions + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdCopyImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcImage, (unsigned long long)srcImageLayout, (unsigned long long)dstImage, (unsigned long long)dstImageLayout, (unsigned long long)regionCount, (unsigned long long)pRegions);
                 }
                 vk->vkCmdCopyImage(unboxed_commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
@@ -5415,6 +5707,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageBlit(m_state, (VkImageBlit*)(pRegions + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBlitImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcImage, (unsigned long long)srcImageLayout, (unsigned long long)dstImage, (unsigned long long)dstImageLayout, (unsigned long long)regionCount, (unsigned long long)pRegions, (unsigned long long)filter);
+                }
                 vk->vkCmdBlitImage(unboxed_commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5426,10 +5722,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdCopyBufferToImage:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdCopyBufferToImage\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkBuffer srcBuffer;
                 VkImage dstImage;
@@ -5465,6 +5757,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBufferImageCopy(m_state, (VkBufferImageCopy*)(pRegions + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdCopyBufferToImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcBuffer, (unsigned long long)dstImage, (unsigned long long)dstImageLayout, (unsigned long long)regionCount, (unsigned long long)pRegions);
+                }
                 m_state->on_vkCmdCopyBufferToImage(&m_pool, commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5476,10 +5772,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdCopyImageToBuffer:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdCopyImageToBuffer\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkImage srcImage;
                 VkImageLayout srcImageLayout;
@@ -5515,6 +5807,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBufferImageCopy(m_state, (VkBufferImageCopy*)(pRegions + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdCopyImageToBuffer 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcImage, (unsigned long long)srcImageLayout, (unsigned long long)dstBuffer, (unsigned long long)regionCount, (unsigned long long)pRegions);
+                }
                 m_state->on_vkCmdCopyImageToBuffer(&m_pool, commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5547,6 +5843,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&dataSize, sizeof(VkDeviceSize));
                 vkReadStream->alloc((void**)&pData, ((dataSize)) * sizeof(const uint8_t));
                 vkReadStream->read((void*)pData, ((dataSize)) * sizeof(const uint8_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdUpdateBuffer 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)dstBuffer, (unsigned long long)dstOffset, (unsigned long long)dataSize, (unsigned long long)pData);
+                }
                 vk->vkCmdUpdateBuffer(unboxed_commandBuffer, dstBuffer, dstOffset, dataSize, pData);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5578,6 +5878,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)&size, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&data, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdFillBuffer 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)dstBuffer, (unsigned long long)dstOffset, (unsigned long long)size, (unsigned long long)data);
+                }
                 vk->vkCmdFillBuffer(unboxed_commandBuffer, dstBuffer, dstOffset, size, data);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5627,6 +5931,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageSubresourceRange(m_state, (VkImageSubresourceRange*)(pRanges + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdClearColorImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)image, (unsigned long long)imageLayout, (unsigned long long)pColor, (unsigned long long)rangeCount, (unsigned long long)pRanges);
+                }
                 vk->vkCmdClearColorImage(unboxed_commandBuffer, image, imageLayout, pColor, rangeCount, pRanges);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5675,6 +5983,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkImageSubresourceRange(m_state, (VkImageSubresourceRange*)(pRanges + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdClearDepthStencilImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)image, (unsigned long long)imageLayout, (unsigned long long)pDepthStencil, (unsigned long long)rangeCount, (unsigned long long)pRanges);
                 }
                 vk->vkCmdClearDepthStencilImage(unboxed_commandBuffer, image, imageLayout, pDepthStencil, rangeCount, pRanges);
                 vkStream->unsetHandleMapping();
@@ -5727,6 +6039,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkClearRect(m_state, (VkClearRect*)(pRects + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdClearAttachments 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)attachmentCount, (unsigned long long)pAttachments, (unsigned long long)rectCount, (unsigned long long)pRects);
+                }
                 vk->vkCmdClearAttachments(unboxed_commandBuffer, attachmentCount, pAttachments, rectCount, pRects);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5775,6 +6091,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageResolve(m_state, (VkImageResolve*)(pRegions + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdResolveImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcImage, (unsigned long long)srcImageLayout, (unsigned long long)dstImage, (unsigned long long)dstImageLayout, (unsigned long long)regionCount, (unsigned long long)pRegions);
+                }
                 vk->vkCmdResolveImage(unboxed_commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5802,6 +6122,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_336, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_336, (VkEvent*)&event, 1);
                 vkReadStream->read((VkPipelineStageFlags*)&stageMask, sizeof(VkPipelineStageFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetEvent 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)event, (unsigned long long)stageMask);
+                }
                 vk->vkCmdSetEvent(unboxed_commandBuffer, event, stageMask);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5829,6 +6153,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_338, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_338, (VkEvent*)&event, 1);
                 vkReadStream->read((VkPipelineStageFlags*)&stageMask, sizeof(VkPipelineStageFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdResetEvent 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)event, (unsigned long long)stageMask);
+                }
                 vk->vkCmdResetEvent(unboxed_commandBuffer, event, stageMask);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5910,6 +6238,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageMemoryBarrier(m_state, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdWaitEvents 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)eventCount, (unsigned long long)pEvents, (unsigned long long)srcStageMask, (unsigned long long)dstStageMask, (unsigned long long)memoryBarrierCount, (unsigned long long)pMemoryBarriers, (unsigned long long)bufferMemoryBarrierCount, (unsigned long long)pBufferMemoryBarriers, (unsigned long long)imageMemoryBarrierCount, (unsigned long long)pImageMemoryBarriers);
+                }
                 vk->vkCmdWaitEvents(unboxed_commandBuffer, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -5921,10 +6253,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdPipelineBarrier:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdPipelineBarrier\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkPipelineStageFlags srcStageMask;
                 VkPipelineStageFlags dstStageMask;
@@ -5986,6 +6314,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkImageMemoryBarrier(m_state, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdPipelineBarrier 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcStageMask, (unsigned long long)dstStageMask, (unsigned long long)dependencyFlags, (unsigned long long)memoryBarrierCount, (unsigned long long)pMemoryBarriers, (unsigned long long)bufferMemoryBarrierCount, (unsigned long long)pBufferMemoryBarriers, (unsigned long long)imageMemoryBarrierCount, (unsigned long long)pImageMemoryBarriers);
+                }
                 m_state->on_vkCmdPipelineBarrier(&m_pool, commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6015,6 +6347,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_343, (VkQueryPool*)&queryPool, 1);
                 vkReadStream->read((uint32_t*)&query, sizeof(uint32_t));
                 vkReadStream->read((VkQueryControlFlags*)&flags, sizeof(VkQueryControlFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBeginQuery 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)queryPool, (unsigned long long)query, (unsigned long long)flags);
+                }
                 vk->vkCmdBeginQuery(unboxed_commandBuffer, queryPool, query, flags);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6042,6 +6378,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_345, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_345, (VkQueryPool*)&queryPool, 1);
                 vkReadStream->read((uint32_t*)&query, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdEndQuery 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)queryPool, (unsigned long long)query);
+                }
                 vk->vkCmdEndQuery(unboxed_commandBuffer, queryPool, query);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6071,6 +6411,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_347, (VkQueryPool*)&queryPool, 1);
                 vkReadStream->read((uint32_t*)&firstQuery, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&queryCount, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdResetQueryPool 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)queryPool, (unsigned long long)firstQuery, (unsigned long long)queryCount);
+                }
                 vk->vkCmdResetQueryPool(unboxed_commandBuffer, queryPool, firstQuery, queryCount);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6100,6 +6444,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_349, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_349, (VkQueryPool*)&queryPool, 1);
                 vkReadStream->read((uint32_t*)&query, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdWriteTimestamp 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pipelineStage, (unsigned long long)queryPool, (unsigned long long)query);
+                }
                 vk->vkCmdWriteTimestamp(unboxed_commandBuffer, pipelineStage, queryPool, query);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6139,6 +6487,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)&stride, sizeof(VkDeviceSize));
                 vkReadStream->read((VkQueryResultFlags*)&flags, sizeof(VkQueryResultFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdCopyQueryPoolResults 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)queryPool, (unsigned long long)firstQuery, (unsigned long long)queryCount, (unsigned long long)dstBuffer, (unsigned long long)dstOffset, (unsigned long long)stride, (unsigned long long)flags);
+                }
                 vk->vkCmdCopyQueryPoolResults(unboxed_commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6173,6 +6525,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&size, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pValues, ((size)) * sizeof(const uint8_t));
                 vkReadStream->read((void*)pValues, ((size)) * sizeof(const uint8_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdPushConstants 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)layout, (unsigned long long)stageFlags, (unsigned long long)offset, (unsigned long long)size, (unsigned long long)pValues);
+                }
                 vk->vkCmdPushConstants(unboxed_commandBuffer, layout, stageFlags, offset, size, pValues);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6203,6 +6559,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkRenderPassBeginInfo(m_state, (VkRenderPassBeginInfo*)(pRenderPassBegin));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBeginRenderPass 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pRenderPassBegin, (unsigned long long)contents);
+                }
                 vk->vkCmdBeginRenderPass(unboxed_commandBuffer, pRenderPassBegin, contents);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6226,6 +6586,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkSubpassContents*)&contents, sizeof(VkSubpassContents));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdNextSubpass 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)contents);
+                }
                 vk->vkCmdNextSubpass(unboxed_commandBuffer, contents);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6247,6 +6611,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdEndRenderPass 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                }
                 vk->vkCmdEndRenderPass(unboxed_commandBuffer);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6258,10 +6626,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdExecuteCommands:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdExecuteCommands\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 uint32_t commandBufferCount;
                 const VkCommandBuffer* pCommandBuffers;
@@ -6283,6 +6647,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->read((uint64_t*)cgen_var_359, ((commandBufferCount)) * 8);
                     vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_359, (VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdExecuteCommands 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)commandBufferCount, (unsigned long long)pCommandBuffers);
+                }
                 m_state->on_vkCmdExecuteCommands(&m_pool, commandBuffer, commandBufferCount, pCommandBuffers);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6296,10 +6664,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_VERSION_1_1
             case OP_vkEnumerateInstanceVersion:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEnumerateInstanceVersion\n");;
-                }
                 uint32_t* pApiVersion;
                 // Begin manual dispatchable handle unboxing for pApiVersion;
                 vkReadStream->unsetHandleMapping();
@@ -6307,6 +6671,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)pApiVersion, sizeof(uint32_t));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pApiVersion;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumerateInstanceVersion 0x%llx \n", ioStream, (unsigned long long)pApiVersion);
+                }
                 VkResult vkEnumerateInstanceVersion_VkResult_return = (VkResult)0;
                 vkEnumerateInstanceVersion_VkResult_return = m_state->on_vkEnumerateInstanceVersion(&m_pool, pApiVersion);
                 vkStream->unsetHandleMapping();
@@ -6321,10 +6689,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindBufferMemory2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindBufferMemory2\n");;
-                }
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
@@ -6349,6 +6713,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkBindBufferMemoryInfo(m_state, (VkBindBufferMemoryInfo*)(pBindInfos + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBindBufferMemory2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)bindInfoCount, (unsigned long long)pBindInfos);
                 }
                 VkResult vkBindBufferMemory2_VkResult_return = (VkResult)0;
                 vkBindBufferMemory2_VkResult_return = m_state->on_vkBindBufferMemory2(&m_pool, device, bindInfoCount, pBindInfos);
@@ -6388,6 +6756,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBindImageMemoryInfo(m_state, (VkBindImageMemoryInfo*)(pBindInfos + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBindImageMemory2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)bindInfoCount, (unsigned long long)pBindInfos);
+                }
                 VkResult vkBindImageMemory2_VkResult_return = (VkResult)0;
                 vkBindImageMemory2_VkResult_return = vk->vkBindImageMemory2(unboxed_device, bindInfoCount, pBindInfos);
                 vkStream->unsetHandleMapping();
@@ -6424,6 +6796,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pPeerMemoryFeatures;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceGroupPeerMemoryFeatures 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)heapIndex, (unsigned long long)localDeviceIndex, (unsigned long long)remoteDeviceIndex, (unsigned long long)pPeerMemoryFeatures);
+                }
                 vk->vkGetDeviceGroupPeerMemoryFeatures(unboxed_device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 vkStream->unsetHandleMapping();
                 vkStream->write((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
@@ -6448,6 +6824,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((uint32_t*)&deviceMask, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetDeviceMask 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)deviceMask);
+                }
                 vk->vkCmdSetDeviceMask(unboxed_commandBuffer, deviceMask);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6481,6 +6861,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&groupCountX, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountY, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountZ, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDispatchBase 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)baseGroupX, (unsigned long long)baseGroupY, (unsigned long long)baseGroupZ, (unsigned long long)groupCountX, (unsigned long long)groupCountY, (unsigned long long)groupCountZ);
+                }
                 vk->vkCmdDispatchBase(unboxed_commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -6536,6 +6920,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumeratePhysicalDeviceGroups 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pPhysicalDeviceGroupCount, (unsigned long long)pPhysicalDeviceGroupProperties);
+                }
                 VkResult vkEnumeratePhysicalDeviceGroups_VkResult_return = (VkResult)0;
                 vkEnumeratePhysicalDeviceGroups_VkResult_return = vk->vkEnumeratePhysicalDeviceGroups(unboxed_instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 vkStream->unsetHandleMapping();
@@ -6573,10 +6961,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageMemoryRequirements2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetImageMemoryRequirements2\n");;
-                }
                 VkDevice device;
                 const VkImageMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
@@ -6604,6 +6988,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageMemoryRequirements2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pMemoryRequirements);
                 }
                 m_state->on_vkGetImageMemoryRequirements2(&m_pool, device, pInfo, pMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -6648,6 +7036,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetBufferMemoryRequirements2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pMemoryRequirements);
                 }
                 vk->vkGetBufferMemoryRequirements2(unboxed_device, pInfo, pMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -6716,6 +7108,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageSparseMemoryRequirements2 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pSparseMemoryRequirementCount, (unsigned long long)pSparseMemoryRequirements);
+                }
                 vk->vkGetImageSparseMemoryRequirements2(unboxed_device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -6751,10 +7147,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFeatures2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures2\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures2* pFeatures;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -6776,6 +7168,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkPhysicalDeviceFeatures2(m_state, (VkPhysicalDeviceFeatures2*)(pFeatures));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceFeatures2 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pFeatures);
+                }
                 m_state->on_vkGetPhysicalDeviceFeatures2(&m_pool, physicalDevice, pFeatures);
                 vkStream->unsetHandleMapping();
                 if (pFeatures)
@@ -6792,10 +7188,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceProperties2\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties2* pProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -6817,6 +7209,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkPhysicalDeviceProperties2(m_state, (VkPhysicalDeviceProperties2*)(pProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceProperties2 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pProperties);
+                }
                 m_state->on_vkGetPhysicalDeviceProperties2(&m_pool, physicalDevice, pProperties);
                 vkStream->unsetHandleMapping();
                 if (pProperties)
@@ -6833,10 +7229,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -6860,6 +7252,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceFormatProperties2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)pFormatProperties);
+                }
                 m_state->on_vkGetPhysicalDeviceFormatProperties2(&m_pool, physicalDevice, format, pFormatProperties);
                 vkStream->unsetHandleMapping();
                 if (pFormatProperties)
@@ -6876,10 +7272,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -6907,6 +7299,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pImageFormatProperties)
                 {
                     transform_tohost_VkImageFormatProperties2(m_state, (VkImageFormatProperties2*)(pImageFormatProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceImageFormatProperties2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pImageFormatInfo, (unsigned long long)pImageFormatProperties);
                 }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties2(&m_pool, physicalDevice, pImageFormatInfo, pImageFormatProperties);
@@ -6970,6 +7366,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceQueueFamilyProperties2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pQueueFamilyPropertyCount, (unsigned long long)pQueueFamilyProperties);
+                }
                 vk->vkGetPhysicalDeviceQueueFamilyProperties2(unboxed_physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -7005,10 +7405,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties2:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceMemoryProperties2\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties2* pMemoryProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -7029,6 +7425,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryProperties)
                 {
                     transform_tohost_VkPhysicalDeviceMemoryProperties2(m_state, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceMemoryProperties2 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pMemoryProperties);
                 }
                 m_state->on_vkGetPhysicalDeviceMemoryProperties2(&m_pool, physicalDevice, pMemoryProperties);
                 vkStream->unsetHandleMapping();
@@ -7097,6 +7497,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSparseImageFormatProperties2 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pFormatInfo, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 vk->vkGetPhysicalDeviceSparseImageFormatProperties2(unboxed_physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -7148,6 +7552,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_393, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_393, (VkCommandPool*)&commandPool, 1);
                 vkReadStream->read((VkCommandPoolTrimFlags*)&flags, sizeof(VkCommandPoolTrimFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkTrimCommandPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)commandPool, (unsigned long long)flags);
+                }
                 vk->vkTrimCommandPool(unboxed_device, commandPool, flags);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -7184,6 +7592,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pQueueInfo)
                 {
                     transform_tohost_VkDeviceQueueInfo2(m_state, (VkDeviceQueueInfo2*)(pQueueInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceQueue2 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pQueueInfo, (unsigned long long)pQueue);
                 }
                 vk->vkGetDeviceQueue2(unboxed_device, pQueueInfo, pQueue);
                 vkStream->unsetHandleMapping();
@@ -7236,6 +7648,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateSamplerYcbcrConversion 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pYcbcrConversion);
                 }
                 VkResult vkCreateSamplerYcbcrConversion_VkResult_return = (VkResult)0;
                 vkCreateSamplerYcbcrConversion_VkResult_return = vk->vkCreateSamplerYcbcrConversion(unboxed_device, pCreateInfo, pAllocator, pYcbcrConversion);
@@ -7290,6 +7706,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroySamplerYcbcrConversion 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)ycbcrConversion, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroySamplerYcbcrConversion(unboxed_device, ycbcrConversion, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -7301,10 +7721,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDescriptorUpdateTemplate:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateDescriptorUpdateTemplate\n");;
-                }
                 VkDevice device;
                 const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -7343,6 +7759,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDescriptorUpdateTemplate 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pDescriptorUpdateTemplate);
+                }
                 VkResult vkCreateDescriptorUpdateTemplate_VkResult_return = (VkResult)0;
                 vkCreateDescriptorUpdateTemplate_VkResult_return = m_state->on_vkCreateDescriptorUpdateTemplate(&m_pool, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 vkStream->unsetHandleMapping();
@@ -7364,10 +7784,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyDescriptorUpdateTemplate:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyDescriptorUpdateTemplate\n");;
-                }
                 VkDevice device;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 const VkAllocationCallbacks* pAllocator;
@@ -7399,6 +7815,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDescriptorUpdateTemplate 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorUpdateTemplate, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroyDescriptorUpdateTemplate(&m_pool, device, descriptorUpdateTemplate, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -7436,6 +7856,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
                     vkReadStream->read((void*)pData, sizeof(const uint8_t));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUpdateDescriptorSetWithTemplate 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorSet, (unsigned long long)descriptorUpdateTemplate, (unsigned long long)pData);
                 }
                 vk->vkUpdateDescriptorSetWithTemplate(unboxed_device, descriptorSet, descriptorUpdateTemplate, pData);
                 vkStream->unsetHandleMapping();
@@ -7477,6 +7901,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->transformImpl_VkExternalBufferProperties_tohost(pExternalBufferProperties, 1);
                     transform_tohost_VkExternalBufferProperties(m_state, (VkExternalBufferProperties*)(pExternalBufferProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalBufferProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalBufferInfo, (unsigned long long)pExternalBufferProperties);
                 }
                 vk->vkGetPhysicalDeviceExternalBufferProperties(unboxed_physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 vkStream->unsetHandleMapping();
@@ -7523,6 +7951,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalFenceProperties(m_state, (VkExternalFenceProperties*)(pExternalFenceProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalFenceProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalFenceInfo, (unsigned long long)pExternalFenceProperties);
+                }
                 vk->vkGetPhysicalDeviceExternalFenceProperties(unboxed_physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 vkStream->unsetHandleMapping();
                 if (pExternalFenceProperties)
@@ -7539,10 +7971,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphoreProperties\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -7570,6 +7998,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pExternalSemaphoreProperties)
                 {
                     transform_tohost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalSemaphoreProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalSemaphoreInfo, (unsigned long long)pExternalSemaphoreProperties);
                 }
                 m_state->on_vkGetPhysicalDeviceExternalSemaphoreProperties(&m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 vkStream->unsetHandleMapping();
@@ -7614,6 +8046,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pSupport)
                 {
                     transform_tohost_VkDescriptorSetLayoutSupport(m_state, (VkDescriptorSetLayoutSupport*)(pSupport));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDescriptorSetLayoutSupport 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pSupport);
                 }
                 vk->vkGetDescriptorSetLayoutSupport(unboxed_device, pCreateInfo, pSupport);
                 vkStream->unsetHandleMapping();
@@ -7665,6 +8101,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroySurfaceKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)surface, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroySurfaceKHR(unboxed_instance, surface, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -7699,6 +8139,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkBool32*)pSupported, sizeof(VkBool32));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pSupported;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceSupportKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)surface, (unsigned long long)pSupported);
+                }
                 VkResult vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return = vk->vkGetPhysicalDeviceSurfaceSupportKHR(unboxed_physicalDevice, queueFamilyIndex, surface, pSupported);
                 vkStream->unsetHandleMapping();
@@ -7737,6 +8181,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pSurfaceCapabilities)
                 {
                     transform_tohost_VkSurfaceCapabilitiesKHR(m_state, (VkSurfaceCapabilitiesKHR*)(pSurfaceCapabilities));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceCapabilitiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)surface, (unsigned long long)pSurfaceCapabilities);
                 }
                 VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return = vk->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(unboxed_physicalDevice, surface, pSurfaceCapabilities);
@@ -7803,6 +8251,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkSurfaceFormatKHR(m_state, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceFormatsKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)surface, (unsigned long long)pSurfaceFormatCount, (unsigned long long)pSurfaceFormats);
                 }
                 VkResult vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return = vk->vkGetPhysicalDeviceSurfaceFormatsKHR(unboxed_physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
@@ -7879,6 +8331,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pPresentModes;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfacePresentModesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)surface, (unsigned long long)pPresentModeCount, (unsigned long long)pPresentModes);
+                }
                 VkResult vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return = vk->vkGetPhysicalDeviceSurfacePresentModesKHR(unboxed_physicalDevice, surface, pPresentModeCount, pPresentModes);
                 vkStream->unsetHandleMapping();
@@ -7946,6 +8402,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateSwapchainKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSwapchain);
+                }
                 VkResult vkCreateSwapchainKHR_VkResult_return = (VkResult)0;
                 vkCreateSwapchainKHR_VkResult_return = vk->vkCreateSwapchainKHR(unboxed_device, pCreateInfo, pAllocator, pSwapchain);
                 vkStream->unsetHandleMapping();
@@ -7998,6 +8458,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroySwapchainKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)pAllocator);
                 }
                 vk->vkDestroySwapchainKHR(unboxed_device, swapchain, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -8054,6 +8518,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pSwapchainImages;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetSwapchainImagesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)pSwapchainImageCount, (unsigned long long)pSwapchainImages);
+                }
                 VkResult vkGetSwapchainImagesKHR_VkResult_return = (VkResult)0;
                 vkGetSwapchainImagesKHR_VkResult_return = vk->vkGetSwapchainImagesKHR(unboxed_device, swapchain, pSwapchainImageCount, pSwapchainImages);
                 vkStream->unsetHandleMapping();
@@ -8118,6 +8586,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)pImageIndex, sizeof(uint32_t));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pImageIndex;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAcquireNextImageKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)timeout, (unsigned long long)semaphore, (unsigned long long)fence, (unsigned long long)pImageIndex);
+                }
                 VkResult vkAcquireNextImageKHR_VkResult_return = (VkResult)0;
                 vkAcquireNextImageKHR_VkResult_return = vk->vkAcquireNextImageKHR(unboxed_device, swapchain, timeout, semaphore, fence, pImageIndex);
                 vkStream->unsetHandleMapping();
@@ -8148,6 +8620,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pPresentInfo)
                 {
                     transform_tohost_VkPresentInfoKHR(m_state, (VkPresentInfoKHR*)(pPresentInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueuePresentKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)pPresentInfo);
                 }
                 VkResult vkQueuePresentKHR_VkResult_return = (VkResult)0;
                 vkQueuePresentKHR_VkResult_return = vk->vkQueuePresentKHR(unboxed_queue, pPresentInfo);
@@ -8182,6 +8658,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pDeviceGroupPresentCapabilities)
                 {
                     transform_tohost_VkDeviceGroupPresentCapabilitiesKHR(m_state, (VkDeviceGroupPresentCapabilitiesKHR*)(pDeviceGroupPresentCapabilities));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceGroupPresentCapabilitiesKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pDeviceGroupPresentCapabilities);
                 }
                 VkResult vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return = (VkResult)0;
                 vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return = vk->vkGetDeviceGroupPresentCapabilitiesKHR(unboxed_device, pDeviceGroupPresentCapabilities);
@@ -8227,6 +8707,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pModes;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceGroupSurfacePresentModesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)surface, (unsigned long long)pModes);
+                }
                 VkResult vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return = (VkResult)0;
                 vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return = vk->vkGetDeviceGroupSurfacePresentModesKHR(unboxed_device, surface, pModes);
                 vkStream->unsetHandleMapping();
@@ -8295,6 +8779,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkRect2D(m_state, (VkRect2D*)(pRects + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDevicePresentRectanglesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)surface, (unsigned long long)pRectCount, (unsigned long long)pRects);
+                }
                 VkResult vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return = vk->vkGetPhysicalDevicePresentRectanglesKHR(unboxed_physicalDevice, surface, pRectCount, pRects);
                 vkStream->unsetHandleMapping();
@@ -8356,6 +8844,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAcquireNextImageInfoKHR(m_state, (VkAcquireNextImageInfoKHR*)(pAcquireInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAcquireNextImage2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAcquireInfo, (unsigned long long)pImageIndex);
+                }
                 VkResult vkAcquireNextImage2KHR_VkResult_return = (VkResult)0;
                 vkAcquireNextImage2KHR_VkResult_return = vk->vkAcquireNextImage2KHR(unboxed_device, pAcquireInfo, pImageIndex);
                 vkStream->unsetHandleMapping();
@@ -8415,6 +8907,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkDisplayPropertiesKHR(m_state, (VkDisplayPropertiesKHR*)(pProperties + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceDisplayPropertiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
                 }
                 VkResult vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return = vk->vkGetPhysicalDeviceDisplayPropertiesKHR(unboxed_physicalDevice, pPropertyCount, pProperties);
@@ -8497,6 +8993,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkDisplayPlanePropertiesKHR(m_state, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceDisplayPlanePropertiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 VkResult vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return = vk->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(unboxed_physicalDevice, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
@@ -8576,6 +9076,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pDisplays;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDisplayPlaneSupportedDisplaysKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)planeIndex, (unsigned long long)pDisplayCount, (unsigned long long)pDisplays);
+                }
                 VkResult vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return = (VkResult)0;
                 vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return = vk->vkGetDisplayPlaneSupportedDisplaysKHR(unboxed_physicalDevice, planeIndex, pDisplayCount, pDisplays);
                 vkStream->unsetHandleMapping();
@@ -8657,6 +9161,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkDisplayModePropertiesKHR(m_state, (VkDisplayModePropertiesKHR*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDisplayModePropertiesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)display, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 VkResult vkGetDisplayModePropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetDisplayModePropertiesKHR_VkResult_return = vk->vkGetDisplayModePropertiesKHR(unboxed_physicalDevice, display, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
@@ -8736,6 +9244,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDisplayModeKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)display, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pMode);
+                }
                 VkResult vkCreateDisplayModeKHR_VkResult_return = (VkResult)0;
                 vkCreateDisplayModeKHR_VkResult_return = vk->vkCreateDisplayModeKHR(unboxed_physicalDevice, display, pCreateInfo, pAllocator, pMode);
                 vkStream->unsetHandleMapping();
@@ -8783,6 +9295,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pCapabilities)
                 {
                     transform_tohost_VkDisplayPlaneCapabilitiesKHR(m_state, (VkDisplayPlaneCapabilitiesKHR*)(pCapabilities));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDisplayPlaneCapabilitiesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)mode, (unsigned long long)planeIndex, (unsigned long long)pCapabilities);
                 }
                 VkResult vkGetDisplayPlaneCapabilitiesKHR_VkResult_return = (VkResult)0;
                 vkGetDisplayPlaneCapabilitiesKHR_VkResult_return = vk->vkGetDisplayPlaneCapabilitiesKHR(unboxed_physicalDevice, mode, planeIndex, pCapabilities);
@@ -8839,6 +9355,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDisplayPlaneSurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
                 }
                 VkResult vkCreateDisplayPlaneSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateDisplayPlaneSurfaceKHR_VkResult_return = vk->vkCreateDisplayPlaneSurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
@@ -8908,6 +9428,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateSharedSwapchainsKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchainCount, (unsigned long long)pCreateInfos, (unsigned long long)pAllocator, (unsigned long long)pSwapchains);
+                }
                 VkResult vkCreateSharedSwapchainsKHR_VkResult_return = (VkResult)0;
                 vkCreateSharedSwapchainsKHR_VkResult_return = vk->vkCreateSharedSwapchainsKHR(unboxed_device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
                 vkStream->unsetHandleMapping();
@@ -8968,6 +9492,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateXlibSurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateXlibSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateXlibSurfaceKHR_VkResult_return = vk->vkCreateXlibSurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -9005,6 +9533,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for dpy;
                 vkReadStream->read((VisualID*)&visualID, sizeof(VisualID));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceXlibPresentationSupportKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)dpy, (unsigned long long)visualID);
+                }
                 VkBool32 vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return = vk->vkGetPhysicalDeviceXlibPresentationSupportKHR(unboxed_physicalDevice, queueFamilyIndex, dpy, visualID);
                 vkStream->unsetHandleMapping();
@@ -9059,6 +9591,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateXcbSurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateXcbSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateXcbSurfaceKHR_VkResult_return = vk->vkCreateXcbSurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -9096,6 +9632,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for connection;
                 vkReadStream->read((xcb_visualid_t*)&visual_id, sizeof(xcb_visualid_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceXcbPresentationSupportKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)connection, (unsigned long long)visual_id);
+                }
                 VkBool32 vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return = vk->vkGetPhysicalDeviceXcbPresentationSupportKHR(unboxed_physicalDevice, queueFamilyIndex, connection, visual_id);
                 vkStream->unsetHandleMapping();
@@ -9150,6 +9690,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateWaylandSurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateWaylandSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateWaylandSurfaceKHR_VkResult_return = vk->vkCreateWaylandSurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -9185,6 +9729,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((wl_display*)display, sizeof(wl_display));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for display;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceWaylandPresentationSupportKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)display);
+                }
                 VkBool32 vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return = vk->vkGetPhysicalDeviceWaylandPresentationSupportKHR(unboxed_physicalDevice, queueFamilyIndex, display);
                 vkStream->unsetHandleMapping();
@@ -9239,6 +9787,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateMirSurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateMirSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateMirSurfaceKHR_VkResult_return = vk->vkCreateMirSurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -9274,6 +9826,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((MirConnection*)connection, sizeof(MirConnection));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for connection;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceMirPresentationSupportKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)connection);
+                }
                 VkBool32 vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return = vk->vkGetPhysicalDeviceMirPresentationSupportKHR(unboxed_physicalDevice, queueFamilyIndex, connection);
                 vkStream->unsetHandleMapping();
@@ -9327,6 +9883,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateAndroidSurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
                 }
                 VkResult vkCreateAndroidSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateAndroidSurfaceKHR_VkResult_return = vk->vkCreateAndroidSurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
@@ -9384,6 +9944,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateWin32SurfaceKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateWin32SurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateWin32SurfaceKHR_VkResult_return = vk->vkCreateWin32SurfaceKHR(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -9412,6 +9976,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->read((uint32_t*)&queueFamilyIndex, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceWin32PresentationSupportKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex);
+                }
                 VkBool32 vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return = vk->vkGetPhysicalDeviceWin32PresentationSupportKHR(unboxed_physicalDevice, queueFamilyIndex);
                 vkStream->unsetHandleMapping();
@@ -9431,10 +9999,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_get_physical_device_properties2
             case OP_vkGetPhysicalDeviceFeatures2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures2KHR\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures2* pFeatures;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -9456,6 +10020,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkPhysicalDeviceFeatures2(m_state, (VkPhysicalDeviceFeatures2*)(pFeatures));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceFeatures2KHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pFeatures);
+                }
                 m_state->on_vkGetPhysicalDeviceFeatures2KHR(&m_pool, physicalDevice, pFeatures);
                 vkStream->unsetHandleMapping();
                 if (pFeatures)
@@ -9472,10 +10040,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceProperties2KHR\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties2* pProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -9497,6 +10061,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkPhysicalDeviceProperties2(m_state, (VkPhysicalDeviceProperties2*)(pProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceProperties2KHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pProperties);
+                }
                 m_state->on_vkGetPhysicalDeviceProperties2KHR(&m_pool, physicalDevice, pProperties);
                 vkStream->unsetHandleMapping();
                 if (pProperties)
@@ -9513,10 +10081,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2KHR\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -9540,6 +10104,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceFormatProperties2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)pFormatProperties);
+                }
                 m_state->on_vkGetPhysicalDeviceFormatProperties2KHR(&m_pool, physicalDevice, format, pFormatProperties);
                 vkStream->unsetHandleMapping();
                 if (pFormatProperties)
@@ -9556,10 +10124,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2KHR\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -9587,6 +10151,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pImageFormatProperties)
                 {
                     transform_tohost_VkImageFormatProperties2(m_state, (VkImageFormatProperties2*)(pImageFormatProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceImageFormatProperties2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pImageFormatInfo, (unsigned long long)pImageFormatProperties);
                 }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties2KHR(&m_pool, physicalDevice, pImageFormatInfo, pImageFormatProperties);
@@ -9650,6 +10218,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceQueueFamilyProperties2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pQueueFamilyPropertyCount, (unsigned long long)pQueueFamilyProperties);
+                }
                 vk->vkGetPhysicalDeviceQueueFamilyProperties2KHR(unboxed_physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -9685,10 +10257,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceMemoryProperties2KHR\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties2* pMemoryProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -9709,6 +10277,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryProperties)
                 {
                     transform_tohost_VkPhysicalDeviceMemoryProperties2(m_state, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceMemoryProperties2KHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pMemoryProperties);
                 }
                 m_state->on_vkGetPhysicalDeviceMemoryProperties2KHR(&m_pool, physicalDevice, pMemoryProperties);
                 vkStream->unsetHandleMapping();
@@ -9777,6 +10349,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSparseImageFormatProperties2KHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pFormatInfo, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 vk->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(unboxed_physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -9837,6 +10413,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pPeerMemoryFeatures;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDeviceGroupPeerMemoryFeaturesKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)heapIndex, (unsigned long long)localDeviceIndex, (unsigned long long)remoteDeviceIndex, (unsigned long long)pPeerMemoryFeatures);
+                }
                 vk->vkGetDeviceGroupPeerMemoryFeaturesKHR(unboxed_device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 vkStream->unsetHandleMapping();
                 vkStream->write((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
@@ -9861,6 +10441,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((uint32_t*)&deviceMask, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetDeviceMaskKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)deviceMask);
+                }
                 vk->vkCmdSetDeviceMaskKHR(unboxed_commandBuffer, deviceMask);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -9894,6 +10478,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&groupCountX, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountY, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountZ, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDispatchBaseKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)baseGroupX, (unsigned long long)baseGroupY, (unsigned long long)baseGroupZ, (unsigned long long)groupCountX, (unsigned long long)groupCountY, (unsigned long long)groupCountZ);
+                }
                 vk->vkCmdDispatchBaseKHR(unboxed_commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -9925,6 +10513,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_556, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_556, (VkCommandPool*)&commandPool, 1);
                 vkReadStream->read((VkCommandPoolTrimFlags*)&flags, sizeof(VkCommandPoolTrimFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkTrimCommandPoolKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)commandPool, (unsigned long long)flags);
+                }
                 vk->vkTrimCommandPoolKHR(unboxed_device, commandPool, flags);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -9981,6 +10573,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEnumeratePhysicalDeviceGroupsKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pPhysicalDeviceGroupCount, (unsigned long long)pPhysicalDeviceGroupProperties);
                 }
                 VkResult vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return = (VkResult)0;
                 vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return = vk->vkEnumeratePhysicalDeviceGroupsKHR(unboxed_instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
@@ -10051,6 +10647,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     m_state->transformImpl_VkExternalBufferProperties_tohost(pExternalBufferProperties, 1);
                     transform_tohost_VkExternalBufferProperties(m_state, (VkExternalBufferProperties*)(pExternalBufferProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalBufferPropertiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalBufferInfo, (unsigned long long)pExternalBufferProperties);
+                }
                 vk->vkGetPhysicalDeviceExternalBufferPropertiesKHR(unboxed_physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 vkStream->unsetHandleMapping();
                 if (pExternalBufferProperties)
@@ -10096,6 +10696,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkMemoryGetWin32HandleInfoKHR(m_state, (VkMemoryGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryWin32HandleKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pGetWin32HandleInfo, (unsigned long long)pHandle);
+                }
                 VkResult vkGetMemoryWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryWin32HandleKHR_VkResult_return = vk->vkGetMemoryWin32HandleKHR(unboxed_device, pGetWin32HandleInfo, pHandle);
                 vkStream->unsetHandleMapping();
@@ -10134,6 +10738,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryWin32HandleProperties)
                 {
                     transform_tohost_VkMemoryWin32HandlePropertiesKHR(m_state, (VkMemoryWin32HandlePropertiesKHR*)(pMemoryWin32HandleProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryWin32HandlePropertiesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)handleType, (unsigned long long)handle, (unsigned long long)pMemoryWin32HandleProperties);
                 }
                 VkResult vkGetMemoryWin32HandlePropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryWin32HandlePropertiesKHR_VkResult_return = vk->vkGetMemoryWin32HandlePropertiesKHR(unboxed_device, handleType, handle, pMemoryWin32HandleProperties);
@@ -10179,6 +10787,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkMemoryGetFdInfoKHR(m_state, (VkMemoryGetFdInfoKHR*)(pGetFdInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryFdKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pGetFdInfo, (unsigned long long)pFd);
+                }
                 VkResult vkGetMemoryFdKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryFdKHR_VkResult_return = vk->vkGetMemoryFdKHR(unboxed_device, pGetFdInfo, pFd);
                 vkStream->unsetHandleMapping();
@@ -10218,6 +10830,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkMemoryFdPropertiesKHR(m_state, (VkMemoryFdPropertiesKHR*)(pMemoryFdProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryFdPropertiesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)handleType, (unsigned long long)fd, (unsigned long long)pMemoryFdProperties);
+                }
                 VkResult vkGetMemoryFdPropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryFdPropertiesKHR_VkResult_return = vk->vkGetMemoryFdPropertiesKHR(unboxed_device, handleType, fd, pMemoryFdProperties);
                 vkStream->unsetHandleMapping();
@@ -10240,10 +10856,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_capabilities
             case OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphorePropertiesKHR\n");;
-                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -10271,6 +10883,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pExternalSemaphoreProperties)
                 {
                     transform_tohost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalSemaphorePropertiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalSemaphoreInfo, (unsigned long long)pExternalSemaphoreProperties);
                 }
                 m_state->on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(&m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 vkStream->unsetHandleMapping();
@@ -10309,6 +10925,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImportSemaphoreWin32HandleInfoKHR(m_state, (VkImportSemaphoreWin32HandleInfoKHR*)(pImportSemaphoreWin32HandleInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkImportSemaphoreWin32HandleKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pImportSemaphoreWin32HandleInfo);
+                }
                 VkResult vkImportSemaphoreWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkImportSemaphoreWin32HandleKHR_VkResult_return = vk->vkImportSemaphoreWin32HandleKHR(unboxed_device, pImportSemaphoreWin32HandleInfo);
                 vkStream->unsetHandleMapping();
@@ -10346,6 +10966,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSemaphoreGetWin32HandleInfoKHR(m_state, (VkSemaphoreGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetSemaphoreWin32HandleKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pGetWin32HandleInfo, (unsigned long long)pHandle);
+                }
                 VkResult vkGetSemaphoreWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkGetSemaphoreWin32HandleKHR_VkResult_return = vk->vkGetSemaphoreWin32HandleKHR(unboxed_device, pGetWin32HandleInfo, pHandle);
                 vkStream->unsetHandleMapping();
@@ -10362,10 +10986,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_fd
             case OP_vkImportSemaphoreFdKHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkImportSemaphoreFdKHR\n");;
-                }
                 VkDevice device;
                 const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -10383,6 +11003,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImportSemaphoreFdInfoKHR(m_state, (VkImportSemaphoreFdInfoKHR*)(pImportSemaphoreFdInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkImportSemaphoreFdKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pImportSemaphoreFdInfo);
+                }
                 VkResult vkImportSemaphoreFdKHR_VkResult_return = (VkResult)0;
                 vkImportSemaphoreFdKHR_VkResult_return = m_state->on_vkImportSemaphoreFdKHR(&m_pool, device, pImportSemaphoreFdInfo);
                 vkStream->unsetHandleMapping();
@@ -10396,10 +11020,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetSemaphoreFdKHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetSemaphoreFdKHR\n");;
-                }
                 VkDevice device;
                 const VkSemaphoreGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
@@ -10423,6 +11043,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pGetFdInfo)
                 {
                     transform_tohost_VkSemaphoreGetFdInfoKHR(m_state, (VkSemaphoreGetFdInfoKHR*)(pGetFdInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetSemaphoreFdKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pGetFdInfo, (unsigned long long)pFd);
                 }
                 VkResult vkGetSemaphoreFdKHR_VkResult_return = (VkResult)0;
                 vkGetSemaphoreFdKHR_VkResult_return = m_state->on_vkGetSemaphoreFdKHR(&m_pool, device, pGetFdInfo, pFd);
@@ -10473,6 +11097,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkWriteDescriptorSet(m_state, (VkWriteDescriptorSet*)(pDescriptorWrites + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdPushDescriptorSetKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pipelineBindPoint, (unsigned long long)layout, (unsigned long long)set, (unsigned long long)descriptorWriteCount, (unsigned long long)pDescriptorWrites);
+                }
                 vk->vkCmdPushDescriptorSetKHR(unboxed_commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -10512,6 +11140,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
                     vkReadStream->read((void*)pData, sizeof(const uint8_t));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdPushDescriptorSetWithTemplateKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)descriptorUpdateTemplate, (unsigned long long)layout, (unsigned long long)set, (unsigned long long)pData);
+                }
                 vk->vkCmdPushDescriptorSetWithTemplateKHR(unboxed_commandBuffer, descriptorUpdateTemplate, layout, set, pData);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -10529,10 +11161,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_descriptor_update_template
             case OP_vkCreateDescriptorUpdateTemplateKHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateDescriptorUpdateTemplateKHR\n");;
-                }
                 VkDevice device;
                 const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -10571,6 +11199,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDescriptorUpdateTemplateKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pDescriptorUpdateTemplate);
+                }
                 VkResult vkCreateDescriptorUpdateTemplateKHR_VkResult_return = (VkResult)0;
                 vkCreateDescriptorUpdateTemplateKHR_VkResult_return = m_state->on_vkCreateDescriptorUpdateTemplateKHR(&m_pool, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 vkStream->unsetHandleMapping();
@@ -10592,10 +11224,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyDescriptorUpdateTemplateKHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyDescriptorUpdateTemplateKHR\n");;
-                }
                 VkDevice device;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 const VkAllocationCallbacks* pAllocator;
@@ -10627,6 +11255,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDescriptorUpdateTemplateKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorUpdateTemplate, (unsigned long long)pAllocator);
                 }
                 m_state->on_vkDestroyDescriptorUpdateTemplateKHR(&m_pool, device, descriptorUpdateTemplate, pAllocator);
                 vkStream->unsetHandleMapping();
@@ -10664,6 +11296,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
                     vkReadStream->read((void*)pData, sizeof(const uint8_t));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUpdateDescriptorSetWithTemplateKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorSet, (unsigned long long)descriptorUpdateTemplate, (unsigned long long)pData);
                 }
                 vk->vkUpdateDescriptorSetWithTemplateKHR(unboxed_device, descriptorSet, descriptorUpdateTemplate, pData);
                 vkStream->unsetHandleMapping();
@@ -10716,6 +11352,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateRenderPass2KHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pRenderPass);
+                }
                 VkResult vkCreateRenderPass2KHR_VkResult_return = (VkResult)0;
                 vkCreateRenderPass2KHR_VkResult_return = vk->vkCreateRenderPass2KHR(unboxed_device, pCreateInfo, pAllocator, pRenderPass);
                 vkStream->unsetHandleMapping();
@@ -10756,6 +11396,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSubpassBeginInfoKHR(m_state, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBeginRenderPass2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pRenderPassBegin, (unsigned long long)pSubpassBeginInfo);
+                }
                 vk->vkCmdBeginRenderPass2KHR(unboxed_commandBuffer, pRenderPassBegin, pSubpassBeginInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -10791,6 +11435,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSubpassEndInfoKHR(m_state, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdNextSubpass2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pSubpassBeginInfo, (unsigned long long)pSubpassEndInfo);
+                }
                 vk->vkCmdNextSubpass2KHR(unboxed_commandBuffer, pSubpassBeginInfo, pSubpassEndInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -10819,6 +11467,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSubpassEndInfoKHR(m_state, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdEndRenderPass2KHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pSubpassEndInfo);
+                }
                 vk->vkCmdEndRenderPass2KHR(unboxed_commandBuffer, pSubpassEndInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -10846,6 +11498,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_597;
                 vkReadStream->read((uint64_t*)&cgen_var_597, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_597, (VkSwapchainKHR*)&swapchain, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetSwapchainStatusKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain);
+                }
                 VkResult vkGetSwapchainStatusKHR_VkResult_return = (VkResult)0;
                 vkGetSwapchainStatusKHR_VkResult_return = vk->vkGetSwapchainStatusKHR(unboxed_device, swapchain);
                 vkStream->unsetHandleMapping();
@@ -10889,6 +11545,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalFenceProperties(m_state, (VkExternalFenceProperties*)(pExternalFenceProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalFencePropertiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalFenceInfo, (unsigned long long)pExternalFenceProperties);
+                }
                 vk->vkGetPhysicalDeviceExternalFencePropertiesKHR(unboxed_physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 vkStream->unsetHandleMapping();
                 if (pExternalFenceProperties)
@@ -10925,6 +11585,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pImportFenceWin32HandleInfo)
                 {
                     transform_tohost_VkImportFenceWin32HandleInfoKHR(m_state, (VkImportFenceWin32HandleInfoKHR*)(pImportFenceWin32HandleInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkImportFenceWin32HandleKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pImportFenceWin32HandleInfo);
                 }
                 VkResult vkImportFenceWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkImportFenceWin32HandleKHR_VkResult_return = vk->vkImportFenceWin32HandleKHR(unboxed_device, pImportFenceWin32HandleInfo);
@@ -10963,6 +11627,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFenceGetWin32HandleInfoKHR(m_state, (VkFenceGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetFenceWin32HandleKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pGetWin32HandleInfo, (unsigned long long)pHandle);
+                }
                 VkResult vkGetFenceWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkGetFenceWin32HandleKHR_VkResult_return = vk->vkGetFenceWin32HandleKHR(unboxed_device, pGetWin32HandleInfo, pHandle);
                 vkStream->unsetHandleMapping();
@@ -10995,6 +11663,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pImportFenceFdInfo)
                 {
                     transform_tohost_VkImportFenceFdInfoKHR(m_state, (VkImportFenceFdInfoKHR*)(pImportFenceFdInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkImportFenceFdKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pImportFenceFdInfo);
                 }
                 VkResult vkImportFenceFdKHR_VkResult_return = (VkResult)0;
                 vkImportFenceFdKHR_VkResult_return = vk->vkImportFenceFdKHR(unboxed_device, pImportFenceFdInfo);
@@ -11032,6 +11704,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pGetFdInfo)
                 {
                     transform_tohost_VkFenceGetFdInfoKHR(m_state, (VkFenceGetFdInfoKHR*)(pGetFdInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetFenceFdKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pGetFdInfo, (unsigned long long)pFd);
                 }
                 VkResult vkGetFenceFdKHR_VkResult_return = (VkResult)0;
                 vkGetFenceFdKHR_VkResult_return = vk->vkGetFenceFdKHR(unboxed_device, pGetFdInfo, pFd);
@@ -11078,6 +11754,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pSurfaceCapabilities)
                 {
                     transform_tohost_VkSurfaceCapabilities2KHR(m_state, (VkSurfaceCapabilities2KHR*)(pSurfaceCapabilities));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceCapabilities2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pSurfaceInfo, (unsigned long long)pSurfaceCapabilities);
                 }
                 VkResult vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return = vk->vkGetPhysicalDeviceSurfaceCapabilities2KHR(unboxed_physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
@@ -11147,6 +11827,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkSurfaceFormat2KHR(m_state, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceFormats2KHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pSurfaceInfo, (unsigned long long)pSurfaceFormatCount, (unsigned long long)pSurfaceFormats);
                 }
                 VkResult vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return = vk->vkGetPhysicalDeviceSurfaceFormats2KHR(unboxed_physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
@@ -11233,6 +11917,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkDisplayProperties2KHR(m_state, (VkDisplayProperties2KHR*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceDisplayProperties2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 VkResult vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return = vk->vkGetPhysicalDeviceDisplayProperties2KHR(unboxed_physicalDevice, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
@@ -11313,6 +12001,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkDisplayPlaneProperties2KHR(m_state, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceDisplayPlaneProperties2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
                 }
                 VkResult vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return = vk->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(unboxed_physicalDevice, pPropertyCount, pProperties);
@@ -11399,6 +12091,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkDisplayModeProperties2KHR(m_state, (VkDisplayModeProperties2KHR*)(pProperties + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDisplayModeProperties2KHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)display, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
+                }
                 VkResult vkGetDisplayModeProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetDisplayModeProperties2KHR_VkResult_return = vk->vkGetDisplayModeProperties2KHR(unboxed_physicalDevice, display, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
@@ -11464,6 +12160,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkDisplayPlaneCapabilities2KHR(m_state, (VkDisplayPlaneCapabilities2KHR*)(pCapabilities));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDisplayPlaneCapabilities2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pDisplayPlaneInfo, (unsigned long long)pCapabilities);
+                }
                 VkResult vkGetDisplayPlaneCapabilities2KHR_VkResult_return = (VkResult)0;
                 vkGetDisplayPlaneCapabilities2KHR_VkResult_return = vk->vkGetDisplayPlaneCapabilities2KHR(unboxed_physicalDevice, pDisplayPlaneInfo, pCapabilities);
                 vkStream->unsetHandleMapping();
@@ -11490,10 +12190,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_get_memory_requirements2
             case OP_vkGetImageMemoryRequirements2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetImageMemoryRequirements2KHR\n");;
-                }
                 VkDevice device;
                 const VkImageMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
@@ -11521,6 +12217,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageMemoryRequirements2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pMemoryRequirements);
                 }
                 m_state->on_vkGetImageMemoryRequirements2KHR(&m_pool, device, pInfo, pMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -11565,6 +12265,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetBufferMemoryRequirements2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pMemoryRequirements);
                 }
                 vk->vkGetBufferMemoryRequirements2KHR(unboxed_device, pInfo, pMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -11632,6 +12336,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetImageSparseMemoryRequirements2KHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pSparseMemoryRequirementCount, (unsigned long long)pSparseMemoryRequirements);
                 }
                 vk->vkGetImageSparseMemoryRequirements2KHR(unboxed_device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 vkStream->unsetHandleMapping();
@@ -11710,6 +12418,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateSamplerYcbcrConversionKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pYcbcrConversion);
+                }
                 VkResult vkCreateSamplerYcbcrConversionKHR_VkResult_return = (VkResult)0;
                 vkCreateSamplerYcbcrConversionKHR_VkResult_return = vk->vkCreateSamplerYcbcrConversionKHR(unboxed_device, pCreateInfo, pAllocator, pYcbcrConversion);
                 vkStream->unsetHandleMapping();
@@ -11763,6 +12475,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroySamplerYcbcrConversionKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)ycbcrConversion, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroySamplerYcbcrConversionKHR(unboxed_device, ycbcrConversion, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -11776,10 +12492,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_bind_memory2
             case OP_vkBindBufferMemory2KHR:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindBufferMemory2KHR\n");;
-                }
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
@@ -11804,6 +12516,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkBindBufferMemoryInfo(m_state, (VkBindBufferMemoryInfo*)(pBindInfos + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBindBufferMemory2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)bindInfoCount, (unsigned long long)pBindInfos);
                 }
                 VkResult vkBindBufferMemory2KHR_VkResult_return = (VkResult)0;
                 vkBindBufferMemory2KHR_VkResult_return = m_state->on_vkBindBufferMemory2KHR(&m_pool, device, bindInfoCount, pBindInfos);
@@ -11842,6 +12558,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkBindImageMemoryInfo(m_state, (VkBindImageMemoryInfo*)(pBindInfos + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBindImageMemory2KHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)bindInfoCount, (unsigned long long)pBindInfos);
                 }
                 VkResult vkBindImageMemory2KHR_VkResult_return = (VkResult)0;
                 vkBindImageMemory2KHR_VkResult_return = vk->vkBindImageMemory2KHR(unboxed_device, bindInfoCount, pBindInfos);
@@ -11885,6 +12605,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pSupport)
                 {
                     transform_tohost_VkDescriptorSetLayoutSupport(m_state, (VkDescriptorSetLayoutSupport*)(pSupport));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetDescriptorSetLayoutSupportKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pSupport);
                 }
                 vk->vkGetDescriptorSetLayoutSupportKHR(unboxed_device, pCreateInfo, pSupport);
                 vkStream->unsetHandleMapping();
@@ -11930,6 +12654,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndirectCountKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)countBuffer, (unsigned long long)countBufferOffset, (unsigned long long)maxDrawCount, (unsigned long long)stride);
+                }
                 vk->vkCmdDrawIndirectCountKHR(unboxed_commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -11967,6 +12695,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndexedIndirectCountKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)countBuffer, (unsigned long long)countBufferOffset, (unsigned long long)maxDrawCount, (unsigned long long)stride);
+                }
                 vk->vkCmdDrawIndexedIndirectCountKHR(unboxed_commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -11982,10 +12714,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_ANDROID_native_buffer
             case OP_vkGetSwapchainGrallocUsageANDROID:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetSwapchainGrallocUsageANDROID\n");;
-                }
                 VkDevice device;
                 VkFormat format;
                 VkImageUsageFlags imageUsage;
@@ -12007,6 +12735,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((int*)grallocUsage, sizeof(int));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for grallocUsage;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetSwapchainGrallocUsageANDROID 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)format, (unsigned long long)imageUsage, (unsigned long long)grallocUsage);
+                }
                 VkResult vkGetSwapchainGrallocUsageANDROID_VkResult_return = (VkResult)0;
                 vkGetSwapchainGrallocUsageANDROID_VkResult_return = m_state->on_vkGetSwapchainGrallocUsageANDROID(&m_pool, device, format, imageUsage, grallocUsage);
                 vkStream->unsetHandleMapping();
@@ -12021,10 +12753,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAcquireImageANDROID:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkAcquireImageANDROID\n");;
-                }
                 VkDevice device;
                 VkImage image;
                 int nativeFenceFd;
@@ -12049,6 +12777,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_653;
                 vkReadStream->read((uint64_t*)&cgen_var_653, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_653, (VkFence*)&fence, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAcquireImageANDROID 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)nativeFenceFd, (unsigned long long)semaphore, (unsigned long long)fence);
+                }
                 VkResult vkAcquireImageANDROID_VkResult_return = (VkResult)0;
                 vkAcquireImageANDROID_VkResult_return = m_state->on_vkAcquireImageANDROID(&m_pool, device, image, nativeFenceFd, semaphore, fence);
                 vkStream->unsetHandleMapping();
@@ -12062,10 +12794,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueSignalReleaseImageANDROID:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkQueueSignalReleaseImageANDROID\n");;
-                }
                 VkQueue queue;
                 uint32_t waitSemaphoreCount;
                 const VkSemaphore* pWaitSemaphores;
@@ -12103,6 +12831,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((int*)pNativeFenceFd, sizeof(int));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pNativeFenceFd;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueSignalReleaseImageANDROID 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)waitSemaphoreCount, (unsigned long long)pWaitSemaphores, (unsigned long long)image, (unsigned long long)pNativeFenceFd);
+                }
                 VkResult vkQueueSignalReleaseImageANDROID_VkResult_return = (VkResult)0;
                 vkQueueSignalReleaseImageANDROID_VkResult_return = m_state->on_vkQueueSignalReleaseImageANDROID(&m_pool, queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
                 vkStream->unsetHandleMapping();
@@ -12157,6 +12889,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDebugReportCallbackEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pCallback);
+                }
                 VkResult vkCreateDebugReportCallbackEXT_VkResult_return = (VkResult)0;
                 vkCreateDebugReportCallbackEXT_VkResult_return = vk->vkCreateDebugReportCallbackEXT(unboxed_instance, pCreateInfo, pAllocator, pCallback);
                 vkStream->unsetHandleMapping();
@@ -12210,6 +12946,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDebugReportCallbackEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)callback, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyDebugReportCallbackEXT(unboxed_instance, callback, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12245,6 +12985,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((int32_t*)&messageCode, sizeof(int32_t));
                 vkReadStream->loadStringInPlace((char**)&pLayerPrefix);
                 vkReadStream->loadStringInPlace((char**)&pMessage);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDebugReportMessageEXT 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)flags, (unsigned long long)objectType, (unsigned long long)object, (unsigned long long)location, (unsigned long long)messageCode, (unsigned long long)pLayerPrefix, (unsigned long long)pMessage);
+                }
                 vk->vkDebugReportMessageEXT(unboxed_instance, flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12287,6 +13031,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkDebugMarkerObjectTagInfoEXT(m_state, (VkDebugMarkerObjectTagInfoEXT*)(pTagInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDebugMarkerSetObjectTagEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pTagInfo);
+                }
                 VkResult vkDebugMarkerSetObjectTagEXT_VkResult_return = (VkResult)0;
                 vkDebugMarkerSetObjectTagEXT_VkResult_return = vk->vkDebugMarkerSetObjectTagEXT(unboxed_device, pTagInfo);
                 vkStream->unsetHandleMapping();
@@ -12316,6 +13064,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pNameInfo)
                 {
                     transform_tohost_VkDebugMarkerObjectNameInfoEXT(m_state, (VkDebugMarkerObjectNameInfoEXT*)(pNameInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDebugMarkerSetObjectNameEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pNameInfo);
                 }
                 VkResult vkDebugMarkerSetObjectNameEXT_VkResult_return = (VkResult)0;
                 vkDebugMarkerSetObjectNameEXT_VkResult_return = vk->vkDebugMarkerSetObjectNameEXT(unboxed_device, pNameInfo);
@@ -12347,6 +13099,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkDebugMarkerMarkerInfoEXT(m_state, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDebugMarkerBeginEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pMarkerInfo);
+                }
                 vk->vkCmdDebugMarkerBeginEXT(unboxed_commandBuffer, pMarkerInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12368,6 +13124,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDebugMarkerEndEXT 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                }
                 vk->vkCmdDebugMarkerEndEXT(unboxed_commandBuffer);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12395,6 +13155,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMarkerInfo)
                 {
                     transform_tohost_VkDebugMarkerMarkerInfoEXT(m_state, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDebugMarkerInsertEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pMarkerInfo);
                 }
                 vk->vkCmdDebugMarkerInsertEXT(unboxed_commandBuffer, pMarkerInfo);
                 vkStream->unsetHandleMapping();
@@ -12439,6 +13203,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndirectCountAMD 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)countBuffer, (unsigned long long)countBufferOffset, (unsigned long long)maxDrawCount, (unsigned long long)stride);
+                }
                 vk->vkCmdDrawIndirectCountAMD(unboxed_commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12476,6 +13244,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdDrawIndexedIndirectCountAMD 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)buffer, (unsigned long long)offset, (unsigned long long)countBuffer, (unsigned long long)countBufferOffset, (unsigned long long)maxDrawCount, (unsigned long long)stride);
+                }
                 vk->vkCmdDrawIndexedIndirectCountAMD(unboxed_commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12539,6 +13311,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pInfo;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetShaderInfoAMD 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipeline, (unsigned long long)shaderStage, (unsigned long long)infoType, (unsigned long long)pInfoSize, (unsigned long long)pInfo);
+                }
                 VkResult vkGetShaderInfoAMD_VkResult_return = (VkResult)0;
                 vkGetShaderInfoAMD_VkResult_return = vk->vkGetShaderInfoAMD(unboxed_device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
                 vkStream->unsetHandleMapping();
@@ -12606,6 +13382,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalImageFormatPropertiesNV(m_state, (VkExternalImageFormatPropertiesNV*)(pExternalImageFormatProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalImageFormatPropertiesNV 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)type, (unsigned long long)tiling, (unsigned long long)usage, (unsigned long long)flags, (unsigned long long)externalHandleType, (unsigned long long)pExternalImageFormatProperties);
+                }
                 VkResult vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return = vk->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(unboxed_physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
                 vkStream->unsetHandleMapping();
@@ -12651,6 +13431,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((HANDLE*)pHandle, sizeof(HANDLE));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pHandle;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryWin32HandleNV 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)handleType, (unsigned long long)pHandle);
+                }
                 VkResult vkGetMemoryWin32HandleNV_VkResult_return = (VkResult)0;
                 vkGetMemoryWin32HandleNV_VkResult_return = vk->vkGetMemoryWin32HandleNV(unboxed_device, memory, handleType, pHandle);
                 vkStream->unsetHandleMapping();
@@ -12709,6 +13493,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateViSurfaceNN 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateViSurfaceNN_VkResult_return = (VkResult)0;
                 vkCreateViSurfaceNN_VkResult_return = vk->vkCreateViSurfaceNN(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -12748,6 +13536,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkConditionalRenderingBeginInfoEXT(m_state, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBeginConditionalRenderingEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pConditionalRenderingBegin);
+                }
                 vk->vkCmdBeginConditionalRenderingEXT(unboxed_commandBuffer, pConditionalRenderingBegin);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12769,6 +13561,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdEndConditionalRenderingEXT 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                }
                 vk->vkCmdEndConditionalRenderingEXT(unboxed_commandBuffer);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12799,6 +13595,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkCmdProcessCommandsInfoNVX(m_state, (VkCmdProcessCommandsInfoNVX*)(pProcessCommandsInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdProcessCommandsNVX 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pProcessCommandsInfo);
+                }
                 vk->vkCmdProcessCommandsNVX(unboxed_commandBuffer, pProcessCommandsInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12826,6 +13626,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pReserveSpaceInfo)
                 {
                     transform_tohost_VkCmdReserveSpaceForCommandsInfoNVX(m_state, (VkCmdReserveSpaceForCommandsInfoNVX*)(pReserveSpaceInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdReserveSpaceForCommandsNVX 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pReserveSpaceInfo);
                 }
                 vk->vkCmdReserveSpaceForCommandsNVX(unboxed_commandBuffer, pReserveSpaceInfo);
                 vkStream->unsetHandleMapping();
@@ -12875,6 +13679,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateIndirectCommandsLayoutNVX 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pIndirectCommandsLayout);
                 }
                 VkResult vkCreateIndirectCommandsLayoutNVX_VkResult_return = (VkResult)0;
                 vkCreateIndirectCommandsLayoutNVX_VkResult_return = vk->vkCreateIndirectCommandsLayoutNVX(unboxed_device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
@@ -12929,6 +13737,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyIndirectCommandsLayoutNVX 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)indirectCommandsLayout, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyIndirectCommandsLayoutNVX(unboxed_device, indirectCommandsLayout, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -12977,6 +13789,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateObjectTableNVX 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pObjectTable);
                 }
                 VkResult vkCreateObjectTableNVX_VkResult_return = (VkResult)0;
                 vkCreateObjectTableNVX_VkResult_return = vk->vkCreateObjectTableNVX(unboxed_device, pCreateInfo, pAllocator, pObjectTable);
@@ -13031,6 +13847,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyObjectTableNVX 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)objectTable, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyObjectTableNVX(unboxed_device, objectTable, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -13063,6 +13883,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
                 (void)ppObjectTableEntries;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkRegisterObjectsNVX 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)objectTable, (unsigned long long)objectCount, (unsigned long long)ppObjectTableEntries, (unsigned long long)pObjectIndices);
+                }
                 VkResult vkRegisterObjectsNVX_VkResult_return = (VkResult)0;
                 vkRegisterObjectsNVX_VkResult_return = vk->vkRegisterObjectsNVX(unboxed_device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
                 vkStream->unsetHandleMapping();
@@ -13098,6 +13922,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkObjectEntryTypeNVX*)pObjectEntryTypes, ((objectCount)) * sizeof(const VkObjectEntryTypeNVX));
                 vkReadStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUnregisterObjectsNVX 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)objectTable, (unsigned long long)objectCount, (unsigned long long)pObjectEntryTypes, (unsigned long long)pObjectIndices);
+                }
                 VkResult vkUnregisterObjectsNVX_VkResult_return = (VkResult)0;
                 vkUnregisterObjectsNVX_VkResult_return = vk->vkUnregisterObjectsNVX(unboxed_device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
                 vkStream->unsetHandleMapping();
@@ -13142,6 +13970,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pLimits)
                 {
                     transform_tohost_VkDeviceGeneratedCommandsLimitsNVX(m_state, (VkDeviceGeneratedCommandsLimitsNVX*)(pLimits));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pFeatures, (unsigned long long)pLimits);
                 }
                 vk->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(unboxed_physicalDevice, pFeatures, pLimits);
                 vkStream->unsetHandleMapping();
@@ -13193,6 +14025,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkViewportWScalingNV(m_state, (VkViewportWScalingNV*)(pViewportWScalings + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetViewportWScalingNV 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)firstViewport, (unsigned long long)viewportCount, (unsigned long long)pViewportWScalings);
+                }
                 vk->vkCmdSetViewportWScalingNV(unboxed_commandBuffer, firstViewport, viewportCount, pViewportWScalings);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -13220,6 +14056,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_718;
                 vkReadStream->read((uint64_t*)&cgen_var_718, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_718, (VkDisplayKHR*)&display, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkReleaseDisplayEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)display);
+                }
                 VkResult vkReleaseDisplayEXT_VkResult_return = (VkResult)0;
                 vkReleaseDisplayEXT_VkResult_return = vk->vkReleaseDisplayEXT(unboxed_physicalDevice, display);
                 vkStream->unsetHandleMapping();
@@ -13256,6 +14096,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_720;
                 vkReadStream->read((uint64_t*)&cgen_var_720, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_720, (VkDisplayKHR*)&display, 1);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkAcquireXlibDisplayEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)dpy, (unsigned long long)display);
+                }
                 VkResult vkAcquireXlibDisplayEXT_VkResult_return = (VkResult)0;
                 vkAcquireXlibDisplayEXT_VkResult_return = vk->vkAcquireXlibDisplayEXT(unboxed_physicalDevice, dpy, display);
                 vkStream->unsetHandleMapping();
@@ -13298,6 +14142,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_722, (VkDisplayKHR*)pDisplay, 1);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pDisplay;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetRandROutputDisplayEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)dpy, (unsigned long long)rrOutput, (unsigned long long)pDisplay);
+                }
                 VkResult vkGetRandROutputDisplayEXT_VkResult_return = (VkResult)0;
                 vkGetRandROutputDisplayEXT_VkResult_return = vk->vkGetRandROutputDisplayEXT(unboxed_physicalDevice, dpy, rrOutput, pDisplay);
                 vkStream->unsetHandleMapping();
@@ -13342,6 +14190,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSurfaceCapabilities2EXT(m_state, (VkSurfaceCapabilities2EXT*)(pSurfaceCapabilities));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceCapabilities2EXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)surface, (unsigned long long)pSurfaceCapabilities);
+                }
                 VkResult vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return = vk->vkGetPhysicalDeviceSurfaceCapabilities2EXT(unboxed_physicalDevice, surface, pSurfaceCapabilities);
                 vkStream->unsetHandleMapping();
@@ -13382,6 +14234,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pDisplayPowerInfo)
                 {
                     transform_tohost_VkDisplayPowerInfoEXT(m_state, (VkDisplayPowerInfoEXT*)(pDisplayPowerInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDisplayPowerControlEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)display, (unsigned long long)pDisplayPowerInfo);
                 }
                 VkResult vkDisplayPowerControlEXT_VkResult_return = (VkResult)0;
                 vkDisplayPowerControlEXT_VkResult_return = vk->vkDisplayPowerControlEXT(unboxed_device, display, pDisplayPowerInfo);
@@ -13433,6 +14289,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkRegisterDeviceEventEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pDeviceEventInfo, (unsigned long long)pAllocator, (unsigned long long)pFence);
                 }
                 VkResult vkRegisterDeviceEventEXT_VkResult_return = (VkResult)0;
                 vkRegisterDeviceEventEXT_VkResult_return = vk->vkRegisterDeviceEventEXT(unboxed_device, pDeviceEventInfo, pAllocator, pFence);
@@ -13492,6 +14352,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkRegisterDisplayEventEXT 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)display, (unsigned long long)pDisplayEventInfo, (unsigned long long)pAllocator, (unsigned long long)pFence);
+                }
                 VkResult vkRegisterDisplayEventEXT_VkResult_return = (VkResult)0;
                 vkRegisterDisplayEventEXT_VkResult_return = vk->vkRegisterDisplayEventEXT(unboxed_device, display, pDisplayEventInfo, pAllocator, pFence);
                 vkStream->unsetHandleMapping();
@@ -13531,6 +14395,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)pCounterValue, sizeof(uint64_t));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pCounterValue;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetSwapchainCounterEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)counter, (unsigned long long)pCounterValue);
+                }
                 VkResult vkGetSwapchainCounterEXT_VkResult_return = (VkResult)0;
                 vkGetSwapchainCounterEXT_VkResult_return = vk->vkGetSwapchainCounterEXT(unboxed_device, swapchain, counter, pCounterValue);
                 vkStream->unsetHandleMapping();
@@ -13571,6 +14439,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pDisplayTimingProperties)
                 {
                     transform_tohost_VkRefreshCycleDurationGOOGLE(m_state, (VkRefreshCycleDurationGOOGLE*)(pDisplayTimingProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetRefreshCycleDurationGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)pDisplayTimingProperties);
                 }
                 VkResult vkGetRefreshCycleDurationGOOGLE_VkResult_return = (VkResult)0;
                 vkGetRefreshCycleDurationGOOGLE_VkResult_return = vk->vkGetRefreshCycleDurationGOOGLE(unboxed_device, swapchain, pDisplayTimingProperties);
@@ -13637,6 +14509,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         transform_tohost_VkPastPresentationTimingGOOGLE(m_state, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
                     }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPastPresentationTimingGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)pPresentationTimingCount, (unsigned long long)pPresentationTimings);
                 }
                 VkResult vkGetPastPresentationTimingGOOGLE_VkResult_return = (VkResult)0;
                 vkGetPastPresentationTimingGOOGLE_VkResult_return = vk->vkGetPastPresentationTimingGOOGLE(unboxed_device, swapchain, pPresentationTimingCount, pPresentationTimings);
@@ -13714,6 +14590,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkRect2D(m_state, (VkRect2D*)(pDiscardRectangles + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetDiscardRectangleEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)firstDiscardRectangle, (unsigned long long)discardRectangleCount, (unsigned long long)pDiscardRectangles);
+                }
                 vk->vkCmdSetDiscardRectangleEXT(unboxed_commandBuffer, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -13765,6 +14645,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkHdrMetadataEXT(m_state, (VkHdrMetadataEXT*)(pMetadata + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSetHdrMetadataEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchainCount, (unsigned long long)pSwapchains, (unsigned long long)pMetadata);
+                }
                 vk->vkSetHdrMetadataEXT(unboxed_device, swapchainCount, pSwapchains, pMetadata);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -13815,6 +14699,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateIOSSurfaceMVK 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
                 }
                 VkResult vkCreateIOSSurfaceMVK_VkResult_return = (VkResult)0;
                 vkCreateIOSSurfaceMVK_VkResult_return = vk->vkCreateIOSSurfaceMVK(unboxed_instance, pCreateInfo, pAllocator, pSurface);
@@ -13872,6 +14760,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateMacOSSurfaceMVK 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
+                }
                 VkResult vkCreateMacOSSurfaceMVK_VkResult_return = (VkResult)0;
                 vkCreateMacOSSurfaceMVK_VkResult_return = vk->vkCreateMacOSSurfaceMVK(unboxed_instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->unsetHandleMapping();
@@ -13911,6 +14803,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkDebugUtilsObjectNameInfoEXT(m_state, (VkDebugUtilsObjectNameInfoEXT*)(pNameInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSetDebugUtilsObjectNameEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pNameInfo);
+                }
                 VkResult vkSetDebugUtilsObjectNameEXT_VkResult_return = (VkResult)0;
                 vkSetDebugUtilsObjectNameEXT_VkResult_return = vk->vkSetDebugUtilsObjectNameEXT(unboxed_device, pNameInfo);
                 vkStream->unsetHandleMapping();
@@ -13940,6 +14836,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pTagInfo)
                 {
                     transform_tohost_VkDebugUtilsObjectTagInfoEXT(m_state, (VkDebugUtilsObjectTagInfoEXT*)(pTagInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSetDebugUtilsObjectTagEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pTagInfo);
                 }
                 VkResult vkSetDebugUtilsObjectTagEXT_VkResult_return = (VkResult)0;
                 vkSetDebugUtilsObjectTagEXT_VkResult_return = vk->vkSetDebugUtilsObjectTagEXT(unboxed_device, pTagInfo);
@@ -13971,6 +14871,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkDebugUtilsLabelEXT(m_state, (VkDebugUtilsLabelEXT*)(pLabelInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueBeginDebugUtilsLabelEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)pLabelInfo);
+                }
                 vk->vkQueueBeginDebugUtilsLabelEXT(unboxed_queue, pLabelInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -13992,6 +14896,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkQueue(queue);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueEndDebugUtilsLabelEXT 0x%llx \n", ioStream, (unsigned long long)queue);
+                }
                 vk->vkQueueEndDebugUtilsLabelEXT(unboxed_queue);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14019,6 +14927,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pLabelInfo)
                 {
                     transform_tohost_VkDebugUtilsLabelEXT(m_state, (VkDebugUtilsLabelEXT*)(pLabelInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueInsertDebugUtilsLabelEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)pLabelInfo);
                 }
                 vk->vkQueueInsertDebugUtilsLabelEXT(unboxed_queue, pLabelInfo);
                 vkStream->unsetHandleMapping();
@@ -14048,6 +14960,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkDebugUtilsLabelEXT(m_state, (VkDebugUtilsLabelEXT*)(pLabelInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdBeginDebugUtilsLabelEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pLabelInfo);
+                }
                 vk->vkCmdBeginDebugUtilsLabelEXT(unboxed_commandBuffer, pLabelInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14069,6 +14985,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdEndDebugUtilsLabelEXT 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                }
                 vk->vkCmdEndDebugUtilsLabelEXT(unboxed_commandBuffer);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14096,6 +15016,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pLabelInfo)
                 {
                     transform_tohost_VkDebugUtilsLabelEXT(m_state, (VkDebugUtilsLabelEXT*)(pLabelInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdInsertDebugUtilsLabelEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pLabelInfo);
                 }
                 vk->vkCmdInsertDebugUtilsLabelEXT(unboxed_commandBuffer, pLabelInfo);
                 vkStream->unsetHandleMapping();
@@ -14145,6 +15069,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateDebugUtilsMessengerEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pMessenger);
                 }
                 VkResult vkCreateDebugUtilsMessengerEXT_VkResult_return = (VkResult)0;
                 vkCreateDebugUtilsMessengerEXT_VkResult_return = vk->vkCreateDebugUtilsMessengerEXT(unboxed_instance, pCreateInfo, pAllocator, pMessenger);
@@ -14199,6 +15127,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyDebugUtilsMessengerEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)messenger, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyDebugUtilsMessengerEXT(unboxed_instance, messenger, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14230,6 +15162,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pCallbackData)
                 {
                     transform_tohost_VkDebugUtilsMessengerCallbackDataEXT(m_state, (VkDebugUtilsMessengerCallbackDataEXT*)(pCallbackData));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSubmitDebugUtilsMessageEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)messageSeverity, (unsigned long long)messageTypes, (unsigned long long)pCallbackData);
                 }
                 vk->vkSubmitDebugUtilsMessageEXT(unboxed_instance, messageSeverity, messageTypes, pCallbackData);
                 vkStream->unsetHandleMapping();
@@ -14267,6 +15203,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pProperties)
                 {
                     transform_tohost_VkAndroidHardwareBufferPropertiesANDROID(m_state, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetAndroidHardwareBufferPropertiesANDROID 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)buffer, (unsigned long long)pProperties);
                 }
                 VkResult vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return = (VkResult)0;
                 vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return = vk->vkGetAndroidHardwareBufferPropertiesANDROID(unboxed_device, buffer, pProperties);
@@ -14309,6 +15249,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pInfo)
                 {
                     transform_tohost_VkMemoryGetAndroidHardwareBufferInfoANDROID(m_state, (VkMemoryGetAndroidHardwareBufferInfoANDROID*)(pInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryAndroidHardwareBufferANDROID 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pInfo, (unsigned long long)pBuffer);
                 }
                 VkResult vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return = (VkResult)0;
                 vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return = vk->vkGetMemoryAndroidHardwareBufferANDROID(unboxed_device, pInfo, pBuffer);
@@ -14353,6 +15297,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSampleLocationsInfoEXT(m_state, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetSampleLocationsEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pSampleLocationsInfo);
+                }
                 vk->vkCmdSetSampleLocationsEXT(unboxed_commandBuffer, pSampleLocationsInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14386,6 +15334,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (pMultisampleProperties)
                 {
                     transform_tohost_VkMultisamplePropertiesEXT(m_state, (VkMultisamplePropertiesEXT*)(pMultisampleProperties));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceMultisamplePropertiesEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)samples, (unsigned long long)pMultisampleProperties);
                 }
                 vk->vkGetPhysicalDeviceMultisamplePropertiesEXT(unboxed_physicalDevice, samples, pMultisampleProperties);
                 vkStream->unsetHandleMapping();
@@ -14453,6 +15405,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateValidationCacheEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pValidationCache);
+                }
                 VkResult vkCreateValidationCacheEXT_VkResult_return = (VkResult)0;
                 vkCreateValidationCacheEXT_VkResult_return = vk->vkCreateValidationCacheEXT(unboxed_device, pCreateInfo, pAllocator, pValidationCache);
                 vkStream->unsetHandleMapping();
@@ -14506,6 +15462,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkDestroyValidationCacheEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)validationCache, (unsigned long long)pAllocator);
+                }
                 vk->vkDestroyValidationCacheEXT(unboxed_device, validationCache, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14541,6 +15501,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_787, ((srcCacheCount)) * 8);
                     vkReadStream->read((uint64_t*)cgen_var_787, ((srcCacheCount)) * 8);
                     vkReadStream->handleMapping()->mapHandles_u64_VkValidationCacheEXT(cgen_var_787, (VkValidationCacheEXT*)pSrcCaches, ((srcCacheCount)));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkMergeValidationCachesEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)dstCache, (unsigned long long)srcCacheCount, (unsigned long long)pSrcCaches);
                 }
                 VkResult vkMergeValidationCachesEXT_VkResult_return = (VkResult)0;
                 vkMergeValidationCachesEXT_VkResult_return = vk->vkMergeValidationCachesEXT(unboxed_device, dstCache, srcCacheCount, pSrcCaches);
@@ -14593,6 +15557,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pData;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetValidationCacheDataEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)validationCache, (unsigned long long)pDataSize, (unsigned long long)pData);
+                }
                 VkResult vkGetValidationCacheDataEXT_VkResult_return = (VkResult)0;
                 vkGetValidationCacheDataEXT_VkResult_return = vk->vkGetValidationCacheDataEXT(unboxed_device, validationCache, pDataSize, pData);
                 vkStream->unsetHandleMapping();
@@ -14660,6 +15628,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkMemoryHostPointerPropertiesEXT(m_state, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryHostPointerPropertiesEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)handleType, (unsigned long long)pHostPointer, (unsigned long long)pMemoryHostPointerProperties);
+                }
                 VkResult vkGetMemoryHostPointerPropertiesEXT_VkResult_return = (VkResult)0;
                 vkGetMemoryHostPointerPropertiesEXT_VkResult_return = vk->vkGetMemoryHostPointerPropertiesEXT(unboxed_device, handleType, pHostPointer, pMemoryHostPointerProperties);
                 vkStream->unsetHandleMapping();
@@ -14700,6 +15672,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_799, (VkBuffer*)&dstBuffer, 1);
                 vkReadStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&marker, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdWriteBufferMarkerAMD 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pipelineStage, (unsigned long long)dstBuffer, (unsigned long long)dstOffset, (unsigned long long)marker);
+                }
                 vk->vkCmdWriteBufferMarkerAMD(unboxed_commandBuffer, pipelineStage, dstBuffer, dstOffset, marker);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -14736,6 +15712,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pCheckpointMarker, sizeof(const uint8_t));
                     vkReadStream->read((void*)pCheckpointMarker, sizeof(const uint8_t));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCmdSetCheckpointNV 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pCheckpointMarker);
                 }
                 vk->vkCmdSetCheckpointNV(unboxed_commandBuffer, pCheckpointMarker);
                 vkStream->unsetHandleMapping();
@@ -14792,6 +15772,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkCheckpointDataNV(m_state, (VkCheckpointDataNV*)(pCheckpointData + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetQueueCheckpointDataNV 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)pCheckpointDataCount, (unsigned long long)pCheckpointData);
+                }
                 vk->vkGetQueueCheckpointDataNV(unboxed_queue, pCheckpointDataCount, pCheckpointData);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -14829,10 +15813,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_address_space
             case OP_vkMapMemoryIntoAddressSpaceGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkMapMemoryIntoAddressSpaceGOOGLE\n");;
-                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 uint64_t* pAddress;
@@ -14859,6 +15839,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pAddress;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkMapMemoryIntoAddressSpaceGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pAddress);
+                }
                 VkResult vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return = (VkResult)0;
                 vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return = m_state->on_vkMapMemoryIntoAddressSpaceGOOGLE(&m_pool, device, memory, pAddress);
                 vkStream->unsetHandleMapping();
@@ -14881,10 +15865,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_color_buffer
             case OP_vkRegisterImageColorBufferGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkRegisterImageColorBufferGOOGLE\n");;
-                }
                 VkDevice device;
                 VkImage image;
                 uint32_t colorBuffer;
@@ -14901,6 +15881,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_812, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_812, (VkImage*)&image, 1);
                 vkReadStream->read((uint32_t*)&colorBuffer, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkRegisterImageColorBufferGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)colorBuffer);
+                }
                 VkResult vkRegisterImageColorBufferGOOGLE_VkResult_return = (VkResult)0;
                 vkRegisterImageColorBufferGOOGLE_VkResult_return = m_state->on_vkRegisterImageColorBufferGOOGLE(&m_pool, device, image, colorBuffer);
                 vkStream->unsetHandleMapping();
@@ -14914,10 +15898,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkRegisterBufferColorBufferGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkRegisterBufferColorBufferGOOGLE\n");;
-                }
                 VkDevice device;
                 VkBuffer buffer;
                 uint32_t colorBuffer;
@@ -14934,6 +15914,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_814, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_814, (VkBuffer*)&buffer, 1);
                 vkReadStream->read((uint32_t*)&colorBuffer, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkRegisterBufferColorBufferGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)buffer, (unsigned long long)colorBuffer);
+                }
                 VkResult vkRegisterBufferColorBufferGOOGLE_VkResult_return = (VkResult)0;
                 vkRegisterBufferColorBufferGOOGLE_VkResult_return = m_state->on_vkRegisterBufferColorBufferGOOGLE(&m_pool, device, buffer, colorBuffer);
                 vkStream->unsetHandleMapping();
@@ -14949,10 +15933,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_sized_descriptor_update_template
             case OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkUpdateDescriptorSetWithTemplateSizedGOOGLE\n");;
-                }
                 VkDevice device;
                 VkDescriptorSet descriptorSet;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
@@ -15051,6 +16031,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkDescriptorBufferInfo(m_state, (VkDescriptorBufferInfo*)(pBufferInfos + i));
                     }
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUpdateDescriptorSetWithTemplateSizedGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorSet, (unsigned long long)descriptorUpdateTemplate, (unsigned long long)imageInfoCount, (unsigned long long)bufferInfoCount, (unsigned long long)bufferViewCount, (unsigned long long)pImageInfoEntryIndices, (unsigned long long)pBufferInfoEntryIndices, (unsigned long long)pBufferViewEntryIndices, (unsigned long long)pImageInfos, (unsigned long long)pBufferInfos, (unsigned long long)pBufferViews);
+                }
                 m_state->on_vkUpdateDescriptorSetWithTemplateSizedGOOGLE(&m_pool, device, descriptorSet, descriptorUpdateTemplate, imageInfoCount, bufferInfoCount, bufferViewCount, pImageInfoEntryIndices, pBufferInfoEntryIndices, pBufferViewEntryIndices, pImageInfos, pBufferInfos, pBufferViews);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -15064,10 +16048,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_async_command_buffers
             case OP_vkBeginCommandBufferAsyncGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBeginCommandBufferAsyncGOOGLE\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -15085,6 +16065,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkCommandBufferBeginInfo(m_state, (VkCommandBufferBeginInfo*)(pBeginInfo));
                 }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkBeginCommandBufferAsyncGOOGLE 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pBeginInfo);
+                }
                 m_state->on_vkBeginCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, pBeginInfo);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -15096,10 +16080,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEndCommandBufferAsyncGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEndCommandBufferAsyncGOOGLE\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->unsetHandleMapping();
@@ -15110,6 +16090,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkEndCommandBufferAsyncGOOGLE 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                }
                 m_state->on_vkEndCommandBufferAsyncGOOGLE(&m_pool, commandBuffer);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
@@ -15121,10 +16105,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetCommandBufferAsyncGOOGLE:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkResetCommandBufferAsyncGOOGLE\n");;
-                }
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -15137,6 +16117,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkCommandBufferResetFlags*)&flags, sizeof(VkCommandBufferResetFlags));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkResetCommandBufferAsyncGOOGLE 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)flags);
+                }
                 m_state->on_vkResetCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, flags);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();

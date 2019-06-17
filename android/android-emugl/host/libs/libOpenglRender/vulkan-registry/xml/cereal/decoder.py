@@ -169,6 +169,20 @@ class DecodingParameters(object):
 
             i += 1
 
+def emit_call_log(api, cgen):
+    decodingParams = DecodingParameters(api)
+    paramsToRead = decodingParams.toRead
+
+    cgen.beginIf("m_logCalls")
+    paramLogFormat = ""
+    paramLogArgs = []
+    for p in paramsToRead:
+        paramLogFormat += "0x%llx "
+    for p in paramsToRead:
+        paramLogArgs.append("(unsigned long long)%s" % (p.paramName))
+    cgen.stmt("fprintf(stderr, \"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
+    cgen.endIf()
+
 def emit_decode_parameters(typeInfo, api, cgen):
 
     decodingParams = DecodingParameters(api)
@@ -207,10 +221,7 @@ def emit_decode_parameters(typeInfo, api, cgen):
     for p in paramsToRead:
         emit_transform(typeInfo, p, cgen, variant="tohost");
 
-def emit_call_log(api, cgen):
-    cgen.beginIf("m_logCalls")
-    cgen.stmt("fprintf(stderr, \"call %s\\n\");" % api.name)
-    cgen.endIf()
+    emit_call_log(api, cgen)
 
 def emit_dispatch_call(api, cgen):
 
@@ -317,7 +328,6 @@ def emit_snapshot(typeInfo, api, cgen):
     cgen.vkApiCall(apiForSnapshot, customPrefix="m_state->snapshot()->")
 
 def emit_default_decoding(typeInfo, api, cgen):
-    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
@@ -327,7 +337,6 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_pool_free(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
-    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
@@ -338,7 +347,6 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
 
 ## Custom decoding definitions##################################################
 def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
-    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
 
     cgen.beginIf("!m_state->usingDirectMapping()")
@@ -365,7 +373,6 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_pool_free(cgen)
 
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
-    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
@@ -549,13 +556,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         if api.name in custom_decodes.keys():
             custom_decodes[api.name](typeInfo, api, cgen)
         else:
-            emit_decode_parameters(typeInfo, api, cgen)
-            emit_dispatch_call(api, cgen)
-            emit_decode_parameters_writeback(typeInfo, api, cgen)
-            emit_decode_return_writeback(api, cgen)
-            emit_decode_finish(cgen)
-            emit_snapshot(typeInfo, api, cgen);
-            emit_pool_free(cgen)
+            emit_default_decoding(typeInfo, api, cgen)
 
         cgen.stmt("break")
         cgen.endBlock()
