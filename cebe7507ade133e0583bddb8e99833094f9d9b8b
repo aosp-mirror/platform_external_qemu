@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d50cf7ae_c3111161",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-and-playback-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T23:42:56Z",
+      "side": 1,
+      "message": "Sorry for the randomization, but I think that the most Qt way to do this is with signals/slots:\n\nconnect(mUi-\u003erecordSettings, SIGNAL(enablePresetMacros(bool)), mUi-\u003erecordMacro, SLOT(enablePresetMacros(bool)));\n\nThen you can emit the enablePresetMacros event in the settings page and have it invoke directly into the macro page.",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 64
+      },
+      "revId": "cebe7507ade133e0583bddb8e99833094f9d9b8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
