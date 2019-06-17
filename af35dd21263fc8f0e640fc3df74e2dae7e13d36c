@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9d85424_bc03371e",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T23:29:17Z",
+      "side": 1,
+      "message": "This would be better as a std::array\u003cGLuint, 2\u003e mTextures;\n\nIf this was dynamic, I would say std::unique_ptr\u003cGLuint[]\u003e, but since this is hardcoded to 2 std::array is better.  I recommend avoiding raw pointers whenever possible :-)",
+      "range": {
+        "startLine": 62,
+        "startChar": 3,
+        "endLine": 62,
+        "endChar": 22
+      },
+      "revId": "af35dd21263fc8f0e640fc3df74e2dae7e13d36c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
