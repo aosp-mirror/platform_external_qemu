@@ -214,6 +214,7 @@ class IOStream;
 
 #include "android/base/AlignedBuf.h"
 #include "android/base/Pool.h"
+#include "android/base/synchronization/AndroidLock.h"
 
 #include <cutils/properties.h>
 
