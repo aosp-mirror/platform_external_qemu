@@ -990,8 +990,7 @@ extern "C" int main(int argc, char** argv) {
                     args.size(),
                     args.array(),
                     "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
-                    // TODO: Have a way to communicate GPU mode via plain QEMU command line args
-                    "host", opts->no_window, lcdWidth, lcdHeight,
+                    opts->gpu, opts->no_window, lcdWidth, lcdHeight,
                     // LCD DPI, orientation
                     96, "landscape",
                     opts, hw, &android_avdInfo);
