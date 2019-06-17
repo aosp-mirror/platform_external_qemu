@@ -281,6 +281,7 @@ struct StylesheetValues {
         {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
         {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,10%)"},  // Drop target background color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
+        {"VHAL_PROPERTY_BKG",               "#f2f2f2"},  // Vhal property background color.
     };
 
     QHash<QString, QString> darkValues = {
@@ -322,6 +323,7 @@ struct StylesheetValues {
         {"RAISED_COLORED_COLOR",         "#ffffff"},
         {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,7%)"},
         {THEME_PATH_VAR,                    "dark"},
+        {"VHAL_PROPERTY_BKG",            "#394249"},
     };
 
     StylesheetValues() {
