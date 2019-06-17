@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90772a8a_36e1eba2",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T20:41:42Z",
+      "side": 1,
+      "message": "Can this be !mRequestContexts.empty() instead?",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 242,
+        "endChar": 23
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "790403e1_e675b060",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T20:41:42Z",
+      "side": 1,
+      "message": "This will unconditionally send a response, even if sendErrorAsyncResponse has been triggered.  Can we only send this if we haven\u0027t sent it otherwise?  Otherwise a request could potentially look like this:\n\nRequest\nSync response: id 1\nAsync response: id 1, error\nAsync response: id 1, ok\n\nAdditionally, when combined with removing the set_completed flag above the client doesn\u0027t know that the request completed for either of those.\n\nI\u0027d expect either one of the following sequences:\n\nRequest\nSync response: id 1\nAsync response: id 1, error, completed\u003dtrue\n\n-or-\n\nRequest\nSync response: id 1\nAsync response: id 1, ok, completed\u003dtrue",
+      "range": {
+        "startLine": 245,
+        "startChar": 8,
+        "endLine": 248,
+        "endChar": 39
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6fe84f7e_f0f107b3",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T20:41:42Z",
+      "side": 1,
+      "message": "Remove std::",
+      "range": {
+        "startLine": 265,
+        "startChar": 8,
+        "endLine": 265,
+        "endChar": 13
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31860532_5dc7bcf6",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T20:41:42Z",
+      "side": 1,
+      "message": "We should also remove from mRequestContexts here",
+      "range": {
+        "startLine": 277,
+        "startChar": 42,
+        "endLine": 277,
+        "endChar": 43
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "720c6e92_ce6c60c6",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T20:41:42Z",
+      "side": 1,
+      "message": "It\u0027s unexpected to send a response for id 1 here, since that has already received a successful response.",
+      "range": {
+        "startLine": 237,
+        "startChar": 40,
+        "endLine": 237,
+        "endChar": 41
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6a7b2bc_25d8807c",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-17T20:41:42Z",
+      "side": 1,
+      "message": "Based on the code, I don\u0027t think the expected thing is happening here.  Can we add explicit checks?  With other changes, this is what I would expect:\n\n\n    EXPECT_CALL(*this,\n        offworldSendResponse(\n                Eq(pipe2),\n                Partially(EqualsProto(\n                        \"result: RESULT_NO_ERROR async { async_id: 1 complete: true }\"))))\n            .Times(1);\n\n    EXPECT_CALL(*this,\n        offworldSendResponse(\n                Eq(pipe2),\n                Partially(EqualsProto(\n                        \"result: RESULT_ERROR_UNKNOWN async { async_id: 2 complete: true }\"))))\n            .Times(1);\n    mController-\u003egetNextRequest(android::base::Ok());  // Doesn\u0027t send a response.\n    mController-\u003egetNextRequest(android::base::Ok());  // Responds to id 1.\n    mController-\u003esendErrorAsyncResponse(2, VideoInjectionError::InvalidRequest);",
+      "range": {
+        "startLine": 234,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 80
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
