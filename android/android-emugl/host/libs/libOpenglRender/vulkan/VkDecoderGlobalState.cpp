@@ -33,6 +33,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
@@ -46,9 +47,12 @@
 #endif
 
 using android::base::AutoLock;
+using android::base::ConditionVariable;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::Optional;
+using android::base::pj;
+using android::base::System;
 
 #define VKDGS_DEBUG 0
 
@@ -2813,6 +2817,44 @@ public:
                 info->data.data());
     }
 
+    void hostSyncCommandBuffer(
+        const char* tag,
+        VkCommandBuffer boxed_commandBuffer,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber) {
+
+        auto nextDeadline = []() {
+            return System::get()->getUnixTimeUs() + 10000; // 10 ms
+        };
+
+        auto timeoutDeadline = System::get()->getUnixTimeUs() + 5000000; // 5 s
+
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+
+        AutoLock lock(mLock);
+        auto& info = mCmdBufferInfo[commandBuffer];
+
+        bool doWait = false;
+
+        if (needHostSync) {
+            while ((sequenceNumber - info.sequenceNumber) != 1) {
+                auto waitUntilUs = nextDeadline();
+                mCvWaitSequenceNumber.timedWait(
+                    &mLock, waitUntilUs);
+                doWait = true;
+
+                if (timeoutDeadline < System::get()->getUnixTimeUs()) {
+                    fprintf(stderr, "%s: warning: command buffer sync timed out! curr %u info %u\n", __func__, sequenceNumber, info.sequenceNumber);
+                    break;
+                }
+            }
+        }
+
+        info.sequenceNumber = sequenceNumber;
+        mCvWaitSequenceNumber.signal();
+    }
+
+
     VkResult on_vkBeginCommandBuffer(
             android::base::Pool* pool,
             VkCommandBuffer boxed_commandBuffer,
@@ -3318,8 +3360,7 @@ private:
             } else {
                 shaderSrcFileName += "2DArray.spv";
             }
-            using android::base::pj;
-            using android::base::System;
+
             std::string fullPath =
                 pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
                         "shaders", shaderSrcFileName);
@@ -3842,6 +3883,7 @@ private:
         uint32_t firstSet = 0;
         VkPipelineLayout descriptorLayout = 0;
         std::vector<VkDescriptorSet> descriptorSets;
+        uint32_t sequenceNumber = 0;
     };
 
     struct CommandPoolInfo {
@@ -4014,6 +4056,7 @@ private:
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
+    ConditionVariable mCvWaitSequenceNumber;
 
     // We always map the whole size on host.
     // This makes it much easier to implement
@@ -4921,6 +4964,14 @@ void VkDecoderGlobalState::on_vkResetCommandBufferAsyncGOOGLE(
     VkCommandBufferResetFlags flags) {
     mImpl->on_vkResetCommandBufferAsyncGOOGLE(
         pool, commandBuffer, flags);
+}
+
+void VkDecoderGlobalState::on_vkCommandBufferHostSyncGOOGLE(
+    android::base::Pool* pool,
+    VkCommandBuffer commandBuffer,
+    uint32_t needHostSync,
+    uint32_t sequenceNumber) {
+    mImpl->hostSyncCommandBuffer("hostSync", commandBuffer, needHostSync, sequenceNumber);
 }
 
 void VkDecoderGlobalState::on_vkCmdBindPipeline(

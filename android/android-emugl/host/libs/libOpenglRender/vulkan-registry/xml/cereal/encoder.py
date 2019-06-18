@@ -17,7 +17,11 @@ public:
     VkEncoder(IOStream* stream);
     ~VkEncoder();
 
-    void flush(); // Cross-thread flushing!!!111
+    void flush();
+
+    using CleanupCallback = std::function<void()>;
+    void registerCleanupCallback(void* handle, CleanupCallback cb);
+    void unregisterCleanupCallback(void* handle);
 """
 
 encoder_decl_postamble = """
@@ -46,6 +50,14 @@ public:
             m_logEncodes = atoi(encodeProp) > 0;
         }
     }
+
+    ~Impl() {
+        for (auto it : mCleanupCallbacks) {
+            fprintf(stderr, "%%s: run cleanup callback for %%p\\n", __func__, it.first);
+            it.second();
+        }
+    }
+
     VulkanCountingStream* countingStream() { return &m_countingStream; }
     %s* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
@@ -62,6 +74,19 @@ public:
         m_stream.flush();
     }
 
+    // Assume the lock for the current encoder is held.
+    void registerCleanupCallback(void* handle, VkEncoder::CleanupCallback cb) {
+        if (mCleanupCallbacks.end() == mCleanupCallbacks.find(handle)) {
+            mCleanupCallbacks[handle] = cb;
+        } else {
+            return;
+        }
+    }
+
+    void unregisterCleanupCallback(void* handle) {
+        mCleanupCallbacks.erase(handle);
+    }
+
     Lock lock;
 
 private:
@@ -71,6 +96,8 @@ private:
 
     Validation m_validation;
     bool m_logEncodes;
+
+    std::unordered_map<void*, VkEncoder::CleanupCallback> mCleanupCallbacks;
 };
 
 VkEncoder::VkEncoder(IOStream *stream) :
@@ -78,6 +105,14 @@ VkEncoder::VkEncoder(IOStream *stream) :
 
 void VkEncoder::flush() {
     mImpl->flush();
+}
+
+void VkEncoder::registerCleanupCallback(void* handle, VkEncoder::CleanupCallback cb) {
+    mImpl->registerCleanupCallback(handle, cb);
+}
+
+void VkEncoder::unregisterCleanupCallback(void* handle) {
+    mImpl->unregisterCleanupCallback(handle);
 }
 
 #define VALIDATE_RET(retType, success, validate) \\

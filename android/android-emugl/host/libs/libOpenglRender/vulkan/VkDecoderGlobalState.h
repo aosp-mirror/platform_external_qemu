@@ -563,6 +563,11 @@ public:
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
+    void on_vkCommandBufferHostSyncGOOGLE(
+        android::base::Pool* pool,
+        VkCommandBuffer commandBuffer,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
 
     void on_vkCmdBindPipeline(android::base::Pool* pool,
                               VkCommandBuffer commandBuffer,
