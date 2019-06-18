@@ -22,6 +22,30 @@
       "revId": "cebe7507ade133e0583bddb8e99833094f9d9b8b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad8aa0a9_e28a0315",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-and-playback-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-06-18T00:19:46Z",
+      "side": 1,
+      "message": "worked, and it is cleaner. Thanks",
+      "parentUuid": "d50cf7ae_c3111161",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 64
+      },
+      "revId": "cebe7507ade133e0583bddb8e99833094f9d9b8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
