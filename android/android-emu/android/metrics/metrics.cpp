@@ -97,10 +97,10 @@ bool android_metrics_start(const char* emulatorVersion,
                 // nothing to do here.
                 return true;
             });
-    // Coolect PerfStats metrics every 5 seconds.
+    // Collect PerfStats metrics every 5 seconds.
     sGlobalData->perfStatReporter =
             android::metrics::PerfStatReporter::create(
-                    android::base::ThreadLooper::get(), 5000);
+                    android::base::ThreadLooper::get(), 5 * 1000);
     sGlobalData->perfStatReporter->start();
 
     return true;
