@@ -175,7 +175,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
 
             if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
-                std::thread{watchHostCtsFunction, 20}.detach();
+                std::thread{watchHostCtsFunction, 30}.detach();
             }
 
             if (changing_language_country_locale) {
