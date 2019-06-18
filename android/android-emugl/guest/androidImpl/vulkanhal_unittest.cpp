@@ -27,7 +27,10 @@
 #include "android/base/files/Stream.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/opengles.h"
 #include "android/snapshot/interface.h"
 
@@ -38,6 +41,10 @@
 #include <memory>
 #include <vector>
 
+using android::base::AutoLock;
+using android::base::ConditionVariable;
+using android::base::FunctorThread;
+using android::base::Lock;
 using android::base::pj;
 using android::base::System;
 
@@ -1103,6 +1110,91 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadDependentHandlesImageView) {
     vk->vkDestroyImageView(mDevice, imageView, nullptr);
 
     vk->vkDestroyImage(mDevice, image, nullptr);
+}
+
+// Tests beginning and ending command buffers from separate threads.
+TEST_F(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
+    Lock lock;
+    ConditionVariable cvSequence;
+    uint32_t begins = 0;
+    uint32_t ends = 0;
+    constexpr uint32_t kTrials = 1000;
+
+    VkCommandPoolCreateInfo poolCi = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
+    };
+
+    VkCommandPool pool;
+    vk->vkCreateCommandPool(mDevice, &poolCi, nullptr, &pool);
+
+    VkCommandBuffer cb;
+    VkCommandBufferAllocateInfo cbAi = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi, &cb);
+
+    auto timeoutDeadline = []() {
+        return System::get()->getUnixTimeUs() + 5000000; // 5 s
+    };
+
+    FunctorThread beginThread([this, cb, &lock, &cvSequence, &begins, &ends, timeoutDeadline]() {
+
+        while (begins < kTrials) {
+            AutoLock a(lock);
+
+            while (ends != begins) {
+                if (!cvSequence.timedWait(&lock, timeoutDeadline())) {
+                    EXPECT_TRUE(false) << "Error: begin thread timed out!";
+                    return 0;
+                }
+            }
+
+            VkCommandBufferBeginInfo beginInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
+            };
+
+            vk->vkBeginCommandBuffer(cb, &beginInfo);
+
+            ++begins;
+            cvSequence.signal();
+        }
+
+        vk->vkDeviceWaitIdle(mDevice);
+        return 0;
+    });
+
+    FunctorThread endThread([this, cb, &lock, &cvSequence, &begins, &ends, timeoutDeadline]() {
+
+        while (ends < kTrials) {
+            AutoLock a(lock);
+
+            while (begins - ends != 1) {
+                if (!cvSequence.timedWait(&lock, timeoutDeadline())) {
+                    EXPECT_TRUE(false) << "Error: end thread timed out!";
+                    return 0;
+                }
+            }
+
+            vk->vkEndCommandBuffer(cb);
+
+            ++ends;
+            cvSequence.signal();
+        }
+
+        vk->vkDeviceWaitIdle(mDevice);
+        return 0;
+    });
+
+    beginThread.start();
+    endThread.start();
+    beginThread.wait();
+    endThread.wait();
+
+    vk->vkFreeCommandBuffers(mDevice, pool, 1, &cb);
+    vk->vkDestroyCommandPool(mDevice, pool, nullptr);
 }
 
 }  // namespace aemu

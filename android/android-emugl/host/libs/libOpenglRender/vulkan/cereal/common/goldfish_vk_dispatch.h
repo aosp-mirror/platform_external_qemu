@@ -635,6 +635,7 @@ PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE vkUpdateDescriptorSetWithTempla
 PFN_vkBeginCommandBufferAsyncGOOGLE vkBeginCommandBufferAsyncGOOGLE;
 PFN_vkEndCommandBufferAsyncGOOGLE vkEndCommandBufferAsyncGOOGLE;
 PFN_vkResetCommandBufferAsyncGOOGLE vkResetCommandBufferAsyncGOOGLE;
+PFN_vkCommandBufferHostSyncGOOGLE vkCommandBufferHostSyncGOOGLE;
 #endif
 };
 
