@@ -373,6 +373,7 @@ bool start_webrtc_module(const char* handle, int fps) {
     if (globals.webrtc_module) {
         globals.webrtc_module->stop();
     }
+    fprintf(stderr, "start_webrtc_module(const char *handle, int fps): %s, %d\n", handle, fps);
 
     auto producer = android::recording::createVideoProducer(
             globals.fbWidth, globals.fbHeight, fps, globals.displayAgent);

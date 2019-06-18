@@ -1162,7 +1162,24 @@ help_turncfg(stralloc_t*  out)
     "  - That contain at least an \"iceServers\" array.\n"
     "  - The exit value should be 0 on success\n\n"
     "  For example:\n\n"
-    "  -turncfg \"curl -s -X POST https://networktraversal.googleapis.com/v1alpha/iceconfig?key=MySec\""
+    "  -turncfg \"curl -s -X POST https://networktraversal.googleapis.com/v1alpha/iceconfig?key=MySec\"\n\n"
+    );
+}
+
+static void
+help_rtcfps(stralloc_t*  out)
+{
+    PRINTF(
+    "  The maximimum frequency at which frames are delivered to the webrtc video bridge. \n\n"
+    "   <fps> The maximimum frequency at which frames are delivered.\n\n"
+    "  The emulator will deliver frames to the WebRTC engine at this rate.\n"
+    "  A higher rate will increase the cpu load on both the emulator\n"
+    "  and video bridge executable, but can give a smoother experience.\n"
+    "  The actual framerate you will see in the browser will depend\n"
+    "  on available encoders and network conditions, but will not exceed the.\n"
+    "  <fps> set above.\n\n"
+    "  For example:\n\n"
+    "  -rtcfps 60\n\n"
     );
 }
 

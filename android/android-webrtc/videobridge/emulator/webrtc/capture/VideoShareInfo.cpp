@@ -56,9 +56,9 @@ int32_t VideoShareInfo::Init() {
 
     memcpy(&mCapability, *shm, sizeof(VideoInfo));
     mCapability.videoType = ::webrtc::VideoType::kI420;
-    mCapability.maxFPS = mFps;
     RTC_LOG(INFO) << "Discovered " << mCapability.width << "x"
-                  << mCapability.height << " at: " << mCapability.maxFPS;
+                  << mCapability.height << " at: " << mCapability.maxFPS
+                  << " fps";
     return 0;
 }
 }  // namespace videocapturemodule
