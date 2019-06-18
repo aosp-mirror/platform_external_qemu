@@ -8,24 +8,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#pragma once
 
-#include "ui_record-and-playback-page.h"
+#include "record-settings-page.h"
 
-#include <QWidget>
-#include <QTabBar>
-#include <memory>
-
-class RecordAndPlaybackPage : public QWidget {
-    Q_OBJECT
-
-public:
-    explicit RecordAndPlaybackPage(QWidget* parent = 0);
-
-    void updateTheme();
-    void enableCustomMacros();
-    void removeSettingsTab();
-
-    std::unique_ptr<Ui::RecordAndPlaybackPage> mUi;
-    QTabBar* mTabBar = nullptr;
-};
+RecordSettingsPage::RecordSettingsPage(QWidget *parent) :
+    QWidget(parent),
+    mUi(new Ui::RecordSettingsPage()) {
+    mUi->setupUi(this);
+}

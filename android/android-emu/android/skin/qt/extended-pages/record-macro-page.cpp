@@ -61,6 +61,12 @@ RecordMacroPage::RecordMacroPage(QWidget* parent)
     }
 
     loadUi();
+
+    QObject::connect(&mTimer, &QTimer::timeout, this,
+                     &RecordMacroPage::updateElapsedTime);
+
+    QObject::connect(this, &RecordMacroPage::playbackFinishedSignal, this,
+                     &RecordMacroPage::playbackFinished);
 }
 
 RecordMacroPage::~RecordMacroPage() {
@@ -124,12 +130,6 @@ void RecordMacroPage::loadUi() {
     if (mRecordEnabled) {
         loadCustomMacros();
     }
-
-    QObject::connect(&mTimer, &QTimer::timeout, this,
-                     &RecordMacroPage::updateElapsedTime);
-
-    QObject::connect(this, &RecordMacroPage::playbackFinishedSignal, this,
-                     &RecordMacroPage::playbackFinished);
 
     setMacroUiState(MacroUiState::Waiting);
 }
@@ -624,6 +624,7 @@ void RecordMacroPage::setRecordState() {
         mUi->recButton->setText(tr("RECORD NEW "));
         mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
         mUi->recButton->setProperty("themeIconName", "recordCircle");
+        mUi->recButton->setIconSize(QSize(30, 20));
     }
     mUi->stackedWidget->setCurrentIndex(0);
 
@@ -870,6 +871,34 @@ void RecordMacroPage::deleteMacroItem(RecordMacroSavedItem* macroItem) {
 
 void RecordMacroPage::on_cancelButton_clicked() {
     mTimer.stop();
+    enableMacroItems();
+    setMacroUiState(MacroUiState::Waiting);
+}
+
+void RecordMacroPage::enablePresetMacros(bool enable) {
+    // Reset all the possible states.
+    mTimer.stop();
+    mRecording = false;
+    if (mState == MacroUiState::Playing) {
+        playbackFinished();
+    }
+    sAutomationAgent->reset();
+    if (mVideoPlayer && mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
+
+    if (enable) {
+        loadUi();
+    } else {
+        // Iterate top to bottom to not skip items when deleting.
+        for (int i = mUi->macroList->count() - 1; i >= 0; --i) {
+            QListWidgetItem* item = mUi->macroList->item(i);
+            RecordMacroSavedItem* macroItem = getItemWidget(item);
+            if (macroItem->getIsPreset()) {
+                mUi->macroList->takeItem(i);
+            }
+        }
+    }
     enableMacroItems();
     setMacroUiState(MacroUiState::Waiting);
 }

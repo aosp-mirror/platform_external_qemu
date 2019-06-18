@@ -14,6 +14,9 @@
 RecordAndPlaybackPage::RecordAndPlaybackPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordAndPlaybackPage()) {
     mUi->setupUi(this);
+
+    connect(mUi->recordSettings, SIGNAL(on_toggleMacros_toggled(bool)), 
+            mUi->recordMacro, SLOT(enablePresetMacros(bool)));
 }
 
 void RecordAndPlaybackPage::updateTheme() {
@@ -22,4 +25,8 @@ void RecordAndPlaybackPage::updateTheme() {
 
 void RecordAndPlaybackPage::enableCustomMacros() {
     mUi->tabWidget->setTabText(1, tr("Macro Record"));
+}
+
+void RecordAndPlaybackPage::removeSettingsTab() {
+    mUi->tabWidget->removeTab(2);
 }

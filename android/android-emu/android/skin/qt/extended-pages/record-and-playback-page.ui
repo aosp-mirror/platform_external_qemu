@@ -38,6 +38,11 @@
      <string>Macro Playback</string>
     </attribute>
    </widget>
+   <widget class="RecordSettingsPage" name="recordSettings">
+    <attribute name="title">
+     <string>Settings</string>
+    </attribute>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
@@ -51,6 +56,12 @@
    <class>RecordMacroPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/record-macro-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RecordSettingsPage</class>
+   <extends>QWidget</extends>
+   <header location="global">android/skin/qt/extended-pages/record-settings-page.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
