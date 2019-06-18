@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16302d3c_4b51c39d",
+        "filename": "android/android-emu/android/recording/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-06-18T19:45:33Z",
+      "side": 1,
+      "message": "should this be plain printf (assuming its meant 2 be printed)?",
+      "range": {
+        "startLine": 376,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 95
+      },
+      "revId": "b2777b248b000b42e9ada80fcffd561a737a6e7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
