@@ -19,6 +19,7 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 
+#include <array>
 #include <memory>
 
 namespace android {
@@ -43,6 +44,8 @@ public:
     void renderBuffer();
 
 private:
+    void renderVideoFrame();
+    void renderEmptyFrame();
     const unsigned char* mBuffer = nullptr;
     size_t mBufferLen;
     FrameInfo mFrameInfo;
@@ -53,11 +56,11 @@ private:
 
     GLuint mVertexBuffer;
     GLuint mElementBuffer;
-    GLuint mTexture;
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;
     GLuint mVao;
+    std::array<GLuint, 2> mTextures;
 };
 
 }  // namespace videoplayback
