@@ -16303,6 +16303,10 @@ const char* api_opcode_to_string(
         {
             return "OP_vkResetCommandBufferAsyncGOOGLE";
         }
+        case OP_vkCommandBufferHostSyncGOOGLE:
+        {
+            return "OP_vkCommandBufferHostSyncGOOGLE";
+        }
 #endif
         default:
         {

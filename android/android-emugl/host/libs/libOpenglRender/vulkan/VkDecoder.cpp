@@ -16144,6 +16144,35 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->clearPool();
                 break;
             }
+            case OP_vkCommandBufferHostSyncGOOGLE:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t needHostSync;
+                uint32_t sequenceNumber;
+                // Begin manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_828;
+                vkReadStream->read((uint64_t*)&cgen_var_828, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_828, (VkCommandBuffer*)&commandBuffer, 1);
+                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
+                auto vk = dispatch_VkCommandBuffer(commandBuffer);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->read((uint32_t*)&needHostSync, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&sequenceNumber, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCommandBufferHostSyncGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)needHostSync, (unsigned long long)sequenceNumber);
+                }
+                m_state->on_vkCommandBufferHostSyncGOOGLE(&m_pool, commandBuffer, needHostSync, sequenceNumber);
+                vkStream->unsetHandleMapping();
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                m_state->snapshot()->vkCommandBufferHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, needHostSync, sequenceNumber);
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
 #endif
             default:
             {

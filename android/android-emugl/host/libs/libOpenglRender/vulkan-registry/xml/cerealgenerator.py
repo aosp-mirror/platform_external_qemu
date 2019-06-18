@@ -202,6 +202,7 @@ $(call emugl-end-module)
 
         encoderInclude = """
 #include "goldfish_vk_private_defs.h"
+#include <functional>
 #include <memory>
 class IOStream;
 """
@@ -223,6 +224,9 @@ class IOStream;
 #include "goldfish_vk_handlemap_guest.h"
 #include "goldfish_vk_private_defs.h"
 #include "goldfish_vk_transform_guest.h"
+
+#include <unordered_map>
+
 """ % VULKAN_STREAM_TYPE_GUEST
 
         functableImplInclude = """
