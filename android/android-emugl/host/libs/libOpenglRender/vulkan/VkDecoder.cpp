@@ -16050,6 +16050,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
+                uint32_t needHostSync;
+                uint32_t sequenceNumber;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->unsetHandleMapping();
                 uint64_t cgen_var_825;
@@ -16061,19 +16063,21 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pBeginInfo, sizeof(const VkCommandBufferBeginInfo));
                 unmarshal_VkCommandBufferBeginInfo(vkReadStream, (VkCommandBufferBeginInfo*)(pBeginInfo));
+                vkReadStream->read((uint32_t*)&needHostSync, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&sequenceNumber, sizeof(uint32_t));
                 if (pBeginInfo)
                 {
                     transform_tohost_VkCommandBufferBeginInfo(m_state, (VkCommandBufferBeginInfo*)(pBeginInfo));
                 }
                 if (m_logCalls)
                 {
-                    fprintf(stderr, "stream %p: call vkBeginCommandBufferAsyncGOOGLE 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pBeginInfo);
+                    fprintf(stderr, "stream %p: call vkBeginCommandBufferAsyncGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pBeginInfo, (unsigned long long)needHostSync, (unsigned long long)sequenceNumber);
                 }
-                m_state->on_vkBeginCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, pBeginInfo);
+                m_state->on_vkBeginCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, pBeginInfo, needHostSync, sequenceNumber);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
-                m_state->snapshot()->vkBeginCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pBeginInfo);
+                m_state->snapshot()->vkBeginCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pBeginInfo, needHostSync, sequenceNumber);
                 m_pool.freeAll();
                 vkReadStream->clearPool();
                 break;
@@ -16081,6 +16085,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             case OP_vkEndCommandBufferAsyncGOOGLE:
             {
                 VkCommandBuffer commandBuffer;
+                uint32_t needHostSync;
+                uint32_t sequenceNumber;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->unsetHandleMapping();
                 uint64_t cgen_var_826;
@@ -16090,15 +16096,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
+                vkReadStream->read((uint32_t*)&needHostSync, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&sequenceNumber, sizeof(uint32_t));
                 if (m_logCalls)
                 {
-                    fprintf(stderr, "stream %p: call vkEndCommandBufferAsyncGOOGLE 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
+                    fprintf(stderr, "stream %p: call vkEndCommandBufferAsyncGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)needHostSync, (unsigned long long)sequenceNumber);
                 }
-                m_state->on_vkEndCommandBufferAsyncGOOGLE(&m_pool, commandBuffer);
+                m_state->on_vkEndCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, needHostSync, sequenceNumber);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
-                m_state->snapshot()->vkEndCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
+                m_state->snapshot()->vkEndCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, needHostSync, sequenceNumber);
                 m_pool.freeAll();
                 vkReadStream->clearPool();
                 break;
@@ -16107,6 +16115,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
+                uint32_t needHostSync;
+                uint32_t sequenceNumber;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->unsetHandleMapping();
                 uint64_t cgen_var_827;
@@ -16117,15 +16127,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->read((VkCommandBufferResetFlags*)&flags, sizeof(VkCommandBufferResetFlags));
+                vkReadStream->read((uint32_t*)&needHostSync, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&sequenceNumber, sizeof(uint32_t));
                 if (m_logCalls)
                 {
-                    fprintf(stderr, "stream %p: call vkResetCommandBufferAsyncGOOGLE 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)flags);
+                    fprintf(stderr, "stream %p: call vkResetCommandBufferAsyncGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)flags, (unsigned long long)needHostSync, (unsigned long long)sequenceNumber);
                 }
-                m_state->on_vkResetCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, flags);
+                m_state->on_vkResetCommandBufferAsyncGOOGLE(&m_pool, commandBuffer, flags, needHostSync, sequenceNumber);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
-                m_state->snapshot()->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, flags);
+                m_state->snapshot()->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, flags, needHostSync, sequenceNumber);
                 m_pool.freeAll();
                 vkReadStream->clearPool();
                 break;

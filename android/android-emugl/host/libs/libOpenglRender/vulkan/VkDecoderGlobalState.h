@@ -555,14 +555,20 @@ public:
     void on_vkBeginCommandBufferAsyncGOOGLE(
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
-        const VkCommandBufferBeginInfo* pBeginInfo);
+        const VkCommandBufferBeginInfo* pBeginInfo,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
     void on_vkEndCommandBufferAsyncGOOGLE(
         android::base::Pool* pool,
-        VkCommandBuffer commandBuffer);
+        VkCommandBuffer commandBuffer,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
     void on_vkResetCommandBufferAsyncGOOGLE(
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
-        VkCommandBufferResetFlags flags);
+        VkCommandBufferResetFlags flags,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
 
     void on_vkCmdBindPipeline(android::base::Pool* pool,
                               VkCommandBuffer commandBuffer,
