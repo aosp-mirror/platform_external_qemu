@@ -104,6 +104,7 @@ private:
     // Behind feature flag.
     void setRecordState();
     bool mRecordEnabled = false;
+    bool mFirstShowEvent = true;
 
     bool mRecording = false;
     bool mMacroPlaying = false;

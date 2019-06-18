@@ -80,6 +80,11 @@ void RecordMacroPage::setAutomationAgent(const QAndroidAutomationAgent* agent) {
 
 void RecordMacroPage::showEvent(QShowEvent* event) {
     mAutomationMetrics = AutomationMetrics();
+    // Some assets need to be reloaded.
+    if (mFirstShowEvent) {
+        loadUi();
+        mFirstShowEvent = false;
+    }
 }
 
 void RecordMacroPage::hideEvent(QHideEvent* event) {
