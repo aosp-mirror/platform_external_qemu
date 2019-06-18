@@ -368,6 +368,7 @@ bool screen_recorder_stop(bool async) {
 
 bool start_webrtc_module(const char* handle, int fps) {
     auto& globals = *sGlobals;
+    D("%s(handle=%s, fps=%d)", __func__, handle, fps);
 
     AutoLock lock(globals.lock);
     if (globals.webrtc_module) {

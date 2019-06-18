@@ -225,10 +225,16 @@ bool qemu_android_emulation_setup() {
     if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
         #ifdef ANDROID_WEBRTC
             std::string turn = "";
+            int fps = android::emulation::control::WebRtcBridge::kMaxFPS;
             if (android_cmdLineOptions->turncfg) {
                 turn = android_cmdLineOptions->turncfg;
             }
-            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents(), turn));
+            if (android_cmdLineOptions->rtcfps) {
+                if (sscanf(android_cmdLineOptions->rtcfps, "%d",  &fps) != 1) {
+                    dwarning("-rtcfps expected a number, not: %s, using default of: %d\n", android_cmdLineOptions->rtcfps, fps);
+                }
+            }
+            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents(), fps, turn));
         #else
             rtcBridge.reset(new android::emulation::control::NopRtcBridge());
         #endif

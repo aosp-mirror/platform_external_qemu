@@ -74,6 +74,7 @@ public:
     // Returns a webrtc bridge, or NopBridge in case of failures..
     static RtcBridge* create(int port,
                              const AndroidConsoleAgents* const consoleAgents,
+                             int fps,
                              std::string turncfg);
 
     // Socket events..
