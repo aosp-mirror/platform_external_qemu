@@ -30,7 +30,8 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(memory)) dprint(__VA_ARGS__); } while (0)
 
-static const uint32_t kPerfStatReportIntervalMs = 10 * 1000;
+// Report PerfStats metrics every 10 minutes.
+static const uint32_t kPerfStatReportIntervalMs = 10 * 60 * 1000;
 
 static bool sStopping = false;
 
