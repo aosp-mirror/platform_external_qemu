@@ -6318,6 +6318,8 @@ server.
             <proto><type>void</type> <name>vkBeginCommandBufferAsyncGOOGLE</name></proto>
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
             <param>const <type>VkCommandBufferBeginInfo</type>* <name>pBeginInfo</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
             <implicitexternsyncparams>
                 <param>the sname:VkCommandPool that pname:commandBuffer was allocated from</param>
             </implicitexternsyncparams>
@@ -6325,6 +6327,8 @@ server.
         <command>
             <proto><type>void</type> <name>vkEndCommandBufferAsyncGOOGLE</name></proto>
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
             <implicitexternsyncparams>
                 <param>the sname:VkCommandPool that pname:commandBuffer was allocated from</param>
             </implicitexternsyncparams>
@@ -6333,6 +6337,8 @@ server.
             <proto><type>void</type> <name>vkResetCommandBufferAsyncGOOGLE</name></proto>
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
             <param optional="true"><type>VkCommandBufferResetFlags</type> <name>flags</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
         </command>
     </commands>
 

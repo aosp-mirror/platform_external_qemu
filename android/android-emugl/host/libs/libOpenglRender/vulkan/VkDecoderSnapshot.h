@@ -2909,18 +2909,24 @@ public:
         size_t snapshotTraceBytes,
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
-        const VkCommandBufferBeginInfo* pBeginInfo);
+        const VkCommandBufferBeginInfo* pBeginInfo,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
     void vkEndCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
         android::base::Pool* pool,
-        VkCommandBuffer commandBuffer);
+        VkCommandBuffer commandBuffer,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
     void vkResetCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
-        VkCommandBufferResetFlags flags);
+        VkCommandBufferResetFlags flags,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
 #endif
 
 private:
