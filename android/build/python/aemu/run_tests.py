@@ -62,7 +62,7 @@ def run_binary_exists(out_dir):
         raise Exception('Emulator binary is missing')
 
 
-def run_ctest(out_dir, jos):
+def run_ctest(out_dir, jobs):
     cmd = [get_ctest(), '-j', jobs, '--output-on-failure']
     with TemporaryDirectory() as tmpdir:
         logging.info("Running tests with TMP=%s", tmpdir)
