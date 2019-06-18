@@ -30,8 +30,8 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(memory)) dprint(__VA_ARGS__); } while (0)
 
-// Report PerfStats metrics every 10 minutes.
-static const uint32_t kPerfStatReportIntervalMs = 10 * 60 * 1000;
+// Report PerfStats metrics in 1 minute but only once.
+static const uint32_t kPerfStatReportIntervalMs = 60 * 1000;
 
 static bool sStopping = false;
 
@@ -77,21 +77,23 @@ PerfStatReporter::PerfStatReporter(
               },
               mCheckIntervalMs) {
     // Also start up a periodic reporter that takes whatever is in the
-    // current struct.
+    // current struct. Report the metrics only once.
     using android::metrics::PeriodicReporter;
-    PeriodicReporter::get().addTask(kPerfStatReportIntervalMs,
-        [this](android_studio::AndroidStudioEvent* event) {
+    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+            kPerfStatReportIntervalMs,
+            [this](android_studio::AndroidStudioEvent* event) {
+                if (sStopping)
+                    return false;
 
-            if (sStopping) return true;
+                android_studio::EmulatorPerformanceStats* perfStatProto =
+                        event->mutable_emulator_performance_stats();
 
-            android_studio::EmulatorPerformanceStats* perfStatProto =
-                event->mutable_emulator_performance_stats();
+                fillProto(perfStatProto);
 
-            fillProto(perfStatProto);
-
-            CommonReportedInfo::setPerformanceStats(perfStatProto);
-            return true;
-        });
+                CommonReportedInfo::setPerformanceStats(perfStatProto);
+                mMetricsReportingToken.reset();
+                return true;
+            });
 
     // Don't call start() here: start() launches a parallel task that calls
     // shared_from_this(), which needs at least one shared pointer owning

@@ -64,7 +64,7 @@ private:
     android::base::Looper* const mLooper;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
-
+    android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     // TODO: Add more perf stats here.
     android::base::Lock mLock;
 
