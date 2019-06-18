@@ -16,6 +16,7 @@
 #include "android/featurecontrol/feature_control.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -122,6 +123,7 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(
             QString(kTextStyleFormatString)
                     .arg(Ui::stylesheetFontSize(Ui::FontSize::Large));
     mControlsUi->instructions->setStyleSheet(textStyle);
+    mControlsUi->recordButton->hide();
 
     QApplication::instance()->installEventFilter(this);
 
@@ -626,4 +628,15 @@ QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
     QWidget* container = parentWidget();
     return container->pos() +
            QPoint(container->width() / 2, container->height() / 2);
+}
+
+void VirtualSceneControlWindow::setRecordingState(bool state) {
+    if (state) {
+        mControlsUi->recordButton->setIcon(
+                getIconForCurrentTheme("recordCircle"));
+        mControlsUi->recordButton->setIconSize(QSize(30, 20));
+        mControlsUi->recordButton->show();
+    } else {
+        mControlsUi->recordButton->hide();
+    }
 }
