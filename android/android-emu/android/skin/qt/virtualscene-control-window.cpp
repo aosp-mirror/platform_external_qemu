@@ -16,6 +16,7 @@
 #include "android/featurecontrol/feature_control.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -626,4 +627,15 @@ QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
     QWidget* container = parentWidget();
     return container->pos() +
            QPoint(container->width() / 2, container->height() / 2);
+}
+
+void VirtualSceneControlWindow::setRecordingState(bool state) {
+    if (state) {
+        mControlsUi->recOngoingButton->setIcon(
+                getIconForCurrentTheme("recordCircle"));
+        mControlsUi->recOngoingButton->setIconSize(QSize(30, 20));
+        mControlsUi->recOngoingButton->show();
+    } else {
+        mControlsUi->recOngoingButton->hide();
+    }
 }

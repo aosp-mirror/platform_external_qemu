@@ -68,6 +68,7 @@ protected:
 
 signals:
     void playbackFinishedSignal();
+    void setRecordingStateSignal(bool state);
 
 private:
     void loadUi();

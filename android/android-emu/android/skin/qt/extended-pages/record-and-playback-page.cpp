@@ -17,6 +17,9 @@ RecordAndPlaybackPage::RecordAndPlaybackPage(QWidget* parent)
 
     connect(mUi->recordSettings, SIGNAL(on_toggleMacros_toggled(bool)), 
             mUi->recordMacro, SLOT(enablePresetMacros(bool)));
+
+    connect(mUi->recordMacro, SIGNAL(setRecordingStateSignal(bool)), this,
+            SLOT(setRecordingStateSlot(bool)));
 }
 
 void RecordAndPlaybackPage::updateTheme() {
@@ -29,4 +32,12 @@ void RecordAndPlaybackPage::enableCustomMacros() {
 
 void RecordAndPlaybackPage::removeSettingsTab() {
     mUi->tabWidget->removeTab(2);
+}
+
+void RecordAndPlaybackPage::setRecordingStateSlot(bool state) {
+    emit setRecordingStateSignal(state);
+}
+
+void RecordAndPlaybackPage::focusMacroRecordTab() {
+    mUi->tabWidget->setCurrentIndex(1);
 }

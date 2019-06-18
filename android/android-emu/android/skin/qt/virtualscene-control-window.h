@@ -75,11 +75,13 @@ public:
             ShortcutKeyStore<QtUICommand>& keystore);
 signals:
     void virtualSceneControlsEngaged(bool engaged);
+    void on_recOngoingButton_clicked();
 
 public slots:
     void orientationChanged(SkinRotation);
     void virtualSensorsPageVisible();
     void virtualSensorsInteraction();
+    void setRecordingState(bool state);
 
 private slots:
     void slot_mousePoller();
