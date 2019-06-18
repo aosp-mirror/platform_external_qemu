@@ -8133,11 +8133,19 @@ message vkBeginCommandBufferAsyncGOOGLE
     optional uint64 commandBuffer = 1;
     // Original field: struct VkCommandBufferBeginInfo pBeginInfo. stringarray? 0 string? 0 hasLenInfo? 0
     optional VkCommandBufferBeginInfo pBeginInfo = 2;
+    // Original field: None uint32_t needHostSync. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 needHostSync = 3;
+    // Original field: None uint32_t sequenceNumber. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 sequenceNumber = 4;
 }
 message vkEndCommandBufferAsyncGOOGLE
 {
     // Original field: handle VkCommandBuffer commandBuffer. stringarray? 0 string? 0 hasLenInfo? 0
     optional uint64 commandBuffer = 1;
+    // Original field: None uint32_t needHostSync. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 needHostSync = 2;
+    // Original field: None uint32_t sequenceNumber. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 sequenceNumber = 3;
 }
 message vkResetCommandBufferAsyncGOOGLE
 {
@@ -8145,6 +8153,10 @@ message vkResetCommandBufferAsyncGOOGLE
     optional uint64 commandBuffer = 1;
     // Original field: bitmask VkCommandBufferResetFlags flags. stringarray? 0 string? 0 hasLenInfo? 0
     optional uint32 flags = 2;
+    // Original field: None uint32_t needHostSync. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 needHostSync = 3;
+    // Original field: None uint32_t sequenceNumber. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 sequenceNumber = 4;
 }
 message VkExtensionStruct
 {
