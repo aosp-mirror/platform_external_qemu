@@ -22,6 +22,30 @@
       "revId": "e02f51dcab557a52985b2a66dfb566c1cd32c304",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4e6f54f_506e1424",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 0,
+      "message": "Changed, the complete will be set when it\u0027s an async indicating execution completed.",
+      "parentUuid": "42810484_757f9d50",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 38
+      },
+      "revId": "e02f51dcab557a52985b2a66dfb566c1cd32c304",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

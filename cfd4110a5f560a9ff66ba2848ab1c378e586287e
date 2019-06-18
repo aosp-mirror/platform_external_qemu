@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a3ff1724_80299f05",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 1,
+      "message": "the elements in mRequestContexts is not removed, so it won\u0027t be empty, though elements will be removed when an error occurs. So we use this flag to indicate whether there is pending request.",
+      "parentUuid": "90772a8a_36e1eba2",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 242,
+        "endChar": 23
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "790403e1_e675b060",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "059c5bf0_4db23c64",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 1,
+      "message": "This will be modified in the next as it involves the changes in its caller and the way we send async response as well.",
+      "parentUuid": "790403e1_e675b060",
+      "range": {
+        "startLine": 245,
+        "startChar": 8,
+        "endLine": 248,
+        "endChar": 39
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1fad3750_b86f90c3",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fe84f7e_f0f107b3",
+      "range": {
+        "startLine": 265,
+        "startChar": 8,
+        "endLine": 265,
+        "endChar": 13
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "31860532_5dc7bcf6",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 6
@@ -91,6 +163,30 @@
       "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fff9af1a_1313a06c",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31860532_5dc7bcf6",
+      "range": {
+        "startLine": 277,
+        "startChar": 42,
+        "endLine": 277,
+        "endChar": 43
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -137,6 +233,54 @@
       "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7919c47e_21648816",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 1,
+      "message": "The test case will be changed accordingly.",
+      "parentUuid": "720c6e92_ce6c60c6",
+      "range": {
+        "startLine": 237,
+        "startChar": 40,
+        "endLine": 237,
+        "endChar": 41
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94c67462_42966b0e",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-18T22:46:11Z",
+      "side": 1,
+      "message": "getNextRequest will send an async response indicating the start of execution, but it will be changed in the next cl.",
+      "parentUuid": "e6a7b2bc_25d8807c",
+      "range": {
+        "startLine": 234,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 80
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
