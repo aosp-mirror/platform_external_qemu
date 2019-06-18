@@ -561,6 +561,7 @@ void RecordMacroPage::on_recButton_clicked() {
 void RecordMacroPage::startRecording() {
     disableMacroItems();
     mRecording = true;
+    emit setRecordingStateSignal(mRecording);
 
     const std::string macrosLocation = getCustomMacrosDirectory();
     const std::string placeholderPath =
@@ -581,6 +582,7 @@ void RecordMacroPage::stopRecording() {
     mTimer.stop();
     enableMacroItems();
     mRecording = false;
+    emit setRecordingStateSignal(mRecording);
 
     auto result = sAutomationAgent->stopRecording();
     if (result.err()) {
@@ -879,6 +881,7 @@ void RecordMacroPage::enablePresetMacros(bool enable) {
     // Reset all the possible states.
     mTimer.stop();
     mRecording = false;
+    emit setRecordingStateSignal(mRecording);
     if (mState == MacroUiState::Playing) {
         playbackFinished();
     }

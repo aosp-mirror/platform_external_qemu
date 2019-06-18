@@ -28,4 +28,11 @@ public:
 
     std::unique_ptr<Ui::RecordAndPlaybackPage> mUi;
     QTabBar* mTabBar = nullptr;
+
+signals:
+    void setRecordingStateSignal(bool state);
+
+private slots:
+    void setRecordingStateSlot(bool state);
+    void showMacroRecordPage();
 };
