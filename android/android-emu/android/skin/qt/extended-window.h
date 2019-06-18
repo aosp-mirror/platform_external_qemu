@@ -73,6 +73,7 @@ private slots:
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
     void disableMouseWheel(bool disabled);
+    void showMacroRecordPageSlot();
 
     // Master tabs
     void on_batteryButton_clicked();
@@ -92,6 +93,9 @@ private slots:
     void on_snapshotButton_clicked();
     void on_telephoneButton_clicked();
     void on_virtSensorsButton_clicked();
+
+signals:
+    void showMacroRecordPageSignal();
 
 private:
     void closeEvent(QCloseEvent* ce) override;

@@ -296,6 +296,14 @@ void ExtendedWindow::connectVirtualSceneWindow(
     connect(mExtendedUi->virtualSensorsPage,
             SIGNAL(virtualSensorsInteraction()), virtualSceneWindow,
             SLOT(virtualSensorsInteraction()));
+
+    connect(mExtendedUi->recordAndPlaybackPage,
+            SIGNAL(setRecordingStateSignal(bool)), virtualSceneWindow,
+            SLOT(setRecordingState(bool)));
+    connect(virtualSceneWindow, SIGNAL(on_recordButton_clicked()), this,
+            SLOT(showMacroRecordPageSlot()));
+    connect(this, SIGNAL(showMacroRecordPageSignal()),
+            mExtendedUi->recordAndPlaybackPage, SLOT(showMacroRecordPage()));
 }
 
 void ExtendedWindow::closeEvent(QCloseEvent *e) {
@@ -402,4 +410,10 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
              mToolWindow->geometry().top());
     }
     QFrame::showEvent(e);
+}
+
+void ExtendedWindow::showMacroRecordPageSlot() {
+    show();
+    on_recordButton_clicked();
+    emit showMacroRecordPageSignal();
 }
