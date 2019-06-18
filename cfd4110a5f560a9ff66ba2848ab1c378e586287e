@@ -281,6 +281,30 @@
       "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "341de516_3db795c4",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-18T23:00:01Z",
+      "side": 1,
+      "message": "Can you add more detailed EXPECT_CALLS like in my first comment in this chain?  That would verify the behavior better",
+      "parentUuid": "94c67462_42966b0e",
+      "range": {
+        "startLine": 234,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 80
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

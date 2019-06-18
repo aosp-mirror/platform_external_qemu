@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f1c7e98_2a547b21",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-18T23:00:01Z",
+      "side": 1,
+      "message": "Remove std::",
+      "range": {
+        "startLine": 121,
+        "startChar": 35,
+        "endLine": 121,
+        "endChar": 40
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "24844227_419309e6",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-18T23:00:01Z",
+      "side": 1,
+      "message": "auto result \u003d Err(VideoInjectionError::InternalError);",
+      "range": {
+        "startLine": 170,
+        "startChar": 8,
+        "endLine": 170,
+        "endChar": 90
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c8b01c2_066f20fa",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-18T23:00:01Z",
+      "side": 1,
+      "message": "Please run clang-format on this",
+      "range": {
+        "startLine": 100,
+        "startChar": 4,
+        "endLine": 102,
+        "endChar": 62
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9678c07_78072e76",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-18T23:00:01Z",
+      "side": 1,
+      "message": "Remove commented code (here and below)",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 121
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
