@@ -87,8 +87,8 @@ public:
 
         uint64_t off = physAddr - mPciStart;
 
-        for (auto it : mEntries) {
-            for (auto it2 : it.second.blocks) {
+        for (auto &it : mEntries) {
+            for (auto &it2 : it.second.blocks) {
                 if (it2.first == off) {
                     it2.second.hva = hva;
                     return;
@@ -103,8 +103,8 @@ public:
 
         uint64_t off = physAddr - mPciStart;
 
-        for (auto it : mEntries) {
-            for (auto it2 : it.second.blocks) {
+        for (auto &it : mEntries) {
+            for (auto &it2 : it.second.blocks) {
                 if (it2.first == off) {
                     it2.second.hva = nullptr;
                     return;
@@ -120,12 +120,12 @@ public:
         uint64_t off = physAddr - mPciStart;
 
         // First check ping infos
-        for (auto it : mEntries) {
+        for (const auto &it : mEntries) {
             if ((uint64_t)(uintptr_t)it.second.pingInfo == physAddr) return it.second.pingInfo;
         }
 
-        for (auto it : mEntries) {
-            for (auto it2 : it.second.blocks) {
+        for (const auto &it : mEntries) {
+            for (const auto &it2 : it.second.blocks) {
                 if (it2.first == off) {
                     return it2.second.hva;
                 }
