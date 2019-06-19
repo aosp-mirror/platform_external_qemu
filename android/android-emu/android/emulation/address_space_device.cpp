@@ -242,6 +242,8 @@ private:
             return nullptr;
         } else if (i->first == gpa) {
             return i->second.first;  // gpa is exactly the beginning of the range
+        } else if (i == mMemoryMappings.begin()) {
+            return nullptr;
         } else {
             // gpa points into the range or between ranges, `i` points to the next range
             --i;  // go the previous range
