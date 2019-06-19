@@ -2847,6 +2847,13 @@ public:
         on_vkResetCommandBuffer(pool, boxed_commandBuffer, flags);
     }
 
+    VkResult on_vkFinishRoundTripGOOGLE(
+            android::base::Pool* pool,
+            VkQueue queue) {
+        (void)queue;
+        return VK_SUCCESS;
+    }
+
     void on_vkCmdBindPipeline(android::base::Pool* pool,
             VkCommandBuffer boxed_commandBuffer,
             VkPipelineBindPoint pipelineBindPoint,
@@ -4923,6 +4930,12 @@ void VkDecoderGlobalState::on_vkResetCommandBufferAsyncGOOGLE(
     VkCommandBufferResetFlags flags) {
     mImpl->on_vkResetCommandBufferAsyncGOOGLE(
         pool, commandBuffer, flags);
+}
+
+VkResult VkDecoderGlobalState::on_vkFinishRoundTripGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue) {
+    return mImpl->on_vkFinishRoundTripGOOGLE(pool, queue);
 }
 
 void VkDecoderGlobalState::on_vkCmdBindPipeline(

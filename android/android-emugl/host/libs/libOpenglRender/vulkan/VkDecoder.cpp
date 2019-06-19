@@ -16130,6 +16130,33 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->clearPool();
                 break;
             }
+            case OP_vkFinishRoundTripGOOGLE:
+            {
+                VkQueue queue;
+                // Begin manual dispatchable handle unboxing for queue;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_828;
+                vkReadStream->read((uint64_t*)&cgen_var_828, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_828, (VkQueue*)&queue, 1);
+                auto unboxed_queue = unbox_VkQueue(queue);
+                auto vk = dispatch_VkQueue(queue);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for queue;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkFinishRoundTripGOOGLE 0x%llx \n", ioStream, (unsigned long long)queue);
+                }
+                VkResult vkFinishRoundTripGOOGLE_VkResult_return = (VkResult)0;
+                vkFinishRoundTripGOOGLE_VkResult_return = m_state->on_vkFinishRoundTripGOOGLE(&m_pool, queue);
+                vkStream->unsetHandleMapping();
+                vkStream->write(&vkFinishRoundTripGOOGLE_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                m_state->snapshot()->vkFinishRoundTripGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFinishRoundTripGOOGLE_VkResult_return, queue);
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
 #endif
             default:
             {
