@@ -1829,6 +1829,12 @@ message EmulatorAutomation {
   optional uint64 preview_replay_count = 3;
   // Played preset-macros.
   repeated EmulatorAutomationPresetMacro played_preset_macro = 4;
+  // Total amount of macros recorded.
+  optional uint64 record_macro_count = 5;
+  // Total amount of macros deleted.
+  optional uint64 delete_macro_count = 6;
+  // Total amount of macros edited.
+  optional uint64 edit_macro_count = 7;
 }
 
 // Metrics for multi-display details
