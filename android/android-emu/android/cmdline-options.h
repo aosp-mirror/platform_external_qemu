@@ -232,7 +232,8 @@ OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge" )
 #endif
 
 #ifdef ANDROID_WEBRTC
-OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc video bridge")
+OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc video bridge.")
+OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrtc video bridge.")
 #endif
 
 #undef CFG_FLAG
