@@ -16130,6 +16130,25 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->clearPool();
                 break;
             }
+            case OP_vkFinishRoundTripGOOGLE:
+            {
+                uint32_t flags;
+                vkReadStream->read((uint32_t*)&flags, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkFinishRoundTripGOOGLE 0x%llx \n", ioStream, (unsigned long long)flags);
+                }
+                VkResult vkFinishRoundTripGOOGLE_VkResult_return = (VkResult)0;
+                vkFinishRoundTripGOOGLE_VkResult_return = m_state->on_vkFinishRoundTripGOOGLE(&m_pool, flags);
+                vkStream->unsetHandleMapping();
+                vkStream->write(&vkFinishRoundTripGOOGLE_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                m_state->snapshot()->vkFinishRoundTripGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFinishRoundTripGOOGLE_VkResult_return, flags);
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
 #endif
             default:
             {

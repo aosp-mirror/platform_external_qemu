@@ -53,6 +53,22 @@ SUCCESS_VAL = {
     "VkResult" : ["VK_SUCCESS"],
 }
 
+def need_cmdbuf_pre_finish(api):
+    for p in api.parameters:
+        if p.isCreatedBy(api) or p.isDestroyedBy(api):
+            return True
+
+    if api.name in ["vkQueueSubmit", "vkQueueWaitIdle", "vkDeviceWaitIdle", "vkCreateCommandPool", "vkDestroyCommandPool",
+                    "vkResetCommandPool", "vkTrimCommandPoolKHR", "vkTrimCommandPool", "vkDestroyCommandPool",
+                    "vkAllocateCommandBuffers", "vkFreeCommandBuffers", "vkUpdateDescriptorSets", "vkUpdateDescriptorSetWithTemplateKHR", "vkUpdateDescriptorSetWithTemplate"]:
+        return True
+
+    return False
+
+def is_cmdbuf_statechange(api):
+    return len(api.parameters) > 0 and \
+        "VkCommandBuffer" == api.parameters[0].typeName
+
 class VulkanFuncTable(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
@@ -82,7 +98,13 @@ class VulkanFuncTable(VulkanWrapperGenerator):
 
         cgen.stmt("AEMU_SCOPED_TRACE(\"%s\")" % api.name)
 
-        cgen.stmt("auto vkEnc = HostConnection::get()->vkEncoder()")
+        if need_cmdbuf_pre_finish(api):
+            cgen.stmt("CommandBufferHostConnection::get()->finish()")
+
+        if is_cmdbuf_statechange(api):
+            cgen.stmt("auto vkEnc = CommandBufferHostConnection::get()->vkEncoder()")
+        else:
+            cgen.stmt("auto vkEnc = HostConnection::get()->vkEncoder()")
 
         callLhs = None
         retTypeName = api.getRetTypeExpr()

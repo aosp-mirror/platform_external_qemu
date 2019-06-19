@@ -8146,6 +8146,11 @@ message vkResetCommandBufferAsyncGOOGLE
     // Original field: bitmask VkCommandBufferResetFlags flags. stringarray? 0 string? 0 hasLenInfo? 0
     optional uint32 flags = 2;
 }
+message vkFinishRoundTripGOOGLE
+{
+    // Original field: None uint32_t flags. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint32 flags = 1;
+}
 message VkExtensionStruct
 {
     oneof struct
@@ -8591,5 +8596,6 @@ message VkApiCall
         vkBeginCommandBufferAsyncGOOGLE api_vkBeginCommandBufferAsyncGOOGLE = 322;
         vkEndCommandBufferAsyncGOOGLE api_vkEndCommandBufferAsyncGOOGLE = 323;
         vkResetCommandBufferAsyncGOOGLE api_vkResetCommandBufferAsyncGOOGLE = 324;
+        vkFinishRoundTripGOOGLE api_vkFinishRoundTripGOOGLE = 325;
     }
 }

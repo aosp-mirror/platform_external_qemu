@@ -768,6 +768,7 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkResetCommandBufferAsyncGOOGLE");
+    out->vkFinishRoundTripGOOGLE = (PFN_vkFinishRoundTripGOOGLE)dlSymFunc(lib, "vkFinishRoundTripGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1286,6 +1287,7 @@ void init_vulkan_dispatch_from_instance(
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkResetCommandBufferAsyncGOOGLE");
+    out->vkFinishRoundTripGOOGLE = (PFN_vkFinishRoundTripGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkFinishRoundTripGOOGLE");
 #endif
 }
 
@@ -1768,6 +1770,7 @@ void init_vulkan_dispatch_from_device(
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkResetCommandBufferAsyncGOOGLE");
+    out->vkFinishRoundTripGOOGLE = (PFN_vkFinishRoundTripGOOGLE)vk->vkGetDeviceProcAddr(device, "vkFinishRoundTripGOOGLE");
 #endif
 }
 

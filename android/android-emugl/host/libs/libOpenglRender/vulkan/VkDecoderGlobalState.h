@@ -563,6 +563,9 @@ public:
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
+    VkResult on_vkFinishRoundTripGOOGLE(
+        android::base::Pool* pool,
+        uint32_t flags);
 
     void on_vkCmdBindPipeline(android::base::Pool* pool,
                               VkCommandBuffer commandBuffer,
