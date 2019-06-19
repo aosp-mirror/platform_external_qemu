@@ -2225,7 +2225,6 @@ static void max_x86_cpu_initfn(Object *obj)
 {
     X86CPU *cpu = X86_CPU(obj);
     CPUX86State *env = &cpu->env;
-    KVMState *s = kvm_state;
 
     /* We can't fill the features array here because we don't know yet if
      * "migratable" is true or false.
@@ -2233,6 +2232,7 @@ static void max_x86_cpu_initfn(Object *obj)
     cpu->max_features = true;
 
     if (kvm_enabled()) {
+        KVMState *s = kvm_state;
         char vendor[CPUID_VENDOR_SZ + 1] = { 0 };
         char model_id[CPUID_MODEL_ID_SZ + 1] = { 0 };
         int family, model, stepping;
@@ -2259,6 +2259,30 @@ static void max_x86_cpu_initfn(Object *obj)
         if (lmce_supported()) {
             object_property_set_bool(OBJECT(cpu), true, "lmce", &error_abort);
         }
+    } else if (gvm_enabled()) {
+        GVMState *s = gvm_state;
+        char vendor[CPUID_VENDOR_SZ + 1] = { 0 };
+        char model_id[CPUID_MODEL_ID_SZ + 1] = { 0 };
+        int family, model, stepping;
+
+        host_vendor_fms(vendor, &family, &model, &stepping);
+
+        cpu_x86_fill_model_id(model_id);
+
+        object_property_set_str(OBJECT(cpu), vendor, "vendor", &error_abort);
+        object_property_set_int(OBJECT(cpu), family, "family", &error_abort);
+        object_property_set_int(OBJECT(cpu), model, "model", &error_abort);
+        object_property_set_int(OBJECT(cpu), stepping, "stepping",
+                                &error_abort);
+        object_property_set_str(OBJECT(cpu), model_id, "model-id",
+                                &error_abort);
+
+        env->cpuid_min_level =
+            gvm_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
+        env->cpuid_min_xlevel =
+            gvm_arch_get_supported_cpuid(s, 0x80000000, 0, R_EAX);
+        env->cpuid_min_xlevel2 =
+            gvm_arch_get_supported_cpuid(s, 0xC0000000, 0, R_EAX);
     } else {
         object_property_set_str(OBJECT(cpu), CPUID_VENDOR_AMD,
                                 "vendor", &error_abort);
@@ -2280,13 +2304,17 @@ static const TypeInfo max_x86_cpu_type_info = {
     .class_init = max_x86_cpu_class_init,
 };
 
-#ifdef CONFIG_KVM
+#if defined (CONFIG_KVM) || defined (CONFIG_GVM)
 
 static void host_x86_cpu_class_init(ObjectClass *oc, void *data)
 {
     X86CPUClass *xcc = X86_CPU_CLASS(oc);
 
+#if defined CONFIG_KVM
     xcc->kvm_required = true;
+#elif defined CONFIG_GVM
+    xcc->gvm_required = true;
+#endif
     xcc->ordering = 8;
 
     xcc->model_description =
@@ -2313,7 +2341,7 @@ static void report_unavailable_features(FeatureWord w, uint32_t mask)
             assert(reg);
             warn_report("%s doesn't support requested feature: "
                         "CPUID.%02XH:%s%s%s [bit %d]",
-                        kvm_enabled() ? "host" : "TCG",
+                        kvm_enabled() || gvm_enabled() ? "host" : "TCG",
                         f->cpuid_eax, reg,
                         f->feat_names[i] ? "." : "",
                         f->feat_names[i] ? f->feat_names[i] : "", i);
@@ -2771,6 +2799,13 @@ static void x86_cpu_class_check_missing_features(X86CPUClass *xcc,
         return;
     }
 
+    if (xcc->gvm_required && !gvm_enabled()) {
+        strList *new = g_new0(strList, 1);
+        new->value = g_strdup("gvm");
+        *missing_feats = new;
+        return;
+    }
+
     xc = X86_CPU(object_new(object_class_get_name(OBJECT_CLASS(xcc))));
 
     x86_cpu_expand_features(xc, &err);
@@ -2926,6 +2961,10 @@ static uint32_t x86_cpu_get_supported_feature_word(FeatureWord w,
         r = kvm_arch_get_supported_cpuid(kvm_state, wi->cpuid_eax,
                                                     wi->cpuid_ecx,
                                                     wi->cpuid_reg);
+    } else if (gvm_enabled()) {
+        r = gvm_arch_get_supported_cpuid(gvm_state, wi->cpuid_eax,
+                                                    wi->cpuid_ecx,
+                                                    wi->cpuid_reg);
     } else if (tcg_enabled()) {
         r = wi->tcg_features;
     } else {
@@ -3005,7 +3044,7 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
      * when doing cross vendor migration
      */
     vendor = def->vendor;
-    if (kvm_enabled()) {
+    if (kvm_enabled() || gvm_enabled()) {
         uint32_t  ebx = 0, ecx = 0, edx = 0;
         host_cpuid(0, 0, NULL, &ebx, &ecx, &edx);
         x86_cpu_vendor_words2str(host_vendor, ebx, edx, ecx);
@@ -3460,6 +3499,13 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
             *ebx = kvm_arch_get_supported_cpuid(s, 0xA, count, R_EBX);
             *ecx = kvm_arch_get_supported_cpuid(s, 0xA, count, R_ECX);
             *edx = kvm_arch_get_supported_cpuid(s, 0xA, count, R_EDX);
+        } else if (gvm_enabled() && cpu->enable_pmu) {
+            GVMState *s = cs->gvm_state;
+
+            *eax = gvm_arch_get_supported_cpuid(s, 0xA, count, R_EAX);
+            *ebx = gvm_arch_get_supported_cpuid(s, 0xA, count, R_EBX);
+            *ecx = gvm_arch_get_supported_cpuid(s, 0xA, count, R_ECX);
+            *edx = gvm_arch_get_supported_cpuid(s, 0xA, count, R_EDX);
         } else {
             *eax = 0;
             *ebx = 0;
@@ -3839,6 +3885,9 @@ static void x86_cpu_reset(CPUState *s)
 
     if (kvm_enabled()) {
         kvm_arch_reset_vcpu(cpu);
+    }
+    if (gvm_enabled()) {
+        gvm_arch_reset_vcpu(cpu);
     }
 #endif
 }
@@ -4237,6 +4286,13 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
         goto out;
     }
 
+    if (xcc->gvm_required && !gvm_enabled()) {
+        char *name = x86_cpu_class_get_model_name(xcc);
+        error_setg(&local_err, "CPU model '%s' requires GVM", name);
+        g_free(name);
+        goto out;
+    }
+
     if (cpu->apic_id == UNASSIGNED_APIC_ID) {
         error_setg(errp, "apic-id property was not initialized properly");
         return;
@@ -4252,7 +4308,7 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
         x86_cpu_report_filtered_features(cpu);
         if (cpu->enforce_cpuid) {
             error_setg(&local_err,
-                       kvm_enabled() ?
+                       kvm_enabled() || gvm_enabled() ?
                            "Host doesn't support requested features" :
                            "TCG doesn't support requested features");
             goto out;
@@ -4275,7 +4331,7 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
      * consumer AMD devices but nothing else.
      */
     if (env->features[FEAT_8000_0001_EDX] & CPUID_EXT2_LM) {
-        if (kvm_enabled()) {
+        if (kvm_enabled() || gvm_enabled()) {
             uint32_t host_phys_bits = x86_host_phys_bits();
             static bool warned;
 
@@ -4597,6 +4653,25 @@ static void android_emulator_set_pmu_feature(X86CPU *cpu)
         env->cpuid_xlevel = kvm_arch_get_supported_cpuid(s, 0x80000000, 0,
                                                          R_EAX);
         env->cpuid_xlevel2 = kvm_arch_get_supported_cpuid(s, 0xC0000000, 0,
+                                                          R_EAX);
+
+        /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
+        object_property_set_bool(OBJECT(cpu), true, "pmu", &error_abort);
+    }
+    if (gvm_enabled() &&
+        intel_pmu_enabled &&
+        !strcmp("on", intel_pmu_enabled)) {
+
+        CPUX86State *env = &cpu->env;
+        GVMState *s = gvm_state;
+
+        /* Use the host/KVM CPUID level in order to enable additional features
+         * supported by the host CPU, such as PMU. Cf. host_x86_cpu_initfn().
+         */
+        env->cpuid_level = gvm_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
+        env->cpuid_xlevel = gvm_arch_get_supported_cpuid(s, 0x80000000, 0,
+                                                         R_EAX);
+        env->cpuid_xlevel2 = gvm_arch_get_supported_cpuid(s, 0xC0000000, 0,
                                                           R_EAX);
 
         /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
@@ -4994,7 +5069,7 @@ static void x86_cpu_register_types(void)
 
     type_register_static(&max_x86_cpu_type_info);
     type_register_static(&x86_base_cpu_type_info);
-#ifdef CONFIG_KVM
+#if defined (CONFIG_KVM) || defined (CONFIG_GVM)
     type_register_static(&host_x86_cpu_type_info);
 #endif
 }
