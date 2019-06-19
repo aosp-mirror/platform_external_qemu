@@ -4375,6 +4375,15 @@ void vkResetCommandBufferAsyncGOOGLE(
 {
     // TODO: Implement
 }
+void vkFinishRoundTripGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    uint32_t flags)
+{
+    // TODO: Implement
+}
 #endif
 
 private:
@@ -8631,6 +8640,17 @@ void VkDecoderSnapshot::vkResetCommandBufferAsyncGOOGLE(
     VkCommandBufferResetFlags flags)
 {
     mImpl->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, flags);
+}
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+void VkDecoderSnapshot::vkFinishRoundTripGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    uint32_t flags)
+{
+    mImpl->vkFinishRoundTripGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, flags);
 }
 #endif
 

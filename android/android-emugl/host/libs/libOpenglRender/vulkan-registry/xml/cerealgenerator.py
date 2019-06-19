@@ -227,6 +227,7 @@ class IOStream;
 
         functableImplInclude = """
 #include "VkEncoder.h"
+#include "CommandBufferHostConnection.h"
 #include "HostConnection.h"
 #include "ResourceTracker.h"
 

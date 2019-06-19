@@ -16247,6 +16247,10 @@ const char* api_opcode_to_string(
         {
             return "OP_vkResetCommandBufferAsyncGOOGLE";
         }
+        case OP_vkFinishRoundTripGOOGLE:
+        {
+            return "OP_vkFinishRoundTripGOOGLE";
+        }
 #endif
         default:
         {

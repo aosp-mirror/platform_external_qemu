@@ -2921,6 +2921,12 @@ public:
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
+    void vkFinishRoundTripGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        uint32_t flags);
 #endif
 
 private:
