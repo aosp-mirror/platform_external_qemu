@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "099db9af_2e375d59",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54043043_3cf5f9b9",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 5
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96b7ca93_6548dc72",
         "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "f22338bdb465656060502376aa1e52a2186baaea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3371dc1_7c903c9b",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96b7ca93_6548dc72",
+      "range": {
+        "startLine": 50,
+        "startChar": 30,
+        "endLine": 50,
+        "endChar": 38
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ba32fb6d_0a1f25d0",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "Per offline discussion, we will create a custom EventSource and use it to turn packets into events. This will be implemented in a separate CL.",
+      "parentUuid": "65e0da39_98ed179f",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 12
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fc99f8b2_e962407d",
         "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
         "patchSetId": 4
@@ -91,6 +163,30 @@
       "revId": "f22338bdb465656060502376aa1e52a2186baaea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f6a4123_551d7b08",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "See the previous comment.",
+      "parentUuid": "fc99f8b2_e962407d",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 14
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "e4d96079_72bda3b0",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c9c8659_8f8f09ab",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 41
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "373fb23d_4ab533b2",
         "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
         "patchSetId": 4
@@ -137,6 +257,30 @@
       "revId": "f22338bdb465656060502376aa1e52a2186baaea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4149e5d0_48c2b0cb",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "373fb23d_4ab533b2",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 142,
+        "endChar": 14
+      },
+      "revId": "f22338bdb465656060502376aa1e52a2186baaea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

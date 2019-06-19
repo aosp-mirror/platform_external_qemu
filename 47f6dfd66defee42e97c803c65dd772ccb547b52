@@ -22,6 +22,30 @@
       "revId": "47f6dfd66defee42e97c803c65dd772ccb547b52",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0982e198_e5b485c8",
+        "filename": "android/android-emu/android/mp4/mp4_demuxer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-06-19T00:30:50Z",
+      "side": 1,
+      "message": "Mp4Dataset is basically just a wrapper around the input file that allow other classes to read whatever info from the file. This demuxer class is specifically for handling the work of reading packets out of the file and dispatch them to the packet queues.",
+      "parentUuid": "8ceaaee6_a6cba05d",
+      "range": {
+        "startLine": 20,
+        "startChar": 6,
+        "endLine": 20,
+        "endChar": 20
+      },
+      "revId": "47f6dfd66defee42e97c803c65dd772ccb547b52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
