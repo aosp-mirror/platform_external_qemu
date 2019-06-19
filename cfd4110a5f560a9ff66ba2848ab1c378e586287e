@@ -305,6 +305,30 @@
       "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5bc8545_dcfea3e6",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-19T00:06:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "341de516_3db795c4",
+      "range": {
+        "startLine": 234,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 80
+      },
+      "revId": "cfd4110a5f560a9ff66ba2848ab1c378e586287e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

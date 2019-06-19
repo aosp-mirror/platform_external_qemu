@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "f2024703_84d4deab",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-19T00:06:49Z",
+      "side": 1,
+      "message": "It doesn\u0027t compile, because Err is not a result type, so we cannot pass an Err instance, we need to pass an Result instance(using the constructor taking Err instance).",
+      "parentUuid": "24844227_419309e6",
+      "range": {
+        "startLine": 170,
+        "startChar": 8,
+        "endLine": 170,
+        "endChar": 90
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c8b01c2_066f20fa",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
         "patchSetId": 9
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "d6bc4cb0_d7605fe4",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-19T00:06:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c8b01c2_066f20fa",
+      "range": {
+        "startLine": 100,
+        "startChar": 4,
+        "endLine": 102,
+        "endChar": 62
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9678c07_78072e76",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
         "patchSetId": 9
@@ -91,6 +139,30 @@
       "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c3f747b_3549169c",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-19T00:06:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c9678c07_78072e76",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 121
+      },
+      "revId": "b8a4a22fbe234257a22ce7d51196b3758fef2ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
