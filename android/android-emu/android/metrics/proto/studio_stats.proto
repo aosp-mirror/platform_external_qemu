@@ -307,6 +307,18 @@ message AndroidStudioEvent {
   // Set when kind = WINDOWS_DEFENDER_STATUS
   optional WindowsDefenderStatus windows_defender_status = 84;
 
+  // Set when kind = MEMORY_SETTINGS_EVENT
+  optional MemorySettingsEvent memory_settings_event = 85;
+
+  // Set when kind = STUDIO_UPDATE_FLOW
+  optional StudioUpdateFlowEvent studio_update_flow_event = 86;
+
+  // set when kind = BUILD_OUTPUT_WINDOW_STATS
+  optional BuildOutputWindowStats build_output_window_stats = 87;
+
+  // set when kind = GRADLE_PLUGIN_DSL_USAGE_STATS
+  optional GradlePluginDslUsageStats gradle_plugin_dsl_usage_stats = 88;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -768,6 +780,18 @@ message AndroidStudioEvent {
 
     // Status of Windows Defender
     WINDOWS_DEFENDER_STATUS = 182;
+
+    // Memory settings configuration statistics
+    MEMORY_SETTINGS_EVENT = 183;
+
+    // Studio update flow events
+    STUDIO_UPDATE_FLOW = 184;
+
+    // Build output window statistics when build fails.
+    BUILD_OUTPUT_WINDOW_STATS = 185;
+
+    // Stats about the use of the Android Gradle Plugin DSL
+    GRADLE_PLUGIN_DSL_USAGE_STATS = 186;
   }
 
   // Represents different Performance Monitoring types.
@@ -870,6 +894,7 @@ message AndroidStudioEvent {
     ANDROID_INSTANT_APP_MODULE = 37;
     ANDROID_INSTANT_APP_BUNDLE_PROJECT = 38;
     ANDROID_INSTANT_APP_DYNAMIC_MODULE = 39;
+    BENCHMARK_LIBRARY_MODULE = 40;
   }
 
   // Reasons Gradle sync failed.
@@ -907,6 +932,8 @@ message AndroidStudioEvent {
     DAEMON_CONTEXT_MISMATCH = 30;
     JAVA_HEAP_ERROR = 31;
     JDK8_REQUIRED = 32;
+    GRADLE_DISTRIBUTION_INSTALL_ERROR = 33;
+    DISTRIBUTIONSHA256SUM_FOUND_IN_WRAPPER = 34;
   }
 
   // IDE brand containing the android plugin
@@ -915,6 +942,8 @@ message AndroidStudioEvent {
     ANDROID_STUDIO = 1;
     ANDROID_STUDIO_WITH_BLAZE = 2;
     INTELLIJ = 3;
+    // For the Toolkit preview build released at Google IO 2019
+    ANDROID_STUDIO_TOOLKIT_2019_IO_PREVIEW = 4;
   }
 
   // Gradle sync issue type.
@@ -1027,6 +1056,15 @@ message AndroidStudioEvent {
     // the ANDROID_SDK_ROOT environment variable or the projects
     // local.properties files.
     TYPE_SDK_NOT_SET = 37;
+
+    // Indicates that the user has specified multiple default build types.
+    TYPE_AMBIGUOUS_BUILD_TYPE_DEFAULT = 38;
+
+    // Indicates that the user has specified multiple default product flavors.
+    TYPE_AMBIGUOUS_PRODUCT_FLAVOR_DEFAULT = 39;
+
+    // Indicates that the compileSdkVersion is missing.
+    TYPE_COMPILE_SDK_VERSION_NOT_SET = 40;
   }
 
   // Various quick-fixes that are offered to resolve sync issues.
@@ -1076,6 +1114,8 @@ message AndroidStudioEvent {
     USE_EMBEDDED_JDK_HYPERLINK = 42;
     SET_NDK_DIR_HYPERLINK = 43;
     SET_CMAKE_DIR_HYPERLINK = 44;
+    DELETE_FILE_HYPERLINK = 45;
+    REMOVE_DISTRIBUTIONSHA256SUM_FROM_WRAPPER_HYPERLINK = 46;
   }
 }
 
@@ -1131,6 +1171,8 @@ message ProductDetails {
     LIGHT_MAC_NATIVE = 3;
     LIGHT_WIN_NATIVE = 4;
     GTK = 5;
+    HIGH_CONTRAST = 6;
+    CUSTOM = 7;
   }
 }
 
@@ -1410,13 +1452,7 @@ message EmulatorFeatureFlagState {
     VIDEO_PLAYBACK = 40;
     VULKAN = 41;
     MACRO_UI = 42;
-    CAR_PROPERTY_TABLE = 43;
-    DYNAMIC_PARTITION = 44;
-    IP_DISCONNECT_ON_LOAD = 45;
-    VULKAN_SNAPSHOTS = 46;
-    VIRTIO_INPUT = 47;
-    MULTI_DISPLAY = 48;
-    // Next tag: 49
+    // Next tag: 43
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
@@ -1828,6 +1864,12 @@ message EmulatorAutomation {
   optional uint64 preview_replay_count = 3;
   // Played preset-macros.
   repeated EmulatorAutomationPresetMacro played_preset_macro = 4;
+  // Total amount of macros recorded.
+  optional uint64 record_macro_count = 5;
+  // Total amount of macros deleted.
+  optional uint64 delete_macro_count = 6;
+  // Total amount of macros edited.
+  optional uint64 edit_macro_count = 7;
 }
 
 // Metrics for multi-display details
@@ -2234,6 +2276,18 @@ message JniInspectionEvent {
     ONLOAD_INSPECTION_EVENT = 4;
     // Set when the FindMethod inspection quickfix is used.
     FIND_METHOD_INSPECTION_EVENT = 5;
+    // Set when the FindField inspection quickfix is used.
+    FIND_FIELD_INSPECTION_EVENT = 6;
+    // Set when the FindClass inspection quickfix is used.
+    FIND_CLASS_INSPECTION_EVENT = 7;
+    // Set when the RegisterNatives inspection quickfix is used.
+    REGISTER_NATIVES_INSPECTION_EVENT = 8;
+    // Set when the CallMethod inspection quickfix is used.
+    CALL_METHOD_INSPECTION_EVENT = 9;
+    // Set when the GetField inspection quickfix is used.
+    GET_FIELD_INSPECTION_EVENT = 10;
+    // Set when the SetField inspection quickfix is used.
+    SET_FIELD_INSPECTION_EVENT = 11;
   }
 
   optional JniInspectionType type = 1;
@@ -2871,6 +2925,13 @@ message GradleBuildVariant {
   // Per-ABI native build info.
   repeated NativeBuildConfigInfo native_build_config = 21;
 
+  // Whether annotation processing could be run incrementally
+  optional bool is_annotation_processing_incremental = 22;
+
+  // Whether this variant (a base module or dynamic feature) is marked as
+  // instant enabled in its manifest (Google Play Instant / Instant Apps)
+  optional bool is_instant_enabled = 23;
+
   // The nature of this variant.
   // The test variants have an associated tested variant.
   // See com.android.builder.core.VariantType
@@ -2974,6 +3035,10 @@ message AnnotationProcessorInfo {
 
   // How the processor was included in the build file.
   optional InclusionType inclusion_type = 2;
+
+  // Whether the annotation processor is
+  // incremental(isolating/aggregating/dynamic)
+  optional bool is_incremental = 3;
 
   enum InclusionType {
     // The old apt way of including them.
@@ -3080,6 +3145,7 @@ message GradleBuildProfileSpan {
     TASK_EXECUTION = 14;
     WORKER_EXECUTION = 15;
     THREAD_EXECUTION = 16;
+    ARTIFACT_TRANSFORM = 17;
     INITIAL_METADATA = 100 [deprecated = true];
     FINAL_METADATA = 101 [deprecated = true];
     GENERAL_CONFIG = 102;
@@ -4473,13 +4539,40 @@ message CpuCaptureMetadata {
     // The capture was successful
     SUCCESS = 1;
     // The device responded to our request for a capture with an error
-    STOP_CAPTURING_FAILURE = 2;
+    // Deprecated by STOP_FAILED_* enum constants.
+    STOP_CAPTURING_FAILURE = 2 [deprecated = true];
     // The capture data sent back to us could not be parsed successfully
     PARSING_FAILURE = 3;
     // User aborted parsing the trace after being notified it was too large
     USER_ABORTED_PARSING = 4;
     // There was an error while preprocessing the trace file
     PREPROCESS_FAILURE = 5;
+    // There was no ongoing capture to stop.
+    STOP_FAILED_NO_GOING_PROFILING = 6;
+    // The profiled app process died.
+    STOP_FAILED_APP_PROCESS_DIED = 7;
+    // The PID of the profiled app process changed (it's another process).
+    STOP_FAILED_APP_PID_CHANGED = 8;
+    // The profiler process (e.g., simpleperf process) died.
+    STOP_FAILED_PROFILER_PROCESS_DIED = 9;
+    // The shell/DDMS command to stop capture didn't return successfully.
+    STOP_FAILED_STOP_COMMAND_FAILED = 10;
+    // The capture didn't stop after the stop command.
+    STOP_FAILED_STILL_PROFILING_AFTER_STOP = 11;
+    // The wait for the trace file to complete couldn't be initiated.
+    STOP_FAILED_CANNOT_START_WAITING = 12;
+    // The wait for the trace file to complete timed out.
+    STOP_FAILED_WAIT_TIMEOUT = 13;
+    // The wait for the trace file to complete had unspecified failure.
+    STOP_FAILED_WAIT_FAILED = 14;
+    // Couldn't read events while waiting for the trace file to complete.
+    STOP_FAILED_CANNOT_READ_WAIT_EVENT = 15;
+    // Couldn't copy/move the trace file within the device.
+    STOP_FAILED_CANNOT_COPY_FILE = 16;
+    // Couldn't form the trace file into the format expected by Studio.
+    STOP_FAILED_CANNOT_FORM_FILE = 17;
+    // Couldn't read the content of the trace file.
+    STOP_FAILED_CANNOT_READ_FILE = 18;
   }
 
   // The result of a CPU capture
@@ -4507,6 +4600,9 @@ message CpuCaptureMetadata {
   // Timeout set by the user for the system "profiler.cpu.art.stop.timeout.sec"
   // property. Set if |profiling_config.type| is |ART|.
   optional int32 art_stop_timeout_sec = 7;
+
+  // How much time it took to stop CPU recording.
+  optional int32 stopping_time_ms = 8;
 }
 
 // Data associated with importing CPU traces.
@@ -5041,6 +5137,10 @@ message GradleSyncStats {
     TRIGGER_QF_WRAPPER_GRADLE_VERSION_FIXED = 421;
     // SDK has been removed from manifest files
     TRIGGER_QF_SDK_REMOVED_FROM_MANIFEST = 422;
+    // Gradle distribution file has been deleted
+    TRIGGER_QF_GRADLE_DISTRIBUTION_DELETED = 423;
+    // Property distributionSha256Sum was removed from Gradle wrapper
+    TRIGGER_QF_DISTRIBUTIONSHA256SUM_REMOVED_FROM_WRAPPER = 424;
     // Last marker for syncs caused by quickfixes
     TRIGGER_QF_LAST_MARKER = 999;
 
@@ -5603,6 +5703,10 @@ message RunEvent {
 
   // Enum name representing deploy failure reason
   optional string deploy_failure_id = 21;
+  // Whether the user configured AC to fall back to Run
+  optional bool apply_changes_fallback_to_run = 22;
+  // Whether the user configured ACC to fall back to Run
+  optional bool apply_code_changes_fallback_to_run = 23;
 }
 
 message LaunchTaskDetail {
@@ -6139,7 +6243,6 @@ message DataBindingEvent {
     // Whether user enabled data binding in gradle file.
     optional bool data_binding_enabled = 1;
 
-    /// These are set when the message is a |DATA_BINDING_BUILD_EVENT|
     // # of data binding layout xmls
     optional uint32 layout_xml_count = 2;
 
@@ -6154,6 +6257,12 @@ message DataBindingEvent {
 
     // # of data binding related errors generated by compiler
     optional uint32 error_count = 6;
+
+    // # of modules in this project
+    optional uint32 module_count = 7;
+
+    // # of modules with data binding enabled
+    optional uint32 data_binding_enabled_module_count = 8;
 
     // Observable type metrics
     optional ObservableMetrics observable_metrics = 101;
@@ -6329,5 +6438,155 @@ message WindowsDefenderStatus {
     ALL_EXCLUDED = 2;
     SOME_EXCLUDED = 3;
     NONE_EXCLUDED = 4;
+  }
+}
+
+// Event for memory settings configuration and recommendation
+message MemorySettingsEvent {
+  // Kind of the event.
+  optional EventKind kind = 1;
+  // Current memory settings.
+  optional MemorySettings current = 2;
+  // Recommended memory settings.
+  optional MemorySettings recommended = 3;
+  // New memory settings changed by users (may or may not be saved yet).
+  optional MemorySettings changed = 4;
+
+  enum EventKind {
+    UNKNOWN = 0;
+    // Configuration dialog shown.
+    SHOW_CONFIG_DIALOG = 1;
+    // Users change the settings and save.
+    SETTINGS_CHANGE_SAVED = 2;
+    // Users change the settings but do not save.
+    SETTINGS_CHANGE_CANCELLED = 3;
+    // Session uses the non-default recommended heap size.
+    NON_DEFAULT_RECOMMENDATION_USED = 4;
+    // Users click the "Apply recommendation" button in the memory panel.
+    APPLY_RECOMMENDATION_BUTTON_CLICKED = 5;
+    // Recommendation notification shown.
+    SHOW_RECOMMENDATION = 6;
+    // Users click "Save and Restart" from recommendation notification.
+    SAVE_AND_RESTART = 7;
+    // Users click "Configure" from recommendation notification.
+    CONFIGURE = 8;
+    // Users click "Remind me later" from recommendation notification.
+    REMIND_ME_LATER = 9;
+    // Users click "Do not ask again" from recommendation notification.
+    DO_NOT_ASK = 10;
+  }
+}
+
+message MemorySettings {
+  optional int32 ide_xmx = 1;
+  optional int32 gradle_daemon_xmx = 2;
+  optional int32 kotlin_daemon_xmx = 3;
+}
+
+// Event related to studion update flow
+message StudioUpdateFlowEvent {
+  optional Kind event_kind = 1;
+
+  // Version we are updating to, e.g. "182.5107.16.33.5314842"
+  optional string studio_new_version = 2;
+
+  // Set when event_kind = DIALOG_OPEN
+  optional DialogTrigger dialog_trigger = 3;
+
+  // Set when event_kind = DIALOG_CLICK_ACTION
+  // Some extra buttons can be added to the update dialog with
+  // the build xml entry. The action is to open provided link in the browser.
+  // Typically it is 'Release notes' button, but since it is not fixed,
+  // seems good to send the name of the action.
+  // This text comes as part of an update information xml from Google
+  // and does not contain any end user information.
+  optional string action_name = 4;
+
+  enum Kind {
+    UNKNOWN_KIND = 0;
+    NOTIFICATION_SHOWN = 1;
+    // User clicked on the notification update action
+    NOTIFICATION_UPDATE_LINK_CLICKED = 2;
+    // Update dialog was opened
+    DIALOG_OPEN = 3;
+
+    // Dialog button clicks
+    DIALOG_CLICK_UPDATE = 4;
+    DIALOG_CLICK_IGNORE = 5;
+    DIALOG_CLICK_LATER = 6;
+    // Other non-fixed actions (typically 'Release notes' link)
+    DIALOG_CLICK_ACTION = 7;
+
+    // Patch download result
+    PATCH_DOWNLOAD_SUCCESS = 8;
+    PATCH_DOWNLOAD_FAILURE = 9;
+  }
+
+  // What triggers update dialog to open
+  enum DialogTrigger {
+    UNKNOWN_DIALOG_TRIGER = 0;
+    // User clicks check for updates action to open dialog
+    MANUAL = 1;
+    // User clicked on the notification update action to open dialog
+    NOTIFICATION = 2;
+  }
+}
+
+// Contains information on what we show on the build output window when the
+// build fails.
+message BuildErrorMessage {
+  enum ErrorType {
+    UNKNOWN_ERROR_TYPE = 0;
+    JAVA_COMPILER = 1;
+    KOTLIN_COMPILER = 2;
+    CLANG = 3;
+    CMAKE = 4;
+    DATA_BINDING = 5;
+    XML_PARSER = 6;
+    AAPT = 7;
+    D8 = 8;
+    R8 = 9;
+    RESOURCE_AND_ASSET_MERGER = 10;
+    GENERAL_ANDROID_GRADLE_PLUGIN = 11;
+  }
+
+  enum FileType {
+    UNKNOWN_FILE_TYPE = 0;
+    // The file location is pointing to a build generated file.
+    BUILD_GENERATED_FILE = 1;
+    // The file location is pointing to a project file.
+    PROJECT_FILE = 2;
+  }
+
+  // The tool produced the error.
+  optional ErrorType error_shown_type = 1;
+  // Whether the file location was parsed and shown successfully.
+  optional bool file_location_included = 2;
+  // The included file type.
+  optional FileType file_included_type = 3;
+  // Whether the line location in file was parsed and shown successfully.
+  optional bool line_location_included = 4;
+}
+
+// Statistics for what we show on the build output window.
+message BuildOutputWindowStats {
+  repeated BuildErrorMessage build_error_messages = 1;
+}
+
+// Statistics for Android Gradle Plugin DSL methods that are invoked in
+// build scripts or by other Gradle plugins.
+message GradlePluginDslUsageStats {
+  // A data point for each DSL method the user invokes.
+  repeated DslElementUse dsl_element_use = 1;
+
+  // Statistics for an individual Android Gradle Plugin DSL method
+  message DslElementUse {
+    // The DSL method called in the build script or by another Gradle Plugin
+    // This is an enum in android git:
+    // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+    // DslElementType
+    optional int32 type = 1;
+    // The number of times this method is called within this multi-project build
+    optional int32 count = 2;
   }
 }
