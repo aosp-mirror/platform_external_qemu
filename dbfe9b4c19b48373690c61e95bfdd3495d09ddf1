@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54dde93c_8ee4b059",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "While this isn\u0027t a regression, based on how this is used cross-thread I think this should be\n\nstd::atomic\u003cbool\u003e mRunning \u003d false;",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 26
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd4c2362_7aaf7f02",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "Storing non-primitive types on an atomic is not very common, so this is probably breaking mingw.  Instead store this value directly and guard it with the lock.  I\u0027ll provide more comments with details:\n\nPlayConfig mPlayConfig;",
+      "range": {
+        "startLine": 240,
+        "startChar": 16,
+        "endLine": 240,
+        "endChar": 26
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3869655b_bd32ef43",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "This should be changed to false\n\nOr better yet, remove this line entirely since the value of member-initialized to false above.",
+      "range": {
+        "startLine": 613,
+        "startChar": 6,
+        "endLine": 613,
+        "endChar": 20
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbf098b1_deaf966b",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "This line can likely be removed",
+      "range": {
+        "startLine": 614,
+        "startChar": 6,
+        "endLine": 614,
+        "endChar": 21
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef12a897_7d97119b",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1265,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "See my comment below about moving mRunning to play() to avoid a race condition",
+      "range": {
+        "startLine": 1265,
+        "startChar": 4,
+        "endLine": 1265,
+        "endChar": 20
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c53232f4_5bb8a947",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1275,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "Prefer AutoLock versus explicitly locking:\n\nwhile (true) {\n  int rc \u003d play();\n  \n  AutoLock lock(mLock);\n  if (rc || mPlayConfig.looping) {\n    mRunning \u003d false;\n    break;\n  }\n}",
+      "range": {
+        "startLine": 1264,
+        "startChar": 4,
+        "endLine": 1275,
+        "endChar": 19
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86c30119_1f71c33f",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1385,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "I think there\u0027s a deadlock here, which I addressed in my other comment for this block.  Would it be possible to add unittests in a follow-up CL?  There\u0027s the start of one here: https://android-review.googlesource.com/c/platform/external/qemu/+/984778/7/android/android-emu/android/mp4/MP4Dataset_test.cpp\n\nThe deadlock would be:\n\nT1: calls stop(), setting mRunning to false\nT1: calls play(), notices mRunning is false, so it calls mWorkerThread.reset() under lock.  This  waits for the previous thread to exit\nT2: In workerThreadFunc after noticing mRunning\u003dfalse, tries to acquire mLock after play() returns\n\n(No action is required in this CL)",
+      "range": {
+        "startLine": 1385,
+        "startChar": 8,
+        "endLine": 1385,
+        "endChar": 87
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d803db62_6dcb605d",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1390,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "bool stillRunning \u003d false;\n{\n    AutoLock lock(mLock);\n    mPlayConfig \u003d config;\n    stillRunning \u003d mRunning;\n}\n\nif (!stillRunning) {\n   // Reset the worker thread out of the lock, because destroying the previous thread may take the lock.\n   mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));\n\n   mRunning \u003d true;\n   mWorkerThread-\u003estart();\n}\n\n\nIt\u0027s safe to call mWorkerThread-\u003estart() under the lock.  However, I think we need to move the mRunning state into this function to prevent the following sequence:\n\nT1: start(PlayConfig) with running\u003dfalse\nT2 created, but not started\nT1: start(PlayConfig) with running\u003dfalse (again)\nT1: blocks and waits for T2 to complete before creating T3",
+      "range": {
+        "startLine": 1381,
+        "startChar": 4,
+        "endLine": 1390,
+        "endChar": 5
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32bd01a0_b8e40cdf",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T06:31:10Z",
+      "side": 1,
+      "message": "Since this has a default value, I recommend making this start(PlayConfig playConfig \u003d PlayConfig())",
+      "range": {
+        "startLine": 65,
+        "startChar": 23,
+        "endLine": 65,
+        "endChar": 51
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
