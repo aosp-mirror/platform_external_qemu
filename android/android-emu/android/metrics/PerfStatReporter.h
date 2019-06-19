@@ -19,6 +19,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/metrics/MetricsReporter.h"
+#include "android/metrics/PeriodicReporter.h"
 
 #include <memory>
 
@@ -64,7 +65,7 @@ private:
     android::base::Looper* const mLooper;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
-
+    android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     // TODO: Add more perf stats here.
     android::base::Lock mLock;
 
