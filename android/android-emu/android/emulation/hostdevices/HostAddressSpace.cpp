@@ -82,26 +82,36 @@ public:
     }
 
     void setHostAddrByPhysAddr(uint64_t physAddr, void* hva) {
+        fprintf(stderr, "%s:%d physAddr=%llx hva=%p\n", __func__, __LINE__, (unsigned long long)physAddr, hva);
+
         AutoLock lock(mLock);
         if (!physAddr) return;
 
         uint64_t off = physAddr - mPciStart;
+        fprintf(stderr, "%s:%d off=%llx\n", __func__, __LINE__, (unsigned long long)off);
 
         for (auto &it : mEntries) {
             for (auto &it2 : it.second.blocks) {
+                fprintf(stderr, "%s:%d off=%llx it2.first=%llx hva=%p\n", __func__, __LINE__, (unsigned long long)off, (unsigned long long)it2.first, hva);
                 if (it2.first == off) {
                     it2.second.hva = hva;
+                    fprintf(stderr, "%s:%d off=%llx it2.first=%llx hva=%p OK\n", __func__, __LINE__, (unsigned long long)off, (unsigned long long)it2.first, hva);
                     return;
                 }
             }
         }
+
+        fprintf(stderr, "%s:%d physAddr=%llx hva=%p BAD\n", __func__, __LINE__, (unsigned long long)physAddr, hva);
     }
 
     void unsetHostAddrByPhysAddr(uint64_t physAddr) {
+        fprintf(stderr, "%s:%d physAddr=%llx\n", __func__, __LINE__, (unsigned long long)physAddr);
+
         AutoLock lock(mLock);
         if (!physAddr) return;
 
         uint64_t off = physAddr - mPciStart;
+        fprintf(stderr, "%s:%d off=%llx\n", __func__, __LINE__, (unsigned long long)off);
 
         for (auto &it : mEntries) {
             for (auto &it2 : it.second.blocks) {
@@ -114,24 +124,31 @@ public:
     }
 
     void* getHostAddr(uint64_t physAddr) {
+        fprintf(stderr, "%s:%d physAddr=%llx\n", __func__, __LINE__, (unsigned long long)physAddr);
+
         AutoLock lock(mLock);
         if (!physAddr) return nullptr;
 
         uint64_t off = physAddr - mPciStart;
+        fprintf(stderr, "%s:%d off=%llx\n", __func__, __LINE__, (unsigned long long)off);
 
         // First check ping infos
         for (const auto &it : mEntries) {
+            fprintf(stderr, "%s:%d physAddr=%llx it.second.pingInfo=%p\n", __func__, __LINE__, (unsigned long long)physAddr, it.second.pingInfo);
             if ((uint64_t)(uintptr_t)it.second.pingInfo == physAddr) return it.second.pingInfo;
         }
 
         for (const auto &it : mEntries) {
             for (const auto &it2 : it.second.blocks) {
+                fprintf(stderr, "%s:%d off=%llx it2.first=%llx\n", __func__, __LINE__, (unsigned long long)off, (unsigned long long)it2.first);
                 if (it2.first == off) {
+                    fprintf(stderr, "%s:%d off=%llx it2.first=%llx it2.second.hva=%p\n", __func__, __LINE__, (unsigned long long)off, (unsigned long long)it2.first, it2.second.hva);
                     return it2.second.hva;
                 }
             }
         }
 
+        fprintf(stderr, "%s:%d physAddr=%llx nullptr\n", __func__, __LINE__, (unsigned long long)physAddr);
         return nullptr;
     }
 

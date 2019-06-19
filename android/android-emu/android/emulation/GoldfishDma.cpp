@@ -26,6 +26,8 @@ static void* android_goldfish_dma_get_host_addr(uint64_t guest_paddr) {
         return host_ptr;
     }
 
+    fprintf(stderr, "%s:%d android::DmaMap::get()=%p\n", __func__, __LINE__, android::DmaMap::get());
+
     return android::DmaMap::get()->getHostAddr(guest_paddr);
 }
 

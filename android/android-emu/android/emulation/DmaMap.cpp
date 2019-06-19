@@ -44,6 +44,7 @@ namespace android {
 static DmaMap* sInstance = nullptr;
 
 DmaMap* DmaMap::get() {
+    fprintf(stderr, "%s:%d sInstance=%p\n", __func__, __LINE__, sInstance);
     return sInstance;
 }
 

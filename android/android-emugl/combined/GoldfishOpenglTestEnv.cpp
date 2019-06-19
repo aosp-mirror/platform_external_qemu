@@ -245,10 +245,12 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
     },
     .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {
         (void)size;
+        fprintf(stderr, "goldfish-opengl vm ops: mapUserBackedRam gpa=0x%llx hva=%p\n", (unsigned long long)gpa, hva);
         HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa, hva);
     },
     .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {
         (void)size;
+        fprintf(stderr, "goldfish-opengl vm ops: unmapUserBackedRam gpa=0x%llx\n", (unsigned long long)gpa);
         HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
     },
     .getVmConfiguration = [](VmConfiguration* out) {
@@ -264,7 +266,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         fprintf(stderr, "goldfish-opengl vm ops: allow real audio\n");
      },
     .physicalMemoryGetAddr = [](uint64_t gpa) {
-        fprintf(stderr, "goldfish-opengl vm ops: physical memory get addr\n");
+        fprintf(stderr, "goldfish-opengl vm ops: physicalMemoryGetAddr gpa=0x%llx\n", (unsigned long long)gpa);
         void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
         if (!res) return (void*)(uintptr_t)gpa;
         return res;

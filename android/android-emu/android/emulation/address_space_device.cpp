@@ -219,6 +219,8 @@ private:
     }
 
     bool addMemoryMappingLocked(uint64_t gpa, void *ptr, uint64_t size) {
+        fprintf(stderr, "%s:%d gpa=%llx ptr=%p\n", __func__, __LINE__, (unsigned long long)gpa, ptr);
+
         if (mMemoryMappings.insert({gpa, {ptr, size}}).second) {
             sVmOps->mapUserBackedRam(gpa, ptr, size);
             return true;
@@ -228,6 +230,8 @@ private:
     }
 
     bool removeMemoryMappingLocked(uint64_t gpa, void *ptr, uint64_t size) {
+        fprintf(stderr, "%s:%d gpa=%llx ptr=%p\n", __func__, __LINE__, (unsigned long long)gpa, ptr);
+
         if (mMemoryMappings.erase(gpa) > 0) {
             sVmOps->unmapUserBackedRam(gpa, size);
             return true;
