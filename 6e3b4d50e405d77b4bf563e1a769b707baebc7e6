@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea7b2fff_2d783d74",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-19T19:05:35Z",
+      "side": 1,
+      "message": "The ASAN failure is here:\n\nmAsyncRequestContextMap.erase(itr) invalidates itr, but the line below uses it.",
+      "range": {
+        "startLine": 290,
+        "startChar": 38,
+        "endLine": 293,
+        "endChar": 65
+      },
+      "revId": "6e3b4d50e405d77b4bf563e1a769b707baebc7e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
