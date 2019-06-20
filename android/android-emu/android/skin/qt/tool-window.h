@@ -181,6 +181,7 @@ public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
     void showVirtualSceneControls(bool show);
+    void checkForVirtualsceneControlsWindow();
 
 private slots:
     void on_back_button_pressed();

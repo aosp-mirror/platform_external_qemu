@@ -404,10 +404,12 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     p.end();
 }
 
-void VirtualSceneControlWindow::setActive(bool active) {
-    mIsActive = active;
+void VirtualSceneControlWindow::setActiveForCamera(bool active) {
+    mIsActiveCamera = active;
     if (active) {
-        show();
+        if (!mIsActiveRecording) {
+            show();
+        }
 
         if (mShouldShowInfoDialog) {
             mEmulatorWindow->containerWindow()->showVirtualSceneInfoDialog();
@@ -417,7 +419,9 @@ void VirtualSceneControlWindow::setActive(bool active) {
                     SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
         }
     } else {
-        hide();
+        if (!mIsActiveRecording) {
+            hide();
+        }
 
         // The camera session has ended.  If the info dialog is still open, we
         // want to show it again next time in case the camera crashed and the
@@ -432,8 +436,20 @@ void VirtualSceneControlWindow::setActive(bool active) {
     }
 }
 
+void VirtualSceneControlWindow::setActiveForRecording(bool active) {
+    mIsActiveRecording = active;
+    if (mIsActiveCamera) {
+        return;
+    }
+    if (active) {
+        show();
+    } else {
+        hide();
+    }
+}
+
 bool VirtualSceneControlWindow::isActive() {
-    return mIsActive;
+    return mIsActiveCamera || mIsActiveRecording;
 }
 
 void VirtualSceneControlWindow::reportMouseButtonDown() {
@@ -631,6 +647,7 @@ QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
 }
 
 void VirtualSceneControlWindow::setRecordingState(bool state) {
+    setActiveForRecording(state);
     if (state) {
         mControlsUi->recordButton->setIcon(
                 getIconForCurrentTheme("recordCircle"));
