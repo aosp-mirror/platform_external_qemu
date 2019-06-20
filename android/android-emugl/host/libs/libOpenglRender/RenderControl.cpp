@@ -184,6 +184,7 @@ static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_
 // Vulkan
 static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
 static constexpr android::base::StringView kDeferredVulkanCommands = "ANDROID_EMU_deferred_vulkan_commands";
+static constexpr android::base::StringView kVulkanNullOptionalStrings = "ANDROID_EMU_vulkan_null_optional_strings";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -377,6 +378,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool vulkanEnabled = shouldEnableVulkan();
     bool deferredVulkanCommandsEnabled =
         shouldEnableVulkan() && shouldEnableDeferredVulkanCommands();
+    bool vulkanNullOptionalStringsEnabled =
+        shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -420,6 +423,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (deferredVulkanCommandsEnabled && name == GL_EXTENSIONS) {
         glStr += kDeferredVulkanCommands;
+        glStr += " ";
+    }
+
+    if (vulkanNullOptionalStringsEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanNullOptionalStrings;
         glStr += " ";
     }
 

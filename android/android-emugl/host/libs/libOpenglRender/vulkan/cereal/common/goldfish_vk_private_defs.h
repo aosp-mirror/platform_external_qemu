@@ -184,6 +184,9 @@ typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, IOSurfaceRef* pIO
 
 #endif  // VK_MVK_moltenvk
 
+// VulkanStream features
+#define VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT (1 << 0)
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

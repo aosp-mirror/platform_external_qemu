@@ -17,18 +17,29 @@
 
 #include "android/base/Pool.h"
 
+#include "emugl/common/feature_control.h"
+
 #include <vector>
 
 #include <inttypes.h>
 
 #define E(fmt,...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
+using emugl::emugl_feature_is_enabled;
+
 namespace goldfish_vk {
 
 class VulkanStream::Impl : public android::base::Stream {
 public:
     Impl(IOStream* stream)
-        : mStream(stream) { unsetHandleMapping(); }
+        : mStream(stream) {
+
+        unsetHandleMapping();
+
+        if (emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings)) {
+            mFeatureBits |= VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT;
+        }
+    }
 
     ~Impl() { }
 
@@ -80,6 +91,10 @@ public:
         return mCurrentHandleMapping;
     }
 
+    uint32_t getFeatureBits() const {
+        return mFeatureBits;
+    }
+
 private:
     size_t oustandingWriteBuffer() const {
         return mWritePos;
@@ -121,6 +136,7 @@ private:
     IOStream* mStream = nullptr;
     DefaultHandleMapping mDefaultHandleMapping;
     VulkanHandleMapping* mCurrentHandleMapping;
+    uint32_t mFeatureBits = 0;
 };
 
 VulkanStream::VulkanStream(IOStream *stream) :
@@ -199,6 +215,10 @@ void VulkanStream::unsetHandleMapping() {
 
 VulkanHandleMapping* VulkanStream::handleMapping() const {
     return mImpl->handleMapping();
+}
+
+uint32_t VulkanStream::getFeatureBits() const {
+    return mImpl->getFeatureBits();
 }
 
 VulkanMemReadingStream::VulkanMemReadingStream(uint8_t* start)

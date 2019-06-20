@@ -745,6 +745,11 @@ class VulkanTypeInfo(object):
     def onEnd(self,):
         pass
 
+def hasNullOptionalStringFeature(forEachType):
+    return (hasattr(forEachType, "onCheckWithNullOptionalStringFeature")) and \
+           (hasattr(forEachType, "endCheckWithNullOptionalStringFeature")) and \
+           (hasattr(forEachType, "finalCheckWithNullOptionalStringFeature"))
+
 # General function to iterate over a vulkan type and call code that processes
 # each of its sub-components, if any.
 def iterateVulkanType(typeInfo, vulkanType, forEachType):
@@ -773,11 +778,18 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
 
         if vulkanType.isString():
 
-            if needCheck:
+            if needCheck and hasNullOptionalStringFeature(forEachType):
+                forEachType.onCheckWithNullOptionalStringFeature(vulkanType)
+                forEachType.onString(vulkanType)
+                forEachType.endCheckWithNullOptionalStringFeature(vulkanType)
+                forEachType.onString(vulkanType)
+                forEachType.finalCheckWithNullOptionalStringFeature(vulkanType)
+            elif needCheck:
                 forEachType.onCheck(vulkanType)
-            forEachType.onString(vulkanType)
-            if needCheck:
+                forEachType.onString(vulkanType)
                 forEachType.endCheck(vulkanType)
+            else:
+                forEachType.onString(vulkanType)
 
         elif vulkanType.isArrayOfStrings():
 
