@@ -10,15 +10,17 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/QemuMiscPipe.h"
-#include "android/base/files/MemStream.h"
+
 #include "android/base/ProcessControl.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/base/files/MemStream.h"
 #include "android/emulation/AndroidMessagePipe.h"
+#include "android/emulation/control/AdbInterface.h"
 #include "android/emulation/control/vm_operations.h"
-#include "android/utils/debug.h"
-#include "android/utils/system.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-sensors.h"
+#include "android/utils/debug.h"
+#include "android/utils/system.h"
 
 #include <assert.h>
 
@@ -27,7 +29,6 @@
 #include <random>
 #include <thread>
 #include <vector>
-
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
 
@@ -37,6 +38,8 @@ static std::atomic<int> num_watchdog {};
 static std::atomic<int> num_hostcts_watchdog {};
 
 extern "C" int get_host_cts_heart_beat_count(void);
+
+namespace fc = android::featurecontrol;
 
 namespace android {
 static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
@@ -176,6 +179,15 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
                 std::thread{watchHostCtsFunction, 30}.detach();
+            }
+
+            // start multi-display service after boot completion
+            if (fc::isEnabled(fc::MultiDisplay)) {
+                adbInterface->enqueueCommand(
+                        {"shell", "am", "broadcast", "-a",
+                         "com.android.emulator.multidisplay.START", "-n",
+                         "com.android.emulator.multidisplay/"
+                         ".MultiDisplayServiceReceiver"});
             }
 
             if (changing_language_country_locale) {
