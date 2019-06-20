@@ -130,10 +130,16 @@ int64_t RenderMultiplexer::render() {
         return -1;
     }
 
-    base::Optional<::offworld::VideoInjectionRequest> maybe_next_request =
-            videoinjection::VideoInjectionController::tryGetNextRequest(
-                    base::Ok());
-    if (maybe_next_request) {
+    base::Optional<::android::videoinjection::RequestContext>
+            maybe_next_request_context = videoinjection::
+                    VideoInjectionController::tryGetNextRequestContext();
+
+    //If there is pending RequestContext, invoke execution accordingly.
+    if (maybe_next_request_context) {
+        base::Optional<::offworld::VideoInjectionRequest> maybe_next_request =
+            maybe_next_request_context->request;
+        uint32_t async_id = maybe_next_request_context->asyncId;
+
         switch (maybe_next_request->function_case()) {
             case ::offworld::VideoInjectionRequest::kDisplayDefaultFrame:
                 switchRenderer(mDefaultRenderer.get());
@@ -156,7 +162,7 @@ int64_t RenderMultiplexer::render() {
                 break;
             case ::offworld::VideoInjectionRequest::kLoad:
                 switchRenderer(mVideoRenderer.get());
-                loadVideo(maybe_next_request->load().video_data());
+                loadVideo(maybe_next_request->load().video_data(), async_id);
                 break;
             default:
                 switchRenderer(mDefaultRenderer.get());
@@ -169,13 +175,27 @@ int64_t RenderMultiplexer::render() {
     return mCurrentRenderer->render();
 }
 
-void RenderMultiplexer::loadVideo(const std::string& video_data) {
+void RenderMultiplexer::loadVideo(const std::string& video_data,
+                                  uint32_t async_id) {
+
+    //Send async response indicating load starts.
+    android::videoinjection::VideoInjectionResult start_result = base::Ok();
+    videoinjection::VideoInjectionController::trySendAsyncResponse(
+            async_id, &start_result, false);
+
     TempFile* tempfile = tempfile_create();
     const char* path = tempfile_path(tempfile);
     FILE* videofile = fopen(path, "wb");
     android::base::ScopedFd fd(fileno(videofile));
+
+    //If there is any Error in Loading.
     if (!writeStringToFile(fd.get(), video_data)) {
         LOG(ERROR) << "Failed to write video to tempfile.";
+        android::videoinjection::VideoInjectionResult result =
+                android::base::Err(
+                        videoinjection::VideoInjectionError::FileIsNotLoaded);
+        videoinjection::VideoInjectionController::trySendAsyncResponse(
+                async_id, &result, false);
         return;
     }
 
@@ -184,6 +204,10 @@ void RenderMultiplexer::loadVideo(const std::string& video_data) {
             std::unique_ptr<videoplayer::VideoPlayerNotifier>(
                     new VideoplaybackNotifier()));
 
+    //File Loaded, sends async response indicating execution completed.
+    android::videoinjection::VideoInjectionResult result = base::Ok();
+    videoinjection::VideoInjectionController::trySendAsyncResponse(
+            async_id, &result, true);
     // Force the video player to be in a known stable state.
     mPlayer->stop();
 }
