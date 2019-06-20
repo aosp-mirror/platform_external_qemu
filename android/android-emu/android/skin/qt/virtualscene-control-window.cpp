@@ -652,6 +652,7 @@ void VirtualSceneControlWindow::setRecordingState(bool state) {
         mControlsUi->recordButton->setIcon(
                 getIconForCurrentTheme("recordCircle"));
         mControlsUi->recordButton->setIconSize(QSize(30, 20));
+        mControlsUi->recordButton->setText(tr("RECORDING ONGOING "));
         mControlsUi->recordButton->show();
     } else {
         mControlsUi->recordButton->hide();
