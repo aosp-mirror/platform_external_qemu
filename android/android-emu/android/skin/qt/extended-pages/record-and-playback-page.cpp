@@ -35,6 +35,7 @@ void RecordAndPlaybackPage::removeSettingsTab() {
 }
 
 void RecordAndPlaybackPage::setRecordingStateSlot(bool state) {
+    emit ensureVirtualSceneWindowCreated();
     emit setRecordingStateSignal(state);
 }
 
