@@ -32,6 +32,12 @@ enum class VideoInjectionError {
     InternalError,
 };
 
+struct RequestContext {
+    ::offworld::VideoInjectionRequest request;
+    base::Optional<android::AsyncMessagePipeHandle> pipe;
+    uint32_t asyncId;
+};
+
 using VideoInjectionResult = base::Result<void, VideoInjectionError>;
 std::ostream& operator<<(std::ostream& os, const VideoInjectionError& value);
 
@@ -67,8 +73,13 @@ public:
 
     // Return the next video injection request in the queue if any and the
     // VideoInjectionController has been created. The
-    static base::Optional<::offworld::VideoInjectionRequest>
-    tryGetNextRequest(VideoInjectionResult previousResult);
+    static base::Optional<android::videoinjection::RequestContext> tryGetNextRequestContext();
+
+    //Try to send the async response back to java video injection controller
+    static void trySendAsyncResponse(
+            uint32_t async_id,
+            VideoInjectionResult result,
+            bool isCompleted);
 
     // Reset the current state. Clear the queue. Send response for any pending
     // request.
@@ -77,8 +88,7 @@ public:
     // Handles the previous request execution result.
     //
     // Returns the next video injection request from the queue if any.
-    virtual base::Optional<::offworld::VideoInjectionRequest> getNextRequest(
-        VideoInjectionResult previousResult) = 0;
+    virtual base::Optional<android::videoinjection::RequestContext> getNextRequestContext() = 0;
 
     //
     // Offworld API
