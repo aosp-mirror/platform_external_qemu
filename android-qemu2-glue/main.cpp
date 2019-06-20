@@ -902,20 +902,6 @@ static int startEmulatorWithMinConfig(
     return 0;
 }
 
-static std::string BuildCpuName(const char* cpu, const char* features) {
-    if (features) {
-        if (!strcmp(features, "safe")) {
-            return cpu;  // 'safe' is noop.
-        }
-
-        if (!strcmp(features, "whitelist")) {
-            return StringFormat("%s-%s", cpu, features);
-        }
-    }
-
-    return cpu;
-}
-
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
@@ -1537,7 +1523,7 @@ extern "C" int main(int argc, char** argv) {
     args.add((hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
                                                        : kTarget.qemuCpu);
 #else
-    args.add(BuildCpuName(kTarget.qemuCpu, opts->cpu_features).c_str());
+    args.add(kTarget.qemuCpu);
 #endif
 
     // Set env var to "on" for Intel PMU if the feature is enabled.
