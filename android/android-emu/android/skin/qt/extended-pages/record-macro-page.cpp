@@ -512,6 +512,18 @@ void RecordMacroPage::reportTotalDuration() {
     mAutomationMetrics.totalDurationMs += mElapsedTimeTimer.elapsed();
 }
 
+void RecordMacroPage::reportMacroRecorded() {
+    mAutomationMetrics.recordMacroCount++;
+}
+
+void RecordMacroPage::reportMacroDeleted() {
+    mAutomationMetrics.deleteMacroCount++;
+}
+
+void RecordMacroPage::reportMacroEdited() {
+    mAutomationMetrics.editMacroCount++;
+}
+
 void RecordMacroPage::reportPresetMacroPlayed(const std::string& macroName) {
     EmulatorAutomationPresetMacro presetMacro;
 
@@ -543,6 +555,9 @@ void RecordMacroPage::reportAllMetrics() {
     for (auto presetMacro : mAutomationMetrics.presetsPlayed) {
         metrics.add_played_preset_macro(presetMacro);
     }
+    metrics.set_record_macro_count(mAutomationMetrics.recordMacroCount);
+    metrics.set_delete_macro_count(mAutomationMetrics.deleteMacroCount);
+    metrics.set_edit_macro_count(mAutomationMetrics.editMacroCount);
 
     MetricsReporter::get().report(
             [metrics](android_studio::AndroidStudioEvent* event) {
@@ -617,6 +632,7 @@ void RecordMacroPage::stopRecording() {
             std::remove(oldPath.c_str());
         } else {
             createMacroItem(newName, false);
+            reportMacroRecorded();
         }
     } else {
         // Delete file.
@@ -840,6 +856,7 @@ void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
         const std::string path =
                 PathUtils::join(macrosLocation, getMacroNameFromItem(listItem));
         sAutomationAgent->setMacroName(macroName, path);
+        reportMacroEdited();
     }
 }
 
@@ -872,6 +889,8 @@ void RecordMacroPage::deleteMacroItem(RecordMacroSavedItem* macroItem) {
         const std::string path = PathUtils::join(macrosLocation, name);
         if (std::remove(path.c_str()) != 0) {
             displayErrorBox("Deletion failed.");
+        } else {
+            reportMacroDeleted();
         }
     }
 }
