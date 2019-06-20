@@ -32,6 +32,7 @@ public:
 
 signals:
     void setRecordingStateSignal(bool state);
+    void ensureVirtualSceneWindowCreated();
 
 private slots:
     void setRecordingStateSlot(bool state);

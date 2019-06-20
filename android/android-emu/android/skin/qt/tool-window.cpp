@@ -299,8 +299,13 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
     }
 }
 
+void ToolWindow::ensureVirtualSceneWindowCreated() {
+    // Creates the virtual scene control window if it does not exist.
+    mVirtualSceneControlWindow.get();
+}
+
 void ToolWindow::showVirtualSceneControls(bool show) {
-    mVirtualSceneControlWindow.get()->setActive(show);
+    mVirtualSceneControlWindow.get()->setActiveForCamera(show);
 }
 
 void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {

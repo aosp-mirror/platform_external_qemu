@@ -87,6 +87,10 @@ ExtendedWindow::ExtendedWindow(
         mToolWindow, SIGNAL(haveClipboardSharingKnown(bool)),
         mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
 
+    connect(mExtendedUi->recordAndPlaybackPage,
+            SIGNAL(ensureVirtualSceneWindowCreated()), mToolWindow,
+            SLOT(ensureVirtualSceneWindowCreated()));
+
     connect(
         mExtendedUi->settingsPage, SIGNAL(enableMultiDisplayChanged(bool, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)),
         mEmulatorWindow, SLOT(switchMultiDisplay(bool, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)));

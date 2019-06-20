@@ -65,7 +65,8 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
-    void setActive(bool active);
+    void setActiveForCamera(bool active);
+    void setActiveForRecording(bool active);
     bool isActive();
 
     void reportMouseButtonDown();
@@ -113,7 +114,8 @@ private:
     QPoint mOriginalMousePosition;
     QPoint mPreviousMousePosition;
 
-    bool mIsActive = false;
+    bool mIsActiveCamera = false;
+    bool mIsActiveRecording = false;
     bool mShouldShowInfoDialog = true;
     bool mIsHotkeyAvailable = true;
 
