@@ -18,6 +18,8 @@
 
 #include "VulkanHandleMapping.h"
 
+#include "common/goldfish_vk_private_defs.h"
+
 #include <memory>
 
 class IOStream;
@@ -53,6 +55,8 @@ public:
     void setHandleMapping(VulkanHandleMapping* mapping);
     void unsetHandleMapping();
     VulkanHandleMapping* handleMapping() const;
+
+    uint32_t getFeatureBits() const;
 
 private:
     class Impl;

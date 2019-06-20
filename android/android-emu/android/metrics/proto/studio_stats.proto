@@ -1416,7 +1416,8 @@ message EmulatorFeatureFlagState {
     VULKAN_SNAPSHOTS = 46;
     VIRTIO_INPUT = 47;
     MULTI_DISPLAY = 48;
-    // Next tag: 49
+    VULKAN_NULL_OPTIONAL_STRINGS = 49;
+    // Next tag: 50
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

@@ -417,6 +417,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTIO_INPUT;
         case android::featurecontrol::MultiDisplay:
             return android_studio::EmulatorFeatureFlagState::MULTI_DISPLAY;
+        case android::featurecontrol::VulkanNullOptionalStrings:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_NULL_OPTIONAL_STRINGS;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
