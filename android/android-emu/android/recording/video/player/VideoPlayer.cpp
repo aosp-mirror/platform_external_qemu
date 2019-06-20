@@ -995,6 +995,7 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 
 int VideoPlayerImpl::play() {
     mDataset = Mp4Dataset::create(mVideoFile);
+    mDataset->init();
     mFormatCtx = mDataset->getFormatContext();
 
     PacketQueue::init();
