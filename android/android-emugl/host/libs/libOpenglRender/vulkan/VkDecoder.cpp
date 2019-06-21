@@ -743,9 +743,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
                 VkExtensionProperties* pProperties;
-                // WARNING PTR CHECK
-                pLayerName = (const char*)(uintptr_t)vkReadStream->getBe64();
-                if (pLayerName)
+                if (vkReadStream->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT)
+                {
+                    // WARNING PTR CHECK
+                    pLayerName = (const char*)(uintptr_t)vkReadStream->getBe64();
+                    if (pLayerName)
+                    {
+                        vkReadStream->loadStringInPlace((char**)&pLayerName);
+                    }
+                }
+                else
                 {
                     vkReadStream->loadStringInPlace((char**)&pLayerName);
                 }
@@ -835,9 +842,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
-                // WARNING PTR CHECK
-                pLayerName = (const char*)(uintptr_t)vkReadStream->getBe64();
-                if (pLayerName)
+                if (vkReadStream->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT)
+                {
+                    // WARNING PTR CHECK
+                    pLayerName = (const char*)(uintptr_t)vkReadStream->getBe64();
+                    if (pLayerName)
+                    {
+                        vkReadStream->loadStringInPlace((char**)&pLayerName);
+                    }
+                }
+                else
                 {
                     vkReadStream->loadStringInPlace((char**)&pLayerName);
                 }

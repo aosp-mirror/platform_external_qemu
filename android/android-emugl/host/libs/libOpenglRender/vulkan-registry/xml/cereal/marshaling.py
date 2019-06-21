@@ -202,6 +202,19 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                 "fprintf(stderr, \"fatal: %s inconsistent between guest and host\\n\")" % (access))
             self.cgen.endIf()
 
+
+    def onCheckWithNullOptionalStringFeature(self, vulkanType):
+        self.cgen.beginIf("%s->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT" % self.streamVarName)
+        self.onCheck(vulkanType)
+
+    def endCheckWithNullOptionalStringFeature(self, vulkanType):
+        self.endCheck(vulkanType)
+        self.cgen.endIf()
+        self.cgen.beginElse()
+
+    def finalCheckWithNullOptionalStringFeature(self, vulkanType):
+        self.cgen.endElse()
+
     def endCheck(self, vulkanType):
 
         if self.checked:

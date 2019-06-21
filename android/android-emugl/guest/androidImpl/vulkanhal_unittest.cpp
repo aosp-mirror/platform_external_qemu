@@ -155,9 +155,16 @@ protected:
                 enabledExtensions.size() > 0 ? enabledExtensions.data()
                                              : nullptr;
 
+        VkApplicationInfo appInfo = {
+            VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
+            "someAppName", 1,
+            "someEngineName", 1,
+            VK_VERSION_1_0,
+        };
+
         VkInstanceCreateInfo instCi = {
             VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            0, 0, nullptr,
+            0, 0, &appInfo,
             0, nullptr,
             (uint32_t)enabledExtensions.size(),
             enabledExtensionNames,
