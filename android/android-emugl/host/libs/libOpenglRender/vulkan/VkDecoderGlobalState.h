@@ -54,6 +54,7 @@ public:
     static VkDecoderGlobalState* get();
 
     // Snapshot save/load
+    bool snapshotsEnabled() const;
 
     void save(android::base::Stream* stream);
     void load(android::base::Stream* stream);
