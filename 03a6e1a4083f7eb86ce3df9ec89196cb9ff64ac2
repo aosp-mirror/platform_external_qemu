@@ -25,6 +25,53 @@
     },
     {
       "key": {
+        "uuid": "d407cd55_8f5c9ff1",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-21T21:52:26Z",
+      "side": 1,
+      "message": "or complete\u003dfalse. It depends.",
+      "parentUuid": "2c61e331_ade0384a",
+      "range": {
+        "startLine": 144,
+        "startChar": 12,
+        "endLine": 144,
+        "endChar": 16
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66ce7d30_24ddf84e",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-21T21:52:26Z",
+      "side": 1,
+      "message": "I don\u0027t think we need this, because we already have the completed flag.",
+      "range": {
+        "startLine": 182,
+        "startChar": 4,
+        "endLine": 184,
+        "endChar": 44
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3c42a2b1_1e37ca60",
         "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
         "patchSetId": 12
@@ -64,6 +111,29 @@
         "startChar": 32,
         "endLine": 115,
         "endChar": 78
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "994a4e64_a4606a32",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-06-21T21:52:26Z",
+      "side": 1,
+      "message": "Why change to use a pointer?",
+      "range": {
+        "startLine": 81,
+        "startChar": 12,
+        "endLine": 81,
+        "endChar": 45
       },
       "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
