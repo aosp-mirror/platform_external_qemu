@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c61e331_ade0384a",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:54:05Z",
+      "side": 1,
+      "message": "With the removal of the automatic response in tryGetNextRequest, each of these case statements needs to have a trySendAsyncResponse with completed\u003dtrue.",
+      "range": {
+        "startLine": 144,
+        "startChar": 12,
+        "endLine": 144,
+        "endChar": 16
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c42a2b1_1e37ca60",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:54:05Z",
+      "side": 1,
+      "message": "This should be true, there are no more responses after this",
+      "range": {
+        "startLine": 198,
+        "startChar": 35,
+        "endLine": 198,
+        "endChar": 40
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b64a772_74a0c1a5",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:54:05Z",
+      "side": 1,
+      "message": "Keep this as a value-type.  In fact, createAsyncResponse should really pass this by-value too.  If it isn\u0027t copyable, pass a \"const VideoInjectionResult\u0026\" instead.\n\nPassing by pointer allows the function to modify the caller\u0027s value, which is unexpected here.",
+      "range": {
+        "startLine": 115,
+        "startChar": 32,
+        "endLine": 115,
+        "endChar": 78
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10dec242_c47cec73",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:54:05Z",
+      "side": 1,
+      "message": "This is a bug, this should be 1",
+      "range": {
+        "startLine": 110,
+        "startChar": 15,
+        "endLine": 110,
+        "endChar": 16
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e11e39f6_edd1caf6",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:54:05Z",
+      "side": 1,
+      "message": "Same here, and below-- Times(0) means that it isn\u0027t being called and it should",
+      "range": {
+        "startLine": 123,
+        "startChar": 15,
+        "endLine": 123,
+        "endChar": 16
+      },
+      "revId": "03a6e1a4083f7eb86ce3df9ec89196cb9ff64ac2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
