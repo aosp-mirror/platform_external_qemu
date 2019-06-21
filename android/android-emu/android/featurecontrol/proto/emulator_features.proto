@@ -72,7 +72,6 @@ enum Feature {
 
     MultiDisplay = 36;
 
-    CarPropertyTable = 43;
 
     DynamicPartition = 44;
 }

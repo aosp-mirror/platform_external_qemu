@@ -38,11 +38,6 @@ CarDataPage::CarDataPage(QWidget* parent)
     };
     mUi->tab_sensor->setSendEmulatorMsgCallback(sendFunc);
     mUi->vhal_table->setSendEmulatorMsgCallback(sendFunc);
-    if (feature_is_enabled(kFeature_CarPropertyTable)) {
-        mUi->car_property_table->setSendEmulatorMsgCallback(sendFunc);
-    } else {
-        mUi->tabWidget->removeTab(DATA_PROPERTY_TABLE_INDEX);
-    }
     if (sCarDataAgent != nullptr) {
         sCarDataAgent->setCarCallback(&CarDataPage::carDataCallback, this);
     }
@@ -73,7 +68,6 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
     } else {
         printMsg = "Received raw string: " + protoStr;
     }
-    mUi->car_property_table->processMsg(emulatorMsg);
     mUi->tab_sensor->processMsg(emulatorMsg);
     mUi->vhal_table->processMsg(emulatorMsg);
     D(printMsg.c_str());
