@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b237ab6b_877b6570",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2019-06-21T20:19:10Z",
+      "side": 1,
+      "message": "nit: line is long",
+      "revId": "e9b4c5df297ffe5c4569d0422d2b50754ac9bf61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
