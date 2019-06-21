@@ -680,6 +680,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     LOG(VERBOSE) << "Vulkan device found: "
                  << sVkEmulation->deviceInfo.physdevProps.deviceName;
+    LOG(VERBOSE) << "Supports Vulkan 1.1? "
+                 << (sVkEmulation->deviceInfo.physdevProps.apiVersion >= VK_MAKE_VERSION(1, 1, 0));
     LOG(VERBOSE) << "Has graphics queue? "
                  << sVkEmulation->deviceInfo.hasGraphicsQueueFamily;
     LOG(VERBOSE) << "Has external memory support? "
