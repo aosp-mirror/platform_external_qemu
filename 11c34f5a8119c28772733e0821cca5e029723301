@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0cd0b0ac_b2cc9ef2",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:32:26Z",
+      "side": 1,
+      "message": "Add comment:\n// Creates the virtual scene control window if it does not exist.",
+      "range": {
+        "startLine": 303,
+        "startChar": 4,
+        "endLine": 303,
+        "endChar": 37
+      },
+      "revId": "11c34f5a8119c28772733e0821cca5e029723301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "330642e1_93959777",
+        "filename": "android/android-emu/android/skin/qt/tool-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:32:26Z",
+      "side": 1,
+      "message": "Naming: ensureVirtualSceneWindowCreated",
+      "range": {
+        "startLine": 184,
+        "startChar": 9,
+        "endLine": 184,
+        "endChar": 43
+      },
+      "revId": "11c34f5a8119c28772733e0821cca5e029723301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "676d8b38_7df214b9",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-21T20:32:26Z",
+      "side": 1,
+      "message": "Does it break anything if we call show() when the window is already visible?  If not, consider simplifying and removing this \"if (!mIsActiveRecording)\" check.  Same for recording below-- although we still need the special check for hide()",
+      "range": {
+        "startLine": 410,
+        "startChar": 8,
+        "endLine": 412,
+        "endChar": 9
+      },
+      "revId": "11c34f5a8119c28772733e0821cca5e029723301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
