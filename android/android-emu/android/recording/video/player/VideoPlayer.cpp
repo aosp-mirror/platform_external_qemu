@@ -37,12 +37,10 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/Thread.h"
 #include "android/emulation/AudioOutputEngine.h"
-#include "android/mp4/MP4Dataset.h"
-#include "android/mp4/MP4Demuxer.h"
-#include "android/recording/AVScopedPtr.h"
 #include "android/recording/video/player/Clock.h"
 #include "android/recording/video/player/FrameQueue.h"
 #include "android/recording/video/player/PacketQueue.h"
+#include "android/recording/AVScopedPtr.h"
 #include "android/utils/debug.h"
 
 extern "C" {
@@ -60,8 +58,6 @@ extern "C" {
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
 using android::emulation::AudioOutputEngine;
-using android::mp4::Mp4Dataset;
-using android::mp4::Mp4Demuxer;
 using android::recording::AVScopedPtr;
 using android::recording::makeAVScopedPtr;
 
@@ -207,8 +203,10 @@ private:
     void updateVideoPts(double pts, int64_t pos, int serial);
     void refreshFrame(double* remaining_time);
 
+    void workerThreadFunc();
+
 public:
-    AVFormatContext* mFormatCtx;
+    AVScopedPtr<AVFormatContext> mFormatCtx;
     int mAudioStreamIdx = -1;
     int mVideoStreamIdx = -1;
 
@@ -257,9 +255,6 @@ private:
     // data into the packet queues
     VideoPlayerWaitInfo mContinueReadWaitInfo;
 
-    std::unique_ptr<Mp4Dataset> mDataset;
-    std::unique_ptr<Mp4Demuxer> mDemuxer;
-
     std::unique_ptr<PacketQueue> mAudioQueue;
     std::unique_ptr<PacketQueue> mVideoQueue;
 
@@ -300,6 +295,9 @@ private:
     int64_t mAudioCallbackTime = 0ll;
 
     bool mForceRefresh = false;
+
+    // A separate worker thread for the player
+    base::FunctorThread mWorkerThread;
 };
 
 // Decoder implementations
@@ -517,7 +515,7 @@ int VideoDecoder::getVideoFrame(AVFrame* frame) {
         }
 
         frame->sample_aspect_ratio =
-                av_guess_sample_aspect_ratio(mPlayer->mFormatCtx, st, frame);
+                av_guess_sample_aspect_ratio(mPlayer->mFormatCtx.get(), st, frame);
 
         mPlayer->mWidth = frame->width;
         mPlayer->mHeight = frame->height;
@@ -551,7 +549,7 @@ void VideoDecoder::workerThreadFunc() {
     AVRational tb =
             mPlayer->mFormatCtx->streams[mPlayer->mVideoStreamIdx]->time_base;
     AVRational frame_rate = av_guess_frame_rate(
-            mPlayer->mFormatCtx,
+            mPlayer->mFormatCtx.get(),
             mPlayer->mFormatCtx->streams[mPlayer->mVideoStreamIdx], NULL);
 
     while (mPlayer->isRunning()) {
@@ -594,6 +592,7 @@ std::unique_ptr<VideoPlayer> VideoPlayer::create(
     return std::move(player);
 }
 
+#define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 25
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
 #define EXTERNAL_CLOCK_MAX_FRAMES 10
@@ -606,7 +605,8 @@ VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
     : mVideoFile(videoFile),
       mRenderTarget(renderTarget),
       mNotifier(std::move(notifier)),
-      mRunning(true) {
+      mRunning(true),
+      mWorkerThread([this]() { workerThreadFunc(); }) {
     mNotifier->setVideoPlayer(this);
     mNotifier->initTimer();
 }
@@ -619,9 +619,7 @@ VideoPlayerImpl::~VideoPlayerImpl() {
     if (mAudioDecoder) {
         mAudioDecoder->wait();
     }
-    if (mDemuxer) {
-        mDemuxer->stop();
-    }
+    mWorkerThread.wait();
 }
 
 // adjust window size to fit the video apect ratio
@@ -994,22 +992,58 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 }
 
 int VideoPlayerImpl::play() {
-    mDataset = Mp4Dataset::create(mVideoFile);
-    mFormatCtx = mDataset->getFormatContext();
+    const char* filename = mVideoFile.c_str();
+
+    // Register all formats and codecs
+    av_register_all();
+    avformat_network_init();
 
     PacketQueue::init();
 
+    AVFormatContext* inputCtx = nullptr;
+    if (avformat_open_input(&inputCtx, filename, NULL, NULL) != 0) {
+        LOG(ERROR) << __func__ << ": Failed to open input context";
+        return -1;
+    }
+    mFormatCtx = makeAVScopedPtr(inputCtx);
+
+    if (avformat_find_stream_info(mFormatCtx.get(), NULL) < 0) {
+        LOG(ERROR) << __func__ << ": Failed to find stream info";
+        return -1;
+    }
 
     this->mMaxFrameDuration =
             (mFormatCtx->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
 
-    this->mRealTime = isRealTimeFormat(mFormatCtx);
+    this->mRealTime = isRealTimeFormat(mFormatCtx.get());
+
+    // dump video format
+    av_dump_format(mFormatCtx.get(), 0, filename, false);
 
     mRunning = true;
 
     // Find the first audio/video stream
-    int audioStream = mDataset->getAudioStreamIndex();
-    int videoStream = mDataset->getVideoStreamIndex();
+    int audioStream = -1;
+    int videoStream = -1;
+    for (int i = 0; i < mFormatCtx->nb_streams; i++) {
+        if (mFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+            audioStream = i;
+            if (videoStream != -1) {
+                break;
+            }
+        } else if (mFormatCtx->streams[i]->codec->codec_type ==
+                   AVMEDIA_TYPE_VIDEO) {
+            videoStream = i;
+            if (audioStream != -1) {
+                break;
+            }
+        }
+    }
+
+    if (videoStream == -1 && audioStream == -1) {
+        LOG(ERROR) << __func__ << ": No audio or video stream found";
+        return -1;
+    }
 
     // we do this before mAudioClock since audio callback uses it
     mExternalClock.init(mExternalClock.getSerialPtr());
@@ -1158,35 +1192,81 @@ int VideoPlayerImpl::play() {
         mVideoDecoder->start();
     }
 
-    // Start the demuxer to read frames from the video file and dispatch them to
-    // corresponding packet queues
-    mDemuxer = Mp4Demuxer::create(mDataset.get(), &mContinueReadWaitInfo);
-    mDemuxer->setAudioPacketQueue(mAudioQueue.get());
-    mDemuxer->setVideoPacketQueue(mVideoQueue.get());
-    std::function<void()> callback = [this] {
-        if (mAudioDecoder.get() != nullptr) {
-            mAudioDecoder->wait();
-            mAudioDecoder.reset();
+    // Read frames from the video file
+    int ret = 0;
+    AVPacket packet;
+    while (mRunning && (ret = av_read_frame(mFormatCtx.get(), &packet)) >= 0) {
+        if (packet.stream_index == audioStream) {
+            mAudioQueue->put(&packet);
+        } else if (packet.stream_index == videoStream) {
+            mVideoQueue->put(&packet);
+        } else {
+            // stream that we don't handle, simply free and ignore it
+            av_free_packet(&packet);
         }
 
-        if (mVideoDecoder.get() != nullptr) {
-            mVideoDecoder->wait();
-            mVideoDecoder.reset();
+        // if the queues are full, no need to read more
+        int curent_queues_total_size = 0;
+        if (mAudioQueue.get() != nullptr) {
+            curent_queues_total_size += mAudioQueue->getSize();
+        }
+        if (mVideoQueue.get() != nullptr) {
+            curent_queues_total_size += mVideoQueue->getSize();
         }
 
-        const bool wasRunning = mRunning;
-        mRunning = false;
-
-        cleanup();
-
-        if (wasRunning) {
-            mNotifier->emitVideoStopped();
+        if (curent_queues_total_size > MAX_QUEUE_SIZE ||
+            (mFormatCtx->streams[mVideoStreamIdx]->disposition &
+             AV_DISPOSITION_ATTACHED_PIC)) {
+            // wait 10 ms
+            android::base::System::Duration timeoutMs = 10ll;
+            VideoPlayerWaitInfo* pwi = &mContinueReadWaitInfo;
+            pwi->lock.lock();
+            const auto deadlineUs =
+                    android::base::System::get()->getUnixTimeUs() +
+                    timeoutMs * 1000;
+            while (android::base::System::get()->getUnixTimeUs() < deadlineUs) {
+                pwi->cvDone.timedWait(&pwi->lock, deadlineUs);
+            }
+            pwi->lock.unlock();
         }
-        mNotifier->emitVideoFinished();
-    };
-    mDemuxer->start(callback);
+    }
+
+    if (ret == AVERROR_EOF || avio_feof(mFormatCtx->pb)) {
+        if (videoStream >= 0) {
+            mVideoQueue->putNullPacket(videoStream);
+        }
+
+        if (audioStream >= 0) {
+            mAudioQueue->putNullPacket(audioStream);
+        }
+    }
+
+    if (mAudioDecoder.get() != nullptr) {
+        mAudioDecoder->wait();
+        mAudioDecoder.reset();
+    }
+
+    if (mVideoDecoder.get() != nullptr) {
+        mVideoDecoder->wait();
+        mVideoDecoder.reset();
+    }
+
+    const bool wasRunning = mRunning;
+    mRunning = false;
+
+    cleanup();
+
+    if (wasRunning) {
+        mNotifier->emitVideoStopped();
+    }
+    mNotifier->emitVideoFinished();
 
     return 0;
+}
+
+void VideoPlayerImpl::workerThreadFunc() {
+    int rc = play();
+    (void)rc;
 }
 
 // get an audio frame from the decoded queue, and convert it to buffer
@@ -1292,8 +1372,7 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
 }
 
 void VideoPlayerImpl::start() {
-    int rc = play();
-    (void)rc;
+    mWorkerThread.start();
 }
 
 void VideoPlayerImpl::stop() {
@@ -1306,10 +1385,6 @@ void VideoPlayerImpl::stop() {
 
 void VideoPlayerImpl::internalStop() {
     mRunning = false;
-
-    if (mDemuxer.get() != nullptr) {
-        mDemuxer->stop();
-    }
 
     if (mAudioDecoder.get() != nullptr) {
         mAudioDecoder->abort();
@@ -1376,7 +1451,7 @@ void VideoPlayerImpl::cleanup() {
     mVideoCodecCtx.reset();
 
     // close the video file
-    mDataset->clearFormatContext();
+    mFormatCtx.reset();
 
     if (mAudioOutputEngine != nullptr) {
         mAudioOutputEngine->close();
