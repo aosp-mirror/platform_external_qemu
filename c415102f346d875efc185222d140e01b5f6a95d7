@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e618b00_d23d82c0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2019-06-21T19:47:09Z",
+      "side": 1,
+      "message": "Why not just log the version directly?",
+      "revId": "c415102f346d875efc185222d140e01b5f6a95d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
