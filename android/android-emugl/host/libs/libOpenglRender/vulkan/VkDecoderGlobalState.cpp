@@ -3653,9 +3653,7 @@ private:
             case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
             case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
-                // nVidia vulkan driver does not seem to support
-                // VK_FORMAT_R8G8B8A8_SRGB nicely.
-                return VK_FORMAT_R8G8B8A8_UNORM;
+                return VK_FORMAT_R8G8B8A8_SRGB;
             case VK_FORMAT_EAC_R11_UNORM_BLOCK:
                 return VK_FORMAT_R16_UNORM;
             case VK_FORMAT_EAC_R11_SNORM_BLOCK:
