@@ -3,6 +3,8 @@ prebuilt(QT5)
 prebuilt(FFMPEG)
 
 set(ANDROID_LIBUI_HEADLESS_SRC_FILES
+    android/mp4/MP4Dataset.cpp
+    android/mp4/MP4Demuxer.cpp
     android/skin/charmap.c
     android/skin/rect.c
     android/skin/generic-event.cpp
@@ -44,6 +46,8 @@ set(ANDROID_LIBUI_HEADLESS_SRC_FILES
     android/recording/video/VideoFrameSharer.cpp)
 
 set(ANDROID_LIBUI_SRC_FILES
+    android/mp4/MP4Dataset.cpp
+    android/mp4/MP4Demuxer.cpp
     android/skin/charmap.c
     android/skin/rect.c
     android/skin/generic-event.cpp
@@ -363,6 +367,8 @@ android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-libui windows_msvc-x86_64 PUBLIC dirent-win32)
 
 set(emulator-libui_unittests_src
+    android/mp4/MP4Dataset_test.cpp
+    android/mp4/MP4Demuxer_test.cpp
     android/skin/keycode_unittest.cpp
     android/skin/keycode-buffer_unittest.cpp
     android/skin/rect_unittest.cpp
@@ -371,8 +377,14 @@ set(emulator-libui_unittests_src
     android/recording/FfmpegRecorder.cpp
     android/recording/test/FfmpegRecorder_unittest.cpp
 )
+
+list(APPEND android-libui-testdata
+            testdata/mp4/video.mp4)
+
 set(emulator-libui_unittests_windows_src android/skin/qt/qtmain_dummy_test.cpp)
 android_add_test(emulator-libui_unittests)
+
+android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}" testdata)
 
 target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
 
