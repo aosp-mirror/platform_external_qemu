@@ -13,16 +13,7 @@
 // limitations under the License.
 
 #include "android/automation/AutomationController.h"
-
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
-#include <google/protobuf/text_format.h>
-
-#include <chrono>
-#include <deque>
-#include <ostream>
-
 #include "android/automation/AutomationEventSink.h"
-#include "android/automation/EventSource.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/async/ThreadLooper.h"
@@ -36,6 +27,13 @@
 #include "android/hw-sensors.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/physics/PhysicalModel.h"
+
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <google/protobuf/text_format.h>
+
+#include <chrono>
+#include <deque>
+#include <ostream>
 
 using namespace android::base;
 
@@ -174,6 +172,18 @@ private:
     std::function<void(android::AsyncMessagePipeHandle,
                        const ::offworld::Response&)>
             mSendMessageCallback;
+};
+
+class EventSource {
+public:
+    virtual ~EventSource() = default;
+
+    // Return the next command from the source.
+    virtual pb::RecordedEvent consumeNextCommand() = 0;
+
+    // Get the next command delay from the event source.  Returns false if there
+    // are no events remaining.
+    virtual bool getNextCommandDelay(DurationNs* outDelay) = 0;
 };
 
 class BinaryStreamEventSource : public EventSource {
