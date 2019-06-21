@@ -325,7 +325,9 @@ def emit_snapshot(typeInfo, api, cgen):
         api.withCustomReturnType(makeVulkanTypeSimple(False, "void", 0, "void")). \
             withCustomParameters(customParams)
 
+    cgen.beginIf("m_state->snapshotsEnabled()")
     cgen.vkApiCall(apiForSnapshot, customPrefix="m_state->snapshot()->")
+    cgen.endIf()
 
 def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
