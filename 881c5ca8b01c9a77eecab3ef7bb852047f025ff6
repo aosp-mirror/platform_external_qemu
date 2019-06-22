@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a5c998d6_66c764a1",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-22T01:01:15Z",
+      "side": 1,
+      "message": "Cannot pass result by value as copied here, and const Result\u0026 won\u0027t work because it has non const function called in createAsyncResponse. So a new Result instance is passed accordingly.",
+      "parentUuid": "5a523049_1dbe3477",
+      "range": {
+        "startLine": 255,
+        "startChar": 8,
+        "endLine": 260,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "189bc700_7ef72914",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 13
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "65222a68_5cf772d1",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-22T01:01:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "189bc700_7ef72914",
+      "range": {
+        "startLine": 261,
+        "startChar": 8,
+        "endLine": 263,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d1511b2_38b19ed1",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 13
@@ -68,6 +116,30 @@
       "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10cd4e03_d12c1d8c",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-06-22T01:01:15Z",
+      "side": 1,
+      "message": "Cannot use copy of Result or const Result\u0026 here.",
+      "parentUuid": "2d1511b2_38b19ed1",
+      "range": {
+        "startLine": 287,
+        "startChar": 8,
+        "endLine": 295,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
