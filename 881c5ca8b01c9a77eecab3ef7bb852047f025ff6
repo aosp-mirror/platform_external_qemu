@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a523049_1dbe3477",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-22T00:28:56Z",
+      "side": 1,
+      "message": "These are both the same, remove the if/else:\nsInstance-\u003esendFollowUpAsyncResponse(async_id, result, isCompleted);",
+      "range": {
+        "startLine": 255,
+        "startChar": 8,
+        "endLine": 260,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "189bc700_7ef72914",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-22T00:28:56Z",
+      "side": 1,
+      "message": "This is impossible, there are only two states",
+      "range": {
+        "startLine": 261,
+        "startChar": 8,
+        "endLine": 263,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d1511b2_38b19ed1",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-22T00:28:56Z",
+      "side": 1,
+      "message": "Same here, why the if/else?",
+      "range": {
+        "startLine": 287,
+        "startChar": 8,
+        "endLine": 295,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
