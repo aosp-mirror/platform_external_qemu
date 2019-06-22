@@ -422,17 +422,6 @@ help_datadir(stralloc_t*  out)
 }
 
 static void
-help_cpu_features(stralloc_t*  out)
-{
-    PRINTF(
-    "  use '-cpu-features {safe|whitelist}' the set of CPU features to\n"
-    "  enable.\n"
-    "  The default value is 'safe'. 'whitelist' adds features from a predefined\n"
-    "  list if they are supported by the host CPU.\n\n"
-    );
-}
-
-static void
 help_kernel(stralloc_t*  out)
 {
     PRINTF(
