@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "e92c40dd_9ed459b7",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-22T02:57:39Z",
+      "side": 1,
+      "message": "Oh, that\u0027s my fault then, Result wasn\u0027t defined with copy constructors.  It is movable, though, you can do:\n\nsInstance-\u003esendFollowUpAsyncResponse(async_id, std::move(result), isCompleted);",
+      "parentUuid": "a5c998d6_66c764a1",
+      "range": {
+        "startLine": 255,
+        "startChar": 8,
+        "endLine": 260,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "189bc700_7ef72914",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
         "patchSetId": 13
