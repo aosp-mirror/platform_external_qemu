@@ -87,7 +87,6 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/camera-page.cpp
     android/skin/qt/extended-pages/camera-virtualscene-subpage.cpp
     android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp
-    android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
     android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp
@@ -171,7 +170,6 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/bug-report-page.ui
     android/skin/qt/extended-pages/camera-page.ui
     android/skin/qt/extended-pages/camera-virtualscene-subpage.ui
-    android/skin/qt/extended-pages/car-data-emulation/car-property-table.ui
     android/skin/qt/extended-pages/car-data-page.ui
     android/skin/qt/extended-pages/cellular-page.ui
     android/skin/qt/extended-pages/dpad-page.ui
@@ -212,7 +210,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/bug-report-page.h
     android/skin/qt/extended-pages/camera-page.h
     android/skin/qt/extended-pages/camera-virtualscene-subpage.h
-    android/skin/qt/extended-pages/car-data-emulation/car-property-table.h
+    android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h
     android/skin/qt/extended-pages/car-data-page.h
     android/skin/qt/extended-pages/cellular-page.h
     android/skin/qt/extended-pages/dpad-page.h

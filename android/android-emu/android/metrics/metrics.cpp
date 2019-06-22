@@ -407,8 +407,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VULKAN;
         case android::featurecontrol::MacroUi:
             return android_studio::EmulatorFeatureFlagState::MACRO_UI;
-        case android::featurecontrol::CarPropertyTable:
-            return android_studio::EmulatorFeatureFlagState::CAR_PROPERTY_TABLE;
+        case android::featurecontrol::CarVHalTable:
+            return android_studio::EmulatorFeatureFlagState::CAR_VHAL_TABLE;
         case android::featurecontrol::IpDisconnectOnLoad:
             return android_studio::EmulatorFeatureFlagState::IP_DISCONNECT_ON_LOAD;
         case android::featurecontrol::VulkanSnapshots:
