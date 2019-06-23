@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94a633f5_0dcb278b",
+        "filename": "android/android-emu/android/mp4/MP4Demuxer_test.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-23T17:39:05Z",
+      "side": 1,
+      "message": "This should be initialized to false",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 18
+      },
+      "revId": "a94850cacacbeef0bd5b2d7585121b331ab1147d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "becd65fe_10b03e0d",
+        "filename": "android/android-emu/android/mp4/MP4Demuxer_test.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-23T17:39:05Z",
+      "side": 1,
+      "message": "Lifetime: This is destructed at the end of SetUp(), but Mp4Demuxer still has a reference to it",
+      "range": {
+        "startLine": 59,
+        "startChar": 8,
+        "endLine": 59,
+        "endChar": 78
+      },
+      "revId": "a94850cacacbeef0bd5b2d7585121b331ab1147d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d28ee695_a12c4022",
+        "filename": "android/android-emu/android/mp4/MP4Demuxer_test.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-06-23T17:39:05Z",
+      "side": 1,
+      "message": "This doesn\u0027t wait for the mDemuxer thread to exit, and it may still be using the dataset\u0027s format context when this function exits and the object is destructed.",
+      "range": {
+        "startLine": 76,
+        "startChar": 8,
+        "endLine": 76,
+        "endChar": 31
+      },
+      "revId": "a94850cacacbeef0bd5b2d7585121b331ab1147d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
