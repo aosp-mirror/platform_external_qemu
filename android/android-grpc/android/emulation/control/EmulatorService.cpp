@@ -26,11 +26,12 @@
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
-#include "android/emulation/control/emulator_controller.grpc.pb.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/emulation/control/waterfall/WaterfallForwarder.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
+#include "emulator_controller.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -61,7 +62,10 @@ class EmulatorControllerImpl final : public EmulatorController::Service {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents,
                            RtcBridge* rtcBridge)
-        : mAgents(agents), mRtcBridge(rtcBridge), mLogcatBuffer(k128KB) {
+        : mAgents(agents),
+          mRtcBridge(rtcBridge),
+          mLogcatBuffer(k128KB),
+          mWaterfall(getDefaultWaterfallService()) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -319,7 +323,6 @@ public:
                               JsepMsg* reply) override {
         std::string msg;
         std::string id = request->guid();
-
         // Block and wait for at most 5 seconds.
         mRtcBridge->nextMessage(id, &msg, k5SecondsWait);
         reply->mutable_id()->set_guid(request->guid());
@@ -327,11 +330,62 @@ public:
         LOG(INFO) << "receiveJsepMessage id: " << id << ", msg: " << msg;
         return Status::OK;
     }
+    // Waterfall forwarders..
+    Status Echo(
+            ServerContext* context,
+            ::grpc::ServerReaderWriter<::waterfall::Message,
+                                       ::waterfall::Message>* stream) override {
+        LOG(INFO) << "Forwarding Echo to waterfall";
+        return ManyToMany<::waterfall::Message>(
+                mWaterfall.get(), stream,
+                [](auto stub, auto ctx) { return stub->Echo(ctx); });
+    }
+
+    Status Forward(
+            ServerContext* context,
+            ::grpc::ServerReaderWriter<::waterfall::ForwardMessage,
+                                       ::waterfall::ForwardMessage>* stream) override {
+        LOG(INFO) << "Forwarding forward to waterfall";
+        return ManyToMany<::waterfall::ForwardMessage>(
+                mWaterfall.get(), stream,
+                [](auto stub, auto ctx) { return stub->Forward(ctx); });
+    }
+
+    Status Exec(ServerContext* context,
+                ::grpc::ServerReaderWriter<::waterfall::CmdProgress,
+                                           ::waterfall::CmdProgress>* stream)
+            override {
+        LOG(INFO) << "Forwarding Exec to waterfall";
+        return ManyToMany<::waterfall::CmdProgress>(
+                mWaterfall.get(), stream,
+                [](auto stub, auto ctx) { return stub->Exec(ctx); });
+    }
+
+    Status Pull(ServerContext* context,
+                const ::waterfall::Transfer* request,
+                ServerWriter<::waterfall::Transfer>* writer) override {
+        LOG(INFO) << "Forwarding Pull to waterfall";
+        return OneToMany<::waterfall::Transfer>(
+                mWaterfall.get(), writer, [&request](auto stub, auto ctx) {
+                    return stub->Pull(ctx, *request);
+                });
+    }
+
+    Status Push(ServerContext* context,
+                grpc::ServerReader<::waterfall::Transfer>* reader,
+                ::waterfall::Transfer* reply) override {
+        return ManyToOne<::waterfall::Transfer>(
+                mWaterfall.get(), reader, [&reply](auto stub, auto ctx) {
+                    return stub->Push(ctx, reply);
+                });
+    }
 
 private:
     const AndroidConsoleAgents* mAgents;
     RtcBridge* mRtcBridge;
-    RingStreambuf mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+    std::unique_ptr<WaterfallService> mWaterfall;
+    RingStreambuf
+            mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
     static constexpr uint16_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
