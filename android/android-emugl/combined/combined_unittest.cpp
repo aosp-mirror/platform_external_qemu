@@ -182,6 +182,8 @@ protected:
         mEGL.surface = EGL_NO_SURFACE;
     }
 
+#define CHECK_GL_ERROR() do { GLint err = glGetError(); EXPECT_EQ(0, err) << "GL error " << err; } while(0)
+
     buffer_handle_t createTestGrallocBuffer(
             int usage = GRALLOC_USAGE_HW_RENDER,
             int format = HAL_PIXEL_FORMAT_RGBA_8888,
@@ -917,4 +919,24 @@ TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotGralloc) {
     androidSnapshot_load("test_snapshot");
 
     destroyTestGrallocBuffer(buffer);
+}
+
+TEST_F(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 256, 256, 1);
+
+    GLuint fbo;
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+
+    glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0, 0);
+    CHECK_GL_ERROR();
+    glBlitFramebuffer(0, 0, 256, 256, 0, 0, 256, 256, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    CHECK_GL_ERROR();
+
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteTextures(1, &tex);
 }
