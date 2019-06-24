@@ -2922,6 +2922,18 @@ public:
         VkCommandBuffer commandBuffer,
         VkCommandBufferResetFlags flags);
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+    void vkCreateImageWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage,
+        VkMemoryRequirements* pMemoryRequirements);
+#endif
 
 private:
     class Impl;

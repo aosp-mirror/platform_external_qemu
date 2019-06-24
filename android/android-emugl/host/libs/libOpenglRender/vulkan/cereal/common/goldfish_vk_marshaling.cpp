@@ -13543,6 +13543,8 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)
@@ -16302,6 +16304,12 @@ const char* api_opcode_to_string(
         case OP_vkResetCommandBufferAsyncGOOGLE:
         {
             return "OP_vkResetCommandBufferAsyncGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+        case OP_vkCreateImageWithRequirementsGOOGLE:
+        {
+            return "OP_vkCreateImageWithRequirementsGOOGLE";
         }
 #endif
         default:

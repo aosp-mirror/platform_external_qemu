@@ -4376,6 +4376,31 @@ void vkResetCommandBufferAsyncGOOGLE(
     // TODO: Implement
 }
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+void vkCreateImageWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage,
+    VkMemoryRequirements* pMemoryRequirements)
+{
+    // TODO: Implement
+    android::base::AutoLock lock(mLock);
+    // pImage create
+    mReconstruction.addHandles((const uint64_t*)pImage, 1);
+    mReconstruction.addHandleDependency((const uint64_t*)pImage, 1, (uint64_t)(uintptr_t)device);
+    if (!pMemoryRequirements) return;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    mReconstruction.setApiTrace(apiInfo, OP_vkCreateImageWithRequirementsGOOGLE, snapshotTraceBegin, snapshotTraceBytes);
+    mReconstruction.forEachHandleAddApi((const uint64_t*)pMemoryRequirements, 1, apiHandle);
+    mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pMemoryRequirements, 1);
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8631,6 +8656,21 @@ void VkDecoderSnapshot::vkResetCommandBufferAsyncGOOGLE(
     VkCommandBufferResetFlags flags)
 {
     mImpl->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, flags);
+}
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+void VkDecoderSnapshot::vkCreateImageWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage,
+    VkMemoryRequirements* pMemoryRequirements)
+{
+    mImpl->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
 }
 #endif
 

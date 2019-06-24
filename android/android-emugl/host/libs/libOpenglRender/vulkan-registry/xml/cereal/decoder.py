@@ -500,6 +500,9 @@ custom_decodes = {
     "vkBeginCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkEndCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkResetCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_create_resources_with_requirements
+    "vkCreateImageWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

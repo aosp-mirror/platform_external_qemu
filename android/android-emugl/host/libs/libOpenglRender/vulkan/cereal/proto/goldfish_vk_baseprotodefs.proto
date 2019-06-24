@@ -8146,6 +8146,19 @@ message vkResetCommandBufferAsyncGOOGLE
     // Original field: bitmask VkCommandBufferResetFlags flags. stringarray? 0 string? 0 hasLenInfo? 0
     optional uint32 flags = 2;
 }
+message vkCreateImageWithRequirementsGOOGLE
+{
+    // Original field: handle VkDevice device. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 device = 1;
+    // Original field: struct VkImageCreateInfo pCreateInfo. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkImageCreateInfo pCreateInfo = 2;
+    // Original field: struct VkAllocationCallbacks pAllocator. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkAllocationCallbacks pAllocator = 3;
+    // Original field: handle VkImage pImage. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 pImage = 4;
+    // Original field: struct VkMemoryRequirements pMemoryRequirements. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkMemoryRequirements pMemoryRequirements = 5;
+}
 message VkExtensionStruct
 {
     oneof struct
@@ -8591,5 +8604,6 @@ message VkApiCall
         vkBeginCommandBufferAsyncGOOGLE api_vkBeginCommandBufferAsyncGOOGLE = 322;
         vkEndCommandBufferAsyncGOOGLE api_vkEndCommandBufferAsyncGOOGLE = 323;
         vkResetCommandBufferAsyncGOOGLE api_vkResetCommandBufferAsyncGOOGLE = 324;
+        vkCreateImageWithRequirementsGOOGLE api_vkCreateImageWithRequirementsGOOGLE = 325;
     }
 }
