@@ -65,6 +65,9 @@ struct VkEmulation {
     // Whether to use deferred command submission.
     bool useDeferredCommands = false;
 
+    // Whether to fuse memory requirements getting with resource creation.
+    bool useCreateResourcesWithRequirements = false;
+
     // Instance and device for creating the system-wide shareable objects.
     VkInstance instance = VK_NULL_HANDLE;
     VkPhysicalDevice physdev = VK_NULL_HANDLE;
@@ -275,6 +278,7 @@ struct VkEmulation {
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
 void setUseDeferredCommands(VkEmulation* emu, bool useDeferred);
+void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResourcesWithRequirements);
 
 VkEmulation* getGlobalVkEmulation();
 void teardownGlobalVkEmulation();

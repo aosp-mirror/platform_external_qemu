@@ -2311,6 +2311,8 @@ public:
             emu->deviceInfo.supportsExternalMemory;
         res.useDeferredCommands =
             emu->useDeferredCommands;
+        res.useCreateResourcesWithRequirements =
+            emu->useCreateResourcesWithRequirements;
 
         res.apiVersion = props.apiVersion;
         res.driverVersion = props.driverVersion;
@@ -2852,6 +2854,33 @@ public:
 
         info.sequenceNumber = sequenceNumber;
         mCvWaitSequenceNumber.signal();
+    }
+
+    VkResult on_vkCreateImageWithRequirementsGOOGLE(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage,
+        VkMemoryRequirements* pMemoryRequirements) {
+
+        if (pMemoryRequirements) {
+            memset(pMemoryRequirements, 0, sizeof(*pMemoryRequirements));
+        }
+
+        VkResult imageCreateRes =
+            on_vkCreateImage(pool, boxed_device, pCreateInfo, pAllocator, pImage);
+
+        if (imageCreateRes != VK_SUCCESS) {
+            return imageCreateRes;
+        }
+
+        on_vkGetImageMemoryRequirements(
+            pool, boxed_device,
+            unbox_non_dispatchable_VkImage(*pImage),
+            pMemoryRequirements);
+
+        return imageCreateRes;
     }
 
 
@@ -4972,6 +5001,17 @@ void VkDecoderGlobalState::on_vkCommandBufferHostSyncGOOGLE(
     uint32_t needHostSync,
     uint32_t sequenceNumber) {
     mImpl->hostSyncCommandBuffer("hostSync", commandBuffer, needHostSync, sequenceNumber);
+}
+
+void VkDecoderGlobalState::on_vkCreateImageWithRequirementsGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage,
+    VkMemoryRequirements* pMemoryRequirements) {
+    return mImpl->on_vkCreateImageWithRequirementsGOOGLE(
+            pool, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
 }
 
 void VkDecoderGlobalState::on_vkCmdBindPipeline(

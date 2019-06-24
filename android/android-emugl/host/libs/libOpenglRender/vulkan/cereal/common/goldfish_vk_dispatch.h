@@ -637,6 +637,9 @@ PFN_vkEndCommandBufferAsyncGOOGLE vkEndCommandBufferAsyncGOOGLE;
 PFN_vkResetCommandBufferAsyncGOOGLE vkResetCommandBufferAsyncGOOGLE;
 PFN_vkCommandBufferHostSyncGOOGLE vkCommandBufferHostSyncGOOGLE;
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+PFN_vkCreateImageWithRequirementsGOOGLE vkCreateImageWithRequirementsGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk
