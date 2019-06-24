@@ -143,6 +143,7 @@ void VkReconstruction::save(android::base::Stream* stream) {
         for (auto apiHandle : uniqApiRefsByTopoOrder[i]) {
             auto item = mApiTrace.get(apiHandle);
             for (auto createdHandle : item->createdHandles) {
+                DEBUG_RECON("save handle: 0x%llx\n", createdHandle);
                 createdHandleBuffer.push_back(createdHandle);
             }
         }

@@ -2929,6 +2929,28 @@ public:
         uint32_t needHostSync,
         uint32_t sequenceNumber);
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+    void vkCreateImageWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage,
+        VkMemoryRequirements* pMemoryRequirements);
+    void vkCreateBufferWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        const VkBufferCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkBuffer* pBuffer,
+        VkMemoryRequirements* pMemoryRequirements);
+#endif
 
 private:
     class Impl;

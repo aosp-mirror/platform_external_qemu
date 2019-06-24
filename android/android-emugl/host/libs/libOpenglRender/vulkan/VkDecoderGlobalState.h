@@ -370,6 +370,7 @@ public:
         bool supportsVulkan1_1 = false;
         bool supportsExternalMemory = false;
         bool useDeferredCommands = false;
+        bool useCreateResourcesWithRequirements = false;
         uint32_t apiVersion = 0;
         uint32_t driverVersion = 0;
         uint32_t deviceID = 0;
@@ -568,6 +569,21 @@ public:
         VkCommandBuffer commandBuffer,
         uint32_t needHostSync,
         uint32_t sequenceNumber);
+
+    VkResult on_vkCreateImageWithRequirementsGOOGLE(
+        android::base::Pool* pool,
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage,
+        VkMemoryRequirements* pMemoryRequirements);
+    VkResult on_vkCreateBufferWithRequirementsGOOGLE(
+        android::base::Pool* pool,
+        VkDevice device,
+        const VkBufferCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkBuffer* pBuffer,
+        VkMemoryRequirements* pMemoryRequirements);
 
     void on_vkCmdBindPipeline(android::base::Pool* pool,
                               VkCommandBuffer commandBuffer,

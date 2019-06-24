@@ -16174,6 +16174,166 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+            case OP_vkCreateImageWithRequirementsGOOGLE:
+            {
+                VkDevice device;
+                const VkImageCreateInfo* pCreateInfo;
+                const VkAllocationCallbacks* pAllocator;
+                VkImage* pImage;
+                VkMemoryRequirements* pMemoryRequirements;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_829;
+                vkReadStream->read((uint64_t*)&cgen_var_829, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_829, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
+                unmarshal_VkImageCreateInfo(vkReadStream, (VkImageCreateInfo*)(pCreateInfo));
+                // WARNING PTR CHECK
+                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                if (pAllocator)
+                {
+                    vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
+                    unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                // Begin manual dispatchable handle unboxing for pImage;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pImage, sizeof(VkImage));
+                uint64_t cgen_var_831;
+                vkReadStream->read((uint64_t*)&cgen_var_831, 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_831, (VkImage*)pImage, 1);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pImage;
+                // Begin manual dispatchable handle unboxing for pMemoryRequirements;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
+                unmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pMemoryRequirements;
+                if (pCreateInfo)
+                {
+                    transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
+                }
+                if (pAllocator)
+                {
+                    transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (pMemoryRequirements)
+                {
+                    transform_tohost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateImageWithRequirementsGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pImage, (unsigned long long)pMemoryRequirements);
+                }
+                VkResult vkCreateImageWithRequirementsGOOGLE_VkResult_return = (VkResult)0;
+                vkCreateImageWithRequirementsGOOGLE_VkResult_return = m_state->on_vkCreateImageWithRequirementsGOOGLE(&m_pool, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
+                vkStream->unsetHandleMapping();
+                // Begin manual non dispatchable handle create for pImage;
+                vkStream->unsetHandleMapping();
+                uint64_t cgen_var_832;
+                static_assert(8 == sizeof(VkImage), "handle map overwrite requres VkImage to be 8 bytes long");
+                vkStream->handleMapping()->mapHandles_VkImage((VkImage*)pImage, 1);
+                vkStream->write((VkImage*)pImage, 8 * 1);
+                // Begin manual non dispatchable handle create for pImage;
+                vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                if (pMemoryRequirements)
+                {
+                    transform_fromhost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
+                }
+                marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
+                vkStream->write(&vkCreateImageWithRequirementsGOOGLE_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                m_state->snapshot()->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkCreateBufferWithRequirementsGOOGLE:
+            {
+                VkDevice device;
+                const VkBufferCreateInfo* pCreateInfo;
+                const VkAllocationCallbacks* pAllocator;
+                VkBuffer* pBuffer;
+                VkMemoryRequirements* pMemoryRequirements;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_833;
+                vkReadStream->read((uint64_t*)&cgen_var_833, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_833, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferCreateInfo));
+                unmarshal_VkBufferCreateInfo(vkReadStream, (VkBufferCreateInfo*)(pCreateInfo));
+                // WARNING PTR CHECK
+                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                if (pAllocator)
+                {
+                    vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
+                    unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                // Begin manual dispatchable handle unboxing for pBuffer;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pBuffer, sizeof(VkBuffer));
+                uint64_t cgen_var_835;
+                vkReadStream->read((uint64_t*)&cgen_var_835, 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_835, (VkBuffer*)pBuffer, 1);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pBuffer;
+                // Begin manual dispatchable handle unboxing for pMemoryRequirements;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
+                unmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pMemoryRequirements;
+                if (pCreateInfo)
+                {
+                    transform_tohost_VkBufferCreateInfo(m_state, (VkBufferCreateInfo*)(pCreateInfo));
+                }
+                if (pAllocator)
+                {
+                    transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (pMemoryRequirements)
+                {
+                    transform_tohost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkCreateBufferWithRequirementsGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pBuffer, (unsigned long long)pMemoryRequirements);
+                }
+                VkResult vkCreateBufferWithRequirementsGOOGLE_VkResult_return = (VkResult)0;
+                vkCreateBufferWithRequirementsGOOGLE_VkResult_return = m_state->on_vkCreateBufferWithRequirementsGOOGLE(&m_pool, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
+                vkStream->unsetHandleMapping();
+                // Begin manual non dispatchable handle create for pBuffer;
+                vkStream->unsetHandleMapping();
+                uint64_t cgen_var_836;
+                static_assert(8 == sizeof(VkBuffer), "handle map overwrite requres VkBuffer to be 8 bytes long");
+                vkStream->handleMapping()->mapHandles_VkBuffer((VkBuffer*)pBuffer, 1);
+                vkStream->write((VkBuffer*)pBuffer, 8 * 1);
+                // Begin manual non dispatchable handle create for pBuffer;
+                vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                if (pMemoryRequirements)
+                {
+                    transform_fromhost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
+                }
+                marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
+                vkStream->write(&vkCreateBufferWithRequirementsGOOGLE_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                m_state->snapshot()->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;

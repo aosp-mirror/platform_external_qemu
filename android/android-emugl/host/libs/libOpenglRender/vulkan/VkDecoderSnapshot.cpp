@@ -4386,6 +4386,54 @@ void vkCommandBufferHostSyncGOOGLE(
     // TODO: Implement
 }
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+void vkCreateImageWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage,
+    VkMemoryRequirements* pMemoryRequirements)
+{
+    // TODO: Implement
+    android::base::AutoLock lock(mLock);
+    // pImage create
+    mReconstruction.addHandles((const uint64_t*)pImage, 1);
+    mReconstruction.addHandleDependency((const uint64_t*)pImage, 1, (uint64_t)(uintptr_t)device);
+    if (!pImage) return;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    mReconstruction.setApiTrace(apiInfo, OP_vkCreateImageWithRequirementsGOOGLE, snapshotTraceBegin, snapshotTraceBytes);
+    mReconstruction.forEachHandleAddApi((const uint64_t*)pImage, 1, apiHandle);
+    mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pImage, 1);
+}
+void vkCreateBufferWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkBufferCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkBuffer* pBuffer,
+    VkMemoryRequirements* pMemoryRequirements)
+{
+    // TODO: Implement
+    android::base::AutoLock lock(mLock);
+    // pBuffer create
+    mReconstruction.addHandles((const uint64_t*)pBuffer, 1);
+    mReconstruction.addHandleDependency((const uint64_t*)pBuffer, 1, (uint64_t)(uintptr_t)device);
+    if (!pBuffer) return;
+    auto apiHandle = mReconstruction.createApiInfo();
+    auto apiInfo = mReconstruction.getApiInfo(apiHandle);
+    mReconstruction.setApiTrace(apiInfo, OP_vkCreateBufferWithRequirementsGOOGLE, snapshotTraceBegin, snapshotTraceBytes);
+    mReconstruction.forEachHandleAddApi((const uint64_t*)pBuffer, 1, apiHandle);
+    mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pBuffer, 1);
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8653,6 +8701,36 @@ void VkDecoderSnapshot::vkCommandBufferHostSyncGOOGLE(
     uint32_t sequenceNumber)
 {
     mImpl->vkCommandBufferHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, needHostSync, sequenceNumber);
+}
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+void VkDecoderSnapshot::vkCreateImageWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage,
+    VkMemoryRequirements* pMemoryRequirements)
+{
+    mImpl->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
+}
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+void VkDecoderSnapshot::vkCreateBufferWithRequirementsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkBufferCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkBuffer* pBuffer,
+    VkMemoryRequirements* pMemoryRequirements)
+{
+    mImpl->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
 }
 #endif
 
