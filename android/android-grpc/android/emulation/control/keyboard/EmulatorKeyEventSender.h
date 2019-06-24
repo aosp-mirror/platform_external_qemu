@@ -7,7 +7,7 @@
 #include "android/base/containers/BufferQueue.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/console.h"
-#include "android/emulation/control/emulator_controller.pb.h"
+#include "emulator_controller.pb.h"
 #include "android/emulation/control/keyboard/dom_key.h"
 
 namespace android {

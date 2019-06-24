@@ -13,67 +13,71 @@
 # limitations under the License.
 #
 GOCMD=go
-GOBUILD=$(GOCMD) build
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-GOPATH=$(shell go env GOPATH)
 BINARY_NAME=httpbridge
 GOPATH = $(shell $(GOCMD) env GOPATH)
 export PATH :=$(GOPATH)/bin:$(PATH)
-PROTOC=protoc
+
 GRPC_GO_PLUGIN = grpc
 GRPC_GO_PLUGIN_PATH ?= `which $(GRPC_GO_PLUGIN)`
+DEP=dep
+PROTOC=protoc
 PROTOC_CMD = which $(PROTOC)
-PROTOC_CHECK_CMD=$(PROTOC) --version | grep -q "libprotoc 3.6" && echo true || echo false
+
+# Check that the minimum protocol version >3.6
+MIN_PROTOC_VERSION=3.6
+PROTOC_VERSION=($(PROTOC_CMD) --version |  sed 's/[[:alpha:]|(|[:space:]]//g'; echo $(MIN_PROTOC_VERSION)) | sort -V | head -n 1
+PROTOHEADER=$(shell pkg-config --variable prefix protobuf)/include
+PROTOLIB=$(shell pkg-config --variable prefix protobuf)/lib
+
 HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
-HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
 
 ifeq ($(HAS_PROTOC),true)
-	HAS_VALID_PROTOC := $(shell $(PROTOC_CHECK_CMD))
+	HAS_VALID_PROTOC := $(subst $(MIN_PROTOC_VERSION),true,$(shell $(PROTOC_VERSION)))
 endif
 
-MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
-QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
-PROTODIR = $(CURRENT_DIR)/android_emulation_control
-PROTO = $(PROTODIR)/emulator_controller.proto
 
 all: build
 
-$(PROTO):
-		mkdir -p $(PROTODIR)
-ifeq (,$(wildcard $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto))
-		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto  $(PROTO)
-else
-		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
-endif
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
+CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
+WEBPROXY = $(GOPATH)/bin/grpcwebproxy
 
-protoc: deps $(PROTO) system-check
-		@mkdir -p /tmp/proto
-		@mkdir -p $(GOPATH)/src/android_emulation_control
-		$(PROTOC) -I$(PROTODIR) \
-				-I$(GOPATH)/src \
-				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-				--go_out=plugins=$(GRPC_GO_PLUGIN):/tmp/proto \
-				$(PROTO)
-		$(PROTOC) -I$(PROTODIR) -I$(GOPATH)/src \
-				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-				--grpc-gateway_out=logtostderr=true,grpc_api_configuration=api_config.yaml:/tmp/proto \
-				$(PROTO)
-		$(PROTOC) -I$(PROTODIR) -I$(GOPATH)/src \
-				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-				--swagger_out=logtostderr=true:. \
-				$(PROTO)
-		mv  /tmp/proto/* $(GOPATH)/src/android_emulation_control
+# Protobuf settings.
+GRPC_ROOT     := $(QEMU_ROOT)/android/android-grpc
+PROTODIR      := $(GOPATH)/src/android_emulation_control
+PROTOSRCDIR   := $(if $(wildcard $(GRPC_ROOT)/*.proto), $(GRPC_ROOT), $(ANDROID_SDK_ROOT)/emulator/lib)
+PROTO_SRC     := $(wildcard $(PROTOSRCDIR)/*.proto)
+PROTO_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTO_SRC:.proto=.pb.go)))
+PROXY_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTO_SRC:.proto=.pb.gw.go)))
 
-build: protoc
-		$(GOBUILD) -o $(BINARY_NAME) -v
-test:
-		$(GOTEST) -v ./...
+$(PROTODIR):
+	@mkdir -p $(PROTODIR)
+
+# Protobuf --> go
+$(PROTO_OBJS) : $(PROTOSRCDIR)/emulator_controller.proto $(PROTODIR)
+		$(PROTOC) -I$(PROTODIR) -I$(GOPATH)/src -I$(PROTOSRCDIR) \
+				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+				--go_out=plugins=$(GRPC_GO_PLUGIN),import_path=android_emulation_control:$(PROTODIR) \
+				$(PROTO_SRC)
+
+# Protobuf --> proxy
+$(PROXY_OBJS) : $(PROTOSRCDIR)/emulator_controller.proto $(PROTODIR)
+		$(PROTOC) -I$(PROTODIR) -I$(GOPATH)/src -I$(PROTOSRCDIR) \
+				-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+				--grpc-gateway_out=logtostderr=true,import_path=android_emulation_control,grpc_api_configuration=api_config.yaml:$(PROTODIR) \
+				$(PROTO_SRC)
+
+
+
+build: $(PROTO_OBJS) $(PROXY_OBJS)
+		$(GOCMD) build -o $(BINARY_NAME) -v
+
 clean:
-		$(GOCLEAN)
+		$(GOCMD) clean
 		rm -f $(BINARY_NAME)
+		rm -rf $(PROTODIR)
 
 run: build
 		$(GOBUILD) -o $(BINARY_NAME) -v ./...
@@ -100,5 +104,8 @@ ifneq ($(HAS_VALID_PROTOC),true)
 	-$(PROTOC) --version
 	@echo
 	@echo
+	@false
+endif
+ifneq ($(HAS_VALID_PROTOC),true)
 	@false
 endif

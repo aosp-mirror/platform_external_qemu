@@ -16,29 +16,33 @@ PROTOC=python -m grpc_tools.protoc
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
 QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
-PROTODIR = $(CURRENT_DIR)/android_emulation_control
-PROTO = $(PROTODIR)/emulator_controller.proto
 
-all: deps
+# Protobuf settings.
+GRPC_ROOT     := $(QEMU_ROOT)/android/android-grpc
+PROTODIR 	  := $(CURRENT_DIR)/sample
+PROTOSRCDIR   := $(if $(wildcard $(GRPC_ROOT)/*.proto), $(GRPC_ROOT), $(ANDROID_SDK_ROOT)/emulator/lib)
+PROTO_SRC     := $(wildcard $(PROTOSRCDIR)/*.proto)
+PROTO_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTO_SRC:.proto=_pb2.py)))
+PROXY_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTO_SRC:.proto=.pb2_grpc.py)))
 
-$(PROTO):
-		mkdir -p $(PROTODIR)
-ifeq (,$(wildcard $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto))
-		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto  $(PROTO)
-else
-		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
-endif
+$(PROTODIR):
+	@mkdir -p $(PROTODIR)
 
-protoc: deps $(PROTO)
-		$(PROTOC) -I$(PROTODIR) \
-				--python_out=sample --grpc_python_out=sample \
-				$(PROTO)
+# Protobuf --> py (note technically this produces 2 files.)
+$(PROTODIR)/%_pb2.py  : $(PROTOSRCDIR)/%.proto $(PROTODIR)
+	$(PROTOC) -I$(PROTODIR) -I$(PROTOSRCDIR) \
+	 		--python_out=sample --grpc_python_out=$(PROTODIR) \
+			$<
+
+all: deps protoc
+
+protoc: $(PROTO_OBJS)
+
 clean:
-		rm -f sample/*pb2*
+		rm -f $(PROTODIR)/*pb2*
 
 run: protoc
 	python -m sample.logcat
-
 
 deps:
 		pip install --user grpcio

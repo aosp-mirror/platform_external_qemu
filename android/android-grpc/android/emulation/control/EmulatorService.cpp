@@ -26,11 +26,14 @@
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
-#include "android/emulation/control/emulator_controller.grpc.pb.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/emulation/control/waterfall/WaterfallForwarder.h"
+#include "android/emulation/control/waterfall/SocketController.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
+#include "emulator_controller.grpc.pb.h"
+#include "waterfall.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -48,12 +51,85 @@ public:
     void stop() override { mServer->Shutdown(); }
 
     EmulatorControllerServiceImpl(EmulatorController::Service* service,
+                                  waterfall::Waterfall::Service* waterfall,
                                   grpc::Server* server)
-        : mService(service), mServer(server) {}
+        : mService(service), mForwarder(waterfall), mServer(server) {}
 
 private:
     std::unique_ptr<EmulatorController::Service> mService;
+    std::unique_ptr<waterfall::Waterfall::Service> mForwarder;
+
     std::unique_ptr<grpc::Server> mServer;
+};
+
+class WaterfallImpl final : public waterfall::Waterfall::Service {
+public:
+    WaterfallImpl() : mWaterfall(new ControlSocketLibrary()) {}
+
+    Status Forward(ServerContext* context,
+                   ::grpc::ServerReaderWriter<::waterfall::ForwardMessage,
+                                              ::waterfall::ForwardMessage>*
+                           stream) override {
+        LOG(INFO) << "Forwarding forward to waterfall";
+        return StreamingToStreaming<::waterfall::ForwardMessage>(
+                mWaterfall.get(), stream,
+                [](auto stub, auto ctx) { return stub->Forward(ctx); });
+    }
+
+    Status Echo(
+            ServerContext* context,
+            ::grpc::ServerReaderWriter<::waterfall::Message,
+                                       ::waterfall::Message>* stream) override {
+        LOG(INFO) << "Forwarding Exec to waterfall";
+        return StreamingToStreaming<::waterfall::Message>(
+                mWaterfall.get(), stream,
+                [](auto stub, auto ctx) { return stub->Echo(ctx); });
+    }
+
+    Status Exec(ServerContext* context,
+                ::grpc::ServerReaderWriter<::waterfall::CmdProgress,
+                                           ::waterfall::CmdProgress>* stream)
+            override {
+        LOG(INFO) << "Forwarding Exec to waterfall";
+        return StreamingToStreaming<::waterfall::CmdProgress>(
+                mWaterfall.get(), stream,
+                [](auto stub, auto ctx) { return stub->Exec(ctx); });
+    }
+
+    Status Pull(ServerContext* context,
+                const ::waterfall::Transfer* request,
+                ServerWriter<::waterfall::Transfer>* writer) override {
+        LOG(INFO) << "Forwarding Pull to waterfall";
+        return UnaryToStreaming<::waterfall::Transfer>(
+                mWaterfall.get(), writer, [&request](auto stub, auto ctx) {
+                    return stub->Pull(ctx, *request);
+                });
+    }
+
+    Status Push(ServerContext* context,
+                grpc::ServerReader<::waterfall::Transfer>* reader,
+                ::waterfall::Transfer* reply) override {
+        LOG(INFO) << "Forwarding Pull to waterfall";
+        return StreamingToUnary<::waterfall::Transfer>(
+                mWaterfall.get(), reader, [&reply](auto stub, auto ctx) {
+                    return stub->Push(ctx, reply);
+                });
+    }
+
+    Status Version(ServerContext* context,
+                   const ::google::protobuf::Empty* request,
+                   ::waterfall::VersionMessage* reply) override {
+        ScopedWaterfallStub fwd(mWaterfall.get());
+        if (!fwd.get())
+            return Status(grpc::StatusCode::UNAVAILABLE,
+                          "Unable to reach waterfall");
+
+        ::grpc::ClientContext defaultCtx;
+        return fwd->Version(&defaultCtx, *request, reply);
+    }
+
+private:
+    std::unique_ptr<WaterfallServiceLibrary> mWaterfall;
 };
 
 // Logic and data behind the server's behavior.
@@ -321,7 +397,6 @@ public:
                               JsepMsg* reply) override {
         std::string msg;
         std::string id = request->guid();
-
         // Block and wait for at most 5 seconds.
         mRtcBridge->nextMessage(id, &msg, k5SecondsWait);
         reply->mutable_id()->set_guid(request->guid());
@@ -377,10 +452,14 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     std::string server_address = "0.0.0.0:" + std::to_string(mPort);
     std::unique_ptr<EmulatorController::Service> controller(
             new EmulatorControllerImpl(mAgents, mBridge));
+    std::unique_ptr<waterfall::Waterfall::Service> wfallforwarder(
+            new WaterfallImpl());
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
+    builder.RegisterService(wfallforwarder.release());
+
     // TODO(jansene): It seems that we can easily overload the server with
     // touch events. if the gRPC server runs out of threads to serve
     // requests it appears to terminate ungoing requests. If one of those
@@ -398,6 +477,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(controller.release(),
+                                              wfallforwarder.release(),
                                               service.release()));
 }
 
