@@ -1680,5 +1680,7 @@ VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
 
 } // namespace goldfish_vk

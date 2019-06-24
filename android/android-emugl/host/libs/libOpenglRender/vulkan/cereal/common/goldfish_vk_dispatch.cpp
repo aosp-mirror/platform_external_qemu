@@ -286,6 +286,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -769,6 +771,9 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)dlSymFunc(lib, "vkCommandBufferHostSyncGOOGLE");
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+    out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateImageWithRequirementsGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1289,6 +1294,9 @@ void init_vulkan_dispatch_from_instance(
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCommandBufferHostSyncGOOGLE");
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+    out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateImageWithRequirementsGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1771,6 +1779,9 @@ void init_vulkan_dispatch_from_device(
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCommandBufferHostSyncGOOGLE");
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+    out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateImageWithRequirementsGOOGLE");
 #endif
 }
 
