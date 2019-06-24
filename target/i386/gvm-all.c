@@ -1557,6 +1557,9 @@ int gvm_vcpu_ioctl(CPUState *cpu, int type,
         case ERROR_MORE_DATA:
             ret = -E2BIG;
             break;
+        case ERROR_RETRY:
+            ret = -EAGAIN;
+            break;
         default:
             ret = -EFAULT;
         }
