@@ -892,6 +892,14 @@ void setUseDeferredCommands(VkEmulation* emu, bool useDeferredCommands) {
     emu->useDeferredCommands = useDeferredCommands;
 }
 
+void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResourcesWithRequirements) {
+    if (!emu) return;
+    if (!emu->live) return;
+
+    LOG(VERBOSE) << "Using deferred Vulkan commands: " << useCreateResourcesWithRequirements;
+    emu->useCreateResourcesWithRequirements = useCreateResourcesWithRequirements;
+}
+
 VkEmulation* getGlobalVkEmulation() {
     if (sVkEmulation && !sVkEmulation->live) return nullptr;
     return sVkEmulation;

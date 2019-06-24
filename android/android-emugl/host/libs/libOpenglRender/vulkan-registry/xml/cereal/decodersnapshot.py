@@ -122,10 +122,7 @@ def emit_impl(typeInfo, api, cgen):
 
     cgen.line("// TODO: Implement")
 
-    traceCreate = False
-
     for p in api.parameters:
-
         if not (p.isHandleType):
             continue
 
@@ -141,7 +138,6 @@ def emit_impl(typeInfo, api, cgen):
 
         if p.isCreatedBy(api):
             cgen.stmt("android::base::AutoLock lock(mLock)")
-            traceCreate = True
             cgen.line("// %s create" % p.paramName)
             cgen.stmt("mReconstruction.addHandles((const uint64_t*)%s, %s)" % (access, lenExpr));
 
@@ -152,6 +148,13 @@ def emit_impl(typeInfo, api, cgen):
                         cgen.stmt("mReconstruction.addHandleDependency((const uint64_t*)%s, %s, (uint64_t)(uintptr_t)%s)" % (access, lenExpr, p2.paramName))
                 if api.name in specialCaseDependencyExtractors:
                     specialCaseDependencyExtractors[api.name](p, access, lenExpr, api, cgen)
+
+            cgen.stmt("if (!%s) return" % access)
+            cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
+            cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
+            cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
+            cgen.stmt("mReconstruction.forEachHandleAddApi((const uint64_t*)%s, %s, apiHandle)" % (access, lenExpr))
+            cgen.stmt("mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)%s, %s)" % (access, lenExpr))
 
         if p.isDestroyedBy(api):
             cgen.stmt("android::base::AutoLock lock(mLock)")
@@ -171,14 +174,6 @@ def emit_impl(typeInfo, api, cgen):
                 cgen.stmt("%s boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_%s(%s[i])" % (p.typeName, p.typeName, access))
             cgen.stmt("mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle)")
             cgen.endFor()
-
-    if traceCreate:
-        cgen.stmt("if (!%s) return" % access)
-        cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
-        cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
-        cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
-        cgen.stmt("mReconstruction.forEachHandleAddApi((const uint64_t*)%s, %s, apiHandle)" % (access, lenExpr))
-        cgen.stmt("mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)%s, %s)" % (access, lenExpr))
 
 def emit_passthrough_to_impl(typeInfo, api, cgen):
     cgen.vkApiCall(api, customPrefix = "mImpl->")

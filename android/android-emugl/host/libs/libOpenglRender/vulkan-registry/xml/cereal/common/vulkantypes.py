@@ -309,6 +309,9 @@ class VulkanType(object):
             if len(api.name) > 3 and "KHR" == api.name[-3:]:
                 return HANDLE_INFO[self.typeName].isCreateApi(api.name[:-3])
 
+        if self.typeName == "VkImage" and api.name == "vkCreateImageWithRequirementsGOOGLE":
+            return True
+
         return False
 
     def isDestroyedBy(self, api):
