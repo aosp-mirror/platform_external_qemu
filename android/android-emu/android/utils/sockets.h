@@ -425,7 +425,11 @@ int  socket_anyaddr_server( int  port, SocketType  type );
  * descriptor or -1 */
 int  socket_accept_any( int  server_fd );
 
+/* Set the write timeout in millieseconds for a blocking socket. */
+int socket_write_timeout(int fd, uint32_t msec);
 
+/* Set the read timeout in millieseconds for a blocking socket. */
+int socket_read_timeout(int fd, uint32_t msec);
 int  socket_mcast_inet_add_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_drop_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_set_loop( int  s, int  enabled );

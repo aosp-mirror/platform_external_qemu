@@ -1199,6 +1199,25 @@ int socket_set_nonblock(int fd)
 #endif
 }
 
+static int set_sock_opt(int fd, int option, uint32_t msec){
+    struct timeval tv;
+    tv.tv_usec = msec * 1000ULL;
+    tv.tv_sec = msec / 1000ULL;
+    #ifdef _WIN32
+    return setsockopt(fd, SOL_SOCKET, option, &msec, sizeof(msec));
+    #else
+    return setsockopt(fd, SOL_SOCKET, option,(struct timeval *)&tv,sizeof(struct timeval));
+    #endif
+}
+
+int socket_write_timeout(int fd, uint32_t msec) {
+    return set_sock_opt(fd, SO_SNDTIMEO, msec);
+}
+
+int socket_read_timeout(int fd, uint32_t msec) {
+    return set_sock_opt(fd, SO_RCVTIMEO, msec);
+}
+
 int socket_set_blocking(int fd)
 {
 #ifdef _WIN32
