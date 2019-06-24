@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc765152_07e5dc37",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-24T19:31:40Z",
+      "side": 1,
+      "message": "I noticed you have a lot of 4096 in your code. Could you please give them names?",
+      "range": {
+        "startLine": 38,
+        "startChar": 38,
+        "endLine": 38,
+        "endChar": 42
+      },
+      "revId": "5df1d39a96a2261aa9f211b09f375e55dddc3b8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
