@@ -21,6 +21,7 @@ option objc_class_prefix = "AEC";
 package android.emulation.control;
 
 import "google/protobuf/empty.proto";
+import "waterfall.proto";
 
 // An EmulatorController service lets you control the emulator.
 service EmulatorController {
@@ -72,6 +73,22 @@ service EmulatorController {
     // The ice candidates for example will trickle in on this callback,
     // as will the SDP negotation.
     rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
+
+    // From waterfall proto
+
+    // Echo exists solely for test purposes.
+    rpc Echo(stream waterfall.Message) returns (stream waterfall.Message);
+
+    // Push file/dir from host to device.
+    rpc Push(stream waterfall.Transfer) returns (waterfall.Transfer);
+
+    // Pull file/dir from device to host.
+    rpc Pull(waterfall.Transfer) returns (stream waterfall.Transfer);
+
+    // Exec executes cmd in the device and foward stdout and stderr to client
+    // Exec expects a single initial CmdProgress message if stdin is not
+    // being redirected. Otherwise Exec will read std from the stream.
+    rpc Exec(stream waterfall.CmdProgress) returns (stream waterfall.CmdProgress);
 }
 
 message RtcId {
@@ -126,7 +143,8 @@ message LogMessage {
     // by newer content and the start values will be mismatched.
     int64 start = 2;
     //[Output Only] The position of the next byte of content from the serial
-    //console output. Use this value in the next request as the start parameter.
+    // console output. Use this value in the next request as the start
+    // parameter.
     int64 next = 3;
 }
 

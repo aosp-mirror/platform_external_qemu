@@ -16,23 +16,30 @@ PROTOC=python -m grpc_tools.protoc
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
 QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
+GRPC_ROOT := $(QEMU_ROOT)/android/android-grpc
 PROTODIR = $(CURRENT_DIR)/android_emulation_control
-PROTO = $(PROTODIR)/emulator_controller.proto
+CONTROLLER = $(PROTODIR)/emulator_controller.proto
+WATERFALL = $(PROTODIR)/waterfall.proto
 
 all: deps
 
-$(PROTO):
+$(WATERFALL) $(CONTROLLER):
 		mkdir -p $(PROTODIR)
-ifeq (,$(wildcard $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto))
-		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto  $(PROTO)
+ifeq (,$(wildcard $(GRPC_ROOT)/emulator_controller.proto))
+		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto $(PROTODIR)
+		cp  $(ANDROID_SDK_ROOT)/emulator/lib/waterfall.proto $(PROTODIR)
 else
-		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
+		cp  $(GRPC_ROOT)/emulator_controller.proto  $(PROTODIR)
+		cp  $(GRPC_ROOT)/waterfall.proto  $(PROTODIR)
 endif
 
-protoc: deps $(PROTO)
+protoc: $(CONTROLLER) $(WATERFALL)
 		$(PROTOC) -I$(PROTODIR) \
 				--python_out=sample --grpc_python_out=sample \
-				$(PROTO)
+				$(CONTROLLER)
+		$(PROTOC) -I$(PROTODIR) \
+				--python_out=sample --grpc_python_out=sample \
+				$(WATERFALL)
 clean:
 		rm -f sample/*pb2*
 

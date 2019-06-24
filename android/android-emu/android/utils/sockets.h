@@ -425,7 +425,8 @@ int  socket_anyaddr_server( int  port, SocketType  type );
  * descriptor or -1 */
 int  socket_accept_any( int  server_fd );
 
-
+int socket_write_timeout(int fd, uint64_t usec);
+int socket_read_timeout(int fd, uint64_t usec);
 int  socket_mcast_inet_add_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_drop_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_set_loop( int  s, int  enabled );
