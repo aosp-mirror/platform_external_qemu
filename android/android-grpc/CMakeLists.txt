@@ -5,7 +5,9 @@ set(grpc_proto_src automation.proto)
 protobuf_generate_grpc_cpp(SOURCE_DIR
                            ${CMAKE_CURRENT_LIST_DIR}
                            SOURCES
-                           android/emulation/control/emulator_controller.proto
+                           emulator_controller.proto
+                           waterfall.proto
+                           control_socket.proto
                            OUTPUT_DIR
                            ${CMAKE_CURRENT_BINARY_DIR}
                            GENERATED
@@ -17,24 +19,25 @@ set(android-grpc_src
     android/emulation/control/EmulatorServiceStub.cpp
     android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
     android/emulation/control/GrpcServices.cpp
-    android/emulation/control/logcat/RingStreambuf.cpp)
+    android/emulation/control/logcat/RingStreambuf.cpp
+    android/emulation/control/waterfall/SocketController.cpp)
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE grpc++ png PUBLIC libprotobuf android-emu-base)
+target_link_libraries(android-grpc PRIVATE grpc++ png PUBLIC libprotobuf android-emu)
 target_include_directories(android-grpc
-                           PRIVATE # For Renderer.h
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
+                           PRIVATE # For Renderer.h ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
 
-set(android-grpc_unittest_src android/emulation/control/logcat/RingStreambuf_unittest.cpp)
+set(android-grpc_unittest_src
+    android/emulation/control/logcat/RingStreambuf_unittest.cpp)
 
 android_add_test(android-grpc_unittest)
-target_link_libraries(android-grpc_unittest PRIVATE android-grpc gmock_main)
+target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++ gmock_main)
 
 # Lets distribute the proto file
-install(FILES android/emulation/control/emulator_controller.proto DESTINATION lib)
+install(FILES emulator_controller.proto waterfall.proto DESTINATION lib)
 
 # Add the benchmark
 set(grpc_benchmark_src android/emulation/control/keyboard/KeytranslatePerf.cpp
