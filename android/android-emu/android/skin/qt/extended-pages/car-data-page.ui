@@ -35,12 +35,6 @@
     </attribute>
    </widget>
    <!-- Car Property Table Tab -->
-   <widget class="CarPropertyTable" name="car_property_table">
-    <attribute name="title">
-     <string>Car properties</string>
-    </attribute>
-   </widget>
-   <!-- Car Property Table Tab -->
    <widget class="VhalTable" name="vhal_table">
     <attribute name="title">
      <string>Vhal properties</string>
@@ -54,11 +48,6 @@
    <class>CarSensorData</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h</header>
-  </customwidget>
-  <customwidget>
-   <class>CarPropertyTable</class>
-   <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/car-data-emulation/car-property-table.h</header>
   </customwidget>
   <customwidget>
    <class>VhalTable</class>

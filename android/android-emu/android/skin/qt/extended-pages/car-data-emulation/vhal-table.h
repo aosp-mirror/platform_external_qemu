@@ -18,7 +18,7 @@
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/skin/qt/extended-pages/car-data-emulation/car-property-table.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 #include "ui_vhal-table.h"
 #include "vhal-item.h"

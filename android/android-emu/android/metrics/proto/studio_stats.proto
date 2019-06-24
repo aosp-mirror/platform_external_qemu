@@ -1410,7 +1410,7 @@ message EmulatorFeatureFlagState {
     VIDEO_PLAYBACK = 40;
     VULKAN = 41;
     MACRO_UI = 42;
-    CAR_PROPERTY_TABLE = 43;
+    CAR_VHAL_TABLE = 43;
     DYNAMIC_PARTITION = 44;
     IP_DISCONNECT_ON_LOAD = 45;
     VULKAN_SNAPSHOTS = 46;
