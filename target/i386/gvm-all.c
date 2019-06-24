@@ -1563,8 +1563,9 @@ int gvm_vcpu_ioctl(CPUState *cpu, int type,
         default:
             ret = -EFAULT;
         }
-    }
-    return 0;
+    } else
+	ret = 0;
+    return ret;
 }
 
 int gvm_has_sync_mmu(void)
