@@ -16,6 +16,24 @@
       "revId": "b34b331091641500a752129535d435fd9aaa50fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5073a9d_7fbc9666",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-06-24T18:44:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "add39ddb_e83bfed4",
+      "revId": "b34b331091641500a752129535d435fd9aaa50fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
