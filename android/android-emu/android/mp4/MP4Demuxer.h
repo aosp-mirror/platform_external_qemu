@@ -38,8 +38,13 @@ public:
     static std::unique_ptr<Mp4Demuxer> create(
             Mp4Dataset* dataset,
             VideoPlayerWaitInfo* readingWaitInfo);
+    // Start the demuxer with a callback upon completion of demuxing
     virtual void start(std::function<void()> finishedCallback) = 0;
+    // Stop the ongoing demuxing effort
     virtual void stop() = 0;
+    // Wait for the ongoing demuxing effort to complete
+    // Caution: it could freeze your process if the dataset is large.
+    virtual void wait() = 0;
     virtual void setAudioPacketQueue(PacketQueue* audioPacketQueue) = 0;
     virtual void setVideoPacketQueue(PacketQueue* videoPacketQueue) = 0;
     virtual void setSensorLocationEventProvider(

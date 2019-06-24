@@ -44,6 +44,7 @@ public:
     virtual ~Mp4DemuxerImpl();
     void start(std::function<void()> finishedCallback);
     void stop();
+    void wait();
 
     void setAudioPacketQueue(PacketQueue* audioPacketQueue) {
         mAudioPacketQueue = audioPacketQueue;
@@ -94,6 +95,10 @@ void Mp4DemuxerImpl::start(std::function<void()> finishedCallback) {
 
 void Mp4DemuxerImpl::stop() {
     mRunning = false;
+    mWorkerThread.wait();
+}
+
+void Mp4DemuxerImpl::wait() {
     mWorkerThread.wait();
 }
 

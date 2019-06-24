@@ -40,12 +40,13 @@ public:
     void scheduleRefresh(int delayMS) {}
 
 private:
-    bool mRunning;
+    bool mRunning = false;
     int mPktSerial = 0;
 };
 
 class Mp4DemuxerTest : public testing::Test {
 protected:
+    std::unique_ptr<Mp4Dataset> mDataset;
     std::unique_ptr<Mp4Demuxer> mDemuxer;
     std::unique_ptr<VideoPlayer> mMockedVideoPlayer;
     std::unique_ptr<PacketQueue> mAudioQueue;
@@ -56,8 +57,8 @@ protected:
                 android::base::System::get()->getProgramDirectory(), "testdata",
                 "video.mp4");
 
-        std::unique_ptr<Mp4Dataset> dataset = Mp4Dataset::create(absDataPath);
-        mDemuxer = Mp4Demuxer::create(dataset.get(), nullptr);
+        mDataset = Mp4Dataset::create(absDataPath);
+        mDemuxer = Mp4Demuxer::create(mDataset.get(), nullptr);
 
         mMockedVideoPlayer.reset(new MockedVideoPlayer());
 
@@ -73,26 +74,12 @@ protected:
         mAudioQueue->start();
         mVideoQueue->start();
         mDemuxer->start([] {});
-        waitForDemuxFinished();
+        mDemuxer->wait();
     }
 
     virtual void TearDown() override {
         mMockedVideoPlayer->stop();
         mDemuxer->stop();
-    }
-
-private:
-    // The total number of video packets in the input file. This need to be
-    // changed if the input file is swapped.
-    static const int MAX_VIDEO_PACKET_COUNT = 47;
-    static const int DEMUXER_WAIT_DURATION_MS = 10;
-
-    // A helper function to wait for demuxing to finish. Check every 10ms
-    // until the demuxing of the input dataset completes
-    void waitForDemuxFinished() {
-        while (mVideoQueue->getNumPackets() < MAX_VIDEO_PACKET_COUNT) {
-            android::base::Thread::sleepMs(DEMUXER_WAIT_DURATION_MS);
-        };
     }
 };
 
