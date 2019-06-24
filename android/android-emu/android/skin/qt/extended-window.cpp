@@ -87,6 +87,10 @@ ExtendedWindow::ExtendedWindow(
         mToolWindow, SIGNAL(haveClipboardSharingKnown(bool)),
         mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
 
+    connect(mExtendedUi->recordAndPlaybackPage,
+            SIGNAL(ensureVirtualSceneWindowCreated()), mToolWindow,
+            SLOT(ensureVirtualSceneWindowCreated()));
+
     connect(
         mExtendedUi->settingsPage, SIGNAL(enableMultiDisplayChanged(bool, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)),
         mEmulatorWindow, SLOT(switchMultiDisplay(bool, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)));
@@ -296,6 +300,12 @@ void ExtendedWindow::connectVirtualSceneWindow(
     connect(mExtendedUi->virtualSensorsPage,
             SIGNAL(virtualSensorsInteraction()), virtualSceneWindow,
             SLOT(virtualSensorsInteraction()));
+
+    connect(mExtendedUi->recordAndPlaybackPage,
+            SIGNAL(setRecordingStateSignal(bool)), virtualSceneWindow,
+            SLOT(setRecordingState(bool)));
+    connect(virtualSceneWindow, SIGNAL(on_recOngoingButton_clicked()), this,
+            SLOT(showMacroRecordPage()));
 }
 
 void ExtendedWindow::closeEvent(QCloseEvent *e) {
@@ -402,4 +412,10 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
              mToolWindow->geometry().top());
     }
     QFrame::showEvent(e);
+}
+
+void ExtendedWindow::showMacroRecordPage() {
+    show();
+    on_recordButton_clicked();
+    mExtendedUi->recordAndPlaybackPage->focusMacroRecordTab();
 }

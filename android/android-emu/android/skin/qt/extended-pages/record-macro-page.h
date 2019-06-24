@@ -68,6 +68,7 @@ protected:
 
 signals:
     void playbackFinishedSignal();
+    void setRecordingStateSignal(bool state);
 
 private:
     void loadUi();
@@ -88,6 +89,9 @@ private:
     void reportPreviewPlayedAgain();
     void reportTotalDuration();
     void reportPresetMacroPlayed(const std::string& macroName);
+    void reportMacroRecorded();
+    void reportMacroDeleted();
+    void reportMacroEdited();
     void reportAllMetrics();
     void startRecording();
     void stopRecording();
@@ -103,6 +107,7 @@ private:
     // Behind feature flag.
     void setRecordState();
     bool mRecordEnabled = false;
+    bool mFirstShowEvent = true;
 
     bool mRecording = false;
     bool mMacroPlaying = false;
@@ -138,6 +143,9 @@ private:
         std::vector<android_studio::EmulatorAutomation::
                             EmulatorAutomationPresetMacro>
                 presetsPlayed = {};
+        uint64_t recordMacroCount = 0;
+        uint64_t deleteMacroCount = 0;
+        uint64_t editMacroCount = 0;
     };
 
     AutomationMetrics mAutomationMetrics;

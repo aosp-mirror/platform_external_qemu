@@ -80,6 +80,11 @@ void RecordMacroPage::setAutomationAgent(const QAndroidAutomationAgent* agent) {
 
 void RecordMacroPage::showEvent(QShowEvent* event) {
     mAutomationMetrics = AutomationMetrics();
+    // Some assets need to be reloaded.
+    if (mFirstShowEvent) {
+        loadUi();
+        mFirstShowEvent = false;
+    }
 }
 
 void RecordMacroPage::hideEvent(QHideEvent* event) {
@@ -507,6 +512,18 @@ void RecordMacroPage::reportTotalDuration() {
     mAutomationMetrics.totalDurationMs += mElapsedTimeTimer.elapsed();
 }
 
+void RecordMacroPage::reportMacroRecorded() {
+    mAutomationMetrics.recordMacroCount++;
+}
+
+void RecordMacroPage::reportMacroDeleted() {
+    mAutomationMetrics.deleteMacroCount++;
+}
+
+void RecordMacroPage::reportMacroEdited() {
+    mAutomationMetrics.editMacroCount++;
+}
+
 void RecordMacroPage::reportPresetMacroPlayed(const std::string& macroName) {
     EmulatorAutomationPresetMacro presetMacro;
 
@@ -538,6 +555,9 @@ void RecordMacroPage::reportAllMetrics() {
     for (auto presetMacro : mAutomationMetrics.presetsPlayed) {
         metrics.add_played_preset_macro(presetMacro);
     }
+    metrics.set_record_macro_count(mAutomationMetrics.recordMacroCount);
+    metrics.set_delete_macro_count(mAutomationMetrics.deleteMacroCount);
+    metrics.set_edit_macro_count(mAutomationMetrics.editMacroCount);
 
     MetricsReporter::get().report(
             [metrics](android_studio::AndroidStudioEvent* event) {
@@ -561,6 +581,7 @@ void RecordMacroPage::on_recButton_clicked() {
 void RecordMacroPage::startRecording() {
     disableMacroItems();
     mRecording = true;
+    emit setRecordingStateSignal(mRecording);
 
     const std::string macrosLocation = getCustomMacrosDirectory();
     const std::string placeholderPath =
@@ -581,6 +602,7 @@ void RecordMacroPage::stopRecording() {
     mTimer.stop();
     enableMacroItems();
     mRecording = false;
+    emit setRecordingStateSignal(mRecording);
 
     auto result = sAutomationAgent->stopRecording();
     if (result.err()) {
@@ -610,6 +632,7 @@ void RecordMacroPage::stopRecording() {
             std::remove(oldPath.c_str());
         } else {
             createMacroItem(newName, false);
+            reportMacroRecorded();
         }
     } else {
         // Delete file.
@@ -624,7 +647,7 @@ void RecordMacroPage::setRecordState() {
         mUi->recButton->setText(tr("RECORD NEW "));
         mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
         mUi->recButton->setProperty("themeIconName", "recordCircle");
-        mUi->recButton->setIconSize(QSize(30, 20));
+        mUi->recButton->setIconSize(QSize(26, 18));
     }
     mUi->stackedWidget->setCurrentIndex(0);
 
@@ -833,6 +856,7 @@ void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
         const std::string path =
                 PathUtils::join(macrosLocation, getMacroNameFromItem(listItem));
         sAutomationAgent->setMacroName(macroName, path);
+        reportMacroEdited();
     }
 }
 
@@ -865,6 +889,8 @@ void RecordMacroPage::deleteMacroItem(RecordMacroSavedItem* macroItem) {
         const std::string path = PathUtils::join(macrosLocation, name);
         if (std::remove(path.c_str()) != 0) {
             displayErrorBox("Deletion failed.");
+        } else {
+            reportMacroDeleted();
         }
     }
 }
@@ -879,6 +905,7 @@ void RecordMacroPage::enablePresetMacros(bool enable) {
     // Reset all the possible states.
     mTimer.stop();
     mRecording = false;
+    emit setRecordingStateSignal(mRecording);
     if (mState == MacroUiState::Playing) {
         playbackFinished();
     }

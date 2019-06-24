@@ -16,6 +16,7 @@
 #include "android/featurecontrol/feature_control.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -402,8 +403,8 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     p.end();
 }
 
-void VirtualSceneControlWindow::setActive(bool active) {
-    mIsActive = active;
+void VirtualSceneControlWindow::setActiveForCamera(bool active) {
+    mIsActiveCamera = active;
     if (active) {
         show();
 
@@ -415,7 +416,9 @@ void VirtualSceneControlWindow::setActive(bool active) {
                     SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
         }
     } else {
-        hide();
+        if (!mIsActiveRecording) {
+            hide();
+        }
 
         // The camera session has ended.  If the info dialog is still open, we
         // want to show it again next time in case the camera crashed and the
@@ -430,8 +433,20 @@ void VirtualSceneControlWindow::setActive(bool active) {
     }
 }
 
+void VirtualSceneControlWindow::setActiveForRecording(bool active) {
+    mIsActiveRecording = active;
+    if (mIsActiveCamera) {
+        return;
+    }
+    if (active) {
+        show();
+    } else {
+        hide();
+    }
+}
+
 bool VirtualSceneControlWindow::isActive() {
-    return mIsActive;
+    return mIsActiveCamera || mIsActiveRecording;
 }
 
 void VirtualSceneControlWindow::reportMouseButtonDown() {
@@ -626,4 +641,17 @@ QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
     QWidget* container = parentWidget();
     return container->pos() +
            QPoint(container->width() / 2, container->height() / 2);
+}
+
+void VirtualSceneControlWindow::setRecordingState(bool state) {
+    setActiveForRecording(state);
+    if (state) {
+        mControlsUi->recOngoingButton->setIcon(
+                getIconForCurrentTheme("recordCircle"));
+        mControlsUi->recOngoingButton->setIconSize(QSize(30, 20));
+        mControlsUi->recOngoingButton->setText(tr("RECORDING ONGOING "));
+        mControlsUi->recOngoingButton->show();
+    } else {
+        mControlsUi->recOngoingButton->hide();
+    }
 }

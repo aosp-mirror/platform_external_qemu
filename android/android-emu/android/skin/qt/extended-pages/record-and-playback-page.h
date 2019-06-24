@@ -25,7 +25,15 @@ public:
     void updateTheme();
     void enableCustomMacros();
     void removeSettingsTab();
+    void focusMacroRecordTab();
 
     std::unique_ptr<Ui::RecordAndPlaybackPage> mUi;
     QTabBar* mTabBar = nullptr;
+
+signals:
+    void setRecordingStateSignal(bool state);
+    void ensureVirtualSceneWindowCreated();
+
+private slots:
+    void setRecordingStateSlot(bool state);
 };

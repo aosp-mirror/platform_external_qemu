@@ -73,6 +73,7 @@ private slots:
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
     void disableMouseWheel(bool disabled);
+    void showMacroRecordPage();
 
     // Master tabs
     void on_batteryButton_clicked();

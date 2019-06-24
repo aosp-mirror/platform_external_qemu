@@ -65,7 +65,8 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
-    void setActive(bool active);
+    void setActiveForCamera(bool active);
+    void setActiveForRecording(bool active);
     bool isActive();
 
     void reportMouseButtonDown();
@@ -75,11 +76,13 @@ public:
             ShortcutKeyStore<QtUICommand>& keystore);
 signals:
     void virtualSceneControlsEngaged(bool engaged);
+    void on_recOngoingButton_clicked();
 
 public slots:
     void orientationChanged(SkinRotation);
     void virtualSensorsPageVisible();
     void virtualSensorsInteraction();
+    void setRecordingState(bool state);
 
 private slots:
     void slot_mousePoller();
@@ -111,7 +114,8 @@ private:
     QPoint mOriginalMousePosition;
     QPoint mPreviousMousePosition;
 
-    bool mIsActive = false;
+    bool mIsActiveCamera = false;
+    bool mIsActiveRecording = false;
     bool mShouldShowInfoDialog = true;
     bool mIsHotkeyAvailable = true;
 
