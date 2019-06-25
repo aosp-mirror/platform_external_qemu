@@ -63,13 +63,14 @@ private:
     GLuint mYtex = 0;
     GLuint mUtex = 0;
     GLuint mVtex = 0;
-
+    GLuint mVUtex = 0;
     // shader uniform locations
     GLint mYWidthCutoffLoc = -1;
     GLint mCWidthCutoffLoc = -1;
     GLint mYSamplerLoc = -1;
     GLint mUSamplerLoc = -1;
     GLint mVSamplerLoc = -1;
+    GLint mVUSamplerLoc = -1;
     GLint mInCoordLoc = -1;
     GLint mPosLoc = -1;
     float mYWidthCutoff = 1.0;
