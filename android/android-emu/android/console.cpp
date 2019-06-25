@@ -3658,13 +3658,17 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
 }
 
 static int do_fold(ControlClient client, char* args) {
-    client->global->emu_agent->fold(true);
-    return 0;
+    if (client->global->emu_agent->fold(true)) {
+          return 0;
+    }
+    return -1;
 }
 
 static int do_unfold(ControlClient client, char* args) {
-    client->global->emu_agent->fold(false);
-    return 0;
+    if (client->global->emu_agent->fold(false)) {
+        return 0;
+    }
+    return -1;
 }
 
 /* NOTE: The names of all commands are listed when the 'help' command

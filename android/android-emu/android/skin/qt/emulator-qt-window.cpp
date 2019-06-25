@@ -2199,6 +2199,8 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
 
 bool EmulatorQtWindow::isFolded() const { return ToolWindow::isFolded(); }
 
+bool EmulatorQtWindow::isFoldableConfigured() const { return ToolWindow::isFoldableConfigured(); }
+
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
         QMouseEvent* event) const {
     return (event->button() == Qt::RightButton) ? kMouseButtonRight
