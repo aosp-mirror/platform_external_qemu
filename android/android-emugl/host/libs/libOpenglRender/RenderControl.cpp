@@ -187,6 +187,9 @@ static constexpr android::base::StringView kDeferredVulkanCommands = "ANDROID_EM
 static constexpr android::base::StringView kVulkanNullOptionalStrings = "ANDROID_EMU_vulkan_null_optional_strings";
 static constexpr android::base::StringView kVulkanCreateResourcesWithRequirements = "ANDROID_EMU_vulkan_create_resources_with_requirements";
 
+// treat YUV420_888 as NV21
+static constexpr android::base::StringView kYUV420888toNV21 = "ANDROID_EMU_YUV420_888_to_NV21";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -391,6 +394,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings);
     bool vulkanCreateResourceWithRequirementsEnabled =
         shouldEnableVulkan() && shouldEnableCreateResourcesWithRequirements();
+    bool YUV420888toNV21Enabled =
+        emugl_feature_is_enabled(android::featurecontrol::YUV420888toNV21);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -444,6 +449,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanCreateResourceWithRequirementsEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanCreateResourcesWithRequirements;
+        glStr += " ";
+    }
+
+    if (YUV420888toNV21Enabled && name == GL_EXTENSIONS) {
+        glStr += kYUV420888toNV21;
         glStr += " ";
     }
 
