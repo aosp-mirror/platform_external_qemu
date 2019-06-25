@@ -6334,6 +6334,12 @@ server.
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
             <param optional="true"><type>VkCommandBufferResetFlags</type> <name>flags</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkCommandBufferHostSyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9179,6 +9185,7 @@ server.
                 <command name="vkBeginCommandBufferAsyncGOOGLE"/>
                 <command name="vkEndCommandBufferAsyncGOOGLE"/>
                 <command name="vkResetCommandBufferAsyncGOOGLE"/>
+                <command name="vkCommandBufferHostSyncGOOGLE"/>
             </require>
         </extension>
     </extensions>

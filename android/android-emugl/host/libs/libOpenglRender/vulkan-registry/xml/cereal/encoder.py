@@ -16,6 +16,12 @@ class VkEncoder {
 public:
     VkEncoder(IOStream* stream);
     ~VkEncoder();
+
+    void flush();
+
+    using CleanupCallback = std::function<void()>;
+    void registerCleanupCallback(void* handle, CleanupCallback cb);
+    void unregisterCleanupCallback(void* handle);
 """
 
 encoder_decl_postamble = """
@@ -31,6 +37,8 @@ using namespace goldfish_vk;
 
 using android::aligned_buf_alloc;
 using android::aligned_buf_free;
+using android::base::guest::AutoLock;
+using android::base::guest::Lock;
 using android::base::Pool;
 
 class VkEncoder::Impl {
@@ -42,6 +50,14 @@ public:
             m_logEncodes = atoi(encodeProp) > 0;
         }
     }
+
+    ~Impl() {
+        for (auto it : mCleanupCallbacks) {
+            fprintf(stderr, "%%s: run cleanup callback for %%p\\n", __func__, it.first);
+            it.second();
+        }
+    }
+
     VulkanCountingStream* countingStream() { return &m_countingStream; }
     %s* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
@@ -52,6 +68,27 @@ public:
         if (!m_logEncodes) return;
         ALOGD(\"encoder log: %%s\", text);
     }
+
+    void flush() {
+        AutoLock encoderLock(lock);
+        m_stream.flush();
+    }
+
+    // Assume the lock for the current encoder is held.
+    void registerCleanupCallback(void* handle, VkEncoder::CleanupCallback cb) {
+        if (mCleanupCallbacks.end() == mCleanupCallbacks.find(handle)) {
+            mCleanupCallbacks[handle] = cb;
+        } else {
+            return;
+        }
+    }
+
+    void unregisterCleanupCallback(void* handle) {
+        mCleanupCallbacks.erase(handle);
+    }
+
+    Lock lock;
+
 private:
     VulkanCountingStream m_countingStream;
     %s m_stream;
@@ -59,10 +96,24 @@ private:
 
     Validation m_validation;
     bool m_logEncodes;
+
+    std::unordered_map<void*, VkEncoder::CleanupCallback> mCleanupCallbacks;
 };
 
 VkEncoder::VkEncoder(IOStream *stream) :
     mImpl(new VkEncoder::Impl(stream)) { }
+
+void VkEncoder::flush() {
+    mImpl->flush();
+}
+
+void VkEncoder::registerCleanupCallback(void* handle, VkEncoder::CleanupCallback cb) {
+    mImpl->registerCleanupCallback(handle, cb);
+}
+
+void VkEncoder::unregisterCleanupCallback(void* handle) {
+    mImpl->unregisterCleanupCallback(handle);
+}
 
 #define VALIDATE_RET(retType, success, validate) \\
     retType goldfish_vk_validateResult = validate; \\
@@ -147,21 +198,25 @@ def emit_custom_pre_validate(typeInfo, api, cgen):
 
 def emit_custom_resource_preprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_PREPROCESS:
+        cgen.stmt("encoderLock.unlock()")
         cgen.stmt( \
             make_event_handler_call( \
                 "mImpl->resources()", api,
                 ENCODER_THIS_PARAM,
                 SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                 cgen, suffix="_pre"))
+        cgen.stmt("encoderLock.lock()")
 
 def emit_custom_resource_postprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_POSTPROCESS:
+        cgen.stmt("encoderLock.unlock()")
         cgen.stmt(make_event_handler_call( \
             "mImpl->resources()",
             api,
             ENCODER_THIS_PARAM,
             api.getRetVarExpr(),
             cgen))
+        cgen.stmt("encoderLock.lock()")
 
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
@@ -259,6 +314,7 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
+    cgen.stmt("AutoLock encoderLock(mImpl->lock)")
     cgen.stmt("AEMU_SCOPED_TRACE(\"%s encode\")" % api.name)
 
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)

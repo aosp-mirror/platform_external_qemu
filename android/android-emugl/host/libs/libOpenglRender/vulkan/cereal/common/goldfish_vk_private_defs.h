@@ -138,6 +138,10 @@ typedef void (VKAPI_PTR *PFN_vkEndCommandBufferAsyncGOOGLE)(
 typedef void (VKAPI_PTR *PFN_vkResetCommandBufferAsyncGOOGLE)(
     VkCommandBuffer commandBuffer,
     VkCommandBufferResetFlags flags);
+typedef void (VKAPI_PTR *PFN_vkCommandBufferHostSyncGOOGLE)(
+    VkCommandBuffer commandBuffer,
+    uint32_t needHostSync,
+    uint32_t sequenceNumber);
 
 #ifndef VK_FUCHSIA_external_memory
 #define VK_FUCHSIA_external_memory 1

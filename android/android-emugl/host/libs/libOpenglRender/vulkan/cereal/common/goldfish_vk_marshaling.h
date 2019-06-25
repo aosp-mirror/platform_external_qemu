@@ -3380,6 +3380,7 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #define OP_vkBeginCommandBufferAsyncGOOGLE 20321
 #define OP_vkEndCommandBufferAsyncGOOGLE 20322
 #define OP_vkResetCommandBufferAsyncGOOGLE 20323
+#define OP_vkCommandBufferHostSyncGOOGLE 20324
 #endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
