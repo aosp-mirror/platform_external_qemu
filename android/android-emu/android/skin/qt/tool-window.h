@@ -80,6 +80,7 @@ public:
     static void onMainLoopStart();
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
     static bool isFolded();
+    static bool isFoldableConfigured();
 
     const ShortcutKeyStore<QtUICommand>* getShortcutKeyStore() {
         return &mShortcutKeyStore;
@@ -124,7 +125,6 @@ signals:
 private:
     static void forwardGenericEventToEmulator(int type, int code, int value);
     static void sendFoldedArea();
-    static bool isFoldableConfigured();
     void handleUICommand(QtUICommand cmd, bool down);
     void ensureExtendedWindowExists();
 

@@ -52,6 +52,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 [](bool is_fold) {
                     printf("window-agent-mock-impl: .fold %d\n", is_fold);
                     sIsFolded = is_fold;
+                    return true;
                 },
         .isFolded =
                 [](void) -> bool {

@@ -66,7 +66,9 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                             win->fold();
                         else
                             win->unFold();
+                        return false;
                     }
+                    return true;
                 },
         .isFolded =
                 [] {
