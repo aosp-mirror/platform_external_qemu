@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "378b3f06_aa72b391",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-06-25T22:10:24Z",
+      "side": 1,
+      "message": "Will old/new emulators work with new/old system images?",
+      "range": {
+        "startLine": 173,
+        "startChar": 8,
+        "endLine": 173,
+        "endChar": 21
+      },
+      "revId": "2bd6b320026fd9a318de62fb1ad5f449828bb704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
