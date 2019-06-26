@@ -254,10 +254,12 @@ bool qemu_android_emulation_setup() {
     for (int i = 0; i < nCores; ++i) {
         auto cpuLooper = new android::qemu::CpuLooper(i);
         android::crashreport::CrashReporter::get()->hangDetector().
+#ifndef _WIN32
                 addWatchedLooper(cpuLooper);
         android::base::CpuUsage::get()->addLooper(
                     (int)android::base::CpuUsage::UsageArea::Vcpu + i,
                     cpuLooper);
+#endif
     }
 
     if (android_cmdLineOptions && android_cmdLineOptions->detect_image_hang) {

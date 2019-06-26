@@ -145,7 +145,9 @@ void PerfStatReporter::refreshPerfStats() {
     mCurrPerfStats->set_guest_uptime_us(guest_uptime);
 
     fillProtoMemUsage(mCurrPerfStats.get());
+#ifndef _WIN32
     fillProtoCpuUsage(mCurrPerfStats.get());
+#endif
 }
 
 static void fillProtoMemUsage(android_studio::EmulatorPerformanceStats* stats_out) {
