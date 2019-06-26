@@ -1171,18 +1171,25 @@ extern "C" int main(int argc, char** argv) {
         }
 
         // Situations where not to use mmap() for RAM
-        // 1. Using HDD on Linux; no file mapping or we will have a bad time.
+        // 1. Using HDD on Linux or macOS; no file mapping or we will have a bad time.
+        // 2. macOS when having a machine with < 8 logical cores
         if (avd){
             auto contentPath = avdInfo_getContentPath(avd);
             auto diskKind = System::get()->pathDiskKind(contentPath);
             if (diskKind) {
                 if (*diskKind == System::DiskKind::Hdd) {
                     androidSnapshot_setUsingHdd(true /* is hdd */);
-#ifdef __linux__
+#ifndef _WIN32
                     feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
 #endif
                 }
             }
+#ifdef __APPLE__
+            auto numCores = System::get()->getCpuCoreCount();
+            if (numCores < 8) {
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
+            }
+#endif
         }
         // 2. TODO
 
@@ -1591,6 +1598,16 @@ extern "C" int main(int argc, char** argv) {
         }
 #endif
         args.addFormat("cores=%d", hw->hw_cpu_ncore);
+
+#ifdef __APPLE__
+        // macOS emulator is super slow on machines with less
+        // than 8 logical cores.
+        if (System::get()->getCpuCoreCount() < 8) {
+            dwarning("Running on a sytem with less than 8 logical cores. "
+                     "Setting number of virtual cores to 1");
+            hw->hw_cpu_ncore = 1;
+        }
+#endif
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
