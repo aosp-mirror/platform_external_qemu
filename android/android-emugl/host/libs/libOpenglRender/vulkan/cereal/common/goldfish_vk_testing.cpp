@@ -6280,6 +6280,8 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,

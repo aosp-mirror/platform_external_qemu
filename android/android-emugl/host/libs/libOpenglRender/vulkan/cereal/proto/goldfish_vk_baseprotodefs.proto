@@ -8155,6 +8155,32 @@ message vkCommandBufferHostSyncGOOGLE
     // Original field: None uint32_t sequenceNumber. stringarray? 0 string? 0 hasLenInfo? 0
     optional uint32 sequenceNumber = 3;
 }
+message vkCreateImageWithRequirementsGOOGLE
+{
+    // Original field: handle VkDevice device. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 device = 1;
+    // Original field: struct VkImageCreateInfo pCreateInfo. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkImageCreateInfo pCreateInfo = 2;
+    // Original field: struct VkAllocationCallbacks pAllocator. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkAllocationCallbacks pAllocator = 3;
+    // Original field: handle VkImage pImage. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 pImage = 4;
+    // Original field: struct VkMemoryRequirements pMemoryRequirements. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkMemoryRequirements pMemoryRequirements = 5;
+}
+message vkCreateBufferWithRequirementsGOOGLE
+{
+    // Original field: handle VkDevice device. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 device = 1;
+    // Original field: struct VkBufferCreateInfo pCreateInfo. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkBufferCreateInfo pCreateInfo = 2;
+    // Original field: struct VkAllocationCallbacks pAllocator. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkAllocationCallbacks pAllocator = 3;
+    // Original field: handle VkBuffer pBuffer. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 pBuffer = 4;
+    // Original field: struct VkMemoryRequirements pMemoryRequirements. stringarray? 0 string? 0 hasLenInfo? 0
+    optional VkMemoryRequirements pMemoryRequirements = 5;
+}
 message VkExtensionStruct
 {
     oneof struct
@@ -8601,5 +8627,7 @@ message VkApiCall
         vkEndCommandBufferAsyncGOOGLE api_vkEndCommandBufferAsyncGOOGLE = 323;
         vkResetCommandBufferAsyncGOOGLE api_vkResetCommandBufferAsyncGOOGLE = 324;
         vkCommandBufferHostSyncGOOGLE api_vkCommandBufferHostSyncGOOGLE = 325;
+        vkCreateImageWithRequirementsGOOGLE api_vkCreateImageWithRequirementsGOOGLE = 326;
+        vkCreateBufferWithRequirementsGOOGLE api_vkCreateBufferWithRequirementsGOOGLE = 327;
     }
 }

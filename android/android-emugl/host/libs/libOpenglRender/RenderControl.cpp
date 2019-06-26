@@ -185,6 +185,7 @@ static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_
 static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
 static constexpr android::base::StringView kDeferredVulkanCommands = "ANDROID_EMU_deferred_vulkan_commands";
 static constexpr android::base::StringView kVulkanNullOptionalStrings = "ANDROID_EMU_vulkan_null_optional_strings";
+static constexpr android::base::StringView kVulkanCreateResourcesWithRequirements = "ANDROID_EMU_vulkan_create_resources_with_requirements";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -272,6 +273,14 @@ static bool shouldEnableDeferredVulkanCommands() {
             getHostFeatureSupport();
     return supportInfo.supportsVulkan &&
            supportInfo.useDeferredCommands;
+}
+
+static bool shouldEnableCreateResourcesWithRequirements() {
+    auto supportInfo =
+        goldfish_vk::VkDecoderGlobalState::get()->
+            getHostFeatureSupport();
+    return supportInfo.supportsVulkan &&
+           supportInfo.useCreateResourcesWithRequirements;
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -380,6 +389,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         shouldEnableVulkan() && shouldEnableDeferredVulkanCommands();
     bool vulkanNullOptionalStringsEnabled =
         shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings);
+    bool vulkanCreateResourceWithRequirementsEnabled =
+        shouldEnableVulkan() && shouldEnableCreateResourcesWithRequirements();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -428,6 +439,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanNullOptionalStringsEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanNullOptionalStrings;
+        glStr += " ";
+    }
+
+    if (vulkanCreateResourceWithRequirementsEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanCreateResourcesWithRequirements;
         glStr += " ";
     }
 

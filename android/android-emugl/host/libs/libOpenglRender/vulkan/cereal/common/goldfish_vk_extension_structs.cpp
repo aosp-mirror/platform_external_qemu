@@ -282,6 +282,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
 #endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
 uint32_t goldfish_vk_struct_type(
     const void* structExtension)
 {

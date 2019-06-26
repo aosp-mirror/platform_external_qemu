@@ -569,8 +569,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         auto dispatch = emugl::vkDispatch(false /* not for testing */);
         auto emu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
         bool useDeferredCommands =
-            android::base::System::get()->envGet("ANDROID_EMU_VK_IMMEDIATE_COMMANDS").empty();
+            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
+        bool useCreateResourcesWithRequirements =
+            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
         goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
+        goldfish_vk::setUseCreateResourcesWithRequirements(emu, useCreateResourcesWithRequirements);
     }
 
     // Start up the single sync thread if GLAsyncSwap enabled

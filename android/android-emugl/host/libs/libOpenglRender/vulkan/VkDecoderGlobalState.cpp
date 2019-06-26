@@ -2311,6 +2311,8 @@ public:
             emu->deviceInfo.supportsExternalMemory;
         res.useDeferredCommands =
             emu->useDeferredCommands;
+        res.useCreateResourcesWithRequirements =
+            emu->useCreateResourcesWithRequirements;
 
         res.apiVersion = props.apiVersion;
         res.driverVersion = props.driverVersion;
@@ -2854,6 +2856,61 @@ public:
         mCvWaitSequenceNumber.signal();
     }
 
+    VkResult on_vkCreateImageWithRequirementsGOOGLE(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage,
+        VkMemoryRequirements* pMemoryRequirements) {
+
+        if (pMemoryRequirements) {
+            memset(pMemoryRequirements, 0, sizeof(*pMemoryRequirements));
+        }
+
+        VkResult imageCreateRes =
+            on_vkCreateImage(pool, boxed_device, pCreateInfo, pAllocator, pImage);
+
+        if (imageCreateRes != VK_SUCCESS) {
+            return imageCreateRes;
+        }
+
+        on_vkGetImageMemoryRequirements(
+            pool, boxed_device,
+            unbox_non_dispatchable_VkImage(*pImage),
+            pMemoryRequirements);
+
+        return imageCreateRes;
+    }
+
+    VkResult on_vkCreateBufferWithRequirementsGOOGLE(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        const VkBufferCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkBuffer* pBuffer,
+        VkMemoryRequirements* pMemoryRequirements) {
+
+        if (pMemoryRequirements) {
+            memset(pMemoryRequirements, 0, sizeof(*pMemoryRequirements));
+        }
+
+        VkResult bufferCreateRes =
+            on_vkCreateBuffer(pool, boxed_device, pCreateInfo, pAllocator, pBuffer);
+
+        if (bufferCreateRes != VK_SUCCESS) {
+            return bufferCreateRes;
+        }
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        vk->vkGetBufferMemoryRequirements(
+            device, unbox_non_dispatchable_VkBuffer(*pBuffer), pMemoryRequirements);
+
+        return bufferCreateRes;
+    }
+
 
     VkResult on_vkBeginCommandBuffer(
             android::base::Pool* pool,
@@ -3020,6 +3077,7 @@ public:
         if (!mCreatedHandlesForSnapshotLoad.empty() &&
                 (mCreatedHandlesForSnapshotLoad.size() - mCreatedHandlesForSnapshotLoadIndex > 0)) {
             auto handle = mCreatedHandlesForSnapshotLoad[mCreatedHandlesForSnapshotLoadIndex];
+            VKDGS_LOG("use handle: %p", handle);
             ++mCreatedHandlesForSnapshotLoadIndex;
             auto res = mGlobalHandleStore.addFixed(handle, item, typeTag);
             return res;
@@ -4972,6 +5030,28 @@ void VkDecoderGlobalState::on_vkCommandBufferHostSyncGOOGLE(
     uint32_t needHostSync,
     uint32_t sequenceNumber) {
     mImpl->hostSyncCommandBuffer("hostSync", commandBuffer, needHostSync, sequenceNumber);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateImageWithRequirementsGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage,
+    VkMemoryRequirements* pMemoryRequirements) {
+    return mImpl->on_vkCreateImageWithRequirementsGOOGLE(
+            pool, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateBufferWithRequirementsGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device,
+    const VkBufferCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkBuffer* pBuffer,
+    VkMemoryRequirements* pMemoryRequirements) {
+    return mImpl->on_vkCreateBufferWithRequirementsGOOGLE(
+            pool, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
 }
 
 void VkDecoderGlobalState::on_vkCmdBindPipeline(

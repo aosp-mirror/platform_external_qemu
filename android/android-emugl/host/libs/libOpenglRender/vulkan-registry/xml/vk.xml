@@ -6340,6 +6340,22 @@ server.
             <param><type>uint32_t</type> <name>needHostSync</name></param>
             <param><type>uint32_t</type> <name>sequenceNumber</name></param>
         </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkCreateImageWithRequirementsGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param>const <type>VkImageCreateInfo</type>* <name>pCreateInfo</name></param>
+            <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+            <param><type>VkImage</type>* <name>pImage</name></param>
+            <param><type>VkMemoryRequirements</type>* <name>pMemoryRequirements</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkCreateBufferWithRequirementsGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param>const <type>VkBufferCreateInfo</type>* <name>pCreateInfo</name></param>
+            <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+            <param><type>VkBuffer</type>* <name>pBuffer</name></param>
+            <param><type>VkMemoryRequirements</type>* <name>pMemoryRequirements</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9180,12 +9196,21 @@ server.
         <extension name="VK_GOOGLE_async_command_buffers" number="221" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
             <require>
                 <enum value="0"                                             name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_SPEC_VERSION"/>
-                <enum value="220"                                           name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_NUMBER"/>
+                <enum value="221"                                           name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_async_command_buffers&quot;"            name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_EXTENSION_NAME"/>
                 <command name="vkBeginCommandBufferAsyncGOOGLE"/>
                 <command name="vkEndCommandBufferAsyncGOOGLE"/>
                 <command name="vkResetCommandBufferAsyncGOOGLE"/>
                 <command name="vkCommandBufferHostSyncGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_create_resources_with_requirements" number="222" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMENTS"/>
+                <enum value="222"                                           name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMENTS_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_create_resources_with_requirements&quot;"            name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMNTS_EXTENSION_NAME"/>
+                <command name="vkCreateImageWithRequirementsGOOGLE"/>
+                <command name="vkCreateBufferWithRequirementsGOOGLE"/>
             </require>
         </extension>
     </extensions>
