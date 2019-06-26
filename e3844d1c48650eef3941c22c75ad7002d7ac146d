@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "38e5c73f_591fc9d9",
+        "filename": "android/android-emu/android/utils/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-06-26T13:57:05Z",
+      "side": 1,
+      "message": "needs ULL suffix for the literals",
+      "range": {
+        "startLine": 1204,
+        "startChar": 24,
+        "endLine": 1204,
+        "endChar": 32
+      },
+      "revId": "e3844d1c48650eef3941c22c75ad7002d7ac146d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29d05224_8d15c2d4",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/StreamForwarder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-06-26T13:57:05Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 5
+      },
+      "revId": "e3844d1c48650eef3941c22c75ad7002d7ac146d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
