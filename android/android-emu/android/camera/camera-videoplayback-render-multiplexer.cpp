@@ -157,6 +157,14 @@ int64_t RenderMultiplexer::render() {
                 switchRenderer(mVideoRenderer.get());
                 mPlayer->stop();
                 break;
+            case ::offworld::VideoInjectionRequest::kPause:
+                if (mPlayer == nullptr) {
+                    LOG(ERROR) << "No video loaded.";
+                    return -1;
+                }
+                switchRenderer(mVideoRenderer.get());
+                mPlayer->pause();
+                break;
             case ::offworld::VideoInjectionRequest::kLoad:
                 switchRenderer(mVideoRenderer.get());
                 loadVideo(maybe_next_request->load().video_data());

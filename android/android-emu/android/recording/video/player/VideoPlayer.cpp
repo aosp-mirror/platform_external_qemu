@@ -56,7 +56,6 @@ extern "C" {
 }
 
 #include <cmath>
-
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
 using android::emulation::AudioOutputEngine;
@@ -176,7 +175,11 @@ public:
     virtual void start();
     virtual void start(const PlayConfig& playConfig);
     virtual void stop();
+    virtual void pause();
+    virtual void internalPause();
+    virtual void internalResume();
     virtual bool isRunning() const { return mRunning; }
+    virtual bool isPaused() const { return mPaused; }
     virtual void scheduleRefresh(int delayMs);
     virtual void videoRefresh();
 
@@ -1193,9 +1196,14 @@ int VideoPlayerImpl::play() {
         mVideoDecoder.reset();
     }
 
+    // mRunning needs to be set to false before cleanup; use temp variable to
+    // keep track of whether video was stopped or finished
+    const bool wasRunning = mRunning;
+    mRunning = false;
+
     cleanup();
 
-    if (mRunning) {
+    if (wasRunning) {
         mNotifier->emitVideoStopped();
     }
     mNotifier->emitVideoFinished();
@@ -1218,6 +1226,10 @@ void VideoPlayerImpl::workerThreadFunc() {
 
 // get an audio frame from the decoded queue, and convert it to buffer
 int VideoPlayerImpl::getConvertedAudioFrame() {
+    if (mPaused) {
+        return -1;
+    }
+
     if (mAudioFrameQueue.get() == nullptr) {
         return -1;
     }
@@ -1335,11 +1347,45 @@ void VideoPlayerImpl::start(const PlayConfig& playConfig) {
        mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
        mWorkerThreadStarted = true;
        mWorkerThread->start();
+    } else if (mRunning && mPaused) {
+        internalResume();
+    }
+}
+
+void VideoPlayerImpl::internalPause() {
+    if (mPaused) {
+        return;
+    }
+    mExternalClock.set(mExternalClock.getTime(), mExternalClock.getSerial());
+    mPaused = true;
+    mAudioClock.setPaused(true);
+    mVideoClock.setPaused(true);
+    mExternalClock.setPaused(true);
+}
+
+void VideoPlayerImpl::internalResume() {
+    if (!mPaused) {
+        return;
+    }
+    mFrameTimer = av_gettime_relative() / 1000000.0 - mVideoClock.getLastUpdated();
+    mVideoClock.set(mVideoClock.getTime(), mVideoClock.getSerial());
+    mExternalClock.set(mExternalClock.getTime(), mExternalClock.getSerial());
+    mPaused = false;
+    mAudioClock.setPaused(false);
+    mVideoClock.setPaused(false);
+    mExternalClock.setPaused(false);
+}
+
+void VideoPlayerImpl::pause() {
+    // does nothing on already paused video
+    if (mRunning && !mPaused) {
+        internalPause();
     }
 }
 
 void VideoPlayerImpl::stop() {
     mRunning = false;
+    mPaused = false;
     mPlayConfig = PlayConfig();
 
     mNotifier->stopTimer();
