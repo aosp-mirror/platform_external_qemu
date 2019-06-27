@@ -56,7 +56,7 @@ extern "C" {
 }
 
 #include <cmath>
-
+#include <iostream>
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
 using android::emulation::AudioOutputEngine;
@@ -176,7 +176,10 @@ public:
     virtual void start();
     virtual void start(const PlayConfig& playConfig);
     virtual void stop();
+    virtual void pause();
+    virtual void toggle_pause_resume();
     virtual bool isRunning() const { return mRunning; }
+    virtual bool isPaused() const { return mPaused; }
     virtual void scheduleRefresh(int delayMs);
     virtual void videoRefresh();
 
@@ -1193,9 +1196,13 @@ int VideoPlayerImpl::play() {
         mVideoDecoder.reset();
     }
 
+
+    const bool wasRunning = mRunning;
+    mRunning = false;
+
     cleanup();
 
-    if (mRunning) {
+    if (wasRunning) {
         mNotifier->emitVideoStopped();
     }
     mNotifier->emitVideoFinished();
@@ -1218,6 +1225,10 @@ void VideoPlayerImpl::workerThreadFunc() {
 
 // get an audio frame from the decoded queue, and convert it to buffer
 int VideoPlayerImpl::getConvertedAudioFrame() {
+    if (mPaused) {
+        return -1;
+    }
+
     if (mAudioFrameQueue.get() == nullptr) {
         return -1;
     }
@@ -1335,11 +1346,33 @@ void VideoPlayerImpl::start(const PlayConfig& playConfig) {
        mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
        mWorkerThreadStarted = true;
        mWorkerThread->start();
+    } else if (mRunning && mPaused) { // resume a paused video
+        toggle_pause_resume();
+    }
+}
+
+void VideoPlayerImpl::toggle_pause_resume() {
+    if (mPaused) {
+        this->mFrameTimer = av_gettime_relative() / 1000000.0 - mVideoClock.getLastUpdated();
+        mVideoClock.set(mVideoClock.getTime(), mVideoClock.getSerial());
+    }
+    mExternalClock.set(mExternalClock.getTime(), mExternalClock.getSerial());
+    mPaused = !mPaused;
+    mAudioClock.setPaused(mPaused);
+    mVideoClock.setPaused(mPaused);
+    mExternalClock.setPaused(mPaused);
+}
+
+void VideoPlayerImpl::pause() {
+    // does nothing on already paused video
+    if (mRunning && !mPaused) {
+        toggle_pause_resume();
     }
 }
 
 void VideoPlayerImpl::stop() {
     mRunning = false;
+    mPaused = false;
     mPlayConfig = PlayConfig();
 
     mNotifier->stopTimer();
