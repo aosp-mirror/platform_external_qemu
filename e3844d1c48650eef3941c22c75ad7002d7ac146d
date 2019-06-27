@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "7915527c_3daa1a15",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-06-27T01:29:50Z",
+      "side": 1,
+      "message": "What about forward?",
+      "range": {
+        "startLine": 372,
+        "startChar": 0,
+        "endLine": 372,
+        "endChar": 0
+      },
+      "revId": "e3844d1c48650eef3941c22c75ad7002d7ac146d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "29d05224_8d15c2d4",
         "filename": "android/android-grpc/android/emulation/control/waterfall/StreamForwarder.h",
         "patchSetId": 1
@@ -41,6 +64,29 @@
         "startChar": 0,
         "endLine": 34,
         "endChar": 5
+      },
+      "revId": "e3844d1c48650eef3941c22c75ad7002d7ac146d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c8ee6ea_02ff5b87",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/WaterfallService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-06-27T01:29:50Z",
+      "side": 1,
+      "message": "The emulator service will be the one responsible for doing tls encryption/termination before handing it off to the server on guest right?",
+      "range": {
+        "startLine": 120,
+        "startChar": 17,
+        "endLine": 120,
+        "endChar": 50
       },
       "revId": "e3844d1c48650eef3941c22c75ad7002d7ac146d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
