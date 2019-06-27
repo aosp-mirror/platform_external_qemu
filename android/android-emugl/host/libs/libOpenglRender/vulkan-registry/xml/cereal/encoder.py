@@ -591,6 +591,7 @@ custom_encodes = {
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
     "vkInvalidateMappedMemoryRanges" : encode_vkInvalidateMappedMemoryRanges,
     "vkCreateImage" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
+    "vkCreateImageWithRequirementsGOOGLE" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
     "vkAcquireImageANDROID" : emit_with_custom_unwrap(unwrap_vkAcquireImageANDROID_nativeFenceFd()),
 }
 
