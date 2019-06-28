@@ -921,21 +921,46 @@ TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotGralloc) {
     destroyTestGrallocBuffer(buffer);
 }
 
-TEST_F(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
+TEST_F(CombinedGoldfishOpenglTest, FboBlitTextureLayer) {
     GLuint tex;
+
+    const GLint kImageSize = 4;
+
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 256, 256, 1);
+    glTexStorage3D(
+        GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, kImageSize, kImageSize, 1);
 
     GLuint fbo;
 
     glGenFramebuffers(1, &fbo);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    glFramebufferTextureLayer(
+        GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0, 0);
+
+    const uint32_t kExpectedPixel = 0xffff00ff; 
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 
-    glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0, 0);
     CHECK_GL_ERROR();
-    glBlitFramebuffer(0, 0, 256, 256, 0, 0, 256, 256, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+    glBlitFramebuffer(
+        0, 0, kImageSize, kImageSize,
+        0, 0, kImageSize, kImageSize,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
     CHECK_GL_ERROR();
+
+    uint32_t pixel = 0; 
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel);
+
+    EXPECT_EQ(kExpectedPixel, pixel);
 
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &tex);
