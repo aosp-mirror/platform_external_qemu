@@ -37,14 +37,15 @@ static constexpr const size_t kMaxQueueSize = 15 * 1024 * 1024;  // 15MiB
 
 class Mp4DemuxerImpl : public Mp4Demuxer {
 public:
-    Mp4DemuxerImpl(Mp4Dataset* dataset, VideoPlayerWaitInfo* readingWaitInfo)
-        : mDataset(dataset),
-          mContinueReadWaitInfo(readingWaitInfo),
-          mWorkerThread([this]() { workerThreadFunc(); }) {}
-    virtual ~Mp4DemuxerImpl();
-    void start(std::function<void()> finishedCallback);
-    void stop();
-    void wait();
+    Mp4DemuxerImpl(::android::videoplayer::VideoPlayer* player,
+                   Mp4Dataset* dataset,
+                   VideoPlayerWaitInfo* readingWaitInfo)
+        : mPlayer(player),
+          mDataset(dataset),
+          mContinueReadWaitInfo(readingWaitInfo){}
+    ~Mp4DemuxerImpl() {}
+
+    void demux();
 
     void setAudioPacketQueue(PacketQueue* audioPacketQueue) {
         mAudioPacketQueue = audioPacketQueue;
@@ -60,57 +61,35 @@ public:
     }
 
 private:
-    int demux();
-    void workerThreadFunc();
-
     bool isDataStreamIndex(int index);
 
 private:
+    const ::android::videoplayer::VideoPlayer* const mPlayer = nullptr;
     Mp4Dataset* mDataset;
     VideoPlayerWaitInfo* mContinueReadWaitInfo;
-    base::FunctorThread mWorkerThread;
-    std::function<void()> mFinishedCallback;
-    bool mRunning = false;
     PacketQueue* mAudioPacketQueue = nullptr;
     PacketQueue* mVideoPacketQueue = nullptr;
     SensorLocationEventProvider* mEventProvider = nullptr;
 };
 
 std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
+        ::android::videoplayer::VideoPlayer* player,
         Mp4Dataset* dataset,
         VideoPlayerWaitInfo* readingWaitInfo) {
     std::unique_ptr<Mp4Demuxer> demuxer;
-    demuxer.reset(new Mp4DemuxerImpl(dataset, readingWaitInfo));
+    demuxer.reset(new Mp4DemuxerImpl(player, dataset, readingWaitInfo));
     return std::move(demuxer);
 }
 
-Mp4DemuxerImpl::~Mp4DemuxerImpl() {
-    stop();
-}
 
-void Mp4DemuxerImpl::start(std::function<void()> finishedCallback) {
-    mFinishedCallback = finishedCallback;
-    mWorkerThread.start();
-}
-
-void Mp4DemuxerImpl::stop() {
-    mRunning = false;
-    mWorkerThread.wait();
-}
-
-void Mp4DemuxerImpl::wait() {
-    mWorkerThread.wait();
-}
-
-int Mp4DemuxerImpl::demux() {
+void Mp4DemuxerImpl::demux() {
     int ret = 0;
     AVPacket packet;
     AVFormatContext* formatCtx = mDataset->getFormatContext();
     const int audioStreamIndex = mDataset->getAudioStreamIndex();
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
 
-    mRunning = true;
-    while (mRunning && (ret = av_read_frame(formatCtx, &packet)) >= 0) {
+    while (mPlayer->isRunning() && (ret = av_read_frame(formatCtx, &packet)) >= 0) {
         if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0 &&
             packet.stream_index == audioStreamIndex) {
             mAudioPacketQueue->put(&packet);
@@ -165,15 +144,6 @@ int Mp4DemuxerImpl::demux() {
             mAudioPacketQueue->putNullPacket(audioStreamIndex);
         }
     }
-
-    mFinishedCallback();
-
-    return 0;
-}
-
-void Mp4DemuxerImpl::workerThreadFunc() {
-    int ret = demux();
-    (void)ret;
 }
 
 bool Mp4DemuxerImpl::isDataStreamIndex(int index) {
