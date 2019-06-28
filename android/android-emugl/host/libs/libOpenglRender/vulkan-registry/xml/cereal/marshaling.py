@@ -41,7 +41,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                  forApiOutput = False,
                  dynAlloc = False,
                  mapHandles = True,
-                 handleMapOverwrites = False):
+                 handleMapOverwrites = False,
+                 consistencyCheck = True):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -60,6 +61,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.dynAlloc = dynAlloc
         self.mapHandles = mapHandles
         self.handleMapOverwrites = handleMapOverwrites
+
+        self.consistencyCheck = consistencyCheck
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -188,7 +191,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             checkAccess = checkName
             addrExpr = "&" + checkAccess
             sizeExpr = self.cgen.sizeofExpr(vulkanType)
-            needConsistencyCheck = True
+            needConsistencyCheck = self.consistencyCheck
 
         self.genPrimitiveStreamCall(
             vulkanType,
