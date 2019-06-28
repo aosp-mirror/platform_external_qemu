@@ -126,7 +126,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkInstanceCreateInfo));
                 unmarshal_VkInstanceCreateInfo(vkReadStream, (VkInstanceCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -181,7 +181,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -221,7 +221,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPhysicalDeviceCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPhysicalDeviceCount, 8);
                 if (pPhysicalDeviceCount)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDeviceCount, sizeof(uint32_t));
@@ -232,7 +232,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPhysicalDevices;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPhysicalDevices = (VkPhysicalDevice*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPhysicalDevices, 8);
                 if (pPhysicalDevices)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDevices, (*(pPhysicalDeviceCount)) * sizeof(VkPhysicalDevice));
@@ -255,14 +255,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_9 = (uint64_t)(uintptr_t)pPhysicalDeviceCount;
-                vkStream->putBe64(cgen_var_9);
+                vkStream->write(&cgen_var_9, 8);
                 if (pPhysicalDeviceCount)
                 {
                     vkStream->write((uint32_t*)pPhysicalDeviceCount, sizeof(uint32_t));
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_10 = (uint64_t)(uintptr_t)pPhysicalDevices;
-                vkStream->putBe64(cgen_var_10);
+                vkStream->write(&cgen_var_10, 8);
                 if (pPhysicalDevices)
                 {
                     if ((*(pPhysicalDeviceCount)))
@@ -477,7 +477,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pQueueFamilyPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pQueueFamilyPropertyCount, 8);
                 if (pQueueFamilyPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pQueueFamilyPropertyCount, sizeof(uint32_t));
@@ -488,7 +488,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pQueueFamilyProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pQueueFamilyProperties = (VkQueueFamilyProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pQueueFamilyProperties, 8);
                 if (pQueueFamilyProperties)
                 {
                     vkReadStream->alloc((void**)&pQueueFamilyProperties, (*(pQueueFamilyPropertyCount)) * sizeof(VkQueueFamilyProperties));
@@ -514,7 +514,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_19 = (uint64_t)(uintptr_t)pQueueFamilyPropertyCount;
-                vkStream->putBe64(cgen_var_19);
+                vkStream->write(&cgen_var_19, 8);
                 if (pQueueFamilyPropertyCount)
                 {
                     vkStream->write((uint32_t*)pQueueFamilyPropertyCount, sizeof(uint32_t));
@@ -528,7 +528,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_20 = (uint64_t)(uintptr_t)pQueueFamilyProperties;
-                vkStream->putBe64(cgen_var_20);
+                vkStream->write(&cgen_var_20, 8);
                 if (pQueueFamilyProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
@@ -660,7 +660,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDeviceCreateInfo));
                 unmarshal_VkDeviceCreateInfo(vkReadStream, (VkDeviceCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -715,7 +715,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -746,7 +746,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (vkReadStream->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT)
                 {
                     // WARNING PTR CHECK
-                    pLayerName = (const char*)(uintptr_t)vkReadStream->getBe64();
+                    vkReadStream->read(&pLayerName, 8);
                     if (pLayerName)
                     {
                         vkReadStream->loadStringInPlace((char**)&pLayerName);
@@ -759,7 +759,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -770,7 +770,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkExtensionProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkExtensionProperties));
@@ -797,7 +797,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_33 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_33);
+                vkStream->write(&cgen_var_33, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -811,7 +811,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_34 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_34);
+                vkStream->write(&cgen_var_34, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -845,7 +845,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 if (vkReadStream->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT)
                 {
                     // WARNING PTR CHECK
-                    pLayerName = (const char*)(uintptr_t)vkReadStream->getBe64();
+                    vkReadStream->read(&pLayerName, 8);
                     if (pLayerName)
                     {
                         vkReadStream->loadStringInPlace((char**)&pLayerName);
@@ -858,7 +858,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -869,7 +869,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkExtensionProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkExtensionProperties));
@@ -896,7 +896,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_39 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_39);
+                vkStream->write(&cgen_var_39, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -910,7 +910,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_40 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_40);
+                vkStream->write(&cgen_var_40, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -933,7 +933,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -944,7 +944,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkLayerProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkLayerProperties));
@@ -971,7 +971,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_43 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_43);
+                vkStream->write(&cgen_var_43, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -985,7 +985,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_44 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_44);
+                vkStream->write(&cgen_var_44, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -1018,7 +1018,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -1029,7 +1029,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkLayerProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkLayerProperties));
@@ -1056,7 +1056,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_48 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_48);
+                vkStream->write(&cgen_var_48, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -1070,7 +1070,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_49 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_49);
+                vkStream->write(&cgen_var_49, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -1246,7 +1246,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pAllocateInfo, sizeof(const VkMemoryAllocateInfo));
                 unmarshal_VkMemoryAllocateInfo(vkReadStream, (VkMemoryAllocateInfo*)(pAllocateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -1315,7 +1315,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for memory;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -1364,7 +1364,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for ppData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                ppData = (void**)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&ppData, 8);
                 if (ppData)
                 {
                     vkReadStream->alloc((void**)&ppData, sizeof(void*));
@@ -1381,7 +1381,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_67 = (uint64_t)(uintptr_t)ppData;
-                vkStream->putBe64(cgen_var_67);
+                vkStream->write(&cgen_var_67, 8);
                 if (ppData)
                 {
                     vkStream->write((void**)ppData, sizeof(void*));
@@ -1764,7 +1764,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSparseMemoryRequirementCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSparseMemoryRequirementCount, 8);
                 if (pSparseMemoryRequirementCount)
                 {
                     vkReadStream->alloc((void**)&pSparseMemoryRequirementCount, sizeof(uint32_t));
@@ -1775,7 +1775,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSparseMemoryRequirements = (VkSparseImageMemoryRequirements*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSparseMemoryRequirements, 8);
                 if (pSparseMemoryRequirements)
                 {
                     vkReadStream->alloc((void**)&pSparseMemoryRequirements, (*(pSparseMemoryRequirementCount)) * sizeof(VkSparseImageMemoryRequirements));
@@ -1801,7 +1801,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_88 = (uint64_t)(uintptr_t)pSparseMemoryRequirementCount;
-                vkStream->putBe64(cgen_var_88);
+                vkStream->write(&cgen_var_88, 8);
                 if (pSparseMemoryRequirementCount)
                 {
                     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
@@ -1815,7 +1815,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_89 = (uint64_t)(uintptr_t)pSparseMemoryRequirements;
-                vkStream->putBe64(cgen_var_89);
+                vkStream->write(&cgen_var_89, 8);
                 if (pSparseMemoryRequirements)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
@@ -1857,7 +1857,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -1868,7 +1868,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkSparseImageFormatProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkSparseImageFormatProperties));
@@ -1894,7 +1894,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_93 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_93);
+                vkStream->write(&cgen_var_93, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -1908,7 +1908,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_94 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_94);
+                vkStream->write(&cgen_var_94, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -1987,7 +1987,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkFenceCreateInfo));
                 unmarshal_VkFenceCreateInfo(vkReadStream, (VkFenceCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2056,7 +2056,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for fence;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2208,7 +2208,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSemaphoreCreateInfo));
                 unmarshal_VkSemaphoreCreateInfo(vkReadStream, (VkSemaphoreCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2277,7 +2277,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for semaphore;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2318,7 +2318,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkEventCreateInfo));
                 unmarshal_VkEventCreateInfo(vkReadStream, (VkEventCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2387,7 +2387,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for event;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2521,7 +2521,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkQueryPoolCreateInfo));
                 unmarshal_VkQueryPoolCreateInfo(vkReadStream, (VkQueryPoolCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2590,7 +2590,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for queryPool;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2637,7 +2637,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_138, (VkQueryPool*)&queryPool, 1);
                 vkReadStream->read((uint32_t*)&firstQuery, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&queryCount, sizeof(uint32_t));
-                dataSize = (size_t)vkReadStream->getBe64();
+                vkReadStream->read(&dataSize, 8);
                 // Begin manual dispatchable handle unboxing for pData;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pData, ((dataSize)) * sizeof(uint8_t));
@@ -2680,7 +2680,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferCreateInfo));
                 unmarshal_VkBufferCreateInfo(vkReadStream, (VkBufferCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2749,7 +2749,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for buffer;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2790,7 +2790,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferViewCreateInfo));
                 unmarshal_VkBufferViewCreateInfo(vkReadStream, (VkBufferViewCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2859,7 +2859,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for bufferView;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2900,7 +2900,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
                 unmarshal_VkImageCreateInfo(vkReadStream, (VkImageCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -2969,7 +2969,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for image;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3062,7 +3062,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageViewCreateInfo));
                 unmarshal_VkImageViewCreateInfo(vkReadStream, (VkImageViewCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3131,7 +3131,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for imageView;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3172,7 +3172,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkShaderModuleCreateInfo));
                 unmarshal_VkShaderModuleCreateInfo(vkReadStream, (VkShaderModuleCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3241,7 +3241,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for shaderModule;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3282,7 +3282,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkPipelineCacheCreateInfo));
                 unmarshal_VkPipelineCacheCreateInfo(vkReadStream, (VkPipelineCacheCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3351,7 +3351,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for pipelineCache;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3395,18 +3395,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pDataSize;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pDataSize = (size_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pDataSize, 8);
                 if (pDataSize)
                 {
                     vkReadStream->alloc((void**)&pDataSize, sizeof(size_t));
-                    (*pDataSize) = (size_t)vkReadStream->getBe64();
+                    vkReadStream->read(&(*pDataSize), 8);
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pDataSize;
                 // Begin manual dispatchable handle unboxing for pData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pData = (void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pData, 8);
                 if (pData)
                 {
                     vkReadStream->alloc((void**)&pData, (*(pDataSize)) * sizeof(uint8_t));
@@ -3423,15 +3423,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_189 = (uint64_t)(uintptr_t)pDataSize;
-                vkStream->putBe64(cgen_var_189);
+                vkStream->write(&cgen_var_189, 8);
                 if (pDataSize)
                 {
                     uint64_t cgen_var_190 = (uint64_t)(*pDataSize);
-                    vkStream->putBe64(cgen_var_190);
+                    vkStream->write(&cgen_var_190, 8);
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_191 = (uint64_t)(uintptr_t)pData;
-                vkStream->putBe64(cgen_var_191);
+                vkStream->write(&cgen_var_191, 8);
                 if (pData)
                 {
                     vkStream->write((void*)pData, (*(pDataSize)) * sizeof(uint8_t));
@@ -3513,7 +3513,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     unmarshal_VkGraphicsPipelineCreateInfo(vkReadStream, (VkGraphicsPipelineCreateInfo*)(pCreateInfos + i));
                 }
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3596,7 +3596,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     unmarshal_VkComputePipelineCreateInfo(vkReadStream, (VkComputePipelineCreateInfo*)(pCreateInfos + i));
                 }
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3676,7 +3676,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for pipeline;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3717,7 +3717,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkPipelineLayoutCreateInfo));
                 unmarshal_VkPipelineLayoutCreateInfo(vkReadStream, (VkPipelineLayoutCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3786,7 +3786,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for pipelineLayout;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3827,7 +3827,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerCreateInfo));
                 unmarshal_VkSamplerCreateInfo(vkReadStream, (VkSamplerCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3896,7 +3896,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for sampler;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -3937,7 +3937,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
                 unmarshal_VkDescriptorSetLayoutCreateInfo(vkReadStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4006,7 +4006,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for descriptorSetLayout;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4047,7 +4047,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorPoolCreateInfo));
                 unmarshal_VkDescriptorPoolCreateInfo(vkReadStream, (VkDescriptorPoolCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4116,7 +4116,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for descriptorPool;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4255,7 +4255,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pDescriptorSets_preserve);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 // WARNING PTR CHECK
-                pDescriptorSets = (const VkDescriptorSet*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pDescriptorSets, 8);
                 if (pDescriptorSets)
                 {
                     vkReadStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
@@ -4357,7 +4357,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkFramebufferCreateInfo));
                 unmarshal_VkFramebufferCreateInfo(vkReadStream, (VkFramebufferCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4426,7 +4426,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for framebuffer;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4467,7 +4467,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo));
                 unmarshal_VkRenderPassCreateInfo(vkReadStream, (VkRenderPassCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4536,7 +4536,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for renderPass;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4622,7 +4622,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkCommandPoolCreateInfo));
                 unmarshal_VkCommandPoolCreateInfo(vkReadStream, (VkCommandPoolCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4691,7 +4691,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for commandPool;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -4826,7 +4826,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pCommandBuffers_preserve);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 // WARNING PTR CHECK
-                pCommandBuffers = (const VkCommandBuffer*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pCommandBuffers, 8);
                 if (pCommandBuffers)
                 {
                     vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
@@ -6905,7 +6905,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPhysicalDeviceGroupCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPhysicalDeviceGroupCount, 8);
                 if (pPhysicalDeviceGroupCount)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDeviceGroupCount, sizeof(uint32_t));
@@ -6916,7 +6916,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPhysicalDeviceGroupProperties = (VkPhysicalDeviceGroupProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPhysicalDeviceGroupProperties, 8);
                 if (pPhysicalDeviceGroupProperties)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDeviceGroupProperties, (*(pPhysicalDeviceGroupCount)) * sizeof(VkPhysicalDeviceGroupProperties));
@@ -6943,7 +6943,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_368 = (uint64_t)(uintptr_t)pPhysicalDeviceGroupCount;
-                vkStream->putBe64(cgen_var_368);
+                vkStream->write(&cgen_var_368, 8);
                 if (pPhysicalDeviceGroupCount)
                 {
                     vkStream->write((uint32_t*)pPhysicalDeviceGroupCount, sizeof(uint32_t));
@@ -6957,7 +6957,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_369 = (uint64_t)(uintptr_t)pPhysicalDeviceGroupProperties;
-                vkStream->putBe64(cgen_var_369);
+                vkStream->write(&cgen_var_369, 8);
                 if (pPhysicalDeviceGroupProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
@@ -7089,7 +7089,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSparseMemoryRequirementCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSparseMemoryRequirementCount, 8);
                 if (pSparseMemoryRequirementCount)
                 {
                     vkReadStream->alloc((void**)&pSparseMemoryRequirementCount, sizeof(uint32_t));
@@ -7100,7 +7100,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSparseMemoryRequirements = (VkSparseImageMemoryRequirements2*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSparseMemoryRequirements, 8);
                 if (pSparseMemoryRequirements)
                 {
                     vkReadStream->alloc((void**)&pSparseMemoryRequirements, (*(pSparseMemoryRequirementCount)) * sizeof(VkSparseImageMemoryRequirements2));
@@ -7130,7 +7130,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_375 = (uint64_t)(uintptr_t)pSparseMemoryRequirementCount;
-                vkStream->putBe64(cgen_var_375);
+                vkStream->write(&cgen_var_375, 8);
                 if (pSparseMemoryRequirementCount)
                 {
                     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
@@ -7144,7 +7144,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_376 = (uint64_t)(uintptr_t)pSparseMemoryRequirements;
-                vkStream->putBe64(cgen_var_376);
+                vkStream->write(&cgen_var_376, 8);
                 if (pSparseMemoryRequirements)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
@@ -7351,7 +7351,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pQueueFamilyPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pQueueFamilyPropertyCount, 8);
                 if (pQueueFamilyPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pQueueFamilyPropertyCount, sizeof(uint32_t));
@@ -7362,7 +7362,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pQueueFamilyProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pQueueFamilyProperties = (VkQueueFamilyProperties2*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pQueueFamilyProperties, 8);
                 if (pQueueFamilyProperties)
                 {
                     vkReadStream->alloc((void**)&pQueueFamilyProperties, (*(pQueueFamilyPropertyCount)) * sizeof(VkQueueFamilyProperties2));
@@ -7388,7 +7388,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_384 = (uint64_t)(uintptr_t)pQueueFamilyPropertyCount;
-                vkStream->putBe64(cgen_var_384);
+                vkStream->write(&cgen_var_384, 8);
                 if (pQueueFamilyPropertyCount)
                 {
                     vkStream->write((uint32_t*)pQueueFamilyPropertyCount, sizeof(uint32_t));
@@ -7402,7 +7402,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_385 = (uint64_t)(uintptr_t)pQueueFamilyProperties;
-                vkStream->putBe64(cgen_var_385);
+                vkStream->write(&cgen_var_385, 8);
                 if (pQueueFamilyProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
@@ -7478,7 +7478,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -7489,7 +7489,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkSparseImageFormatProperties2*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkSparseImageFormatProperties2));
@@ -7519,7 +7519,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_390 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_390);
+                vkStream->write(&cgen_var_390, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -7533,7 +7533,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_391 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_391);
+                vkStream->write(&cgen_var_391, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -7641,7 +7641,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerYcbcrConversionCreateInfo));
                 unmarshal_VkSamplerYcbcrConversionCreateInfo(vkReadStream, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -7710,7 +7710,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for ycbcrConversion;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -7751,7 +7751,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorUpdateTemplateCreateInfo));
                 unmarshal_VkDescriptorUpdateTemplateCreateInfo(vkReadStream, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -7820,7 +7820,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for descriptorUpdateTemplate;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -7865,7 +7865,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_413, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_413, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
                 // WARNING PTR CHECK
-                pData = (const void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pData, 8);
                 if (pData)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
@@ -8105,7 +8105,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for surface;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -8237,7 +8237,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSurfaceFormatCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSurfaceFormatCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSurfaceFormatCount, 8);
                 if (pSurfaceFormatCount)
                 {
                     vkReadStream->alloc((void**)&pSurfaceFormatCount, sizeof(uint32_t));
@@ -8248,7 +8248,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSurfaceFormats;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSurfaceFormats = (VkSurfaceFormatKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSurfaceFormats, 8);
                 if (pSurfaceFormats)
                 {
                     vkReadStream->alloc((void**)&pSurfaceFormats, (*(pSurfaceFormatCount)) * sizeof(VkSurfaceFormatKHR));
@@ -8275,7 +8275,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_430 = (uint64_t)(uintptr_t)pSurfaceFormatCount;
-                vkStream->putBe64(cgen_var_430);
+                vkStream->write(&cgen_var_430, 8);
                 if (pSurfaceFormatCount)
                 {
                     vkStream->write((uint32_t*)pSurfaceFormatCount, sizeof(uint32_t));
@@ -8289,7 +8289,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_431 = (uint64_t)(uintptr_t)pSurfaceFormats;
-                vkStream->putBe64(cgen_var_431);
+                vkStream->write(&cgen_var_431, 8);
                 if (pSurfaceFormats)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
@@ -8326,7 +8326,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPresentModeCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPresentModeCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPresentModeCount, 8);
                 if (pPresentModeCount)
                 {
                     vkReadStream->alloc((void**)&pPresentModeCount, sizeof(uint32_t));
@@ -8337,7 +8337,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPresentModes;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPresentModes = (VkPresentModeKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPresentModes, 8);
                 if (pPresentModes)
                 {
                     vkReadStream->alloc((void**)&pPresentModes, (*(pPresentModeCount)) * sizeof(VkPresentModeKHR));
@@ -8354,14 +8354,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_436 = (uint64_t)(uintptr_t)pPresentModeCount;
-                vkStream->putBe64(cgen_var_436);
+                vkStream->write(&cgen_var_436, 8);
                 if (pPresentModeCount)
                 {
                     vkStream->write((uint32_t*)pPresentModeCount, sizeof(uint32_t));
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_437 = (uint64_t)(uintptr_t)pPresentModes;
-                vkStream->putBe64(cgen_var_437);
+                vkStream->write(&cgen_var_437, 8);
                 if (pPresentModes)
                 {
                     vkStream->write((VkPresentModeKHR*)pPresentModes, (*(pPresentModeCount)) * sizeof(VkPresentModeKHR));
@@ -8394,7 +8394,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSwapchainCreateInfoKHR));
                 unmarshal_VkSwapchainCreateInfoKHR(vkReadStream, (VkSwapchainCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -8463,7 +8463,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for swapchain;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -8507,7 +8507,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSwapchainImageCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSwapchainImageCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSwapchainImageCount, 8);
                 if (pSwapchainImageCount)
                 {
                     vkReadStream->alloc((void**)&pSwapchainImageCount, sizeof(uint32_t));
@@ -8518,7 +8518,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSwapchainImages;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSwapchainImages = (VkImage*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSwapchainImages, 8);
                 if (pSwapchainImages)
                 {
                     vkReadStream->alloc((void**)&pSwapchainImages, (*(pSwapchainImageCount)) * sizeof(VkImage));
@@ -8541,14 +8541,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_450 = (uint64_t)(uintptr_t)pSwapchainImageCount;
-                vkStream->putBe64(cgen_var_450);
+                vkStream->write(&cgen_var_450, 8);
                 if (pSwapchainImageCount)
                 {
                     vkStream->write((uint32_t*)pSwapchainImageCount, sizeof(uint32_t));
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_451 = (uint64_t)(uintptr_t)pSwapchainImages;
-                vkStream->putBe64(cgen_var_451);
+                vkStream->write(&cgen_var_451, 8);
                 if (pSwapchainImages)
                 {
                     if ((*(pSwapchainImageCount)))
@@ -8713,7 +8713,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pModes;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pModes = (VkDeviceGroupPresentModeFlagsKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pModes, 8);
                 if (pModes)
                 {
                     vkReadStream->alloc((void**)&pModes, sizeof(VkDeviceGroupPresentModeFlagsKHR));
@@ -8730,7 +8730,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_462 = (uint64_t)(uintptr_t)pModes;
-                vkStream->putBe64(cgen_var_462);
+                vkStream->write(&cgen_var_462, 8);
                 if (pModes)
                 {
                     vkStream->write((VkDeviceGroupPresentModeFlagsKHR*)pModes, sizeof(VkDeviceGroupPresentModeFlagsKHR));
@@ -8764,7 +8764,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pRectCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pRectCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pRectCount, 8);
                 if (pRectCount)
                 {
                     vkReadStream->alloc((void**)&pRectCount, sizeof(uint32_t));
@@ -8775,7 +8775,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pRects;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pRects = (VkRect2D*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pRects, 8);
                 if (pRects)
                 {
                     vkReadStream->alloc((void**)&pRects, (*(pRectCount)) * sizeof(VkRect2D));
@@ -8802,7 +8802,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_467 = (uint64_t)(uintptr_t)pRectCount;
-                vkStream->putBe64(cgen_var_467);
+                vkStream->write(&cgen_var_467, 8);
                 if (pRectCount)
                 {
                     vkStream->write((uint32_t*)pRectCount, sizeof(uint32_t));
@@ -8816,7 +8816,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_468 = (uint64_t)(uintptr_t)pRects;
-                vkStream->putBe64(cgen_var_468);
+                vkStream->write(&cgen_var_468, 8);
                 if (pRects)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
@@ -8893,7 +8893,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -8904,7 +8904,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkDisplayPropertiesKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkDisplayPropertiesKHR));
@@ -8931,7 +8931,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_473 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_473);
+                vkStream->write(&cgen_var_473, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -8945,7 +8945,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_474 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_474);
+                vkStream->write(&cgen_var_474, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -8978,7 +8978,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -8989,7 +8989,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkDisplayPlanePropertiesKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkDisplayPlanePropertiesKHR));
@@ -9016,7 +9016,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_478 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_478);
+                vkStream->write(&cgen_var_478, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -9030,7 +9030,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_479 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_479);
+                vkStream->write(&cgen_var_479, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -9065,7 +9065,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pDisplayCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pDisplayCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pDisplayCount, 8);
                 if (pDisplayCount)
                 {
                     vkReadStream->alloc((void**)&pDisplayCount, sizeof(uint32_t));
@@ -9076,7 +9076,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pDisplays;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pDisplays = (VkDisplayKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pDisplays, 8);
                 if (pDisplays)
                 {
                     vkReadStream->alloc((void**)&pDisplays, (*(pDisplayCount)) * sizeof(VkDisplayKHR));
@@ -9099,14 +9099,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_484 = (uint64_t)(uintptr_t)pDisplayCount;
-                vkStream->putBe64(cgen_var_484);
+                vkStream->write(&cgen_var_484, 8);
                 if (pDisplayCount)
                 {
                     vkStream->write((uint32_t*)pDisplayCount, sizeof(uint32_t));
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_485 = (uint64_t)(uintptr_t)pDisplays;
-                vkStream->putBe64(cgen_var_485);
+                vkStream->write(&cgen_var_485, 8);
                 if (pDisplays)
                 {
                     if ((*(pDisplayCount)))
@@ -9146,7 +9146,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -9157,7 +9157,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkDisplayModePropertiesKHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkDisplayModePropertiesKHR));
@@ -9184,7 +9184,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_491 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_491);
+                vkStream->write(&cgen_var_491, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -9198,7 +9198,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_492 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_492);
+                vkStream->write(&cgen_var_492, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -9236,7 +9236,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDisplayModeCreateInfoKHR));
                 unmarshal_VkDisplayModeCreateInfoKHR(vkReadStream, (VkDisplayModeCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9348,7 +9348,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDisplaySurfaceCreateInfoKHR));
                 unmarshal_VkDisplaySurfaceCreateInfoKHR(vkReadStream, (VkDisplaySurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9413,7 +9413,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     unmarshal_VkSwapchainCreateInfoKHR(vkReadStream, (VkSwapchainCreateInfoKHR*)(pCreateInfos + i));
                 }
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9484,7 +9484,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkXlibSurfaceCreateInfoKHR));
                 unmarshal_VkXlibSurfaceCreateInfoKHR(vkReadStream, (VkXlibSurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9583,7 +9583,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkXcbSurfaceCreateInfoKHR));
                 unmarshal_VkXcbSurfaceCreateInfoKHR(vkReadStream, (VkXcbSurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9682,7 +9682,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkWaylandSurfaceCreateInfoKHR));
                 unmarshal_VkWaylandSurfaceCreateInfoKHR(vkReadStream, (VkWaylandSurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9779,7 +9779,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkMirSurfaceCreateInfoKHR));
                 unmarshal_VkMirSurfaceCreateInfoKHR(vkReadStream, (VkMirSurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9876,7 +9876,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkAndroidSurfaceCreateInfoKHR));
                 unmarshal_VkAndroidSurfaceCreateInfoKHR(vkReadStream, (VkAndroidSurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -9936,7 +9936,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkWin32SurfaceCreateInfoKHR));
                 unmarshal_VkWin32SurfaceCreateInfoKHR(vkReadStream, (VkWin32SurfaceCreateInfoKHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -10203,7 +10203,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pQueueFamilyPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pQueueFamilyPropertyCount, 8);
                 if (pQueueFamilyPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pQueueFamilyPropertyCount, sizeof(uint32_t));
@@ -10214,7 +10214,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pQueueFamilyProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pQueueFamilyProperties = (VkQueueFamilyProperties2*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pQueueFamilyProperties, 8);
                 if (pQueueFamilyProperties)
                 {
                     vkReadStream->alloc((void**)&pQueueFamilyProperties, (*(pQueueFamilyPropertyCount)) * sizeof(VkQueueFamilyProperties2));
@@ -10240,7 +10240,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_544 = (uint64_t)(uintptr_t)pQueueFamilyPropertyCount;
-                vkStream->putBe64(cgen_var_544);
+                vkStream->write(&cgen_var_544, 8);
                 if (pQueueFamilyPropertyCount)
                 {
                     vkStream->write((uint32_t*)pQueueFamilyPropertyCount, sizeof(uint32_t));
@@ -10254,7 +10254,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_545 = (uint64_t)(uintptr_t)pQueueFamilyProperties;
-                vkStream->putBe64(cgen_var_545);
+                vkStream->write(&cgen_var_545, 8);
                 if (pQueueFamilyProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
@@ -10330,7 +10330,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -10341,7 +10341,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkSparseImageFormatProperties2*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkSparseImageFormatProperties2));
@@ -10371,7 +10371,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_550 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_550);
+                vkStream->write(&cgen_var_550, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -10385,7 +10385,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_551 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_551);
+                vkStream->write(&cgen_var_551, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -10559,7 +10559,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPhysicalDeviceGroupCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPhysicalDeviceGroupCount, 8);
                 if (pPhysicalDeviceGroupCount)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDeviceGroupCount, sizeof(uint32_t));
@@ -10570,7 +10570,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPhysicalDeviceGroupProperties = (VkPhysicalDeviceGroupProperties*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPhysicalDeviceGroupProperties, 8);
                 if (pPhysicalDeviceGroupProperties)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDeviceGroupProperties, (*(pPhysicalDeviceGroupCount)) * sizeof(VkPhysicalDeviceGroupProperties));
@@ -10597,7 +10597,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_560 = (uint64_t)(uintptr_t)pPhysicalDeviceGroupCount;
-                vkStream->putBe64(cgen_var_560);
+                vkStream->write(&cgen_var_560, 8);
                 if (pPhysicalDeviceGroupCount)
                 {
                     vkStream->write((uint32_t*)pPhysicalDeviceGroupCount, sizeof(uint32_t));
@@ -10611,7 +10611,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_561 = (uint64_t)(uintptr_t)pPhysicalDeviceGroupProperties;
-                vkStream->putBe64(cgen_var_561);
+                vkStream->write(&cgen_var_561, 8);
                 if (pPhysicalDeviceGroupProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
@@ -11148,7 +11148,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_576, (VkPipelineLayout*)&layout, 1);
                 vkReadStream->read((uint32_t*)&set, sizeof(uint32_t));
                 // WARNING PTR CHECK
-                pData = (const void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pData, 8);
                 if (pData)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
@@ -11191,7 +11191,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorUpdateTemplateCreateInfo));
                 unmarshal_VkDescriptorUpdateTemplateCreateInfo(vkReadStream, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -11260,7 +11260,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for descriptorUpdateTemplate;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -11305,7 +11305,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_587, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_587, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
                 // WARNING PTR CHECK
-                pData = (const void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pData, 8);
                 if (pData)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
@@ -11344,7 +11344,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo2KHR));
                 unmarshal_VkRenderPassCreateInfo2KHR(vkReadStream, (VkRenderPassCreateInfo2KHR*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -11809,7 +11809,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSurfaceFormatCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSurfaceFormatCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSurfaceFormatCount, 8);
                 if (pSurfaceFormatCount)
                 {
                     vkReadStream->alloc((void**)&pSurfaceFormatCount, sizeof(uint32_t));
@@ -11820,7 +11820,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSurfaceFormats;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSurfaceFormats = (VkSurfaceFormat2KHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSurfaceFormats, 8);
                 if (pSurfaceFormats)
                 {
                     vkReadStream->alloc((void**)&pSurfaceFormats, (*(pSurfaceFormatCount)) * sizeof(VkSurfaceFormat2KHR));
@@ -11851,7 +11851,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_607 = (uint64_t)(uintptr_t)pSurfaceFormatCount;
-                vkStream->putBe64(cgen_var_607);
+                vkStream->write(&cgen_var_607, 8);
                 if (pSurfaceFormatCount)
                 {
                     vkStream->write((uint32_t*)pSurfaceFormatCount, sizeof(uint32_t));
@@ -11865,7 +11865,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_608 = (uint64_t)(uintptr_t)pSurfaceFormats;
-                vkStream->putBe64(cgen_var_608);
+                vkStream->write(&cgen_var_608, 8);
                 if (pSurfaceFormats)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
@@ -11902,7 +11902,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -11913,7 +11913,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkDisplayProperties2KHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkDisplayProperties2KHR));
@@ -11940,7 +11940,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_612 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_612);
+                vkStream->write(&cgen_var_612, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -11954,7 +11954,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_613 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_613);
+                vkStream->write(&cgen_var_613, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -11987,7 +11987,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -11998,7 +11998,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkDisplayPlaneProperties2KHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkDisplayPlaneProperties2KHR));
@@ -12025,7 +12025,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_617 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_617);
+                vkStream->write(&cgen_var_617, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -12039,7 +12039,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_618 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_618);
+                vkStream->write(&cgen_var_618, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -12076,7 +12076,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPropertyCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPropertyCount, 8);
                 if (pPropertyCount)
                 {
                     vkReadStream->alloc((void**)&pPropertyCount, sizeof(uint32_t));
@@ -12087,7 +12087,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pProperties = (VkDisplayModeProperties2KHR*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pProperties, 8);
                 if (pProperties)
                 {
                     vkReadStream->alloc((void**)&pProperties, (*(pPropertyCount)) * sizeof(VkDisplayModeProperties2KHR));
@@ -12114,7 +12114,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_623 = (uint64_t)(uintptr_t)pPropertyCount;
-                vkStream->putBe64(cgen_var_623);
+                vkStream->write(&cgen_var_623, 8);
                 if (pPropertyCount)
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
@@ -12128,7 +12128,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_624 = (uint64_t)(uintptr_t)pProperties;
-                vkStream->putBe64(cgen_var_624);
+                vkStream->write(&cgen_var_624, 8);
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -12318,7 +12318,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSparseMemoryRequirementCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSparseMemoryRequirementCount, 8);
                 if (pSparseMemoryRequirementCount)
                 {
                     vkReadStream->alloc((void**)&pSparseMemoryRequirementCount, sizeof(uint32_t));
@@ -12329,7 +12329,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pSparseMemoryRequirements = (VkSparseImageMemoryRequirements2*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pSparseMemoryRequirements, 8);
                 if (pSparseMemoryRequirements)
                 {
                     vkReadStream->alloc((void**)&pSparseMemoryRequirements, (*(pSparseMemoryRequirementCount)) * sizeof(VkSparseImageMemoryRequirements2));
@@ -12359,7 +12359,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_631 = (uint64_t)(uintptr_t)pSparseMemoryRequirementCount;
-                vkStream->putBe64(cgen_var_631);
+                vkStream->write(&cgen_var_631, 8);
                 if (pSparseMemoryRequirementCount)
                 {
                     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
@@ -12373,7 +12373,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_632 = (uint64_t)(uintptr_t)pSparseMemoryRequirements;
-                vkStream->putBe64(cgen_var_632);
+                vkStream->write(&cgen_var_632, 8);
                 if (pSparseMemoryRequirements)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
@@ -12410,7 +12410,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerYcbcrConversionCreateInfo));
                 unmarshal_VkSamplerYcbcrConversionCreateInfo(vkReadStream, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -12479,7 +12479,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for ycbcrConversion;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -12824,7 +12824,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for queue;
                 vkReadStream->read((uint32_t*)&waitSemaphoreCount, sizeof(uint32_t));
                 // WARNING PTR CHECK
-                pWaitSemaphores = (const VkSemaphore*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pWaitSemaphores, 8);
                 if (pWaitSemaphores)
                 {
                     vkReadStream->alloc((void**)&pWaitSemaphores, ((waitSemaphoreCount)) * sizeof(const VkSemaphore));
@@ -12881,7 +12881,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDebugReportCallbackCreateInfoEXT));
                 unmarshal_VkDebugReportCallbackCreateInfoEXT(vkReadStream, (VkDebugReportCallbackCreateInfoEXT*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -12950,7 +12950,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for callback;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -12995,7 +12995,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDebugReportFlagsEXT*)&flags, sizeof(VkDebugReportFlagsEXT));
                 vkReadStream->read((VkDebugReportObjectTypeEXT*)&objectType, sizeof(VkDebugReportObjectTypeEXT));
                 vkReadStream->read((uint64_t*)&object, sizeof(uint64_t));
-                location = (size_t)vkReadStream->getBe64();
+                vkReadStream->read(&location, 8);
                 vkReadStream->read((int32_t*)&messageCode, sizeof(int32_t));
                 vkReadStream->loadStringInPlace((char**)&pLayerPrefix);
                 vkReadStream->loadStringInPlace((char**)&pMessage);
@@ -13306,18 +13306,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pInfoSize;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pInfoSize = (size_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pInfoSize, 8);
                 if (pInfoSize)
                 {
                     vkReadStream->alloc((void**)&pInfoSize, sizeof(size_t));
-                    (*pInfoSize) = (size_t)vkReadStream->getBe64();
+                    vkReadStream->read(&(*pInfoSize), 8);
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pInfoSize;
                 // Begin manual dispatchable handle unboxing for pInfo;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pInfo = (void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pInfo, 8);
                 if (pInfo)
                 {
                     vkReadStream->alloc((void**)&pInfo, (*(pInfoSize)) * sizeof(uint8_t));
@@ -13334,15 +13334,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_683 = (uint64_t)(uintptr_t)pInfoSize;
-                vkStream->putBe64(cgen_var_683);
+                vkStream->write(&cgen_var_683, 8);
                 if (pInfoSize)
                 {
                     uint64_t cgen_var_684 = (uint64_t)(*pInfoSize);
-                    vkStream->putBe64(cgen_var_684);
+                    vkStream->write(&cgen_var_684, 8);
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_685 = (uint64_t)(uintptr_t)pInfo;
-                vkStream->putBe64(cgen_var_685);
+                vkStream->write(&cgen_var_685, 8);
                 if (pInfo)
                 {
                     vkStream->write((void*)pInfo, (*(pInfoSize)) * sizeof(uint8_t));
@@ -13485,7 +13485,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkViSurfaceCreateInfoNN));
                 unmarshal_VkViSurfaceCreateInfoNN(vkReadStream, (VkViSurfaceCreateInfoNN*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -13672,7 +13672,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkIndirectCommandsLayoutCreateInfoNVX));
                 unmarshal_VkIndirectCommandsLayoutCreateInfoNVX(vkReadStream, (VkIndirectCommandsLayoutCreateInfoNVX*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -13741,7 +13741,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for indirectCommandsLayout;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -13782,7 +13782,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkObjectTableCreateInfoNVX));
                 unmarshal_VkObjectTableCreateInfoNVX(vkReadStream, (VkObjectTableCreateInfoNVX*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -13851,7 +13851,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for objectTable;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -14282,7 +14282,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pDeviceEventInfo, sizeof(const VkDeviceEventInfoEXT));
                 unmarshal_VkDeviceEventInfoEXT(vkReadStream, (VkDeviceEventInfoEXT*)(pDeviceEventInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -14344,7 +14344,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pDisplayEventInfo, sizeof(const VkDisplayEventInfoEXT));
                 unmarshal_VkDisplayEventInfoEXT(vkReadStream, (VkDisplayEventInfoEXT*)(pDisplayEventInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -14495,7 +14495,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPresentationTimingCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPresentationTimingCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPresentationTimingCount, 8);
                 if (pPresentationTimingCount)
                 {
                     vkReadStream->alloc((void**)&pPresentationTimingCount, sizeof(uint32_t));
@@ -14506,7 +14506,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pPresentationTimings;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pPresentationTimings = (VkPastPresentationTimingGOOGLE*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pPresentationTimings, 8);
                 if (pPresentationTimings)
                 {
                     vkReadStream->alloc((void**)&pPresentationTimings, (*(pPresentationTimingCount)) * sizeof(VkPastPresentationTimingGOOGLE));
@@ -14533,7 +14533,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_745 = (uint64_t)(uintptr_t)pPresentationTimingCount;
-                vkStream->putBe64(cgen_var_745);
+                vkStream->write(&cgen_var_745, 8);
                 if (pPresentationTimingCount)
                 {
                     vkStream->write((uint32_t*)pPresentationTimingCount, sizeof(uint32_t));
@@ -14547,7 +14547,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_746 = (uint64_t)(uintptr_t)pPresentationTimings;
-                vkStream->putBe64(cgen_var_746);
+                vkStream->write(&cgen_var_746, 8);
                 if (pPresentationTimings)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
@@ -14692,7 +14692,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkIOSSurfaceCreateInfoMVK));
                 unmarshal_VkIOSSurfaceCreateInfoMVK(vkReadStream, (VkIOSSurfaceCreateInfoMVK*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -14752,7 +14752,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkMacOSSurfaceCreateInfoMVK));
                 unmarshal_VkMacOSSurfaceCreateInfoMVK(vkReadStream, (VkMacOSSurfaceCreateInfoMVK*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -15062,7 +15062,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDebugUtilsMessengerCreateInfoEXT));
                 unmarshal_VkDebugUtilsMessengerCreateInfoEXT(vkReadStream, (VkDebugUtilsMessengerCreateInfoEXT*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -15131,7 +15131,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for messenger;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -15397,7 +15397,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkValidationCacheCreateInfoEXT));
                 unmarshal_VkValidationCacheCreateInfoEXT(vkReadStream, (VkValidationCacheCreateInfoEXT*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -15466,7 +15466,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual non dispatchable handle destroy unboxing for validationCache;
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -15552,18 +15552,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pDataSize;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pDataSize = (size_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pDataSize, 8);
                 if (pDataSize)
                 {
                     vkReadStream->alloc((void**)&pDataSize, sizeof(size_t));
-                    (*pDataSize) = (size_t)vkReadStream->getBe64();
+                    vkReadStream->read(&(*pDataSize), 8);
                 }
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pDataSize;
                 // Begin manual dispatchable handle unboxing for pData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pData = (void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pData, 8);
                 if (pData)
                 {
                     vkReadStream->alloc((void**)&pData, (*(pDataSize)) * sizeof(uint8_t));
@@ -15580,15 +15580,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_793 = (uint64_t)(uintptr_t)pDataSize;
-                vkStream->putBe64(cgen_var_793);
+                vkStream->write(&cgen_var_793, 8);
                 if (pDataSize)
                 {
                     uint64_t cgen_var_794 = (uint64_t)(*pDataSize);
-                    vkStream->putBe64(cgen_var_794);
+                    vkStream->write(&cgen_var_794, 8);
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_795 = (uint64_t)(uintptr_t)pData;
-                vkStream->putBe64(cgen_var_795);
+                vkStream->write(&cgen_var_795, 8);
                 if (pData)
                 {
                     vkStream->write((void*)pData, (*(pDataSize)) * sizeof(uint8_t));
@@ -15626,7 +15626,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->read((VkExternalMemoryHandleTypeFlagBits*)&handleType, sizeof(VkExternalMemoryHandleTypeFlagBits));
                 // WARNING PTR CHECK
-                pHostPointer = (const void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pHostPointer, 8);
                 if (pHostPointer)
                 {
                     vkReadStream->alloc((void**)&pHostPointer, sizeof(const uint8_t));
@@ -15721,7 +15721,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 // WARNING PTR CHECK
-                pCheckpointMarker = (const void*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pCheckpointMarker, 8);
                 if (pCheckpointMarker)
                 {
                     vkReadStream->alloc((void**)&pCheckpointMarker, sizeof(const uint8_t));
@@ -15757,7 +15757,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pCheckpointDataCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pCheckpointDataCount = (uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pCheckpointDataCount, 8);
                 if (pCheckpointDataCount)
                 {
                     vkReadStream->alloc((void**)&pCheckpointDataCount, sizeof(uint32_t));
@@ -15768,7 +15768,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pCheckpointData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pCheckpointData = (VkCheckpointDataNV*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pCheckpointData, 8);
                 if (pCheckpointData)
                 {
                     vkReadStream->alloc((void**)&pCheckpointData, (*(pCheckpointDataCount)) * sizeof(VkCheckpointDataNV));
@@ -15794,7 +15794,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_805 = (uint64_t)(uintptr_t)pCheckpointDataCount;
-                vkStream->putBe64(cgen_var_805);
+                vkStream->write(&cgen_var_805, 8);
                 if (pCheckpointDataCount)
                 {
                     vkStream->write((uint32_t*)pCheckpointDataCount, sizeof(uint32_t));
@@ -15808,7 +15808,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 // WARNING PTR CHECK
                 uint64_t cgen_var_806 = (uint64_t)(uintptr_t)pCheckpointData;
-                vkStream->putBe64(cgen_var_806);
+                vkStream->write(&cgen_var_806, 8);
                 if (pCheckpointData)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
@@ -15845,7 +15845,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 // Begin manual dispatchable handle unboxing for pAddress;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
-                pAddress = (uint64_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAddress, 8);
                 if (pAddress)
                 {
                     vkReadStream->alloc((void**)&pAddress, sizeof(uint64_t));
@@ -15862,7 +15862,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_810 = (uint64_t)(uintptr_t)pAddress;
-                vkStream->putBe64(cgen_var_810);
+                vkStream->write(&cgen_var_810, 8);
                 if (pAddress)
                 {
                     vkStream->write((uint64_t*)pAddress, sizeof(uint64_t));
@@ -15978,28 +15978,28 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&bufferInfoCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&bufferViewCount, sizeof(uint32_t));
                 // WARNING PTR CHECK
-                pImageInfoEntryIndices = (const uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pImageInfoEntryIndices, 8);
                 if (pImageInfoEntryIndices)
                 {
                     vkReadStream->alloc((void**)&pImageInfoEntryIndices, ((imageInfoCount)) * sizeof(const uint32_t));
                     vkReadStream->read((uint32_t*)pImageInfoEntryIndices, ((imageInfoCount)) * sizeof(const uint32_t));
                 }
                 // WARNING PTR CHECK
-                pBufferInfoEntryIndices = (const uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pBufferInfoEntryIndices, 8);
                 if (pBufferInfoEntryIndices)
                 {
                     vkReadStream->alloc((void**)&pBufferInfoEntryIndices, ((bufferInfoCount)) * sizeof(const uint32_t));
                     vkReadStream->read((uint32_t*)pBufferInfoEntryIndices, ((bufferInfoCount)) * sizeof(const uint32_t));
                 }
                 // WARNING PTR CHECK
-                pBufferViewEntryIndices = (const uint32_t*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pBufferViewEntryIndices, 8);
                 if (pBufferViewEntryIndices)
                 {
                     vkReadStream->alloc((void**)&pBufferViewEntryIndices, ((bufferViewCount)) * sizeof(const uint32_t));
                     vkReadStream->read((uint32_t*)pBufferViewEntryIndices, ((bufferViewCount)) * sizeof(const uint32_t));
                 }
                 // WARNING PTR CHECK
-                pImageInfos = (const VkDescriptorImageInfo*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pImageInfos, 8);
                 if (pImageInfos)
                 {
                     vkReadStream->alloc((void**)&pImageInfos, ((imageInfoCount)) * sizeof(const VkDescriptorImageInfo));
@@ -16009,7 +16009,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 // WARNING PTR CHECK
-                pBufferInfos = (const VkDescriptorBufferInfo*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pBufferInfos, 8);
                 if (pBufferInfos)
                 {
                     vkReadStream->alloc((void**)&pBufferInfos, ((bufferInfoCount)) * sizeof(const VkDescriptorBufferInfo));
@@ -16019,7 +16019,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 // WARNING PTR CHECK
-                pBufferViews = (const VkBufferView*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pBufferViews, 8);
                 if (pBufferViews)
                 {
                     vkReadStream->alloc((void**)&pBufferViews, ((bufferViewCount)) * sizeof(const VkBufferView));
@@ -16194,7 +16194,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
                 unmarshal_VkImageCreateInfo(vkReadStream, (VkImageCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
@@ -16273,7 +16273,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferCreateInfo));
                 unmarshal_VkBufferCreateInfo(vkReadStream, (VkBufferCreateInfo*)(pCreateInfo));
                 // WARNING PTR CHECK
-                pAllocator = (const VkAllocationCallbacks*)(uintptr_t)vkReadStream->getBe64();
+                vkReadStream->read(&pAllocator, 8);
                 if (pAllocator)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));

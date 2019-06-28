@@ -583,13 +583,14 @@ class CodeGen(object):
 
         needPtrCast = False
 
+        streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+
         if accessType.pointerIndirectionLevels > 0:
             streamSize = 8
             streamStorageVarType = "uint64_t"
             needPtrCast = True
             streamMethod = "putBe64" if direction == "write" else "getBe64"
         else:
-            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
             if streamSize == 1:
                 streamStorageVarType = "uint8_t"
             elif streamSize == 2:
@@ -608,17 +609,25 @@ class CodeGen(object):
         ptrCast = "(uintptr_t)" if needPtrCast else ""
 
         if direction == "read":
-            self.stmt("%s = (%s)%s%s->%s()" % \
-                (accessExpr,
-                 accessCast,
-                 ptrCast,
-                 streamVar,
-                 streamMethod))
+            self.stmt("%s->read(&%s, %d)" % (streamVar, accessExpr, streamSize))
         else:
             self.stmt("%s %s = (%s)%s%s" %
                       (streamStorageVarType, streamStorageVar,
                        streamStorageVarType, ptrCast, accessExpr))
-            self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
+            self.stmt("%s->write(&%s, %d)" % (streamVar, streamStorageVar, streamSize))
+
+        # if direction == "read":
+        #     self.stmt("%s = (%s)%s%s->%s()" % \
+        #         (accessExpr,
+        #          accessCast,
+        #          ptrCast,
+        #          streamVar,
+        #          streamMethod))
+        # else:
+        #     self.stmt("%s %s = (%s)%s%s" %
+        #               (streamStorageVarType, streamStorageVar,
+        #                streamStorageVarType, ptrCast, accessExpr))
+        #     self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
 
 
 # Class to wrap a Vulkan API call.

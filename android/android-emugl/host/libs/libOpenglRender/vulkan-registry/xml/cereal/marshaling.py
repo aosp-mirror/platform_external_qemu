@@ -41,7 +41,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                  forApiOutput = False,
                  dynAlloc = False,
                  mapHandles = True,
-                 handleMapOverwrites = False):
+                 handleMapOverwrites = False,
+                 consistencyCheck = True):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -60,6 +61,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.dynAlloc = dynAlloc
         self.mapHandles = mapHandles
         self.handleMapOverwrites = handleMapOverwrites
+
+        self.consistencyCheck = consistencyCheck
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -188,7 +191,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             checkAccess = checkName
             addrExpr = "&" + checkAccess
             sizeExpr = self.cgen.sizeofExpr(vulkanType)
-            needConsistencyCheck = True
+            needConsistencyCheck = self.consistencyCheck
 
         self.genPrimitiveStreamCall(
             vulkanType,
@@ -290,12 +293,12 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         if self.direction == "write":
             self.cgen.stmt("size_t %s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, access))
-            self.cgen.stmt("%s->putBe32(%s)" % \
+            self.cgen.stmt("%s->write((uint32_t*)&%s, 4)" % \
                 (self.streamVarName, sizeVar))
         else:
-            self.cgen.stmt("size_t %s" % sizeVar)
-            self.cgen.stmt("%s = %s->getBe32()" % \
-                (sizeVar, self.streamVarName))
+            self.cgen.stmt("size_t %s = 0" % sizeVar)
+            self.cgen.stmt("%s->read((uint32_t*)&%s, 4)" % \
+                (self.streamVarName, sizeVar))
 
         if self.direction == "read" and self.dynAlloc:
             self.cgen.stmt("%s = nullptr" % access)

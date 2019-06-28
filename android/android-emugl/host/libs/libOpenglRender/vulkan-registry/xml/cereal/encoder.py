@@ -228,6 +228,16 @@ def emit_count_marshal(typeInfo, param, cgen):
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
+def emit_count_unmarshal(typeInfo, param, cgen):
+    res = \
+        iterateVulkanType(
+            typeInfo, param,
+            VulkanMarshalingCodegen( \
+               cgen, COUNTING_STREAM, param.paramName,
+               API_PREFIX_UNMARSHAL, direction="read", consistencyCheck = False))
+    if not res:
+        cgen.stmt("(void)%s" % param.paramName)
+
 def emit_marshal(typeInfo, param, cgen):
     forOutput = param.isHandleType() and ("out" in param.inout)
     if forOutput:
@@ -250,7 +260,7 @@ def emit_unmarshal(typeInfo, param, cgen):
         typeInfo, param,
         VulkanMarshalingCodegen( \
            cgen, STREAM, param.paramName,
-           API_PREFIX_UNMARSHAL, direction="read"))
+           API_PREFIX_UNMARSHAL, direction="read", consistencyCheck = False))
 
 def emit_deepcopy(typeInfo, param, cgen):
     res = \
@@ -400,8 +410,49 @@ def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
     for p in encodingParams.toWrite:
         emit_marshal(typeInfo, p, cgen)
 
+def is_dynamic_readback_api(api):
+    isEnumerate = api.name.startswith("vkEnumerate")
+    dynamicList = [
+        "vkGetPhysicalDeviceDisplayPropertiesKHR",
+        "vkGetPhysicalDeviceDisplayProperties2KHR",
+        "vkGetPhysicalDeviceDisplayPlanePropertiesKHR",
+        "vkGetPhysicalDeviceDisplayPlaneProperties2KHR",
+        "vkGetPhysicalDeviceSurfaceFormats2KHR",
+        "vkGetPhysicalDeviceSurfacePresentModesKHR",
+        "vkGetSwapchainImagesKHR",
+        "vkGetPhysicalDevicePresentRectanglesKHR",
+        "vkGetDisplayPlaneSupportedDisplaysKHR",
+        "vkGetDisplayModePropertiesKHR",
+        "vkGetDisplayModeProperties2KHR",
+        "vkGetPhysicalDeviceQueueFamilyProperties",
+        "vkGetPhysicalDeviceQueueFamilyProperties2",
+        "vkGetPhysicalDeviceQueueFamilyPropertiesKHR",
+        "vkGetImageSparseMemoryRequirements",
+        "vkGetImageSparseMemoryRequirements2",
+        "vkGetImageSparseMemoryRequirementsKHR",
+        "vkGetQueueCheckpointDataNV",
+        "vkGetPastPresentationTimingGOOGLE",
+    ]
+
+    return isEnumerate or (api.name in dynamicList)
+
 def emit_parameter_encode_read(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
+
+    if not is_dynamic_readback_api(api):
+        cgen.stmt("fprintf(stderr, \"count readback for %s\\n\");" % (api.name))
+        cgen.stmt("AEMU_SCOPED_TRACE(\"%s readParams count\")" % api.name)
+
+        cgen.beginBlock()
+
+        for p in encodingParams.toRead:
+            emit_count_unmarshal(typeInfo, p, cgen)
+
+        cgen.stmt("size_t expectedReadback_%s = %s->bytesRead()" % (api.name, COUNTING_STREAM))
+        cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+        cgen.stmt("%s->setExpectedReadback(expectedReadback_%s)" % (STREAM, api.name))
+
+        cgen.endBlock()
 
     cgen.stmt("AEMU_SCOPED_TRACE(\"%s readParams\")" % api.name)
 
