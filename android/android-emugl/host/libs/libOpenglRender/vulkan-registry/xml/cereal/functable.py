@@ -39,7 +39,9 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkGetAndroidHardwareBufferPropertiesANDROID",
     "vkGetMemoryAndroidHardwareBufferANDROID",
     "vkCreateSamplerYcbcrConversion",
+    "vkDestroySamplerYcbcrConversion",
     "vkCreateSamplerYcbcrConversionKHR",
+    "vkDestroySamplerYcbcrConversionKHR",
     "vkUpdateDescriptorSetWithTemplate",
     "vkGetPhysicalDeviceImageFormatProperties2",
     "vkGetPhysicalDeviceImageFormatProperties2KHR",
@@ -47,6 +49,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkEndCommandBuffer",
     "vkResetCommandBuffer",
     "vkCreateImageView",
+    "vkCreateSampler",
 ]
 
 SUCCESS_VAL = {
