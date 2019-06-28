@@ -207,6 +207,8 @@ private:
     void updateVideoPts(double pts, int64_t pos, int serial);
     void refreshFrame(double* remaining_time);
 
+    void workerThreadFunc();
+
 public:
     std::unique_ptr<Mp4Dataset> mDataset;
     int mAudioStreamIdx = -1;
@@ -299,6 +301,8 @@ private:
     int64_t mAudioCallbackTime = 0ll;
 
     bool mForceRefresh = false;
+
+    std::unique_ptr<base::FunctorThread> mWorkerThread;
 };
 
 // Decoder implementations
@@ -624,8 +628,8 @@ VideoPlayerImpl::~VideoPlayerImpl() {
     if (mAudioDecoder) {
         mAudioDecoder->wait();
     }
-    if (mDemuxer) {
-        mDemuxer->stop();
+    if (mWorkerThread) {
+        mWorkerThread->wait();
     }
 }
 
@@ -1002,6 +1006,7 @@ int VideoPlayerImpl::play() {
     mDataset = Mp4Dataset::create(mVideoFile);
     if (mDataset == nullptr) {
         LOG(ERROR) << ": Failed to create mp4 dataset!";
+        return -1;
     }
 
     AVFormatContext* formatCtx = mDataset->getFormatContext();
@@ -1168,33 +1173,38 @@ int VideoPlayerImpl::play() {
 
     // Start the demuxer to read frames from the video file and dispatch them to
     // corresponding packet queues
-    mDemuxer = Mp4Demuxer::create(mDataset.get(), &mContinueReadWaitInfo);
+    mDemuxer = Mp4Demuxer::create(this, mDataset.get(), &mContinueReadWaitInfo);
     mDemuxer->setAudioPacketQueue(mAudioQueue.get());
     mDemuxer->setVideoPacketQueue(mVideoQueue.get());
-    std::function<void()> callback = [this] {
-        if (mAudioDecoder.get() != nullptr) {
-            mAudioDecoder->wait();
-            mAudioDecoder.reset();
-        }
+    mDemuxer->demux();
 
-        if (mVideoDecoder.get() != nullptr) {
-            mVideoDecoder->wait();
-            mVideoDecoder.reset();
-        }
+    if (mAudioDecoder.get() != nullptr) {
+        mAudioDecoder->wait();
+        mAudioDecoder.reset();
+    }
 
-        const bool wasRunning = mRunning;
-        mRunning = false;
+    if (mVideoDecoder.get() != nullptr) {
+        mVideoDecoder->wait();
+        mVideoDecoder.reset();
+    }
 
-        cleanup();
+    const bool wasRunning = mRunning;
+    mRunning = false;
 
-        if (wasRunning) {
-            mNotifier->emitVideoStopped();
-        }
-        mNotifier->emitVideoFinished();
-    };
-    mDemuxer->start(callback);
+    cleanup();
+
+    if (wasRunning) {
+        mNotifier->emitVideoStopped();
+    }
+    mNotifier->emitVideoFinished();
 
     return 0;
+}
+
+
+void VideoPlayerImpl::workerThreadFunc() {
+    int rc = play();
+    (void)rc;
 }
 
 // get an audio frame from the decoded queue, and convert it to buffer
@@ -1300,8 +1310,11 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
 }
 
 void VideoPlayerImpl::start() {
-    int rc = play();
-    (void)rc;
+    if (!mRunning) {
+       mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
+       mRunning = true;
+       mWorkerThread->start();
+    }
 }
 
 void VideoPlayerImpl::stop() {
@@ -1314,10 +1327,6 @@ void VideoPlayerImpl::stop() {
 
 void VideoPlayerImpl::internalStop() {
     mRunning = false;
-
-    if (mDemuxer.get() != nullptr) {
-        mDemuxer->stop();
-    }
 
     if (mAudioDecoder.get() != nullptr) {
         mAudioDecoder->abort();
