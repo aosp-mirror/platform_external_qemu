@@ -5384,7 +5384,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     X("have-camera", \
             strcmp(android_hw->hw_camera_back, "none") || \
             strcmp(android_hw->hw_camera_front, "none")) \
-    X("have-keyboard", android_hw->hw_keyboard) \
+    X("have-keyboard", have_keyboard) \
     X("have-lidswitch", android_hw->hw_keyboard_lid) \
     X("have-tabletmode", android_hw->hw_arc) \
     X("have-touch", androidHwConfig_isScreenTouch(android_hw)) \
