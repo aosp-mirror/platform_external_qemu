@@ -16,6 +16,7 @@
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
 #include "android/version.h"
@@ -122,6 +123,22 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (!isQemu2)
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLDMA, false);
+
+    // Android media profile selection
+    // 1. If the SelectMediaProfileConfig is on, then select
+    // <media_profile_name> if we are running an XL skin.
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::DynamicMediaProfile)) {
+        char* skinName;
+        char* skinDir;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        if (skinName != NULL &&
+            (!strcmp(skinName, "pixel_xl") ||
+             !strcmp(skinName, "pixel_2_xl") ||
+             !strcmp(skinName, "pixel_3_xl"))) {
+            fprintf(stderr, "Got pixel skin (%s). Using different media profile.\n", skinName);
+            params.addFormat("qemu.mediaprofile.video=%s", "/data/vendor/etc/media_codecs_google_video_v2.xml");
+        }
+    }
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
