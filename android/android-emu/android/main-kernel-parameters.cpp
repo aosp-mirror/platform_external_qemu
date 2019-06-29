@@ -50,7 +50,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    mem_map ramoops,
                                    const int vm_heapSize,
                                    bool isQemu2,
-                                   bool isCros) {
+                                   bool isCros,
+                                   uint32_t lcd_width,
+                                   uint32_t lcd_height) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -122,6 +124,17 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (!isQemu2)
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLDMA, false);
+
+    // Android media profile selection
+    // 1. If the SelectMediaProfileConfig is on, then select
+    // <media_profile_name> if the resolution is above 1080p (1920x1080).
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::DynamicMediaProfile)) {
+        if ((lcd_width > 1920 && lcd_height > 1080) ||
+            (lcd_width > 1080 && lcd_height > 1920)) {
+            fprintf(stderr, "Display resolution > 1080p. Using different media profile.\n");
+            params.addFormat("qemu.mediaprofile.video=%s", "/data/vendor/etc/media_codecs_google_video_v2.xml");
+        }
+    }
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
