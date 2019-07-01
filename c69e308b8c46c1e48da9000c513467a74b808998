@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ea78baf_6d82c26a",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-01T20:27:55Z",
+      "side": 1,
+      "message": "can we base this on screen resolution or lcd density instead of the model name? that way, it will do something that could be right for other models as well.",
+      "range": {
+        "startLine": 137,
+        "startChar": 14,
+        "endLine": 137,
+        "endChar": 48
+      },
+      "revId": "c69e308b8c46c1e48da9000c513467a74b808998",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
