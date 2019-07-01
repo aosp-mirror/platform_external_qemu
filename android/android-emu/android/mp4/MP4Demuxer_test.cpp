@@ -57,10 +57,12 @@ protected:
                 android::base::System::get()->getProgramDirectory(), "testdata",
                 "video.mp4");
 
-        mDataset = Mp4Dataset::create(absDataPath);
-        mDemuxer = Mp4Demuxer::create(mDataset.get(), nullptr);
-
         mMockedVideoPlayer.reset(new MockedVideoPlayer());
+
+        mDataset = Mp4Dataset::create(absDataPath);
+        mDemuxer = Mp4Demuxer::create(mMockedVideoPlayer.get(),
+                                      mDataset.get(),
+                                      nullptr);
 
         PacketQueue::init();
 
@@ -73,13 +75,11 @@ protected:
         mMockedVideoPlayer->start();
         mAudioQueue->start();
         mVideoQueue->start();
-        mDemuxer->start([] {});
-        mDemuxer->wait();
+        mDemuxer->demux();
     }
 
     virtual void TearDown() override {
         mMockedVideoPlayer->stop();
-        mDemuxer->stop();
     }
 };
 

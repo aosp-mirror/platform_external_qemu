@@ -18,6 +18,7 @@
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/SensorLocationEventProvider.h"
 #include "android/recording/video/player/PacketQueue.h"
+#include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
 using android::videoplayer::PacketQueue;
@@ -36,15 +37,10 @@ class Mp4Demuxer {
 public:
     virtual ~Mp4Demuxer(){};
     static std::unique_ptr<Mp4Demuxer> create(
+            ::android::videoplayer::VideoPlayer* player,
             Mp4Dataset* dataset,
             VideoPlayerWaitInfo* readingWaitInfo);
-    // Start the demuxer with a callback upon completion of demuxing
-    virtual void start(std::function<void()> finishedCallback) = 0;
-    // Stop the ongoing demuxing effort
-    virtual void stop() = 0;
-    // Wait for the ongoing demuxing effort to complete
-    // Caution: it could freeze your process if the dataset is large.
-    virtual void wait() = 0;
+    virtual void demux() = 0;
     virtual void setAudioPacketQueue(PacketQueue* audioPacketQueue) = 0;
     virtual void setVideoPacketQueue(PacketQueue* videoPacketQueue) = 0;
     virtual void setSensorLocationEventProvider(
