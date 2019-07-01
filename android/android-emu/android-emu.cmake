@@ -601,6 +601,7 @@ set(android-emu_unittests_src
     android/base/FunctionView_unittest.cpp
     android/base/JsonWriter_unittest.cpp
     android/base/Log_unittest.cpp
+    android/base/LayoutResolver_unittest.cpp
     android/base/memory/LazyInstance_unittest.cpp
     android/base/memory/MemoryHints_unittest.cpp
     android/base/memory/MallocUsableSize_unittest.cpp
