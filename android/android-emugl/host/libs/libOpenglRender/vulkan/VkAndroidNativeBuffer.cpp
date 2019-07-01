@@ -43,6 +43,7 @@ VkResult prepareAndroidNativeBufferImage(
     VulkanDispatch* vk,
     VkDevice device,
     const VkImageCreateInfo* pCreateInfo,
+    const VkNativeBufferANDROID* nativeBufferANDROID,
     const VkAllocationCallbacks* pAllocator,
     const VkPhysicalDeviceMemoryProperties* memProps,
     AndroidNativeBufferInfo* out) {
@@ -58,9 +59,6 @@ VkResult prepareAndroidNativeBufferImage(
         out->queueFamilyIndices.push_back(
                 pCreateInfo->pQueueFamilyIndices[i]);
     }
-
-    const VkNativeBufferANDROID* nativeBufferANDROID =
-        reinterpret_cast<const VkNativeBufferANDROID*>(pCreateInfo->pNext);
 
     out->format = nativeBufferANDROID->format;
     out->stride = nativeBufferANDROID->stride;
