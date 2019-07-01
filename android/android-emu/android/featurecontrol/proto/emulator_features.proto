@@ -77,4 +77,6 @@ enum Feature {
     DynamicPartition = 44;
 
     DynamicMediaProfile = 45;
+
+    YUV420888toNV21 = 46;
 }
