@@ -33,9 +33,10 @@ class MockedVideoPlayer : public VideoPlayer {
 public:
     MockedVideoPlayer() = default;
     ~MockedVideoPlayer() = default;
-    void start() { mRunning = true; }
+    void start(PlayConfig playConfig = PlayConfig()) { mRunning = true; }
     void stop() { mRunning = false; }
     bool isRunning() const { return mRunning; }
+    PlayConfig getPlayConfig() const { return PlayConfig(); }
     void videoRefresh() {}
     void scheduleRefresh(int delayMS) {}
 

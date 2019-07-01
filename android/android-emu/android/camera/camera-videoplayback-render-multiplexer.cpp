@@ -139,13 +139,16 @@ int64_t RenderMultiplexer::render() {
                 switchRenderer(mDefaultRenderer.get());
                 break;
             case ::offworld::VideoInjectionRequest::kPlay:
+            {
                 if (mPlayer == nullptr) {
                     LOG(ERROR) << "No video loaded.";
                     return -1;
                 }
                 switchRenderer(mVideoRenderer.get());
-                mPlayer->start();
+                videoplayer::PlayConfig playConfig(maybe_next_request->play().looping());
+                mPlayer->start(playConfig);
                 break;
+            }
             case ::offworld::VideoInjectionRequest::kStop:
                 if (mPlayer == nullptr) {
                     LOG(ERROR) << "No video loaded.";
