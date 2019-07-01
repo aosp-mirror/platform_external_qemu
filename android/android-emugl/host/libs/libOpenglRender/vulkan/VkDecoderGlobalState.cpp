@@ -1049,18 +1049,18 @@ public:
         }
 
         AndroidNativeBufferInfo anbInfo;
-        bool isAndroidNativeBuffer =
-            parseAndroidNativeBufferInfo(pCreateInfo, &anbInfo);
+        const VkNativeBufferANDROID* nativeBufferANDROID =
+            vk_find_struct<VkNativeBufferANDROID>(pCreateInfo);
 
         VkResult createRes = VK_SUCCESS;
 
-        if (isAndroidNativeBuffer) {
+        if (nativeBufferANDROID) {
 
             auto memProps = memPropsOfDeviceLocked(device);
 
             createRes =
                 prepareAndroidNativeBufferImage(
-                        vk, device, pCreateInfo, pAllocator,
+                        vk, device, pCreateInfo, nativeBufferANDROID, pAllocator,
                         memProps, &anbInfo);
             if (createRes == VK_SUCCESS) {
                 *pImage = anbInfo.image;
@@ -1331,36 +1331,27 @@ public:
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
-        VkSemaphoreCreateInfo finalCreateInfo = *pCreateInfo;
+        VkSemaphoreCreateInfo localCreateInfo = vk_make_orphan_copy(*pCreateInfo);
+        vk_struct_chain_iterator structChainIter = vk_make_chain_iterator(&localCreateInfo);
 
-        vk_struct_common* structChain =
-            vk_init_struct_chain(
-                    (vk_struct_common*)&finalCreateInfo);
-
-
-        VkExportSemaphoreCreateInfo* exportCiPtr =
-            (VkExportSemaphoreCreateInfo*)
-            vk_find_struct(
-                    (vk_struct_common*)pCreateInfo,
-                    VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO);
+        const VkExportSemaphoreCreateInfoKHR* exportCiPtr =
+            vk_find_struct<VkExportSemaphoreCreateInfoKHR>(pCreateInfo);
+        VkExportSemaphoreCreateInfoKHR localSemaphoreCreateInfo;
 
         if (exportCiPtr) {
+            localSemaphoreCreateInfo = vk_make_orphan_copy(*exportCiPtr);
 
 #ifdef _WIN32
-            if (exportCiPtr->handleTypes) {
-                exportCiPtr->handleTypes =
+            if (localSemaphoreCreateInfo.handleTypes) {
+                localSemaphoreCreateInfo.handleTypes =
                     VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR;
             }
 #endif
 
-            structChain =
-                vk_append_struct(
-                        (vk_struct_common*)structChain,
-                        (vk_struct_common*)exportCiPtr);
+            vk_append_struct(&structChainIter, &localSemaphoreCreateInfo);
         }
 
-
-        VkResult res = vk->vkCreateSemaphore(device, &finalCreateInfo, pAllocator, pSemaphore);
+        VkResult res = vk->vkCreateSemaphore(device, &localCreateInfo, pAllocator, pSemaphore);
 
         if (res != VK_SUCCESS) return res;
 
@@ -1989,10 +1980,8 @@ public:
 
         if (!pAllocateInfo) return VK_ERROR_INITIALIZATION_FAILED;
 
-        VkMemoryAllocateInfo allocInfo = *pAllocateInfo;
-
-        vk_struct_common* structChain =
-            vk_init_struct_chain((vk_struct_common*)(&allocInfo));
+        VkMemoryAllocateInfo localAllocInfo = vk_make_orphan_copy(*pAllocateInfo);
+        vk_struct_chain_iterator structChainIter = vk_make_chain_iterator(&localAllocInfo);
 
         VkExportMemoryAllocateInfo exportAllocInfo;
         VkImportColorBufferGOOGLE importCbInfo;
@@ -2000,10 +1989,8 @@ public:
         VkMemoryDedicatedAllocateInfo dedicatedAllocInfo;
 
         // handle type should already be converted in unmarshaling
-        VkExportMemoryAllocateInfo* exportAllocInfoPtr =
-            (VkExportMemoryAllocateInfo*)
-            vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO);
+        const VkExportMemoryAllocateInfo* exportAllocInfoPtr =
+            vk_find_struct<VkExportMemoryAllocateInfo>(pAllocateInfo);
 
         if (exportAllocInfoPtr) {
             fprintf(stderr,
@@ -2013,23 +2000,17 @@ public:
             abort();
         }
 
-        VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
-            (VkMemoryDedicatedAllocateInfo*)
-            vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+        const VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
+            vk_find_struct<VkMemoryDedicatedAllocateInfo>(pAllocateInfo);
+        VkMemoryDedicatedAllocateInfo localDedicatedAllocInfo;
 
         if (dedicatedAllocInfoPtr) {
-            dedicatedAllocInfo = *dedicatedAllocInfoPtr;
-            structChain =
-                vk_append_struct(
-                        (vk_struct_common*)structChain,
-                        (vk_struct_common*)&dedicatedAllocInfo);
+            localDedicatedAllocInfo = vk_make_orphan_copy(*dedicatedAllocInfoPtr);
+            vk_append_struct(&structChainIter, &localDedicatedAllocInfo);
         }
 
-        VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
-            (VkImportPhysicalAddressGOOGLE*)
-            vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE);
+        const VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
+            vk_find_struct<VkImportPhysicalAddressGOOGLE>(pAllocateInfo);
 
         if (importPhysAddrInfoPtr) {
             // TODO: Implement what happens on importing a physical address:
@@ -2039,10 +2020,8 @@ public:
             //     and associate it with the physical address
         }
 
-        VkImportColorBufferGOOGLE* importCbInfoPtr =
-            (VkImportColorBufferGOOGLE*)
-            vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
+        const VkImportColorBufferGOOGLE* importCbInfoPtr =
+            vk_find_struct<VkImportColorBufferGOOGLE>(pAllocateInfo);
 
 #ifdef _WIN32
         VkImportMemoryWin32HandleInfoKHR importInfo {
@@ -2064,7 +2043,7 @@ public:
                     false /* not vulkan only */,
                     nullptr,
                     // Modify the allocation size to suit the resulting image memory size.
-                    &allocInfo.allocationSize);
+                    &localAllocInfo.allocationSize);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
@@ -2085,15 +2064,12 @@ public:
 #else
                 importInfo.fd = cbExtMemoryHandle;
 #endif
-                structChain =
-                    vk_append_struct(
-                            (vk_struct_common*)structChain,
-                            (vk_struct_common*)&importInfo);
+                vk_append_struct(&structChainIter, &importInfo);
             }
         }
 
         VkResult result =
-            vk->vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
+            vk->vkAllocateMemory(device, &localAllocInfo, pAllocator, pMemory);
 
         if (result != VK_SUCCESS) {
             return result;
@@ -2126,7 +2102,7 @@ public:
         // thing.
 
         // First, check validity of the user's type index.
-        if (allocInfo.memoryTypeIndex >=
+        if (localAllocInfo.memoryTypeIndex >=
                 physdevInfo->memoryProperties.memoryTypeCount) {
             // Continue allowing invalid behavior.
             return VK_ERROR_INCOMPATIBLE_DRIVER;
@@ -2134,7 +2110,7 @@ public:
 
         mMapInfo[*pMemory] = MappedMemoryInfo();
         auto& mapInfo = mMapInfo[*pMemory];
-        mapInfo.size = allocInfo.allocationSize;
+        mapInfo.size = localAllocInfo.allocationSize;
         mapInfo.device = device;
         if (importCbInfoPtr && m_emu->instanceSupportsMoltenVK) {
             mapInfo.ioSurface = getColorBufferIOSurface(importCbInfoPtr->colorBuffer);
@@ -2143,7 +2119,7 @@ public:
         VkMemoryPropertyFlags flags =
             physdevInfo->
             memoryProperties
-            .memoryTypes[allocInfo.memoryTypeIndex]
+            .memoryTypes[localAllocInfo.memoryTypeIndex]
             .propertyFlags;
 
         bool hostVisible =

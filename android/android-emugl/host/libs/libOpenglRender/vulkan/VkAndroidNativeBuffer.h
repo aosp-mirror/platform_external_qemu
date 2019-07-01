@@ -103,14 +103,11 @@ struct AndroidNativeBufferInfo {
     QueueState acquireQueueState;
 };
 
-bool parseAndroidNativeBufferInfo(
-    const VkImageCreateInfo* pCreateInfo,
-    AndroidNativeBufferInfo* info_out);
-
 VkResult prepareAndroidNativeBufferImage(
     VulkanDispatch* vk,
     VkDevice device,
     const VkImageCreateInfo* pCreateInfo,
+    const VkNativeBufferANDROID* nativeBufferANDROID,
     const VkAllocationCallbacks* pAllocator,
     const VkPhysicalDeviceMemoryProperties* memProps,
     AndroidNativeBufferInfo* out);
