@@ -421,6 +421,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VULKAN_NULL_OPTIONAL_STRINGS;
         case android::featurecontrol::DynamicMediaProfile:
             return android_studio::EmulatorFeatureFlagState::DYNAMIC_MEDIA_PROFILE;
+        case android::featurecontrol::YUV420888toNV21:
+            return android_studio::EmulatorFeatureFlagState::YUV420_888_to_NV21;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
