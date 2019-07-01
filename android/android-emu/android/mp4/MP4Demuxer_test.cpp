@@ -34,6 +34,7 @@ public:
     MockedVideoPlayer() = default;
     ~MockedVideoPlayer() = default;
     void start() { mRunning = true; }
+    void start(const PlayConfig& playConfig = PlayConfig()) { mRunning = true; }
     void stop() { mRunning = false; }
     bool isRunning() const { return mRunning; }
     void videoRefresh() {}
