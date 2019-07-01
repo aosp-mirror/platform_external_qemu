@@ -75,4 +75,6 @@ enum Feature {
     CarVHalTable = 43;
 
     DynamicPartition = 44;
+
+    YUV420888toNV21 = 45;
 }
