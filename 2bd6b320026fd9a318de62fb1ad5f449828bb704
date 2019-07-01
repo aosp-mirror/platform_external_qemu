@@ -46,6 +46,30 @@
       "revId": "2bd6b320026fd9a318de62fb1ad5f449828bb704",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3fa4924_aa81cdab",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-01T21:57:54Z",
+      "side": 1,
+      "message": "I think it should work out fine if we have a feature flag/gl string that advertises the capablity of the host to support this, (same idea as GLDMA)",
+      "parentUuid": "f0bd7bd4_eeccc2e8",
+      "range": {
+        "startLine": 173,
+        "startChar": 8,
+        "endLine": 173,
+        "endChar": 21
+      },
+      "revId": "2bd6b320026fd9a318de62fb1ad5f449828bb704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
