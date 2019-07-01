@@ -174,6 +174,7 @@ public:
     virtual ~VideoPlayerImpl();
 
     virtual void start();
+    virtual void start(const PlayConfig& playConfig);
     virtual void stop();
     virtual bool isRunning() const { return mRunning; }
     virtual void scheduleRefresh(int delayMs);
@@ -237,8 +238,13 @@ private:
     // this is a real time stream, e.g., rtsp
     bool mRealTime = false;
 
-    bool mRunning = false;
-    bool mPaused = false;
+    std::atomic<bool> mRunning {true};
+    std::atomic<bool> mPaused {false};
+    std::atomic<bool> mWorkerThreadStarted {false};
+
+    PlayConfig mPlayConfig;
+
+    android::base::Lock mLock;
 
     // pixel width and height of the video display window
     int mWindowWidth = 0;
@@ -614,8 +620,7 @@ VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
                                  std::unique_ptr<VideoPlayerNotifier> notifier)
     : mVideoFile(videoFile),
       mRenderTarget(renderTarget),
-      mNotifier(std::move(notifier)),
-      mRunning(true) {
+      mNotifier(std::move(notifier)) {
     mNotifier->setVideoPlayer(this);
     mNotifier->initTimer();
 }
@@ -1188,12 +1193,9 @@ int VideoPlayerImpl::play() {
         mVideoDecoder.reset();
     }
 
-    const bool wasRunning = mRunning;
-    mRunning = false;
-
     cleanup();
 
-    if (wasRunning) {
+    if (mRunning) {
         mNotifier->emitVideoStopped();
     }
     mNotifier->emitVideoFinished();
@@ -1203,8 +1205,15 @@ int VideoPlayerImpl::play() {
 
 
 void VideoPlayerImpl::workerThreadFunc() {
-    int rc = play();
-    (void)rc;
+    while (true) {
+      int rc = play();
+
+      base::AutoLock lock(mLock);
+      if (rc || !mPlayConfig.looping) {
+        mWorkerThreadStarted = false;
+        break;
+      }
+    }
 }
 
 // get an audio frame from the decoded queue, and convert it to buffer
@@ -1310,15 +1319,28 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
 }
 
 void VideoPlayerImpl::start() {
-    if (!mRunning) {
+    PlayConfig playConfig;
+    start(playConfig);
+}
+
+void VideoPlayerImpl::start(const PlayConfig& playConfig) {
+    bool started = false;
+    {
+        base::AutoLock lock(mLock);
+        mPlayConfig = playConfig;
+        started = mWorkerThreadStarted;
+    }
+
+    if (!started) {
        mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
-       mRunning = true;
+       mWorkerThreadStarted = true;
        mWorkerThread->start();
     }
 }
 
 void VideoPlayerImpl::stop() {
     mRunning = false;
+    mPlayConfig = PlayConfig();
 
     mNotifier->stopTimer();
 
