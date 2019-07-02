@@ -235,6 +235,10 @@ public:
               const emugl::RendererPtr& renderer,
               android::base::Stream* loadStream = nullptr)
         : AndroidPipe(hwPipe, service) {
+
+        // Prevent free() in mDataForReading.
+        mDataForReading.reserve(16384);
+
         bool isWorking = true;
         if (loadStream) {
             DD("%s: loading GLES pipe state for hwpipe=%p", __func__, mHwPipe);
@@ -312,14 +316,14 @@ public:
         const auto buffEnd = buff + numBuffers;
         while (buff != buffEnd) {
             if (mDataForReadingLeft == 0) {
-                // No data left, read a new chunk from the channel.
-                int spinCount = 20;
-                for (;;) {
-                    auto result = mChannel->tryRead(&mDataForReading);
-                    if (result == IoResult::Ok) {
-                        mDataForReadingLeft = mDataForReading.size();
-                        break;
-                    }
+                // Check for a pending readback, which is common
+                // with GL (write then read).
+                mChannel->waitPendingReadback();
+
+                auto result = mChannel->tryRead(&mDataForReading);
+                if (result == IoResult::Ok) {
+                    mDataForReadingLeft = mDataForReading.size();
+                } else {
                     DD("%s: tryRead() failed with %d", __func__, (int)result);
                     // This failed either because the channel was stopped
                     // from the host, or if there was no data yet in the
@@ -331,12 +335,7 @@ public:
                     if (result == IoResult::Error) {
                         return PIPE_ERROR_IO;
                     }
-                    // Spin a little before declaring there is nothing
-                    // to read. Many GL calls are much faster than the
-                    // whole host-to-guest-to-host transition.
-                    if (--spinCount > 0) {
-                        continue;
-                    }
+
                     DD("%s: returning PIPE_ERROR_AGAIN", __func__);
                     return PIPE_ERROR_AGAIN;
                 }

@@ -179,6 +179,10 @@ int ApiGen::genContext(const std::string & filename, SideType side)
             side == CLIENT_SIDE ? "client" : "server");
     fprintf(fp, "\n#include \"%s_types.h\"\n", m_basename.c_str());
 
+    if (side == SERVER_SIDE) {
+        fprintf(fp, "\n#include <functional>\n");
+    }
+
     StringVec & contextHeaders = side == CLIENT_SIDE ? m_clientContextHeaders : m_serverContextHeaders;
     for (size_t i = 0; i < contextHeaders.size(); i++) {
         fprintf(fp, "#include %s\n", contextHeaders[i].c_str());
@@ -215,6 +219,13 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     if (side == CLIENT_SIDE) {
         fprintf(fp, "\tvirtual void setError(unsigned int  error){ (void)error; };\n");
         fprintf(fp, "\tvirtual unsigned int getError(){ return 0; };\n");
+    }
+
+    // server side pending readback callbacks
+    if (side == SERVER_SIDE) {
+        fprintf(fp, "\tvoid registerOnReadbackFuncs(std::function<void()> onBegin, std::function<void()> onEnd) { mOnBeginReadback = onBegin; mOnEndReadback = onEnd; }\n");
+        fprintf(fp, "\tstd::function<void()> mOnBeginReadback;\n");
+        fprintf(fp, "\tstd::function<void()> mOnEndReadback;\n");
     }
 
     fprintf(fp, "};\n");
@@ -1409,6 +1420,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                     fprintf(fp,
                             "\t\t\ttotalTmpSize += checksumSize;\n"
                             "\t\t\tunsigned char *tmpBuf = stream->alloc(totalTmpSize);\n");
+                    fprintf(fp, "\t\t\tmOnBeginReadback();\n");
                 }
             }
 
@@ -1422,6 +1434,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                             "&tmpBuf[totalTmpSize - checksumSize], checksumSize);\n"
                             "\t\t\t}\n"
                             "\t\t\tstream->flush();\n");
+                    fprintf(fp, "\t\t\tmOnEndReadback();\n");
                 }
             }
         } // pass;
