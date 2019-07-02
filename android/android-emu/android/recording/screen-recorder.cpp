@@ -27,6 +27,7 @@
 #include "android/recording/video/VideoProducer.h"
 #include "android/recording/video/VideoFrameSharer.h"
 #include "android/utils/debug.h"
+#include "android/android.h"
 
 #include <atomic>
 
@@ -57,6 +58,7 @@ struct Globals {
     Lock lock;
     std::unique_ptr<ScreenRecorder> recorder;
     std::unique_ptr<VideoFrameSharer> webrtc_module;
+    std::string sharedMemoryHandle;
     const QAndroidDisplayAgent* displayAgent = nullptr;
     uint32_t fbWidth = 0;
     uint32_t fbHeight = 0;
@@ -366,8 +368,14 @@ bool screen_recorder_stop(bool async) {
     return false;
 }
 
-bool start_webrtc_module(const char* handle, int fps) {
+const char* start_shared_memory_module(int fps) {
     auto& globals = *sGlobals;
+
+    // emulator name --> shared memory handle.
+    // 1. Discovery is easier.
+    // 2. If we accidentally leak a region on posix, we can reclaim an clean up on 2nd run.
+    globals.sharedMemoryHandle = std::string("videmulator") + std::to_string(android_serial_number_port);
+    const char* handle = globals.sharedMemoryHandle.c_str();
     D("%s(handle=%s, fps=%d)", __func__, handle, fps);
 
     AutoLock lock(globals.lock);
@@ -382,13 +390,13 @@ bool start_webrtc_module(const char* handle, int fps) {
 
     // We can fail due to shared memory allocation issues.
     if (!globals.webrtc_module->attachProducer(std::move(producer)))
-        return false;
+        return nullptr;
 
     globals.webrtc_module->start();
-    return true;
+    return handle;
 }
 
-bool stop_webrtc_module() {
+bool stop_shared_memory_module() {
     auto& globals = *sGlobals;
 
     AutoLock lock(globals.lock);
@@ -401,12 +409,12 @@ bool stop_webrtc_module() {
 }
 
 extern "C" {
-bool start_webrtc(const char* handle, int fps) {
-    return start_webrtc_module(handle, fps);
+const char*  start_webrtc(int fps) {
+    return start_shared_memory_module(fps);
 }
 
 bool stop_webrtc() {
-    return stop_webrtc_module();
+    return stop_shared_memory_module();
 }
 }
 
