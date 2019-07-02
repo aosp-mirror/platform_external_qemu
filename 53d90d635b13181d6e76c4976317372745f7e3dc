@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ead9153_48bbd248",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-07-02T17:17:16Z",
+      "side": 1,
+      "message": "As per the C++ style guide:\n\"Default arguments are banned on virtual functions, where they don\u0027t work properly\"\nhttp://go/cstyle#Default_Arguments\n\nIf we remove this default argument, I think you also don\u0027t need the copy and assignment operators in PlayConfig.",
+      "range": {
+        "startLine": 73,
+        "startChar": 23,
+        "endLine": 73,
+        "endChar": 59
+      },
+      "revId": "53d90d635b13181d6e76c4976317372745f7e3dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
