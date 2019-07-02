@@ -77,4 +77,6 @@ enum Feature {
     DynamicPartition = 44;
 
     YUV420888toNV21 = 45;
+
+    YUV420888Cache = 46;
 }
