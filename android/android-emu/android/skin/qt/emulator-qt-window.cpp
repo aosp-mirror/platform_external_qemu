@@ -2656,6 +2656,9 @@ void EmulatorQtWindow::wheelScrollTimeout() {
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
+    // Do not check for ADB in min config (Fuchsia) mode.
+    if (min_config_qemu_mode) return;
+
     QSettings settings;
     if (!(*mAdbInterface)->isAdbVersionCurrent() &&
         settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
