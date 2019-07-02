@@ -125,6 +125,8 @@ typedef enum{
     PHYSICAL_PARAMETER_(HUMIDITY,"humidity",Humidity,float) \
     PHYSICAL_PARAMETER_(VELOCITY,"velocity",Velocity,vec3) \
     PHYSICAL_PARAMETER_(AMBIENT_MOTION,"ambientMotion",AmbientMotion,float) \
+    PHYSICAL_PARAMETER_(ACCELERATION,"acceleration",Acceleration,vec3) \
+    PHYSICAL_PARAMETER_(ANGULAR_VELOCITY,"angular-velocity",AngularVelocity,vec3) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,

@@ -17,6 +17,7 @@
 #include <string>
 
 #include "android/base/Log.h"
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/AVScopedPtr.h"
 #include "android/recording/video/player/PacketQueue.h"
 
@@ -31,10 +32,13 @@ using android::recording::makeAVScopedPtr;
 namespace android {
 namespace mp4 {
 
+typedef ::offworld::DatasetInfo DatasetInfo;
+
 class Mp4DatasetImpl : public Mp4Dataset {
 public:
-    Mp4DatasetImpl(std::string filepath) : mDatasetFilepath(filepath) {}
+    Mp4DatasetImpl(){};
     virtual ~Mp4DatasetImpl(){};
+    int init(std::string filepath, DatasetInfo* datasetInfo);
     int getAudioStreamIndex() { return mAudioStreamIdx; }
     int getVideoStreamIndex() { return mVideoStreamIdx; }
     int getSensorDataStreamIndex(AndroidSensor sensor) {
@@ -45,32 +49,30 @@ public:
     void clearFormatContext() { mFormatCtx.reset(); }
 
 private:
-    std::string mDatasetFilepath;
     AVScopedPtr<AVFormatContext> mFormatCtx;
     int mAudioStreamIdx = -1;
     int mVideoStreamIdx = -1;
     int mSensorStreamsIdx[MAX_SENSORS] = {-1, -1, -1, -1, -1, -1,
                                           -1, -1, -1, -1, -1};
     int mLocationStreamIdx = -1;
-
-private:
-    int init();
 };
 
-std::unique_ptr<Mp4Dataset> Mp4Dataset::create(std::string filepath) {
-    std::unique_ptr<Mp4Dataset> dataset;
-    dataset.reset(new Mp4DatasetImpl(filepath));
-    if (dataset->init() < 0) {
+std::unique_ptr<Mp4Dataset> Mp4Dataset::create(std::string filepath,
+                                               DatasetInfo* datasetInfo) {
+    auto dataset = new Mp4DatasetImpl();
+    if (dataset->init(filepath, datasetInfo) < 0) {
         LOG(ERROR) << ": Failed to initialize mp4 dataset!";
         return nullptr;
     }
-    return std::move(dataset);
+    std::unique_ptr<Mp4Dataset> ret;
+    ret.reset(dataset);
+    return std::move(ret);
 }
 
 // TODO(haipengwu): Add data stream indices setting logic whith proto
 // integration
-int Mp4DatasetImpl::init() {
-    const char* filename = mDatasetFilepath.c_str();
+int Mp4DatasetImpl::init(std::string filepath, DatasetInfo* datasetInfo) {
+    const char* filename = filepath.c_str();
 
     // Register all formats and codecs
     av_register_all();
@@ -100,9 +102,28 @@ int Mp4DatasetImpl::init() {
         }
     }
 
+    // We expect a dataset to at least have one video stream
     if (mVideoStreamIdx == -1) {
         LOG(ERROR) << ": No video stream found";
         return -1;
+    }
+
+    if (datasetInfo != nullptr) {
+        if (datasetInfo->has_location()) {
+            mLocationStreamIdx = datasetInfo->location().stream_index();
+        }
+        if (datasetInfo->has_accelerometer()) {
+            mSensorStreamsIdx[ANDROID_SENSOR_ACCELERATION] =
+                    datasetInfo->accelerometer().stream_index();
+        }
+        if (datasetInfo->has_gyroscope()) {
+            mSensorStreamsIdx[ANDROID_SENSOR_GYROSCOPE] =
+                    datasetInfo->gyroscope().stream_index();
+        }
+        if (datasetInfo->has_magnetic_field()) {
+            mSensorStreamsIdx[ANDROID_SENSOR_MAGNETIC_FIELD] =
+                    datasetInfo->magnetic_field().stream_index();
+        }
     }
 
     return 0;

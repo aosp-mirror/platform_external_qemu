@@ -42,7 +42,7 @@ public:
                    VideoPlayerWaitInfo* readingWaitInfo)
         : mPlayer(player),
           mDataset(dataset),
-          mContinueReadWaitInfo(readingWaitInfo){}
+          mContinueReadWaitInfo(readingWaitInfo) {}
     ~Mp4DemuxerImpl() {}
 
     void demux();
@@ -81,7 +81,6 @@ std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
     return std::move(demuxer);
 }
 
-
 void Mp4DemuxerImpl::demux() {
     int ret = 0;
     AVPacket packet;
@@ -89,7 +88,8 @@ void Mp4DemuxerImpl::demux() {
     const int audioStreamIndex = mDataset->getAudioStreamIndex();
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
 
-    while (mPlayer->isRunning() && (ret = av_read_frame(formatCtx, &packet)) >= 0) {
+    while (mPlayer->isRunning() &&
+           (ret = av_read_frame(formatCtx, &packet)) >= 0) {
         if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0 &&
             packet.stream_index == audioStreamIndex) {
             mAudioPacketQueue->put(&packet);
@@ -120,9 +120,9 @@ void Mp4DemuxerImpl::demux() {
         }
 
         if ((curent_queues_total_size > kMaxQueueSize ||
-            (formatCtx->streams[videoStreamIndex]->disposition &
-             AV_DISPOSITION_ATTACHED_PIC)) &&
-             mContinueReadWaitInfo != nullptr) {
+             (formatCtx->streams[videoStreamIndex]->disposition &
+              AV_DISPOSITION_ATTACHED_PIC)) &&
+            mContinueReadWaitInfo != nullptr) {
             // wait 10 ms
             android::base::System::Duration timeoutMs = 10ll;
             mContinueReadWaitInfo->lock.lock();
@@ -130,7 +130,8 @@ void Mp4DemuxerImpl::demux() {
                     android::base::System::get()->getUnixTimeUs() +
                     timeoutMs * 1000;
             while (android::base::System::get()->getUnixTimeUs() < deadlineUs) {
-                mContinueReadWaitInfo->cvDone.timedWait(&mContinueReadWaitInfo->lock, deadlineUs);
+                mContinueReadWaitInfo->cvDone.timedWait(
+                        &mContinueReadWaitInfo->lock, deadlineUs);
             }
             mContinueReadWaitInfo->lock.unlock();
         }
@@ -154,6 +155,7 @@ bool Mp4DemuxerImpl::isDataStreamIndex(int index) {
     if (index == mDataset->getLocationDataStreamIndex()) {
         ret = true;
     }
+
     for (int i = 0; i < MAX_SENSORS; i++) {
         if (index == mDataset->getSensorDataStreamIndex((AndroidSensor)i)) {
             ret = true;
