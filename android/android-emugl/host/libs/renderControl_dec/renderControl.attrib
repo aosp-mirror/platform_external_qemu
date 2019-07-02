@@ -38,6 +38,10 @@ rcReadColorBuffer
     dir pixels out
     len pixels (((glUtilsPixelBitSize(format, type) * width) >> 3) * height)
 
+rcReadColorBufferYUV
+    dir pixels out
+    len pixels pixels_size
+
 rcUpdateColorBuffer
     dir pixels in
     len pixels (((glUtilsPixelBitSize(format, type) * width) >> 3) * height)
