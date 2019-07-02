@@ -106,7 +106,7 @@ public:
         if (pos >= (int)mBuffers.size()) {
             pos -= mBuffers.size();
         }
-        mBuffers[pos] = std::move(buffer);
+        mBuffers[pos] = buffer;
         if (mCount++ == 0) {
             mCanPop.signal();
         }
@@ -135,7 +135,7 @@ public:
             return (mClosed || mSnapshotMode) ? BufferQueueResult::Error
                                               : BufferQueueResult::TryAgain;
         }
-        *buffer = std::move(mBuffers[mPos]);
+        *buffer = mBuffers[mPos];
         int pos = mPos + 1;
         if (pos >= (int)mBuffers.size()) {
             pos -= mBuffers.size();
