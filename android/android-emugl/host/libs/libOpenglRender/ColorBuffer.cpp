@@ -209,7 +209,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                 p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
         return nullptr;
     }
-    memset(initialImage.get(), 0xff, bufsize);
+    memset(initialImage.get(), 0x0, bufsize);
 
     RecursiveScopedHelperContext context(helper);
     if (!context.isOk()) {
