@@ -556,6 +556,26 @@ void PhysicalModelImpl::setTargetInternalHumidity(
     targetStateChanged();
 }
 
+// Ignore the provided interpolation mode and just directly override the accelerometer.
+void PhysicalModelImpl::setTargetInternalAcceleration(vec3 acceleration,
+        PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        overrideAccelerometer(acceleration);
+    }
+    targetStateChanged();
+}
+
+// Ignore the provided interpolation mode and just directly override the gyroscope.
+void PhysicalModelImpl::setTargetInternalAngularVelocity(vec3 angularVelocity,
+        PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        overrideGyroscope(angularVelocity);
+    }
+    targetStateChanged();
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -616,6 +636,18 @@ float PhysicalModelImpl::getParameterHumidity(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return mAmbientEnvironment.getHumidity(parameterValueType);
+}
+
+vec3 PhysicalModelImpl::getParameterAcceleration(
+        ParameterValueType parameterValueType) const {
+    long measurementId;
+    return getAccelerometer(&measurementId);
+}
+
+vec3 PhysicalModelImpl::getParameterAngularVelocity(
+        ParameterValueType parameterValueType) const {
+    long measurementId;
+    return getGyroscope(&measurementId);
 }
 
 #define GET_FUNCTION_NAME(x) get##x

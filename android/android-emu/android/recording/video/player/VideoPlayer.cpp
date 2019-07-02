@@ -1003,7 +1003,7 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 }
 
 int VideoPlayerImpl::play() {
-    mDataset = Mp4Dataset::create(mVideoFile);
+    mDataset = Mp4Dataset::create(mVideoFile, nullptr);
     if (mDataset == nullptr) {
         LOG(ERROR) << ": Failed to create mp4 dataset!";
         return -1;
