@@ -522,6 +522,32 @@ void AndroidPipe::abortPendingOperation() {
     sGlobals->pipeWaker.abortPending(mHwPipe);
 }
 
+void AndroidPipe::beginPerfStatsTracking() {
+    mPerfStats = AndroidPipe::PerfStats();
+    mPerfStatsTracking = true;
+}
+
+AndroidPipe::PerfStats AndroidPipe::endPerfStatsTracking() {
+    if (mPerfStatsTracking) {
+        return mPerfStats;
+    }
+    mPerfStatsTracking = false;
+}
+
+void AndroidPipe::perfStats_onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) {
+    (void)buffers;
+    (void)numBuffers;
+    if (!mPerfStatsTracking) return;
+    ++mPerfStats.writeCount;
+}
+
+void AndroidPipe::perfStats_onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
+    (void)buffers;
+    (void)numBuffers;
+    if (!mPerfStatsTracking) return;
+    ++mPerfStats.readCount;
+}
+
 void AndroidPipe::saveToStream(BaseStream* stream) {
     // First, write service name.
     if (mService == &sGlobals->connectorService) {
@@ -758,6 +784,7 @@ int android_pipe_guest_recv(void* internalPipe,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    pipe->perfStats_onGuestRecv(buffers, numBuffers);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
     return pipe->onGuestRecv(buffers, numBuffers);
@@ -768,6 +795,7 @@ int android_pipe_guest_send(void* internalPipe,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    pipe->perfStats_onGuestSend(buffers, numBuffers);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
     return pipe->onGuestSend(buffers, numBuffers);

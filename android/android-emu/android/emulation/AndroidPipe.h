@@ -199,6 +199,18 @@ public:
         return mService ? mService->name().c_str() : "<null>";
     }
 
+    // Track performance stats for a particular pipe
+    struct PerfStats {
+        uint64_t writeCount = 0;
+        uint64_t readCount = 0;
+    };
+
+    void beginPerfStatsTracking();
+    PerfStats endPerfStatsTracking();
+
+    void perfStats_onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers);
+    void perfStats_onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers);
+
     // The following functions are implementation details. They are in the
     // public scope to make the implementation of android_pipe_guest_save()
     // and android_pipe_guest_load() easier. DO NOT CALL THEM DIRECTLY.
@@ -226,7 +238,6 @@ public:
                                              unsigned char* pWakes,
                                              unsigned char* pClosed,
                                              char* pForceClose);
-
 protected:
     // No default constructor.
     AndroidPipe() = delete;
@@ -238,6 +249,8 @@ protected:
     void* const mHwPipe = nullptr;
     Service* mService = nullptr;
     std::string mArgs;
+    bool mPerfStatsTracking = false;
+    PerfStats mPerfStats;
 };
 
 }  // namespace android
