@@ -50,7 +50,6 @@ WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
       mFps(fps),
       mVideoBridgePort(videoBridgePort),
       mTurnConfig(turncfg) {
-    mVideoModule = generateUniqueVideoHandle();
 }
 
 WebRtcBridge::~WebRtcBridge() {
@@ -159,7 +158,7 @@ void WebRtcBridge::terminate() {
     // Note, closing the shared memory region can crash the bridge as it might
     // attempt to read inaccessible memory.
     LOG(INFO) << "Stopping the rtc module.";
-    mScreenAgent->stopWebRtcModule();
+    mScreenAgent->stopSharedMemoryModule();
 }
 
 void WebRtcBridge::received(SocketTransport* from, json object) {
@@ -298,9 +297,9 @@ bool WebRtcBridge::start() {
 
     // TODO(jansen): We should pause the recorder when no connections are
     // active.
-    if (!mScreenAgent->startWebRtcModule(mVideoModule.c_str(), mFps)) {
-        LOG(ERROR) << "Failed to start webrtc module on " << mVideoModule
-                   << ", no video available.";
+    mVideoModule = mScreenAgent->startSharedMemoryModule(mFps);
+    if (mVideoModule.empty()) {
+        LOG(ERROR) << "Failed to start webrtc module, no video available.";
         return false;
     }
 

@@ -80,6 +80,7 @@ void VideoFrameSharer::stop() {
 }
 
 bool VideoFrameSharer::marshallFrame(const Frame* frame) {
+    VideoInfo* info  = (VideoInfo*)mMemory.get();
     uint8_t* bPixels = (uint8_t*)mMemory.get() + sizeof(mVideo);
     const int cPixelBytes = getPixelBytes(mVideo);
     // We need to convert this to I420, otherwise the WebRTC engine
@@ -123,6 +124,10 @@ bool VideoFrameSharer::marshallFrame(const Frame* frame) {
         LOG(ERROR) << "Conversion failed!";
         return false;
     }
+
+    // Update frame information.
+    info->frameNumber++;
+    info->tsUs = base::System::get()->getUnixTimeUs();
     return true;
 }
 
