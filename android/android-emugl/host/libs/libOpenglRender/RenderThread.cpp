@@ -207,6 +207,11 @@ intptr_t RenderThread::main() {
     //
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
+
+    tInfo.m_vkDec.registerOnReadbackFuncs(
+        [this]() { mChannel->beginPendingReadback(); },
+        [this]() { mChannel->signalPendingReadback(); });
+
     initRenderControlContext(&tInfo.m_rcDec);
 
     if (!mChannel) {

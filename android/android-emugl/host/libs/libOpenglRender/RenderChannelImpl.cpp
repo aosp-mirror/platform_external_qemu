@@ -211,4 +211,31 @@ void RenderChannelImpl::onSave(android::base::Stream* stream) {
     mRenderThread->save(stream);
 }
 
+void RenderChannelImpl::waitPendingReadback() {
+    PendingReadbackMessage msg;
+
+    if (!mPendingReadbacks.tryReceive(&msg)) {
+        return;
+    }
+
+    if (msg == PendingReadbackMessage::End) {
+        return;
+    }
+
+    if (msg == PendingReadbackMessage::Begin) {
+        mPendingReadbacks.receive(&msg);
+        return;
+    }
+}
+
+void RenderChannelImpl::beginPendingReadback() {
+    PendingReadbackMessage msg = PendingReadbackMessage::Begin;
+    mPendingReadbacks.send(msg);
+}
+
+void RenderChannelImpl::signalPendingReadback() {
+    PendingReadbackMessage msg = PendingReadbackMessage::End;
+    mPendingReadbacks.send(msg);
+}
+
 }  // namespace emugl
