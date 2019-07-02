@@ -154,6 +154,7 @@ bool Mp4DemuxerImpl::isDataStreamIndex(int index) {
     if (index == mDataset->getLocationDataStreamIndex()) {
         ret = true;
     }
+    
     for (int i = 0; i < MAX_SENSORS; i++) {
         if (index == mDataset->getSensorDataStreamIndex((AndroidSensor)i)) {
             ret = true;

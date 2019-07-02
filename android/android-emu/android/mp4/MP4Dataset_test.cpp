@@ -16,8 +16,10 @@
 
 #include <gtest/gtest.h>
 
+#include "android/hw-sensors.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/offworld/proto/offworld.pb.h"
 
 using namespace android::mp4;
 
@@ -29,8 +31,24 @@ protected:
         std::string absDataPath = android::base::PathUtils::join(
                 android::base::System::get()->getProgramDirectory(), "testdata",
                 "video.mp4");
+        
+        initializeDatasetInfo();
 
-        mDataset = Mp4Dataset::create(absDataPath);
+        mDataset = Mp4Dataset::create(absDataPath, mDatasetInfo.get());
+    }
+
+private:
+    std::unique_ptr<DatasetInfo> mDatasetInfo;
+
+    void initializeDatasetInfo() {
+        mDatasetInfo.reset(new DatasetInfo());
+
+        auto accelInfo = mDatasetInfo->mutable_accelerometer();
+        accelInfo->set_stream_index(1);
+        auto gyroInfo = mDatasetInfo->mutable_gyroscope();
+        gyroInfo->set_stream_index(2);
+        auto magInfo = mDatasetInfo->mutable_magnetic_field();
+        magInfo->set_stream_index(3);
     }
 };
 
@@ -38,4 +56,7 @@ TEST_F(Mp4DatasetTest, init) {
     EXPECT_EQ(mDataset->getFormatContext()->nb_streams, 5);
     EXPECT_EQ(mDataset->getAudioStreamIndex(), -1);
     EXPECT_EQ(mDataset->getVideoStreamIndex(), 0);
+    EXPECT_EQ(mDataset->getSensorDataStreamIndex(ANDROID_SENSOR_ACCELERATION), 1);
+    EXPECT_EQ(mDataset->getSensorDataStreamIndex(ANDROID_SENSOR_GYROSCOPE), 2);
+    EXPECT_EQ(mDataset->getSensorDataStreamIndex(ANDROID_SENSOR_MAGNETIC_FIELD), 3);
 }

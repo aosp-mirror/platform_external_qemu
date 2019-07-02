@@ -59,7 +59,7 @@ protected:
 
         mMockedVideoPlayer.reset(new MockedVideoPlayer());
 
-        mDataset = Mp4Dataset::create(absDataPath);
+        mDataset = Mp4Dataset::create(absDataPath, nullptr);
         mDemuxer = Mp4Demuxer::create(mMockedVideoPlayer.get(),
                                       mDataset.get(),
                                       nullptr);

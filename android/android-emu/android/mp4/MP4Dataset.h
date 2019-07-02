@@ -18,7 +18,9 @@
 #include <string>
 
 #include "android/hw-sensors.h"
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/utils/compiler.h"
+
 
 extern "C" {
 #include "libavformat/avformat.h"
@@ -27,12 +29,15 @@ extern "C" {
 namespace android {
 namespace mp4 {
 
+typedef ::offworld::DatasetInfo DatasetInfo;
+
 // A wrapper around an MP4 dataset file that provides access to
 // information about this dataset.
 class Mp4Dataset {
 public:
     virtual ~Mp4Dataset(){};
-    static std::unique_ptr<Mp4Dataset> create(std::string filepath);
+    static std::unique_ptr<Mp4Dataset> create(
+        std::string filepath, DatasetInfo* datasetInfo);
     virtual int getAudioStreamIndex() = 0;
     virtual int getVideoStreamIndex() = 0;
     virtual int getSensorDataStreamIndex(AndroidSensor sensor) = 0;
@@ -42,7 +47,6 @@ public:
 
 protected:
     Mp4Dataset() = default;
-    virtual int init() = 0;
 };
 
 }  // namespace mp4
