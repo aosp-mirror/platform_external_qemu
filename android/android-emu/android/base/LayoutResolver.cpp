@@ -67,7 +67,7 @@ computeCoordinatesPerRow(
         std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>>& displays) {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
     std::stable_sort(row.begin(), row.end(), [](const Rect& a, const Rect& b) {
-        return a.height > b.height;
+        return a.height > b.height || (a.height == b.height && a.id < b.id);
     });
     uint32_t width = 0;
     for (const auto& iter : row) {
