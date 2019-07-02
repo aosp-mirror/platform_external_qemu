@@ -16,8 +16,10 @@
 
 #include "android/physics/PhysicalModel.h"
 
+#include <cstdio>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
+#include <mutex>
 
 #include "android/automation/AutomationController.h"
 #include "android/automation/AutomationEventSink.h"
@@ -30,12 +32,8 @@
 #include "android/physics/AmbientEnvironment.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/InertialModel.h"
-#include "android/utils/stream.h"
 #include "android/utils/file_io.h"
-
-
-#include <cstdio>
-#include <mutex>
+#include "android/utils/stream.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -99,9 +97,8 @@ public:
      * Can be called from any thread.
      */
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-    void SET_TARGET_FUNCTION_NAME(z)(\
-        w value, PhysicalInterpolation mode);
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
+    void SET_TARGET_FUNCTION_NAME(z)(w value, PhysicalInterpolation mode);
 
     PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -112,7 +109,7 @@ public:
      * Can be called from any thread.
      */
 #define GET_TARGET_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
     w GET_TARGET_FUNCTION_NAME(z)(ParameterValueType parameterValueType) const;
 
     PHYSICAL_PARAMETERS_LIST
@@ -124,8 +121,7 @@ public:
      * Can be called from any thread.
      */
 #define OVERRIDE_FUNCTION_NAME(x) override##x
-#define SENSOR_(x,y,z,v,w) \
-    void OVERRIDE_FUNCTION_NAME(z)(v override_value);
+#define SENSOR_(x, y, z, v, w) void OVERRIDE_FUNCTION_NAME(z)(v override_value);
 
     SENSORS_LIST
 #undef SENSOR_
@@ -136,7 +132,7 @@ public:
      * Can be called from any thread.
      */
 #define GET_FUNCTION_NAME(x) get##x
-#define SENSOR_(x,y,z,v,w) \
+#define SENSOR_(x, y, z, v, w) \
     v GET_FUNCTION_NAME(z)(long* measurement_id) const;
 
     SENSORS_LIST
@@ -144,10 +140,13 @@ public:
 #undef GET_FUNCTION_NAME
 
     /* Get the physical rotation and translation simulatenousely. */
-    void getTransform(
-            float* out_translation_x, float* out_translation_y, float* out_translation_z,
-            float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-            int64_t* out_timestamp);
+    void getTransform(float* out_translation_x,
+                      float* out_translation_y,
+                      float* out_translation_z,
+                      float* out_rotation_x,
+                      float* out_rotation_y,
+                      float* out_rotation_z,
+                      int64_t* out_timestamp);
 
     /*
      * Set or unset callbacks used to signal changing state.
@@ -200,7 +199,7 @@ private:
      * Can be called from any thread.
      */
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
+#define PHYSICAL_PARAMETER_(x, y, z, w)                \
     void SET_TARGET_INTERNAL_FUNCTION_NAME(z)(w value, \
                                               PhysicalInterpolation mode);
 
@@ -212,8 +211,7 @@ private:
      * Getters for non-overridden physical sensor values.
      */
 #define GET_PHYSICAL_NAME(x) getPhysical##x
-#define SENSOR_(x,y,z,v,w) \
-    v GET_PHYSICAL_NAME(z)() const;
+#define SENSOR_(x, y, z, v, w) v GET_PHYSICAL_NAME(z)() const;
 
     SENSORS_LIST
 #undef SENSOR_
@@ -238,7 +236,7 @@ private:
     /*
      * Helper for getting current sensor values.
      */
-    template<class T>
+    template <class T>
     T getSensorValue(AndroidSensor sensor,
                      const T* overrideMemberPointer,
                      std::function<T()> physicalGetter,
@@ -277,8 +275,7 @@ private:
     bool mUseOverride[MAX_SENSORS] = {false};
     mutable long mMeasurementId[MAX_SENSORS] = {0};
 #define OVERRIDE_NAME(x) m##x##Override
-#define SENSOR_(x,y,z,v,w) \
-    v OVERRIDE_NAME(z){0.f};
+#define SENSOR_(x, y, z, v, w) v OVERRIDE_NAME(z){0.f};
 
     SENSORS_LIST
 #undef SENSOR_
@@ -316,9 +313,9 @@ PhysicalModel* PhysicalModelImpl::getPhysicalModel() {
 }
 
 PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
-    return physicalModel != nullptr ?
-            reinterpret_cast<PhysicalModelImpl*>(physicalModel->opaque) :
-            nullptr;
+    return physicalModel != nullptr
+                   ? reinterpret_cast<PhysicalModelImpl*>(physicalModel->opaque)
+                   : nullptr;
 }
 
 pb::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
@@ -330,7 +327,7 @@ pb::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
     case PHYSICAL_PARAMETER_ENUM(x):    \
         return PROTO_ENUM(x);
 
-    PHYSICAL_PARAMETERS_LIST
+        PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef PHYSICAL_PARAMETER_ENUM
         default:
@@ -344,9 +341,9 @@ PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define PROTO_ENUM(x) pb::PhysicalModelEvent_ParameterType_##x
 
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-        case PROTO_ENUM(x):\
-            return PHYSICAL_PARAMETER_ENUM(x);
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
+    case PROTO_ENUM(x):                 \
+        return PHYSICAL_PARAMETER_ENUM(x);
 
         PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -361,7 +358,8 @@ template <typename T>
 T getProtoValue(const pb::PhysicalModelEvent_ParameterValue& parameter);
 
 template <>
-float getProtoValue<float>(const pb::PhysicalModelEvent_ParameterValue& parameter) {
+float getProtoValue<float>(
+        const pb::PhysicalModelEvent_ParameterValue& parameter) {
     if (parameter.data_size() != 1) {
         W("%s: Error in parsed physics command.  Float parameters should have "
           "exactly one value.  Found %d.",
@@ -372,7 +370,8 @@ float getProtoValue<float>(const pb::PhysicalModelEvent_ParameterValue& paramete
 }
 
 template <>
-vec3 getProtoValue<vec3>(const pb::PhysicalModelEvent_ParameterValue& parameter) {
+vec3 getProtoValue<vec3>(
+        const pb::PhysicalModelEvent_ParameterValue& parameter) {
     if (parameter.data_size() != 3) {
         W("%s: Error in parsed physics command.  Vec3 parameters should have "
           "exactly three values.  Found %d.",
@@ -430,18 +429,18 @@ void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
 #define GET_PROTO_VALUE_FUNCTION_NAME(x) getProtoValue_##x
-#define PHYSICAL_PARAMETER_(x, y, z, type)                  \
-    case PHYSICAL_PARAMETER_ENUM(x):                        \
-        if (event.has_current_value()) {                    \
-            SET_TARGET_INTERNAL_FUNCTION_NAME(z)(           \
-                getProtoValue<type>(event.current_value()), \
-                PHYSICAL_INTERPOLATION_STEP);               \
-        }                                                   \
-        if (event.has_target_value()) {                     \
-            SET_TARGET_INTERNAL_FUNCTION_NAME(z)(           \
-                getProtoValue<type>(event.target_value()),  \
-                PHYSICAL_INTERPOLATION_SMOOTH);             \
-        }                                                   \
+#define PHYSICAL_PARAMETER_(x, y, z, type)               \
+    case PHYSICAL_PARAMETER_ENUM(x):                     \
+        if (event.has_current_value()) {                 \
+            SET_TARGET_INTERNAL_FUNCTION_NAME(z)         \
+            (getProtoValue<type>(event.current_value()), \
+             PHYSICAL_INTERPOLATION_STEP);               \
+        }                                                \
+        if (event.has_target_value()) {                  \
+            SET_TARGET_INTERNAL_FUNCTION_NAME(z)         \
+            (getProtoValue<type>(event.target_value()),  \
+             PHYSICAL_INTERPOLATION_SMOOTH);             \
+        }                                                \
         break;
 
         PHYSICAL_PARAMETERS_LIST
@@ -455,7 +454,7 @@ void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
 }
 
 void PhysicalModelImpl::setTargetInternalPosition(vec3 position,
-        PhysicalInterpolation mode) {
+                                                  PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -465,7 +464,7 @@ void PhysicalModelImpl::setTargetInternalPosition(vec3 position,
 }
 
 void PhysicalModelImpl::setTargetInternalVelocity(vec3 velocity,
-        PhysicalInterpolation mode) {
+                                                  PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -474,7 +473,8 @@ void PhysicalModelImpl::setTargetInternalVelocity(vec3 velocity,
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalAmbientMotion(float bounds,
+void PhysicalModelImpl::setTargetInternalAmbientMotion(
+        float bounds,
         PhysicalInterpolation mode) {
     physicalStateChanging();
     {
@@ -485,7 +485,7 @@ void PhysicalModelImpl::setTargetInternalAmbientMotion(float bounds,
 }
 
 void PhysicalModelImpl::setTargetInternalRotation(vec3 rotation,
-        PhysicalInterpolation mode) {
+                                                  PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -507,7 +507,8 @@ void PhysicalModelImpl::setTargetInternalMagneticField(
 }
 
 void PhysicalModelImpl::setTargetInternalTemperature(
-        float celsius, PhysicalInterpolation mode) {
+        float celsius,
+        PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -516,8 +517,8 @@ void PhysicalModelImpl::setTargetInternalTemperature(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalProximity(
-        float centimeters, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalProximity(float centimeters,
+                                                   PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -526,8 +527,8 @@ void PhysicalModelImpl::setTargetInternalProximity(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalLight(
-        float lux, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalLight(float lux,
+                                               PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -536,8 +537,8 @@ void PhysicalModelImpl::setTargetInternalLight(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalPressure(
-        float hPa, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalPressure(float hPa,
+                                                  PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -546,13 +547,33 @@ void PhysicalModelImpl::setTargetInternalPressure(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalHumidity(
-        float percentage, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalHumidity(float percentage,
+                                                  PhysicalInterpolation mode) {
     physicalStateChanging();
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
         mAmbientEnvironment.setHumidity(percentage, mode);
     }
+    targetStateChanged();
+}
+
+// Ignore the provided interpolation mode and just directly override the
+// accelerometer.
+void PhysicalModelImpl::setTargetInternalAcceleration(
+        vec3 acceleration,
+        PhysicalInterpolation mode) {
+    physicalStateChanging();
+    { overrideAccelerometer(acceleration); }
+    targetStateChanged();
+}
+
+// Ignore the provided interpolation mode and just directly override the
+// gyroscope.
+void PhysicalModelImpl::setTargetInternalAngularVelocity(
+        vec3 angularVelocity,
+        PhysicalInterpolation mode) {
+    physicalStateChanging();
+    { overrideGyroscope(angularVelocity); }
     targetStateChanged();
 }
 
@@ -618,6 +639,18 @@ float PhysicalModelImpl::getParameterHumidity(
     return mAmbientEnvironment.getHumidity(parameterValueType);
 }
 
+vec3 PhysicalModelImpl::getParameterAcceleration(
+        ParameterValueType parameterValueType) const {
+    long measurementId;
+    return getAccelerometer(&measurementId);
+}
+
+vec3 PhysicalModelImpl::getParameterAngularVelocity(
+        ParameterValueType parameterValueType) const {
+    long measurementId;
+    return getGyroscope(&measurementId);
+}
+
 #define GET_FUNCTION_NAME(x) get##x
 #define OVERRIDE_FUNCTION_NAME(x) override##x
 #define OVERRIDE_NAME(x) m##x##Override
@@ -625,24 +658,22 @@ float PhysicalModelImpl::getParameterHumidity(
 #define PHYSICAL_NAME(x) getPhysical##x
 
 // Implement sensor overrides.
-#define SENSOR_(x,y,z,v,w) \
-void PhysicalModelImpl::OVERRIDE_FUNCTION_NAME(z)(v override_value) {\
-    setOverride(SENSOR_NAME(x), &OVERRIDE_NAME(z), override_value);\
-}
+#define SENSOR_(x, y, z, v, w)                                            \
+    void PhysicalModelImpl::OVERRIDE_FUNCTION_NAME(z)(v override_value) { \
+        setOverride(SENSOR_NAME(x), &OVERRIDE_NAME(z), override_value);   \
+    }
 
 SENSORS_LIST
 #undef SENSOR_
 
 // Implement getters that respect overrides.
-#define SENSOR_(x,y,z,v,w) \
-v PhysicalModelImpl::GET_FUNCTION_NAME(z)(\
-        long* measurement_id) const {\
-    return getSensorValue<v>(SENSOR_NAME(x),\
-                             &OVERRIDE_NAME(z),\
-                             std::bind(&PhysicalModelImpl::PHYSICAL_NAME(z),\
-                                       this),\
-                             measurement_id);\
-}
+#define SENSOR_(x, y, z, v, w)                                              \
+    v PhysicalModelImpl::GET_FUNCTION_NAME(z)(long* measurement_id) const { \
+        return getSensorValue<v>(                                           \
+                SENSOR_NAME(x), &OVERRIDE_NAME(z),                          \
+                std::bind(&PhysicalModelImpl::PHYSICAL_NAME(z), this),      \
+                measurement_id);                                            \
+    }
 
 SENSORS_LIST
 #undef SENSOR_
@@ -654,23 +685,24 @@ SENSORS_LIST
 #undef GET_FUNCTION_NAME
 
 vec3 PhysicalModelImpl::getPhysicalAccelerometer() const {
-    //Implementation Note:
+    // Implementation Note:
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
     // represented by device_rotation_quat to the "absolute" coordinates
     // of the vectors.
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        (mInertialModel.getAcceleration() - mAmbientEnvironment.getGravity()));
+                   (mInertialModel.getAcceleration() -
+                    mAmbientEnvironment.getGravity()));
 }
 
 vec3 PhysicalModelImpl::getPhysicalGyroscope() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mInertialModel.getRotationalVelocity());
+                   mInertialModel.getRotationalVelocity());
 }
 
 vec3 PhysicalModelImpl::getPhysicalMagnetometer() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mAmbientEnvironment.getMagneticField());
+                   mAmbientEnvironment.getMagneticField());
 }
 
 /* (x, y, z) == (azimuth, pitch, roll) */
@@ -700,18 +732,21 @@ float PhysicalModelImpl::getPhysicalHumidity() const {
 
 vec3 PhysicalModelImpl::getPhysicalMagnetometerUncalibrated() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mAmbientEnvironment.getMagneticField());
+                   mAmbientEnvironment.getMagneticField());
 }
 
 vec3 PhysicalModelImpl::getPhysicalGyroscopeUncalibrated() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mInertialModel.getRotationalVelocity());
+                   mInertialModel.getRotationalVelocity());
 }
 
-void PhysicalModelImpl::getTransform(
-        float* out_translation_x, float* out_translation_y, float* out_translation_z,
-        float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-        int64_t* out_timestamp) {
+void PhysicalModelImpl::getTransform(float* out_translation_x,
+                                     float* out_translation_y,
+                                     float* out_translation_z,
+                                     float* out_rotation_x,
+                                     float* out_rotation_y,
+                                     float* out_rotation_z,
+                                     int64_t* out_timestamp) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     const vec3 position = getParameterPosition(PARAMETER_VALUE_TYPE_CURRENT);
@@ -801,19 +836,17 @@ void PhysicalModelImpl::snapshotSave(Stream* f) {
     // first save targets
     stream_put_be32(f, MAX_PHYSICAL_PARAMETERS);
 
-    for (int parameter = 0;
-         parameter < MAX_PHYSICAL_PARAMETERS;
-         parameter++) {
+    for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
 #define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-            case PHYSICAL_PARAMETER_NAME(x): {\
-                w targetValue = GET_PARAMETER_FUNCTION_NAME(z)(\
-                        PARAMETER_VALUE_TYPE_TARGET);\
-                writeValueToStream(f, targetValue);\
-                break;\
-            }
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                      \
+    case PHYSICAL_PARAMETER_NAME(x): {                                       \
+        w targetValue =                                                      \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_TARGET); \
+        writeValueToStream(f, targetValue);                                  \
+        break;                                                               \
+    }
 
             PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -828,19 +861,17 @@ void PhysicalModelImpl::snapshotSave(Stream* f) {
     // then save overrides
     stream_put_be32(f, MAX_SENSORS);
 
-    for (int sensor = 0;
-         sensor < MAX_SENSORS;
-         sensor++) {
+    for (int sensor = 0; sensor < MAX_SENSORS; sensor++) {
         stream_put_be32(f, mUseOverride[sensor]);
         if (mUseOverride[sensor]) {
-            switch(sensor) {
+            switch (sensor) {
 #define SENSOR_NAME(x) ANDROID_SENSOR_##x
 #define OVERRIDE_NAME(x) m##x##Override
-#define SENSOR_(x,y,z,v,w)\
-                case SENSOR_NAME(x): {\
-                    writeValueToStream(f, OVERRIDE_NAME(z));\
-                    break;\
-                }
+#define SENSOR_(x, y, z, v, w)                   \
+    case SENSOR_NAME(x): {                       \
+        writeValueToStream(f, OVERRIDE_NAME(z)); \
+        break;                                   \
+    }
 
                 SENSORS_LIST
 #undef SENSOR_
@@ -866,20 +897,17 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
 
     // Note: any new target params will remain at their defaults.
 
-    for (int parameter = 0;
-         parameter < num_physical_parameters;
-         parameter++) {
+    for (int parameter = 0; parameter < num_physical_parameters; parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
 #define SET_TARGET_FUNCTION_NAME(x) setTargetInternal##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-            case PHYSICAL_PARAMETER_NAME(x): {\
-                w value;\
-                readValueFromStream(f, &value);\
-                SET_TARGET_FUNCTION_NAME(z)(\
-                        value, PHYSICAL_INTERPOLATION_STEP);\
-                break;\
-            }
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                  \
+    case PHYSICAL_PARAMETER_NAME(x): {                                   \
+        w value;                                                         \
+        readValueFromStream(f, &value);                                  \
+        SET_TARGET_FUNCTION_NAME(z)(value, PHYSICAL_INTERPOLATION_STEP); \
+        break;                                                           \
+    }
 
             PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -902,20 +930,18 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
         return -EIO;
     }
 
-    for (int sensor = 0;
-         sensor < num_sensors;
-         sensor++) {
+    for (int sensor = 0; sensor < num_sensors; sensor++) {
         if (stream_get_be32(f)) {
-            switch(sensor) {
+            switch (sensor) {
 #define SENSOR_NAME(x) ANDROID_SENSOR_##x
 #define OVERRIDE_FUNCTION_NAME(x) override##x
-#define SENSOR_(x,y,z,v,w)\
-                case SENSOR_NAME(x): {\
-                    v value;\
-                    readValueFromStream(f, &value);\
-                    OVERRIDE_FUNCTION_NAME(z)(value);\
-                    break;\
-                }
+#define SENSOR_(x, y, z, v, w)            \
+    case SENSOR_NAME(x): {                \
+        v value;                          \
+        readValueFromStream(f, &value);   \
+        OVERRIDE_FUNCTION_NAME(z)(value); \
+        break;                            \
+    }
 
                 SENSORS_LIST
 #undef SENSOR_
@@ -1010,7 +1036,7 @@ void PhysicalModelImpl::loadState(const pb::InitialState& state) {
         break;                                                                \
     }
 
-        PHYSICAL_PARAMETERS_LIST
+            PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PARAMETER_FUNCTION_NAME
 #undef SET_TARGET_FUNCTION_NAME
@@ -1083,8 +1109,8 @@ int PhysicalModelImpl::recordGroundTruth(const char* filename) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename);
     }
 
-    mGroundTruthStream.reset(
-            new StdioStream(android_fopen(path.c_str(), "wb"), StdioStream::kOwner));
+    mGroundTruthStream.reset(new StdioStream(android_fopen(path.c_str(), "wb"),
+                                             StdioStream::kOwner));
     if (!mGroundTruthStream.get()) {
         E("%s: Error unable to open file %s for writing.  "
           "Physical motion ground truth will not be recorded.",
@@ -1176,8 +1202,8 @@ void PhysicalModelImpl::targetStateChanged() {
 
 template <typename ValueType>
 void PhysicalModelImpl::generateEvent(PhysicalParameter type,
-                   PhysicalInterpolation mode,
-                   ValueType value) {
+                                      PhysicalInterpolation mode,
+                                      ValueType value) {
     pb::PhysicalModelEvent command;
     command.set_type(toProto(type));
     if (mode == PHYSICAL_INTERPOLATION_SMOOTH) {
@@ -1209,8 +1235,7 @@ void physicalModel_free(PhysicalModel* model) {
     }
 }
 
-void physicalModel_setCurrentTime(
-        PhysicalModel* model, int64_t time_ns) {
+void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->setCurrentTime(time_ns);
@@ -1219,35 +1244,34 @@ void physicalModel_setCurrentTime(
 
 #define SET_PHYSICAL_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-void SET_PHYSICAL_TARGET_FUNCTION_NAME(z)(\
-        PhysicalModel* model, w value, PhysicalInterpolation mode) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    if (impl != nullptr) {\
-        impl->SET_TARGET_FUNCTION_NAME(z)(value, mode);\
-    }\
-}
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                       \
+    void SET_PHYSICAL_TARGET_FUNCTION_NAME(z)(PhysicalModel * model, w value, \
+                                              PhysicalInterpolation mode) {   \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);          \
+        if (impl != nullptr) {                                                \
+            impl->SET_TARGET_FUNCTION_NAME(z)(value, mode);                   \
+        }                                                                     \
+    }
 
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
 #undef SET_PHYSICAL_TARGET_FUNCTION_NAME
 
-
 #define GET_PHYSICAL_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
 #define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-w GET_PHYSICAL_PARAMETER_FUNCTION_NAME(z)(\
-        PhysicalModel* model, ParameterValueType parameterValueType) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    w result;\
-    if (impl != nullptr) {\
-        result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType);\
-    } else {\
-        result = {0.f};\
-    }\
-    return result;\
-}
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                        \
+    w GET_PHYSICAL_PARAMETER_FUNCTION_NAME(z)(                                 \
+            PhysicalModel * model, ParameterValueType parameterValueType) {    \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);           \
+        w result;                                                              \
+        if (impl != nullptr) {                                                 \
+            result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType); \
+        } else {                                                               \
+            result = {0.f};                                                    \
+        }                                                                      \
+        return result;                                                         \
+    }
 
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -1256,15 +1280,14 @@ PHYSICAL_PARAMETERS_LIST
 
 #define OVERRIDE_FUNCTION_NAME(x) override##x
 #define PHYSICAL_OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
-#define SENSOR_(x,y,z,v,w) \
-void PHYSICAL_OVERRIDE_FUNCTION_NAME(z)(\
-        PhysicalModel* model,\
-        v override_value) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    if (impl != nullptr) {\
-        impl->OVERRIDE_FUNCTION_NAME(z)(override_value);\
-    }\
-}
+#define SENSOR_(x, y, z, v, w)                                       \
+    void PHYSICAL_OVERRIDE_FUNCTION_NAME(z)(PhysicalModel * model,   \
+                                            v override_value) {      \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model); \
+        if (impl != nullptr) {                                       \
+            impl->OVERRIDE_FUNCTION_NAME(z)(override_value);         \
+        }                                                            \
+    }
 
 SENSORS_LIST
 #undef SENSOR_
@@ -1273,15 +1296,14 @@ SENSORS_LIST
 
 #define GET_FUNCTION_NAME(x) get##x
 #define PHYSICAL_GET_FUNCTION_NAME(x) physicalModel_get##x
-#define SENSOR_(x,y,z,v,w) \
-v PHYSICAL_GET_FUNCTION_NAME(z)(\
-        PhysicalModel* model, long* measurement_id) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    *measurement_id = 0L;\
-    return impl != nullptr ?\
-            impl->GET_FUNCTION_NAME(z)(measurement_id) :\
-            v{0.f};\
-}
+#define SENSOR_(x, y, z, v, w)                                              \
+    v PHYSICAL_GET_FUNCTION_NAME(z)(PhysicalModel * model,                  \
+                                    long* measurement_id) {                 \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);        \
+        *measurement_id = 0L;                                               \
+        return impl != nullptr ? impl->GET_FUNCTION_NAME(z)(measurement_id) \
+                               : v{0.f};                                    \
+    }
 
 SENSORS_LIST
 #undef SENSOR_
@@ -1289,18 +1311,23 @@ SENSORS_LIST
 #undef GET_FUNCTION_NAME
 
 void physicalModel_getTransform(PhysicalModel* model,
-    float* out_translation_x, float* out_translation_y, float* out_translation_z,
-    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-    int64_t* out_timestamp) {
+                                float* out_translation_x,
+                                float* out_translation_y,
+                                float* out_translation_z,
+                                float* out_rotation_x,
+                                float* out_rotation_y,
+                                float* out_rotation_z,
+                                int64_t* out_timestamp) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        impl->getTransform(out_translation_x, out_translation_y, out_translation_z,
-                out_rotation_x, out_rotation_y, out_rotation_z,
-                out_timestamp);
+        impl->getTransform(out_translation_x, out_translation_y,
+                           out_translation_z, out_rotation_x, out_rotation_y,
+                           out_rotation_z, out_timestamp);
     }
 }
 
-void physicalModel_setPhysicalStateAgent(PhysicalModel* model,
+void physicalModel_setPhysicalStateAgent(
+        PhysicalModel* model,
         const QAndroidPhysicalStateAgent* agent) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
@@ -1342,7 +1369,8 @@ int physicalModel_saveState(PhysicalModel* model, pb::InitialState* state) {
     }
 }
 
-int physicalModel_loadState(PhysicalModel* model, const pb::InitialState& state) {
+int physicalModel_loadState(PhysicalModel* model,
+                            const pb::InitialState& state) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->loadState(state);
