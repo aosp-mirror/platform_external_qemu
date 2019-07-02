@@ -20,6 +20,7 @@
 #include <utility>
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 //
@@ -88,6 +89,10 @@ public:
     // It's ok to delete SmallVector<> through the base class - dtor() actually
     // takes care of all living elements and the allocated memory.
     ~SmallVector() { dtor(); }
+
+    void setPerfTracing(bool enable) {
+        mPerfTracing = enable;
+    }
 
     // std::vector<> interface operations.
     iterator begin() { return mBegin; }
@@ -160,6 +165,8 @@ protected:
     // Destroy all elements in the vector and free the array if it was allocated
     // dynamically.
     void dtor() {
+        if (mPerfTracing && mCallingDtorFromMove) fprintf(stderr, "%s: %p: smallvector calling dtor, watch out!\n", __func__, this);
+
         this->destruct(this->begin(), this->end());
         if (isAllocated()) {
             free(this->mBegin);
@@ -248,6 +255,11 @@ protected:
     constexpr const void* smallBufferStart() const {
         return (const void*)(&mCapacity + 1);
     }
+
+    // Whether we are tracing performance.
+    bool mPerfTracing = false;
+    // some common performance events
+    bool mCallingDtorFromMove = false;
 
     // Standard set of members for a vector - begin, end and capacity.
     // These point to the currently used chunk of memory, no matter if it's a
@@ -359,8 +371,10 @@ public:
         }
 
         if (this->isAllocated() && this->mCapacity < other.size()) {
+            this->mCallingDtorFromMove = true;
             // Not enough dynamic memory, switch to in-place.
             this->dtor();
+            this->mCallingDtorFromMove = false;
             init_inplace();
         } else {
             // This could potentially be improved by move-assigning
