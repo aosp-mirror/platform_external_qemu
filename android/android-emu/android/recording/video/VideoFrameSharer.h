@@ -48,8 +48,9 @@ public:
     struct VideoInfo {
         uint32_t width;
         uint32_t height;
-        uint32_t fps;
-
+        uint32_t fps;          // Target framerate.
+        uint32_t frameNumber;  // Frames are ordered
+        uint64_t tsUs;         // Timestamp when this frame was received.
     };
 
     VideoFrameSharer(uint32_t fbWidth,
@@ -66,7 +67,7 @@ private:
     bool marshallFrame(const Frame* frame);
     static size_t getPixelBytes(VideoInfo info);
 
-    VideoInfo mVideo;
+    VideoInfo mVideo = {0};
     base::SharedMemory mMemory;
     std::unique_ptr<Producer> mVideoProducer;
     int mSourceFormat;
