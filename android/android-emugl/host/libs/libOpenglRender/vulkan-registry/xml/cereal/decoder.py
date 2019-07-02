@@ -21,6 +21,11 @@ public:
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
+
+    using OnReadbackFunc = std::function<void()>;
+
+    void registerOnReadbackFuncs(OnReadbackFunc onBegin, OnReadbackFunc onEnd);
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
@@ -29,6 +34,7 @@ private:
 
 decoder_impl_preamble ="""
 using emugl::vkDispatch;
+using emugl::RenderChannelImpl;
 
 using namespace goldfish_vk;
 
@@ -46,6 +52,11 @@ public:
 
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 
+    void registerOnReadbackFuncs(OnReadbackFunc onBegin, OnReadbackFunc onEnd) {
+        mOnBeginReadback = onBegin;
+        mOnEndReadback = onEnd;
+    }
+
 private:
     bool m_logCalls;
     bool m_forSnapshotLoad = false;
@@ -59,6 +70,8 @@ private:
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
     android::base::Pool m_pool { 8, 4096, 64 };
     BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
+    VkDecoder::OnReadbackFunc mOnBeginReadback;
+    VkDecoder::OnReadbackFunc mOnEndReadback;
 };
 
 VkDecoder::VkDecoder() :
@@ -72,6 +85,10 @@ void VkDecoder::setForSnapshotLoad(bool forSnapshotLoad) {
 
 size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
     return mImpl->decode(buf, bufsize, stream);
+}
+
+void VkDecoder::registerOnReadbackFuncs(OnReadbackFunc onBegin, OnReadbackFunc onEnd) {
+    mImpl->registerOnReadbackFuncs(onBegin, onEnd);
 }
 
 // VkDecoder::Impl::decode to follow
@@ -183,11 +200,33 @@ def emit_call_log(api, cgen):
     cgen.stmt("fprintf(stderr, \"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
     cgen.endIf()
 
+def is_iothread_locked_api(api):
+    apiList = [
+        "vkCreateInstance",
+        "vkDestroyInstance",
+        "vkMapMemoryIntoAddressSpaceGOOGLE",
+        "vkFreeMemory",
+    ]
+    return api.name in apiList
+
+def is_readback_api(api):
+
+    if is_iothread_locked_api(api):
+        return False
+
+    decodingParams = DecodingParameters(api)
+    hasWriteParams = len(decodingParams.toWrite) > 0
+    returnTypeNotVoid = "void" != api.getRetTypeExpr()
+    return hasWriteParams or returnTypeNotVoid
+
 def emit_decode_parameters(typeInfo, api, cgen):
 
     decodingParams = DecodingParameters(api)
 
     paramsToRead = decodingParams.toRead
+
+    if is_readback_api(api):
+        cgen.stmt("mOnBeginReadback()")
 
     for p in paramsToRead:
         emit_param_decl_for_reading(p, cgen)
@@ -284,8 +323,10 @@ def emit_decode_return_writeback(api, cgen):
         cgen.stmt("%s->write(&%s, %s)" %
             (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
 
-def emit_decode_finish(cgen):
+def emit_decode_finish(api, cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
+    if is_readback_api(api):
+        cgen.stmt("mOnEndReadback()")
 
 def emit_pool_free(cgen):
     cgen.stmt("m_pool.freeAll()")
@@ -332,7 +373,7 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen)
     emit_pool_free(cgen)
 
@@ -341,7 +382,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen)
     emit_pool_free(cgen)
 
@@ -368,7 +409,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen);
     emit_pool_free(cgen)
 
@@ -395,7 +436,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     cgen.endFor()
     cgen.endIf()
 
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen);
     emit_pool_free(cgen)
 

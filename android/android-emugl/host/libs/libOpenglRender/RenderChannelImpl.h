@@ -14,6 +14,7 @@
 #pragma once
 
 #include "android/base/containers/BufferQueue.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "OpenglRender/RenderChannel.h"
 #include "RendererImpl.h"
 
@@ -60,6 +61,9 @@ public:
     // Callback function when snapshotting the virtual machine.
     virtual void onSave(android::base::Stream* stream) override;
 
+    // Waiting for guaranteed readbacks.
+    virtual void waitPendingReadback() override;
+
     /////////////////////////////////////////////////////////////////
     // These functions are called from the host render thread or renderer.
 
@@ -94,6 +98,9 @@ public:
     // Resume the normal operation after saving or loading a snapshot.
     void resume();
 
+    void beginPendingReadback();
+    void signalPendingReadback();
+
 private:
     void updateStateLocked();
     void notifyStateChangeLocked();
@@ -104,10 +111,19 @@ private:
     // A single lock to protect the state and the two buffer queues at the
     // same time. NOTE: This needs to appear before the BufferQueue instances.
     mutable android::base::Lock mLock;
+
     State mState = State::Empty;
     State mWantedEvents = State::Empty;
     BufferQueue<RenderChannel::Buffer> mFromGuest;
     BufferQueue<RenderChannel::Buffer> mToGuest;
+
+    // Message channel to track pending readbacks.
+    enum class PendingReadbackMessage {
+        Begin = 0,
+        End = 1,
+    };
+
+    android::base::MessageChannel<PendingReadbackMessage, 128> mPendingReadbacks;
 };
 
 }  // namespace emugl

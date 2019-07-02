@@ -312,9 +312,15 @@ public:
         const auto buffEnd = buff + numBuffers;
         while (buff != buffEnd) {
             if (mDataForReadingLeft == 0) {
-                // No data left, read a new chunk from the channel.
-                int spinCount = 20;
+                // No data left and no pending readback.
+                // Spin and try to read a new chunk from the channel.
+                int spinCount = 2;
                 for (;;) {
+                    // No data left. But, check if there is a pending
+                    // operation on this channel that will cause a
+                    // readback.
+                    mChannel->waitPendingReadback();
+
                     auto result = mChannel->tryRead(&mDataForReading);
                     if (result == IoResult::Ok) {
                         mDataForReadingLeft = mDataForReading.size();
