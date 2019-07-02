@@ -17,9 +17,18 @@
 #include <sys/time.h>
 
 #include "VideoShareCapture.h"
-#include "VideoShareInfo.h"
 #include "android/base/memory/SharedMemory.h"
 #include "rtc_base/criticalsection.h"
+#include "rtc_base/timeutils.h"
+
+#define DEBUG 2
+
+#if DEBUG >= 2
+#define DD(str) RTC_LOG(INFO) << str
+#else
+#define DD(...) (void)0
+#endif
+
 
 using android::base::SharedMemory;
 
@@ -50,10 +59,16 @@ bool VideoShareCapture::CaptureProcess() {
     if (sleeptime > 0)
         usleep(sleeptime);
 
+    DD("Frames skipped: " << mVideoInfo->frameNumber - mPrevframeNumber);
+    DD("Delivery delay: " << (rtc::TimeMicros() - mVideoInfo->tsUs) << " frame delay: " << (mVideoInfo->tsUs - mPrevTimestamp));
+    mPrevframeNumber = mVideoInfo->frameNumber;
+    mPrevTimestamp = mVideoInfo->tsUs;
+
     if (mCaptureStarted) {
         // convert to to I420 if needed
         IncomingFrame((uint8_t*)mPixelBuffer, mPixelBufferSize, mSettings);
     }
+
     mPrevTimestamp = getCurrentTimeInUs();
     return true;
 }
@@ -110,6 +125,8 @@ int32_t VideoShareCapture::Init(std::string handle) {
                         << "], due to:" << err;
         return -1;
     }
+
+    mVideoInfo = (VideoShareInfo::VideoInfo*) *mSharedMemory;
     mPixelBuffer = (uint8_t*)*mSharedMemory + sizeof(VideoShareInfo::VideoInfo);
     mPixelBufferSize = getBytesPerFrame(mSettings);
     return 0;

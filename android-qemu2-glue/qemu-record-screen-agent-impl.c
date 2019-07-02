@@ -26,8 +26,8 @@ static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
         .stopRecordingAsync = emulator_window_stop_recording_async,
         .getRecorderState = emulator_window_recorder_state_get,
         .doSnap = android_screenShot,
-        .startWebRtcModule = start_webrtc_module,
-        .stopWebRtcModule = stop_webrtc_module
+        .startSharedMemoryModule = start_shared_memory_module,
+        .stopSharedMemoryModule = stop_shared_memory_module
 };
 
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
