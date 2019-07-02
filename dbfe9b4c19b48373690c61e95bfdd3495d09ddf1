@@ -355,6 +355,30 @@
     },
     {
       "key": {
+        "uuid": "0106f1f5_d361af76",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1385,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-02T17:42:29Z",
+      "side": 1,
+      "message": "If we have a unit test for looping code, we can build and run under ThreadSanitizer to uncover this and other undesired concurrency bugs:\n\npython android/build/python/cmake.py --sanitizer\u003dthread\n\nobjs/***_unittest\n\nGenerally the concurrency bugs here (and in the other comment) are of the form \"something signals (waits) something else twice but the other end forgets about that doubly signaled (waited) state\". It\u0027s a common error in multithreaded apps where the common solution is to move to a command queue pattern (hence the suggestion earlier to keep threads and their state stable while sending commands to control play config)",
+      "parentUuid": "1a8f9ed1_1be7d682",
+      "range": {
+        "startLine": 1385,
+        "startChar": 8,
+        "endLine": 1385,
+        "endChar": 87
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d803db62_6dcb605d",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 3
