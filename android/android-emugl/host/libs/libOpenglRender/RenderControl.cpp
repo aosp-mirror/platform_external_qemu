@@ -1186,6 +1186,20 @@ static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
     return 0;
 }
 
+static void rcReadColorBufferYUV(uint32_t colorBuffer,
+                                GLint x, GLint y,
+                                GLint width, GLint height,
+                                void* pixels, uint32_t pixels_size)
+{
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+
+    fb->readColorBufferYUV(colorBuffer, x, y, width, height, pixels, pixels_size);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1234,4 +1248,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcGetDisplayPose = rcGetDisplayPose;
     dec->rcSetDisplayPose = rcSetDisplayPose;
     dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
+    dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
 }
