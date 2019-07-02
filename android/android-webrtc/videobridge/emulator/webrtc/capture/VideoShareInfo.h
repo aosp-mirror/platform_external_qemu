@@ -37,7 +37,9 @@ public:
     struct VideoInfo {
         uint32_t width;
         uint32_t height;
-        uint32_t fps;
+        uint32_t fps;          // Target framerate.
+        uint32_t frameNumber;  // Frame number.
+        uint64_t tsUs;         // Timestamp when this frame was received.
     };
 
     VideoShareInfo(std::string handle, int fps) : mHandle(handle), mFps(fps) {}
