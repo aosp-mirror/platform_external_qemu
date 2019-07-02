@@ -161,6 +161,14 @@ public:
                     GLenum p_type,
                     void* pixels);
 
+    // Read cached YUV pixel values into host memory.
+    void readPixelsYUVCached(int x,
+                             int y,
+                             int width,
+                             int height,
+                             void* pixels,
+                             uint32_t pixels_size);
+
     // Update the ColorBuffer instance's pixel values from host memory.
     // |p_format / p_type| are the desired OpenGL color buffer format
     // and data type.
@@ -284,6 +292,7 @@ private:
     FrameworkFormat m_frameworkFormat;
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     std::unique_ptr<YUVConverter> m_yuv_converter;
+    std::vector<uint8_t> m_yuv_buf;
     HandleType mHndl;
 
     GLsync m_sync = nullptr;

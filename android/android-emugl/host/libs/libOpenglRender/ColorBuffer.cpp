@@ -340,8 +340,8 @@ void ColorBuffer::readPixels(int x,
         return;
     }
     p_format = sGetUnsizedColorBufferFormat(p_format);
-
     touch();
+
     if (bindFbo(&m_fbo, m_tex)) {
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
@@ -350,6 +350,25 @@ void ColorBuffer::readPixels(int x,
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
     }
+}
+
+void ColorBuffer::readPixelsYUVCached(int x,
+                                      int y,
+                                      int width,
+                                      int height,
+                                      void* pixels,
+                                      uint32_t pixels_size) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    if ((uint32_t)m_yuv_buf.size() != pixels_size) {
+        return;
+    }
+    touch();
+
+    memcpy(pixels, m_yuv_buf.data(), pixels_size);
+    return;
 }
 
 void ColorBuffer::reformat(GLint internalformat) {
@@ -429,6 +448,17 @@ void ColorBuffer::subUpdate(int x,
 
         // |m_tex| still needs to be bound afterwards
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+
+        uint32_t align = (m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) ?
+                    1 : 16;
+        uint32_t yStride = (width + (align - 1)) & ~(align-1);
+        uint32_t uvStride = (yStride / 2 + (align - 1)) & ~(align-1);
+        uint32_t uvHeight = height / 2;
+        uint32_t dataSize = yStride * height + 2 * (uvHeight * uvStride);
+
+        m_yuv_buf.clear();
+        uint8_t* data = (uint8_t*)pixels;
+        m_yuv_buf.insert(m_yuv_buf.begin(), data, data + dataSize);
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -1525,6 +1525,24 @@ void FrameBuffer::readColorBuffer(HandleType p_colorbuffer,
     (*c).second.cb->readPixels(x, y, width, height, format, type, pixels);
 }
 
+void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
+                                     int x,
+                                     int y,
+                                     int width,
+                                     int height,
+                                     void* pixels,
+                                     uint32_t pixels_size) {
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return;
+    }
+
+    (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
+}
+
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int x,
                                     int y,

@@ -299,6 +299,18 @@ public:
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
 
+    // Read the content of a given YUV420_888 ColorBuffer into client memory.
+    // |p_colorbuffer| is the ColorBuffer's handle value. Similar
+    // to glReadPixels(), this can be a slow operation.
+    // |x|, |y|, |width| and |height| are the position and dimensions of
+    // a rectangle whose pixel values will be transfered to the host.
+    // |pixels| is the address of a caller-provided buffer that will be filled
+    // with the pixel data.
+    // |pixles_size| is the size of buffer
+    void  readColorBufferYUV(HandleType p_colorbuffer,
+                             int x, int y, int width, int height,
+                             void *pixels, uint32_t pixels_size);
+
     // Update the content of a given ColorBuffer from client data.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
     // to glReadPixels(), this can be a slow operation.
