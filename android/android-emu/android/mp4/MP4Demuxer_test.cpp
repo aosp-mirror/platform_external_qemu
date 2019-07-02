@@ -59,9 +59,8 @@ protected:
 
         mMockedVideoPlayer.reset(new MockedVideoPlayer());
 
-        mDataset = Mp4Dataset::create(absDataPath);
-        mDemuxer = Mp4Demuxer::create(mMockedVideoPlayer.get(),
-                                      mDataset.get(),
+        mDataset = Mp4Dataset::create(absDataPath, nullptr);
+        mDemuxer = Mp4Demuxer::create(mMockedVideoPlayer.get(), mDataset.get(),
                                       nullptr);
 
         PacketQueue::init();
@@ -78,9 +77,7 @@ protected:
         mDemuxer->demux();
     }
 
-    virtual void TearDown() override {
-        mMockedVideoPlayer->stop();
-    }
+    virtual void TearDown() override { mMockedVideoPlayer->stop(); }
 };
 
 TEST_F(Mp4DemuxerTest, demux) {

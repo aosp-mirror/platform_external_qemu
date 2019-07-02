@@ -18,6 +18,7 @@
 
 #include "android/automation/AutomationController.h"
 #include "android/automation/EventSource.h"
+#include "android/offworld/proto/offworld.pb.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -26,17 +27,20 @@ extern "C" {
 namespace android {
 namespace mp4 {
 
-// SensorLocationEventProvider turns packets containing sensor/location event
+typedef ::offworld::DatasetInfo DatasetInfo;
+
+// SensorLocationEventProvider turns AVPackets containing sensor/location event
 // information into actual event objects that could be consumed by
 // AutomationController.
 class SensorLocationEventProvider : public automation::EventSource {
 public:
-    virtual ~SensorLocationEventProvider() = default;
-    static std::unique_ptr<SensorLocationEventProvider> create();
+    virtual ~SensorLocationEventProvider(){};
+    static std::unique_ptr<SensorLocationEventProvider> create(
+            DatasetInfo* datasetInfo);
     // Create a RecordedEvent from the packet
-    virtual int createEvent(AVPacket* packet) { return -1; };
-    pb::RecordedEvent consumeNextCommand();
-    bool getNextCommandDelay(automation::DurationNs* outDelay);
+    virtual int createEvent(const AVPacket* packet) = 0;
+    virtual pb::RecordedEvent consumeNextCommand() = 0;
+    virtual bool getNextCommandDelay(automation::DurationNs* outDelay) = 0;
 
 protected:
     SensorLocationEventProvider() = default;

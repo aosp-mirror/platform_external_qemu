@@ -158,6 +158,52 @@ message VideoInjectionRequest {
   }
 }
 
+message DatasetInfo {
+  optional DataStreamInfo location = 1;
+  optional DataStreamInfo accelerometer = 2;
+  optional DataStreamInfo gyroscope = 3;
+  optional DataStreamInfo magnetic_field = 4;
+}
+
+message DataStreamInfo {
+  optional uint32 stream_index = 1;
+  oneof packet_info {
+    SensorDataPacketInfo sensor_packet = 2;
+    LocationDataPacketInfo location_packet = 3;
+  }
+
+}
+
+message SensorDataPacketInfo {
+  optional FieldInfo timestamp = 1;
+  repeated FieldInfo value = 2;
+}
+
+
+message LocationDataPacketInfo {
+  optional FieldInfo timestamp = 1;
+  optional FieldInfo latitude = 2;
+  optional FieldInfo longitude = 3;
+  optional FieldInfo meters_elevation = 4;
+  optional FieldInfo knots_speed = 5;
+  optional FieldInfo degrees_heading = 6;
+  optional FieldInfo num_satellites = 7;
+}
+
+message FieldInfo {
+  enum Type {
+    UNDEF = 0;
+    INT_32 = 1;
+    INT_64 = 2;
+    FLOAT = 3;
+    DOUBLE = 4;
+  }
+
+  optional uint32 offset = 1;
+  optional Type type = 2;
+}
+
+
 //
 // Responses
 //
