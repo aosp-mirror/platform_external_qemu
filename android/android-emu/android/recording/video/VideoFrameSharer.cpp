@@ -15,125 +15,90 @@
 #include "android/recording/video/VideoFrameSharer.h"
 
 #include <libyuv.h>
+
 #include "android/base/Log.h"
 #include "android/base/memory/SharedMemory.h"
+#include "android/gpu_frame.h"
+
+
+#if DEBUG >= 2
+#define DD(fmt,...) fprintf(stderr, "VideoFrameSharer: %s: " fmt "\n", __func__, ##__VA_ARGS__);
+#else
+#define DD(...) (void)0
+#endif
 
 namespace android {
 namespace recording {
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
+
 VideoFrameSharer::VideoFrameSharer(uint32_t fbWidth,
                                    uint32_t fbHeight,
-                                   uint8_t fps,
                                    const std::string& handle)
-    : mVideo({fbWidth, fbHeight, fps}),
+    : mVideo({fbWidth, fbHeight, 60}),
+      mHandle(handle),
+      mPixelBufferSize(getPixelBytes(mVideo)),
       mMemory(handle, sizeof(mVideo) + getPixelBytes(mVideo)) {}
 
 VideoFrameSharer::~VideoFrameSharer() {
     stop();
+    mMemory.close(true);
 }
-
-// VideoFormat --> libyuv representation
-static int convertVideoType(VideoFormat video_type) {
-    switch (video_type) {
-        case VideoFormat::INVALID_FMT:
-            return libyuv::FOURCC_ANY;
-        case VideoFormat::RGB565:
-            return libyuv::FOURCC_RGBP;
-        case VideoFormat::RGBA8888:
-            return libyuv::FOURCC_ABGR;
-        case VideoFormat::BGRA8888:
-            return libyuv::FOURCC_ARGB;
-        default:
-            LOG(FATAL) << "A new VideoFormat::... was introduced, please "
-                          "update this translator";
-    }
-    return libyuv::FOURCC_ANY;
-}
-
-bool VideoFrameSharer::attachProducer(std::unique_ptr<Producer> producer) {
+bool VideoFrameSharer::initialize() {
     // Prepare the shared memory with some basic info.
     const mode_t user_read_only = 0600;
     int err = mMemory.create(user_read_only);
     if (err != 0) {
-        LOG(FATAL) << "Unable to open shared memory due to " << err;
+        LOG(ERROR) << "Unable to open shared memory of size: " << mMemory.size()
+                   << ", due to " << -err;
+        mMemory.close(true);
+#ifdef __APPLE__
+        // TODO(jansene): Shared memory is not the right approach on macos,
+        // revisit this and use: https://news.ycombinator.com/item?id=20313751
+        // once we are ready.
+        const int PageSize = 4096;
+         LOG(ERROR) << "Update your kern.sysv.shmmax=" <<
+         (mMemory.size() + PageSize & ~(PageSize-1));
+         LOG(ERROR) << "settings and restart your machine.";
+#endif
         return false;
     }
 
     memcpy(mMemory.get(), &mVideo, sizeof(mVideo));
-
-    mVideoProducer = std::move(producer);
-    mVideoProducer->attachCallback([this](const Frame* frame) -> bool {
-        return marshallFrame(frame);
-    });
-    mSourceFormat = convertVideoType(mVideoProducer->getFormat().videoFormat);
+    mReadPixels = android_getReadPixelsFunc();
+    LOG(INFO) << "Initialized handle: " << mHandle;
     return true;
 }
 
+void VideoFrameSharer::frameCallbackForwarder(void* opaque) {
+    VideoFrameSharer* pThis = reinterpret_cast<VideoFrameSharer*>(opaque);
+    pThis->frameAvailable();
+}
+
 void VideoFrameSharer::start() {
-    if (mVideoProducer)
-        mVideoProducer->start();
+    gpu_set_shared_memory_callback(&VideoFrameSharer::frameCallbackForwarder, this);
 }
 
 void VideoFrameSharer::stop() {
-    if (mVideoProducer)
-        mVideoProducer->stop();
+    gpu_set_shared_memory_callback(nullptr, nullptr);
 }
 
-bool VideoFrameSharer::marshallFrame(const Frame* frame) {
-    VideoInfo* info  = (VideoInfo*)mMemory.get();
+void VideoFrameSharer::frameAvailable() {
+    VideoInfo* info = (VideoInfo*)mMemory.get();
     uint8_t* bPixels = (uint8_t*)mMemory.get() + sizeof(mVideo);
-    const int cPixelBytes = getPixelBytes(mVideo);
-    // We need to convert this to I420, otherwise the WebRTC engine
-    // will get confused. So we do that here.
-    const size_t y_stride = mVideo.width;
-    const size_t u_or_v_stride = y_stride / 2;
-
-    const size_t y_size = y_stride * mVideo.height;
-    const size_t u_or_v_size = u_or_v_stride * ((mVideo.height + 1) / 2);
-
-    const size_t required_framebuffer_size = y_size + 2 * u_or_v_size;
-
-    if (cPixelBytes < required_framebuffer_size) {
-        LOG(FATAL) << "Staging framebuffer too small,"
-                   << required_framebuffer_size << " bytes required,"
-                   << cPixelBytes << " provided";
-        return 0;
-    }
-
-    uint8_t* y_staging = bPixels;
-    uint8_t* u_staging = y_staging + y_size;
-    uint8_t* v_staging = u_staging + u_or_v_size;
-    int result = ConvertToI420(frame->dataVec.data(),  // src_frame
-                               cPixelBytes,            // src_size
-                               y_staging,              // dst_y
-                               y_stride,               // dst_stride_y
-                               u_staging,              // dst_u
-                               u_or_v_stride,          // dst_stride_u
-                               v_staging,              // dst_v
-                               u_or_v_stride,          // dst_stride_v
-                               0,                      // crop_x
-                               0,                      // crop_y
-                               mVideo.width,           // src_width
-                               mVideo.height,          // src_height
-                               mVideo.width,           // crop_width
-                               mVideo.height,          // crop_height
-                               libyuv::kRotate0,       // rotation
-                               mSourceFormat);         // source format.
-
-    if (result != 0) {
-        LOG(ERROR) << "Conversion failed!";
-        return false;
-    }
+    mReadPixels(bPixels, mPixelBufferSize);
 
     // Update frame information.
     info->frameNumber++;
     info->tsUs = base::System::get()->getUnixTimeUs();
-    return true;
+    DD("Marshall, frame: %d, ts: %d", info->frameNumber, info->tsUs);
 }
 
 size_t VideoFrameSharer::getPixelBytes(VideoInfo info) {
-    // I420 = 12 bits per pixel.
-    return info.width * info.height * 12 / 8;
+    // ARGB8888 = 4 bytes per pixel.
+    return info.width * info.height * 4;
 }
 
 }  // namespace recording

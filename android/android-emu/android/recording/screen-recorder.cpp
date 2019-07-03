@@ -13,6 +13,10 @@
 // limitations under the License.
 
 #include "android/recording/screen-recorder.h"
+
+#include <atomic>
+
+#include "android/android.h"
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
@@ -24,12 +28,10 @@
 #include "android/recording/codecs/audio/VorbisCodec.h"
 #include "android/recording/codecs/video/VP9Codec.h"
 #include "android/recording/screen-recorder-constants.h"
-#include "android/recording/video/VideoProducer.h"
 #include "android/recording/video/VideoFrameSharer.h"
+#include "android/recording/video/VideoProducer.h"
 #include "android/utils/debug.h"
-#include "android/android.h"
-
-#include <atomic>
+#include "android/gpu_frame.h"
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
@@ -42,9 +44,9 @@ using android::base::Lock;
 using android::recording::AudioFormat;
 using android::recording::CodecParams;
 using android::recording::FfmpegRecorder;
+using android::recording::VideoFrameSharer;
 using android::recording::VorbisCodec;
 using android::recording::VP9Codec;
-using android::recording::VideoFrameSharer;
 
 // The incoming audio sample format.
 constexpr AudioFormat kInSampleFormat = AudioFormat::AUD_FMT_S16;
@@ -203,8 +205,7 @@ bool ScreenRecorder::startRecordingWorker() {
     VP9Codec videoCodec(
             std::move(videoParams), mFbWidth, mFbHeight,
             toAVPixelFormat(videoProducer->getFormat().videoFormat));
-    if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer),
-                                       &videoCodec)) {
+    if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer), &videoCodec)) {
         LOG(ERROR) << "Failed to add video track";
         mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
@@ -221,8 +222,7 @@ bool ScreenRecorder::startRecordingWorker() {
     VorbisCodec audioCodec(
             std::move(audioParams),
             toAVSampleFormat(audioProducer->getFormat().audioFormat));
-    if (!ffmpegRecorder->addAudioTrack(std::move(audioProducer),
-                                       &audioCodec)) {
+    if (!ffmpegRecorder->addAudioTrack(std::move(audioProducer), &audioCodec)) {
         LOG(ERROR) << "Failed to add audio track";
         mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
@@ -321,7 +321,6 @@ RecorderState screen_recorder_state_get(void) {
     }
 }
 
-
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
                           const QAndroidDisplayAgent* dpy_agent) {
@@ -373,43 +372,37 @@ const char* start_shared_memory_module(int fps) {
 
     // emulator name --> shared memory handle.
     // 1. Discovery is easier.
-    // 2. If we accidentally leak a region on posix, we can reclaim an clean up on 2nd run.
-    globals.sharedMemoryHandle = std::string("videmulator") + std::to_string(android_serial_number_port);
-    const char* handle = globals.sharedMemoryHandle.c_str();
-    D("%s(handle=%s, fps=%d)", __func__, handle, fps);
+    // 2. If we accidentally leak a region on posix, we can reclaim an clean up
+    // on 2nd run.
+    globals.sharedMemoryHandle = std::string("videmulator") +
+                                 std::to_string(android_serial_number_port);
+    if (!globals.webrtc_module) {
+        globals.webrtc_module.reset(
+                new VideoFrameSharer(globals.fbWidth, globals.fbHeight,
+                                     globals.sharedMemoryHandle.c_str()));
 
-    AutoLock lock(globals.lock);
-    if (globals.webrtc_module) {
-        globals.webrtc_module->stop();
+        if (!globals.webrtc_module->initialize()) {
+            LOG(ERROR) << "Unable to initialize frame sharing.. disabling "
+                          "frame sharing.";
+            globals.webrtc_module.reset(nullptr);
+            return nullptr;
+        }
     }
 
-    auto producer = android::recording::createVideoProducer(
-            globals.fbWidth, globals.fbHeight, fps, globals.displayAgent);
-    globals.webrtc_module.reset(new VideoFrameSharer(
-            globals.fbWidth, globals.fbHeight, fps, handle));
-
-    // We can fail due to shared memory allocation issues.
-    if (!globals.webrtc_module->attachProducer(std::move(producer)))
-        return nullptr;
-
     globals.webrtc_module->start();
+    gpu_frame_set_record_mode(true);
+    const char* handle = globals.sharedMemoryHandle.c_str();
+    D("%s(handle=%s, fps=%d)", __func__, handle, fps);
     return handle;
 }
 
 bool stop_shared_memory_module() {
-    auto& globals = *sGlobals;
-
-    AutoLock lock(globals.lock);
-
-    if (globals.webrtc_module) {
-        globals.webrtc_module->stop();
-    }
-
+    gpu_frame_set_record_mode(false);
     return true;
 }
 
 extern "C" {
-const char*  start_webrtc(int fps) {
+const char* start_webrtc(int fps) {
     return start_shared_memory_module(fps);
 }
 
@@ -417,4 +410,3 @@ bool stop_webrtc() {
     return stop_shared_memory_module();
 }
 }
-

@@ -44,10 +44,10 @@ public:
     // |width| and |height| are dimensions in pixels, and |pixels| is
     // the memory buffer of 32-bit RGBA image data. This buffer is freed
     // when the function returns.
-    typedef void (Callback)(void* opaque,
-                            int width,
-                            int height,
-                            const void* pixels);
+    typedef void(Callback)(void* opaque,
+                           int width,
+                           int height,
+                           const void* pixels);
 
     // Create a new GpuFrameBridge instance. |looper| is a handle to the main
     // loop's Looper instance, and |callback| is a function that will be
@@ -70,7 +70,9 @@ public:
 
     // Async version of postRecordFrame for use with async readback.
     // Does not read the frame immediately.
-    virtual void postRecordFrameAsync(int width, int height, const void* pixels) = 0;
+    virtual void postRecordFrameAsync(int width,
+                                      int height,
+                                      const void* pixels) = 0;
 
     // Returns the currently displayed frame. This method is designed only for
     // recording. Returns null if there is no frame available. Make sure to
@@ -84,6 +86,10 @@ public:
     // Invalidates the recording buffers. Once called, getRecordFrame() and it's
     // async version will return null until new data has been posted.
     virtual void invalidateRecordingBuffers() = 0;
+
+    typedef void (*FrameAvailableCallback)(void* opaque);
+
+    virtual void setFrameReceiver(FrameAvailableCallback receiver, void* opaque) = 0;
 
 protected:
     GpuFrameBridge() {}
