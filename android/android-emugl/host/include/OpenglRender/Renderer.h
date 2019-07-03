@@ -163,8 +163,13 @@ public:
 
     // setMultiDisplay
     //    add/modify/del multi-display window
-    virtual void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
-                                 uint32_t h, uint32_t dpi, bool add) = 0;
+    virtual void setMultiDisplay(uint32_t id,
+                                 int32_t x,
+                                 int32_t y,
+                                 uint32_t w,
+                                 uint32_t h,
+                                 uint32_t dpi,
+                                 bool add) = 0;
     // setMultiDisplayColorBuffer
     //    bind ColorBuffer to the display
     virtual void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) = 0;

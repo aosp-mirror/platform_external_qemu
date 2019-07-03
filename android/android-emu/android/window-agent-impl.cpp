@@ -117,8 +117,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .setMultiDisplay =
                 [](uint32_t id,
-                   uint32_t x,
-                   uint32_t y,
+                   int32_t x,
+                   int32_t y,
                    uint32_t w,
                    uint32_t h,
                    bool add) {
@@ -128,8 +128,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .getMultiDisplay =
                 [](uint32_t id,
-                   uint32_t* x,
-                   uint32_t* y,
+                   int32_t* x,
+                   int32_t* y,
                    uint32_t* w,
                    uint32_t* h,
                    uint32_t* dpi,
@@ -157,8 +157,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .switchMultiDisplay =
                 [](bool add,
                    uint32_t id,
-                   uint32_t x,
-                   uint32_t y,
+                   int32_t x,
+                   int32_t y,
                    uint32_t w,
                    uint32_t h,
                    uint32_t dpi,

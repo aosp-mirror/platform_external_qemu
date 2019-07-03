@@ -18,9 +18,14 @@
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidMultiDisplayAgent {
-    void (*setMultiDisplay)(uint32_t id, uint32_t x, uint32_t y,
-                            uint32_t w, uint32_t h, uint32_t dpi,
-                            uint32_t flag, bool add);
+    void (*setMultiDisplay)(uint32_t id,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t w,
+                            uint32_t h,
+                            uint32_t dpi,
+                            uint32_t flag,
+                            bool add);
 } QAndroidMultiDisplayAgent;
 
 ANDROID_END_HEADER
