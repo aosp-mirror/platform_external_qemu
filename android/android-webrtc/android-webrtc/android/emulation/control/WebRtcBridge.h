@@ -92,6 +92,7 @@ public:
     static const uint16_t kMaxMessageQueueLen = 128;
 private:
     void received(std::string msg);
+    void updateBridgeState();
 
     int mFps = kMaxFPS;
     int mVideoBridgePort;

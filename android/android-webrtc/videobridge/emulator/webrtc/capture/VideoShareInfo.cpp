@@ -55,7 +55,9 @@ int32_t VideoShareInfo::Init() {
     }
 
     memcpy(&mCapability, *shm, sizeof(VideoInfo));
-    mCapability.videoType = ::webrtc::VideoType::kI420;
+    // Note, we deliver kABGR, but that is not a format that is
+    // supported!
+    mCapability.videoType = ::webrtc::VideoType::kARGB;
     RTC_LOG(INFO) << "Discovered " << mCapability.width << "x"
                   << mCapability.height << " at: " << mCapability.maxFPS
                   << " fps";
