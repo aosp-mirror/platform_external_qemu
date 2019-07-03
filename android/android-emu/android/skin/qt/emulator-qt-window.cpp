@@ -2788,8 +2788,12 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
 
 bool EmulatorQtWindow::sMultiDisplaySet = false;
 
-void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
-                                       uint32_t h, bool add) {
+void EmulatorQtWindow::setMultiDisplay(uint32_t id,
+                                       int32_t x,
+                                       int32_t y,
+                                       uint32_t w,
+                                       uint32_t h,
+                                       bool add) {
     AutoLock lock(mMultiDisplayLock);
     mMultiDisplay[id].enabled = add;
     if (add) {
@@ -2822,8 +2826,13 @@ void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint
     skin_event_add(event);
 }
 
-void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
-                                       uint32_t h, uint32_t dpi, uint32_t flag,
+void EmulatorQtWindow::setMultiDisplay(uint32_t id,
+                                       int32_t x,
+                                       int32_t y,
+                                       uint32_t w,
+                                       uint32_t h,
+                                       uint32_t dpi,
+                                       uint32_t flag,
                                        bool add) {
     AutoLock lock(mMultiDisplayLock);
     mMultiDisplay[id].pos_x = x;
@@ -2835,8 +2844,13 @@ void EmulatorQtWindow::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint
     mMultiDisplay[id].enabled = add;
 }
 
-bool EmulatorQtWindow::getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w,
-                                       uint32_t* h, uint32_t* dpi, uint32_t* flag,
+bool EmulatorQtWindow::getMultiDisplay(uint32_t id,
+                                       int32_t* x,
+                                       int32_t* y,
+                                       uint32_t* w,
+                                       uint32_t* h,
+                                       uint32_t* dpi,
+                                       uint32_t* flag,
                                        bool* enabled) {
     AutoLock lock(mMultiDisplayLock);
     if (x) {
@@ -2873,9 +2887,13 @@ int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
             });
 }
 
-void EmulatorQtWindow::switchMultiDisplay(bool enabled, uint32_t id, uint32_t x,
-                                          uint32_t y, uint32_t width,
-                                          uint32_t height, uint32_t dpi,
+void EmulatorQtWindow::switchMultiDisplay(bool enabled,
+                                          uint32_t id,
+                                          int32_t x,
+                                          int32_t y,
+                                          uint32_t width,
+                                          uint32_t height,
+                                          uint32_t dpi,
                                           uint32_t flag) {
     setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
     const auto uiAgent = mToolWindow->getUiEmuAgent();
