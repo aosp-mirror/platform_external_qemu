@@ -91,7 +91,7 @@ public:
     // if it was closed.
     // Note: in snapshot mode it never returns TryAgain, but grows the max
     //   queue size instead.
-    BufferQueueResult tryPushLocked(T&& buffer) {
+    BufferQueueResult tryPushLocked(const T& buffer) {
         if (mClosed) {
             return BufferQueueResult::Error;
         }
@@ -106,7 +106,7 @@ public:
         if (pos >= (int)mBuffers.size()) {
             pos -= mBuffers.size();
         }
-        mBuffers[pos] = std::move(buffer);
+        mBuffers[pos] = buffer;
         if (mCount++ == 0) {
             mCanPop.signal();
         }
@@ -116,14 +116,14 @@ public:
     // Push a buffer to the queue. This is a blocking call. On success,
     // move |buffer| into the queue and return BufferQueueResult::Ok. On failure,
     // return BufferQueueResult::Error meaning the queue was closed.
-    BufferQueueResult pushLocked(T&& buffer) {
+    BufferQueueResult pushLocked(const T& buffer) {
         while (mCount == (int)mBuffers.size() && !mSnapshotMode) {
             if (mClosed) {
                 return BufferQueueResult::Error;
             }
             mCanPush.wait(&mLock);
         }
-        return tryPushLocked(std::move(buffer));
+        return tryPushLocked(buffer);
     }
 
     // Try to read a buffer from the queue. On success, moves item into
@@ -135,7 +135,7 @@ public:
             return (mClosed || mSnapshotMode) ? BufferQueueResult::Error
                                               : BufferQueueResult::TryAgain;
         }
-        *buffer = std::move(mBuffers[mPos]);
+        *buffer = mBuffers[mPos];
         int pos = mPos + 1;
         if (pos >= (int)mBuffers.size()) {
             pos -= mBuffers.size();

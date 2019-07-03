@@ -65,12 +65,14 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			size_t totalTmpSize = sizeof(FooBoolean);
 			totalTmpSize += checksumSize;
 			unsigned char *tmpBuf = stream->alloc(totalTmpSize);
+			mOnBeginReadback();
 			DEBUG("foo(%p): fooIsBuffer(%p(%u) )\n", stream, (void*)(inptr_stuff.get()), size_stuff);
 			*(FooBoolean *)(&tmpBuf[0]) = 			this->fooIsBuffer((void*)(inptr_stuff.get()));
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::writeChecksum(checksumCalc, &tmpBuf[0], totalTmpSize - checksumSize, &tmpBuf[totalTmpSize - checksumSize], checksumSize);
 			}
 			stream->flush();
+			mOnEndReadback();
 			SET_LASTCALL("fooIsBuffer");
 			break;
 		}
@@ -132,6 +134,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			size_t totalTmpSize = size_obj;
 			totalTmpSize += checksumSize;
 			unsigned char *tmpBuf = stream->alloc(totalTmpSize);
+			mOnBeginReadback();
 			OutputBuffer outptr_obj(&tmpBuf[0], size_obj);
 			void* forPacking_obj = nullptr;
 			 FooStruct tmp; forPacking_obj = (void*)tmp;
@@ -144,6 +147,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 				ChecksumCalculatorThreadInfo::writeChecksum(checksumCalc, &tmpBuf[0], totalTmpSize - checksumSize, &tmpBuf[totalTmpSize - checksumSize], checksumSize);
 			}
 			stream->flush();
+			mOnEndReadback();
 			SET_LASTCALL("fooGetComplexStruct");
 			break;
 		}
@@ -157,6 +161,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			size_t totalTmpSize = size_count;
 			totalTmpSize += checksumSize;
 			unsigned char *tmpBuf = stream->alloc(totalTmpSize);
+			mOnBeginReadback();
 			OutputBuffer outptr_count(&tmpBuf[0], size_count);
 			memcpy(outptr_count.get(), inptr_count.get(), size_count);
 			DEBUG("foo(%p): fooInout(%p(%u) )\n", stream, (uint32_t*)(outptr_count.get()), size_count);
@@ -166,6 +171,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 				ChecksumCalculatorThreadInfo::writeChecksum(checksumCalc, &tmpBuf[0], totalTmpSize - checksumSize, &tmpBuf[totalTmpSize - checksumSize], checksumSize);
 			}
 			stream->flush();
+			mOnEndReadback();
 			SET_LASTCALL("fooInout");
 			break;
 		}
