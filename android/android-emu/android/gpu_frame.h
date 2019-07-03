@@ -17,6 +17,8 @@
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
 
+
+
 ANDROID_BEGIN_HEADER
 
 typedef void (*on_post_callback_t)(void*, int, int, const void*);
@@ -41,5 +43,13 @@ bool gpu_frame_set_record_mode(bool on);
 // gpu_frame_set_record_mode() before using this. May return NULL if no data is
 // available.
 void* gpu_frame_get_record_frame();
+
+
+typedef void (*FrameAvailableCallback)(void* opaque);
+
+// Used by the VideoFrameSharer to obtain a new frame when one is available.
+// Do not do any expensive calculations on this callback, it should be as fast
+// as possible.
+void gpu_set_shared_memory_callback(FrameAvailableCallback frameAvailable, void* opaque);
 
 ANDROID_END_HEADER

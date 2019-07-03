@@ -29,7 +29,6 @@
 #define DD(...) (void)0
 #endif
 
-
 using android::base::SharedMemory;
 
 namespace emulator {
@@ -37,16 +36,17 @@ namespace webrtc {
 
 namespace videocapturemodule {
 
-static const int kI420BitsPerPixel = 12;
-
-static int64_t getCurrentTimeInUs() {
-    timeval tv;
-    gettimeofday(&tv, nullptr);
-    return tv.tv_sec * 1000000LL + tv.tv_usec;
-}
+static const int kRGB8888BytesPerPixel = 4;
 
 VideoShareCapture::~VideoShareCapture() {
     RTC_LOG(INFO) << "~VideoShareCapture";
+}
+
+static void colorConvert(uint32_t* argb, uint32_t* abgr, size_t bufferSize) {
+    uint32_t* end = abgr + bufferSize;
+    for (; abgr != end; argb++, abgr++) {
+        *abgr = __builtin_bswap32(*argb) >> 8 | (*argb & 0xff000000);
+    }
 }
 
 bool VideoShareCapture::CaptureProcess() {
@@ -54,22 +54,24 @@ bool VideoShareCapture::CaptureProcess() {
 
     // Sleep up to mMaxFrameDelay, as we don't want to
     // slam the encoder.
-    int64_t now = getCurrentTimeInUs();
+    int64_t now = rtc::TimeMicros();
     int64_t sleeptime = mMaxFrameDelayUs - (now - mPrevTimestamp);
     if (sleeptime > 0)
         usleep(sleeptime);
 
-    DD("Frames skipped: " << mVideoInfo->frameNumber - mPrevframeNumber);
-    DD("Delivery delay: " << (rtc::TimeMicros() - mVideoInfo->tsUs) << " frame delay: " << (mVideoInfo->tsUs - mPrevTimestamp));
-    mPrevframeNumber = mVideoInfo->frameNumber;
-    mPrevTimestamp = mVideoInfo->tsUs;
+    if (mCaptureStarted && mVideoInfo->frameNumber != mPrevframeNumber) {
+        DD("Frames: " << mVideoInfo->frameNumber << ", skipped: "
+                      << mVideoInfo->frameNumber - mPrevframeNumber);
+        DD("Delivery delay: " << (rtc::TimeMicros() - mVideoInfo->tsUs)
+                              << " frame delay: "
+                              << (mVideoInfo->tsUs - mPrevtsUs));
+        IncomingFrame((uint8_t*) mPixelBuffer, mPixelBufferSize, mSettings);
 
-    if (mCaptureStarted) {
-        // convert to to I420 if needed
-        IncomingFrame((uint8_t*)mPixelBuffer, mPixelBufferSize, mSettings);
+         mPrevframeNumber = mVideoInfo->frameNumber;
+         mPrevtsUs = mVideoInfo->tsUs;
     }
 
-    mPrevTimestamp = getCurrentTimeInUs();
+    mPrevTimestamp = rtc::TimeMicros();
     return true;
 }
 
@@ -112,7 +114,7 @@ int32_t VideoShareCapture::StartCapture(
 };
 
 static size_t getBytesPerFrame(const VideoCaptureCapability& capability) {
-    return (capability.width * capability.height * kI420BitsPerPixel) / 8;
+    return (capability.width * capability.height * kRGB8888BytesPerPixel);
 }
 
 int32_t VideoShareCapture::Init(std::string handle) {
@@ -126,7 +128,7 @@ int32_t VideoShareCapture::Init(std::string handle) {
         return -1;
     }
 
-    mVideoInfo = (VideoShareInfo::VideoInfo*) *mSharedMemory;
+    mVideoInfo = (VideoShareInfo::VideoInfo*)*mSharedMemory;
     mPixelBuffer = (uint8_t*)*mSharedMemory + sizeof(VideoShareInfo::VideoInfo);
     mPixelBufferSize = getBytesPerFrame(mSettings);
     return 0;

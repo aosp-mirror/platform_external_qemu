@@ -17,6 +17,7 @@
 #include "modules/video_capture/video_capture_impl.h"
 #include "rtc_base/platform_thread.h"
 #include "VideoShareInfo.h"
+#include <vector>
 
 using android::base::SharedMemory;
 using ::webrtc::VideoCaptureCapability;

@@ -43,7 +43,7 @@ public:
         int bpp = 0;
         mAgent->getFrameBuffer(nullptr, nullptr, nullptr, &bpp, nullptr);
         assert(bpp == 2 || bpp == 4);
-        mFormat = bpp == 2 ? VideoFormat::RGB565 : VideoFormat::BGRA8888;
+        mFormat = bpp == 2 ? VideoFormat::RGB565 : VideoFormat::RGBA8888;
         auto sz = fbWidth * fbHeight * bpp;
 
         // Preallocate the space for the three frames
