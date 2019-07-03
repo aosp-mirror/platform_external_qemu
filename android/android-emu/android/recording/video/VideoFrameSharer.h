@@ -16,6 +16,7 @@
 
 #include "android/base/memory/SharedMemory.h"
 #include "android/emulation/control/display_agent.h"
+#include "android/opengles.h"
 #include "android/recording/Producer.h"
 
 namespace android {
@@ -55,22 +56,24 @@ public:
 
     VideoFrameSharer(uint32_t fbWidth,
                      uint32_t fbHeight,
-                     uint8_t fps,
                      const std::string& handle);
     ~VideoFrameSharer();
 
-    bool attachProducer(std::unique_ptr<Producer> producer);
+    bool initialize();
     void start();
     void stop();
 
 private:
-    bool marshallFrame(const Frame* frame);
+    static void frameCallbackForwarder(void* opaque);
+    void frameAvailable();
     static size_t getPixelBytes(VideoInfo info);
 
     VideoInfo mVideo = {0};
+    std::string mHandle;
     base::SharedMemory mMemory;
+    ReadPixelsFunc mReadPixels;
     std::unique_ptr<Producer> mVideoProducer;
-    int mSourceFormat;
+    size_t mPixelBufferSize;
 };
 }  // namespace recording
 }  // namespace android

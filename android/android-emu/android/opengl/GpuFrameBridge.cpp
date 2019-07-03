@@ -50,8 +50,7 @@ struct Frame {
 
     Frame(int w, int h, const void* pixels) :
             width(w), height(h), pixels(NULL), isValid(true) {
-        this->pixels = ::calloc(w * 4, h);
-        ::memcpy(this->pixels, pixels, w * 4 * h);
+        this->pixels = ::malloc(w * 4 * h);
     }
 
     ~Frame() {
@@ -144,6 +143,10 @@ public:
             if (!mRecTmpFrame) {
                 mRecTmpFrame = new Frame(width, height, pixels);
             }
+
+            if (mReceiver) {
+                mReceiver(mReceiverOpaque);
+            }
         }
         mRecFrameUpdated.store(true, std::memory_order_release);
     }
@@ -178,6 +181,10 @@ public:
         mRecFrameUpdated.store(false, std::memory_order_release);
     }
 
+    void setFrameReceiver(FrameAvailableCallback receiver, void* opaque) override {
+        mReceiver = receiver;
+        mReceiverOpaque = opaque;
+    };
 private:
     enum {
         kMaxFrames = 16
@@ -214,6 +221,8 @@ private:
         }
     }
 
+    FrameAvailableCallback mReceiver = nullptr;
+    void* mReceiverOpaque = nullptr;
     Looper* mLooper;
     int mInSocket;
     int mOutSocket;

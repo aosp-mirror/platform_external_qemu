@@ -88,7 +88,7 @@ int SharedMemory::openInternal(AccessMode access, bool doMapping) {
     return 0;
 }
 
-void SharedMemory::close() {
+void SharedMemory::close(bool forceDestroy) {
     if (mAddr != unmappedMemory()) {
         UnmapViewOfFile(mAddr);
         mAddr = unmappedMemory();

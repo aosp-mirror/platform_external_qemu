@@ -29,16 +29,6 @@ using namespace android::base;
 
 const std::string WebRtcBridge::kVideoBridgeExe = "goldfish-webrtc-bridge";
 
-static std::string generateUniqueVideoHandle() {
-    // Create a unique module identifier of at most 32 chars.
-    char handle[32];
-    Uuid id = Uuid::generate();
-    uint64_t* uniqueId = (uint64_t*)id.bytes();
-    snprintf(handle, ARRAY_SIZE(handle), "emuvid%016" PRIX64 "%016" PRIX64,
-             uniqueId[0], uniqueId[1]);
-    return std::string(handle);
-}
-
 WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
                            const QAndroidRecordScreenAgent* const screenAgent,
                            int fps,
@@ -49,11 +39,20 @@ WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
       mScreenAgent(screenAgent),
       mFps(fps),
       mVideoBridgePort(videoBridgePort),
-      mTurnConfig(turncfg) {
-}
+      mTurnConfig(turncfg) {}
 
 WebRtcBridge::~WebRtcBridge() {
     terminate();
+}
+
+void WebRtcBridge::updateBridgeState() {
+    if (mId.size() > 0) {
+        LOG(INFO) << "Starting shared memory module";
+        mScreenAgent->startSharedMemoryModule(mFps);
+    } else {
+        LOG(INFO) << "Stopping shared memory module";
+        mScreenAgent->stopSharedMemoryModule();
+    }
 }
 
 bool WebRtcBridge::connect(std::string identity) {
@@ -66,6 +65,7 @@ bool WebRtcBridge::connect(std::string identity) {
                 new MessageQueue(kMaxMessageQueueLen, *(bufferLock.get())));
         mId[identity] = queue;
         mLocks[queue.get()] = bufferLock;
+        updateBridgeState();
     } else {
         mMapLock.unlockRead();
     }
@@ -99,6 +99,7 @@ void WebRtcBridge::disconnect(std::string identity) {
     auto queue = mId[identity];
     mId.erase(identity);
     mLocks.erase(queue.get());
+    updateBridgeState();
 
     // Notify the video bridge.
     json msg;
@@ -179,6 +180,7 @@ void WebRtcBridge::received(SocketTransport* from, json object) {
             auto queue = mId[dest];
             mLocks.erase(queue.get());
             mId.erase(dest);
+            updateBridgeState();
         }
     } else {
         std::string msg = object["msg"];
@@ -241,11 +243,11 @@ static Optional<System::Pid> launchAsDaemon(std::string executable,
     // This either works or not.. We are not waiting around.
     const System::Duration kHalfSecond = 500;
     System::ProcessExitCode exitCode;
+    LOG(INFO) << "Launching: " << invoke;
     auto pidStr = System::get()->runCommandWithResult(cmdArgs, kHalfSecond,
                                                       &exitCode);
 
     if (exitCode != 0 || !pidStr) {
-        // Failed to start video bridge! Mission abort!
         // Failed to start video bridge! Mission abort!
         LOG(INFO) << "Failed to start " << invoke;
         return {};
@@ -274,6 +276,7 @@ static Optional<System::Pid> launchInBackground(std::string executable,
         invoke += arg + " ";
     }
 
+    LOG(INFO) << "Launching: " << invoke << " &";
     if (!System::get()->runCommand(cmdArgs, RunOptions::DontWait,
                                    System::kInfinite, nullptr, &bridgePid)) {
         // Failed to start video bridge! Mission abort!
@@ -341,8 +344,7 @@ RtcBridge* WebRtcBridge::create(int port,
 
     Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
-    return new WebRtcBridge(socket, consoleAgents->record,
-                            fps, port, turncfg);
+    return new WebRtcBridge(socket, consoleAgents->record, fps, port, turncfg);
 }
 }  // namespace control
 }  // namespace emulation
