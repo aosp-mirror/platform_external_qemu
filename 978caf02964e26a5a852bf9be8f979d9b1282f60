@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed0ec94d_5f747a00",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-03T18:01:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef48e47e_f0be78aa",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 0
+      },
+      "revId": "978caf02964e26a5a852bf9be8f979d9b1282f60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54aba945_12bc6768",
         "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2019-07-03T17:32:30Z",
       "side": 1,
       "message": "I\u0027m assuming you checked that we won\u0027t have any endianess issues with just doing this straight conversion?",
+      "range": {
+        "startLine": 215,
+        "startChar": 28,
+        "endLine": 215,
+        "endChar": 52
+      },
+      "revId": "978caf02964e26a5a852bf9be8f979d9b1282f60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99c116cf_95182c2d",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-03T18:01:20Z",
+      "side": 1,
+      "message": "ARCore MP4 dataset are encoded in little endian. x86 is also little endian. So we should be good, at least for now.",
+      "parentUuid": "54aba945_12bc6768",
       "range": {
         "startLine": 215,
         "startChar": 28,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6349a03a_89782401",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-03T18:01:20Z",
+      "side": 1,
+      "message": "3 axes for vectors such as acceleration.",
+      "parentUuid": "f83d3f06_0a415468",
+      "range": {
+        "startLine": 227,
+        "startChar": 24,
+        "endLine": 227,
+        "endChar": 25
+      },
+      "revId": "978caf02964e26a5a852bf9be8f979d9b1282f60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b3383e23_ab95f9c5",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 4
@@ -91,6 +163,30 @@
       "revId": "978caf02964e26a5a852bf9be8f979d9b1282f60",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4329013_960161e8",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-03T18:01:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b3383e23_ab95f9c5",
+      "range": {
+        "startLine": 388,
+        "startChar": 8,
+        "endLine": 389,
+        "endChar": 80
+      },
+      "revId": "978caf02964e26a5a852bf9be8f979d9b1282f60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
