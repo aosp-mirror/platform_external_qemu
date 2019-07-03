@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bed6ce91_430c40e0",
+        "filename": "android/android-emu/android/avd/hardware-properties.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-07-03T20:43:20Z",
+      "side": 1,
+      "message": "Can we add one more field, uint32_t flag?",
+      "revId": "a54914b68078038a82be1cb6a5b028d77ba5a284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
