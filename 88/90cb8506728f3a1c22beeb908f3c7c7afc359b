@@ -1,0 +1,8 @@
+Verified+1: Joshua Duong <joshuaduong@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Joshua Duong <joshuaduong@google.com>
+Submitted-by: Joshua Duong <joshuaduong@google.com>
+Submitted-at: Wed, 03 Jul 2019 23:04:54 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1008441
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
