@@ -687,7 +687,8 @@ void SettingsPage::on_set_multiDisplay_clicked() {
     uint32_t width = mUi->set_multiDisplayWidth->value();
     uint32_t height = mUi->set_multiDisplayHeight->value();
     uint32_t dpi = mUi->set_multiDisplayDpi->value();
-    uint32_t x, y, w, h, d, f;
+    int32_t x, y;
+    uint32_t w, h, d, f;
     bool e;
     EmulatorQtWindow::getInstance()->getMultiDisplay(mCurrentDisplay, &x, &y, &w, &h,
                                                      &d, &f, &e);
@@ -702,7 +703,8 @@ void SettingsPage::on_set_multiDisplay_clicked() {
     if (enabled != e) {
         mMaxDisplayCnt = enabled ? mMaxDisplayCnt + 1 : mMaxDisplayCnt - 1;
     }
-    emit enableMultiDisplayChanged(enabled, mCurrentDisplay, 0, 0, width, height, dpi, 0);
+    emit enableMultiDisplayChanged(enabled, mCurrentDisplay, -1, -1, width,
+                                   height, dpi, 0);
 }
 
 void SettingsPage::onMultiDisplayIdChanged(int id) {
@@ -712,7 +714,8 @@ void SettingsPage::onMultiDisplayIdChanged(int id) {
     }
     mCurrentDisplay = id + 1;
 
-    uint32_t x, y, w, h, dpi, flag;
+    int32_t x, y;
+    uint32_t w, h, dpi, flag;
     bool enabled;
     EmulatorQtWindow::getInstance()->getMultiDisplay(mCurrentDisplay, &x, &y, &w, &h,
                                                      &dpi, &flag, &enabled);

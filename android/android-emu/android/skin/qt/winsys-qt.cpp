@@ -18,6 +18,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/globals.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
@@ -786,6 +787,26 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                 settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
 
             window->toolWindow()->switchClipboardSharing(enableClipboard);
+            if (android_hw->hw_display1_width != 0 &&
+                android_hw->hw_display1_height != 0) {
+                window->switchMultiDisplay(true, 1,
+                                           android_hw->hw_display1_xOffset,
+                                           android_hw->hw_display1_yOffset,
+                                           android_hw->hw_display1_width,
+                                           android_hw->hw_display1_height,
+                                           android_hw->hw_display1_density,
+                                           android_hw->hw_display1_flag);
+            }
+            if (android_hw->hw_display2_width != 0 &&
+                android_hw->hw_display2_height != 0) {
+                window->switchMultiDisplay(true, 2,
+                                           android_hw->hw_display2_xOffset,
+                                           android_hw->hw_display2_yOffset,
+                                           android_hw->hw_display2_width,
+                                           android_hw->hw_display2_height,
+                                           android_hw->hw_display2_density,
+                                           android_hw->hw_display2_flag);
+            }
         });
     }
 }

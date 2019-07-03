@@ -66,8 +66,14 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
 }
 
 //static
-void MultiDisplayPipe::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h,
-                                       uint32_t dpi, uint32_t flag, bool add) {
+void MultiDisplayPipe::setMultiDisplay(uint32_t id,
+                                       int32_t x,
+                                       int32_t y,
+                                       uint32_t w,
+                                       uint32_t h,
+                                       uint32_t dpi,
+                                       uint32_t flag,
+                                       bool add) {
     if (sMultiDisplayPipeInstance) {
         std::vector<uint8_t> data;
         fillData(data, id, w, h, dpi, flag, add);

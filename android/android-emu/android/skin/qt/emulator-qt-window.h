@@ -261,18 +261,33 @@ public:
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
     // update multiDisplay info from FrameBuffer.cpp
-    void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h, bool add);
-    // update multiDisplay info from UI config
-    void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w, uint32_t h,
-                         uint32_t dpi, uint32_t flag, bool add);
-    bool getMultiDisplay(uint32_t id, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h,
-                         uint32_t* dpi, uint32_t* flag, bool* enabled);
+    void setMultiDisplay(uint32_t id,
+                         int32_t x,
+                         int32_t y,
+                         uint32_t w,
+                         uint32_t h,
+                         bool add);
+    bool getMultiDisplay(uint32_t id,
+                         int32_t* x,
+                         int32_t* y,
+                         uint32_t* w,
+                         uint32_t* h,
+                         uint32_t* dpi,
+                         uint32_t* flag,
+                         bool* enabled);
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
 
 public slots:
     void rotateSkin(SkinRotation rot);
-    void switchMultiDisplay(bool enabled, uint32_t id, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t dpi, uint32_t flag);
+    void switchMultiDisplay(bool enabled,
+                            uint32_t id,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t width,
+                            uint32_t height,
+                            uint32_t dpi,
+                            uint32_t flag);
 
 private slots:
     void slot_adbWarningMessageAccepted();
@@ -525,8 +540,8 @@ private:
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     struct MultiDisplayInfo {
-        uint32_t pos_x;
-        uint32_t pos_y;
+        int32_t pos_x;
+        int32_t pos_y;
         uint32_t width;
         uint32_t height;
         uint32_t dpi;
