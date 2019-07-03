@@ -43,7 +43,7 @@ int SharedMemory::open(AccessMode access) {
     return openInternal(oflag, mode);
 }
 
-void SharedMemory::close() {
+void SharedMemory::close(bool forceDestroy) {
     if (mAddr != unmappedMemory()) {
         munmap(mAddr, mSize);
         mAddr = unmappedMemory();
@@ -54,7 +54,7 @@ void SharedMemory::close() {
     }
 
     assert(!isOpen());
-    if (mCreate)
+    if (forceDestroy || mCreate)
         shm_unlink(mName.c_str());
 }
 

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include "android/base/memory/SharedMemory.h"
 #include "emulator/main/flagdefs.h"
 #include "emulator/net/EmulatorConnection.h"
 #include "rtc_base/logging.h"
@@ -18,6 +19,7 @@
 #include "rtc_base/ssladapter.h"
 
 using emulator::webrtc::Switchboard;
+using android::base::SharedMemory;
 
 const int kMaxFileLogSizeInBytes = 64 * 1024 * 1024;
 
@@ -61,6 +63,18 @@ int main(int argc, char* argv[]) {
     if ((FLAG_port < 1) || (FLAG_port > 65535)) {
         printf("Error: %i is not a valid port.\n", FLAG_port);
         return -1;
+    }
+
+    // Check if we can access the shared memory region.
+    {
+        auto sharedMemory = SharedMemory(FLAG_handle, 4);
+        int err = sharedMemory.open(SharedMemory::AccessMode::READ_ONLY);
+        if (err != 0) {
+            RTC_LOG(LERROR) << "Unable to open memory mapped handle: ["
+                            << FLAG_handle << "], due to:" << -err;
+            return -1;
+        }
+        RTC_LOG(INFO) << "Able to map first 4 bytes of: " << FLAG_handle;
     }
 
     rtc::InitializeSSL();
