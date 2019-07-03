@@ -22,6 +22,30 @@
       "revId": "53d90d635b13181d6e76c4976317372745f7e3dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48a0e480_1e2da926",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-07-03T21:15:08Z",
+      "side": 1,
+      "message": "Changed from using default argument to function overloading. (Need a start() with no argument because some other code is using it.)\n\nRemoved copy constructor, but assignment operator is still needed for updating mPlayConfig.",
+      "parentUuid": "0ead9153_48bbd248",
+      "range": {
+        "startLine": 73,
+        "startChar": 23,
+        "endLine": 73,
+        "endChar": 59
+      },
+      "revId": "53d90d635b13181d6e76c4976317372745f7e3dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
