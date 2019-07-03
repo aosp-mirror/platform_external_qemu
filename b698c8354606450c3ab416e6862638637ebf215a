@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48badb8d_05a45826",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-07-03T16:49:14Z",
+      "side": 1,
+      "message": "How does this guarantee that the queue has begin/end in this exact order and you received End associated with Begin from the previous line?",
+      "range": {
+        "startLine": 226,
+        "startChar": 26,
+        "endLine": 226,
+        "endChar": 33
+      },
+      "revId": "b698c8354606450c3ab416e6862638637ebf215a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
