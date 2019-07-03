@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "472cece4_0879f213",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-03T19:28:41Z",
+      "side": 1,
+      "message": "switch (timestampType) ? Similar for sensorValueType",
+      "range": {
+        "startLine": 208,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 21
+      },
+      "revId": "11cb44caa24c4d31746a91fac1d61fc5bf739514",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
