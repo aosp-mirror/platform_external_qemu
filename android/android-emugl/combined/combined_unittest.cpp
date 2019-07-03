@@ -254,6 +254,7 @@ protected:
 // static
 GoldfishOpenglTestEnv* CombinedGoldfishOpenglTest::testEnv = nullptr;
 
+#if 0
 // Tests that the pipe connection can be made and that
 // gralloc/EGL can be set up.
 
@@ -845,6 +846,7 @@ TEST_F(CombinedGoldfishOpenglTest, UniformUploadRate) {
         duration_us,
         duration_cpu_us);
 }
+#endif
 
 TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
     uint64_t usage =
@@ -885,6 +887,7 @@ TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
     AHardwareBuffer_release(buf);
 }
 
+#if 0
 TEST_F(CombinedGoldfishOpenglTest, GenericSnapshot) {
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
@@ -940,3 +943,4 @@ TEST_F(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &tex);
 }
+#endif

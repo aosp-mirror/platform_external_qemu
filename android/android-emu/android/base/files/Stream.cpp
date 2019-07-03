@@ -18,27 +18,32 @@ namespace android {
 namespace base {
 
 void Stream::putByte(uint8_t value) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     write(&value, 1U);
 }
 
 uint8_t Stream::getByte() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t value[1] = { 0 };
     read(value, 1U);
     return value[0];
 }
 
 void Stream::putBe16(uint16_t value) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t b[2] = { (uint8_t)(value >> 8), (uint8_t)value };
     write(b, 2U);
 }
 
 uint16_t Stream::getBe16() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t b[2] = { 0, 0 };
     read(b, 2U);
     return ((uint16_t)b[0] << 8) | (uint16_t)b[1];
 }
 
 void Stream::putBe32(uint32_t value) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t b[4] = {
             (uint8_t)(value >> 24),
             (uint8_t)(value >> 16),
@@ -48,6 +53,7 @@ void Stream::putBe32(uint32_t value) {
 }
 
 uint32_t Stream::getBe32() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t b[4] = { 0, 0, 0, 0 };
     read(b, 4U);
     return ((uint32_t)b[0] << 24) |
@@ -57,6 +63,7 @@ uint32_t Stream::getBe32() {
 }
 
 void Stream::putBe64(uint64_t value) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t b[8] = {
             (uint8_t)(value >> 56),
             (uint8_t)(value >> 48),
@@ -70,6 +77,7 @@ void Stream::putBe64(uint64_t value) {
 }
 
 uint64_t Stream::getBe64() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint8_t b[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     read(b, 8U);
     return ((uint64_t)b[0] << 56) |
@@ -83,6 +91,7 @@ uint64_t Stream::getBe64() {
 }
 
 void Stream::putFloat(float v) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     union {
         float f;
         uint8_t bytes[sizeof(float)];
@@ -92,6 +101,7 @@ void Stream::putFloat(float v) {
 }
 
 float Stream::getFloat() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     union {
         float f;
         uint8_t bytes[sizeof(float)];
@@ -101,19 +111,23 @@ float Stream::getFloat() {
 }
 
 void Stream::putString(StringView str) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     this->putBe32(str.size());
     this->write(str.data(), str.size());
 }
 
 void Stream::putString(const char* str) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     putString(StringView(str));
 }
 
 void Stream::putString(const char* str, size_t len) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     putString(StringView(str, len));
 }
 
 std::string Stream::getString() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     std::string result;
     size_t len = this->getBe32();
     if (len > 0) {
@@ -143,6 +157,7 @@ std::string Stream::getString() {
 }
 
 void Stream::putPackedNum(uint64_t num) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     do {
         auto byte = uint8_t(num & 0x7f);
         num >>= 7;
@@ -154,6 +169,7 @@ void Stream::putPackedNum(uint64_t num) {
 }
 
 uint64_t Stream::getPackedNum() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     uint64_t res = 0;
     uint8_t byte;
     int i = 0;
@@ -165,6 +181,7 @@ uint64_t Stream::getPackedNum() {
 }
 
 void Stream::putPackedSignedNum(int64_t num) {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     if (num >= 0) {
         assert((uint64_t(num) & (1ULL << 63)) == 0);
         putPackedNum(uint64_t(num) << 1);
@@ -175,6 +192,7 @@ void Stream::putPackedSignedNum(int64_t num) {
 }
 
 int64_t Stream::getPackedSignedNum() {
+    fprintf(stderr, "%s:%d\n", __func__, __LINE__);
     auto num = getPackedNum();
     auto sign = num & 1;
     return sign ? -int64_t(num >> 1) : (num >> 1);

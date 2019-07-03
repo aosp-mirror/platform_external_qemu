@@ -486,6 +486,11 @@ void Snapshot::loadProtobufOnce() {
     const auto file =
             ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
                             O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
+    if (file.get() < 0) {
+        fprintf(stderr, "%s:%d ::open failed\n", __func__, __LINE__);
+        return;
+    }
+
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
         saveFailure(FailureReason::NoSnapshotPb);

@@ -41,6 +41,7 @@ AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext(
         size_t size = kv.second.second;
 
         if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
+            fprintf(stderr, "%s:%d free host_ptr=%p\n", __func__, __LINE__, host_ptr);
             android::aligned_buf_free(host_ptr);
         } else {
             crashhandler_die("Failed remove a memory mapping {phys_addr=%lx, host_ptr=%p, size=%lu}",
@@ -75,17 +76,21 @@ void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_
     const uint64_t aligned_size = ((size + alignment - 1) / alignment) * alignment;
 
     void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
+    fprintf(stderr, "%s:%d alloc host_ptr=%p size=%u\n", __func__, __LINE__, host_ptr, (unsigned int)aligned_size);
     if (host_ptr) {
         auto r = m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}});
         if (r.second) {
             if (m_ops->add_memory_mapping(phys_addr, host_ptr, aligned_size)) {
+                fprintf(stderr, "%s:%d OK host_ptr=%p\n", __func__, __LINE__, host_ptr);
                 return host_ptr;
             } else {
                 m_paddr2ptr.erase(r.first);
+                fprintf(stderr, "%s:%d free host_ptr=%p\n", __func__, __LINE__, host_ptr);
                 android::aligned_buf_free(host_ptr);
                 return nullptr;
             }
         } else {
+            fprintf(stderr, "%s:%d free host_ptr=%p\n", __func__, __LINE__, host_ptr);
             android::aligned_buf_free(host_ptr);
             return nullptr;
         }
@@ -96,6 +101,7 @@ void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_
 
 uint64_t AddressSpaceHostMemoryAllocatorContext::allocate(AddressSpaceDevicePingInfo *info) {
     void* host_ptr = allocate_impl(info->phys_addr, info->size);
+    fprintf(stderr, "%s:%d host_ptr=%p\n", __func__, __LINE__, host_ptr);
     if (host_ptr) {
         return 0;
     } else {
@@ -111,6 +117,7 @@ uint64_t AddressSpaceHostMemoryAllocatorContext::unallocate(AddressSpaceDevicePi
         const uint64_t size = i->second.second;
 
         if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
+            fprintf(stderr, "%s:%d free host_ptr=%p\n", __func__, __LINE__, host_ptr);
             android::aligned_buf_free(host_ptr);
             m_paddr2ptr.erase(i);
             return 0;
@@ -128,12 +135,16 @@ AddressSpaceDeviceType AddressSpaceHostMemoryAllocatorContext::getDeviceType() c
 }
 
 void AddressSpaceHostMemoryAllocatorContext::save(base::Stream* stream) const {
+    fprintf(stderr, "%s:%d size=%zu\n", __func__, __LINE__, m_paddr2ptr.size());
+
     stream->putBe32(m_paddr2ptr.size());
 
     for (const auto &kv : m_paddr2ptr) {
         const uint64_t phys_addr = kv.first;
         const uint64_t size = kv.second.second;
         const void *mem = kv.second.first;
+
+        fprintf(stderr, "%s:%d phys_addr=%llx size=%llu\n", __func__, __LINE__, (unsigned long long)phys_addr, (unsigned long long)size);
 
         stream->putBe64(phys_addr);
         stream->putBe64(size);
@@ -142,17 +153,25 @@ void AddressSpaceHostMemoryAllocatorContext::save(base::Stream* stream) const {
 }
 
 bool AddressSpaceHostMemoryAllocatorContext::load(base::Stream* stream) {
+    clear();
+
     size_t size = stream->getBe32();
+    fprintf(stderr, "%s:%d size=%zu\n", __func__, __LINE__, size);
 
     for (size_t i = 0; i < size; ++i) {
         uint64_t phys_addr = stream->getBe64();
         uint64_t size = stream->getBe64();
         void *mem = allocate_impl(phys_addr, size);
+
+        fprintf(stderr, "%s:%d phys_addr=%llx size=%llu mem=%p\n", __func__, __LINE__, (unsigned long long)phys_addr, (unsigned long long)size, mem);
+
         if (mem) {
             if (stream->read(mem, size) != static_cast<ssize_t>(size)) {
+                fprintf(stderr, "%s:%d phys_addr=%llx size=%llu fail\n", __func__, __LINE__, (unsigned long long)phys_addr, (unsigned long long)size);
                 return false;
             }
         } else {
+            fprintf(stderr, "%s:%d phys_addr=%llx size=%llu fail\n", __func__, __LINE__, (unsigned long long)phys_addr, (unsigned long long)size);
             return false;
         }
     }

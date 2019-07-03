@@ -558,9 +558,11 @@ protected:
 // static
 GoldfishOpenglTestEnv* VulkanHalTest::testEnv = nullptr;
 
+#if 0
 // A basic test of Vulkan HAL:
 // - Touch the Android loader at global, instance, and device level.
 TEST_F(VulkanHalTest, Basic) { }
+#endif
 
 // Test: Allocate, map, flush, invalidate some host visible memory.
 TEST_F(VulkanHalTest, MemoryMapping) {
@@ -636,6 +638,7 @@ TEST_F(VulkanHalTest, MemoryMapping) {
     vk->vkFreeMemory(mDevice, mem, nullptr);
 }
 
+#if 0
 // Tests creation of VkImages backed by gralloc buffers.
 TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
     VkImage image;
@@ -967,12 +970,14 @@ TEST_F(VulkanHalTest, BufferCreate) {
 
     vk->vkDestroyBuffer(mDevice, buffer, nullptr);
 }
+#endif
 
 TEST_F(VulkanHalTest, SnapshotSaveLoad) {
     androidSnapshot_save("test_snapshot");
     androidSnapshot_load("test_snapshot");
 }
 
+#if 0
 TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
     VkBufferCreateInfo bufCi = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
@@ -1196,5 +1201,6 @@ TEST_F(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
     vk->vkFreeCommandBuffers(mDevice, pool, 1, &cb);
     vk->vkDestroyCommandPool(mDevice, pool, nullptr);
 }
+#endif
 
 }  // namespace aemu

@@ -34,6 +34,7 @@ static void android_goldfish_dma_invalidate_host_mappings() {
 }
 
 static void android_goldfish_dma_unlock(uint64_t guest_paddr) {
+#if 0
     void* hwpipe = android::DmaMap::get()->getPipeInstance(guest_paddr);
 
     if (hwpipe) {
@@ -43,6 +44,7 @@ static void android_goldfish_dma_unlock(uint64_t guest_paddr) {
          */
         android_pipe_host_signal_wake(hwpipe, PIPE_WAKE_UNLOCK_DMA);
     }
+#endif
 }
 
 static void android_goldfish_dma_reset_host_mappings() {

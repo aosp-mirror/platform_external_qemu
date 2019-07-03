@@ -108,6 +108,8 @@ public:
     }
 
     void save(Stream* stream) const {
+        fprintf(stderr, "%s:%d mHandleIndex=%u size=%zu\n", __func__, __LINE__, mHandleIndex, mContexts.size());
+
         stream->putBe32(mHandleIndex);
         stream->putBe32(mContexts.size());
 
@@ -122,9 +124,14 @@ public:
             if (device_context) {
                 stream->putByte(1);
                 stream->putBe32(device_context->getDeviceType());
+
+                fprintf(stderr, "%s:%d handle=%u pingInfoGpa=%llx 1 type=%d\n", __func__, __LINE__, handle, (unsigned long long)desc.pingInfoGpa, device_context->getDeviceType());
+
                 device_context->save(stream);
             } else {
                 stream->putByte(0);
+
+                fprintf(stderr, "%s:%d handle=%u pingInfoGpa=%llx 0\n", __func__, __LINE__, handle, (unsigned long long)desc.pingInfoGpa);
             }
         }
     }
@@ -132,6 +139,8 @@ public:
     bool load(Stream* stream) {
         const uint32_t handleIndex = stream->getBe32();
         const size_t size = stream->getBe32();
+
+        fprintf(stderr, "%s:%d mHandleIndex=%u size=%zu\n", __func__, __LINE__, handleIndex, size);
 
         Contexts contexts;
         for (size_t i = 0; i < size; ++i) {
@@ -141,6 +150,7 @@ public:
             std::unique_ptr<AddressSpaceDeviceContext> context;
             switch (stream->getByte()) {
             case 0:
+                fprintf(stderr, "%s:%d handle=%u pingInfoGpa=%llx 0\n", __func__, __LINE__, handle, (unsigned long long)pingInfoGpa);
                 break;
 
             case 1: {
@@ -148,12 +158,16 @@ public:
                         static_cast<AddressSpaceDeviceType>(stream->getBe32());
                     context = buildAddressSpaceDeviceContext(device_type);
                     if (!context || !context->load(stream)) {
+                        fprintf(stderr, "%s:%d handle=%u pingInfoGpa=%llx 1 type=%d fail\n", __func__, __LINE__, handle, (unsigned long long)pingInfoGpa, device_type);
                         return false;
                     }
+
+                    fprintf(stderr, "%s:%d handle=%u pingInfoGpa=%llx 1 type=%d\n", __func__, __LINE__, handle, (unsigned long long)pingInfoGpa, device_type);
                 }
                 break;
 
             default:
+                fprintf(stderr, "%s:%d handle=%u pingInfoGpa=%llx x\n", __func__, __LINE__, handle, (unsigned long long)pingInfoGpa);
                 return false;
             }
 
