@@ -22,6 +22,30 @@
       "revId": "11cb44caa24c4d31746a91fac1d61fc5bf739514",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a116aa8_e403453c",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-03T20:05:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "472cece4_0879f213",
+      "range": {
+        "startLine": 208,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 21
+      },
+      "revId": "11cb44caa24c4d31746a91fac1d61fc5bf739514",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
