@@ -39,6 +39,30 @@
       "revId": "a54914b68078038a82be1cb6a5b028d77ba5a284",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5acc2f40_91643544",
+        "filename": "android/android-emugl/host/libs/renderControl_dec/renderControl.in",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-03T20:51:51Z",
+      "side": 1,
+      "message": "For some reason, int32_t is not recognized by the emugen.",
+      "parentUuid": "babcaa45_cdf729dc",
+      "range": {
+        "startLine": 44,
+        "startChar": 52,
+        "endLine": 44,
+        "endChar": 57
+      },
+      "revId": "a54914b68078038a82be1cb6a5b028d77ba5a284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
