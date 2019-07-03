@@ -1126,7 +1126,11 @@ static int rcGetColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
     return fb->getColorBufferDisplay(colorBuffer, displayId);
 }
 
-static int rcGetDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+static int rcGetDisplayPose(uint32_t displayId,
+                            int32_t* x,
+                            int32_t* y,
+                            uint32_t* w,
+                            uint32_t* h) {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -1135,7 +1139,11 @@ static int rcGetDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32
     return fb->getDisplayPose(displayId, x, y, w, h);
 }
 
-static int rcSetDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+static int rcSetDisplayPose(uint32_t displayId,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t w,
+                            uint32_t h) {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;

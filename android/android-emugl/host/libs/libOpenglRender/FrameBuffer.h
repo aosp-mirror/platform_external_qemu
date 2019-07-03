@@ -486,21 +486,25 @@ public:
     int setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer);
     int getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer);
     int getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId);
-    int getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
-    int setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+    int getDisplayPose(uint32_t displayId,
+                       int32_t* x,
+                       int32_t* y,
+                       uint32_t* w,
+                       uint32_t* h);
+    int setDisplayPose(uint32_t displayId,
+                       int32_t x,
+                       int32_t y,
+                       uint32_t w,
+                       uint32_t h);
     void getCombinedDisplaySize(int* w, int* h);
     struct DisplayInfo {
         uint32_t cb;
-        uint32_t pos_x;
-        uint32_t pos_y;
+        int32_t pos_x;
+        int32_t pos_y;
         uint32_t width;
         uint32_t height;
         DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0) {};
-        DisplayInfo(uint32_t cb,
-                    uint32_t x,
-                    uint32_t y,
-                    uint32_t w,
-                    uint32_t h)
+        DisplayInfo(uint32_t cb, int32_t x, int32_t y, uint32_t w, uint32_t h)
             : cb(cb), pos_x(x), pos_y(y), width(w), height(h) {}
     };
     std::unordered_map<uint32_t, DisplayInfo> m_displays;
@@ -529,7 +533,8 @@ private:
                                        int p_height,
                                        GLenum p_internalFormat,
                                        FrameworkFormat p_frameworkFormat);
-    void resolveLayout();
+    void recomputeLayout();
+    void setDisplayPoseInSkinUI(int totalHeight);
 
 private:
     static FrameBuffer *s_theFrameBuffer;

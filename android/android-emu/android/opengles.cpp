@@ -469,8 +469,13 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     }
 }
 
-void android_setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
-                             uint32_t h, uint32_t dpi, bool add) {
+void android_setMultiDisplay(uint32_t id,
+                             int32_t x,
+                             int32_t y,
+                             uint32_t w,
+                             uint32_t h,
+                             uint32_t dpi,
+                             bool add) {
     if (sRenderer) {
        sRenderer->setMultiDisplay(id, x, y, w, h, dpi, add);
     }
