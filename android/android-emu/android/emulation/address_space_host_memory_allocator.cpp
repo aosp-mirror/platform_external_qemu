@@ -76,10 +76,12 @@ void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_
 
     void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
     if (host_ptr) {
-        if (m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}}).second) {
+        auto r = m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}});
+        if (r.second) {
             if (m_ops->add_memory_mapping(phys_addr, host_ptr, aligned_size)) {
                 return host_ptr;
             } else {
+                m_paddr2ptr.erase(r.first);
                 android::aligned_buf_free(host_ptr);
                 return nullptr;
             }
