@@ -16,6 +16,29 @@
       "revId": "a54914b68078038a82be1cb6a5b028d77ba5a284",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "babcaa45_cdf729dc",
+        "filename": "android/android-emugl/host/libs/renderControl_dec/renderControl.in",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-07-03T20:49:08Z",
+      "side": 1,
+      "message": "nit: please use int32_t",
+      "range": {
+        "startLine": 44,
+        "startChar": 52,
+        "endLine": 44,
+        "endChar": 57
+      },
+      "revId": "a54914b68078038a82be1cb6a5b028d77ba5a284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
