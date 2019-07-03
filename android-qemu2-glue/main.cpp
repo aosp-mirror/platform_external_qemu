@@ -1917,7 +1917,7 @@ extern "C" int main(int argc, char** argv) {
                 hw->kernel_parameters, &verified_boot_params,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
-                true /* isQemu2 */, hw->hw_arc));
+                true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width, hw->hw_lcd_height));
 
         if (!kernel_parameters.get()) {
             return 1;

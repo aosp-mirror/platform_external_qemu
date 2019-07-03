@@ -58,6 +58,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    mem_map ramoops,
                                    const int vm_heapSize,
                                    bool isQemu2,
-                                   bool isCros);
+                                   bool isCros,
+                                   uint32_t lcd_width,
+                                   uint32_t lcd_height);
 
 ANDROID_END_HEADER
