@@ -3535,8 +3535,8 @@ do_multi_display_add( ControlClient  client, char*  args ) {
     int dpi = std::stoi(splitArgs[3]);
     int flag = std::stoi(splitArgs[4]);
 
-    client->global->emu_agent->switchMultiDisplay(true, id, 0, 0, width, height,
-                                                  dpi, flag);
+    client->global->emu_agent->switchMultiDisplay(true, id, -1, -1, width,
+                                                  height, dpi, flag);
     return 0;
 }
 
@@ -3563,7 +3563,8 @@ do_multi_display_del( ControlClient  client, char*  args ) {
         return -1;
     }
 
-    client->global->emu_agent->switchMultiDisplay(false, id, 0, 0, 0, 0, 0, 0);
+    client->global->emu_agent->switchMultiDisplay(false, id, -1, -1, 0, 0, 0,
+                                                  0);
     return 0;
 }
 

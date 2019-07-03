@@ -314,8 +314,13 @@ void RendererImpl::getScreenshot(unsigned int nChannels, unsigned int* width,
     if (fb) fb->getScreenshot(nChannels, width, height, pixels);
 }
 
-void RendererImpl::setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
-                                   uint32_t h, uint32_t dpi, bool add) {
+void RendererImpl::setMultiDisplay(uint32_t id,
+                                   int32_t x,
+                                   int32_t y,
+                                   uint32_t w,
+                                   uint32_t h,
+                                   uint32_t dpi,
+                                   bool add) {
     auto fb = FrameBuffer::getFB();
     if (fb) {
         if (add) {

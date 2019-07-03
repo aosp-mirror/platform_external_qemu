@@ -45,9 +45,14 @@ signals:
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
-    void enableMultiDisplayChanged(bool enabled, uint32_t id, uint32_t x,
-                                   uint32_t y, uint32_t width, uint32_t height,
-                                   uint32_t dpi, uint32_t flag);
+    void enableMultiDisplayChanged(bool enabled,
+                                   uint32_t id,
+                                   int32_t x,
+                                   int32_t y,
+                                   uint32_t width,
+                                   uint32_t height,
+                                   uint32_t dpi,
+                                   uint32_t flag);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
