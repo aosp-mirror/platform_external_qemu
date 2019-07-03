@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0672cbb8_ceba99a0",
+        "filename": "android/android-emu/android/avd/hardware-properties.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-03T20:56:04Z",
+      "side": 1,
+      "message": "ok. that makes sense.",
+      "parentUuid": "bed6ce91_430c40e0",
+      "revId": "a54914b68078038a82be1cb6a5b028d77ba5a284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "babcaa45_cdf729dc",
         "filename": "android/android-emugl/host/libs/renderControl_dec/renderControl.in",
         "patchSetId": 3
