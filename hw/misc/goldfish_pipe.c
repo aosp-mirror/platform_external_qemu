@@ -132,6 +132,7 @@ typedef enum PipeCmd {
     PIPE_CMD_WAKE_ON_DONE_IO,
     PIPE_CMD_DMA_MAPHOST,
     PIPE_CMD_DMA_UNMAPHOST,
+    PIPE_CMD_CALL,
 } PipeCmd;
 
 enum {
@@ -274,6 +275,8 @@ typedef struct PipeCommand {
             // and uint32_t sizes[max_size].
             // max_size is supplied at startup, so we can't reserve the space
             // but need to have a function to calculate the pointers.
+            // The two arrays are followed by the index of the first read
+            // buffer. Index is only used by PIPE_CMD_CALL commands.
         } rw_params;
         struct {
             uint64_t dma_paddr;
@@ -375,6 +378,12 @@ static uint32_t* hwpipe_get_command_rw_sizes(HwPipe* pipe) {
     // |sizes| follows the |ptrs|.
     return (uint32_t*)(
                 hwpipe_get_command_rw_ptrs(pipe) + pipe->rw_params_max_count);
+}
+
+static uint32_t hwpipe_get_command_rw_read_index(HwPipe* pipe) {
+    // |read_index| follows the |sizes|.
+    return *((uint32_t*)(
+                hwpipe_get_command_rw_sizes(pipe) + pipe->rw_params_max_count));
 }
 
 // hashtable-related functions
@@ -852,8 +861,10 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             break;
 
         case PIPE_CMD_READ:
-        case PIPE_CMD_WRITE: {
-            const bool willModifyData = command == PIPE_CMD_READ;
+        case PIPE_CMD_WRITE:
+        case PIPE_CMD_CALL: {
+            const bool willModifyData = command != PIPE_CMD_WRITE;
+            const bool isCall = command == PIPE_CMD_CALL;
             pipe->command_buffer->rw_params.consumed_size = 0;
             unsigned buffers_count =
                     pipe->command_buffer->rw_params.buffers_count;
@@ -951,24 +962,56 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             }
 #endif
 
-            pipe->command_buffer->status =
-                    willModifyData
-                            ? service_ops->guest_recv(pipe->host_pipe,
-                                                        buffers,
-                                                        buffers_count)
-                            : service_ops->guest_send(pipe->host_pipe,
-                                                        buffers,
-                                                        buffers_count);
+            GoldfishPipeBuffer* send_buffers = NULL;
+            unsigned send_buffers_count = 0;
+            GoldfishPipeBuffer* recv_buffers = NULL;
+            unsigned recv_buffers_count = 0;
+
+            if (willModifyData) {
+                // CALL commands perform send/recv using a single command.
+                // |read_index| is the first buffer used for receiving.
+                if (isCall) {
+                    uint32_t read_index = hwpipe_get_command_rw_read_index(pipe);
+                    assert(read_index < buffers_count);
+                    send_buffers = buffers;
+                    send_buffers_count = read_index;
+                    recv_buffers = &buffers[read_index];
+                    recv_buffers_count = buffers_count - read_index;
+                } else {
+                    recv_buffers = buffers;
+                    recv_buffers_count = buffers_count;
+                }
+            } else {
+                send_buffers = buffers;
+                send_buffers_count = buffers_count;
+            }
+
+            int32_t status = 0;
+            int32_t consumed_size = 0;
+            if (send_buffers_count) {
+                status = service_ops->guest_send(pipe->host_pipe,
+                                                 send_buffers,
+                                                 send_buffers_count);
+                if (status > 0) {
+                    consumed_size += status;
+                }
+            }
+            if (status >= 0 && recv_buffers_count) {
+                status = service_ops->guest_recv(pipe->host_pipe,
+                                                 recv_buffers,
+                                                 recv_buffers_count);
+                if (status > 0) {
+                    consumed_size += status;
+                }
+            }
             // TODO(zyy): create an extended version of send()/recv() functions
             // to return both transferred size and resulting status in single
             // call.
-            pipe->command_buffer->rw_params.consumed_size =
-                    pipe->command_buffer->status < 0
-                            ? 0
-                            : pipe->command_buffer->status;
+            pipe->command_buffer->rw_params.consumed_size = consumed_size;
+            pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
             DD("%s: CMD_%s id=%d buffers=%d > status=%d", __func__,
-               (willModifyData ? "READ" : "WRITE"), (int)pipe->id,
-               (int)buffers_count, pipe->command_buffer->status);
+               (willModifyData ? (isCall ? "CALL" : "READ") : "WRITE"),
+               (int)pipe->id, (int)buffers_count, pipe->command_buffer->status);
 
             for (i = 0; i < count; ++i) {
                 const int j = unmapIndex[i];

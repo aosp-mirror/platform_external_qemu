@@ -312,14 +312,23 @@ public:
         const auto buffEnd = buff + numBuffers;
         while (buff != buffEnd) {
             if (mDataForReadingLeft == 0) {
-                // No data left, read a new chunk from the channel.
-                int spinCount = 20;
-                for (;;) {
-                    auto result = mChannel->tryRead(&mDataForReading);
-                    if (result == IoResult::Ok) {
-                        mDataForReadingLeft = mDataForReading.size();
-                        break;
-                    }
+                // No data left, return if we already received some data,
+                // otherwise read a new chunk from the channel.
+                if (len > 0) {
+                    DD("%s: returning %d bytes", __func__, (int)len);
+                        return len;
+                }
+                // Block a little before declaring there is nothing
+                // to read. This gives the render thread a chance to
+                // process pending data before we return control to
+                // the guest. The amount of time we block here should
+                // be kept at a minimum. It's preferred to instead have
+                // the guest block on work that takes a significant
+                // amount of time.
+                const RenderChannel::Duration kBlockAtMostUs = 100;
+                auto result = mChannel->readBefore(&mDataForReading,
+                    android::base::System::get()->getUnixTimeUs() + kBlockAtMostUs);
+                if (result != IoResult::Ok) {
                     DD("%s: tryRead() failed with %d", __func__, (int)result);
                     // This failed either because the channel was stopped
                     // from the host, or if there was no data yet in the
@@ -331,15 +340,10 @@ public:
                     if (result == IoResult::Error) {
                         return PIPE_ERROR_IO;
                     }
-                    // Spin a little before declaring there is nothing
-                    // to read. Many GL calls are much faster than the
-                    // whole host-to-guest-to-host transition.
-                    if (--spinCount > 0) {
-                        continue;
-                    }
                     DD("%s: returning PIPE_ERROR_AGAIN", __func__);
                     return PIPE_ERROR_AGAIN;
                 }
+                mDataForReadingLeft = mDataForReading.size();
             }
 
             const size_t curSize = std::min<size_t>(buff->size - buffOffset,

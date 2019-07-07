@@ -54,6 +54,9 @@ public:
     // Try to read a buffer from the host render thread into the guest.
     virtual IoResult tryRead(Buffer* buffer) override final;
 
+    // Read a buffer from the host render thread into the guest.
+    virtual IoResult readBefore(Buffer* buffer, Duration waitUntilUs) override final;
+
     // Close the channel from the guest.
     virtual void stop() override final;
 
