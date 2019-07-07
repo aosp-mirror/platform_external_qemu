@@ -61,6 +61,7 @@ public:
     };
 
     using IoResult = android::base::BufferQueueResult;
+    using Duration = android::base::System::Duration;
 
     // Type of a callback used to tell the guest when the RenderChannel
     // state changes. Used by setEventCallback(). The parameter contains
@@ -95,6 +96,12 @@ public:
     // IoResult::TryAgain if the channel was empty, or IoResult::Error if
     // it was stopped.
     virtual IoResult tryRead(Buffer* buffer) = 0;
+
+    // Try to read data from the channel. On success, return IoResult::Ok and
+    // sets |*buffer| to contain the data. On failure, return IoResult::Error
+    // if it was stopped. Returns IoResult::Timeout if we waited passed
+    // waitUntilUs.
+    virtual IoResult readBefore(Buffer* buffer, Duration waitUntilUs) = 0;
 
     // Abort all pending operations. Any following operation is a noop.
     // Once a channel is stopped, it cannot be re-started.

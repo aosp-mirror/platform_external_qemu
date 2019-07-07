@@ -103,6 +103,16 @@ IoResult RenderChannelImpl::tryRead(Buffer* buffer) {
     return result;
 }
 
+IoResult RenderChannelImpl::readBefore(Buffer* buffer, Duration waitUntilUs) {
+    D("enter");
+    AutoLock lock(mLock);
+    auto result = mToGuest.popLockedBefore(buffer, waitUntilUs);
+    updateStateLocked();
+    DD("mToGuest.popLockedBefore() returned %d, buffer size %d, state %d",
+       (int)result, (int)buffer->size(), (int)mState);
+    return result;
+}
+
 void RenderChannelImpl::stop() {
     D("enter");
     AutoLock lock(mLock);
