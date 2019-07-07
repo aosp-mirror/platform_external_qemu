@@ -335,6 +335,7 @@ public:
                     // to read. Many GL calls are much faster than the
                     // whole host-to-guest-to-host transition.
                     if (--spinCount > 0) {
+                        base::Thread::yield();
                         continue;
                     }
                     DD("%s: returning PIPE_ERROR_AGAIN", __func__);
