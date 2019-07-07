@@ -132,6 +132,7 @@ typedef enum PipeCmd {
     PIPE_CMD_WAKE_ON_DONE_IO,
     PIPE_CMD_DMA_MAPHOST,
     PIPE_CMD_DMA_UNMAPHOST,
+    PIPE_CMD_CALL,
 } PipeCmd;
 
 enum {
@@ -852,8 +853,10 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             break;
 
         case PIPE_CMD_READ:
-        case PIPE_CMD_WRITE: {
-            const bool willModifyData = command == PIPE_CMD_READ;
+        case PIPE_CMD_WRITE:
+        case PIPE_CMD_CALL: {
+            const bool willModifyData = command != PIPE_CMD_WRITE;
+            const bool isCall = command == PIPE_CMD_CALL;
             pipe->command_buffer->rw_params.consumed_size = 0;
             unsigned buffers_count =
                     pipe->command_buffer->rw_params.buffers_count;
@@ -951,24 +954,56 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             }
 #endif
 
-            pipe->command_buffer->status =
-                    willModifyData
-                            ? service_ops->guest_recv(pipe->host_pipe,
-                                                        buffers,
-                                                        buffers_count)
-                            : service_ops->guest_send(pipe->host_pipe,
-                                                        buffers,
-                                                        buffers_count);
+            GoldfishPipeBuffer* send_buffers = NULL;
+            unsigned send_buffers_count = 0;
+            GoldfishPipeBuffer* recv_buffers = NULL;
+            unsigned recv_buffers_count = 0;
+
+            if (willModifyData) {
+                // CALL comands provide send/recv using a single command.
+                // Buffer count must be 2. First buffer contains send data
+                // and second buffer is for readback.
+                if (isCall) {
+                    assert(buffers_count == 2);
+                    send_buffers = &buffers[0];
+                    send_buffers_count = 1;
+                    recv_buffers = &buffers[1];
+                    recv_buffers_count = 1;
+                } else {
+                    recv_buffers = buffers;
+                    recv_buffers_count = buffers_count;
+                }
+            } else {
+                send_buffers = buffers;
+                send_buffers_count = buffers_count;
+            }
+
+            int32_t status = 0;
+            int32_t consumed_size = 0;
+            if (send_buffers) {
+                status = service_ops->guest_send(pipe->host_pipe,
+                                                 send_buffers,
+                                                 send_buffers_count);
+                if (status > 0) {
+                    consumed_size += status;
+                }
+            }
+            if (status >= 0 && recv_buffers) {
+                status = service_ops->guest_recv(pipe->host_pipe,
+                                                 recv_buffers,
+                                                 recv_buffers_count);
+                if (status > 0) {
+                    consumed_size += status;
+                }
+            }
             // TODO(zyy): create an extended version of send()/recv() functions
             // to return both transferred size and resulting status in single
             // call.
-            pipe->command_buffer->rw_params.consumed_size =
-                    pipe->command_buffer->status < 0
-                            ? 0
-                            : pipe->command_buffer->status;
+            pipe->command_buffer->rw_params.consumed_size = consumed_size;
+            pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
             DD("%s: CMD_%s id=%d buffers=%d > status=%d", __func__,
-               (willModifyData ? "READ" : "WRITE"), (int)pipe->id,
-               (int)buffers_count, pipe->command_buffer->status);
+               (willModifyData ? (isCall ? "CALL" : "WRITE") : "READ"),
+               (int)pipe->id, (int)buffers_count, pipe->command_buffer->status);
 
             for (i = 0; i < count; ++i) {
                 const int j = unmapIndex[i];
