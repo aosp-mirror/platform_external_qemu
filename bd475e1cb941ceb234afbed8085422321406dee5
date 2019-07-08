@@ -22,6 +22,30 @@
       "revId": "bd475e1cb941ceb234afbed8085422321406dee5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7d21f99_bdc4fcf9",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/VideoShareCapture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-08T22:50:23Z",
+      "side": 1,
+      "message": "Will remove once https://android-review.googlesource.com/c/platform/external/qemu/+/1011354 is merged in.",
+      "parentUuid": "bfbaa011_e5d517d9",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 5
+      },
+      "revId": "bd475e1cb941ceb234afbed8085422321406dee5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

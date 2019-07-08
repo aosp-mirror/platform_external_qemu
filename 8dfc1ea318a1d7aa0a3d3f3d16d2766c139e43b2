@@ -22,6 +22,30 @@
       "revId": "8dfc1ea318a1d7aa0a3d3f3d16d2766c139e43b2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4e318f2_58650abe",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-08T22:50:23Z",
+      "side": 0,
+      "message": "Joshua and I went over the code, we are actually memcpy\u0027ing everywhere after creation, or we only create the frame and don\u0027t care about the data.",
+      "parentUuid": "f00798c3_a0398ec7",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 50
+      },
+      "revId": "8dfc1ea318a1d7aa0a3d3f3d16d2766c139e43b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
