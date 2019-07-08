@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46987eb3_09d3869a",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-08T15:19:46Z",
+      "side": 1,
+      "message": "in case of call, can we overload rw params to have 2 uint16_t\u0027s to hold the counts of send vs recv?",
+      "range": {
+        "startLine": 861,
+        "startChar": 0,
+        "endLine": 862,
+        "endChar": 66
+      },
+      "revId": "d395f9d3e46134c0ddb12db55380efac4391acfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
