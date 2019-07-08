@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "6c2c1477_868009a3",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-08T21:47:27Z",
+      "side": 1,
+      "message": "Great. thanks for diagnosing the issue and putting up the fix!",
+      "parentUuid": "6672deb6_8d9abd46",
+      "range": {
+        "startLine": 613,
+        "startChar": 6,
+        "endLine": 613,
+        "endChar": 20
+      },
+      "revId": "dbfe9b4c19b48373690c61e95bfdd3495d09ddf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf098b1_deaf966b",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 3
