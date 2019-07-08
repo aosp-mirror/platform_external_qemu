@@ -35,10 +35,23 @@
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/utils/compiler.h"
 
+#include <atomic>
 #include <memory>
 
 namespace android {
 namespace videoplayer {
+
+struct PlayConfig {
+    std::atomic<bool> looping;
+
+    PlayConfig(bool looping_ = false) : looping(looping_) {}
+
+    // Copy constructor and assignment operator because std::atomic deletes them
+    PlayConfig& operator=(const PlayConfig& other) {
+        looping.exchange(other.looping);
+        return *this;
+    }
+};
 
 // public APIs of the video player
 class VideoPlayer {
@@ -57,6 +70,7 @@ public:
             std::unique_ptr<VideoPlayerNotifier> notifier);
 
     virtual void start() = 0;
+    virtual void start(const PlayConfig& playConfig) = 0;
     virtual void stop() = 0;
     virtual bool isRunning() const = 0;
     virtual void videoRefresh() = 0;
