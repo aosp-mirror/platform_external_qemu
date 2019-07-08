@@ -640,4 +640,41 @@ TEST_F(FrameBufferTest, CreateColorBufferBGRA) {
     // FramBuffer::finalize handles color buffer destruction here
 }
 
+// Test ColorBuffer with GL_RGBA, but read back as GL_BGRA, so that R/B are switched.
+TEST_F(FrameBufferTest, ReadColorBufferSwitchRedBlue) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+
+    TestTexture forUpdate = createTestPatternRGBA8888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate.data());
+
+    TestTexture forRead = createTestTextureRGBA8888SingleColor(mWidth, mHeight, 0.0f, 0.0f, 0.0f, 0.0f);
+    // Switch red and blue
+    mFb->readColorBuffer(handle, 0, 0, mWidth, mHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, forRead.data());
+
+    // Switch them back, so we get the original image
+    uint8_t* forReadBytes = forRead.data();
+
+    for (uint32_t row = 0; row < mHeight; ++row) {
+        for (uint32_t col = 0; col < mWidth; ++col) {
+            uint8_t* pixel = forReadBytes + mWidth * 4 * row + col * 4;
+            // In RGBA8:
+            //    3 2 1 0
+            // 0xAABBGGRR on little endian systems
+            // R component: pixel[0]
+            // B component: pixel[2]
+            uint8_t r = pixel[0];
+            uint8_t b = pixel[2];
+            pixel[0] = b;
+            pixel[2] = r;
+        }
+    }
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(), forRead.data()));
+
+    mFb->closeColorBuffer(handle);
+}
+
 }  // namespace emugl

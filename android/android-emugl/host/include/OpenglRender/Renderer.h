@@ -88,7 +88,7 @@ public:
                                     int format,
                                     int type,
                                     unsigned char* pixels);
-    virtual void setPostCallback(OnPostCallback onPost, void* context) = 0;
+    virtual void setPostCallback(OnPostCallback onPost, void* context, bool useBgraReadback) = 0;
 
     // Async readback API
     virtual bool asyncReadbackSupported() = 0;

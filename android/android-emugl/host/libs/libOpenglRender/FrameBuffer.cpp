@@ -755,10 +755,18 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 
 void FrameBuffer::setPostCallback(
         emugl::Renderer::OnPostCallback onPost,
-        void* onPostContext) {
+        void* onPostContext,
+        bool useBgraReadback) {
     AutoLock mutex(m_lock);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
+
+    if (m_onPost) {
+        m_postCallbackReadBgra = useBgraReadback;
+    } else {
+        m_postCallbackReadBgra = false;
+    }
+
     if (m_onPost && !m_fbImage) {
         m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth *
                 m_framebufferHeight);
@@ -2010,9 +2018,9 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 }
             }
 
-            m_readbackWorker->doNextReadback(cb.get(), m_fbImage, repaint);
+            m_readbackWorker->doNextReadback(cb.get(), m_fbImage, repaint, m_postCallbackReadBgra);
         } else {
-            (*c).second.cb->readback(m_fbImage);
+            (*c).second.cb->readback(m_fbImage, m_postCallbackReadBgra);
             doPostCallback(m_fbImage);
         }
     }

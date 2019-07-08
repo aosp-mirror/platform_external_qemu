@@ -22,12 +22,12 @@ testing::AssertionResult RowMatches(int rowIndex, size_t rowBytes,
                                     unsigned char* expected, unsigned char* actual) {
     for (size_t i = 0; i < rowBytes; ++i) {
         if (expected[i] != actual[i]) {
-            return testing::AssertionFailure()
+            std::cout
                    << "row " << rowIndex << " byte " << i
                    << " mismatch. expected: "
                    << "(" << testing::PrintToString(expected[i])
                    << "), actual: "
-                   << "(" << testing::PrintToString(actual[i]) << ")";
+                   << "(" << testing::PrintToString(actual[i]) << ")" << std::endl;;
         }
     }
     return testing::AssertionSuccess();

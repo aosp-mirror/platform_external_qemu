@@ -256,7 +256,7 @@ _on_multitouch_port_connection(void* opaque,
             D("Multi-touch: SDK Controller is disconnected");
             // Disable OpenGLES framebuffer updates.
             if (android_hw->hw_gpu_enabled) {
-                android_setPostCallback(NULL, NULL);
+                android_setPostCallback(NULL, NULL, false);
             }
             break;
 
@@ -264,7 +264,7 @@ _on_multitouch_port_connection(void* opaque,
             D("Multi-touch: SDK Controller port is enabled.");
             // Enable OpenGLES framebuffer updates.
             if (android_hw->hw_gpu_enabled) {
-                android_setPostCallback(multitouch_opengles_fb_update, NULL);
+                android_setPostCallback(multitouch_opengles_fb_update, NULL, false);
             }
             /* Refresh (possibly stale) device screen. */
             multitouch_refresh_screen();
@@ -274,7 +274,7 @@ _on_multitouch_port_connection(void* opaque,
             D("Multi-touch: SDK Controller port is disabled.");
             // Disable OpenGLES framebuffer updates.
             if (android_hw->hw_gpu_enabled) {
-                android_setPostCallback(NULL, NULL);
+                android_setPostCallback(NULL, NULL, false);
             }
             break;
 

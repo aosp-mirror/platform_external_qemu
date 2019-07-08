@@ -35,7 +35,7 @@ ReadbackWorker::~ReadbackWorker() {
 }
 
 void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
-                                    bool repaint) {
+                                    bool repaint, bool readbackBgra) {
 
     // if |repaint|, make sure that the current frame is immediately sent down
     // the pipeline and made available to the consumer by priming async
@@ -101,7 +101,7 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
         }
         lock.unlock();
 
-        cb->readbackAsync(mBuffers[readAt]);
+        cb->readbackAsync(mBuffers[readAt], readbackBgra);
 
         // It's possible to post callback before any of the async readbacks
         // have written any data yet, which results in a black frame.  Safer

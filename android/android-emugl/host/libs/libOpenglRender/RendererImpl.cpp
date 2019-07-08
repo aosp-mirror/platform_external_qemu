@@ -351,9 +351,9 @@ RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
 }
 
 void RendererImpl::setPostCallback(RendererImpl::OnPostCallback onPost,
-                                   void* context) {
+                                   void* context, bool useBgraReadback) {
     assert(mRenderWindow);
-    mRenderWindow->setPostCallback(onPost, context);
+    mRenderWindow->setPostCallback(onPost, context, useBgraReadback);
 }
 
 bool RendererImpl::asyncReadbackSupported() {

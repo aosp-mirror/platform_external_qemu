@@ -215,13 +215,9 @@ public:
 
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
-    void readback(unsigned char* img);
+    void readback(unsigned char* img, bool readbackBgra = false);
     // readback() but async (to the specified |buffer|)
-    void readbackAsync(GLuint buffer);
-    // readbackAsync() but in one thread:
-    // glReadPixels will be done to buffer1, and then right after,
-    // glMapBufferRange -> memcpy(img, <memory of buffer2>)
-    void readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* img);
+    void readbackAsync(GLuint buffer, bool readbackBgra = false);
 
     void onSave(android::base::Stream* stream);
     static ColorBuffer* onLoad(android::base::Stream* stream,
