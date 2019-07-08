@@ -98,8 +98,10 @@ else()
   # windows-msvc, so we explicitly disable it.
   set(CMAKE_FIND_ROOT_PATH "${ANDROID_SYSROOT}")
 
+  # We must be able to resolve JAVA/JAVAC in order to build our jni + jar for android studio.
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+
   # Disable any searching as it might lead to unexpected behavior that varies amongst build environments
-  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
