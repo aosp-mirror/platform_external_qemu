@@ -35,8 +35,6 @@
 #include "IOStream.h"
 #include "emugl/common/logging.h"
 
-#include "RenderChannelImpl.h"
-
 #include "VkDecoderGlobalState.h"
 #include "VkDecoderSnapshot.h"
 
@@ -50,7 +48,6 @@
 
 
 using emugl::vkDispatch;
-using emugl::RenderChannelImpl;
 
 using namespace goldfish_vk;
 
@@ -58,10 +55,7 @@ using android::base::System;
 
 class VkDecoder::Impl {
 public:
-    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) {
-        mOnBeginReadback = []{ /* does nothing by default */ };
-        mOnEndReadback = []{  /* does nothing by default */ };
-    }
+    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
     VulkanStream* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
@@ -70,11 +64,6 @@ public:
     }
 
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
-
-    void registerOnReadbackFuncs(OnReadbackFunc onBegin, OnReadbackFunc onEnd) {
-        mOnBeginReadback = onBegin;
-        mOnEndReadback = onEnd;
-    }
 
 private:
     bool m_logCalls;
@@ -89,8 +78,6 @@ private:
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
     android::base::Pool m_pool { 8, 4096, 64 };
     BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
-    VkDecoder::OnReadbackFunc mOnBeginReadback;
-    VkDecoder::OnReadbackFunc mOnEndReadback;
 };
 
 VkDecoder::VkDecoder() :
@@ -104,10 +91,6 @@ void VkDecoder::setForSnapshotLoad(bool forSnapshotLoad) {
 
 size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
     return mImpl->decode(buf, bufsize, stream);
-}
-
-void VkDecoder::registerOnReadbackFuncs(OnReadbackFunc onBegin, OnReadbackFunc onEnd) {
-    mImpl->registerOnReadbackFuncs(onBegin, onEnd);
 }
 
 // VkDecoder::Impl::decode to follow
@@ -223,7 +206,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumeratePhysicalDevices:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceCount;
                 VkPhysicalDevice* pPhysicalDevices;
@@ -294,7 +276,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumeratePhysicalDevices_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumeratePhysicalDevices(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDevices_VkResult_return, instance, pPhysicalDeviceCount, pPhysicalDevices);
                 m_pool.freeAll();
@@ -303,7 +284,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFeatures:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures* pFeatures;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -337,7 +317,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceFeatures(vkStream, (VkPhysicalDeviceFeatures*)(pFeatures));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 m_pool.freeAll();
@@ -346,7 +325,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties* pFormatProperties;
@@ -382,7 +360,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkFormatProperties(vkStream, (VkFormatProperties*)(pFormatProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 m_pool.freeAll();
@@ -391,7 +368,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -437,7 +413,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkImageFormatProperties(vkStream, (VkImageFormatProperties*)(pImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceImageFormatProperties_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties_VkResult_return, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 m_pool.freeAll();
@@ -446,7 +421,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties* pProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -480,7 +454,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceProperties(vkStream, (VkPhysicalDeviceProperties*)(pProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 m_pool.freeAll();
@@ -489,7 +462,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceQueueFamilyProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pQueueFamilyPropertyCount;
                 VkQueueFamilyProperties* pQueueFamilyProperties;
@@ -565,7 +537,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 m_pool.freeAll();
@@ -574,7 +545,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties* pMemoryProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -608,7 +578,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceMemoryProperties(vkStream, (VkPhysicalDeviceMemoryProperties*)(pMemoryProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 m_pool.freeAll();
@@ -617,7 +586,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetInstanceProcAddr:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const char* pName;
                 // Begin manual dispatchable handle unboxing for instance;
@@ -639,7 +607,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkGetInstanceProcAddr_PFN_vkVoidFunction_return, sizeof(PFN_vkVoidFunction));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetInstanceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetInstanceProcAddr_PFN_vkVoidFunction_return, instance, pName);
                 m_pool.freeAll();
@@ -648,7 +615,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceProcAddr:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const char* pName;
                 // Begin manual dispatchable handle unboxing for device;
@@ -670,7 +636,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkGetDeviceProcAddr_PFN_vkVoidFunction_return, sizeof(PFN_vkVoidFunction));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceProcAddr_PFN_vkVoidFunction_return, device, pName);
                 m_pool.freeAll();
@@ -679,7 +644,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDevice:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkDeviceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -731,7 +695,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((VkDevice*)pDevice, 8 * 1);
                 vkStream->write(&vkCreateDevice_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDevice_VkResult_return, physicalDevice, pCreateInfo, pAllocator, pDevice);
                 m_pool.freeAll();
@@ -777,7 +740,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateInstanceExtensionProperties:
             {
-                mOnBeginReadback();
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
                 VkExtensionProperties* pProperties;
@@ -859,7 +821,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumerateInstanceExtensionProperties_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumerateInstanceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceExtensionProperties_VkResult_return, pLayerName, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -868,7 +829,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateDeviceExtensionProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
@@ -960,7 +920,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumerateDeviceExtensionProperties_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumerateDeviceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceExtensionProperties_VkResult_return, physicalDevice, pLayerName, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -969,7 +928,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateInstanceLayerProperties:
             {
-                mOnBeginReadback();
                 uint32_t* pPropertyCount;
                 VkLayerProperties* pProperties;
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
@@ -1037,7 +995,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumerateInstanceLayerProperties_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumerateInstanceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceLayerProperties_VkResult_return, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -1046,7 +1003,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateDeviceLayerProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkLayerProperties* pProperties;
@@ -1124,7 +1080,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumerateDeviceLayerProperties_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumerateDeviceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceLayerProperties_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -1133,7 +1088,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceQueue:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t queueFamilyIndex;
                 uint32_t queueIndex;
@@ -1168,7 +1122,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->handleMapping()->mapHandles_VkQueue((VkQueue*)pQueue, 1);
                 vkStream->write((VkQueue*)pQueue, 8 * 1);
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceQueue(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, queueFamilyIndex, queueIndex, pQueue);
                 m_pool.freeAll();
@@ -1177,7 +1130,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueSubmit:
             {
-                mOnBeginReadback();
                 VkQueue queue;
                 uint32_t submitCount;
                 const VkSubmitInfo* pSubmits;
@@ -1216,7 +1168,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkQueueSubmit_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkQueueSubmit(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSubmit_VkResult_return, queue, submitCount, pSubmits, fence);
                 m_pool.freeAll();
@@ -1225,7 +1176,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueWaitIdle:
             {
-                mOnBeginReadback();
                 VkQueue queue;
                 // Begin manual dispatchable handle unboxing for queue;
                 vkReadStream->unsetHandleMapping();
@@ -1245,7 +1195,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkQueueWaitIdle_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkQueueWaitIdle(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueWaitIdle_VkResult_return, queue);
                 m_pool.freeAll();
@@ -1254,7 +1203,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDeviceWaitIdle:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 // Begin manual dispatchable handle unboxing for device;
                 vkReadStream->unsetHandleMapping();
@@ -1274,7 +1222,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkDeviceWaitIdle_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkDeviceWaitIdle(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDeviceWaitIdle_VkResult_return, device);
                 m_pool.freeAll();
@@ -1283,7 +1230,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateMemory:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkMemoryAllocateInfo* pAllocateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -1339,7 +1285,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkAllocateMemory_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAllocateMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateMemory_VkResult_return, device, pAllocateInfo, pAllocator, pMemory);
                 m_pool.freeAll();
@@ -1395,7 +1340,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkMapMemory:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDeviceMemory memory;
                 VkDeviceSize offset;
@@ -1444,7 +1388,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkMapMemory_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkMapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemory_VkResult_return, device, memory, offset, size, flags, ppData);
                 m_pool.freeAll();
@@ -1482,7 +1425,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFlushMappedMemoryRanges:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
@@ -1534,7 +1476,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkFlushMappedMemoryRanges_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkFlushMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFlushMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 m_pool.freeAll();
@@ -1543,7 +1484,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkInvalidateMappedMemoryRanges:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
@@ -1596,7 +1536,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkInvalidateMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkInvalidateMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 m_pool.freeAll();
@@ -1605,7 +1544,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceMemoryCommitment:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDeviceMemory memory;
                 VkDeviceSize* pCommittedMemoryInBytes;
@@ -1635,7 +1573,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write((VkDeviceSize*)pCommittedMemoryInBytes, sizeof(VkDeviceSize));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceMemoryCommitment(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory, pCommittedMemoryInBytes);
                 m_pool.freeAll();
@@ -1644,7 +1581,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindBufferMemory:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkBuffer buffer;
                 VkDeviceMemory memory;
@@ -1674,7 +1610,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindBufferMemory_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBindBufferMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory_VkResult_return, device, buffer, memory, memoryOffset);
                 m_pool.freeAll();
@@ -1683,7 +1618,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkImage image;
                 VkDeviceMemory memory;
@@ -1713,7 +1647,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindImageMemory_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBindImageMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory_VkResult_return, device, image, memory, memoryOffset);
                 m_pool.freeAll();
@@ -1722,7 +1655,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetBufferMemoryRequirements:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkBuffer buffer;
                 VkMemoryRequirements* pMemoryRequirements;
@@ -1760,7 +1692,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetBufferMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, buffer, pMemoryRequirements);
                 m_pool.freeAll();
@@ -1769,7 +1700,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageMemoryRequirements:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkImage image;
                 VkMemoryRequirements* pMemoryRequirements;
@@ -1807,7 +1737,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pMemoryRequirements);
                 m_pool.freeAll();
@@ -1816,7 +1745,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageSparseMemoryRequirements:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkImage image;
                 uint32_t* pSparseMemoryRequirementCount;
@@ -1896,7 +1824,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageSparseMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 m_pool.freeAll();
@@ -1905,7 +1832,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSparseImageFormatProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -1991,7 +1917,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -2000,7 +1925,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueBindSparse:
             {
-                mOnBeginReadback();
                 VkQueue queue;
                 uint32_t bindInfoCount;
                 const VkBindSparseInfo* pBindInfo;
@@ -2039,7 +1963,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkQueueBindSparse_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkQueueBindSparse(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueBindSparse_VkResult_return, queue, bindInfoCount, pBindInfo, fence);
                 m_pool.freeAll();
@@ -2048,7 +1971,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateFence:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkFenceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2104,7 +2026,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateFence_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateFence(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFence_VkResult_return, device, pCreateInfo, pAllocator, pFence);
                 m_pool.freeAll();
@@ -2160,7 +2081,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetFences:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t fenceCount;
                 const VkFence* pFences;
@@ -2191,7 +2111,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetFences_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkResetFences(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetFences_VkResult_return, device, fenceCount, pFences);
                 m_pool.freeAll();
@@ -2200,7 +2119,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetFenceStatus:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkFence fence;
                 // Begin manual dispatchable handle unboxing for device;
@@ -2224,7 +2142,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkGetFenceStatus_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetFenceStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceStatus_VkResult_return, device, fence);
                 m_pool.freeAll();
@@ -2233,7 +2150,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkWaitForFences:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t fenceCount;
                 const VkFence* pFences;
@@ -2268,7 +2184,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkWaitForFences_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkWaitForFences(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkWaitForFences_VkResult_return, device, fenceCount, pFences, waitAll, timeout);
                 m_pool.freeAll();
@@ -2277,7 +2192,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSemaphore:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSemaphoreCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2333,7 +2247,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateSemaphore_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateSemaphore(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSemaphore_VkResult_return, device, pCreateInfo, pAllocator, pSemaphore);
                 m_pool.freeAll();
@@ -2389,7 +2302,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateEvent:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkEventCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2445,7 +2357,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateEvent_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateEvent_VkResult_return, device, pCreateInfo, pAllocator, pEvent);
                 m_pool.freeAll();
@@ -2501,7 +2412,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetEventStatus:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkEvent event;
                 // Begin manual dispatchable handle unboxing for device;
@@ -2525,7 +2435,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkGetEventStatus_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetEventStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetEventStatus_VkResult_return, device, event);
                 m_pool.freeAll();
@@ -2534,7 +2443,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkSetEvent:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkEvent event;
                 // Begin manual dispatchable handle unboxing for device;
@@ -2558,7 +2466,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkSetEvent_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetEvent_VkResult_return, device, event);
                 m_pool.freeAll();
@@ -2567,7 +2474,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetEvent:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkEvent event;
                 // Begin manual dispatchable handle unboxing for device;
@@ -2591,7 +2497,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetEvent_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetEvent_VkResult_return, device, event);
                 m_pool.freeAll();
@@ -2600,7 +2505,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateQueryPool:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkQueryPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2656,7 +2560,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateQueryPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateQueryPool_VkResult_return, device, pCreateInfo, pAllocator, pQueryPool);
                 m_pool.freeAll();
@@ -2712,7 +2615,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetQueryPoolResults:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkQueryPool queryPool;
                 uint32_t firstQuery;
@@ -2754,7 +2656,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((void*)pData, ((dataSize)) * sizeof(uint8_t));
                 vkStream->write(&vkGetQueryPoolResults_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetQueryPoolResults_VkResult_return, device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
                 m_pool.freeAll();
@@ -2763,7 +2664,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateBuffer:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkBufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2819,7 +2719,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateBuffer_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBuffer_VkResult_return, device, pCreateInfo, pAllocator, pBuffer);
                 m_pool.freeAll();
@@ -2875,7 +2774,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateBufferView:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkBufferViewCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2931,7 +2829,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateBufferView_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateBufferView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 m_pool.freeAll();
@@ -2987,7 +2884,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateImage:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3043,7 +2939,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateImage_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImage_VkResult_return, device, pCreateInfo, pAllocator, pImage);
                 m_pool.freeAll();
@@ -3099,7 +2994,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageSubresourceLayout:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkImage image;
                 const VkImageSubresource* pSubresource;
@@ -3144,7 +3038,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkSubresourceLayout(vkStream, (VkSubresourceLayout*)(pLayout));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageSubresourceLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSubresource, pLayout);
                 m_pool.freeAll();
@@ -3153,7 +3046,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateImageView:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageViewCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3209,7 +3101,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateImageView_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateImageView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 m_pool.freeAll();
@@ -3265,7 +3156,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateShaderModule:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkShaderModuleCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3321,7 +3211,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateShaderModule_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateShaderModule(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateShaderModule_VkResult_return, device, pCreateInfo, pAllocator, pShaderModule);
                 m_pool.freeAll();
@@ -3377,7 +3266,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreatePipelineCache:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkPipelineCacheCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3433,7 +3321,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreatePipelineCache_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreatePipelineCache(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineCache_VkResult_return, device, pCreateInfo, pAllocator, pPipelineCache);
                 m_pool.freeAll();
@@ -3489,7 +3376,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPipelineCacheData:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkPipelineCache pipelineCache;
                 size_t* pDataSize;
@@ -3552,7 +3438,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPipelineCacheData_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPipelineCacheData(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPipelineCacheData_VkResult_return, device, pipelineCache, pDataSize, pData);
                 m_pool.freeAll();
@@ -3561,7 +3446,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkMergePipelineCaches:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkPipelineCache dstCache;
                 uint32_t srcCacheCount;
@@ -3596,7 +3480,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkMergePipelineCaches_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkMergePipelineCaches(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergePipelineCaches_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 m_pool.freeAll();
@@ -3605,7 +3488,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateGraphicsPipelines:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkPipelineCache pipelineCache;
                 uint32_t createInfoCount;
@@ -3681,7 +3563,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateGraphicsPipelines_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateGraphicsPipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateGraphicsPipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 m_pool.freeAll();
@@ -3690,7 +3571,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateComputePipelines:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkPipelineCache pipelineCache;
                 uint32_t createInfoCount;
@@ -3766,7 +3646,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateComputePipelines_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateComputePipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateComputePipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 m_pool.freeAll();
@@ -3822,7 +3701,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreatePipelineLayout:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkPipelineLayoutCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3878,7 +3756,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreatePipelineLayout_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreatePipelineLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineLayout_VkResult_return, device, pCreateInfo, pAllocator, pPipelineLayout);
                 m_pool.freeAll();
@@ -3934,7 +3811,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSampler:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSamplerCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3990,7 +3866,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateSampler_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateSampler(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSampler_VkResult_return, device, pCreateInfo, pAllocator, pSampler);
                 m_pool.freeAll();
@@ -4046,7 +3921,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDescriptorSetLayout:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorSetLayoutCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -4102,7 +3976,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDescriptorSetLayout_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDescriptorSetLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorSetLayout_VkResult_return, device, pCreateInfo, pAllocator, pSetLayout);
                 m_pool.freeAll();
@@ -4158,7 +4031,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDescriptorPool:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -4214,7 +4086,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDescriptorPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorPool_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorPool);
                 m_pool.freeAll();
@@ -4270,7 +4141,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetDescriptorPool:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDescriptorPool descriptorPool;
                 VkDescriptorPoolResetFlags flags;
@@ -4296,7 +4166,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetDescriptorPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkResetDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetDescriptorPool_VkResult_return, device, descriptorPool, flags);
                 m_pool.freeAll();
@@ -4305,7 +4174,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateDescriptorSets:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorSetAllocateInfo* pAllocateInfo;
                 VkDescriptorSet* pDescriptorSets;
@@ -4357,7 +4225,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkAllocateDescriptorSets_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAllocateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateDescriptorSets_VkResult_return, device, pAllocateInfo, pDescriptorSets);
                 m_pool.freeAll();
@@ -4366,7 +4233,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFreeDescriptorSets:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDescriptorPool descriptorPool;
                 uint32_t descriptorSetCount;
@@ -4412,7 +4278,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkFreeDescriptorSets_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkFreeDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFreeDescriptorSets_VkResult_return, device, descriptorPool, descriptorSetCount, boxed_pDescriptorSets_preserve);
                 m_pool.freeAll();
@@ -4476,7 +4341,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateFramebuffer:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkFramebufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -4532,7 +4396,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateFramebuffer_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateFramebuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFramebuffer_VkResult_return, device, pCreateInfo, pAllocator, pFramebuffer);
                 m_pool.freeAll();
@@ -4588,7 +4451,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateRenderPass:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkRenderPassCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -4644,7 +4506,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateRenderPass_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 m_pool.freeAll();
@@ -4700,7 +4561,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetRenderAreaGranularity:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkRenderPass renderPass;
                 VkExtent2D* pGranularity;
@@ -4738,7 +4598,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExtent2D(vkStream, (VkExtent2D*)(pGranularity));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetRenderAreaGranularity(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, renderPass, pGranularity);
                 m_pool.freeAll();
@@ -4747,7 +4606,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateCommandPool:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkCommandPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -4803,7 +4661,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateCommandPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateCommandPool_VkResult_return, device, pCreateInfo, pAllocator, pCommandPool);
                 m_pool.freeAll();
@@ -4859,7 +4716,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetCommandPool:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkCommandPool commandPool;
                 VkCommandPoolResetFlags flags;
@@ -4885,7 +4741,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetCommandPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkResetCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandPool_VkResult_return, device, commandPool, flags);
                 m_pool.freeAll();
@@ -4894,7 +4749,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateCommandBuffers:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkCommandBufferAllocateInfo* pAllocateInfo;
                 VkCommandBuffer* pCommandBuffers;
@@ -4942,7 +4796,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkAllocateCommandBuffers_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAllocateCommandBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateCommandBuffers_VkResult_return, device, pAllocateInfo, pCommandBuffers);
                 m_pool.freeAll();
@@ -5000,7 +4853,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBeginCommandBuffer:
             {
-                mOnBeginReadback();
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -5027,7 +4879,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBeginCommandBuffer_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBeginCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBeginCommandBuffer_VkResult_return, commandBuffer, pBeginInfo);
                 m_pool.freeAll();
@@ -5036,7 +4887,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEndCommandBuffer:
             {
-                mOnBeginReadback();
                 VkCommandBuffer commandBuffer;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->unsetHandleMapping();
@@ -5056,7 +4906,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkEndCommandBuffer_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEndCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEndCommandBuffer_VkResult_return, commandBuffer);
                 m_pool.freeAll();
@@ -5065,7 +4914,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetCommandBuffer:
             {
-                mOnBeginReadback();
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
                 // Begin manual dispatchable handle unboxing for commandBuffer;
@@ -5087,7 +4935,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetCommandBuffer_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkResetCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandBuffer_VkResult_return, commandBuffer, flags);
                 m_pool.freeAll();
@@ -6831,7 +6678,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_VERSION_1_1
             case OP_vkEnumerateInstanceVersion:
             {
-                mOnBeginReadback();
                 uint32_t* pApiVersion;
                 // Begin manual dispatchable handle unboxing for pApiVersion;
                 vkReadStream->unsetHandleMapping();
@@ -6849,7 +6695,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint32_t*)pApiVersion, sizeof(uint32_t));
                 vkStream->write(&vkEnumerateInstanceVersion_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumerateInstanceVersion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceVersion_VkResult_return, pApiVersion);
                 m_pool.freeAll();
@@ -6858,7 +6703,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindBufferMemory2:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
@@ -6893,7 +6737,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindBufferMemory2_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBindBufferMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 m_pool.freeAll();
@@ -6902,7 +6745,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory2:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindImageMemoryInfo* pBindInfos;
@@ -6937,7 +6779,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindImageMemory2_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBindImageMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 m_pool.freeAll();
@@ -6946,7 +6787,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceGroupPeerMemoryFeatures:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t heapIndex;
                 uint32_t localDeviceIndex;
@@ -6978,7 +6818,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 m_pool.freeAll();
@@ -7051,7 +6890,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumeratePhysicalDeviceGroups:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceGroupCount;
                 VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties;
@@ -7129,7 +6967,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumeratePhysicalDeviceGroups_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumeratePhysicalDeviceGroups(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroups_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 m_pool.freeAll();
@@ -7138,7 +6975,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageMemoryRequirements2:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
@@ -7179,7 +7015,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 m_pool.freeAll();
@@ -7188,7 +7023,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetBufferMemoryRequirements2:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkBufferMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
@@ -7229,7 +7063,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetBufferMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 m_pool.freeAll();
@@ -7238,7 +7071,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageSparseMemoryRequirements2:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageSparseMemoryRequirementsInfo2* pInfo;
                 uint32_t* pSparseMemoryRequirementCount;
@@ -7321,7 +7153,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageSparseMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 m_pool.freeAll();
@@ -7330,7 +7161,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFeatures2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures2* pFeatures;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -7364,7 +7194,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceFeatures2(vkStream, (VkPhysicalDeviceFeatures2*)(pFeatures));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceFeatures2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 m_pool.freeAll();
@@ -7373,7 +7202,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties2* pProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -7407,7 +7235,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceProperties2(vkStream, (VkPhysicalDeviceProperties2*)(pProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 m_pool.freeAll();
@@ -7416,7 +7243,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -7452,7 +7278,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkFormatProperties2(vkStream, (VkFormatProperties2*)(pFormatProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 m_pool.freeAll();
@@ -7461,7 +7286,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -7504,7 +7328,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceImageFormatProperties2_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 m_pool.freeAll();
@@ -7513,7 +7336,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceQueueFamilyProperties2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pQueueFamilyPropertyCount;
                 VkQueueFamilyProperties2* pQueueFamilyProperties;
@@ -7589,7 +7411,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 m_pool.freeAll();
@@ -7598,7 +7419,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties2* pMemoryProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -7632,7 +7452,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceMemoryProperties2(vkStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 m_pool.freeAll();
@@ -7641,7 +7460,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSparseImageFormatProperties2:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo;
                 uint32_t* pPropertyCount;
@@ -7724,7 +7542,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -7764,7 +7581,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceQueue2:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDeviceQueueInfo2* pQueueInfo;
                 VkQueue* pQueue;
@@ -7801,7 +7617,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->handleMapping()->mapHandles_VkQueue_u64(pQueue, &cgen_var_396, 1);
                 vkStream->write((uint64_t*)&cgen_var_396, 8);
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceQueue2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pQueueInfo, pQueue);
                 m_pool.freeAll();
@@ -7810,7 +7625,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSamplerYcbcrConversion:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSamplerYcbcrConversionCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -7866,7 +7680,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateSamplerYcbcrConversion_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateSamplerYcbcrConversion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversion_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 m_pool.freeAll();
@@ -7922,7 +7735,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDescriptorUpdateTemplate:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -7978,7 +7790,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDescriptorUpdateTemplate_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDescriptorUpdateTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplate_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 m_pool.freeAll();
@@ -8075,7 +7886,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceExternalBufferProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo;
                 VkExternalBufferProperties* pExternalBufferProperties;
@@ -8119,7 +7929,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExternalBufferProperties(vkStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalBufferProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 m_pool.freeAll();
@@ -8128,7 +7937,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceExternalFenceProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo;
                 VkExternalFenceProperties* pExternalFenceProperties;
@@ -8169,7 +7977,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExternalFenceProperties(vkStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalFenceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 m_pool.freeAll();
@@ -8178,7 +7985,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -8219,7 +8025,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExternalSemaphoreProperties(vkStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphoreProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 m_pool.freeAll();
@@ -8228,7 +8033,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDescriptorSetLayoutSupport:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorSetLayoutCreateInfo* pCreateInfo;
                 VkDescriptorSetLayoutSupport* pSupport;
@@ -8269,7 +8073,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkDescriptorSetLayoutSupport(vkStream, (VkDescriptorSetLayoutSupport*)(pSupport));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDescriptorSetLayoutSupport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 m_pool.freeAll();
@@ -8327,7 +8130,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSurfaceSupportKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 VkSurfaceKHR surface;
@@ -8361,7 +8163,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((VkBool32*)pSupported, sizeof(VkBool32));
                 vkStream->write(&vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfaceSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return, physicalDevice, queueFamilyIndex, surface, pSupported);
                 m_pool.freeAll();
@@ -8370,7 +8171,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSurfaceCapabilitiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 VkSurfaceCapabilitiesKHR* pSurfaceCapabilities;
@@ -8410,7 +8210,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkSurfaceCapabilitiesKHR(vkStream, (VkSurfaceCapabilitiesKHR*)(pSurfaceCapabilities));
                 vkStream->write(&vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 m_pool.freeAll();
@@ -8419,7 +8218,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSurfaceFormatsKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 uint32_t* pSurfaceFormatCount;
@@ -8501,7 +8299,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormatsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return, physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
                 m_pool.freeAll();
@@ -8510,7 +8307,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSurfacePresentModesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 uint32_t* pPresentModeCount;
@@ -8572,7 +8368,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return, physicalDevice, surface, pPresentModeCount, pPresentModes);
                 m_pool.freeAll();
@@ -8583,7 +8378,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_swapchain
             case OP_vkCreateSwapchainKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSwapchainCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -8639,7 +8433,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateSwapchainKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateSwapchainKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSwapchainKHR_VkResult_return, device, pCreateInfo, pAllocator, pSwapchain);
                 m_pool.freeAll();
@@ -8695,7 +8488,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetSwapchainImagesKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 uint32_t* pSwapchainImageCount;
@@ -8769,7 +8561,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetSwapchainImagesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetSwapchainImagesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainImagesKHR_VkResult_return, device, swapchain, pSwapchainImageCount, pSwapchainImages);
                 m_pool.freeAll();
@@ -8778,7 +8569,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAcquireNextImageKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 uint64_t timeout;
@@ -8820,7 +8610,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint32_t*)pImageIndex, sizeof(uint32_t));
                 vkStream->write(&vkAcquireNextImageKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAcquireNextImageKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImageKHR_VkResult_return, device, swapchain, timeout, semaphore, fence, pImageIndex);
                 m_pool.freeAll();
@@ -8829,7 +8618,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueuePresentKHR:
             {
-                mOnBeginReadback();
                 VkQueue queue;
                 const VkPresentInfoKHR* pPresentInfo;
                 // Begin manual dispatchable handle unboxing for queue;
@@ -8856,7 +8644,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkQueuePresentKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkQueuePresentKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueuePresentKHR_VkResult_return, queue, pPresentInfo);
                 m_pool.freeAll();
@@ -8865,7 +8652,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceGroupPresentCapabilitiesKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDeviceGroupPresentCapabilitiesKHR* pDeviceGroupPresentCapabilities;
                 // Begin manual dispatchable handle unboxing for device;
@@ -8901,7 +8687,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkDeviceGroupPresentCapabilitiesKHR(vkStream, (VkDeviceGroupPresentCapabilitiesKHR*)(pDeviceGroupPresentCapabilities));
                 vkStream->write(&vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceGroupPresentCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return, device, pDeviceGroupPresentCapabilities);
                 m_pool.freeAll();
@@ -8910,7 +8695,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceGroupSurfacePresentModesKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSurfaceKHR surface;
                 VkDeviceGroupPresentModeFlagsKHR* pModes;
@@ -8953,7 +8737,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceGroupSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return, device, surface, pModes);
                 m_pool.freeAll();
@@ -8962,7 +8745,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDevicePresentRectanglesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 uint32_t* pRectCount;
@@ -9044,7 +8826,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDevicePresentRectanglesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return, physicalDevice, surface, pRectCount, pRects);
                 m_pool.freeAll();
@@ -9053,7 +8834,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAcquireNextImage2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkAcquireNextImageInfoKHR* pAcquireInfo;
                 uint32_t* pImageIndex;
@@ -9088,7 +8868,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint32_t*)pImageIndex, sizeof(uint32_t));
                 vkStream->write(&vkAcquireNextImage2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAcquireNextImage2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImage2KHR_VkResult_return, device, pAcquireInfo, pImageIndex);
                 m_pool.freeAll();
@@ -9099,7 +8878,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_display
             case OP_vkGetPhysicalDeviceDisplayPropertiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayPropertiesKHR* pProperties;
@@ -9177,7 +8955,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceDisplayPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -9186,7 +8963,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceDisplayPlanePropertiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayPlanePropertiesKHR* pProperties;
@@ -9264,7 +9040,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -9273,7 +9048,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDisplayPlaneSupportedDisplaysKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t planeIndex;
                 uint32_t* pDisplayCount;
@@ -9345,7 +9119,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDisplayPlaneSupportedDisplaysKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return, physicalDevice, planeIndex, pDisplayCount, pDisplays);
                 m_pool.freeAll();
@@ -9354,7 +9127,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDisplayModePropertiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkDisplayKHR display;
                 uint32_t* pPropertyCount;
@@ -9436,7 +9208,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetDisplayModePropertiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDisplayModePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModePropertiesKHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -9445,7 +9216,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDisplayModeKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkDisplayKHR display;
                 const VkDisplayModeCreateInfoKHR* pCreateInfo;
@@ -9505,7 +9275,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDisplayModeKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDisplayModeKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayModeKHR_VkResult_return, physicalDevice, display, pCreateInfo, pAllocator, pMode);
                 m_pool.freeAll();
@@ -9514,7 +9283,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDisplayPlaneCapabilitiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkDisplayModeKHR mode;
                 uint32_t planeIndex;
@@ -9556,7 +9324,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkDisplayPlaneCapabilitiesKHR(vkStream, (VkDisplayPlaneCapabilitiesKHR*)(pCapabilities));
                 vkStream->write(&vkGetDisplayPlaneCapabilitiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDisplayPlaneCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilitiesKHR_VkResult_return, physicalDevice, mode, planeIndex, pCapabilities);
                 m_pool.freeAll();
@@ -9565,7 +9332,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDisplayPlaneSurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkDisplaySurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -9616,7 +9382,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_503, 8);
                 vkStream->write(&vkCreateDisplayPlaneSurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDisplayPlaneSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayPlaneSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -9627,7 +9392,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_display_swapchain
             case OP_vkCreateSharedSwapchainsKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t swapchainCount;
                 const VkSwapchainCreateInfoKHR* pCreateInfos;
@@ -9694,7 +9458,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkCreateSharedSwapchainsKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateSharedSwapchainsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSharedSwapchainsKHR_VkResult_return, device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
                 m_pool.freeAll();
@@ -9705,7 +9468,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_xlib_surface
             case OP_vkCreateXlibSurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkXlibSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -9756,7 +9518,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_511, 8);
                 vkStream->write(&vkCreateXlibSurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateXlibSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXlibSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -9765,7 +9526,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceXlibPresentationSupportKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 Display* dpy;
@@ -9797,7 +9557,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((Display*)dpy, sizeof(Display));
                 vkStream->write(&vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return, sizeof(VkBool32));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceXlibPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, dpy, visualID);
                 m_pool.freeAll();
@@ -9808,7 +9567,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_xcb_surface
             case OP_vkCreateXcbSurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkXcbSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -9859,7 +9617,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_516, 8);
                 vkStream->write(&vkCreateXcbSurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateXcbSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXcbSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -9868,7 +9625,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceXcbPresentationSupportKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 xcb_connection_t* connection;
@@ -9900,7 +9656,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((xcb_connection_t*)connection, sizeof(xcb_connection_t));
                 vkStream->write(&vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return, sizeof(VkBool32));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceXcbPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection, visual_id);
                 m_pool.freeAll();
@@ -9911,7 +9666,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_wayland_surface
             case OP_vkCreateWaylandSurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkWaylandSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -9962,7 +9716,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_521, 8);
                 vkStream->write(&vkCreateWaylandSurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateWaylandSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWaylandSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -9971,7 +9724,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 wl_display* display;
@@ -10001,7 +9753,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((wl_display*)display, sizeof(wl_display));
                 vkStream->write(&vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return, sizeof(VkBool32));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceWaylandPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, display);
                 m_pool.freeAll();
@@ -10012,7 +9763,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_mir_surface
             case OP_vkCreateMirSurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkMirSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -10063,7 +9813,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_526, 8);
                 vkStream->write(&vkCreateMirSurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateMirSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMirSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -10072,7 +9821,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMirPresentationSupportKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 MirConnection* connection;
@@ -10102,7 +9850,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((MirConnection*)connection, sizeof(MirConnection));
                 vkStream->write(&vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return, sizeof(VkBool32));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceMirPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection);
                 m_pool.freeAll();
@@ -10113,7 +9860,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_android_surface
             case OP_vkCreateAndroidSurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkAndroidSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -10164,7 +9910,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_531, 8);
                 vkStream->write(&vkCreateAndroidSurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateAndroidSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateAndroidSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -10175,7 +9920,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_win32_surface
             case OP_vkCreateWin32SurfaceKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkWin32SurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -10226,7 +9970,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_535, 8);
                 vkStream->write(&vkCreateWin32SurfaceKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateWin32SurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWin32SurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -10235,7 +9978,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceWin32PresentationSupportKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -10257,7 +9999,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return, sizeof(VkBool32));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceWin32PresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex);
                 m_pool.freeAll();
@@ -10272,7 +10013,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_get_physical_device_properties2
             case OP_vkGetPhysicalDeviceFeatures2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures2* pFeatures;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -10306,7 +10046,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceFeatures2(vkStream, (VkPhysicalDeviceFeatures2*)(pFeatures));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceFeatures2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 m_pool.freeAll();
@@ -10315,7 +10054,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties2* pProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -10349,7 +10087,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceProperties2(vkStream, (VkPhysicalDeviceProperties2*)(pProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 m_pool.freeAll();
@@ -10358,7 +10095,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -10394,7 +10130,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkFormatProperties2(vkStream, (VkFormatProperties2*)(pFormatProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 m_pool.freeAll();
@@ -10403,7 +10138,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -10446,7 +10180,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 m_pool.freeAll();
@@ -10455,7 +10188,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceQueueFamilyProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pQueueFamilyPropertyCount;
                 VkQueueFamilyProperties2* pQueueFamilyProperties;
@@ -10531,7 +10263,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 m_pool.freeAll();
@@ -10540,7 +10271,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties2* pMemoryProperties;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -10574,7 +10304,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkPhysicalDeviceMemoryProperties2(vkStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 m_pool.freeAll();
@@ -10583,7 +10312,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSparseImageFormatProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo;
                 uint32_t* pPropertyCount;
@@ -10666,7 +10394,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -10677,7 +10404,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_device_group
             case OP_vkGetDeviceGroupPeerMemoryFeaturesKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t heapIndex;
                 uint32_t localDeviceIndex;
@@ -10709,7 +10435,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeaturesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 m_pool.freeAll();
@@ -10819,7 +10544,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_device_group_creation
             case OP_vkEnumeratePhysicalDeviceGroupsKHR:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceGroupCount;
                 VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties;
@@ -10897,7 +10621,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkEnumeratePhysicalDeviceGroupsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 m_pool.freeAll();
@@ -10908,7 +10631,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_memory_capabilities
             case OP_vkGetPhysicalDeviceExternalBufferPropertiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo;
                 VkExternalBufferProperties* pExternalBufferProperties;
@@ -10952,7 +10674,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExternalBufferProperties(vkStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalBufferPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 m_pool.freeAll();
@@ -10965,7 +10686,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_memory_win32
             case OP_vkGetMemoryWin32HandleKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkMemoryGetWin32HandleInfoKHR* pGetWin32HandleInfo;
                 HANDLE* pHandle;
@@ -11000,7 +10720,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
                 vkStream->write(&vkGetMemoryWin32HandleKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 m_pool.freeAll();
@@ -11009,7 +10728,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetMemoryWin32HandlePropertiesKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkExternalMemoryHandleTypeFlagBits handleType;
                 HANDLE handle;
@@ -11049,7 +10767,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkMemoryWin32HandlePropertiesKHR(vkStream, (VkMemoryWin32HandlePropertiesKHR*)(pMemoryWin32HandleProperties));
                 vkStream->write(&vkGetMemoryWin32HandlePropertiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryWin32HandlePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandlePropertiesKHR_VkResult_return, device, handleType, handle, pMemoryWin32HandleProperties);
                 m_pool.freeAll();
@@ -11060,7 +10777,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_memory_fd
             case OP_vkGetMemoryFdKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkMemoryGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
@@ -11095,7 +10811,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((int*)pFd, sizeof(int));
                 vkStream->write(&vkGetMemoryFdKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 m_pool.freeAll();
@@ -11104,7 +10819,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetMemoryFdPropertiesKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkExternalMemoryHandleTypeFlagBits handleType;
                 int fd;
@@ -11144,7 +10858,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkMemoryFdPropertiesKHR(vkStream, (VkMemoryFdPropertiesKHR*)(pMemoryFdProperties));
                 vkStream->write(&vkGetMemoryFdPropertiesKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryFdPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdPropertiesKHR_VkResult_return, device, handleType, fd, pMemoryFdProperties);
                 m_pool.freeAll();
@@ -11157,7 +10870,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_capabilities
             case OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -11198,7 +10910,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExternalSemaphoreProperties(vkStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 m_pool.freeAll();
@@ -11211,7 +10922,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_win32
             case OP_vkImportSemaphoreWin32HandleKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -11238,7 +10948,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkImportSemaphoreWin32HandleKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkImportSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreWin32HandleKHR_VkResult_return, device, pImportSemaphoreWin32HandleInfo);
                 m_pool.freeAll();
@@ -11247,7 +10956,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetSemaphoreWin32HandleKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSemaphoreGetWin32HandleInfoKHR* pGetWin32HandleInfo;
                 HANDLE* pHandle;
@@ -11282,7 +10990,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
                 vkStream->write(&vkGetSemaphoreWin32HandleKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 m_pool.freeAll();
@@ -11293,7 +11000,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_fd
             case OP_vkImportSemaphoreFdKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -11320,7 +11026,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkImportSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkImportSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreFdKHR_VkResult_return, device, pImportSemaphoreFdInfo);
                 m_pool.freeAll();
@@ -11329,7 +11034,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetSemaphoreFdKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSemaphoreGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
@@ -11364,7 +11068,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((int*)pFd, sizeof(int));
                 vkStream->write(&vkGetSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 m_pool.freeAll();
@@ -11472,7 +11175,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_descriptor_update_template
             case OP_vkCreateDescriptorUpdateTemplateKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -11528,7 +11230,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDescriptorUpdateTemplateKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDescriptorUpdateTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplateKHR_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 m_pool.freeAll();
@@ -11627,7 +11328,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_create_renderpass2
             case OP_vkCreateRenderPass2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkRenderPassCreateInfo2KHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -11678,7 +11378,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_592, 8);
                 vkStream->write(&vkCreateRenderPass2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass2KHR_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 m_pool.freeAll();
@@ -11799,7 +11498,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_shared_presentable_image
             case OP_vkGetSwapchainStatusKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 // Begin manual dispatchable handle unboxing for device;
@@ -11823,7 +11521,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkGetSwapchainStatusKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetSwapchainStatusKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainStatusKHR_VkResult_return, device, swapchain);
                 m_pool.freeAll();
@@ -11834,7 +11531,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_fence_capabilities
             case OP_vkGetPhysicalDeviceExternalFencePropertiesKHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo;
                 VkExternalFenceProperties* pExternalFenceProperties;
@@ -11875,7 +11571,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkExternalFenceProperties(vkStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalFencePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 m_pool.freeAll();
@@ -11888,7 +11583,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_fence_win32
             case OP_vkImportFenceWin32HandleKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -11915,7 +11609,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkImportFenceWin32HandleKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkImportFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceWin32HandleKHR_VkResult_return, device, pImportFenceWin32HandleInfo);
                 m_pool.freeAll();
@@ -11924,7 +11617,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetFenceWin32HandleKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkFenceGetWin32HandleInfoKHR* pGetWin32HandleInfo;
                 HANDLE* pHandle;
@@ -11959,7 +11651,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
                 vkStream->write(&vkGetFenceWin32HandleKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 m_pool.freeAll();
@@ -11970,7 +11661,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_fence_fd
             case OP_vkImportFenceFdKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImportFenceFdInfoKHR* pImportFenceFdInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -11997,7 +11687,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkImportFenceFdKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkImportFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceFdKHR_VkResult_return, device, pImportFenceFdInfo);
                 m_pool.freeAll();
@@ -12006,7 +11695,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetFenceFdKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkFenceGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
@@ -12041,7 +11729,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((int*)pFd, sizeof(int));
                 vkStream->write(&vkGetFenceFdKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 m_pool.freeAll();
@@ -12054,7 +11741,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_get_surface_capabilities2
             case OP_vkGetPhysicalDeviceSurfaceCapabilities2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo;
                 VkSurfaceCapabilities2KHR* pSurfaceCapabilities;
@@ -12097,7 +11783,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkSurfaceCapabilities2KHR(vkStream, (VkSurfaceCapabilities2KHR*)(pSurfaceCapabilities));
                 vkStream->write(&vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
                 m_pool.freeAll();
@@ -12106,7 +11791,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceSurfaceFormats2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo;
                 uint32_t* pSurfaceFormatCount;
@@ -12191,7 +11875,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormats2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
                 m_pool.freeAll();
@@ -12204,7 +11887,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_get_display_properties2
             case OP_vkGetPhysicalDeviceDisplayProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayProperties2KHR* pProperties;
@@ -12282,7 +11964,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceDisplayProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -12291,7 +11972,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceDisplayPlaneProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayPlaneProperties2KHR* pProperties;
@@ -12369,7 +12049,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -12378,7 +12057,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDisplayModeProperties2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkDisplayKHR display;
                 uint32_t* pPropertyCount;
@@ -12460,7 +12138,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetDisplayModeProperties2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDisplayModeProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModeProperties2KHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 m_pool.freeAll();
@@ -12469,7 +12146,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDisplayPlaneCapabilities2KHR:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 const VkDisplayPlaneInfo2KHR* pDisplayPlaneInfo;
                 VkDisplayPlaneCapabilities2KHR* pCapabilities;
@@ -12512,7 +12188,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkDisplayPlaneCapabilities2KHR(vkStream, (VkDisplayPlaneCapabilities2KHR*)(pCapabilities));
                 vkStream->write(&vkGetDisplayPlaneCapabilities2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDisplayPlaneCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilities2KHR_VkResult_return, physicalDevice, pDisplayPlaneInfo, pCapabilities);
                 m_pool.freeAll();
@@ -12529,7 +12204,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_get_memory_requirements2
             case OP_vkGetImageMemoryRequirements2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
@@ -12570,7 +12244,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 m_pool.freeAll();
@@ -12579,7 +12252,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetBufferMemoryRequirements2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkBufferMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
@@ -12620,7 +12292,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetBufferMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 m_pool.freeAll();
@@ -12629,7 +12300,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageSparseMemoryRequirements2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageSparseMemoryRequirementsInfo2* pInfo;
                 uint32_t* pSparseMemoryRequirementCount;
@@ -12712,7 +12382,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetImageSparseMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 m_pool.freeAll();
@@ -12725,7 +12394,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_sampler_ycbcr_conversion
             case OP_vkCreateSamplerYcbcrConversionKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkSamplerYcbcrConversionCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -12781,7 +12449,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateSamplerYcbcrConversionKHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateSamplerYcbcrConversionKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversionKHR_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 m_pool.freeAll();
@@ -12839,7 +12506,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_bind_memory2
             case OP_vkBindBufferMemory2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
@@ -12874,7 +12540,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindBufferMemory2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBindBufferMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 m_pool.freeAll();
@@ -12883,7 +12548,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindImageMemory2KHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindImageMemoryInfo* pBindInfos;
@@ -12918,7 +12582,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkBindImageMemory2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkBindImageMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 m_pool.freeAll();
@@ -12929,7 +12592,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_maintenance3
             case OP_vkGetDescriptorSetLayoutSupportKHR:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDescriptorSetLayoutCreateInfo* pCreateInfo;
                 VkDescriptorSetLayoutSupport* pSupport;
@@ -12970,7 +12632,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkDescriptorSetLayoutSupport(vkStream, (VkDescriptorSetLayoutSupport*)(pSupport));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetDescriptorSetLayoutSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 m_pool.freeAll();
@@ -13067,7 +12728,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_ANDROID_native_buffer
             case OP_vkGetSwapchainGrallocUsageANDROID:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkFormat format;
                 VkImageUsageFlags imageUsage;
@@ -13099,7 +12759,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((int*)grallocUsage, sizeof(int));
                 vkStream->write(&vkGetSwapchainGrallocUsageANDROID_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetSwapchainGrallocUsageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainGrallocUsageANDROID_VkResult_return, device, format, imageUsage, grallocUsage);
                 m_pool.freeAll();
@@ -13108,7 +12767,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAcquireImageANDROID:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkImage image;
                 int nativeFenceFd;
@@ -13142,7 +12800,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkAcquireImageANDROID_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAcquireImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireImageANDROID_VkResult_return, device, image, nativeFenceFd, semaphore, fence);
                 m_pool.freeAll();
@@ -13151,7 +12808,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueSignalReleaseImageANDROID:
             {
-                mOnBeginReadback();
                 VkQueue queue;
                 uint32_t waitSemaphoreCount;
                 const VkSemaphore* pWaitSemaphores;
@@ -13199,7 +12855,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((int*)pNativeFenceFd, sizeof(int));
                 vkStream->write(&vkQueueSignalReleaseImageANDROID_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkQueueSignalReleaseImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSignalReleaseImageANDROID_VkResult_return, queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
                 m_pool.freeAll();
@@ -13210,7 +12865,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_debug_report
             case OP_vkCreateDebugReportCallbackEXT:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkDebugReportCallbackCreateInfoEXT* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -13266,7 +12920,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDebugReportCallbackEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDebugReportCallbackEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugReportCallbackEXT_VkResult_return, instance, pCreateInfo, pAllocator, pCallback);
                 m_pool.freeAll();
@@ -13375,7 +13028,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_debug_marker
             case OP_vkDebugMarkerSetObjectTagEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDebugMarkerObjectTagInfoEXT* pTagInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -13402,7 +13054,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkDebugMarkerSetObjectTagEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkDebugMarkerSetObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectTagEXT_VkResult_return, device, pTagInfo);
                 m_pool.freeAll();
@@ -13411,7 +13062,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDebugMarkerSetObjectNameEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDebugMarkerObjectNameInfoEXT* pNameInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -13438,7 +13088,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkDebugMarkerSetObjectNameEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkDebugMarkerSetObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectNameEXT_VkResult_return, device, pNameInfo);
                 m_pool.freeAll();
@@ -13634,7 +13283,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_AMD_shader_info
             case OP_vkGetShaderInfoAMD:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkPipeline pipeline;
                 VkShaderStageFlagBits shaderStage;
@@ -13701,7 +13349,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetShaderInfoAMD_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetShaderInfoAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetShaderInfoAMD_VkResult_return, device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
                 m_pool.freeAll();
@@ -13716,7 +13363,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_NV_external_memory_capabilities
             case OP_vkGetPhysicalDeviceExternalImageFormatPropertiesNV:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -13764,7 +13410,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkExternalImageFormatPropertiesNV(vkStream, (VkExternalImageFormatPropertiesNV*)(pExternalImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return, physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
                 m_pool.freeAll();
@@ -13777,7 +13422,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_NV_external_memory_win32
             case OP_vkGetMemoryWin32HandleNV:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDeviceMemory memory;
                 VkExternalMemoryHandleTypeFlagsNV handleType;
@@ -13811,7 +13455,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
                 vkStream->write(&vkGetMemoryWin32HandleNV_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryWin32HandleNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleNV_VkResult_return, device, memory, handleType, pHandle);
                 m_pool.freeAll();
@@ -13826,7 +13469,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_NN_vi_surface
             case OP_vkCreateViSurfaceNN:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkViSurfaceCreateInfoNN* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -13877,7 +13519,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_692, 8);
                 vkStream->write(&vkCreateViSurfaceNN_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateViSurfaceNN(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateViSurfaceNN_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -14015,7 +13656,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateIndirectCommandsLayoutNVX:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkIndirectCommandsLayoutCreateInfoNVX* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -14071,7 +13711,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateIndirectCommandsLayoutNVX_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateIndirectCommandsLayoutNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIndirectCommandsLayoutNVX_VkResult_return, device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
                 m_pool.freeAll();
@@ -14127,7 +13766,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateObjectTableNVX:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkObjectTableCreateInfoNVX* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -14183,7 +13821,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateObjectTableNVX_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateObjectTableNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateObjectTableNVX_VkResult_return, device, pCreateInfo, pAllocator, pObjectTable);
                 m_pool.freeAll();
@@ -14239,7 +13876,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkRegisterObjectsNVX:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkObjectTableNVX objectTable;
                 uint32_t objectCount;
@@ -14270,7 +13906,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkRegisterObjectsNVX_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkRegisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterObjectsNVX_VkResult_return, device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
                 m_pool.freeAll();
@@ -14279,7 +13914,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkUnregisterObjectsNVX:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkObjectTableNVX objectTable;
                 uint32_t objectCount;
@@ -14311,7 +13945,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkUnregisterObjectsNVX_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkUnregisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUnregisterObjectsNVX_VkResult_return, device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
                 m_pool.freeAll();
@@ -14320,7 +13953,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkDeviceGeneratedCommandsFeaturesNVX* pFeatures;
                 VkDeviceGeneratedCommandsLimitsNVX* pLimits;
@@ -14370,7 +14002,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkDeviceGeneratedCommandsLimitsNVX(vkStream, (VkDeviceGeneratedCommandsLimitsNVX*)(pLimits));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures, pLimits);
                 m_pool.freeAll();
@@ -14425,7 +14056,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_direct_mode_display
             case OP_vkReleaseDisplayEXT:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkDisplayKHR display;
                 // Begin manual dispatchable handle unboxing for physicalDevice;
@@ -14449,7 +14079,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkReleaseDisplayEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkReleaseDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkReleaseDisplayEXT_VkResult_return, physicalDevice, display);
                 m_pool.freeAll();
@@ -14460,7 +14089,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_acquire_xlib_display
             case OP_vkAcquireXlibDisplayEXT:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 Display* dpy;
                 VkDisplayKHR display;
@@ -14492,7 +14120,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((Display*)dpy, sizeof(Display));
                 vkStream->write(&vkAcquireXlibDisplayEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkAcquireXlibDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireXlibDisplayEXT_VkResult_return, physicalDevice, dpy, display);
                 m_pool.freeAll();
@@ -14501,7 +14128,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetRandROutputDisplayEXT:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 Display* dpy;
                 RROutput rrOutput;
@@ -14543,7 +14169,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_723, 8);
                 vkStream->write(&vkGetRandROutputDisplayEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetRandROutputDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRandROutputDisplayEXT_VkResult_return, physicalDevice, dpy, rrOutput, pDisplay);
                 m_pool.freeAll();
@@ -14554,7 +14179,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_display_surface_counter
             case OP_vkGetPhysicalDeviceSurfaceCapabilities2EXT:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 VkSurfaceCapabilities2EXT* pSurfaceCapabilities;
@@ -14594,7 +14218,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkSurfaceCapabilities2EXT(vkStream, (VkSurfaceCapabilities2EXT*)(pSurfaceCapabilities));
                 vkStream->write(&vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2EXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 m_pool.freeAll();
@@ -14605,7 +14228,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_display_control
             case OP_vkDisplayPowerControlEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDisplayKHR display;
                 const VkDisplayPowerInfoEXT* pDisplayPowerInfo;
@@ -14636,7 +14258,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkDisplayPowerControlEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkDisplayPowerControlEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDisplayPowerControlEXT_VkResult_return, device, display, pDisplayPowerInfo);
                 m_pool.freeAll();
@@ -14645,7 +14266,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkRegisterDeviceEventEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDeviceEventInfoEXT* pDeviceEventInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -14696,7 +14316,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_731, 8);
                 vkStream->write(&vkRegisterDeviceEventEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkRegisterDeviceEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDeviceEventEXT_VkResult_return, device, pDeviceEventInfo, pAllocator, pFence);
                 m_pool.freeAll();
@@ -14705,7 +14324,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkRegisterDisplayEventEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkDisplayKHR display;
                 const VkDisplayEventInfoEXT* pDisplayEventInfo;
@@ -14760,7 +14378,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_736, 8);
                 vkStream->write(&vkRegisterDisplayEventEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkRegisterDisplayEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDisplayEventEXT_VkResult_return, device, display, pDisplayEventInfo, pAllocator, pFence);
                 m_pool.freeAll();
@@ -14769,7 +14386,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetSwapchainCounterEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 VkSurfaceCounterFlagBitsEXT counter;
@@ -14803,7 +14419,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)pCounterValue, sizeof(uint64_t));
                 vkStream->write(&vkGetSwapchainCounterEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetSwapchainCounterEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainCounterEXT_VkResult_return, device, swapchain, counter, pCounterValue);
                 m_pool.freeAll();
@@ -14814,7 +14429,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_display_timing
             case OP_vkGetRefreshCycleDurationGOOGLE:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 VkRefreshCycleDurationGOOGLE* pDisplayTimingProperties;
@@ -14854,7 +14468,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkRefreshCycleDurationGOOGLE(vkStream, (VkRefreshCycleDurationGOOGLE*)(pDisplayTimingProperties));
                 vkStream->write(&vkGetRefreshCycleDurationGOOGLE_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetRefreshCycleDurationGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRefreshCycleDurationGOOGLE_VkResult_return, device, swapchain, pDisplayTimingProperties);
                 m_pool.freeAll();
@@ -14863,7 +14476,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPastPresentationTimingGOOGLE:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 uint32_t* pPresentationTimingCount;
@@ -14945,7 +14557,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetPastPresentationTimingGOOGLE_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPastPresentationTimingGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPastPresentationTimingGOOGLE_VkResult_return, device, swapchain, pPresentationTimingCount, pPresentationTimings);
                 m_pool.freeAll();
@@ -15065,7 +14676,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_MVK_ios_surface
             case OP_vkCreateIOSSurfaceMVK:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkIOSSurfaceCreateInfoMVK* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -15116,7 +14726,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_753, 8);
                 vkStream->write(&vkCreateIOSSurfaceMVK_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateIOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -15127,7 +14736,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_MVK_macos_surface
             case OP_vkCreateMacOSSurfaceMVK:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkMacOSSurfaceCreateInfoMVK* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -15178,7 +14786,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((uint64_t*)&cgen_var_757, 8);
                 vkStream->write(&vkCreateMacOSSurfaceMVK_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateMacOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMacOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 m_pool.freeAll();
@@ -15193,7 +14800,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_debug_utils
             case OP_vkSetDebugUtilsObjectNameEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDebugUtilsObjectNameInfoEXT* pNameInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -15220,7 +14826,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkSetDebugUtilsObjectNameEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkSetDebugUtilsObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectNameEXT_VkResult_return, device, pNameInfo);
                 m_pool.freeAll();
@@ -15229,7 +14834,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkSetDebugUtilsObjectTagEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkDebugUtilsObjectTagInfoEXT* pTagInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -15256,7 +14860,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkSetDebugUtilsObjectTagEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkSetDebugUtilsObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectTagEXT_VkResult_return, device, pTagInfo);
                 m_pool.freeAll();
@@ -15443,7 +15046,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDebugUtilsMessengerEXT:
             {
-                mOnBeginReadback();
                 VkInstance instance;
                 const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -15499,7 +15101,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDebugUtilsMessengerEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateDebugUtilsMessengerEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugUtilsMessengerEXT_VkResult_return, instance, pCreateInfo, pAllocator, pMessenger);
                 m_pool.freeAll();
@@ -15593,7 +15194,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
             case OP_vkGetAndroidHardwareBufferPropertiesANDROID:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const AHardwareBuffer* buffer;
                 VkAndroidHardwareBufferPropertiesANDROID* pProperties;
@@ -15632,7 +15232,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkAndroidHardwareBufferPropertiesANDROID(vkStream, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties));
                 vkStream->write(&vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetAndroidHardwareBufferPropertiesANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return, device, buffer, pProperties);
                 m_pool.freeAll();
@@ -15641,7 +15240,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetMemoryAndroidHardwareBufferANDROID:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkMemoryGetAndroidHardwareBufferInfoANDROID* pInfo;
                 AHardwareBuffer** pBuffer;
@@ -15676,7 +15274,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->write((AHardwareBuffer**)pBuffer, sizeof(AHardwareBuffer*));
                 vkStream->write(&vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryAndroidHardwareBufferANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return, device, pInfo, pBuffer);
                 m_pool.freeAll();
@@ -15729,7 +15326,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMultisamplePropertiesEXT:
             {
-                mOnBeginReadback();
                 VkPhysicalDevice physicalDevice;
                 VkSampleCountFlagBits samples;
                 VkMultisamplePropertiesEXT* pMultisampleProperties;
@@ -15765,7 +15361,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 marshal_VkMultisamplePropertiesEXT(vkStream, (VkMultisamplePropertiesEXT*)(pMultisampleProperties));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetPhysicalDeviceMultisamplePropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, samples, pMultisampleProperties);
                 m_pool.freeAll();
@@ -15786,7 +15381,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_validation_cache
             case OP_vkCreateValidationCacheEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkValidationCacheCreateInfoEXT* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -15842,7 +15436,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateValidationCacheEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateValidationCacheEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateValidationCacheEXT_VkResult_return, device, pCreateInfo, pAllocator, pValidationCache);
                 m_pool.freeAll();
@@ -15898,7 +15491,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkMergeValidationCachesEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkValidationCacheEXT dstCache;
                 uint32_t srcCacheCount;
@@ -15933,7 +15525,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkMergeValidationCachesEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkMergeValidationCachesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergeValidationCachesEXT_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 m_pool.freeAll();
@@ -15942,7 +15533,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetValidationCacheDataEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkValidationCacheEXT validationCache;
                 size_t* pDataSize;
@@ -16005,7 +15595,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkStream->write(&vkGetValidationCacheDataEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetValidationCacheDataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetValidationCacheDataEXT_VkResult_return, device, validationCache, pDataSize, pData);
                 m_pool.freeAll();
@@ -16022,7 +15611,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_EXT_external_memory_host
             case OP_vkGetMemoryHostPointerPropertiesEXT:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkExternalMemoryHandleTypeFlagBits handleType;
                 const void* pHostPointer;
@@ -16068,7 +15656,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkMemoryHostPointerPropertiesEXT(vkStream, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties));
                 vkStream->write(&vkGetMemoryHostPointerPropertiesEXT_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetMemoryHostPointerPropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostPointerPropertiesEXT_VkResult_return, device, handleType, pHostPointer, pMemoryHostPointerProperties);
                 m_pool.freeAll();
@@ -16155,7 +15742,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetQueueCheckpointDataNV:
             {
-                mOnBeginReadback();
                 VkQueue queue;
                 uint32_t* pCheckpointDataCount;
                 VkCheckpointDataNV* pCheckpointData;
@@ -16231,7 +15817,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     }
                 }
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkGetQueueCheckpointDataNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pCheckpointDataCount, pCheckpointData);
                 m_pool.freeAll();
@@ -16294,7 +15879,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_color_buffer
             case OP_vkRegisterImageColorBufferGOOGLE:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkImage image;
                 uint32_t colorBuffer;
@@ -16320,7 +15904,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkRegisterImageColorBufferGOOGLE_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkRegisterImageColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterImageColorBufferGOOGLE_VkResult_return, device, image, colorBuffer);
                 m_pool.freeAll();
@@ -16329,7 +15912,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkRegisterBufferColorBufferGOOGLE:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 VkBuffer buffer;
                 uint32_t colorBuffer;
@@ -16355,7 +15937,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkRegisterBufferColorBufferGOOGLE_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkRegisterBufferColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterBufferColorBufferGOOGLE_VkResult_return, device, buffer, colorBuffer);
                 m_pool.freeAll();
@@ -16596,7 +16177,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_create_resources_with_requirements
             case OP_vkCreateImageWithRequirementsGOOGLE:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkImageCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -16668,7 +16248,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkStream->write(&vkCreateImageWithRequirementsGOOGLE_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
                 m_pool.freeAll();
@@ -16677,7 +16256,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateBufferWithRequirementsGOOGLE:
             {
-                mOnBeginReadback();
                 VkDevice device;
                 const VkBufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -16749,7 +16327,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkStream->write(&vkCreateBufferWithRequirementsGOOGLE_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
-                mOnEndReadback();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 m_state->snapshot()->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
                 m_pool.freeAll();
