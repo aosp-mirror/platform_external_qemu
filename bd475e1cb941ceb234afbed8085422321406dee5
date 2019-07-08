@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfbaa011_e5d517d9",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/VideoShareCapture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-08T14:18:07Z",
+      "side": 1,
+      "message": "since we\u0027re using libyuv already, you might be able to use a built in:\n\nhttps://chromium.googlesource.com/libyuv/libyuv/+/refs/heads/master/include/libyuv/convert_argb.h#549\n\nwhich might be able to take advantange of SSE instructions",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 5
+      },
+      "revId": "bd475e1cb941ceb234afbed8085422321406dee5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
