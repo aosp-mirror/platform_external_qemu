@@ -19,6 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/opengles.h"
+#include "android/emulation/testing/TestDmaMap.h"
 
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
@@ -49,6 +50,7 @@ using aemu::Display;
 using android::base::FunctorThread;
 using android::base::pj;
 using android::base::System;
+using android::TestDmaMap;
 
 static constexpr int kWindowSize = 256;
 
@@ -243,6 +245,7 @@ protected:
         std::vector<AndroidWindowBuffer> buffers;
     };
 
+    TestDmaMap dmaMap;
     struct gralloc_implementation mGralloc;
     EGLState mEGL;
     std::vector<size_t> mBeforeTest;
