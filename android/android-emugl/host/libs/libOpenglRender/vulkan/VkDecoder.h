@@ -27,12 +27,7 @@
 #include <vulkan/vulkan.h>
 
 
-#include <functional>
 #include <memory>
-
-namespace emugl {
-class RenderChannelImpl;
-} // namespace emugl
 
 namespace android {
 namespace base {
@@ -54,11 +49,6 @@ public:
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
-
-    using OnReadbackFunc = std::function<void()>;
-
-    void registerOnReadbackFuncs(OnReadbackFunc onBegin, OnReadbackFunc onEnd);
-
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

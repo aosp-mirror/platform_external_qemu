@@ -403,12 +403,7 @@ using DlSymFunc = void* (void*, const char*);
 """
 
         decoderHeaderIncludes = """
-#include <functional>
 #include <memory>
-
-namespace emugl {
-class RenderChannelImpl;
-} // namespace emugl
 
 namespace android {
 namespace base {
@@ -428,8 +423,6 @@ class Pool;
 
 #include "IOStream.h"
 #include "emugl/common/logging.h"
-
-#include "RenderChannelImpl.h"
 
 #include "VkDecoderGlobalState.h"
 #include "VkDecoderSnapshot.h"

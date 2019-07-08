@@ -103,11 +103,6 @@ public:
     // Callback function when snapshotting the virtual machine.
     virtual void onSave(android::base::Stream* stream) = 0;
 
-    // Function to wait for a readback that is guaranteed to be there; for decreasing chattiness on common patterns where
-    // there is a function call coming from the guest
-    // that also requires a return.
-    virtual void waitPendingReadback() = 0;
-
 protected:
     ~RenderChannel() = default;
 };
