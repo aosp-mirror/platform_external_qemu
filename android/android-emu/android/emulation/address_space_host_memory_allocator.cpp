@@ -35,18 +35,7 @@ AddressSpaceHostMemoryAllocatorContext::AddressSpaceHostMemoryAllocatorContext(
 }
 
 AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext() {
-    for (const auto& kv : m_paddr2ptr) {
-        uint64_t phys_addr = kv.first;
-        void *host_ptr = kv.second.first;
-        size_t size = kv.second.second;
-
-        if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
-            android::aligned_buf_free(host_ptr);
-        } else {
-            crashhandler_die("Failed remove a memory mapping {phys_addr=%lx, host_ptr=%p, size=%lu}",
-                             phys_addr, host_ptr, size);
-        }
-    }
+    clear();
 }
 
 void AddressSpaceHostMemoryAllocatorContext::perform(AddressSpaceDevicePingInfo *info) {
@@ -142,6 +131,8 @@ void AddressSpaceHostMemoryAllocatorContext::save(base::Stream* stream) const {
 }
 
 bool AddressSpaceHostMemoryAllocatorContext::load(base::Stream* stream) {
+    clear();
+
     size_t size = stream->getBe32();
 
     for (size_t i = 0; i < size; ++i) {
@@ -158,6 +149,21 @@ bool AddressSpaceHostMemoryAllocatorContext::load(base::Stream* stream) {
     }
 
     return true;
+}
+
+void AddressSpaceHostMemoryAllocatorContext::clear() {
+    for (const auto& kv : m_paddr2ptr) {
+        uint64_t phys_addr = kv.first;
+        void *host_ptr = kv.second.first;
+        size_t size = kv.second.second;
+
+        if (m_ops->remove_memory_mapping(phys_addr, host_ptr, size)) {
+            android::aligned_buf_free(host_ptr);
+        } else {
+            crashhandler_die("Failed remove a memory mapping {phys_addr=%lx, host_ptr=%p, size=%lu}",
+                             phys_addr, host_ptr, size);
+        }
+    }
 }
 
 }  // namespace emulation

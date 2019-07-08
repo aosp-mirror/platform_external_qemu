@@ -36,6 +36,7 @@ private:
     uint64_t allocate(AddressSpaceDevicePingInfo *info);
     uint64_t unallocate(AddressSpaceDevicePingInfo *info);
     void *allocate_impl(uint64_t phys_addr, uint64_t size);
+    void clear();
 
     std::unordered_map<uint64_t, std::pair<void *, size_t>> m_paddr2ptr;
     const address_space_device_control_ops *m_ops;  // do not save/load
