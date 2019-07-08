@@ -980,13 +980,9 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
-    // helper macros
+    // helper macro for debug print
     fprintf(fp,
-            "#ifdef OPENGL_DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
-            "#else\n"
-            "#  define DEBUG(...)  ((void)0)\n"
-            "#endif\n\n");
+            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n");
 
     fprintf(fp,
 #if DECODER_CHECK_GL_ERRORS

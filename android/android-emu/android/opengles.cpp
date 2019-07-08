@@ -103,6 +103,17 @@ static GLESv2Dispatch* sGLES = nullptr;
 
 int android_initOpenglesEmulation() {
     android_init_opengl_logger();
+
+    bool glFineLogging = System::get()->envGet("ANDROID_EMUGL_FINE_LOG") == "1";
+    bool glLogPrinting = System::get()->envGet("ANDROID_EMUGL_LOG_PRINT") == "1";
+
+    AndroidOpenglLoggerFlags loggerFlags =
+        static_cast<AndroidOpenglLoggerFlags>(
+        (glFineLogging ? OPENGL_LOGGER_DO_FINE_LOGGING : 0) |
+        (glLogPrinting ? OPENGL_LOGGER_PRINT_TO_STDOUT : 0));
+
+    android_opengl_logger_set_flags(loggerFlags);
+
     sOpenglLoggerInitialized = true;
 
     char* error = NULL;

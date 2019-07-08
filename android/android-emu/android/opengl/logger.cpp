@@ -56,15 +56,20 @@ public:
 
     // Fine log: When we want to log very frequent events.
     // Fine logs can be toggled on/off.
-    void writeFine(uint64_t time, const char* str);
     void writeFineTimestamped(const char* str);
 
-    void startFineLog();
-    void stopFineLog();
+    void setLoggerFlags(AndroidOpenglLoggerFlags flags);
+    bool isFineLogging() const;
+
     static OpenGLLogger* get();
+
 private:
+
+    void writeFineLocked(uint64_t time, const char* str);
+    void stopFineLogLocked();
+
     Lock mLock;
-    bool mFineLogActive;
+    AndroidOpenglLoggerFlags mLoggerFlags = OPENGL_LOGGER_NONE;
     std::string mFileName;
     std::ofstream mFileHandle;
     std::string mFineLogFileName;
@@ -79,8 +84,7 @@ OpenGLLogger* OpenGLLogger::get() {
     return sOpenGLLogger.ptr();
 }
 
-OpenGLLogger::OpenGLLogger() :
-    mFineLogActive(false) {
+OpenGLLogger::OpenGLLogger() {
     const std::string& data_dir =
         CrashReporter::get()->getDataExchangeDir();
     mFileName = PathUtils::join(data_dir,
@@ -97,25 +101,31 @@ OpenGLLogger::OpenGLLogger(const char* filename) :
 }
 
 void OpenGLLogger::writeCoarse(const char* str) {
+    AutoLock lock(mLock);
+    if (mLoggerFlags & OPENGL_LOGGER_PRINT_TO_STDOUT) {
+        printf("%s\n", str);
+    }
     if (mFileHandle) {
         mFileHandle << str << std::endl;
     }
 }
 
 void OpenGLLogger::stop() {
-    stopFineLog();
+    AutoLock lock(mLock);
+    stopFineLogLocked();
     mFileHandle.close();
 }
 
-void OpenGLLogger::writeFine(uint64_t time, const char* str) {
-    if (mFineLogActive) {
-        AutoLock lock(mLock);
+void OpenGLLogger::writeFineLocked(uint64_t time, const char* str) {
+    if (mLoggerFlags & OPENGL_LOGGER_PRINT_TO_STDOUT) {
+        printf("%s", str);
+    } else {
         mFineLog.emplace_back(time, str);
     }
 }
 
 void OpenGLLogger::writeFineTimestamped(const char* str) {
-    if (mFineLogActive) {
+    if (mLoggerFlags & OPENGL_LOGGER_DO_FINE_LOGGING) {
         char buf[kBufferLen] = {};
         struct timeval tv;
         gettimeofday(&tv, NULL);
@@ -132,55 +142,70 @@ void OpenGLLogger::writeFineTimestamped(const char* str) {
                 curr_millis,
                 curr_micros,
                 str);
-        writeFine(curr_micros + 1000ULL * curr_millis +
+        AutoLock lock(mLock);
+        writeFineLocked(curr_micros + 1000ULL * curr_millis +
                   1000ULL * 1000ULL * curr_secs, buf);
     }
 }
 
-void OpenGLLogger::startFineLog() {
-    mFineLogActive = true;
+void OpenGLLogger::setLoggerFlags(AndroidOpenglLoggerFlags flags) {
+    AutoLock lock(mLock);
+    bool needStopFineLog =
+        (mLoggerFlags & OPENGL_LOGGER_DO_FINE_LOGGING) &&
+        (!(flags & OPENGL_LOGGER_DO_FINE_LOGGING));
+
+    if (needStopFineLog) {
+        stopFineLogLocked();
+    }
+
+    mLoggerFlags = flags;
 }
 
-void OpenGLLogger::stopFineLog() {
-    if (mFineLogActive) {
-        mFineLogActive = false;
-        // Only print message when fine-grained
-        // logging is turned on.
-        if (!mFineLog.empty()) {
-            fprintf(stderr,
-                    "Writing fine-grained GL log to %s...",
-                    mFineLogFileName.c_str());
-        }
+bool OpenGLLogger::isFineLogging() const {
+    // For speed, we'll just let this read of mLoggerFlags race.
+    return (mLoggerFlags & OPENGL_LOGGER_DO_FINE_LOGGING);
+}
 
-        // Sort log entries according to their timestamps.
-        // This is because the log entries might arrive
-        // out of order.
-        std::sort(mFineLog.begin(), mFineLog.end(),
-                  [](const TimestampedLogEntry& x,
-                     const TimestampedLogEntry& y) {
-                      return x.first < y.first;
-                  });
-
-        for (const auto& entry : mFineLog) {
-            // The fine log does not print newlines
-            // as it is used with the opengl debug
-            // printout in emugl, which adds
-            // newlines of its own.
-            mFineLogFileHandle << entry.second;
-        }
-        mFineLogFileHandle.close();
-        if (!mFineLog.empty()) {
-            fprintf(stderr, "done\n");
-        }
-        mFineLog.clear();
+void OpenGLLogger::stopFineLogLocked() {
+    // Only print message when fine-grained
+    // logging is turned on.
+    if (!mFineLog.empty()) {
+        fprintf(stderr,
+                "Writing fine-grained GL log to %s...",
+                mFineLogFileName.c_str());
     }
+
+    // Sort log entries according to their timestamps.
+    // This is because the log entries might arrive
+    // out of order.
+    std::sort(mFineLog.begin(), mFineLog.end(),
+              [](const TimestampedLogEntry& x,
+                 const TimestampedLogEntry& y) {
+                  return x.first < y.first;
+              });
+
+    for (const auto& entry : mFineLog) {
+        // The fine log does not print newlines
+        // as it is used with the opengl debug
+        // printout in emugl, which adds
+        // newlines of its own.
+        mFineLogFileHandle << entry.second;
+    }
+    mFineLogFileHandle.close();
+    if (!mFineLog.empty()) {
+        fprintf(stderr, "done\n");
+    }
+    mFineLog.clear();
 }
 
 // C interface
 
 void android_init_opengl_logger() {
     OpenGLLogger* gl_log = OpenGLLogger::get();
-    gl_log->startFineLog();
+}
+
+void android_opengl_logger_set_flags(AndroidOpenglLoggerFlags flags) {
+    OpenGLLogger::get()->setLoggerFlags(flags);
 }
 
 void android_opengl_logger_write(const char* fmt, ...) {
@@ -193,12 +218,17 @@ void android_opengl_logger_write(const char* fmt, ...) {
 }
 
 void android_opengl_cxt_logger_write(const char* fmt, ...) {
+    auto gl_log = OpenGLLogger::get();
+
+    if (!gl_log->isFineLogging()) return;
+
     char buf[kBufferLen] = {};
     va_list ap;
     va_start(ap, fmt);
     vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
     va_end(ap);
-    OpenGLLogger::get()->writeFineTimestamped(buf);
+
+    gl_log->writeFineTimestamped(buf);
 }
 
 void android_stop_opengl_logger() {
