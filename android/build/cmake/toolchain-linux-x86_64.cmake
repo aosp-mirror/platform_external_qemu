@@ -43,7 +43,7 @@ if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
     # searching for shared objects by default, which doesn't apply to
     # transitive shared object dependencies. These shared objects should
     # ideally specify their own rpaths.
-    internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64' -Wl,--disable-new-dtags")
+    internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64:$ORIGIN' -Wl,--disable-new-dtags")
 endif()
 
 # We don't want to do any package resolution

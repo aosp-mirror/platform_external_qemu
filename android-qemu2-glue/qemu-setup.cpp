@@ -244,6 +244,16 @@ bool qemu_android_emulation_setup() {
     }
 #endif
 
+    // We are sharing video, time to launch the shared memory recorder.
+    // Note, the webrtc module could have started the shared memory module with
+    // a differrent fps suggestion. (Fps is mainly used by clients as a
+    // suggestion on how often to check for new frames)
+    if (android_cmdLineOptions->share_vid) {
+        if (!getConsoleAgents()->record->startSharedMemoryModule(60)) {
+            dwarning("Unable to setup a shared memory handler, last errno: %d", errno);
+        }
+    }
+
     if (!android_qemu_mode) return true;
 
     android::base::ScopedCPtr<const char> arch(

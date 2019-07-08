@@ -99,7 +99,7 @@ else()
   set(CMAKE_FIND_ROOT_PATH "${ANDROID_SYSROOT}")
 
   # Disable any searching as it might lead to unexpected behavior that varies amongst build environments
-  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  # set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)

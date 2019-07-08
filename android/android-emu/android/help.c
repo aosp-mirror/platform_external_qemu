@@ -1138,6 +1138,19 @@ help_grpc(stralloc_t*  out)
 }
 
 static void
+help_share_vid(stralloc_t*  out)
+{
+    PRINTF(
+    "  Share the current video state in a shared memory region..\n\n"
+    "  A shared memory region will be created that is available under\n"
+    "  the handle videmulatorXXXX where XXXX is the port number of the emulator\n\n"
+    "  For example:\n\n"
+    "  -ports 6000,6001 -share-vid\n\n"
+    "  will create the shared memory region videmulator6000\n"
+    );
+}
+
+static void
 help_turncfg(stralloc_t*  out)
 {
     PRINTF(

@@ -226,6 +226,8 @@ OPT_FLAG(restart_when_stalled, "Allows restarting guest when it is stalled.")
 
 OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the background and write output to specified file.")
 
+OPT_FLAG(share_vid, "Share current video state in shared memory region.")
+
 #ifdef ANDROID_GRPC
 OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge" )
 #endif

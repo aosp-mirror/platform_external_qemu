@@ -287,6 +287,9 @@ function(android_add_shared_library name)
   if (WINDOWS_MSVC_X86_64)
     target_link_libraries(${name} PRIVATE msvc-posix-compat)
   endif()
+
+  android_target_dependency(${name} all RUNTIME_OS_DEPENDENCIES)
+  android_target_properties(${name} all "${RUNTIME_OS_PROPERTIES}")
 endfunction()
 
 # Adds an interface library with the given name. The source files for this target will be resolved as follows: The
