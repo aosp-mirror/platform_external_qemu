@@ -31,7 +31,10 @@ public:
     // in async mode it should do minimal work that involves |fbImage|.
     // |repaint|: flag to prime async readback with multiple iterations
     // so that the consumer of readback doesn't lag behind.
-    void doNextReadback(ColorBuffer* cb, void* fbImage, bool repaint);
+    // |readbackBgra|: Whether to force the readback format as GL_BGRA_EXT,
+    // so that we get (depending on driver quality, heh) a gpu conversion of the
+    // readback image that is suitable for webrtc, which expects formats like that.
+    void doNextReadback(ColorBuffer* cb, void* fbImage, bool repaint, bool readbackBgra);
 
     // getPixels(): Run this on a separate GL thread. This retrieves the
     // latest framebuffer that has been posted and read with doNextReadback.

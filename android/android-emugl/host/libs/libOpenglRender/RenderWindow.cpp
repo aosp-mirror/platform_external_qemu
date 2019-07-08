@@ -85,6 +85,7 @@ struct RenderWindowMessage {
         struct {
             emugl::Renderer::OnPostCallback on_post;
             void* on_post_context;
+            bool use_bgra_readback;
         } set_post_callback;
 
         // CMD_SETUP_SUBWINDOW
@@ -147,7 +148,8 @@ struct RenderWindowMessage {
                 D("CMD_SET_POST_CALLBACK\n");
                 fb = FrameBuffer::getFB();
                 fb->setPostCallback(msg.set_post_callback.on_post,
-                                    msg.set_post_callback.on_post_context);
+                                    msg.set_post_callback.on_post_context,
+                                    msg.set_post_callback.use_bgra_readback);
                 result = true;
                 break;
 
@@ -444,12 +446,13 @@ bool RenderWindow::getHardwareStrings(const char** vendor,
     return true;
 }
 
-void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext) {
+void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext, bool useBgraReadback) {
     D("Entering\n");
     RenderWindowMessage msg = {};
     msg.cmd = CMD_SET_POST_CALLBACK;
     msg.set_post_callback.on_post = onPost;
     msg.set_post_callback.on_post_context = onPostContext;
+    msg.set_post_callback.use_bgra_readback = useBgraReadback;
     (void) processMessage(msg);
     D("Exiting\n");
 }

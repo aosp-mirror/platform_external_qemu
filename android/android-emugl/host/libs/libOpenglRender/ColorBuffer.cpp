@@ -714,7 +714,7 @@ bool ColorBuffer::postWithOverlay(GLuint tex, float rotation, float dx, float dy
     return m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
 }
 
-void ColorBuffer::readback(unsigned char* img) {
+void ColorBuffer::readback(unsigned char* img, bool readbackBgra) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
@@ -726,13 +726,16 @@ void ColorBuffer::readback(unsigned char* img) {
         // The actual internal format for BGRA8 is RGBA8 but RED and BLUE
         // components are swizzled. We use BGRA here as read back format in
         // order to retrieve RGBA pixels.
-        GLenum format = m_sizedInternalFormat == GL_BGRA8_EXT ? GL_BGRA_EXT : GL_RGBA;
+ 
+        bool shouldReadbackBgra = (readbackBgra || (m_sizedInternalFormat == GL_BGRA8_EXT));
+        GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
+
         s_gles2.glReadPixels(0, 0, m_width, m_height, format, GL_UNSIGNED_BYTE, img);
         unbindFbo();
     }
 }
 
-void ColorBuffer::readbackAsync(GLuint buffer) {
+void ColorBuffer::readbackAsync(GLuint buffer, bool readbackBgra) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
@@ -742,33 +745,10 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
 
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
-        GLenum format = m_sizedInternalFormat == GL_BGRA8_EXT ? GL_BGRA_EXT : GL_RGBA;
+        bool shouldReadbackBgra = (readbackBgra || (m_sizedInternalFormat == GL_BGRA8_EXT));
+        GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
         s_gles2.glReadPixels(0, 0, m_width, m_height, format, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-        unbindFbo();
-    }
-}
-
-void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* img) {
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return;
-    }
-    touch();
-    waitSync();
-
-    if (bindFbo(&m_fbo, m_tex)) {
-        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer1);
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, m_asyncReadbackType, 0);
-        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
-        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer2);
-        uint32_t bytes = 4 * m_width * m_height;
-        void* toCopy = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0, bytes, GL_MAP_READ_BIT);
-        memcpy(img, toCopy, bytes);
-        s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
-        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, 0);
-
         unbindFbo();
     }
 }
