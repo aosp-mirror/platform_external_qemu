@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b28267c_3c39dc49",
+        "filename": "android/android-studio/android/emulation/studio/EmulatorView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-09T14:31:44Z",
+      "side": 1,
+      "message": "may want to think about how to make that generalizable if we want to share video from emulator-5556, or more than one emulator at a time",
+      "range": {
+        "startLine": 28,
+        "startChar": 64,
+        "endLine": 28,
+        "endChar": 79
+      },
+      "revId": "306525c3ffe9db7d71185857bfe3c280138d6fe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b09d446_37a367fe",
+        "filename": "android/android-studio/android/emulation/studio/SharedMemory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-09T14:31:44Z",
+      "side": 1,
+      "message": "apache 2.0 headers throughout",
+      "revId": "306525c3ffe9db7d71185857bfe3c280138d6fe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
