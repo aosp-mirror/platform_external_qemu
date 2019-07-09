@@ -62,34 +62,6 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutVelocity,
                                           double* pOutHeading);
 
-#ifdef USE_WEBENGINE
-class BackgroundDelegate : public QItemDelegate {
-public:
-  explicit BackgroundDelegate(QObject *parent = 0)
-      : QItemDelegate(parent){}
-  void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const {
-    QStyleOptionViewItem nonSelect(option);
-    if (option.state & QStyle::State_Selected) {
-        // Put the "selected" color in the background
-        painter->fillRect(option.rect, QBrush(getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)));
-        // Don't have the default highlighting of the selected row;
-        // we'll deal with that explicitly.
-        nonSelect.state = option.state & ~QStyle::State_Selected;
-    }
-    if (index.row() > 0) {
-        // Draw a dividing line at the top of this row
-        painter->setPen(getColorForCurrentTheme(Ui::TABLE_BOTTOM_COLOR_VAR));
-        painter->drawLine(option.rect.x(),
-                          option.rect.y(),
-                          option.rect.x() + option.rect.width() - 1,
-                          option.rect.y());
-    }
-    QItemDelegate::paint(painter, nonSelect, index);
-  }
-};
-#endif // USE_WEBENGINE
-
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
 
 static void updateThreadLoop();
@@ -172,8 +144,6 @@ LocationPage::LocationPage(QWidget *parent) :
         mUi->locationTabs->removeTab(2); // "Settings"
         mUi->locationTabs->removeTab(1); // "Routes"
         mUi->locationTabs->removeTab(0); // "Single points"
-        mUi->loc_pointList->setRowCount(0);
-        mUi->loc_routeList->setRowCount(0);
     }
 
     if (useLocationV2) {
@@ -183,23 +153,11 @@ LocationPage::LocationPage(QWidget *parent) :
 
         setUpWebEngine(); // Set up the Points and Routes web engines
 
-        mPointItemBuilder = new PointItemBuilder(mUi->loc_pointList);
-
-        mUi->loc_pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
-        mUi->loc_pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
-
         scanForPoints();
         populatePointListWidget();
-        highlightPointListWidget();
-
-        mRouteItemBuilder = new RouteItemBuilder(mUi->loc_routeList);
-
-        mUi->loc_routeList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
-        mUi->loc_routeList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
 
         scanForRoutes();
         populateRouteListWidget();
-        highlightRouteListWidget();
         mUi->loc_playRouteButton->setEnabled(false);
         mUi->loc_saveRoute->setEnabled(false);
 #endif
@@ -310,10 +268,6 @@ void LocationPage::updateTheme() {
     mUi->loc_travelMode->setItemIcon(1, getIconForCurrentTheme("walk"));
     mUi->loc_travelMode->setItemIcon(2, getIconForCurrentTheme("bike"));
     mUi->loc_travelMode->setItemIcon(3, getIconForCurrentTheme("transit"));
-
-    // Re-do the lists of routes and points
-    highlightPointListWidget();
-    highlightRouteListWidget();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()

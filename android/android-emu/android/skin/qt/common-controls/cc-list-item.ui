@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RecordMacroSavedItem</class>
- <widget class="QWidget" name="RecordMacroSavedItem">
+ <!-- A list item that contains a title, subtitle, an extra label
+      for additional info, and a button -->
+ <class>CCListItem</class>
+ <widget class="QWidget" name="CCListItem">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,7 +31,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="name">
+      <widget class="QLabel" name="title">
        <property name="font">
         <font>
          <family>Roboto</family>
@@ -40,7 +42,7 @@
         <number>1</number>
        </property>
        <property name="text">
-        <string>Macro Name</string>
+        <string>Title</string>
        </property>
        <property name="ColorGroup" stdset="0">
         <string>ListItem</string>
@@ -48,7 +50,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="displayInfo">
+      <widget class="QLabel" name="subtitle">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
@@ -62,7 +64,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Display Info</string>
+        <string>Subtitle</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -88,38 +90,35 @@
     </spacer>
    </item>
    <item>
-    <widget class="QPushButton" name="editButton">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../resources.qrc">
-       <normaloff>:/light/edit</normaloff>:/light/edit</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>18</width>
-       <height>18</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="displayTime">
+    <widget class="QLabel" name="extraLabel">
      <property name="font">
       <font>
        <family>Roboto</family>
        <pointsize>10</pointsize>
       </font>
      </property>
-     <property name="text">
-      <string>1:00</string>
-     </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <property name="GroupColor" stdset="0">
       <string>ListItem</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="editButton">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/more_vert</normaloff>:/light/more_vert</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>18</width>
+       <height>18</height>
+      </size>
      </property>
     </widget>
    </item>

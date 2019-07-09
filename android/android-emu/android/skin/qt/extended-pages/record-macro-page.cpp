@@ -157,11 +157,11 @@ void RecordMacroPage::on_macroList_currentItemChanged(
         QListWidgetItem* previous) {
     if (current && previous) {
         RecordMacroSavedItem* macroSavedItem = getItemWidget(previous);
-        macroSavedItem->macroSelected(false);
+        macroSavedItem->setSelected(false);
     }
     if (current) {
         RecordMacroSavedItem* macroSavedItem = getItemWidget(current);
-        macroSavedItem->macroSelected(true);
+        macroSavedItem->setSelected(true);
     }
 }
 
@@ -271,7 +271,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
     const std::string macroName = getMacroNameFromItem(listItem);
     // Check if preset or custom.
     std::string macroAbsolutePath;
-    if (macroSavedItem->getIsPreset()) {
+    if (macroSavedItem->isPreset()) {
         macroAbsolutePath = PathUtils::join(getMacrosDirectory(), macroName);
     } else {
         macroAbsolutePath =
@@ -306,7 +306,7 @@ void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
         return;
     }
 
-    if (macroSavedItem->getIsPreset()) {
+    if (macroSavedItem->isPreset()) {
         reportPresetMacroPlayed(macroName);
     }
 }
@@ -397,7 +397,7 @@ void RecordMacroPage::disableMacroItemsExcept(QListWidgetItem* listItem) {
     for (int i = 0; i < mUi->macroList->count(); ++i) {
         QListWidgetItem* item = mUi->macroList->item(i);
         RecordMacroSavedItem* macroItem = getItemWidget(item);
-        macroItem->editEnabled(false);
+        macroItem->setEditButtonEnabled(false);
         if (item != listItem) {
             item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
             macroItem->setEnabled(false);
@@ -423,8 +423,8 @@ void RecordMacroPage::enableMacroItems() {
         item->setFlags(item->flags() | Qt::ItemIsEnabled);
         RecordMacroSavedItem* macroItem = getItemWidget(item);
         macroItem->setEnabled(true);
-        if (!macroItem->getIsPreset()) {
-            macroItem->editEnabled(true);
+        if (!macroItem->isPreset()) {
+            macroItem->setEditButtonEnabled(true);
         }
     }
 }
@@ -785,7 +785,7 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
 
     RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
     if (isPreset) {
-        macroSavedItem->editEnabled(false);
+        macroSavedItem->setEditButtonEnabled(false);
         macroSavedItem->setIsPreset(true);
         mDescriptions[macroName] = tr("Preset macro");
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
@@ -814,8 +814,8 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
         macroSavedItem->setDisplayInfo(mDescriptions[macroName]);
         macroName = sAutomationAgent->getMacroName(filePath);
         connect(macroSavedItem,
-                SIGNAL(editButtonClickedSignal(RecordMacroSavedItem*)), this,
-                SLOT(editButtonClicked(RecordMacroSavedItem*)));
+                SIGNAL(editButtonClickedSignal(CCListItem*)), this,
+                SLOT(editButtonClicked(CCListItem*)));
     }
     
     listItem->setSizeHint(QSize(0, 50));
@@ -832,7 +832,8 @@ bool RecordMacroPage::isPreviewAvailable(const std::string& macroName) {
     return macroName.find(".emu-macro") == std::string::npos;
 }
 
-void RecordMacroPage::editButtonClicked(RecordMacroSavedItem* macroItem) {
+void RecordMacroPage::editButtonClicked(CCListItem* item) {
+    auto* macroItem = reinterpret_cast<RecordMacroSavedItem*>(item);
     RecordMacroEditDialog editDialog(this);
     editDialog.setCurrentName(QString::fromStdString(macroItem->getName()));
 
@@ -921,7 +922,7 @@ void RecordMacroPage::enablePresetMacros(bool enable) {
         for (int i = mUi->macroList->count() - 1; i >= 0; --i) {
             QListWidgetItem* item = mUi->macroList->item(i);
             RecordMacroSavedItem* macroItem = getItemWidget(item);
-            if (macroItem->getIsPreset()) {
+            if (macroItem->isPreset()) {
                 mUi->macroList->takeItem(i);
             }
         }
