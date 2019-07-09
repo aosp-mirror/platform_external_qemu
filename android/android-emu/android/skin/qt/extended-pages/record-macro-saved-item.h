@@ -11,16 +11,9 @@
 
 #pragma once
 
-#include "ui_record-macro-saved-item.h"
+#include "android/skin/qt/common-controls/cc-list-item.h"
 
-#include <QWidget>
-#include <memory>
-
-namespace Ui {
-class RecordMacroSavedItem;
-}
-
-class RecordMacroSavedItem : public QWidget {
+class RecordMacroSavedItem : public CCListItem {
     Q_OBJECT
 
 public:
@@ -30,22 +23,9 @@ public:
     std::string getName() const;
     void setDisplayInfo(QString displayInfo);
     void setDisplayTime(QString displayTime);
-    void macroSelected(bool state);
-    bool getIsPreset();
+    bool isPreset();
     void setIsPreset(bool isPreset);
-    void editEnabled(bool enable);
-
-private slots:
-    void on_editButton_clicked();
-
-signals:
-    void editButtonClickedSignal(RecordMacroSavedItem* macroItem);
 
 private:
-    void setDisplayInfoOpacity(double opacity);
-    void loadUi();
-
     bool mIsPreset = false;
-    QString mName;
-    std::unique_ptr<Ui::RecordMacroSavedItem> mUi;
 };
