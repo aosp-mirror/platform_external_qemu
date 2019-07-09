@@ -91,9 +91,9 @@ static void gpu_frame_set_post(bool on) {
     CHECK(sBridge);
 
     if (on) {
-        android_setPostCallback(choose_on_new_gpu_frame(), sBridge);
+        android_setPostCallback(choose_on_new_gpu_frame(), sBridge, false /* No BGRA readback */);
     } else {
-        android_setPostCallback(nullptr, nullptr);
+        android_setPostCallback(nullptr, nullptr, false /* No BGRA readback */);
     }
 }
 
@@ -109,7 +109,7 @@ void gpu_frame_set_post_callback(
             context);
     CHECK(sBridge);
 
-    android_setPostCallback(choose_on_new_gpu_frame(), sBridge);
+    android_setPostCallback(choose_on_new_gpu_frame(), sBridge, false /* No BGRA readback */);
     sIsGuestMode = true;
 }
 

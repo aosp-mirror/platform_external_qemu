@@ -276,10 +276,10 @@ android_asyncReadbackSupported() {
 }
 
 void
-android_setPostCallback(OnPostFunc onPost, void* onPostContext)
+android_setPostCallback(OnPostFunc onPost, void* onPostContext, bool useBgraReadback)
 {
     if (sRenderer) {
-        sRenderer->setPostCallback(onPost, onPostContext);
+        sRenderer->setPostCallback(onPost, onPostContext, useBgraReadback);
     }
 }
 

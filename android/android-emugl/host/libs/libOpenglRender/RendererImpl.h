@@ -48,7 +48,7 @@ public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
-                                 void* context) final;
+                         void* context, bool useBgraReadback) final;
     bool asyncReadbackSupported() final;
     ReadPixelsCallback getReadPixelsCallback() final;
     bool showOpenGLSubwindow(FBNativeWindowType window,

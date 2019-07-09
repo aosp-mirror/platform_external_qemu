@@ -50,7 +50,7 @@ bool android_asyncReadbackSupported();
 /* See the description in render_api.h. */
 typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,
                            int format, int type, unsigned char* pixels);
-void android_setPostCallback(OnPostFunc onPost, void* onPostContext);
+void android_setPostCallback(OnPostFunc onPost, void* onPostContext, bool useBgraReadback);
 
 typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes);
 ReadPixelsFunc android_getReadPixelsFunc();
