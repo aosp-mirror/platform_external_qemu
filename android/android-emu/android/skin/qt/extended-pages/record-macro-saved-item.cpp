@@ -11,80 +11,30 @@
 
 #include "record-macro-saved-item.h"
 
-#include "android/skin/qt/extended-pages/common.h"
-
-#include <QGraphicsOpacityEffect>
-
-const double kDisplayInfoOpacity = 0.66f;
-const int kNameLabelWidth = 200;
-
 RecordMacroSavedItem::RecordMacroSavedItem(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::RecordMacroSavedItem()) {
-    mUi->setupUi(this);
-
-    loadUi();
+    : CCListItem(parent) {
 }
 
 void RecordMacroSavedItem::setName(QString name) {
-    mName = name;
-    QFontMetrics metrix(mUi->name->font());
-    QString clippedName = 
-            metrix.elidedText(name, Qt::ElideRight, kNameLabelWidth);
-    mUi->name->setText(clippedName);
+    setTitle(name);
 }
 
 std::string RecordMacroSavedItem::getName() const {
-    return mName.toUtf8().constData();
+    return getTitle();
 }
 
 void RecordMacroSavedItem::setDisplayInfo(QString displayInfo) {
-    mUi->displayInfo->setText(displayInfo);
+    setSubtitle(displayInfo);
 }
 
 void RecordMacroSavedItem::setDisplayTime(QString displayTime) {
-    mUi->displayTime->setText(displayTime);
+    setExtraLabelText(displayTime);
 }
 
-void RecordMacroSavedItem::macroSelected(bool state) {
-    if (state) {
-        mUi->name->setStyleSheet("color: white");
-        mUi->displayInfo->setStyleSheet("color: white");
-        mUi->displayTime->setStyleSheet("color: white");
-    } else {
-        mUi->name->setStyleSheet("");
-        mUi->displayInfo->setStyleSheet("");
-        mUi->displayTime->setStyleSheet("");
-    }
-}
-
-void RecordMacroSavedItem::setDisplayInfoOpacity(double opacity) {
-    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(mUi->displayInfo);
-    effect->setOpacity(opacity);
-    mUi->displayInfo->setGraphicsEffect(effect);
-}
-
-bool RecordMacroSavedItem::getIsPreset() {
+bool RecordMacroSavedItem::isPreset() {
     return mIsPreset;
 }
 
 void RecordMacroSavedItem::setIsPreset(bool isPreset) {
     mIsPreset = isPreset;
-}
-
-void RecordMacroSavedItem::loadUi() {
-    setDisplayInfoOpacity(kDisplayInfoOpacity);
-
-    mUi->editButton->setIcon(getIconForCurrentTheme("edit"));
-}
-
-void RecordMacroSavedItem::on_editButton_clicked() {
-    emit editButtonClickedSignal(this);
-}
-
-void RecordMacroSavedItem::editEnabled(bool enable) {
-    if (enable) {
-        mUi->editButton->show();
-    } else {
-        mUi->editButton->hide();
-    }
 }

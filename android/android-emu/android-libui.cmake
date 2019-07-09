@@ -83,6 +83,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/gl-common.cpp
     android/skin/qt/gl-texture-draw.cpp
     android/skin/qt/gl-widget.cpp
+    android/skin/qt/common-controls/cc-list-item.cpp
     android/skin/qt/extended-pages/common.cpp
     android/skin/qt/extended-pages/battery-page.cpp
     android/skin/qt/extended-pages/bug-report-page.cpp
@@ -168,6 +169,7 @@ set(ANDROID_LIBUI_SRC_FILES
 # uic compiler will find this automatically
 set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended.ui
+    android/skin/qt/common-controls/cc-list-item.ui
     android/skin/qt/extended-pages/battery-page.ui
     android/skin/qt/extended-pages/bug-report-page.ui
     android/skin/qt/extended-pages/camera-page.ui
@@ -208,6 +210,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/emulator-qt-window.h
     android/skin/qt/event-capturer.h
     android/skin/qt/event-subscriber.h
+    android/skin/qt/common-controls/cc-list-item.h
     android/skin/qt/extended-pages/battery-page.h
     android/skin/qt/extended-pages/bug-report-page.h
     android/skin/qt/extended-pages/camera-page.h

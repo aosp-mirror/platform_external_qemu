@@ -34,15 +34,43 @@
 
 static const char PROTO_FILE_NAME[] = "point_metadata.pb";
 
+namespace {
+using PointListElement = LocationPage::PointListElement;
+
+class PointItemBuilder {
+public:
+    PointItemBuilder(QListWidget* listWidget) :
+        mListWidget(listWidget)
+    {
+    }
+
+    PointWidgetItem* addPoint(PointListElement* p) {
+        QListWidgetItem* listItem = new QListWidgetItem(mListWidget);
+        PointWidgetItem* pointWidgetItem = new PointWidgetItem(p, listItem);
+        listItem->setSizeHint(QSize(0, 50));
+        mListWidget->addItem(listItem);
+        mListWidget->setItemWidget(listItem, pointWidgetItem);
+        return pointWidgetItem;
+    }
+
+private:
+    QListWidget* mListWidget = nullptr;
+};
+
+PointWidgetItem* getItemWidget(QListWidget* list,
+                               QListWidgetItem* listItem) {
+    return qobject_cast<PointWidgetItem*>(list->itemWidget(listItem));
+}
+}  // namespace
+
 // Invoked when the user clicks on the map
 void LocationPage::sendLocation(const QString& lat, const QString& lng, const QString& address) {
     mLastLat = lat;
     mLastLng = lng;
     mLastAddr = address;
     // Make nothing selected now
-    mUi->loc_pointList->setCurrentItem(nullptr);
     mSelectedPointName.clear();
-    highlightPointListWidget();
+    mUi->loc_pointList->setCurrentItem(nullptr);
 }
 
 void LocationPage::on_loc_savePoint_clicked() {
@@ -59,9 +87,26 @@ void LocationPage::on_loc_savePoint_clicked() {
     ptMetadata.set_address(mLastAddr.toStdString());
 
     std::string fullPath = writePointProtobufByName(pointName, ptMetadata);
-    mSelectedPointName = fullPath.c_str();
+    mSelectedPointName = QString::fromStdString(fullPath);
 
-    populatePointListWidget();
+    // Add the new point to the list
+    PointListElement listElement;
+    listElement.protoFilePath = QString::fromStdString(fullPath);
+    listElement.logicalName = QString::fromStdString(ptMetadata.logical_name());
+    listElement.description = QString::fromStdString(ptMetadata.description());
+    listElement.latitude = ptMetadata.latitude();
+    listElement.longitude = ptMetadata.longitude();
+    listElement.address = QString::fromStdString(ptMetadata.address());
+
+    mPointList.append(listElement);
+
+    PointItemBuilder builder(mUi->loc_pointList);
+    PointWidgetItem* pointWidgetItem = builder.addPoint(&mPointList.back());
+    connect(pointWidgetItem,
+            SIGNAL(editButtonClickedSignal(CCListItem*)), this,
+            SLOT(pointWidget_editButtonClicked(CCListItem*)));
+
+    mUi->loc_pointList->setCurrentItem(pointWidgetItem->getListWidgetItem());
 }
 
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
@@ -70,7 +115,6 @@ void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
 
 // Populate mPointList with the points that are found on disk
 void LocationPage::scanForPoints() {
-
     mPointList.clear();
 
     // Get the directory
@@ -103,12 +147,12 @@ void LocationPage::scanForPoints() {
         if (pointMetadata == nullptr) continue;
 
         PointListElement listElement;
-        listElement.protoFilePath = protoFilePath.c_str();
-        listElement.logicalName = pointMetadata->logical_name().c_str();
-        listElement.description = pointMetadata->description().c_str();
+        listElement.protoFilePath = QString::fromStdString(protoFilePath);
+        listElement.logicalName = QString::fromStdString(pointMetadata->logical_name());
+        listElement.description = QString::fromStdString(pointMetadata->description());
         listElement.latitude = pointMetadata->latitude();
         listElement.longitude = pointMetadata->longitude();
-        listElement.address = pointMetadata->address().c_str();
+        listElement.address = QString::fromStdString(pointMetadata->address());
 
         mPointList.append(listElement);
     }
@@ -116,111 +160,82 @@ void LocationPage::scanForPoints() {
 
 // Update mPointList and populate the UI list of points
 void LocationPage::populatePointListWidget() {
-    // Get the saved points
-    scanForPoints();
-
+    mUi->loc_pointList->clear();
     // Disable sorting while we're updating the table
     mUi->loc_pointList->setSortingEnabled(false);
 
-    // Set the dotdotdot column to take the available space. This
-    // prevents the widget from scrolling horizontally due to an
-    // unreasonably wide final column.
-    mUi->loc_pointList->setColumnWidth(1,
-            mUi->loc_pointList->width() - mUi->loc_pointList->columnWidth(0));
-
     int nItems = mPointList.size();
-    mUi->loc_pointList->setRowCount(nItems);
 
+    PointItemBuilder builder(mUi->loc_pointList);
     for (int idx = 0; idx < nItems; idx++) {
-        mUi->loc_pointList->setItem(idx, 0, new PointWidgetItem(&mPointList[idx]));
-        mUi->loc_pointList->setItem(idx, 1, new QTableWidgetItem());
+        PointWidgetItem* pointWidgetItem = builder.addPoint(&mPointList[idx]);
+        connect(pointWidgetItem,
+                SIGNAL(editButtonClickedSignal(CCListItem*)), this,
+                SLOT(pointWidget_editButtonClicked(CCListItem*)));
     }
 
     // All done updating. Enable sorting now.
-    mUi->loc_pointList->sortByColumn(0, Qt::AscendingOrder);
     mUi->loc_pointList->setSortingEnabled(true);
 
     // If the list is empty, show an overlay saying that.
     mUi->loc_noSavedPoints_mask->setVisible(nItems <= 0);
-
-    // Highlight the selected row
-    highlightPointListWidget();
 }
 
-// Update the appearance of the UI list of points to
-// highlight the row that is selected
-void LocationPage::highlightPointListWidget() {
-    // Update the QTableWidgetItems that are associated
-    // with this widget
-    for (int row = 0; row < mUi->loc_pointList->rowCount(); row++) {
-        PointWidgetItem* pointItem = (PointWidgetItem*)mUi->loc_pointList->takeItem(row, 0);
-        bool isSelected = (mSelectedPointName == pointItem->pointElement->protoFilePath);
-        mPointItemBuilder->highlightPointWidgetItem(pointItem, isSelected);
-        mUi->loc_pointList->setItem(row, 0, pointItem);
-
-        QTableWidgetItem* dotDotItem = mUi->loc_pointList->takeItem(row, 1);
-        mPointItemBuilder->highlightDotDotWidgetItem(dotDotItem, isSelected);
-        mUi->loc_pointList->setItem(row, 1, dotDotItem);
-
-        if (isSelected) {
-            mUi->loc_pointList->setCurrentItem(pointItem);
+void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
+                                                       QListWidgetItem* previous) {
+    if (previous) {
+        PointWidgetItem* item = getItemWidget(mUi->loc_pointList, previous);
+        if (item != nullptr) {
+            item->setSelected(false);
         }
     }
-    mUi->loc_pointList->viewport()->repaint();
-}
+    if (current) {
+        PointWidgetItem* item = getItemWidget(mUi->loc_pointList, current);
+        if (item != nullptr) {
+            item->setSelected(true);
+            // update the selected point
+            auto* pointElement = item->pointElement();
+            if (pointElement == nullptr || mSelectedPointName == pointElement->protoFilePath) {
+                // No change in the selection
+                return;
+            }
 
-void LocationPage::on_loc_pointList_cellClicked(int row, int column) {
-    mUi->loc_pointList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
-    if (column == 1) {
-        QMenu* popMenu = new QMenu(this);
-        QAction* editAction   = popMenu->addAction(tr("Edit"));
-        QAction* deleteAction = popMenu->addAction(tr("Delete"));
+            mSelectedPointName = pointElement->protoFilePath;
 
-        QAction* theAction = popMenu->exec(QCursor::pos());
-        if (theAction == editAction) {
-            editPoint(row);
-        } else if (theAction == deleteAction) {
-            deletePoint(row);
+            mLastLat = QString::number(pointElement->latitude, 'g', 12);
+            mLastLng = QString::number(pointElement->longitude, 'g', 12);
+
+            // show the location on the map, but do not send it to the device
+            emit showLocation(mLastLat, mLastLng);
         }
     }
 }
 
-void LocationPage::on_loc_pointList_itemSelectionChanged() {
-    int selectedRow = mUi->loc_pointList->currentRow();
-    if (selectedRow < 0) return;
+void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
+    auto* pointWidgetItem = reinterpret_cast<PointWidgetItem*>(listItem);
+    QMenu* popMenu = new QMenu(this);
+    QAction* editAction   = popMenu->addAction(tr("Edit"));
+    QAction* deleteAction = popMenu->addAction(tr("Delete"));
 
-    mUi->loc_pointList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
-
-    auto widgetItem = (PointWidgetItem*)(mUi->loc_pointList->item(selectedRow, 0));
-    auto pointElement = widgetItem->pointElement;
-
-    if (mSelectedPointName == pointElement->protoFilePath) {
-        // No change in the selection
-        if (selectedRow >= 0) {
-            mUi->loc_pointList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
-            mUi->loc_pointList->scrollToItem(mUi->loc_pointList->currentItem());
-        }
-        return;
+    mUi->loc_pointList->setCurrentItem(pointWidgetItem->getListWidgetItem());
+    QAction* theAction = popMenu->exec(QCursor::pos());
+    if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
+        pointWidgetItem->refresh();
+        emit showLocation(mLastLat, mLastLng);
+    } else if (theAction == deleteAction && deletePoint(pointWidgetItem->pointElement())) {
+        mUi->loc_pointList->setCurrentItem(nullptr);
+        auto item = pointWidgetItem->takeListWidgetItem();
+        mUi->loc_pointList->removeItemWidget(item);
+        delete item;
+        mPointList.removeOne(*(pointWidgetItem->takePointElement()));
+        // If the list is empty, show an overlay saying that.
+        mUi->loc_noSavedPoints_mask->setVisible(mPointList.size() == 0);
     }
-
-    mSelectedPointName = pointElement->protoFilePath;
-
-    mLastLat = QString::number(pointElement->latitude, 'g', 12);
-    mLastLng = QString::number(pointElement->longitude, 'g', 12);
-
-    // Show the location, but do not send it to the device
-    emit showLocation(mLastLat, mLastLng);
-
-    // Redraw the table to show the new selection
-    highlightPointListWidget();
 }
 
-void LocationPage::editPoint(int row) {
+bool LocationPage::editPoint(PointListElement* pointElement) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
-
-    auto widgetItem = (PointWidgetItem*)(mUi->loc_pointList->item(row, 0));
-    auto pointElement = widgetItem->pointElement;
 
     // Name
     dialogLayout->addWidget(new QLabel(tr("Name")));
@@ -277,7 +292,7 @@ void LocationPage::editPoint(int row) {
     int selection = editDialog.exec();
 
     if (selection == QDialog::Rejected) {
-        return;
+        return false;
     }
 
     QString newName = nameEdit->text();
@@ -293,32 +308,33 @@ void LocationPage::editPoint(int row) {
         android::location::Point point(pointElement->protoFilePath.toStdString().c_str());
 
         const emulator_location::PointMetadata* oldPointMetadata = point.getProtoInfo();
-        if (oldPointMetadata == nullptr) return;
+        if (oldPointMetadata == nullptr) return false;
 
         emulator_location::PointMetadata pointMetadata(*oldPointMetadata);
 
         if (!newName.isEmpty()) {
             pointMetadata.set_logical_name(newName.toStdString().c_str());
+            pointElement->logicalName = newName;
         }
         pointMetadata.set_description(newDescription.toStdString().c_str());
+        pointElement->description = newDescription;
+
+        mLastLat = QString::number(pointElement->latitude, 'g', 12);
+        mLastLng = QString::number(pointElement->longitude, 'g', 12);
 
         writePointProtobufFullPath(pointElement->protoFilePath, pointMetadata);
-        populatePointListWidget();
         QApplication::restoreOverrideCursor();
     }
+
+    return true;
 }
 
-void LocationPage::deletePoint(int row) {
-    if (row < 0 || row >= mPointList.size()) {
-        return;
-    }
-    auto widgetItem = (PointWidgetItem*)(mUi->loc_pointList->item(row, 0));
-    auto thisPoint = widgetItem->pointElement;
-
+bool LocationPage::deletePoint(const PointListElement* pointElement) {
+    bool ret = false;
     QMessageBox msgBox(QMessageBox::Warning,
                        tr("Delete point"),
                        tr("Do you want to permanently delete<br>point \"%1\"?")
-                               .arg(thisPoint->logicalName),
+                               .arg(pointElement->logicalName),
                        QMessageBox::Cancel,
                        this);
     QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
@@ -328,7 +344,7 @@ void LocationPage::deletePoint(int row) {
 
     if (selection == QMessageBox::Ok) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        std::string protobufName = thisPoint->protoFilePath.toStdString();
+        std::string protobufName = pointElement->protoFilePath.toStdString();
         android::base::StringView dirName;
         bool haveDirName = android::base::PathUtils::split(protobufName,
                                                            &dirName,
@@ -336,59 +352,13 @@ void LocationPage::deletePoint(int row) {
         if (haveDirName) {
             path_delete_dir(dirName.str().c_str());
             mSelectedPointName.clear();
-            mUi->loc_pointList->setCurrentItem(nullptr);
-            populatePointListWidget();
+            ret = true;
         }
 
         QApplication::restoreOverrideCursor();
     }
-}
 
-void
-LocationPage::PointItemBuilder::highlightPointWidgetItem(LocationPage::PointWidgetItem* theItem,
-                                                         bool isSelected)
-{
-    QColor foregroundColor = getColorForCurrentTheme(Ui::THEME_TEXT_COLOR);
-    QColor backgroundColor = isSelected ? getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)
-                                        : getColorForCurrentTheme(Ui::TAB_BKG_COLOR_VAR);
-
-    QPixmap basePixmap(mFieldWidth, mFieldHeight);
-    basePixmap.fill(backgroundColor);
-    QPainter painter(&basePixmap);
-    painter.setPen(foregroundColor);
-
-    QFont baseFont = painter.font();
-    int baseFontHeight = painter.fontInfo().pointSize();
-
-    QFont bigFont = baseFont;
-    bigFont.setPointSize(bigFont.pointSize() + 2);
-    painter.setFont(bigFont);
-    int bigFontHeight = painter.fontInfo().pointSize();
-
-    int vertPosition = (mFieldHeight - (bigFontHeight + TEXT_SEPARATION + baseFontHeight)) / 2;
-    vertPosition += bigFontHeight;
-    painter.drawText(HORIZ_PADDING, vertPosition, theItem->pointElement->logicalName);
-
-    painter.setFont(baseFont);
-    vertPosition += bigFontHeight + TEXT_SEPARATION;
-    painter.drawText(HORIZ_PADDING, vertPosition, theItem->pointElement->address);
-
-    theItem->setIcon(basePixmap);
-}
-
-void LocationPage::PointItemBuilder::highlightDotDotWidgetItem(QTableWidgetItem* dotDotItem, bool isSelected) {
-    QColor backgroundColor = isSelected ? getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)
-                                        : getColorForCurrentTheme(Ui::TAB_BKG_COLOR_VAR);
-
-    QPixmap basePixmap(ICON_SIZE, ICON_SIZE);
-    basePixmap.fill(backgroundColor);
-    QPainter painter(&basePixmap);
-
-    QPixmap dotDotIcon = getIconForCurrentTheme("more_vert").pixmap(ICON_SIZE, ICON_SIZE);
-
-    painter.drawPixmap(QRect(0, 0, ICON_SIZE, ICON_SIZE), dotDotIcon);
-
-    dotDotItem->setIcon(basePixmap);
+    return ret;
 }
 
 // Write a protobuf into the specified directory.
@@ -539,15 +509,9 @@ void LocationPage::on_loc_savePoint_clicked() { }
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
 void LocationPage::populatePointListWidget() { }
-void LocationPage::highlightPointListWidget() { }
-void LocationPage::on_loc_pointList_cellClicked(int row, int column) { }
-void LocationPage::on_loc_pointList_itemSelectionChanged() { }
-void LocationPage::editPoint(int row) { }
-void LocationPage::deletePoint(int row) { }
-void LocationPage::PointItemBuilder::highlightPointWidgetItem(LocationPage::PointWidgetItem* theItem,
-                                                              bool isSelected) { }
-void LocationPage::PointItemBuilder::highlightDotDotWidgetItem(QTableWidgetItem* dotDotItem,
-                                                               bool isSelected) { }
+void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous) { }
+bool LocationPage::editPoint(PointListElement* pointElement) { }
+bool LocationPage::deletePoint(const PointListElement* pointElement) { }
 std::string LocationPage::writePointProtobufByName(
         const QString& pointFormalName,
         const emulator_location::PointMetadata& protobuf) { return ""; }
@@ -555,4 +519,5 @@ void LocationPage::writePointProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::PointMetadata& protobuf) { }
 void LocationPage::setUpWebEngine() { }
+void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) { }
 #endif // !USE_WEBENGINE
