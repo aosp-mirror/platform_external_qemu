@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2649f7c0_acbbd65c",
+        "filename": "android/android-studio/android/emulation/studio/EmulatorView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-09T15:52:54Z",
+      "side": 1,
+      "message": "Yes, the default constructor should not really be used.  Let me just remove this one, so no one will accidentally use it.",
+      "parentUuid": "3b28267c_3c39dc49",
+      "range": {
+        "startLine": 28,
+        "startChar": 64,
+        "endLine": 28,
+        "endChar": 79
+      },
+      "revId": "306525c3ffe9db7d71185857bfe3c280138d6fe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2b09d446_37a367fe",
         "filename": "android/android-studio/android/emulation/studio/SharedMemory.cpp",
         "patchSetId": 2
@@ -39,6 +63,24 @@
       "revId": "306525c3ffe9db7d71185857bfe3c280138d6fe2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ad3c486_17753691",
+        "filename": "android/android-studio/android/emulation/studio/SharedMemory.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-09T15:52:54Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2b09d446_37a367fe",
+      "revId": "306525c3ffe9db7d71185857bfe3c280138d6fe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
