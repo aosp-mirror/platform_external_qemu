@@ -96,22 +96,22 @@ int gFps = 0;
 bool gRtcRunning = false;
 
 extern "C" {
-bool startWebRtcModule(const char* module, int fps) {
-    gModule = module;
+const char* startSharedMemoryModule(int fps) {
+    gModule = "shared_region";
     gFps = fps;
     gRtcRunning = true;
-    return true;
+    return gModule;
 }
 
-bool stopWebRtcModule() {
+bool stopSharedMemoryModule() {
     gRtcRunning = false;
     return true;
 }
 }
 
 static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
-        .startWebRtcModule = startWebRtcModule,
-        .stopWebRtcModule = stopWebRtcModule};
+        .startSharedMemoryModule = startSharedMemoryModule,
+        .stopSharedMemoryModule = stopSharedMemoryModule};
 
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
         &sQAndroidRecordScreenAgent;
@@ -378,7 +378,7 @@ TEST(WebRtcBridge, startChangesState) {
     EXPECT_EQ(bridge.state(), RtcBridge::BridgeState::Connected);
 }
 
-TEST(WebRtcBridge, startStopWebRtcModule) {
+TEST(WebRtcBridge, startStopSharedMemoryModule) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
     TestBridge bridge(socket);
     socket->close();

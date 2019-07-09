@@ -16,6 +16,8 @@
 #include "android/base/memory/SharedMemory.h"
 #include "modules/video_capture/video_capture_impl.h"
 #include "rtc_base/platform_thread.h"
+#include "VideoShareInfo.h"
+#include <vector>
 
 using android::base::SharedMemory;
 using ::webrtc::VideoCaptureCapability;
@@ -55,10 +57,14 @@ private:
     rtc::CriticalSection mCaptureCS;
     VideoCaptureCapability mSettings;
     SharedMemory mSharedMemory;
+    VideoShareInfo::VideoInfo* mVideoInfo;
     void* mPixelBuffer;
     uint32_t mPixelBufferSize;
     uint64_t mPrevTimestamp = 0;
     int64_t mMaxFrameDelayUs = kUsPerSecond / kInitialFrameRate;
+
+    uint32_t mPrevframeNumber = 0;  // Frames are ordered
+    uint64_t mPrevtsUs = 0;         // Timestamp when this frame was received.
     bool mCaptureStarted;
 };
 

@@ -143,7 +143,7 @@ public:
     int open(AccessMode access);
 
     bool isOpen() const;
-    void close();
+    void close(bool forceDestroy=false);
 
     size_t size() const { return mSize; }
     StringView name() const { return mName; }

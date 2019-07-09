@@ -58,7 +58,7 @@ public:
             mFormat.videoFormat = mGuestReadbackWorker->getPixelFormat();
         } else {
             // The host framebuffer is always using RGBA8888.
-            mFormat.videoFormat = VideoFormat::RGBA8888;
+            mFormat.videoFormat = VideoFormat::BGRA8888;
         }
 
         // Prefill the free queue with empty frames

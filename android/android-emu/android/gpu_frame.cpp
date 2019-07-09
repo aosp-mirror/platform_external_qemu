@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/opengl/GpuFrameBridge.h"
 #include "android/gpu_frame.h"
+
+#include <atomic>
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/opengl/GpuFrameBridge.h"
 #include "android/opengles.h"
-
-#include <functional>
 
 // Standard values from Khronos.
 #define GL_RGBA 0x1908
@@ -32,6 +31,14 @@ static GpuFrameBridge* sBridge = NULL;
 // We need some way to disable the post() if only the recording is using that
 // path and it is not in use because glReadPixels will slow down everything.
 static bool sIsGuestMode = false;
+
+
+static FrameAvailableCallback sFrameReceiver;
+static void* sFrameReceiverOpaque;
+
+// Used to keep track of how many recorders we have active.
+// Frame forwarding will stop if this hits 0.
+static std::atomic<int> sRecordCounter(0);
 
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
@@ -91,25 +98,27 @@ static void gpu_frame_set_post(bool on) {
     CHECK(sBridge);
 
     if (on) {
-        android_setPostCallback(choose_on_new_gpu_frame(), sBridge, false /* No BGRA readback */);
+        android_setPostCallback(choose_on_new_gpu_frame(), sBridge, true /* BGRA readback */);
     } else {
-        android_setPostCallback(nullptr, nullptr, false /* No BGRA readback */);
+        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */);
     }
 }
 
-void gpu_frame_set_post_callback(
-        Looper* looper,
-        void* context,
-        on_post_callback_t callback) {
+static void frame_callback() {
+    if (sFrameReceiver) {
+        sFrameReceiver(sFrameReceiverOpaque);
+    }
+}
+void gpu_frame_set_post_callback(Looper* looper,
+                                 void* context,
+                                 on_post_callback_t callback) {
     DCHECK(!sBridge);
-
     sBridge = android::opengl::GpuFrameBridge::create(
-            reinterpret_cast<android::base::Looper*>(looper),
-            callback,
+            reinterpret_cast<android::base::Looper*>(looper), callback,
             context);
     CHECK(sBridge);
-
-    android_setPostCallback(choose_on_new_gpu_frame(), sBridge, false /* No BGRA readback */);
+    sBridge->setFrameReceiver(sFrameReceiver, sFrameReceiverOpaque);
+    android_setPostCallback(choose_on_new_gpu_frame(), sBridge, true /* BGRA readback */);
     sIsGuestMode = true;
 }
 
@@ -120,12 +129,23 @@ bool gpu_frame_set_record_mode(bool on) {
         return false;
     }
 
+    // Note that we can have multiple recorders active at the same time:
+    // 1. The WebRTC module might want to expose the shared region
+    // 2. A Java View might want expose the shared region inside android studio
+    // 3. The ffmpeg based video recorder might want to receive frames.
+    // The updates are atomic operations.
+    sRecordCounter += on ? 1 : -1;
+
     if (!sBridge) {
-        sBridge = android::opengl::GpuFrameBridge::create(nullptr, nullptr, nullptr);
+        sBridge = android::opengl::GpuFrameBridge::create(nullptr, nullptr,
+                                                          nullptr);
+        sBridge->setFrameReceiver(sFrameReceiver, sFrameReceiverOpaque);
     }
     CHECK(sBridge);
 
-    gpu_frame_set_post(on);
+    // We need frames if we have at least one recorder.
+    gpu_frame_set_post(sRecordCounter > 0);
+
     // Need to invalidate the recording buffers in GpuFrameBridge so on the next
     // recording we only read the new data and not data from the previous
     // recording. The buffers will be valid again once new data has been posted.
@@ -141,5 +161,14 @@ void* gpu_frame_get_record_frame() {
         return sBridge->getRecordFrameAsync();
     } else {
         return sBridge->getRecordFrame();
+    }
+}
+
+void gpu_set_shared_memory_callback(FrameAvailableCallback frameAvailable, void* opaque) {
+        sFrameReceiver = frameAvailable;
+        sFrameReceiverOpaque = opaque;
+
+    if (sBridge) {
+        sBridge->setFrameReceiver(sFrameReceiver, sFrameReceiverOpaque);
     }
 }
