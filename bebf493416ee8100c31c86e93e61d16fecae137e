@@ -33,6 +33,24 @@
       "revId": "bebf493416ee8100c31c86e93e61d16fecae137e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97d5d9c2_e29610b0",
+        "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-10T20:43:54Z",
+      "side": 1,
+      "message": "We need to resolve JAVA/JAVAC in crosscompile. Will remove this line",
+      "parentUuid": "4c855b70_0793faa2",
+      "revId": "bebf493416ee8100c31c86e93e61d16fecae137e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
