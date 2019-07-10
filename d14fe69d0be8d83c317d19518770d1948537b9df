@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55b66225_389659d9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T14:28:36Z",
+      "side": 1,
+      "message": "needs to error out if the m_yuv420_888_buf is not the right size",
+      "range": {
+        "startLine": 367,
+        "startChar": 4,
+        "endLine": 367,
+        "endChar": 57
+      },
+      "revId": "d14fe69d0be8d83c317d19518770d1948537b9df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "330b7afe_73326368",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T14:28:36Z",
+      "side": 1,
+      "message": "maybe readPixelsYUVCached to signal that it is from a cache and not from the current rgba buffer?",
+      "range": {
+        "startLine": 165,
+        "startChar": 9,
+        "endLine": 165,
+        "endChar": 22
+      },
+      "revId": "d14fe69d0be8d83c317d19518770d1948537b9df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
