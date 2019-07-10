@@ -34,8 +34,14 @@ public:
     virtual ~MultiDisplayPipe();
 
     void onMessage(const std::vector<uint8_t>& data) override;
-    static void setMultiDisplay(uint32_t id, uint32_t x, uint32_t y, uint32_t w,
-                                uint32_t h, uint32_t dpi, uint32_t flag, bool add);
+    static void setMultiDisplay(uint32_t id,
+                                int32_t x,
+                                int32_t y,
+                                uint32_t w,
+                                uint32_t h,
+                                uint32_t dpi,
+                                uint32_t flag,
+                                bool add);
     const static uint8_t ADD;
     const static uint8_t DEL;
     const static uint8_t QUERY;

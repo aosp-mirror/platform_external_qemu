@@ -79,9 +79,9 @@ rcGetColorBufferDisplay
 
 rcGetDisplayPose
     dir x out
-    len x sizeof(uint32_t)
+    len x sizeof(int32_t)
     dir y out
-    len y sizeof(uint32_t)
+    len y sizeof(int32_t)
     dir w out
     len w sizeof(uint32_t)
     dir h out

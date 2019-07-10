@@ -2402,8 +2402,8 @@ bool FrameBuffer::onLoad(Stream* stream,
                    [this](Stream* stream) -> std::unordered_map<uint32_t, DisplayInfo>::value_type {
         const uint32_t idx = stream->getBe32();
         const uint32_t cb = stream->getBe32();
-        const uint32_t pos_x = stream->getBe32();
-        const uint32_t pos_y = stream->getBe32();
+        const int32_t pos_x = stream->getBe32();
+        const int32_t pos_y = stream->getBe32();
         const uint32_t width = stream->getBe32();
         const uint32_t height = stream->getBe32();
         return {idx, {cb, pos_x, pos_y, width, height}};
@@ -2539,8 +2539,9 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
         m_displays.erase(displayId);
         emugl::get_emugl_window_operations().setMultiDisplay(displayId, 0, 0, 0,
                                                              0, false);
-        resolveLayout();
+        recomputeLayout();
         getCombinedDisplaySize(&width, &height);
+        setDisplayPoseInSkinUI(height);
     }
     // unlock before calling setUIDisplayRegion
     emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
@@ -2587,7 +2588,11 @@ int FrameBuffer::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId
     return 0;
 }
 
-int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+int FrameBuffer::getDisplayPose(uint32_t displayId,
+                                int32_t* x,
+                                int32_t* y,
+                                uint32_t* w,
+                                uint32_t* h) {
     AutoLock mutex(m_lock);
     if (m_displays.find(displayId) == m_displays.end()) {
         return -1;
@@ -2599,7 +2604,11 @@ int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, ui
     return 0;
 }
 
-int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+int FrameBuffer::setDisplayPose(uint32_t displayId,
+                                int32_t x,
+                                int32_t y,
+                                uint32_t w,
+                                uint32_t h) {
     int width, height;
 
     {
@@ -2609,13 +2618,14 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
         }
         m_displays[displayId].width = w;
         m_displays[displayId].height = h;
-        if (x == 0 && y ==0) {
-            resolveLayout();
+        if (x == -1 && y == -1) {
+            recomputeLayout();
         } else {
             m_displays[displayId].pos_x = x;
             m_displays[displayId].pos_y = y;
         }
         getCombinedDisplaySize(&width, &height);
+        setDisplayPoseInSkinUI(height);
     }
 
     // unlock before calling setUIDisplayRegion
@@ -2639,7 +2649,7 @@ int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint
  * input coordinates willl be calculated correctly when mouse events are
  * captured by QT window.
  */
-void FrameBuffer::resolveLayout() {
+void FrameBuffer::recomputeLayout() {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     for (const auto& iter : m_displays) {
         rectangles[iter.first] =
@@ -2650,9 +2660,9 @@ void FrameBuffer::resolveLayout() {
         m_displays[iter.first].pos_x = iter.second.first;
         m_displays[iter.first].pos_y = iter.second.second;
     }
-    int totalHeight = 0;
-    getCombinedDisplaySize(nullptr, &totalHeight);
+}
 
+void FrameBuffer::setDisplayPoseInSkinUI(int totalHeight) {
     // QT window uses the top left corner as the origin.
     // So we need to transform the (x, y) coordinates from
     // bottom left corner to top left corner.
@@ -2666,9 +2676,7 @@ void FrameBuffer::resolveLayout() {
                 m_displays[displayId].width, m_displays[displayId].height,
                 true);
     }
-
 }
-
 void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
