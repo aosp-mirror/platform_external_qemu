@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97fb666e_4a9c6e18",
+        "filename": "android/build/cmake/toolchain-windows-x86_64.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T18:20:24Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "bebf493416ee8100c31c86e93e61d16fecae137e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c855b70_0793faa2",
+        "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T18:20:24Z",
+      "side": 1,
+      "message": "still need?",
+      "revId": "bebf493416ee8100c31c86e93e61d16fecae137e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
