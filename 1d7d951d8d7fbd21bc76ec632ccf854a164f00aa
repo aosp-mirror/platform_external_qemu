@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d272fde4_cfce03de",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T15:45:53Z",
+      "side": 1,
+      "message": "im getting lower scores in glmark2 vulkan on android with readBefore for some reason",
+      "revId": "1d7d951d8d7fbd21bc76ec632ccf854a164f00aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
