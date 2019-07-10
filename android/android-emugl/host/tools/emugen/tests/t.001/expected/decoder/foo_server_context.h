@@ -7,6 +7,8 @@
 
 #include "foo_types.h"
 
+#include <functional>
+
 
 struct foo_server_context_t {
 
@@ -20,6 +22,9 @@ struct foo_server_context_t {
 	fooInout_server_proc_t fooInout;
 	virtual ~foo_server_context_t() {}
 	int initDispatchByName( void *(*getProc)(const char *name, void *userData), void *userData);
+	void registerOnReadbackFuncs(std::function<void()> onBegin, std::function<void()> onEnd) { mOnBeginReadback = onBegin; mOnEndReadback = onEnd; }
+	std::function<void()> mOnBeginReadback;
+	std::function<void()> mOnEndReadback;
 };
 
 #endif

@@ -15,6 +15,7 @@
 
 #include "RenderThread.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 
 #include <algorithm>
 #include <utility>
@@ -24,6 +25,8 @@
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
+
+using android::base::System;
 
 namespace emugl {
 
@@ -209,6 +212,53 @@ void RenderChannelImpl::onSave(android::base::Stream* stream) {
     stream->putBe32(static_cast<uint32_t>(mWantedEvents));
     lock.unlock();
     mRenderThread->save(stream);
+}
+
+static constexpr System::Duration kMaxReceiveDelayUs = 4;
+
+void RenderChannelImpl::waitPendingReadback() {
+    PendingReadbackMessage msg;
+
+    if (!mPendingReadbacks.tryReceive(&msg)) {
+        return;
+    }
+
+    if (msg == PendingReadbackMessage::End) {
+        return;
+    }
+
+    if (msg == PendingReadbackMessage::Begin) {
+        mPendingReadbacks.timedReceive(
+          System::get()->getUnixTimeUs() + kMaxReceiveDelayUs);
+    }
+}
+
+void RenderChannelImpl::beginPendingReadback() {
+    PendingReadbackMessage msg = PendingReadbackMessage::Begin;
+    mPendingReadbacks.send(msg);
+}
+
+void RenderChannelImpl::signalPendingReadback() {
+    PendingReadbackMessage msg = PendingReadbackMessage::End;
+    mPendingReadbacks.send(msg);
+}
+
+void RenderChannelImpl::waitSendFinished() {
+    AutoLock lock(mLock);
+    if (!mPendingSend) return;
+
+    while (mPendingSend) {
+      if (!mPendingSendCv.timedWait(&mLock,
+          System::get()->getUnixTimeUs() + kMaxReceiveDelayUs)) {
+        return;
+      }
+    }
+}
+
+void RenderChannelImpl::updatePendingSend() {
+    AutoLock lock(mLock);
+    mPendingSend = mFromGuest.size();
+    mPendingSendCv.signal();
 }
 
 }  // namespace emugl
