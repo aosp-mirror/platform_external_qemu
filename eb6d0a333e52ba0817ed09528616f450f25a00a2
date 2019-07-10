@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "280a2443_90c576de",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T14:29:09Z",
+      "side": 1,
+      "message": "this should be an explicit switch statement over the different framework formats",
+      "range": {
+        "startLine": 452,
+        "startChar": 26,
+        "endLine": 452,
+        "endChar": 43
+      },
+      "revId": "eb6d0a333e52ba0817ed09528616f450f25a00a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
