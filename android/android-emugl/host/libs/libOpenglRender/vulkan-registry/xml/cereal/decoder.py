@@ -28,15 +28,18 @@ private:
 """
 
 decoder_impl_preamble ="""
+using emugl::emugl_cxt_logger;
 using emugl::vkDispatch;
 
 using namespace goldfish_vk;
 
 using android::base::System;
 
+#define VK_DEBUG_LOG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)
+
 class VkDecoder::Impl {
 public:
-    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
+    Impl() : m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
     %s* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
@@ -47,7 +50,6 @@ public:
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 
 private:
-    bool m_logCalls;
     bool m_forSnapshotLoad = false;
     VulkanDispatch* m_vk;
     VkDecoderGlobalState* m_state;
@@ -173,15 +175,13 @@ def emit_call_log(api, cgen):
     decodingParams = DecodingParameters(api)
     paramsToRead = decodingParams.toRead
 
-    cgen.beginIf("m_logCalls")
     paramLogFormat = ""
     paramLogArgs = []
     for p in paramsToRead:
         paramLogFormat += "0x%llx "
     for p in paramsToRead:
         paramLogArgs.append("(unsigned long long)%s" % (p.paramName))
-    cgen.stmt("fprintf(stderr, \"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
-    cgen.endIf()
+    cgen.stmt("VK_DEBUG_LOG(\"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
 
 def emit_decode_parameters(typeInfo, api, cgen):
 
