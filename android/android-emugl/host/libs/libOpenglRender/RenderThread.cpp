@@ -207,7 +207,22 @@ intptr_t RenderThread::main() {
     //
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
+
+    tInfo.m_glDec.registerOnReadbackFuncs(
+        [this]() { mChannel->beginPendingReadback(); },
+        [this]() { mChannel->signalPendingReadback(); });
+    tInfo.m_gl2Dec.registerOnReadbackFuncs(
+        [this]() { mChannel->beginPendingReadback(); },
+        [this]() { mChannel->signalPendingReadback(); });
+    tInfo.m_vkDec.registerOnReadbackFuncs(
+        [this]() { mChannel->beginPendingReadback(); },
+        [this]() { mChannel->signalPendingReadback(); });
+
     initRenderControlContext(&tInfo.m_rcDec);
+
+    tInfo.m_rcDec.registerOnReadbackFuncs(
+        [this]() { mChannel->beginPendingReadback(); },
+        [this]() { mChannel->signalPendingReadback(); });
 
     if (!mChannel) {
         DBG("Exited a loader RenderThread @%p\n", this);
@@ -362,6 +377,7 @@ intptr_t RenderThread::main() {
                 if (last > 0) {
                     progress = true;
                     readBuf.consume(last);
+            mChannel->updatePendingSend();
                 }
             }
 
@@ -377,6 +393,7 @@ intptr_t RenderThread::main() {
                 if (last > 0) {
                     progress = true;
                     readBuf.consume(last);
+            mChannel->updatePendingSend();
                 }
             }
 
@@ -391,6 +408,7 @@ intptr_t RenderThread::main() {
                                             &stream, &checksumCalc);
                 if (last > 0) {
                     readBuf.consume(last);
+            mChannel->updatePendingSend();
                     progress = true;
                 }
             }
@@ -405,6 +423,7 @@ intptr_t RenderThread::main() {
                                             &stream);
                 if (last > 0) {
                     readBuf.consume(last);
+            mChannel->updatePendingSend();
                     progress = true;
                 }
             }
