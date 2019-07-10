@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66c952cd_6ea76f83",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1350,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-10T14:44:02Z",
+      "side": 1,
+      "message": "toggle_pause_resume seems to be doing too much on its own here, esp when it\u0027s called in contexts where it will have to pause or have to resume. Can we instead split it into two functions, internalPause/internalResume, or a function with a parameter, setPaused(bool paused)? That way, mPaused is also set to either true or false explicity; when reading the code it makes it so there are fewer things to keep in mind versus mPaused \u003d !mPaused (which i suppose is a general problem with all \"toggle\" methods).\n\nAlso, can we ever set or read mPaused from multiple threads?",
+      "range": {
+        "startLine": 1350,
+        "startChar": 8,
+        "endLine": 1350,
+        "endChar": 30
+      },
+      "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
