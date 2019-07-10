@@ -304,6 +304,7 @@ public:
 
     virtual int onGuestRecv(AndroidPipeBuffer* buffers,
                             int numBuffers) override {
+        mLastTransferType = PipeTransferType::ToGuest;
         DD("%s", __func__);
 
         // Consume the pipe's dataForReading, then put the next received data
@@ -341,6 +342,7 @@ public:
                     }
 
                     DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                    ++mReadRetriesSinceLastCall;
                     return PIPE_ERROR_AGAIN;
                 }
             }
@@ -367,6 +369,14 @@ public:
 
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
                             int numBuffers) override {
+
+        if (mLastTransferType == PipeTransferType::ToGuest) {
+            fprintf(stderr, "%s: read retries since last call: %zu\n", __func__, mReadRetriesSinceLastCall);
+            mReadRetriesSinceLastCall = 0;
+        }
+
+        mLastTransferType = PipeTransferType::FromGuest;
+
         DD("%s", __func__);
 
         if (!mIsWorking) {
@@ -478,6 +488,15 @@ private:
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
     uint32_t mDataForReadingLeft = 0;
     ChannelBuffer mDataForReading;
+
+    // Performance stats related stuff
+    enum PipeTransferType {
+        FromGuest = 0,
+        ToGuest = 1,
+    };
+
+    PipeTransferType mLastTransferType = PipeTransferType::ToGuest;
+    size_t mReadRetriesSinceLastCall = 0;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);
 };
