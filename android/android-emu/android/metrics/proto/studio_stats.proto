@@ -1419,7 +1419,8 @@ message EmulatorFeatureFlagState {
     VULKAN_NULL_OPTIONAL_STRINGS = 49;
     DYNAMIC_MEDIA_PROFILE = 50;
     YUV420_888_to_NV21 = 51;
-    // Next tag: 52
+    YUV_Cache = 52;
+    // Next tag: 53
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

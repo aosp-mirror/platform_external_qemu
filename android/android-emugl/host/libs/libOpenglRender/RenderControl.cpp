@@ -190,6 +190,9 @@ static constexpr android::base::StringView kVulkanCreateResourcesWithRequirement
 // treat YUV420_888 as NV21
 static constexpr android::base::StringView kYUV420888toNV21 = "ANDROID_EMU_YUV420_888_to_NV21";
 
+// Cache YUV frame
+static constexpr android::base::StringView kYUVCache = "ANDROID_EMU_YUV_Cache";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -396,6 +399,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         shouldEnableVulkan() && shouldEnableCreateResourcesWithRequirements();
     bool YUV420888toNV21Enabled =
         emugl_feature_is_enabled(android::featurecontrol::YUV420888toNV21);
+    bool YUVCacheEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::YUVCache);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -454,6 +459,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (YUV420888toNV21Enabled && name == GL_EXTENSIONS) {
         glStr += kYUV420888toNV21;
+        glStr += " ";
+    }
+
+    if (YUVCacheEnabled && name == GL_EXTENSIONS) {
+        glStr += kYUVCache;
         glStr += " ";
     }
 
@@ -1194,6 +1204,20 @@ static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
     return 0;
 }
 
+static void rcReadColorBufferYUV(uint32_t colorBuffer,
+                                GLint x, GLint y,
+                                GLint width, GLint height,
+                                void* pixels, uint32_t pixels_size)
+{
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+
+    fb->readColorBufferYUV(colorBuffer, x, y, width, height, pixels, pixels_size);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1242,4 +1266,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcGetDisplayPose = rcGetDisplayPose;
     dec->rcSetDisplayPose = rcSetDisplayPose;
     dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
+    dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
 }

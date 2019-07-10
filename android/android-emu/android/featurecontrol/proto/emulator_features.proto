@@ -79,4 +79,6 @@ enum Feature {
     DynamicMediaProfile = 45;
 
     YUV420888toNV21 = 46;
+
+    YUVCache = 47;
 }
