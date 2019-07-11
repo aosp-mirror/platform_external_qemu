@@ -1,0 +1,20 @@
+
+set(studio-bridge_src
+    ${EMULATOR_GRPC_SRC}
+    android/emulation/control/EmulatorService.cpp
+    android/emulation/control/EmulatorServiceStub.cpp
+    android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
+    android/emulation/control/GrpcServices.cpp
+    android/emulation/control/logcat/RingStreambuf.cpp
+    android/emulation/control/waterfall/BstrStreambuf.cpp
+    android/emulation/control/waterfall/SocketStreambuf.cpp
+    android/emulation/control/waterfall/WaterfallConnection.cpp
+    android/emulation/control/waterfall/WaterfallService.cpp)
+
+# Let's add in the library
+android_add_shared_library(studio-bridge)
+target_link_libraries(studio-bridge PRIVATE android-emu)
+target_compile_definitions(studio-bridge PUBLIC -DANDROID_GRPC)
+
+# Lets distribute the proto file
+install(studio-bridge DESTINATION lib)
