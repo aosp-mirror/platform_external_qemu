@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ecb7fb9_2164bdc8",
+        "filename": "android/android-emu/android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-11T00:30:27Z",
+      "side": 1,
+      "message": "ah i see what you meant earlier :) Will try this out",
+      "range": {
+        "startLine": 315,
+        "startChar": 0,
+        "endLine": 320,
+        "endChar": 17
+      },
+      "revId": "75babd3e81dc9030861e9e836b85fe610b18ad6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
