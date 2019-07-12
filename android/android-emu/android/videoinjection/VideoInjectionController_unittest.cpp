@@ -83,7 +83,7 @@ TEST_F(VideoInjectionControllerTest, handleRequest) {
                 IsOk());
 }
 
-TEST_F(VideoInjectionControllerTest, TryGetNextRequest) {
+TEST_F(VideoInjectionControllerTest, TryGetNextRequestContext) {
     android::AsyncMessagePipeHandle pipe;
     pipe.id = 123;
 
@@ -95,58 +95,52 @@ TEST_F(VideoInjectionControllerTest, TryGetNextRequest) {
     mController->handleRequest(pipe, request, 2);
 
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
-                EqualsProto("sequence_id: 100 display_default_frame {}"));
-    testing::Mock::VerifyAndClearExpectations(this);
 
-    EXPECT_CALL(*this,
-                offworldSendResponse(
-                    Eq(pipe), Partially(EqualsProto(
-                                  "async { async_id: 1 "
-                                  "video_injection {sequence_id: 100}}"))))
-        .Times(1);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext1 = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext1->request,
                 EqualsProto("sequence_id: 100 display_default_frame {}"));
-    testing::Mock::VerifyAndClearExpectations(this);
-
-    EXPECT_CALL(*this,
-                offworldSendResponse(
-                    Eq(pipe), Partially(EqualsProto(
-                                  "async { async_id: 2 "
-                                  "video_injection {sequence_id: 100}}"))))
-        .Times(1);
-    EXPECT_FALSE(mController->getNextRequest(android::base::Ok()));
     testing::Mock::VerifyAndClearExpectations(this);
 
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
-    EXPECT_FALSE(mController->getNextRequest(android::base::Ok()));
+
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext2 = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext2->request,
+                EqualsProto("sequence_id: 100 display_default_frame {}"));
+    testing::Mock::VerifyAndClearExpectations(this);
+
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+    EXPECT_FALSE(mController->getNextRequestContext());
+    testing::Mock::VerifyAndClearExpectations(this);
+
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+    EXPECT_FALSE(mController->getNextRequestContext());
     testing::Mock::VerifyAndClearExpectations(this);
 
     mController->handleRequest(pipe, request, 3);
     mController->handleRequest(pipe, request, 4);
     mController->handleRequest(pipe, request, 5);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
+
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext3 = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext3->request,
                 EqualsProto("sequence_id: 100 display_default_frame {}"));
 
-    EXPECT_CALL(*this,
-                offworldSendResponse(
-                    Eq(pipe), Partially(EqualsProto(
-                                  "async { async_id: 3 "
-                                  "video_injection {sequence_id: 100}}"))))
-        .Times(1);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext4 = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext4->request,
                 EqualsProto("sequence_id: 100 display_default_frame {}"));
     testing::Mock::VerifyAndClearExpectations(this);
 
-    EXPECT_CALL(*this,
-        offworldSendResponse(
-                Eq(pipe),
-                Partially(EqualsProto(
-                        "result: RESULT_ERROR_UNKNOWN"))))
-            .Times(1);
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext5 = mController->getNextRequestContext();
     EXPECT_THAT(
-        *(mController->getNextRequest(
-            android::base::Err(VideoInjectionError::InternalError))),
+        requestContext5->request,
         EqualsProto("sequence_id: 100 display_default_frame {}"));
     testing::Mock::VerifyAndClearExpectations(this);
 }
@@ -165,24 +159,25 @@ TEST_F(VideoInjectionControllerTest, PipeClosed) {
     mController->handleRequest(pipe2, request, 2);
 
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
+
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext1 = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext1->request,
                 EqualsProto("display_default_frame {}"));
     testing::Mock::VerifyAndClearExpectations(this);
 
     mController->pipeClosed(pipe1);
 
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
+
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext2 = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext2->request,
                 EqualsProto("display_default_frame {}"));
     testing::Mock::VerifyAndClearExpectations(this);
 
-    EXPECT_CALL(*this,
-        offworldSendResponse(
-                Eq(pipe2),
-                Partially(EqualsProto(
-                        "async { async_id: 2 }"))))
-            .Times(1);
-    EXPECT_FALSE(mController->getNextRequest(android::base::Ok()));
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+    EXPECT_FALSE(mController->getNextRequestContext());
     testing::Mock::VerifyAndClearExpectations(this);
 }
 
@@ -198,25 +193,26 @@ TEST_F(VideoInjectionControllerTest, Reset) {
 
     // Reset when no request is pending.
     mController->reset();
-    EXPECT_FALSE(mController->getNextRequest(android::base::Ok()));
+    EXPECT_FALSE(mController->getNextRequestContext());
 
     // Reset when a request is pending.
     mController->handleRequest(pipe, request, 3);
     mController->handleRequest(pipe, request, 4);
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
-    EXPECT_THAT(*(mController->getNextRequest(android::base::Ok())),
+    android::base::Optional<::android::videoinjection::RequestContext>
+            requestContext = mController->getNextRequestContext();
+    EXPECT_THAT(requestContext->request,
                 EqualsProto("display_default_frame {}"));
     testing::Mock::VerifyAndClearExpectations(this);
     EXPECT_CALL(*this,
-        offworldSendResponse(
-                Eq(pipe),
-                Partially(EqualsProto(
-                        "result: RESULT_ERROR_UNKNOWN "
-                        "error_string: \"Internal error\""))))
+                offworldSendResponse(
+                        Eq(pipe), Partially(EqualsProto(
+                                          "result: RESULT_ERROR_UNKNOWN "
+                                          "error_string: \"Internal error\""))))
             .Times(1);
     mController->reset();
 
-    EXPECT_FALSE(mController->getNextRequest(android::base::Ok()));
+    EXPECT_FALSE(mController->getNextRequestContext());
     testing::Mock::VerifyAndClearExpectations(this);
 }
 
@@ -235,14 +231,9 @@ TEST_F(VideoInjectionControllerTest, sendFollowUpAsyncResponse) {
     mController->handleRequest(pipe, loadRequest, 1);
     mController->handleRequest(pipe, playRequest, 2);
 
-    EXPECT_CALL(*this,
-        offworldSendResponse(
-                Eq(pipe),
-                Partially(EqualsProto(
-                        "result: RESULT_NO_ERROR async { async_id: 1}"))))
-            .Times(1);
-    mController->getNextRequest(android::base::Ok());
-    mController->getNextRequest(android::base::Ok());
+    EXPECT_CALL(*this, offworldSendResponse).Times(0);
+    mController->getNextRequestContext();
+    mController->getNextRequestContext();
 
     testing::Mock::VerifyAndClearExpectations(this);
 
@@ -252,6 +243,7 @@ TEST_F(VideoInjectionControllerTest, sendFollowUpAsyncResponse) {
                 Partially(EqualsProto(
                         "result: RESULT_NO_ERROR async { async_id: 1 complete: true }"))))
             .Times(1);
+
     mController->sendFollowUpAsyncResponse(1, android::base::Ok(), true);
 
     testing::Mock::VerifyAndClearExpectations(this);
@@ -262,11 +254,13 @@ TEST_F(VideoInjectionControllerTest, sendFollowUpAsyncResponse) {
                 Partially(EqualsProto(
                         "result: RESULT_ERROR_UNKNOWN async { async_id: 2}"))))
             .Times(1);
+
     mController->sendFollowUpAsyncResponse(2, android::base::Err(VideoInjectionError::InvalidRequest), false);
 
     testing::Mock::VerifyAndClearExpectations(this);
 
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
+
     mController->sendFollowUpAsyncResponse(3, android::base::Err(VideoInjectionError::InvalidRequest), false);
 
     testing::Mock::VerifyAndClearExpectations(this);
