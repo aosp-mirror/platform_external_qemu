@@ -655,6 +655,7 @@ set(android-emu_unittests_src
     android/emulation/AdbGuestPipe_unittest.cpp
     android/emulation/AdbHostListener_unittest.cpp
     android/emulation/AdbHostServer_unittest.cpp
+    android/emulation/address_space_host_memory_allocator_unittests.cpp
     android/emulation/android_pipe_pingpong_unittest.cpp
     android/emulation/android_pipe_zero_unittest.cpp
     android/emulation/AndroidAsyncMessagePipe_unittest.cpp

@@ -21,14 +21,6 @@
 namespace android {
 namespace emulation {
 
-namespace {
-enum class HostMemoryAllocatorCommand {
-    Allocate = 1,
-    Unallocate = 2
-};
-
-}  // namespace
-
 AddressSpaceHostMemoryAllocatorContext::AddressSpaceHostMemoryAllocatorContext(
     const address_space_device_control_ops *ops)
   : m_ops(ops) {
