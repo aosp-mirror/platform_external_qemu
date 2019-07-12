@@ -16,15 +16,20 @@ import javax.swing.*;
 
 public class SampleWindow {
     public static void main(String[] args) {
-        String handle = EmulatorView.DEFAULT_SHARED_MEMORY_REGION;
+        int port = 5554;
         if (args.length > 0) {
-            handle = args[0];
+            port = Integer.parseInt(args[0]);
         }
+        InteractiveEmulatorView emuView = new InteractiveEmulatorView(port);
+        JButton rotate = new JButton("Rotate The Emulator");
+        rotate.addActionListener(e->{ emuView.rotate(); });
 
         JFrame frame = new JFrame("DefaultEmulatorDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new EmulatorView(handle), BorderLayout.CENTER);
+        frame.getContentPane().add(emuView, BorderLayout.CENTER);
+        frame.getContentPane().add(rotate, BorderLayout.SOUTH);
         frame.setPreferredSize(new Dimension(360, 640));
+        frame.setTitle("Interactive Emulator Demo.");
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
