@@ -188,6 +188,30 @@
       "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0b514aa_562ff620",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-07-12T18:47:13Z",
+      "side": 1,
+      "message": "Like above, it should be possible to use std::move.",
+      "parentUuid": "10cd4e03_d12c1d8c",
+      "range": {
+        "startLine": 287,
+        "startChar": 8,
+        "endLine": 295,
+        "endChar": 9
+      },
+      "revId": "881c5ca8b01c9a77eecab3ef7bb852047f025ff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
