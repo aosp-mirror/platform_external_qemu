@@ -10,12 +10,11 @@
 // GNU General Public License for more details.
 package android.emulation.studio;
 
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.file.FileSystems;
-
 /**
- * Enables reading of a Shared Memory handle.
+ * Enables reading of a Shared Memory handle. This requires a native library (libandroid-studio.so)
+ * that ships with the android emulator.
+ *
+ * @author Erwin Jansen (jansene@google.com)
  */
 public final class SharedMemory {
     // Load lib.
