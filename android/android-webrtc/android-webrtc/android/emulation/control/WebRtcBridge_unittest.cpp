@@ -303,7 +303,7 @@ TEST(WebRtcBridge, connectedTimeoutSaysNothing) {
     EXPECT_STREQ("", msg.c_str());
 }
 
-TEST(WebRtcBridge, deliverWithoutLoss) {
+TEST(WebRtcBridge, DISABLED_deliverWithoutLoss) {
     // This will expose if you have locking issues and are losing messages.
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
     TestBridge bridge(socket);
