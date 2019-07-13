@@ -972,7 +972,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 // |read_index| is the first buffer used for receiving.
                 if (isCall) {
                     uint32_t read_index = hwpipe_get_command_rw_read_index(pipe);
-                    assert(read_index < buffers_count);
+                    assert(read_index <= buffers_count);
                     send_buffers = buffers;
                     send_buffers_count = read_index;
                     recv_buffers = &buffers[read_index];
