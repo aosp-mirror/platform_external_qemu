@@ -23,6 +23,11 @@ namespace emulation {
 
 class AddressSpaceHostMemoryAllocatorContext : public AddressSpaceDeviceContext {
 public:
+    enum class HostMemoryAllocatorCommand {
+        Allocate = 1,
+        Unallocate = 2
+    };
+
     AddressSpaceHostMemoryAllocatorContext(const address_space_device_control_ops *ops);
     ~AddressSpaceHostMemoryAllocatorContext();
 
