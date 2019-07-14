@@ -520,6 +520,8 @@ public:
             : cb(cb), pos_x(x), pos_y(y), width(w), height(h) {}
     };
     std::unordered_map<uint32_t, DisplayInfo> m_displays;
+    static uint32_t s_maxNumMultiDisplay;
+    static uint32_t s_invalidIdMultiDisplay;
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
