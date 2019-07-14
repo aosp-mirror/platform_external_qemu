@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2fa3703_53d64331",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-14T17:18:13Z",
+      "side": 1,
+      "message": "huans@\nI think this line of change could cause a bug because the original intention was 1, if the *displayId is 0, FrameBuffer::createDisplay() will use a new ID for displayID. 2, if *displayId is not 0, FrameBuffer::createDisplay() will use whatever is specified in *displayId.\n\nI think this line of code change the original assumption and always set *displayId to 0.",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
