@@ -2532,12 +2532,11 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
             __FUNCTION__, MAX_NUM_MULTI_DISPLAY);
         return -1;
     }
-    if (m_displays.find(*displayId) != m_displays.end()) {
-        return 0;
-    }
-
     if (*displayId == 0) {
         *displayId = s_nextDisplayId++;
+    }
+    if (m_displays.find(*displayId) != m_displays.end()) {
+        return 0;
     }
     if (m_displays.size() == 1) {
         emugl::get_emugl_window_operations().setNoSkin();
