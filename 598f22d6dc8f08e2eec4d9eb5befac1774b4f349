@@ -16,6 +16,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "535a55f5_b9f29c01",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-14T17:48:37Z",
+      "side": 1,
+      "message": "I think it would be cleaner to have two interfaces\n1, int createDisplay() where the return type indicates the displayID and -1 indicates that creation fails.\n2, int createDisplay(int displayId) where the return type simply indicates that creations succeeds or not.",
+      "parentUuid": "a2fa3703_53d64331",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
