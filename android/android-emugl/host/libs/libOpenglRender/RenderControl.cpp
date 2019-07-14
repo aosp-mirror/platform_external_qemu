@@ -1107,6 +1107,7 @@ static int rcCreateDisplay(uint32_t* displayId) {
         return -1;
     }
 
+    *displayId = 0;
     return fb->createDisplay(displayId);
 }
 
