@@ -21,4 +21,6 @@
 void initRenderControlContext(renderControl_decoder_context_t *dec);
 void registerTriggerWait();
 
+#define INVALID_ID_MULTI_DISPLAY 0xFFFFFFAB
+
 #endif

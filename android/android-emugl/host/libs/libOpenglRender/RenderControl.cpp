@@ -1107,6 +1107,8 @@ static int rcCreateDisplay(uint32_t* displayId) {
         return -1;
     }
 
+    // Assume this API call always allocates a new displayId
+    *displayId = INVALID_ID_MULTI_DISPLAY;
     return fb->createDisplay(displayId);
 }
 
