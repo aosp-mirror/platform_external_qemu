@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78845cdc_58fa817e",
+        "filename": "android/android-studio/android/emulation/studio/net/EmulatorTelnetClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-07-15T18:30:13Z",
+      "side": 1,
+      "message": "nit: line break",
+      "range": {
+        "startLine": 128,
+        "startChar": 6,
+        "endLine": 128,
+        "endChar": 110
+      },
+      "revId": "9d79f709e99af57bf8e13ec9c2de417d009499a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
