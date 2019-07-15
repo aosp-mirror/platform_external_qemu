@@ -281,6 +281,7 @@ public:
     bool isMultiDisplayEnabled();
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
+    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -553,12 +554,11 @@ private:
         uint32_t flag;
         bool     enabled;
         MultiDisplayInfo() :
-          pos_x(0), pos_y(0), width(1200), height(800), dpi(240), flag(0), enabled(false) {}
+          pos_x(0), pos_y(0), width(720), height(1080), dpi(213), flag(0), enabled(false) {}
     };
     std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
     static const int MAX_MULTIDISPLAYS = 10;
-    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 };
 
 class SkinSurfaceBitmap {
