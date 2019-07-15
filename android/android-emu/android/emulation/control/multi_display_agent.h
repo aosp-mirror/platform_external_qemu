@@ -26,6 +26,8 @@ typedef struct QAndroidMultiDisplayAgent {
                             uint32_t dpi,
                             uint32_t flag,
                             bool add);
+    bool (*tryLockMultiDisplayOnLoad)(void);
+    void (*unlockMultiDisplayOnLoad)(void);
 } QAndroidMultiDisplayAgent;
 
 ANDROID_END_HEADER
