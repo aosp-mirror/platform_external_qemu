@@ -52,12 +52,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .fold = nullptr,
         .isFolded = nullptr,
         .setUIDisplayRegion = nullptr,
-        .setMultiDisplay = [](uint32_t id,
+        .setUIMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,
                               uint32_t w,
                               uint32_t h,
-                              bool add) {},
+                              bool add,
+                              uint32_t dpi = 0) {},
         .getMultiDisplay = nullptr,
         .getMonitorRect =
                 [](uint32_t* w, uint32_t* h) {
