@@ -22,6 +22,30 @@
       "revId": "9d79f709e99af57bf8e13ec9c2de417d009499a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bae07c1c_508f23ac",
+        "filename": "android/android-studio/android/emulation/studio/net/EmulatorTelnetClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-15T18:54:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "78845cdc_58fa817e",
+      "range": {
+        "startLine": 128,
+        "startChar": 6,
+        "endLine": 128,
+        "endChar": 110
+      },
+      "revId": "9d79f709e99af57bf8e13ec9c2de417d009499a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
