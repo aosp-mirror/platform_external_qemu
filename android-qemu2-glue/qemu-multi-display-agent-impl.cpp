@@ -12,6 +12,7 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplayPipe.h"
+#include "android/opengles.h"
 
 using android::MultiDisplayPipe;
 
@@ -25,6 +26,13 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                               uint32_t flag,
                               bool add) {
             MultiDisplayPipe::setMultiDisplay(id, x, y, w, h, dpi, flag, add);
-        }};
+        },
+        .tryLockMultiDisplayOnLoad = [](void)->bool {
+            return android_tryLockMultiDisplayOnLoad();
+        },
+        .unlockMultiDisplayOnLoad = [](void) {
+            android_unlockMultiDisplayOnLoad();
+        }
+};
 
 const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;

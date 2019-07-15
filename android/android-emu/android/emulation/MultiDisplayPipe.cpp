@@ -29,6 +29,7 @@ const uint8_t MultiDisplayPipe::MAX_DISPLAYS = 10;
 MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
   : AndroidAsyncMessagePipe(service, std::move(pipeArgs)),
     mService(static_cast<Service*>(service)) {
+    LOG(VERBOSE) << "MultiDisplayPipe created " << this;
     if (sMultiDisplayPipeInstance) {
         LOG(ERROR) << "MultiDisplayPipe already created";
     }
@@ -36,6 +37,7 @@ MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pip
 }
 
 MultiDisplayPipe::~MultiDisplayPipe() {
+    LOG(VERBOSE) << "MultiDisplayPipe deleted self " << this;
     sMultiDisplayPipeInstance = NULL;
 }
 
@@ -43,13 +45,21 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
     uint8_t cmd = data[0];
     switch (cmd) {
         case QUERY:
+            LOG(VERBOSE) << "MultiDisplayPipe recevied QUERY";
             for (uint32_t i = 1; i < MAX_DISPLAYS + 1; i++) {
                 uint32_t w, h, dpi, flag;
                 if (mService->mWindowAgent->getMultiDisplay(i, NULL, NULL, &w, &h,
                                                             &dpi, &flag, NULL)) {
-                  std::vector<uint8_t> buf;
-                  fillData(buf, i, w, h, dpi, flag, true);
-                  send(std::move(buf));
+                    if (dpi == 0) {
+                        // Display created by guest through rcCommand,
+                        // not by UI/config.ini/cmd, need not report
+                        continue;
+                    }
+                    std::vector<uint8_t> buf;
+                    fillData(buf, i, w, h, dpi, flag, true);
+                    LOG(VERBOSE) << "MultiDisplayPipe send add id " << i << " width " << w
+                                 << " height " << h << " dpi " << dpi << " flag " << flag;
+                    send(std::move(buf));
                 }
             }
             break;
@@ -77,6 +87,9 @@ void MultiDisplayPipe::setMultiDisplay(uint32_t id,
     if (sMultiDisplayPipeInstance) {
         std::vector<uint8_t> data;
         fillData(data, id, w, h, dpi, flag, add);
+        LOG(VERBOSE) << "MultiDisplayPipe send " << (add ? "add":"del") << " id " << id
+                     << " width " << w << " height " << h << " dpi " << dpi
+                     << " flag " << flag;
         sMultiDisplayPipeInstance->send(std::move(data));
     }
     // adjust the host window

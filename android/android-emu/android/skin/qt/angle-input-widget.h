@@ -79,6 +79,9 @@ public:
     // to the AVD.
     void forceUpdate();
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
 public slots:
     // Sets the widget's current input mode to either decimal or sexagesimal.
     void setInputMode(InputMode);
@@ -88,6 +91,9 @@ signals:
     // Regardless of the current input mode, new_value will always be a decimal
     // value specified in degrees, i.e. 10.5 degrees.
     void valueChanged(double new_value);
+ 
+    // Emitted when key "enter" pressed.
+    void enterPressed();
 
 private slots:
     // Updates the internal value based on the decimal editor.

@@ -115,15 +115,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         });
                     }
                 },
-        .setMultiDisplay =
+        .setUIMultiDisplay =
                 [](uint32_t id,
                    int32_t x,
                    int32_t y,
                    uint32_t w,
                    uint32_t h,
-                   bool add) {
+                   bool add,
+                   uint32_t dpi = 0) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        win->setMultiDisplay(id, x, y, w, h, add);
+                        win->setUIMultiDisplay(id, x, y, w, h, add, dpi);
                     }
                 },
         .getMultiDisplay =

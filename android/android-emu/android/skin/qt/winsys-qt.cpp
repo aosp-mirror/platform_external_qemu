@@ -31,6 +31,8 @@
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
 #include "android/skin/winsys.h"
+#include "android/ui-emu-agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/utils/setenv.h"
 
 #include <QtCore>
@@ -652,11 +654,11 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
-void skin_winsys_parse_multidisplay_args(uint32_t* count, uint32_t* para) {
+std::vector<MultiDisplayInfo> skin_winsys_parse_multidisplay_args() {
     EmulatorQtWindow* qtWindow = EmulatorQtWindow::getInstance();
-    *count = 0;
+    std::vector<MultiDisplayInfo> ret;
     if (!qtWindow || !android_cmdLineOptions || !android_cmdLineOptions->multidisplay) {
-        return;
+        return ret;
     }
     std::string s = android_cmdLineOptions->multidisplay;
     std::vector<uint32_t> params;
@@ -667,32 +669,29 @@ void skin_winsys_parse_multidisplay_args(uint32_t* count, uint32_t* para) {
     }
     params.push_back(std::stoi(s.substr(last)));
     if (params.size() < 5 || params.size() % 5 != 0) {
-        fprintf(stderr, "Not enough parameters for multidisplay\n");
-        return;
+        LOG(ERROR) << "Not enough parameters for multidisplay command";
+        return ret;
     }
     int i = 0;
     for (i = 0; i < params.size(); i+=5) {
         if (params[i] == 0 || params[i] > 3) {
-            fprintf(stderr, "multidisplay index should only be 1, 2, or 3\n");
-            return;
+            LOG(ERROR) << "multidisplay index should only be 1, 2, or 3";
+            ret.clear();
+            return ret;
         }
-        if (!qtWindow->multiDisplayParamValidate(params[i + 1],
+        if (!qtWindow->multiDisplayParamValidate(params[i],
+                                                 params[i + 1],
                                                  params[i + 2],
                                                  params[i + 3],
                                                  params[i + 4])) {
-            fprintf(stderr, "Invalid width/height/dpi settings for multidisplay\n");
-            return;
+            LOG(ERROR) << "Invalid index/width/height/dpi settings for multidisplay command";
+            ret.clear();
+            return ret;
         }
-        if (para) {
-            *para++ = params[i];
-            *para++ = params[i + 1];
-            *para++ = params[i + 2];
-            *para++ = params[i + 3];
-            *para++ = params[i + 4];
-        }
+        ret.push_back(MultiDisplayInfo(params[i], -1, -1, params[i + 1], params[i + 2],
+                                       params[i + 3], params[i + 4], true));
     }
-
-    *count = params.size() / 5;
+    return ret;
 }
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -850,57 +849,75 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
 
             // Get the multidisplay configs from startup parameters, if yes,
             // override the configs in config.ini
-            uint32_t multidisplay_cnt;
-            skin_winsys_parse_multidisplay_args(&multidisplay_cnt, nullptr);
-            std::vector<uint32_t> multidisplay_args;
-            if (multidisplay_cnt) {
-                multidisplay_args.resize(multidisplay_cnt * 5);
-                skin_winsys_parse_multidisplay_args(&multidisplay_cnt,
-                                                    multidisplay_args.data());
-            }
-            if (multidisplay_cnt) {
-                int i = 0;
-                for (int cnt = 0; cnt < multidisplay_cnt; cnt++) {
-                    window->switchMultiDisplay(true,
-                                               multidisplay_args[i++],
-                                               -1, -1,
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++]);
+            // This stage happens before the MultiDisplayPipe created
+            // (bootCompleted). MultiDisplay configs will not send to guest
+            // immediately, instead MultiDisplayPipe queries configs when it is
+            // created.
+            // tryLockMultiDisplayOnLoad() guarantees that snapshot replay from
+            // FrameBuffer::onLoad() and replay from config.ini are not simultaneous.
+            // IF snapshot happens first, tryLockMultiDisplayOnLoad() returns
+            // false; if snapshot happens second, it will override the the
+            // multidisplays with snapshot contents.
+            // The snapshot overriding only reconfigs the
+            // host, and will not be sent to guest. Guest just restore to
+            // it snapshot vm status.
+            if (agent->multiDisplay->tryLockMultiDisplayOnLoad()) {
+                std::vector<MultiDisplayInfo> info = skin_winsys_parse_multidisplay_args();
+                if (info.size()) {
+                    LOG(VERBOSE) << "config multidisplay with command-line";
+                    for (const auto& i : info) {
+                        window->switchMultiDisplay(true,
+                                                   i.id,
+                                                   -1,
+                                                   -1,
+                                                   i.width,
+                                                   i.height,
+                                                   i.dpi,
+                                                   i.flag);
+                    }
                 }
-            }
-            else {
-                if (android_hw->hw_display1_width != 0 &&
-                    android_hw->hw_display1_height != 0) {
-                    window->switchMultiDisplay(true, 1,
-                                               android_hw->hw_display1_xOffset,
-                                               android_hw->hw_display1_yOffset,
-                                               android_hw->hw_display1_width,
-                                               android_hw->hw_display1_height,
-                                               android_hw->hw_display1_density,
-                                               android_hw->hw_display1_flag);
+                else {
+                    LOG(VERBOSE) << "config multidisplay with config.ini " << android_hw->hw_display1_width
+                                 << "x" << android_hw->hw_display1_height << " " <<
+                                 android_hw->hw_display2_width << "x" <<
+                                 android_hw->hw_display2_height << " " <<
+                                 android_hw->hw_display3_width << "x" <<
+                                 android_hw->hw_display3_height;
+                    if (android_hw->hw_display1_width != 0 &&
+                        android_hw->hw_display1_height != 0) {
+                        LOG(VERBOSE) << " add display 1";
+                        window->switchMultiDisplay(true, 1,
+                                                   android_hw->hw_display1_xOffset,
+                                                   android_hw->hw_display1_yOffset,
+                                                   android_hw->hw_display1_width,
+                                                   android_hw->hw_display1_height,
+                                                   android_hw->hw_display1_density,
+                                                   android_hw->hw_display1_flag);
+                    }
+                    if (android_hw->hw_display2_width != 0 &&
+                        android_hw->hw_display2_height != 0) {
+                        LOG(VERBOSE) << " add display 2";
+                        window->switchMultiDisplay(true, 2,
+                                                   android_hw->hw_display2_xOffset,
+                                                   android_hw->hw_display2_yOffset,
+                                                   android_hw->hw_display2_width,
+                                                   android_hw->hw_display2_height,
+                                                   android_hw->hw_display2_density,
+                                                   android_hw->hw_display2_flag);
+                    }
+                    if (android_hw->hw_display3_width != 0 &&
+                        android_hw->hw_display3_height != 0) {
+                        LOG(VERBOSE) << " add display 3";
+                        window->switchMultiDisplay(true, 3,
+                                                   android_hw->hw_display3_xOffset,
+                                                   android_hw->hw_display3_yOffset,
+                                                   android_hw->hw_display3_width,
+                                                   android_hw->hw_display3_height,
+                                                   android_hw->hw_display3_density,
+                                                   android_hw->hw_display3_flag);
+                    }
                 }
-                if (android_hw->hw_display2_width != 0 &&
-                    android_hw->hw_display2_height != 0) {
-                    window->switchMultiDisplay(true, 2,
-                                               android_hw->hw_display2_xOffset,
-                                               android_hw->hw_display2_yOffset,
-                                               android_hw->hw_display2_width,
-                                               android_hw->hw_display2_height,
-                                               android_hw->hw_display2_density,
-                                               android_hw->hw_display2_flag);
-                }
-                if (android_hw->hw_display3_width != 0 &&
-                    android_hw->hw_display3_height != 0) {
-                    window->switchMultiDisplay(true, 2,
-                                               android_hw->hw_display3_xOffset,
-                                               android_hw->hw_display3_yOffset,
-                                               android_hw->hw_display3_width,
-                                               android_hw->hw_display3_height,
-                                               android_hw->hw_display3_density,
-                                               android_hw->hw_display3_flag);
-                }
+                agent->multiDisplay->unlockMultiDisplayOnLoad();
             }
         });
     }

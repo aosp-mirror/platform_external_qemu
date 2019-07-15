@@ -2000,3 +2000,56 @@ void avdInfo_setCustomContentPath(AvdInfo* info, const char* path) {
 void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path) {
     info->coreHardwareIniPath = strdup(path);
 }
+
+void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,
+                                            int x, int y,
+                                            int w, int h,
+                                            int dpi, int flag ) {
+    if (!i || !i->configIni) return;
+
+//    char x_s[] = "hw.display0.xOffset";
+//    char y_s[] = "hw.display0.yOffset";
+    char w_s[] = "hw.display0.width";
+    char h_s[] = "hw.display0.height";
+    char d_s[] = "hw.display0.density";
+    char f_s[] = "hw.display0.flag";
+    bool write = false;
+
+//    x_s[10] += index;
+//    y_s[10] += index;
+    w_s[10] += index;
+    h_s[10] += index;
+    d_s[10] += index;
+    f_s[10] += index;
+
+//    if (iniFile_getInteger(i->configIni, x_s, -1) != x) {
+//        iniFile_setInteger(i->configIni, x_s, x);
+//        write = true;
+//    }
+//    if (iniFile_getInteger(i->configIni, y_s, -1) != y) {
+//        iniFile_setInteger(i->configIni, y_s, y);
+//        write = true;
+//    }
+    if (iniFile_getInteger(i->configIni, w_s, 0) != w) {
+        iniFile_setInteger(i->configIni, w_s, w);
+        write = true;
+    }
+    if (iniFile_getInteger(i->configIni, h_s, 0) != h) {
+        iniFile_setInteger(i->configIni, h_s, h);
+        write = true;
+    }
+    if (iniFile_getInteger(i->configIni, d_s, 0) != dpi) {
+        iniFile_setInteger(i->configIni, d_s, dpi);
+        write = true;
+    }
+    if (iniFile_getInteger(i->configIni, f_s, 0) != flag) {
+        iniFile_setInteger(i->configIni, f_s, flag);
+        write = true;
+    }
+
+    char*  iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
+    if (iniPath && write)
+        iniFile_saveToFile(i->configIni, iniPath);
+}
+
+

@@ -97,6 +97,23 @@ public:
     }
 };
 
+struct MultiDisplayInfo {
+    int32_t id;
+    int32_t pos_x;
+    int32_t pos_y;
+    uint32_t width;
+    uint32_t height;
+    uint32_t dpi;
+    uint32_t flag;
+    bool     enabled;
+    MultiDisplayInfo() :
+      id(0), pos_x(0), pos_y(0), width(0), height(0), dpi(0), flag(0), enabled(false) {}
+    MultiDisplayInfo(int32_t i, int32_t x, int32_t y, uint32_t w, uint32_t h,
+                     uint32_t d, uint32_t f, bool e) :
+      id(i), pos_x(x), pos_y(y), width(w), height(h), dpi(d), flag(f), enabled(e) {}
+
+};
+
 class EmulatorQtWindow final : public QFrame {
     Q_OBJECT
 
@@ -128,7 +145,6 @@ public:
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
-    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 
     // In Qt, signals are normally events of interest that a class can emit,
     // which can be hooked up to arbitrary slots. Here we use this mechanism for
@@ -202,6 +218,7 @@ signals:
                                         int timeoutMs);
 
     void showVirtualSceneControls(bool show);
+    void updateMultiDisplayPage(int id);
 
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
@@ -263,12 +280,13 @@ public:
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
     // update multiDisplay info from FrameBuffer.cpp
-    void setMultiDisplay(uint32_t id,
+    void setUIMultiDisplay(uint32_t id,
                          int32_t x,
                          int32_t y,
                          uint32_t w,
                          uint32_t h,
-                         bool add);
+                         bool add,
+                         uint32_t dpi = 0);
     bool getMultiDisplay(uint32_t id,
                          int32_t* x,
                          int32_t* y,
@@ -280,6 +298,8 @@ public:
     bool isMultiDisplayEnabled();
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
+    bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
+                                   uint32_t dpi, uint32_t flag);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -542,20 +562,10 @@ private:
     QScreen* mCurrentScreen = nullptr;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
-    struct MultiDisplayInfo {
-        int32_t pos_x;
-        int32_t pos_y;
-        uint32_t width;
-        uint32_t height;
-        uint32_t dpi;
-        uint32_t flag;
-        bool     enabled;
-        MultiDisplayInfo() :
-          pos_x(0), pos_y(0), width(1200), height(800), dpi(240), flag(0), enabled(false) {}
-    };
     std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
     static const int MAX_MULTIDISPLAYS = 10;
+    void saveMultidisplayToConfig();
 };
 
 class SkinSurfaceBitmap {

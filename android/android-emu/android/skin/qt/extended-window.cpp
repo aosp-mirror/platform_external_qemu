@@ -104,6 +104,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
         {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
+        {PANE_IDX_MULTIDISPLAY,  mExtendedUi->displaysButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
         {PANE_IDX_SNAPSHOT,      mExtendedUi->snapshotButton},
@@ -120,6 +121,13 @@ ExtendedWindow::ExtendedWindow(
                    + ":" + QString::number(android_serial_number_port));
 
     mSidebarButtons.addButton(mExtendedUi->locationButton);
+    if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
+        !ToolWindow::isFoldableConfigured()) {
+        mSidebarButtons.addButton(mExtendedUi->displaysButton);
+        mExtendedUi->displaysButton->setVisible(true);
+    } else {
+        mExtendedUi->displaysButton->setVisible(false);
+    }
     mSidebarButtons.addButton(mExtendedUi->cellularButton);
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
@@ -321,6 +329,7 @@ void ExtendedWindow::on_cameraButton_clicked()       { adjustTabs(PANE_IDX_CAMER
 void ExtendedWindow::on_bugreportButton_clicked()    { adjustTabs(PANE_IDX_BUGREPORT); }
 void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
+void ExtendedWindow::on_displaysButton_clicked()     { adjustTabs(PANE_IDX_MULTIDISPLAY); }
 void ExtendedWindow::on_rotaryInputButton_clicked()  { adjustTabs(PANE_IDX_ROTARY); }
 void ExtendedWindow::on_fingerButton_clicked()       { adjustTabs(PANE_IDX_FINGER); }
 void ExtendedWindow::on_helpButton_clicked()         { adjustTabs(PANE_IDX_HELP); }
@@ -376,6 +385,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     mToolWindow->updateTheme(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->location_page->updateTheme();
+    mExtendedUi->multiDisplayPage->updateTheme();
     mExtendedUi->bugreportPage->updateTheme();
     mExtendedUi->recordAndPlaybackPage->updateTheme();
 
