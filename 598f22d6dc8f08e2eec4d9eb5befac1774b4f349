@@ -124,6 +124,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04d470e0_c295bedc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-07-15T17:22:01Z",
+      "side": 1,
+      "message": "Agree. I just tried to make the code clear to differentiate the id 0 for default display and some special value for requesting a new id.",
+      "parentUuid": "f6900b7d_818ac6a4",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
