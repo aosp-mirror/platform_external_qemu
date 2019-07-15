@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>add_display</title>
+    <desc>Created with Sketch.</desc>
+    <g id="add_display" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-4" transform="translate(4.000000, 4.000000)" fill="#617D8A">
+            <g id="Group-3" transform="translate(7.000000, 6.000000)">
+                <g id="Group" transform="translate(4.000000, 4.250000) rotate(90.000000) translate(-4.000000, -4.250000) translate(0.000000, 0.250000)">
+                    <g id="Group-2" transform="translate(0.437500, 0.525000)">
+                        <rect id="Rectangle" x="2.3125" y="0.475" width="2" height="6"></rect>
+                        <polygon id="Rectangle" transform="translate(3.312500, 3.475000) rotate(90.000000) translate(-3.312500, -3.475000) " points="2.3125 0.475 4.3125 0.475 4.3125 6.475 2.3125 6.475"></polygon>
+                    </g>
+                </g>
+            </g>
+            <path d="M12,6 L10,6 L10,2.1 L2,2.1 L2,6.3 L7,6.3 L7,8.4 L0,8.4 L0,0 L12,0 L12,6 Z M7,9.6 L7,12 L0,12 L0,9.6 L7,9.6 Z" id="Combined-Shape"></path>
+        </g>
+    </g>
+</svg>
