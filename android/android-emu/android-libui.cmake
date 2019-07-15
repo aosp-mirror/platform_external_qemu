@@ -106,6 +106,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/location-page-route-playback.cpp
     android/skin/qt/extended-pages/location-page.cpp
     android/skin/qt/extended-pages/microphone-page.cpp
+    android/skin/qt/extended-pages/multi-display-page.cpp
+    android/skin/qt/extended-pages/multi-display-arrangement.cpp
     android/skin/qt/extended-pages/perfstats-page.cpp
     android/skin/qt/extended-pages/record-and-playback-page.cpp
     android/skin/qt/extended-pages/record-macro-edit-dialog.cpp
@@ -179,6 +181,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/google-play-page.ui
     android/skin/qt/extended-pages/help-page.ui
     android/skin/qt/extended-pages/microphone-page.ui
+    android/skin/qt/extended-pages/multi-display-page.ui
     android/skin/qt/extended-pages/record-and-playback-page.ui
     android/skin/qt/extended-pages/record-macro-edit-dialog.ui
     android/skin/qt/extended-pages/record-macro-page.ui
@@ -221,6 +224,8 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/help-page.h
     android/skin/qt/extended-pages/location-page.h
     android/skin/qt/extended-pages/microphone-page.h
+    android/skin/qt/extended-pages/multi-display-page.h
+    android/skin/qt/extended-pages/multi-display-arrangement.h
     android/skin/qt/extended-pages/record-and-playback-page.h
     android/skin/qt/extended-pages/record-macro-edit-dialog.h
     android/skin/qt/extended-pages/record-macro-page.h

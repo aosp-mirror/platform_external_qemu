@@ -90,7 +90,7 @@ QListWidget QPushButton {
     background: none;
     border: none;
 }
-QGroupBox::title { margin-top: 4px; margin-left: 0px }
+QGroupBox::title { margin-top: 4px; margin-left: 0px; padding-left: 0px; }
 QTextEdit:disabled, QLineEdit:disabled { border: 0px }
 QTextEdit, QLineEdit {
     border-top: 0px;
