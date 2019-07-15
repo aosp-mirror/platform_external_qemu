@@ -88,6 +88,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e84e99f4_bdf62018",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-07-15T17:10:26Z",
+      "side": 1,
+      "message": "Oops, uint32_t for displayId. We may need a constant for INVALID displayID. I will upload a patch.",
+      "parentUuid": "5560662a_d8cf534f",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
