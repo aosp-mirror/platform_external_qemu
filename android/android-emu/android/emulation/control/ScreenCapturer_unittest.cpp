@@ -172,8 +172,12 @@ public:
                          uint32_t w,
                          uint32_t h,
                          uint32_t dpi,
-                         bool add){};
-    void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) { };
+                         bool add) { }
+    void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) { }
+    bool tryLockMultiDisplayOnLoad(void) {
+        return true;
+    }
+    void unlockMultiDisplayOnLoad(void) { }
 
     void cleanupProcGLObjects(uint64_t puid) { }
     void stop(bool wait) { }
