@@ -1007,8 +1007,15 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             // TODO(zyy): create an extended version of send()/recv() functions
             // to return both transferred size and resulting status in single
             // call.
-            pipe->command_buffer->rw_params.consumed_size = consumed_size;
-            pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
+            if (isCall) {
+                pipe->command_buffer->rw_params.consumed_size = consumed_size;
+                pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
+            } else {
+                pipe->command_buffer->status = status;
+                pipe->command_buffer->rw_params.consumed_size =
+                    status < 0 ? 0 : status;
+            }
+
             DD("%s: CMD_%s id=%d buffers=%d > status=%d", __func__,
                (willModifyData ? (isCall ? "CALL" : "READ") : "WRITE"),
                (int)pipe->id, (int)buffers_count, pipe->command_buffer->status);
