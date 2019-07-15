@@ -1107,6 +1107,8 @@ static int rcCreateDisplay(uint32_t* displayId) {
         return -1;
     }
 
+    // Assume this API call always allocates a new displayId
+    *displayId = FrameBuffer::s_invalidIdMultiDisplay;
     return fb->createDisplay(displayId);
 }
 

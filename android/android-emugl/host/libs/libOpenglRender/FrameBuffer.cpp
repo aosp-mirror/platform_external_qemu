@@ -44,8 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_NUM_MULTI_DISPLAY 11
-
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Stream;
@@ -89,6 +87,8 @@ private:
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
 uint32_t FrameBuffer::s_nextDisplayId = 1;  /* start from 1, 0 is for default Android display */
+uint32_t FrameBuffer::s_maxNumMultiDisplay = 11;
+uint32_t FrameBuffer::s_invalidIdMultiDisplay = 0xFFFFFFAB;
 
 static const GLint gles2ContextAttribsESOrGLCompat[] =
    { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -2527,17 +2527,17 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
         ERR("%s: null displayId", __FUNCTION__);
         return -1;
     }
-    if (m_displays.size() > MAX_NUM_MULTI_DISPLAY) {
+    if (m_displays.size() > s_maxNumMultiDisplay) {
         ERR("%s: cannot create more displays, exceeding limits %d",
-            __FUNCTION__, MAX_NUM_MULTI_DISPLAY);
+            __FUNCTION__, s_maxNumMultiDisplay);
         return -1;
     }
     if (m_displays.find(*displayId) != m_displays.end()) {
         return 0;
     }
-
-    if (*displayId == 0) {
-        *displayId = s_nextDisplayId++;
+    if (*displayId == s_invalidIdMultiDisplay) {
+        while (m_displays.find(++s_nextDisplayId) != m_displays.end()) { }
+        *displayId = s_nextDisplayId;
     }
     if (m_displays.size() == 1) {
         emugl::get_emugl_window_operations().setNoSkin();
