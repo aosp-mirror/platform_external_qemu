@@ -70,6 +70,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5560662a_d8cf534f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-07-15T17:07:16Z",
+      "side": 1,
+      "message": "Can we put a note here, indicating that we always assume that rcCreateDisplay will end up with a new ID allocated? Also \"-1\" may be a better candidate because \"0\" actually stands for the default display",
+      "parentUuid": "98e3efc0_14f9d974",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
