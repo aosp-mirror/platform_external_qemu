@@ -52,6 +52,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "98e3efc0_14f9d974",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-15T16:57:38Z",
+      "side": 1,
+      "message": "I realize that rcCreateDisplay() is not used by device/generic/goldfish-opengl. Thus, setting *displayId \u003d 0 will not cause any issue. I think this CL is a good fix.",
+      "parentUuid": "39597f1b_d7a9e4be",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
