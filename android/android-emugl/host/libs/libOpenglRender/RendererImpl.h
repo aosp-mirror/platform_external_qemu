@@ -78,6 +78,8 @@ public:
                          uint32_t dpi,
                          bool add) final;
     void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb);
+    bool tryLockMultiDisplayOnLoad(void);
+    void unlockMultiDisplayOnLoad(void);
     void cleanupProcGLObjects(uint64_t puid) final;
 
     void pauseAllPreSave() final;
