@@ -553,7 +553,7 @@ private:
         uint32_t flag;
         bool     enabled;
         MultiDisplayInfo() :
-          pos_x(0), pos_y(0), width(1200), height(800), dpi(240), flag(0), enabled(false) {}
+          pos_x(0), pos_y(0), width(720), height(1080), dpi(213), flag(0), enabled(false) {}
     };
     std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
