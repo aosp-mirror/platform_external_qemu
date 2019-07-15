@@ -128,7 +128,6 @@ public:
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
-    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 
     // In Qt, signals are normally events of interest that a class can emit,
     // which can be hooked up to arbitrary slots. Here we use this mechanism for
@@ -202,6 +201,7 @@ signals:
                                         int timeoutMs);
 
     void showVirtualSceneControls(bool show);
+    void updateMultiDisplayPage(uint32_t id);
 
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
@@ -268,7 +268,8 @@ public:
                          int32_t y,
                          uint32_t w,
                          uint32_t h,
-                         bool add);
+                         bool add,
+                         uint32_t dpi = 0);
     bool getMultiDisplay(uint32_t id,
                          int32_t* x,
                          int32_t* y,
@@ -280,6 +281,7 @@ public:
     bool isMultiDisplayEnabled();
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
+    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -551,11 +553,12 @@ private:
         uint32_t flag;
         bool     enabled;
         MultiDisplayInfo() :
-          pos_x(0), pos_y(0), width(1200), height(800), dpi(240), flag(0), enabled(false) {}
+          pos_x(0), pos_y(0), width(0), height(0), dpi(0), flag(0), enabled(false) {}
     };
     std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
     static const int MAX_MULTIDISPLAYS = 10;
+    void saveMultidisplayToConfig();
 };
 
 class SkinSurfaceBitmap {

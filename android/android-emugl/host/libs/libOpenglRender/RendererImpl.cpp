@@ -325,7 +325,7 @@ void RendererImpl::setMultiDisplay(uint32_t id,
     if (fb) {
         if (add) {
             fb->createDisplay(&id);
-            fb->setDisplayPose(id, x, y, w, h);
+            fb->setDisplayPose(id, x, y, w, h, dpi);
         } else {
             fb->destroyDisplay(id);
         }

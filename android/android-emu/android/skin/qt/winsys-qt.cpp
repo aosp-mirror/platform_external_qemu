@@ -850,6 +850,15 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
 
             // Get the multidisplay configs from startup parameters, if yes,
             // override the configs in config.ini
+            // This stage happens before the MultiDisplayPipe created
+            // (bootCompleted). MultiDisplay configs will not send to guest
+            // immediately, instead MultiDisplayPipe queries configs when it is
+            // created.
+            // If snapshot loaded after this stage, it is possible that
+            // MultiDisplay configs in these two stages may differ. Snapshot
+            // configs will override. Snapshot overriding only reconfigs the
+            // host, and will not be sent to guest. Guest just restore to
+            // it snapshot vm status.
             uint32_t multidisplay_cnt;
             skin_winsys_parse_multidisplay_args(&multidisplay_cnt, nullptr);
             std::vector<uint32_t> multidisplay_args;
@@ -862,12 +871,13 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                 int i = 0;
                 for (int cnt = 0; cnt < multidisplay_cnt; cnt++) {
                     window->switchMultiDisplay(true,
-                                               multidisplay_args[i++],
+                                               multidisplay_args[i],
                                                -1, -1,
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++]);
+                                               multidisplay_args[i + 1],
+                                               multidisplay_args[i + 2],
+                                               multidisplay_args[i + 3],
+                                               multidisplay_args[i + 4]);
+                    i += 5;
                 }
             }
             else {
