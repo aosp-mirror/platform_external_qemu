@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "347993f6_da0bb250",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2539,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2019-07-15T13:16:48Z",
+      "side": 0,
+      "message": "this code will never execute today because at line 668 in the ctor we create the default display with id 0. the result is that \"m_displays.find(*displayId) !\u003d m_displays.end()\" will return  true when *displayId is 0 and it\u0027s impossible to have this code actually allocate the ID.",
+      "revId": "fff09e1cac6dc4bf51c32ec01686a613ed4170ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

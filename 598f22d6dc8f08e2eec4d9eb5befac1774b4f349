@@ -34,6 +34,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39597f1b_d7a9e4be",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2019-07-15T13:16:48Z",
+      "side": 1,
+      "message": "I understand the original intention. See my comment in FrameBuffer.cpp for why that\u0027s currently not working. I\u0027m happy to change this into two different calls if that\u0027s preferred? But maybe as a follow-up as that\u0027s an IPC change. Or do  you just want the FrameBuffer API to change?\n\nIs rcCreateDisplay used for non IPC purposes? Hard to say how this could cause a bug otherwise as this IPC never seemed to work afaict.",
+      "parentUuid": "535a55f5_b9f29c01",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
