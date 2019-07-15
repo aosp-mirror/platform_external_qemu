@@ -57,7 +57,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                               int32_t y,
                               uint32_t w,
                               uint32_t h,
-                              bool add) {},
+                              bool add,
+                              uint32_t dpi = 0) {},
         .getMultiDisplay = nullptr,
         .getMonitorRect =
                 [](uint32_t* w, uint32_t* h) {

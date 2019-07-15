@@ -70,7 +70,8 @@ typedef struct QAndroidEmulatorWindowAgent {
                             int32_t,
                             uint32_t,
                             uint32_t,
-                            bool);
+                            bool,
+                            uint32_t);
     bool (*getMultiDisplay)(uint32_t,
                             int32_t*,
                             int32_t*,
