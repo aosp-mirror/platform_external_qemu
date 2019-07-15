@@ -487,6 +487,18 @@ void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
     }
 }
 
+bool android_tryLockMultiDisplayOnLoad(void) {
+    if (sRenderer) {
+        return sRenderer->tryLockMultiDisplayOnLoad();
+    }
+    return false;
+}
+
+void android_unlockMultiDisplayOnLoad(void) {
+    if (sRenderer) {
+        sRenderer->unlockMultiDisplayOnLoad();
+    }
+}
 
 static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];

@@ -94,7 +94,17 @@ QListWidget QPushButton {
     background: none;
     border: none;
 }
-QGroupBox::title { margin-top: 4px; margin-left: 0px }
+QListWidget[ColorGroup="MultiDisplay"] {
+    border: none;
+}
+QListWidget::item[ColorGroup="MultiDisplay"] {
+    border: none;
+}
+QListWidget::item:focus[ColorGroup="MultiDisplay"], QListWidget::item:selected[ColorGroup="MultiDisplay"] {
+    border: none;
+    background-color: %%BKG_COLOR%%;
+}
+QGroupBox::title { margin-top: 4px; margin-left: 0px; padding-left: 0px; }
 QTextEdit:disabled, QLineEdit:disabled { border: 0px }
 QTextEdit, QLineEdit {
     border-top: 0px;

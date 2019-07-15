@@ -41,6 +41,7 @@
 #include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/multi-display-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/screen-mask.h"
@@ -896,6 +897,8 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         mCarClusterWindow->setEnabled(false);
     }
 
+    saveMultidisplayToConfig();
+
     const bool alreadyClosed = mClosed;
     mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
@@ -1393,6 +1396,13 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
         }
         CrashReporter::get()->attachData(
                 "qemu-main-loop-args.txt", arguments);
+
+        if (arguments.find("-loadvm") != std::string::npos) {
+            printf("found -loadvm\n");
+        }
+        if (arguments.find("-mem-path") != std::string::npos) {
+            printf("found -mem-path\n");
+        }
 
         mMainLoopThread = new MainLoopThread(f, argc, argv);
         QObject::connect(mMainLoopThread, &QThread::finished, &mContainer,
@@ -2783,32 +2793,39 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
 
 bool EmulatorQtWindow::sMultiDisplaySet = false;
 
-void EmulatorQtWindow::setMultiDisplay(uint32_t id,
+void EmulatorQtWindow::setUIMultiDisplay(uint32_t id,
                                        int32_t x,
                                        int32_t y,
                                        uint32_t w,
                                        uint32_t h,
-                                       bool add) {
-    AutoLock lock(mMultiDisplayLock);
-    mMultiDisplay[id].enabled = add;
-    if (add) {
-        mMultiDisplay[id].pos_x = x;
-        mMultiDisplay[id].pos_y = y;
-        mMultiDisplay[id].width = w;
-        mMultiDisplay[id].height = h;
-        if (!sMultiDisplaySet && countEnabledMultiDisplayLocked() == 1) {
-            sMultiDisplaySet = true;
+                                       bool add,
+                                       uint32_t dpi) {
+    LOG(VERBOSE) << "setUIMultiDisplay id " << id << " " << x
+                 << " " << y << " " << w << " " << h
+                 << " " << (add ? "add" : "del");
+    {
+        AutoLock lock(mMultiDisplayLock);
+        mMultiDisplay[id].enabled = add;
+        if (add) {
+            mMultiDisplay[id].pos_x = x;
+            mMultiDisplay[id].pos_y = y;
+            mMultiDisplay[id].width = w;
+            mMultiDisplay[id].height = h;
+            mMultiDisplay[id].dpi = dpi;
+            if (!sMultiDisplaySet && countEnabledMultiDisplayLocked() == 1) {
+                sMultiDisplaySet = true;
+                runOnUiThread([this] {
+                    mToolWindow->hideRotationButton(true);
+                    setFrameAlways(true);
+                });
+            }
+        } else if (sMultiDisplaySet && countEnabledMultiDisplayLocked() == 0) {
+            sMultiDisplaySet = false;
             runOnUiThread([this] {
-                mToolWindow->hideRotationButton(true);
+                mToolWindow->hideRotationButton(false);
                 setFrameAlways(true);
             });
         }
-    } else if (sMultiDisplaySet && countEnabledMultiDisplayLocked() == 0) {
-        sMultiDisplaySet = false;
-        runOnUiThread([this] {
-            mToolWindow->hideRotationButton(false);
-            setFrameAlways(true);
-        });
     }
     SkinEvent* event = new SkinEvent();
     event->type = kEventSetMultiDisplay;
@@ -2819,6 +2836,12 @@ void EmulatorQtWindow::setMultiDisplay(uint32_t id,
     event->u.multi_display.height = h;
     event->u.multi_display.add = add;
     skin_event_add(event);
+
+    // update the MutiDisplay UI page, e.g., config through console,
+    // loaded from snapshot
+    if (dpi != 0 && id > 0 && id <= MultiDisplayPage::sMaxItem) {
+        emit(updateMultiDisplayPage(id));
+    }
 }
 
 bool EmulatorQtWindow::getMultiDisplay(uint32_t id,
@@ -2877,12 +2900,15 @@ bool EmulatorQtWindow::switchMultiDisplay(bool enabled,
                                           uint32_t height,
                                           uint32_t dpi,
                                           uint32_t flag) {
+    LOG(VERBOSE) << "switchMultiDisplay id " << id << " "
+                 << x << " " << y << " " << width << " " << height << " "
+                << dpi << " " << flag << " " << (enabled? "add":"del");
     if (!android::featurecontrol::isEnabled(
                 android::featurecontrol::MultiDisplay) ||
         ToolWindow::isFoldableConfigured()) {
         return false;
     }
-    if (enabled && !multiDisplayParamValidate(width, height, dpi, flag)) {
+    if (enabled && !multiDisplayParamValidate(id, width, height, dpi, flag)) {
         return false;
     }
     if (mOrientation != SKIN_ROTATION_0) {
@@ -2900,6 +2926,11 @@ bool EmulatorQtWindow::switchMultiDisplay(bool enabled,
       mMultiDisplay[id].flag = flag;
       mMultiDisplay[id].enabled = enabled;
     }
+
+    // Service inside guest already started in QemuMiscPipe when guesst
+    // bootCompleted. But this service may be killed, e.g., Android low
+    // memory. Send broadcast again to gurantee servce running.
+    // P.S. Service has check to avoid duplication.
     getAdbInterface()->enqueueCommand(
         {"shell", "am", "broadcast", "-a",
          "com.android.emulator.multidisplay.START", "-n",
@@ -2948,7 +2979,7 @@ void EmulatorQtWindow::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
     }
 }
 
-bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t w, uint32_t h,
+bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                                  uint32_t dpi, uint32_t flag) {
     // According the Android 9 CDD,
     // * 120 <= dpi <= 640
@@ -2977,11 +3008,41 @@ bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t w, uint32_t h,
         fprintf(stderr, "resolution should not exceed 4k (4096*2160)\n");
         return false;
     }
-    if ( w * 21 < h * 9 || w * 9 > h * 21) {
+    if (w * 21 < h * 9 || w * 9 > h * 21) {
         showMessage("Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)",
                     Ui::OverlayMessageType::Error, 1000);
         fprintf(stderr, "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)\n");
         return false;
     }
+    if (id > MultiDisplayPage::sMaxItem) {
+        showMessage("Display index cannot be more than 3",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "Display index cannot be more than 3\n");
+        return false;
+    }
     return true;
+}
+
+void EmulatorQtWindow::saveMultidisplayToConfig() {
+    for (int i = 1; i < MultiDisplayPage::sMaxItem + 1; i++) {
+        if (mMultiDisplay[i].enabled && mMultiDisplay[i].dpi != 0) {
+            avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
+                                                   i,
+                                                   mMultiDisplay[i].pos_x,
+                                                   mMultiDisplay[i].pos_y,
+                                                   mMultiDisplay[i].width,
+                                                   mMultiDisplay[i].height,
+                                                   mMultiDisplay[i].dpi,
+                                                   mMultiDisplay[i].flag);
+        } else {
+            avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
+                                                   i,
+                                                   -1,
+                                                   -1,
+                                                   0,
+                                                   0,
+                                                   0,
+                                                   0);
+        }
+    }
 }

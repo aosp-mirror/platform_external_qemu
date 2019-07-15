@@ -445,4 +445,10 @@ void avdInfo_setCustomContentPath(AvdInfo* info, const char* path);
 /* Set a custom core hw ini path. Useful for testing. */
 void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path);
 
+void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,
+                                            int x, int y,
+                                            int w, int h,
+                                            int dpi, int flag );
+
+
 ANDROID_END_HEADER

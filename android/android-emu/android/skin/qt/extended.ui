@@ -64,6 +64,7 @@ font-family: &quot;Roboto&quot;</string>
     <number>0</number>
    </property>
    <widget class="LocationPage" name="location_page"/>
+   <widget class="MultiDisplayPage" name="multiDisplayPage"/>
    <widget class="CellularPage" name="cellular_page"/>
    <widget class="BatteryPage" name="batteryPage"/>
    <widget class="CameraPage" name="cameraPage"/>
@@ -383,6 +384,55 @@ padding: 10px 0px 10px 16px;</string>
         </property>
         <property name="themeIconName" stdset="0">
          <string>location</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="displaysButton">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Displays </string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/displays</normaloff>:/light/displays</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>displays</string>
         </property>
         <property name="ColorGroup" stdset="0">
          <string>MajorTab</string>
@@ -1261,6 +1311,12 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>MultiDisplayPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/multi-display-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>CameraPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/camera-page.h</header>
@@ -1299,6 +1355,7 @@ padding: 10px 0px 10px 16px;</string>
  </customwidgets>
  <tabstops>
   <tabstop>locationButton</tabstop>
+  <tabstop>displaysButton</tabstop>
   <tabstop>cellularButton</tabstop>
   <tabstop>batteryButton</tabstop>
   <tabstop>telephoneButton</tabstop>
