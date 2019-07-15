@@ -106,6 +106,24 @@
       "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6900b7d_818ac6a4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-15T17:16:44Z",
+      "side": 1,
+      "message": "huans@\nI don\u0027t think we need to set the displayId to -1 because in FrameBuffer.cpp, it will check if displayID \u003d\u003d 0 before look up in m_display. This won\u0027t conflict with lin 668 in FrameBuffer.cpp.",
+      "parentUuid": "e84e99f4_bdf62018",
+      "revId": "598f22d6dc8f08e2eec4d9eb5befac1774b4f349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
