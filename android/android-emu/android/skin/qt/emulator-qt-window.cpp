@@ -2892,6 +2892,11 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled,
       mMultiDisplay[id].flag = flag;
       mMultiDisplay[id].enabled = enabled;
     }
+    getAdbInterface()->enqueueCommand(
+        {"shell", "am", "broadcast", "-a",
+         "com.android.emulator.multidisplay.START", "-n",
+         "com.android.emulator.multidisplay/"
+         ".MultiDisplayServiceReceiver"});
     const auto uiAgent = mToolWindow->getUiEmuAgent();
     uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
 }
