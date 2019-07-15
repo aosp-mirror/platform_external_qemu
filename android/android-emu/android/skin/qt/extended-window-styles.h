@@ -20,6 +20,7 @@
 // QtDesigner and written to extended.ui.
 enum ExtendedWindowPane {
     PANE_IDX_LOCATION = 0,
+    PANE_IDX_MULTIDISPLAY,
     PANE_IDX_CELLULAR,
     PANE_IDX_BATTERY,
     PANE_IDX_CAMERA,
