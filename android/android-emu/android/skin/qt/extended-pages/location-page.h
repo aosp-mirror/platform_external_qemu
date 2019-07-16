@@ -270,7 +270,11 @@ public:
     void refresh() {
         if (mPointElement != nullptr) {
             setTitle(mPointElement->logicalName);
-            setSubtitle(mPointElement->description);
+            QString subtitle;
+            subtitle.sprintf("%.4f, %.4f",
+                             mPointElement->latitude,
+                             mPointElement->longitude);
+            setSubtitle(subtitle);
         }
     }
 
