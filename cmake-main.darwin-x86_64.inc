@@ -1320,6 +1320,7 @@ set(qemu-system-aarch64_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -1676,6 +1677,7 @@ set(qemu-system-arm_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2019,6 +2021,7 @@ set(qemu-system-i386_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2209,6 +2212,7 @@ set(qemu-system-mips64el_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2359,6 +2363,7 @@ set(qemu-system-mipsel_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2496,6 +2501,7 @@ set(qemu-system-x86_64_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2709,7 +2715,7 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/block/tr
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/ipack/ipack.c ${ANDROID_QEMU2_TOP_DIR}/hw/ipack/tpci200.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ipack")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/sparc/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/sparc")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/disas/mips.c ${ANDROID_QEMU2_TOP_DIR}/disas/arm-a64.cc ${ANDROID_QEMU2_TOP_DIR}/disas/i386.c ${ANDROID_QEMU2_TOP_DIR}/disas/arm.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/disas")
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/stubs/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/whpx-stub.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/accel/stubs")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/stubs/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/whpx-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/gvm-stub.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/accel/stubs")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ide/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/ahci.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/atapi.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/isa.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/core.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/ahci-allwinner.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/piix.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/microdrive.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/via.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/ich.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/qdev.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ide")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/tpm/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_crb.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_emulator.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_tis.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_util.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/tpm")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/mips/trace.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/op_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/dsp_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/cpu.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/lmi_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/msa_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/mips-semi.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/translate.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/cp0_timer.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/machine.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/mips")

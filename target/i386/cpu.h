@@ -1269,6 +1269,7 @@ typedef struct CPUX86State {
     int64_t tsc_khz;
     int64_t user_tsc_khz; /* for sanity check only */
     void *kvm_xsave_buf;
+    void *gvm_xsave_buf;
 
     uint64_t mcg_cap;
     uint64_t mcg_ctl;
@@ -1287,6 +1288,7 @@ typedef struct CPUX86State {
 } CPUX86State;
 
 struct kvm_msrs;
+struct gvm_msrs;
 
 /**
  * X86CPU:
@@ -1378,6 +1380,8 @@ struct X86CPU {
     Notifier machine_done;
 
     struct kvm_msrs *kvm_msr_buf;
+
+    struct gvm_msrs *gvm_msr_buf;
 
     int32_t node_id; /* NUMA node this CPU belongs to */
     int32_t socket_id;

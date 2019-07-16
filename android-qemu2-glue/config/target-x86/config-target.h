@@ -15,6 +15,7 @@
 #ifdef _WIN32
 
 #define CONFIG_WHPX 1
+#define CONFIG_GVM 1
 
 #endif // __WIN32
 

@@ -50,11 +50,13 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/numa.h"
 #include "sysemu/kvm.h"
+#include "sysemu/gvm.h"
 #ifdef CONFIG_HAX
 #include "sysemu/hax.h"
 #endif
 #include "sysemu/qtest.h"
 #include "kvm_i386.h"
+#include "gvm_i386.h"
 #include "hw/xen/xen.h"
 #include "ui/qemu-spice.h"
 #include "exec/memory.h"
@@ -1648,6 +1650,8 @@ void pc_basic_device_init(ISABus *isa_bus, qemu_irq *gsi,
     if (!xen_enabled() && has_pit) {
         if (kvm_pit_in_kernel()) {
             pit = kvm_pit_init(isa_bus, 0x40);
+        } else if (gvm_pit_in_kernel()) {
+            pit = gvm_pit_init(isa_bus, 0x0);
         } else {
             pit = i8254_pit_init(isa_bus, 0x40, pit_isa_irq, pit_alt_irq);
         }
@@ -1690,6 +1694,8 @@ void ioapic_init_gsi(GSIState *gsi_state, const char *parent_name)
 
     if (kvm_ioapic_in_kernel()) {
         dev = qdev_create(NULL, "kvm-ioapic");
+    } else if (gvm_ioapic_in_kernel()) {
+        dev = qdev_create(NULL, "gvm-ioapic");
     } else {
         dev = qdev_create(NULL, "ioapic");
     }
