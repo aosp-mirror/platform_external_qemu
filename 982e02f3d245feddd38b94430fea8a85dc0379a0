@@ -22,6 +22,30 @@
       "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8033680e_efa0e630",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1350,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-07-16T21:58:09Z",
+      "side": 1,
+      "message": "Thanks for the suggestion!\n\nmPaused can be set from internalPause() or internalResume(), and read from refreshFrame() which are on different threads, so mPaused is set as std::atomic\u003cbool\u003e.",
+      "parentUuid": "66c952cd_6ea76f83",
+      "range": {
+        "startLine": 1350,
+        "startChar": 8,
+        "endLine": 1350,
+        "endChar": 30
+      },
+      "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
