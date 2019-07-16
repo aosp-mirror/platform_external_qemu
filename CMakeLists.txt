@@ -32,7 +32,7 @@ set(GRPC FALSE CACHE BOOL "True if the emulator should be build with GRPC suppor
 set(WEBRTC FALSE CACHE BOOL "True if the emulator should be build with WEBRTC support. Defaults on for Linux")
 endif()
 set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
-
+set(ANDROIDSTUDIO TRUE CACHE BOOL "True if we should build android studio components. Default on.")
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
