@@ -16,4 +16,7 @@ if (GRPC)
     add_subdirectory(android-webrtc)
   endif()
 endif()
-add_subdirectory(android-studio)
+
+if (ANDROIDSTUDIO)
+  add_subdirectory(android-studio)
+endif()
