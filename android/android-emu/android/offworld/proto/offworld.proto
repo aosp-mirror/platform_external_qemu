@@ -130,6 +130,7 @@ message VideoInjectionRequest {
 
   message Load {
       optional bytes video_data = 1;
+      optional DatasetInfo dataset_info = 2;
   }
 
   message Play {

@@ -54,6 +54,8 @@ static offworld::Response createAsyncResponse(uint32_t asyncId) {
 
 }  // namespace.
 
+namespace pb = emulator_automation;
+
 namespace android {
 namespace automation {
 
@@ -356,6 +358,9 @@ public:
     StartResult startRecording(StringView filename) override;
     StopResult stopRecording() override;
 
+    StartResult startPlaybackFromSource(
+            std::shared_ptr<EventSource> source) override;
+
     StartResult startPlayback(StringView filename) override;
     StartResult startPlaybackWithCallback(StringView filename,
                                           void (*onStopCallback)()) override;
@@ -407,7 +412,7 @@ private:
 
     // Playback state.
     bool mPlayingFromFile = false;
-    std::unique_ptr<EventSource> mPlaybackEventSource;
+    std::shared_ptr<EventSource> mPlaybackEventSource;
     DurationNs mNextPlaybackCommandTime = 0L;
 
     // After replay callback.
@@ -514,7 +519,16 @@ DurationNs AutomationControllerImpl::advanceTime() {
     }
 
     const DurationNs nowNs = mLooper->nowNs(Looper::ClockType::kVirtual);
-    while (mPlaybackEventSource && nowNs >= mNextPlaybackCommandTime) {
+    DurationNs outDelay;
+    if (mPlaybackEventSource &&
+        mPlaybackEventSource->getNextCommandDelay(&outDelay)) {
+        mPlayingFromFile = true;
+        // If mNextPlaybackCommandTime was not initialized, initialize it here
+        if (mNextPlaybackCommandTime == 0) {
+            mNextPlaybackCommandTime = nowNs + outDelay;
+        }
+    }
+    while (mPlayingFromFile && nowNs >= mNextPlaybackCommandTime) {
         physicalModel_setCurrentTime(mPhysicalModel, mNextPlaybackCommandTime);
         replayNextEvent(lock);
     }
@@ -663,7 +677,7 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
         return Err(StartError::InternalError);
     }
 
-    std::unique_ptr<EventSource> source(
+    std::shared_ptr<EventSource> source(
             new BinaryStreamEventSource(std::move(playbackStream)));
 
     DurationNs nextCommandDelay;
@@ -681,6 +695,30 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
             mOnStopCallback();
             mOnStopCallback = nullptr;
         }
+    }
+
+    return Ok();
+}
+
+StartResult AutomationControllerImpl::startPlaybackFromSource(
+        std::shared_ptr<EventSource> source) {
+    // Block playback if either the playing from file flag is explicitly set,
+    // which may be set by itself if the file is has ended, or if there is an
+    // event source.
+    if (mPlayingFromFile || mPlaybackEventSource) {
+        return Err(StartError::AlreadyStarted);
+    }
+    mPlaybackEventSource = std::move(source);
+
+    DurationNs nextCommandDelay;
+    if (mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay)) {
+        // Header parsed, initialize class state.
+        mNextPlaybackCommandTime =
+                mLooper->nowNs(Looper::ClockType::kVirtual) + nextCommandDelay;
+
+        mPlayingFromFile = true;
+    } else {
+        LOG(INFO) << "Playback did not contain any commands";
     }
 
     return Ok();
@@ -777,7 +815,7 @@ ReplayResult AutomationControllerImpl::replayEvent(
     }
 
     if (!mOffworldEventSource) {
-        std::unique_ptr<OffworldEventSource> source(new OffworldEventSource(
+        std::shared_ptr<OffworldEventSource> source(new OffworldEventSource(
                 pipe, event, asyncId, mSendMessageCallback));
 
         DurationNs nextCommandDelay;
@@ -855,6 +893,11 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         case pb::RecordedEvent::StreamCase::kPhysicalModel:
             physicalModel_replayEvent(mPhysicalModel, event.physical_model());
             break;
+        case pb::RecordedEvent::StreamCase::kSensorOverride: {
+            physicalModel_replayOverrideEvent(mPhysicalModel,
+                                              event.sensor_override());
+            break;
+        }
         case pb::RecordedEvent::StreamCase::STREAM_NOT_SET:
             // Last event for files to simulate recordings.
             break;

@@ -56,8 +56,8 @@ public:
     }
 
     void setSensorLocationEventProvider(
-            SensorLocationEventProvider* eventProvider) {
-        mEventProvider = eventProvider;
+            std::shared_ptr<SensorLocationEventProvider> eventProvider) {
+        mEventProvider = std::move(eventProvider);
     }
 
 private:
@@ -69,7 +69,7 @@ private:
     VideoPlayerWaitInfo* mContinueReadWaitInfo;
     PacketQueue* mAudioPacketQueue = nullptr;
     PacketQueue* mVideoPacketQueue = nullptr;
-    SensorLocationEventProvider* mEventProvider = nullptr;
+    std::shared_ptr<SensorLocationEventProvider> mEventProvider;
 };
 
 std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
@@ -99,7 +99,7 @@ void Mp4DemuxerImpl::demux() {
         } else {
             // Create an event from this packet if it's from one of the known
             // data stream that carries event info
-            if (mEventProvider != nullptr &&
+            if (mEventProvider.get() != nullptr &&
                 isDataStreamIndex(packet.stream_index)) {
                 mEventProvider->createEvent(&packet);
             }
