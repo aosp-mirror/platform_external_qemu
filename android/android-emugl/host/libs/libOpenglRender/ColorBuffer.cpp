@@ -753,11 +753,8 @@ void ColorBuffer::readback(unsigned char* img, bool readbackBgra) {
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
-        // The actual internal format for BGRA8 is RGBA8 but RED and BLUE
-        // components are swizzled. We use BGRA here as read back format in
-        // order to retrieve RGBA pixels.
- 
-        bool shouldReadbackBgra = (readbackBgra || (m_sizedInternalFormat == GL_BGRA8_EXT));
+        // Flip the readback format if RED/BLUE components are swizzled.
+        bool shouldReadbackBgra = m_BRSwizzle ? !readbackBgra : readbackBgra;
         GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
 
         s_gles2.glReadPixels(0, 0, m_width, m_height, format, GL_UNSIGNED_BYTE, img);
@@ -775,7 +772,7 @@ void ColorBuffer::readbackAsync(GLuint buffer, bool readbackBgra) {
 
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
-        bool shouldReadbackBgra = (readbackBgra || (m_sizedInternalFormat == GL_BGRA8_EXT));
+        bool shouldReadbackBgra = m_BRSwizzle ? !readbackBgra : readbackBgra;
         GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
         s_gles2.glReadPixels(0, 0, m_width, m_height, format, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -917,8 +914,10 @@ bool ColorBuffer::importMemory(
         s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height, m_memoryObject, 0);
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+        m_BRSwizzle = true;
     } else {
         s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, m_sizedInternalFormat, m_width, m_height, m_memoryObject, 0);
+        m_BRSwizzle = false;
     }
 
     s_egl.eglDestroyImageKHR(m_display, m_eglImage);
