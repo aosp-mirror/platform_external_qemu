@@ -423,3 +423,7 @@ void ExtendedWindow::showMacroRecordPage() {
     on_recordButton_clicked();
     mExtendedUi->recordAndPlaybackPage->focusMacroRecordTab();
 }
+
+void ExtendedWindow::hideRotationButtons(bool hide) {
+    mExtendedUi->virtualSensorsPage->hideRotationButtons(hide);
+}

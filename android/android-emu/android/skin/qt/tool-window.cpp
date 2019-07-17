@@ -1103,6 +1103,7 @@ void ToolWindow::hideRotationButton(bool hide) {
     } else {
         mToolsUi->prev_layout_button->setHidden(hide);
         mToolsUi->next_layout_button->setHidden(hide);
+        mExtendedWindow.get()->hideRotationButtons(hide);
     }
 }
 
