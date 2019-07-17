@@ -18,7 +18,7 @@
 #ifndef GVM_INTERFACE_H
 #define GVM_INTERFACE_H
 
-#ifdef __WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <winioctl.h>
 #include <windef.h>
