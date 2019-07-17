@@ -1,127 +1,156 @@
 Android Emulator Windows Development
 =====================================
 
-In order to develop the android emulator under windows you will need to have access to:
-  - Have a bit9 exception http://go/bit9
-  - Have admin privileges on your machine.
-  - Our repository of sources:
-      1. Use a windows version of repo to access the sources (RECOMMENDED)
-      2. Use the linux subsystem to get access:
-          - Currently not working due to issues with symlinking between WSL and NTFS
-          - Abysmal performance due to file system translation
-  - A Compiler toolchain to compile the sources, in this case Visual Studio 2017
+This document describes how to get started with emulator development under windows.
 
-# Using repo for windows
+## Developing on gWindows.
+
+This section is only relevant if you work at Google.
+
+In order to develop the android emulator in gWindows you will need to meet the
+following requirements.
+
+  - Have a bit9 exception http://go/bit9
+  - Exception for credential guard http://go/winops-credential-guard (if you
+    want to use haxm)
+  - Have admin privileges on your machine.
+  - A Compiler toolchain to compile the sources. Any edition of Visual Studio
+    2017 is known to work
+
+*Note: The gWindows machines are locked down very well and you will experience
+some performance penalties due to this. You are highly encouraged to develop in GCE*
+
+# Software Requirements
 
 Install the following:
 
-- [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/). We will need the compiler toolchain with the latest windows sdk, as we need the WHPX headers.
-    - [Python](https://www.python.org/downloads/windows/). You only need this if your version of visual studio does not come with python.
-    - [Cmake](https://cmake.org/download/). You only need this if your version of visual studio does not come with cmake.
-- [Git](https://git-scm.com/downloads). Make sure that the install updates your path, so git will be on the path.
-- Add %USERPROFILE%\bin to the [path](https://www.windows-commandline.com/set-path-command-line/).
+- [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/). We will
+  need the compiler toolchain with the latest windows sdk, as we need the WHPX
+  headers. Make sure to install the following set of tools:
+    - Visual C++ build tools
+    - Visual C++ ATL for x86 & x64
+    - Visual C++ MFC for x86 & x64
+    - Windows 10 SDK (10.0.177763.0)
+    - [Python](https://www.python.org/downloads/windows/). You only need this
+      if your version of visual studio does not come with python.
+    - [Cmake](https://cmake.org/download/). You only need this if your version
+      of visual studio does not come with cmake.
+- [Android Studio](https://developer.android.com/studio). You will need this to
+  run the emulator.
+    - Make sure to create an avd so you can run the emulator.
+    - Make sure you install a hypervisor (whpx/haxm).
+- [Git](https://git-scm.com/downloads). Make sure that the install updates your
+  path, so git will be on the path.
+- [VScode](https://code.visualstudio.com/) Visual studio code works well for
+  emulator development. Make sure to install the at least following extensions:
+    - [ms-vscode.cpptool](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools).
+      Needed for debugging.
+    - [vector-of-bool.cmake-tools](https://marketplace.visualstudio.com/items?itemName=vector-of-bool.cmake-tools).
+      Needed for compiling.
+- Add %USERPROFILE%\bin to the
+  [path](https://www.windows-commandline.com/set-path-command-line/).
 
-Once you have installed these open a cmd prompt. Make sure your account has **[SeCreateSymbolicLinkPrivilege](https://security.stackexchange.com/questions/10194/why-do-you-have-to-be-an-admin-to-create-a-symlink-in-windows)**. The easiest way to make sure you have this is to open this with administrator privileges.
+If you are using [Chocolatey](https://chocolatey.org/), you can install all the
+dependencies with the following command in an elevated terminal window (i.e.
+type Win-R key then type "cmd"):
 
-1. First check that all dependencies are on the path:
+```bat
+C:\> @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 
-    ```
-    C:\> where git && where python
-    C:\Program Files\Git\cmd\git.exe
-    C:\python_27_amd64\files\python.exe
-    ```
-
-2. The next step is to obtain a copy of [git-remote-sso.exe](https://x20web.corp.google.com/teams/gerritcodereview/bin/git-remote-sso.exe), and place it in the git\cmd directory (or anywhere else on the PATH).  **Optional, you can live without**
-
-    ```
-    C:> copy %USERPROFILE%\Downloads\git-remote-sso.exe "C:\Program Files\Git\cmd\"
-    ```
-3. Now we need to obtain a copy of repo for [windows](https://user.git.corp.google.com/rpaquay/git-repo-windows/+/windows-port-stable)
-
-    ```
-    C:> cd %USERPROFILE% && mkdir src && cd src
-    C:> git clone -b windows-port-stable sso://user/rpaquay/git-repo-windows
-    ```
-
-4. Make sure we have a repo launcher somewhere on the path.
-
-    ```
-    C:> echo @call python "%USERPROFILE%\src\git-repo-windows\repo" %* > "%USERPROFILE%\bin\repo.cmd"
-    C:> repo help
-    usage: repo COMMAND [ARGS]
-
-    repo is not yet installed.  Use "repo init" to install it here.
-
-    The most commonly used repo commands are:
-
-      init      Install repo in the current working directory
-      help      Display detailed help on a command
-
-    For access to the full online help, install repo ("repo init").
-    ```
-
-    You now should have repo on the path, and should be able to initialize a repo. Which we will do next:
-
-  5. Initialize the repository:
-
-      ```
-      C:> cd %USERPROFILE%\src && mkdir emu-master-dev && cd emu-master-dev
-      C:> repo init -u https://android.googlesource.com/platform/manifest -b emu-master-dev
-      ```
-
-      ***Note:** we are not using persistent-https to initialize the repo*
-
-  6. Sync the repo (and get some coffee, or a have a good nap.)
-
-     ```
-        C:>  cd %USERPROFILE%\src\emu-master-dev && repo sync -f --no-tags --optimized-fetch --prune
-     ```
-
-   7. Congratulations! You have all the sources you need. Now run:
-
-     ```
-        C:>  cd %USERPROFILE%\src\emu-master-dev\external\qemu && android\rebuild
-     ```
-
-
-   8. Setup git cookies so you can repo upload by following this link: [https://www.googlesource.com/new-password](https://www.googlesource.com/new-password)
-
-## Using Debian.
-
-**NOTE: Currently does not work due symlinks not being visible in NTFS**
-
-We will use debian with git & repo to access our source repository. You will have to use this approach if you do not have access to a windows version of repo. Installing debian can be done from [PowerShell:](https://docs.microsoft.com/en-us/powershell/).
-
-**Make sure you have a bit9 exception before you start!**
-
-First we need to enable the windows subsystem feature:
+C:> choco install -y python2 visualstudio2017community visualstudio2017-workload-vctools visualstudio2017-workload-nativedesktop cmake
 
 ```
-PS C:> Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-```
 
-Next we need to obtain the debian subsystem. You can obtain it from microsoft as follows
+You must run visual studio at least once to accept a license and do some initial configuration.
 
-```
- PS C:\> Invoke-WebRequest -Uri https://aka.ms/wsl-debian-gnulinux -OutFile ~/Debian.zip -UseBasicParsing
-```
+Make sure your account has
+**[SeCreateSymbolicLinkPrivilege](https://security.stackexchange.com/questions/10194/why-do-you-have-to-be-an-admin-to-create-a-symlink-in-windows)**.
+The easiest way to make sure you have this is to open every terminal window
+with administrator privileges.
 
-You will now have a zipfile that contains the debian subsystem.  Simply unzip it:
+Once you have installed everything you can validate that you have what you need on the path by executing:
 
-```
-PS C:\> Expand-Archive ~/Debian.zip -DestinationPath ~
-```
+  ```bat
+  C:\> where git && where python
+  C:\Program Files\Git\cmd\git.exe
+  C:\python_27_amd64\files\python.exe
+  ```
 
-And install/launch
+## Configure git
 
-```
-PS C:> ~/Debian.exe
-```
+Git might not be configured properly to handle symlinks well on windows. Make
+sure you have the following settings set:
 
-You now should have a debian shell. First thing we have to do is install a set of dependencies:
+  ```bat
+  C:\> git config --system core.symlink true
+  C:\> git config --global core.symlink true
+  ```
 
-```
-$ sudo apt-get update && sudo apt-get install python git curl vim wget byobu
-```
+## Obtaining repo for windows
 
-In theory you should now be able to use the standard repo tools to obtain a copy of all the sources.
+*Note: The instructions in this section are for using the native Windows
+version of the `repo` tool, where "native" is used to mean without "cygwin".*
+
+There are 2 advantages running with Windows native tools:
+  - Improved performance. For example, Git for Windows is usually dramatically
+    faster the git for cygwin for many common operations
+  - Compatibility with other native Windows tools: e.g. cmd.exe, TortoiseGit,
+    IntelliJ, etc.
+
+From a PowerShell window (i.e. type Win-R key then type "Powershell"):
+
+  ```PS
+  PS C:\Users\hacker> md "$env:USERPROFILE\bin\"
+  PS C:\Users\hacker> $wc = New-Object Net.WebClient
+  PS C:\Users\hacker> $wc.DownloadFile('http://storage.googleapis.com/git-repo-downloads/repo', "$env:USERPROFILE\bin\repo")
+  PS C:\Users\hacker> '@call python %~dp0repo %*' | Out-File -FilePath "$env:USERPROFILE\bin\repo.cmd"
+  ```
+
+Make sure to add `"$env:USERPROFILE\bin"` to the `PATH`, otherwise you will not
+be able to use repo. For the example above this would be:
+`C:\Users\hacker\bin"`.
+
+*Note: If the output of “repo” commands produce escaped ANSI codes (e.g.
+“ESC[m”), try the following:*
+
+  ```bat
+  C:> set LESS=-r
+  ```
+
+ ### Initialize the repository:
+
+You can initialize repo as follows:
+
+  ```bat
+  C:> cd %USERPROFILE%\src && mkdir emu-master-dev && cd emu-master-dev
+  C:> repo init -u https://android.googlesource.com/platform/manifest -b emu-master-dev
+  ```
+
+***Note:** we are not using persistent-https to initialize the repo, this means
+performance will not be as good as it could be.*
+
+
+Sync the repo (and get some coffee, or a have a good nap.)
+
+  ```bat
+    C:>  cd %USERPROFILE%\src\emu-master-dev && repo sync -f --no-tags --optimized-fetch --prune
+  ```
+
+Congratulations! You have all the sources you need. Now run:
+
+  ```bat
+    C:>  cd %USERPROFILE%\src\emu-master-dev\external\qemu && android\rebuild
+  ```
+
+
+### Setup git cookies
+
+Setup git cookies so you can repo upload by following this link:
+[https://www.googlesource.com/new-password](https://www.googlesource.com/new-password).
+
+Make sure you have configured the proper user name and email address:
+
+  ```bat
+    C:\>git config --global user.name "I just copy pasted this without looking"
+    C:\>git config --global user.email wrong-do-it-again@badrobot.com
+  ```
