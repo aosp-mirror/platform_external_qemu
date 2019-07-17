@@ -36,6 +36,8 @@ typedef struct ASimCardRec_ {
     char        out_buff[ 256 ];
     int         out_size;
 
+    char        voicemailbuf[256];
+
 } ASimCardRec;
 
 static ASimCardRec  _s_card[1];
@@ -49,6 +51,8 @@ asimcard_create(int port, int sim_present)
     strncpy( card->pin, "0000", sizeof(card->pin) );
     strncpy( card->puk, "12345678", sizeof(card->puk) );
     card->port = port;
+    snprintf(card->voicemailbuf, sizeof(card->voicemailbuf), "%s",
+            "566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff");
     return card;
 }
 
@@ -458,7 +462,7 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         { "+CRSM=178,28480,1,4,32", "+CRSM: 144,0,ffffffffffffffffffffffffffffffffffff07815155258131f5ffffffffffff" },
 
         { "+CRSM=192,28615,0,0,15", "+CRSM: 144,0,000000406fc7040011a0aa01020120" },
-        { "+CRSM=178,28615,1,4,32", "+CRSM: 144,0,566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff" },
+//        { "+CRSM=178,28615,1,4,32", "+CRSM: 144,0,566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff" },
 
         /* b/37718561
            192, 28539 is for querying forbidden PLMN; the response is fake data.
@@ -473,6 +477,21 @@ asimcard_io( ASimCard  sim, const char*  cmd )
     };
 
     assert( memcmp( cmd, "+CRSM=", 6 ) == 0 );
+
+    if (!strcmp("+CRSM=178,28615,1,4,32", cmd)) {
+        fprintf(stdout, "get voicemail %s\n", sim->voicemailbuf);
+        snprintf(sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,%s", sim->voicemailbuf);
+        return sim->out_buff;
+    }
+
+    const char* pvoicemail = NULL;
+    if ((pvoicemail = strstr(cmd, "+CRSM=220,28615,1,4,32,")) != NULL) {
+        snprintf(sim->voicemailbuf, sizeof(sim->voicemailbuf), "%s", pvoicemail);
+        snprintf(sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0");
+        fprintf(stdout, "set voicemail %s\n", sim->voicemailbuf);
+        return sim->out_buff;
+    }
+
 
 #if ENABLE_DYNAMIC_RECORDS
     if ( sscanf(cmd, "+CRSM=%d,%d,%d,%d,%d", &command, &id, &p1, &p2, &p3) == 5 ) {
@@ -557,6 +576,11 @@ asimcard_io( ASimCard  sim, const char*  cmd )
                                     phone_number[14]);
         return sim->out_buff;
         }
+
+    if (!strcmp("+CRSM=242,0,0,0,0", cmd)) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,620483023f00");
+        return sim->out_buff;
+    }
 
     for (nn = 0; answers[nn].cmd != NULL; nn++) {
         if ( !strcmp( answers[nn].cmd, cmd ) ) {
