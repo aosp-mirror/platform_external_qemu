@@ -688,16 +688,23 @@ void VirtualSensorsPage::on_helpPressure_clicked() {
 }
 
 void VirtualSensorsPage::on_helpAmbientTemp_clicked() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
+    QDesktopServices::openUrl(QUrl::fromEncoded(
             "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_AMBIENT_TEMPERATURE"));
 }
 
 void VirtualSensorsPage::on_helpProximity_clicked() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
+    QDesktopServices::openUrl(QUrl::fromEncoded(
             "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_PROXIMITY"));
 }
 
 void VirtualSensorsPage::on_helpHumidity_clicked() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
+    QDesktopServices::openUrl(QUrl::fromEncoded(
             "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_RELATIVE_HUMIDITY"));
+}
+
+void VirtualSensorsPage::hideRotationButtons(bool hide) {
+    mUi->rotateToLandscape->setHidden(hide);
+    mUi->rotateToReversePortrait->setHidden(hide);
+    mUi->rotateToReverseLandscape->setHidden(hide);
+    mUi->accelModeRotate->setHidden(hide);
 }

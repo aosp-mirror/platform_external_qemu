@@ -42,8 +42,8 @@ public:
     ~VirtualSensorsPage();
 
     void showEvent(QShowEvent* event) override;
-
     static void setSensorsAgent(const QAndroidSensorsAgent* agent);
+    void hideRotationButtons(bool hide);
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
