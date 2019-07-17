@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87d4d94f_ea6de04e",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-17T23:52:36Z",
+      "side": 1,
+      "message": "Have you verified that the Macro Playback UI works correctly with this change?  Particularly, the reset macro has no events so it may have problems with this change.",
+      "range": {
+        "startLine": 524,
+        "startChar": 8,
+        "endLine": 524,
+        "endChar": 60
+      },
+      "revId": "3ee663dd21cecb697c567c78cdcc1e2ab9ea7de0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5020ea1f_8bc0ed60",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 894,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-17T23:52:36Z",
+      "side": 1,
+      "message": "This is fragile, I add something like the fromProto function defined in PhysicalModel.cpp",
+      "range": {
+        "startLine": 894,
+        "startChar": 20,
+        "endLine": 894,
+        "endChar": 70
+      },
+      "revId": "3ee663dd21cecb697c567c78cdcc1e2ab9ea7de0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f72ee3cb_4d9beb80",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-17T23:52:36Z",
+      "side": 1,
+      "message": "android_sensors_override_set just redirects to physicalModel, and always uses the global phyiscalModel instead of the mPhysicalModel here.  For testability, this should call directly into physicalModel.\n\nI recommend adding a physicalModel_overrideById function because the physical model currently have separate functions for each sensor.",
+      "range": {
+        "startLine": 893,
+        "startChar": 22,
+        "endLine": 897,
+        "endChar": 54
+      },
+      "revId": "3ee663dd21cecb697c567c78cdcc1e2ab9ea7de0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc862cc6_4d009713",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-17T23:52:36Z",
+      "side": 1,
+      "message": "LOG(ERROR) is user-visible, and displays a popup in Android Studio.  LOG(INFO) would be more appropriate.",
+      "range": {
+        "startLine": 899,
+        "startChar": 16,
+        "endLine": 899,
+        "endChar": 26
+      },
+      "revId": "3ee663dd21cecb697c567c78cdcc1e2ab9ea7de0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23729506_665e2cd0",
+        "filename": "android/android-emu/android/automation/proto/automation.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-17T23:52:36Z",
+      "side": 1,
+      "message": "This is actually PHYSICAL_PARAMETERS_LIST and if not in sync it will be a compile error (only the name is important, the numbering doesn\u0027t need to match).",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 18
+      },
+      "revId": "3ee663dd21cecb697c567c78cdcc1e2ab9ea7de0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
