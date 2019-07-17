@@ -17,6 +17,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
@@ -39,6 +40,7 @@ public:
     bool isRunning() const { return mRunning; }
     void videoRefresh() {}
     void scheduleRefresh(int delayMS) {}
+    void loadVideoFileWithData(const ::offworld::DatasetInfo& datasetInfo) {}
 
 private:
     bool mRunning = false;
@@ -60,7 +62,8 @@ protected:
 
         mMockedVideoPlayer.reset(new MockedVideoPlayer());
 
-        mDataset = Mp4Dataset::create(absDataPath, nullptr);
+        mDataset = Mp4Dataset::create(
+                absDataPath, ::offworld::DatasetInfo::default_instance());
         mDemuxer = Mp4Demuxer::create(mMockedVideoPlayer.get(), mDataset.get(),
                                       nullptr);
 
