@@ -189,6 +189,10 @@ typedef enum {
  * Secure Elements Access Control (SEAC) document for more instructions. */
 typedef enum {
     kSimApduGetData = 0xCA, // Global Platform SEAC section 4.1 GET DATA Command
+    kSimApduSelect = 0xA4, // Command: SELECT
+    kSimApduReadBinary = 0xB0, // Command: READ_BINARY
+    kSimApduStatus = 0xF2, // Command: STATUS
+    kSimApduManageChannel = 0x70, // Command: MANAGE_CHANNEL
 } SimApduInstruction;
 
 
@@ -362,6 +366,7 @@ typedef struct AModemRec_
     struct {
         char* df_name;
         bool is_open;
+        uint16_t file_id;
     } logical_channels[MAX_LOGICAL_CHANNELS];
 } AModemRec;
 
@@ -415,7 +420,7 @@ parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
         // Invalid or mismatching parameters
         return false;
     }
-    if (length < 10) {
+    if (length < 8) {
         // Less than minimal length for an APDU
         return false;
     }
@@ -424,7 +429,9 @@ parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
     apdu->instruction = hex2int(commandData + 2, 2);
     apdu->param1 = hex2int(commandData + 4, 2);
     apdu->param2 = hex2int(commandData + 6, 2);
-    apdu->param3 = hex2int(commandData + 8, 2);
+    if (length > 8) {
+        apdu->param3 = hex2int(commandData + 8, 2);
+    }
     if (length > 10) {
         apdu->data = (char*)malloc(length - 10);
         parseHexCharsToBuffer(command + 10, length - 10, apdu->data);
@@ -660,6 +667,9 @@ amodem_reset( AModem  modem )
 
     // Clear out all logical channels, none of them are open, they have no names
     memset(modem->logical_channels, 0, sizeof(modem->logical_channels));
+    // channel 0 is the basic channel and it is always open
+    modem->logical_channels[0].is_open = true;
+    modem->logical_channels[0].df_name = strdup("");
 }
 
 static AVoiceCall amodem_alloc_call( AModem   modem );
@@ -1474,6 +1484,7 @@ handleOpenLogicalChannel(const char* cmd, AModem modem)
         return amodem_printf(modem, "+CME ERROR: %d",
                             kCmeErrorInvalidCharactersInTextString);
     }
+    fprintf(stdout, "%s %d: cmd %s\n", __FUNCTION__, __LINE__, cmd);
     df_name = divider + 1;
     for (channel = 0; channel < MAX_LOGICAL_CHANNELS; ++channel) {
         if (!modem->logical_channels[channel].is_open) {
@@ -1486,8 +1497,10 @@ handleOpenLogicalChannel(const char* cmd, AModem modem)
         // Could not find an available channel, we're probably leaking channels
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
     }
-    // Note that logical channels start at 1 so use an offset here
-    return amodem_printf(modem, "%u", channel + 1);
+
+    fprintf(stdout, "%s %d: channel %d\n", __FUNCTION__, __LINE__, channel);
+    fflush(stdout);
+    return amodem_printf(modem, "%u", channel);
 }
 
 static const char*
@@ -1498,20 +1511,26 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
     char* channel_str = NULL;
     char* divider = strchr(cmd, '=');
 
+    fprintf(stdout, "%s %d: cmd %s\n", __FUNCTION__, __LINE__, cmd);
+    fflush(stdout);
     if (divider == NULL) {
+        fprintf(stdout, "%s %d: cmd %s invalidchars\n", __FUNCTION__, __LINE__, cmd);
+    fflush(stdout);
         return amodem_printf(modem, "+CME ERROR: %d",
                             kCmeErrorInvalidCharactersInTextString);
     }
     channel_str = divider + 1;
     if (sscanf(channel_str, "%d%c", &channel, &dummy) != 1) {
+        fprintf(stdout, "%s %d: cmd %s invalidchars\n", __FUNCTION__, __LINE__, cmd);
+    fflush(stdout);
         return amodem_printf(modem, "+CME ERROR: %d",
                             kCmeErrorInvalidCharactersInTextString);
     }
-    // Logical channels start at 1, decrease by one to create an index
-    --channel;
     if (channel < 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
             !modem->logical_channels[channel].is_open) {
+        fprintf(stdout, "%s %d: cmd %s invalidindex \n", __FUNCTION__, __LINE__, cmd);
+    fflush(stdout);
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
     }
     modem->logical_channels[channel].is_open = false;
@@ -1519,6 +1538,19 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
     modem->logical_channels[channel].df_name = NULL;
 
     return "+CCHC";
+}
+
+static void swap_bytes(void* ptr, int sz) {
+    int i = 0;
+    int j = sz - 1;
+    char * cptr = ptr;
+    while(i < j) {
+        char tmp = cptr[i];
+        cptr[i] = cptr[j];
+        cptr[j] = tmp;
+        ++i;
+        --j;
+    }
 }
 
 static const char*
@@ -1532,26 +1564,28 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
     uint8_t apduClass;
     SIM_APDU apdu;
 
+    fprintf(stdout, "%s %d: cmd %s\n", __FUNCTION__, __LINE__, cmd);
     // Create a scan string with the size of the command array in it
     snprintf(scan_string, sizeof(scan_string),
              "+CGLA=%%d,%%d,%%%ds%%c", (int)(sizeof(command) - 1));
     // Then scan the AT string to get the components
     if (sscanf(cmd, scan_string, &channel, &length, command, &dummy) != 3) {
+        fprintf(stdout, "%s %d: cmd %s cannot read cmd\n", __FUNCTION__, __LINE__, cmd);
         return amodem_printf( modem, "+CME ERROR: %d",
                               kCmeErrorInvalidCharactersInTextString);
     }
 
-    // Logical channels start at 1, decrease by one to get a channel index
-    --channel;
     // Validate the channel number and ensure the channel is open
     if (channel < 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
             !modem->logical_channels[channel].is_open) {
+        fprintf(stdout, "%s %d: cmd %s channel index problem\n", __FUNCTION__, __LINE__, cmd);
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
     }
 
     // Parse the command part of the AT string into a SIM APDU struct
     if (!parseSimApduCommand(command, length, &apdu)) {
+        fprintf(stdout, "%s %d: cmd %s cannot parse apdu\n", __FUNCTION__, __LINE__, cmd);
         return amodem_printf(modem, "+CME ERROR: %d",
                              kCmeErrorInvalidCharactersInTextString);
     }
@@ -1572,8 +1606,85 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
             }
         }
         break;
+    case kSimApduSelect:
+        if (apduClass == 0x00 && apdu.param1 == 0x00 && apdu.param2 == 0x0C && apdu.param3 == 2) {
+            uint16_t *file_id = &(modem->logical_channels[channel].file_id);
+            memcpy(file_id, apdu.data, 2);
+            swap_bytes(file_id, 2);
+
+            fprintf(stdout, "got file_id %d with str %s\n", (int)(*file_id), sim_get_fcp(*file_id));
+            const char* fcpstr = sim_get_fcp(*file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0");
+            }
+        } else if (apduClass == 0x00 && apdu.param1 == 0x00 && apdu.param2 == 0x04 && apdu.param3 == 2) {
+            uint16_t *file_id = &(modem->logical_channels[channel].file_id);
+            memcpy(file_id, apdu.data, 2);
+            swap_bytes(file_id, 2);
+
+            fprintf(stdout, "got file_id %d with str %s\n", (int)(*file_id), sim_get_fcp(*file_id));
+            // when p2 is 0x004, we need to return the respond right away
+            const char* fcpstr = sim_get_fcp(*file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", sim_get_fcp(*file_id));
+            }
+        }
+        break;
+    case kSimApduReadBinary:
+        if (apduClass == 0x00 && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            uint16_t file_id = modem->logical_channels[channel].file_id;
+            if (file_id == 0x2FE2) {
+                fprintf(stdout, "got file_id %d send results back\n", (int)(file_id));
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", "98942000001081853911");
+            }
+        }
+        break;
+    case kSimApduStatus:
+        if (apduClass != 0x80 && apduClass != 0x00) {
+            result = amodem_printf(modem, "+CGLA: %d,%d", 0x6e, 0x00);
+        } else if (apduClass == 0x80 && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            result = amodem_printf(modem, "+CGLA: 144,0,%s", "620483023f00");
+        } else if (apdu.param1 != 0x00 && apdu.param1 != 0x01 && apdu.param1 != 0x02) {
+            result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x86);
+        }
+        break;
+    case kSimApduManageChannel:
+        if (apduClass == 0x00 && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            int channel = -1;
+            for (channel = 0; channel < MAX_LOGICAL_CHANNELS; ++channel) {
+                if (!modem->logical_channels[channel].is_open) {
+                    modem->logical_channels[channel].is_open = true;
+                    modem->logical_channels[channel].df_name = strdup("");
+                    break;
+                }
+            }
+            if (channel >= MAX_LOGICAL_CHANNELS) {
+                result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%02x", channel);
+            }
+        }
+        else if (apduClass == 0x00 && apdu.param1 == 0x80 && apdu.param2 > 0x00 && apdu.param3 == 0x00) {
+            int channel = apdu.param2; // to close this channel
+            if (channel < 0 || channel >= MAX_LOGICAL_CHANNELS || !modem->logical_channels[channel].is_open) {
+                fprintf(stdout, "%s %d: cmd %s invalidindex \n", __FUNCTION__, __LINE__, cmd);
+                fflush(stdout);
+                result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
+            } else {
+                modem->logical_channels[channel].is_open = false;
+                free(modem->logical_channels[channel].df_name);
+                modem->logical_channels[channel].df_name = NULL;
+                result = amodem_printf(modem, "+CGLA: 144,0");
+            }
+        }
+        break;
     }
     if (result == NULL) {
+        fprintf(stdout, "%s %d: cmd %s result is null \n", __FUNCTION__, __LINE__, cmd);
         result = amodem_printf(modem, "+CME ERROR: %d (%d, %d) (%s)",
                                kCmeErrorUnknownError, apdu.param1, apdu.param2,
                                cmd);

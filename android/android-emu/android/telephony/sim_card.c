@@ -558,6 +558,11 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         return sim->out_buff;
         }
 
+    if (!strcmp("+CRSM=242,0,0,0,0", cmd)) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,620483023f00");
+        return sim->out_buff;
+    }
+
     for (nn = 0; answers[nn].cmd != NULL; nn++) {
         if ( !strcmp( answers[nn].cmd, cmd ) ) {
             return answers[nn].answer;
