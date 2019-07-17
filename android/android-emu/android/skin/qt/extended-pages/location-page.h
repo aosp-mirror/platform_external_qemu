@@ -86,6 +86,7 @@ public:
 
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
+    Q_INVOKABLE void map_savePoint();
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
     Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
 
@@ -106,9 +107,10 @@ signals:
 
     // Ways to send updates to the js code
     void locationChanged(QString lat, QString lng);
-    void showLocation(QString lat, QString lng);
+    void showLocation(QString lat, QString lng, QString addr);
     void showRouteOnMap(const QString& routeJson);
     void travelModeChanged(int mode);
+    void resetPointsMap();
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
