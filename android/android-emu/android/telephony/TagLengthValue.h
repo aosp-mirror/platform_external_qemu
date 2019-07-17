@@ -156,4 +156,16 @@ public:
     explicit AllRefArDo(const std::vector<RefArDo>& refArDos);
 };
 
+class FileDescriptorDo: public TagLengthValue {
+    static const char kTag[];
+public:
+    explicit FileDescriptorDo(uint16_t value);
+};
+
+class FileControlParametersDo: public TagLengthValue {
+    static const char kTag[];
+public:
+    explicit FileControlParametersDo(const FileDescriptorDo& fdDo);
+};
+
 }  // namespace android
