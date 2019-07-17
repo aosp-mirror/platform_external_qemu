@@ -196,8 +196,15 @@ int64_t RenderMultiplexer::render() {
                 break;
             case ::offworld::VideoInjectionRequest::kLoad:
                 switchRenderer(mVideoRenderer.get());
-                //Async response will be sent within loadVideo.
-                loadVideo(maybe_next_request->load().video_data(), async_id);
+                if (maybe_next_request->load().has_dataset_info()) {
+                    LOG(VERBOSE) << "Load video with dataset info";
+                    loadVideoWithData(maybe_next_request->load().video_data(),
+                                      maybe_next_request->load().dataset_info(),
+                                      async_id);
+                } else {
+                    loadVideo(maybe_next_request->load().video_data(),
+                              async_id);
+                }
                 break;
             default:
                 switchRenderer(mDefaultRenderer.get());
@@ -237,6 +244,13 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
             async_id, base::Ok(), true);
     // Force the video player to be in a known stable state.
     mPlayer->stop();
+}
+
+void RenderMultiplexer::loadVideoWithData(const std::string& video_data,
+                                          const DatasetInfo& datasetInfo,
+                                          uint32_t async_id) {
+    loadVideo(video_data, async_id);
+    mPlayer->loadVideoFileWithData(datasetInfo);
 }
 
 // switchRenderer cleans up any previous renderer state or sets up any new

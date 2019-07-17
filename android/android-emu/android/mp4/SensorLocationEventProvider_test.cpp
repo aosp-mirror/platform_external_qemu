@@ -30,25 +30,23 @@ typedef ::offworld::FieldInfo::Type Type;
 class SensorLocationEventProviderTest : public testing::Test {
 protected:
     AVPacket mPacket1, mPacket2;
-    std::unique_ptr<SensorLocationEventProvider> mProvider;
+    std::shared_ptr<SensorLocationEventProvider> mProvider;
 
     virtual void SetUp() override {
         initializeDatasetInfo();
-        mProvider = SensorLocationEventProvider::create(mDatasetInfo.get());
+        mProvider = SensorLocationEventProvider::create(mDatasetInfo);
         initializePackets();
     }
 
 private:
-    std::unique_ptr<DatasetInfo> mDatasetInfo;
+    DatasetInfo mDatasetInfo;
     uint8_t mPacketData1[8] = {0,  202, 154, 59,
                                44, 1,   0,   0};  // 1000000000, 300
     uint8_t mPacketData2[8] = {1,   202, 154, 59,
                                144, 1,   0,   0};  // 1000000001, 400
 
     void initializeDatasetInfo() {
-        mDatasetInfo.reset(new DatasetInfo());
-
-        auto accelInfo = mDatasetInfo->mutable_accelerometer();
+        auto accelInfo = mDatasetInfo.mutable_accelerometer();
         accelInfo->set_stream_index(2);
         auto packetInfo = accelInfo->mutable_sensor_packet();
         auto timestampInfo = packetInfo->mutable_timestamp();
@@ -78,20 +76,22 @@ TEST_F(SensorLocationEventProviderTest, createConsumeEvents) {
     DurationNs delay;
     EXPECT_TRUE(mProvider->getNextCommandDelay(&delay));
     EXPECT_EQ(delay, 0);
-    const pb::RecordedEvent event1 = mProvider->consumeNextCommand();
+    const emulator_automation::RecordedEvent event1 =
+            mProvider->consumeNextCommand();
     EXPECT_EQ(event1.delay(), 1000000000);
-    EXPECT_TRUE(event1.has_physical_model());
-    EXPECT_EQ(event1.physical_model().current_value().data_size(), 1);
-    EXPECT_EQ(event1.physical_model().current_value().data(0),
+    EXPECT_TRUE(event1.has_sensor_override());
+    EXPECT_EQ(event1.sensor_override().value().data_size(), 1);
+    EXPECT_EQ(event1.sensor_override().value().data(0),
               static_cast<float>(300));
 
     // Check event2 consumption
     EXPECT_TRUE(mProvider->getNextCommandDelay(&delay));
     EXPECT_EQ(delay, 1);
-    const pb::RecordedEvent event2 = mProvider->consumeNextCommand();
+    const emulator_automation::RecordedEvent event2 =
+            mProvider->consumeNextCommand();
     EXPECT_EQ(event2.delay(), 1000000001);
-    EXPECT_TRUE(event2.has_physical_model());
-    EXPECT_EQ(event2.physical_model().current_value().data_size(), 1);
-    EXPECT_EQ(event2.physical_model().current_value().data(0),
+    EXPECT_TRUE(event2.has_sensor_override());
+    EXPECT_EQ(event2.sensor_override().value().data_size(), 1);
+    EXPECT_EQ(event2.sensor_override().value().data(0),
               static_cast<float>(400));
 }

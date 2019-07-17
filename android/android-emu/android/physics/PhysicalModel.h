@@ -29,6 +29,7 @@ struct Stream;
 namespace emulator_automation {
 class InitialState;
 class PhysicalModelEvent;
+class SensorOverrideEvent;
 }  // namespace emulator_automation
 
 namespace android {
@@ -144,6 +145,11 @@ int physicalModel_loadState(PhysicalModel* model,
 void physicalModel_replayEvent(
         PhysicalModel* model,
         const emulator_automation::PhysicalModelEvent& event);
+
+/* Replay a SensorOverride event. */
+void physicalModel_replayOverrideEvent(
+        PhysicalModel* model,
+        const emulator_automation::SensorOverrideEvent& event);
 
 /* Start recording ground truth to the specified file.
  * Returns 0 if successful.
