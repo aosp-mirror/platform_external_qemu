@@ -1066,11 +1066,6 @@
    <header>android/skin/qt/raised-material-button.h</header>
   </customwidget>
   <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header>../../../../prebuilts/android-emulator-build/qt/common/include/QtWebEngineWidgets/qwebengineview.h</header>
-  </customwidget>
-  <customwidget>
    <class>AngleInputWidget</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/angle-input-widget.h</header>

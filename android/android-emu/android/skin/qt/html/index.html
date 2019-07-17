@@ -5,8 +5,71 @@
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
 <style>
+#pointInfoOverlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 80px;
+    justify-content: center;
+    flex-direction: column;
+    bottom: 0;
+    z-index: 2;
+    background-color: #5489ea;
+}
+#savePointOverlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 128px;
+    bottom: 0;
+    z-index: 2;
+}
+#upperbox {
+    background-color: #5489ea;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+#lowerbox {
+    display: flex;
+    background-color: #3d69cf;
+    width: 100%;
+    height: 48px;
+}
 #map {
     height: 100%;
+}
+.title {
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 400;
+    color: white;
+    margin-left: 24px;
+    padding-bottom: 6px;
+}
+.subtitle {
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 200;
+    color: white;
+    opacity: 0.6;
+    margin-left: 24px;
+}
+.spacer-horizontal {
+    width: 100%;
+}
+.common-button {
+    display: flex;
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 200;
+    color: white;
+    height: 100%;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
 }
 
 html, body {
@@ -90,6 +153,22 @@ html, body {
 <body>
     <input id="pac-input" class="controls" type="text" placeholder="Search">
     <div id="map"></div>
+    <div id="pointInfoOverlay">
+      <div id="pointInfoTitle" class="title">Port Authority Bus Terminal, NY</div>
+      <div id="pointInfoSubtitle" class="subtitle">40.134832, -74.832453, 14.34</div>
+    </div>
+    <div id="savePointOverlay">
+     <div id="upperbox">
+      <div id="savePointTitle" class="title">Port Authority Bus Terminal, NY</div>
+      <div id="savePointSubtitle" class="subtitle">40.134832, -74.832453, 14.34</div>
+     </div>
+     <div id="lowerbox">
+      <div class="spacer-horizontal"></div>
+      <div class="common-button" style="margin-right: 24px;" onclick="savePoint()">
+       SAVE POINT
+      </div>
+     </div>
+    </div>
     <script>
     // Googleplex!
     var lastLatLng = {lat: 37.4220919, lng: -122.0826088};
@@ -99,6 +178,31 @@ html, body {
     var gCurrentMarker; // The blue dot
     var gPendingMarker; // The red "pin"
     var gSearchResultMarkers = [];
+
+    function savePoint() {
+        // The emulator should have the point of interest already, from the
+        // sendAddress() call.
+        channel.objects.emulocationserver.map_savePoint();
+    }
+
+    function hideAllOverlays() {
+        document.getElementById("savePointOverlay").style.display = "none";
+        document.getElementById("pointInfoOverlay").style.display = "none";
+    }
+
+    function resetPointsMap() {
+        hideAllOverlays();
+    }
+
+    function showPointInfoOverlay(address, latLng, elevation) {
+        hideAllOverlays();
+        document.getElementById("pointInfoTitle").innerHTML = address;
+        var lat = latLng.lat().toFixed(4);
+        var lng = latLng.lng().toFixed(4);
+        subtitle = lat + ", " + lng + (elevation != null ? ", " + elevation.toFixed(4) : "");
+        document.getElementById("pointInfoSubtitle").innerHTML = subtitle;
+        document.getElementById("pointInfoOverlay").style.display = "flex";
+    }
 
     // Callback function for Maps API
     function initMap() {
@@ -133,13 +237,25 @@ html, body {
                 gMap.setCenter(latLng);
             }
         }
+        function showSavePointOverlay(address, latLng, elevation) {
+            hideAllOverlays();
+            document.getElementById("savePointTitle").innerHTML = address;
+            var lat = latLng.lat().toFixed(4);
+            var lng = latLng.lng().toFixed(4);
+            subtitle = lat + ", " + lng + (elevation != null ? ", " + elevation.toFixed(4) : "");
+            document.getElementById("savePointSubtitle").innerHTML = subtitle;
+            document.getElementById("savePointOverlay").style.display = "block";
+        }
         function sendAddress(latLng) {
           gGeocoder.geocode({ 'location': latLng },
                             function(results, status) {
                               var address = "";
+                              var elevation = 0.0;
                               if (status === 'OK' && results[0]) {
                                 address = results[0].formatted_address;
+                                elevation = results[0].elevation;
                               }
+                              showSavePointOverlay(address, latLng, elevation);
                               channel.objects.emulocationserver
                                   .sendLocation(latLng.lat(), latLng.lng(), address);
                             });
@@ -155,10 +271,13 @@ html, body {
             sendAddress(lastLatLng);
         });
 
-        showPendingLocation = function(lat, lng) {
+        showPendingLocation = function(lat, lng, addr) {
             // Called from Qt code to show a pending location on the UI map.
             // This point has NOT been sent to the AVD.
-            showPin(new google.maps.LatLng(lat, lng));
+            var latLng = new google.maps.LatLng(lat, lng);
+            showPin(latLng);
+            // TODO: no support for elevation yet.
+            showPointInfoOverlay(addr, latLng, null);
         }
 
         setDeviceLocation = function(lat, lng) {

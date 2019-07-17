@@ -63,6 +63,42 @@ PointWidgetItem* getItemWidget(QListWidget* list,
 }
 }  // namespace
 
+// Invoked when the user saves a point on the map
+void LocationPage::map_savePoint() {
+    QDateTime now = QDateTime::currentDateTime();
+    QString pointName("point_" + now.toString("yyyy-MM-dd_HH-mm-ss"));
+
+    emulator_location::PointMetadata ptMetadata;
+    QString logicalName = pointName;
+    ptMetadata.set_logical_name(logicalName.toStdString());
+    ptMetadata.set_creation_time(now.toMSecsSinceEpoch() / 1000LL);
+    ptMetadata.set_latitude(mLastLat.toDouble());
+    ptMetadata.set_longitude(mLastLng.toDouble());
+    ptMetadata.set_altitude(0.0);
+    ptMetadata.set_address(mLastAddr.toStdString());
+
+    std::string fullPath = writePointProtobufByName(pointName, ptMetadata);
+    mSelectedPointName = QString::fromStdString(fullPath);
+
+    // Add the new point to the list
+    PointListElement listElement;
+    listElement.protoFilePath = QString::fromStdString(fullPath);
+    listElement.logicalName = QString::fromStdString(ptMetadata.logical_name());
+    listElement.description = QString::fromStdString(ptMetadata.description());
+    listElement.latitude = ptMetadata.latitude();
+    listElement.longitude = ptMetadata.longitude();
+    listElement.address = QString::fromStdString(ptMetadata.address());
+
+    mPointList.append(listElement);
+
+    PointItemBuilder builder(mUi->loc_pointList);
+    PointWidgetItem* pointWidgetItem = builder.addPoint(&mPointList[mPointList.size() - 1]);
+    connect(pointWidgetItem,
+            SIGNAL(editButtonClickedSignal(CCListItem*)), this,
+            SLOT(pointWidget_editButtonClicked(CCListItem*)));
+    mUi->loc_pointList->setCurrentItem(pointWidgetItem->getListWidgetItem());
+}
+
 // Invoked when the user clicks on the map
 void LocationPage::sendLocation(const QString& lat, const QString& lng, const QString& address) {
     mLastLat = lat;
@@ -204,9 +240,10 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
 
             mLastLat = QString::number(pointElement->latitude, 'g', 12);
             mLastLng = QString::number(pointElement->longitude, 'g', 12);
+            mLastAddr = pointElement->address;
 
             // show the location on the map, but do not send it to the device
-            emit showLocation(mLastLat, mLastLng);
+            emit showLocation(mLastLat, mLastLng, mLastAddr);
         }
     }
 }
@@ -221,7 +258,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     QAction* theAction = popMenu->exec(QCursor::pos());
     if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
         pointWidgetItem->refresh();
-        emit showLocation(mLastLat, mLastLng);
+        emit showLocation(mLastLat, mLastLng, mLastAddr);
     } else if (theAction == deleteAction && deletePoint(pointWidgetItem->pointElement())) {
         mUi->loc_pointList->setCurrentItem(nullptr);
         auto item = pointWidgetItem->takeListWidgetItem();
@@ -230,6 +267,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
         mPointList.removeOne(*(pointWidgetItem->takePointElement()));
         // If the list is empty, show an overlay saying that.
         mUi->loc_noSavedPoints_mask->setVisible(mPointList.size() == 0);
+        emit resetPointsMap();
     }
 }
 
@@ -439,8 +477,12 @@ void LocationPage::setUpWebEngine() {
         if (isPoint) {
             // Define Points-specific interfaces
             webChannelJs.append(
-                        "channel.objects.emulocationserver.showLocation.connect(function(lat, lng) {"
-                            "if (showPendingLocation) showPendingLocation(lat, lng);"
+                        "channel.objects.emulocationserver.showLocation.connect(function(lat, lng, addr) {"
+                            "if (showPendingLocation) showPendingLocation(lat, lng, addr);"
+                        "});");
+            webChannelJs.append(
+                        "channel.objects.emulocationserver.resetPointsMap.connect(function() {"
+                            "if (resetPointsMap) resetPointsMap();"
                         "});");
         } else {
             // Define Routes-specific interfaces
@@ -504,6 +546,7 @@ void LocationPage::setUpWebEngine() {
 
 
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
+void LocationPage::map_savePoint() { }
 void LocationPage::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
 void LocationPage::on_loc_savePoint_clicked() { }
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
