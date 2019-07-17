@@ -28,11 +28,13 @@ Java_android_emulation_studio_SharedMemory_openMemoryHandle(JNIEnv* env,
     const char* handleString = env->GetStringUTFChars(jHandle, &isCopy);
     auto memory = new SharedMemory(handleString, jSize);
     int err = memory->open(SharedMemory::AccessMode::READ_ONLY);
+    env->ReleaseStringUTFChars(jHandle, handleString);
+
     if (err != 0) {
         printf("Unable to open memory mapped handle: [%s], due to: %d\n",
                handleString, err);
+        return 0;
     };
-    env->ReleaseStringUTFChars(jHandle, handleString);
     return (jlong)memory;
 }
 
