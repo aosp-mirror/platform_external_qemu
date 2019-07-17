@@ -29,8 +29,8 @@ extern "C" {
 namespace android {
 namespace mp4 {
 
-typedef pb::RecordedEvent RecordedEvent;
-typedef pb::PhysicalModelEvent PhysicalModelEvent;
+typedef emulator_automation::RecordedEvent RecordedEvent;
+typedef emulator_automation::SensorOverrideEvent SensorOverrideEvent;
 typedef ::offworld::DatasetInfo DatasetInfo;
 typedef ::offworld::FieldInfo::Type Type;
 
@@ -66,7 +66,7 @@ public:
         mEventQueue.reset(new RecordedEventQueue(recorded_event_comparator));
     };
     virtual ~SensorLocationEventProviderImpl(){};
-    int init(const DatasetInfo* datasetInfo);
+    int init(const DatasetInfo& datasetInfo);
     int createEvent(const AVPacket* packet) override;
     RecordedEvent consumeNextCommand() override;
     bool getNextCommandDelay(automation::DurationNs* outDelay) override;
@@ -83,30 +83,25 @@ private:
     SensorDecodeInfo mSensorDecodeInfo[MAX_SENSORS];
 };
 
-std::unique_ptr<SensorLocationEventProvider>
-SensorLocationEventProvider::create(DatasetInfo* datasetInfo) {
+std::shared_ptr<SensorLocationEventProvider>
+SensorLocationEventProvider::create(const DatasetInfo& datasetInfo) {
     auto provider = new SensorLocationEventProviderImpl();
     if (provider->init(datasetInfo) < 0) {
-        LOG(ERROR) << ": Failed to initialize event provider!";
-        return nullptr;
+        LOG(ERROR) << "Failed to initialize event provider!";
+        provider = nullptr;
     }
-    std::unique_ptr<SensorLocationEventProvider> ret;
+    std::shared_ptr<SensorLocationEventProvider> ret;
     ret.reset(provider);
     return std::move(ret);
 }
 
-int SensorLocationEventProviderImpl::init(const DatasetInfo* datasetInfo) {
-    if (datasetInfo == nullptr) {
-        LOG(ERROR) << ": Cannot initialize with null dataset info!";
-        return -1;
-    }
-
+int SensorLocationEventProviderImpl::init(const DatasetInfo& datasetInfo) {
     // Populate accelerometer stream decode info
-    if (datasetInfo->has_accelerometer()) {
+    if (datasetInfo.has_accelerometer()) {
         mSensorDecodeInfo[ANDROID_SENSOR_ACCELERATION].streamIndex =
-                datasetInfo->accelerometer().stream_index();
+                datasetInfo.accelerometer().stream_index();
 
-        auto SensorDecodeInfo = datasetInfo->accelerometer().sensor_packet();
+        auto SensorDecodeInfo = datasetInfo.accelerometer().sensor_packet();
         mSensorDecodeInfo[ANDROID_SENSOR_ACCELERATION].timestamp.offset =
                 SensorDecodeInfo.timestamp().offset();
         mSensorDecodeInfo[ANDROID_SENSOR_ACCELERATION].timestamp.type =
@@ -122,11 +117,11 @@ int SensorLocationEventProviderImpl::init(const DatasetInfo* datasetInfo) {
     }
 
     // Populate gyroscope stream decode info
-    if (datasetInfo->has_gyroscope()) {
+    if (datasetInfo.has_gyroscope()) {
         mSensorDecodeInfo[ANDROID_SENSOR_GYROSCOPE].streamIndex =
-                datasetInfo->gyroscope().stream_index();
+                datasetInfo.gyroscope().stream_index();
 
-        auto SensorDecodeInfo = datasetInfo->gyroscope().sensor_packet();
+        auto SensorDecodeInfo = datasetInfo.gyroscope().sensor_packet();
         mSensorDecodeInfo[ANDROID_SENSOR_GYROSCOPE].timestamp.offset =
                 SensorDecodeInfo.timestamp().offset();
         mSensorDecodeInfo[ANDROID_SENSOR_GYROSCOPE].timestamp.type =
@@ -142,11 +137,11 @@ int SensorLocationEventProviderImpl::init(const DatasetInfo* datasetInfo) {
     }
 
     // Populate magnetometer stream decode info
-    if (datasetInfo->has_magnetic_field()) {
+    if (datasetInfo.has_magnetic_field()) {
         mSensorDecodeInfo[ANDROID_SENSOR_MAGNETIC_FIELD].streamIndex =
-                datasetInfo->magnetic_field().stream_index();
+                datasetInfo.magnetic_field().stream_index();
 
-        auto SensorDecodeInfo = datasetInfo->magnetic_field().sensor_packet();
+        auto SensorDecodeInfo = datasetInfo.magnetic_field().sensor_packet();
         mSensorDecodeInfo[ANDROID_SENSOR_MAGNETIC_FIELD].timestamp.offset =
                 SensorDecodeInfo.timestamp().offset();
         mSensorDecodeInfo[ANDROID_SENSOR_MAGNETIC_FIELD].timestamp.type =
@@ -178,24 +173,24 @@ int SensorLocationEventProviderImpl::createEvent(const AVPacket* packet) {
 int SensorLocationEventProviderImpl::createSensorEvent(AndroidSensor sensor,
                                                        uint8_t* data) {
     RecordedEvent recordedEvent;
-    auto physicalEvent = recordedEvent.mutable_physical_model();
+    auto sensorEvent = recordedEvent.mutable_sensor_override();
 
     // Set event type
     switch (sensor) {
         case ANDROID_SENSOR_ACCELERATION:
-            physicalEvent->set_type(
-                    PhysicalModelEvent::ParameterType::
-                            PhysicalModelEvent_ParameterType_ACCELERATION);
+            sensorEvent->set_sensor(
+                    SensorOverrideEvent::Sensor::
+                            SensorOverrideEvent_Sensor_ACCELEROMETER);
             break;
         case ANDROID_SENSOR_GYROSCOPE:
-            physicalEvent->set_type(
-                    PhysicalModelEvent::ParameterType::
-                            PhysicalModelEvent_ParameterType_ANGULAR_VELOCITY);
+            sensorEvent->set_sensor(
+                    SensorOverrideEvent::Sensor::
+                            SensorOverrideEvent_Sensor_GYROSCOPE);
             break;
         case ANDROID_SENSOR_MAGNETIC_FIELD:
-            physicalEvent->set_type(
-                    PhysicalModelEvent::ParameterType::
-                            PhysicalModelEvent_ParameterType_MAGNETIC_FIELD);
+            sensorEvent->set_sensor(
+                    SensorOverrideEvent::Sensor::
+                            SensorOverrideEvent_Sensor_MAGNETOMETER);
             break;
         default:
             LOG(ERROR) << ": Unrecognized sensor type!";
@@ -236,7 +231,6 @@ int SensorLocationEventProviderImpl::createSensorEvent(AndroidSensor sensor,
     }
 
     // Set values
-    auto valueObject = physicalEvent->mutable_current_value();
     for (int i = 0; i < 3; i++) {
         int valueOffset = mSensorDecodeInfo[sensor].value[i].offset;
         if (valueOffset >= 0) {
@@ -245,25 +239,25 @@ int SensorLocationEventProviderImpl::createSensorEvent(AndroidSensor sensor,
                 case Type::FieldInfo_Type_INT_32: {
                     auto valuePtr =
                             reinterpret_cast<int32_t*>(data + valueOffset);
-                    valueObject->add_data(static_cast<float>(*valuePtr));
+                    sensorEvent->add_value(static_cast<float>(*valuePtr));
                     break;
                 }
                 case Type::FieldInfo_Type_INT_64: {
                     auto valuePtr =
                             reinterpret_cast<int64_t*>(data + valueOffset);
-                    valueObject->add_data(static_cast<float>(*valuePtr));
+                    sensorEvent->add_value(static_cast<float>(*valuePtr));
                     break;
                 }
                 case Type::FieldInfo_Type_FLOAT: {
                     auto valuePtr =
                             reinterpret_cast<float*>(data + valueOffset);
-                    valueObject->add_data(*valuePtr);
+                    sensorEvent->add_value(*valuePtr);
                     break;
                 }
                 case Type::FieldInfo_Type_DOUBLE: {
                     auto valuePtr =
                             reinterpret_cast<double*>(data + valueOffset);
-                    valueObject->add_data(static_cast<float>(*valuePtr));
+                    sensorEvent->add_value(static_cast<float>(*valuePtr));
                     break;
                 }
                 default:

@@ -44,7 +44,7 @@ public:
     virtual void setAudioPacketQueue(PacketQueue* audioPacketQueue) = 0;
     virtual void setVideoPacketQueue(PacketQueue* videoPacketQueue) = 0;
     virtual void setSensorLocationEventProvider(
-            SensorLocationEventProvider* eventProvider) = 0;
+            std::shared_ptr<SensorLocationEventProvider> eventProvider) = 0;
 
 protected:
     Mp4Demuxer() = default;
