@@ -38,7 +38,7 @@ class Mp4DatasetImpl : public Mp4Dataset {
 public:
     Mp4DatasetImpl(){};
     virtual ~Mp4DatasetImpl(){};
-    int init(std::string filepath, DatasetInfo* datasetInfo);
+    int init(const std::string filepath, const DatasetInfo& datasetInfo);
     int getAudioStreamIndex() { return mAudioStreamIdx; }
     int getVideoStreamIndex() { return mVideoStreamIdx; }
     int getSensorDataStreamIndex(AndroidSensor sensor) {
@@ -57,8 +57,8 @@ private:
     int mLocationStreamIdx = -1;
 };
 
-std::unique_ptr<Mp4Dataset> Mp4Dataset::create(std::string filepath,
-                                               DatasetInfo* datasetInfo) {
+std::unique_ptr<Mp4Dataset> Mp4Dataset::create(const std::string filepath,
+                                               const DatasetInfo& datasetInfo) {
     auto dataset = new Mp4DatasetImpl();
     if (dataset->init(filepath, datasetInfo) < 0) {
         LOG(ERROR) << ": Failed to initialize mp4 dataset!";
@@ -71,7 +71,8 @@ std::unique_ptr<Mp4Dataset> Mp4Dataset::create(std::string filepath,
 
 // TODO(haipengwu): Add data stream indices setting logic whith proto
 // integration
-int Mp4DatasetImpl::init(std::string filepath, DatasetInfo* datasetInfo) {
+int Mp4DatasetImpl::init(const std::string filepath,
+                         const DatasetInfo& datasetInfo) {
     const char* filename = filepath.c_str();
 
     // Register all formats and codecs
@@ -108,24 +109,21 @@ int Mp4DatasetImpl::init(std::string filepath, DatasetInfo* datasetInfo) {
         return -1;
     }
 
-    if (datasetInfo != nullptr) {
-        if (datasetInfo->has_location()) {
-            mLocationStreamIdx = datasetInfo->location().stream_index();
-        }
-        if (datasetInfo->has_accelerometer()) {
-            mSensorStreamsIdx[ANDROID_SENSOR_ACCELERATION] =
-                    datasetInfo->accelerometer().stream_index();
-        }
-        if (datasetInfo->has_gyroscope()) {
-            mSensorStreamsIdx[ANDROID_SENSOR_GYROSCOPE] =
-                    datasetInfo->gyroscope().stream_index();
-        }
-        if (datasetInfo->has_magnetic_field()) {
-            mSensorStreamsIdx[ANDROID_SENSOR_MAGNETIC_FIELD] =
-                    datasetInfo->magnetic_field().stream_index();
-        }
+    if (datasetInfo.has_location()) {
+        mLocationStreamIdx = datasetInfo.location().stream_index();
     }
-
+    if (datasetInfo.has_accelerometer()) {
+        mSensorStreamsIdx[ANDROID_SENSOR_ACCELERATION] =
+                datasetInfo.accelerometer().stream_index();
+    }
+    if (datasetInfo.has_gyroscope()) {
+        mSensorStreamsIdx[ANDROID_SENSOR_GYROSCOPE] =
+                datasetInfo.gyroscope().stream_index();
+    }
+    if (datasetInfo.has_magnetic_field()) {
+        mSensorStreamsIdx[ANDROID_SENSOR_MAGNETIC_FIELD] =
+                datasetInfo.magnetic_field().stream_index();
+    }
     return 0;
 }
 

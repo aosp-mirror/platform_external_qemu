@@ -17,11 +17,12 @@
 #include <chrono>
 
 #include "android/automation/proto/automation.pb.h"
-
-namespace pb = emulator_automation;
+#include "android/base/async/Looper.h"
 
 namespace android {
 namespace automation {
+
+typedef android::base::Looper::DurationNs DurationNs;
 
 // An EventSource provides a series of RecordedEvent's to AutomationController
 class EventSource {
@@ -29,7 +30,7 @@ public:
     virtual ~EventSource() = default;
 
     // Return the next command from the source.
-    virtual pb::RecordedEvent consumeNextCommand() = 0;
+    virtual emulator_automation::RecordedEvent consumeNextCommand() = 0;
 
     // Get the next command delay from the event source.  Returns false if there
     // are no events remaining.
