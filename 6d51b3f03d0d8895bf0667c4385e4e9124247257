@@ -22,6 +22,29 @@
       "revId": "6d51b3f03d0d8895bf0667c4385e4e9124247257",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7cda3428_3553c547",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1202,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-07-17T23:43:54Z",
+      "side": 1,
+      "message": "Can you put a comment on why we need to keep track of wasRunning? The reasoning isn\u0027t readily apparent from the code.",
+      "range": {
+        "startLine": 1200,
+        "startChar": 0,
+        "endLine": 1202,
+        "endChar": 21
+      },
+      "revId": "6d51b3f03d0d8895bf0667c4385e4e9124247257",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
