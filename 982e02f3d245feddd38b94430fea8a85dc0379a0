@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a7d175d_f834f1a1",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-18T00:02:24Z",
+      "side": 1,
+      "message": "Resolving outdated comment",
+      "parentUuid": "ea9347bf_d5353798",
+      "range": {
+        "startLine": 180,
+        "startChar": 17,
+        "endLine": 180,
+        "endChar": 36
+      },
+      "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "66c952cd_6ea76f83",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "2376e730_e3e04205",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1350,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-18T00:02:24Z",
+      "side": 1,
+      "message": "Re-resolving",
+      "parentUuid": "8052b603_18ae6241",
+      "range": {
+        "startLine": 1350,
+        "startChar": 8,
+        "endLine": 1350,
+        "endChar": 30
+      },
+      "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fde8873a_0ebca28e",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -116,6 +164,30 @@
       "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c86b384_f299f520",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-18T00:02:24Z",
+      "side": 1,
+      "message": "Resolving outdated comment",
+      "parentUuid": "fde8873a_0ebca28e",
+      "range": {
+        "startLine": 1356,
+        "startChar": 8,
+        "endLine": 1356,
+        "endChar": 14
+      },
+      "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
