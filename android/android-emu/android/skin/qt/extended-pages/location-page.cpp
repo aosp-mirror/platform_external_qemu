@@ -696,7 +696,7 @@ void LocationPage::timeout_v2() {
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
 
     // Update the location marker on the UI map
-    emit locationChanged(QString::number(latNow, 'g', 12), QString::number(lngNow, 'g', 12));
+    emit mMapBridge->locationChanged(QString::number(latNow, 'g', 12), QString::number(lngNow, 'g', 12));
     emit targetHeadingChanged(mHeadingOnRoute); // Update the magnetometer repeatedly
 
     int sleepTime = mSegmentDurationMs - mMsIntoSegment;
@@ -759,7 +759,7 @@ void LocationPage::updateControlsAfterLoading() {
 // the map UI
 void LocationPage::sendMostRecentUiLocation() {
     // Update the location marker on the map
-    emit locationChanged(mLastLat, mLastLng);
+    emit mMapBridge->locationChanged(mLastLat, mLastLng);
 
     writeDeviceLocationToSettings(mLastLat.toDouble(),
                                   mLastLng.toDouble(),

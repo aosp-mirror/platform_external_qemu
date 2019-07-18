@@ -41,6 +41,7 @@
 
 struct QAndroidLocationAgent;
 class GeoDataLoaderThread;
+class MapBridge;
 
 class LocationPage : public QWidget
 {
@@ -86,9 +87,6 @@ public:
 
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
-    Q_INVOKABLE void map_savePoint();
-    Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
-    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
 
     void updateTheme();
 
@@ -99,18 +97,17 @@ public:
                                               double heading);
     static void getDeviceLocation(double* pLatitude, double* pLongitude,
                                   double* pAltitude, double* pVelocity, double* pHeading);
+
+    // Handlers for point/route map callbacks
+    void map_savePoint();
+    void sendLocation(const QString& lat, const QString& lng, const QString& address);
+    void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
+
 signals:
     void locationUpdateRequired(double latitude, double longitude, double altitude,
                                 double velocity, double heading);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
-
-    // Ways to send updates to the js code
-    void locationChanged(QString lat, QString lng);
-    void showLocation(QString lat, QString lng, QString addr);
-    void showRouteOnMap(const QString& routeJson);
-    void travelModeChanged(int mode);
-    void resetPointsMap();
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
@@ -253,6 +250,8 @@ private:
 
     QVector<RouteListElement> mRouteList;
     QString                   mSelectedRouteName;
+
+    std::unique_ptr<MapBridge> mMapBridge;
 };
 
 class PointWidgetItem : public CCListItem {
@@ -308,6 +307,33 @@ public:
 private:
     LocationPage::PointListElement* mPointElement;
     QListWidgetItem* mListItem;
+};
+
+// Class to communicate between the html page and the LocationPage code.
+// Moved this code into a class with QObject at its base will silence the warnings
+// produced by QWebChannel.
+class MapBridge : public QObject {
+    Q_OBJECT
+public:
+    explicit MapBridge(LocationPage* locationPage,
+                       QObject* parent = nullptr) :
+            mLocationPage(locationPage),
+            QObject(parent) {}
+    Q_INVOKABLE void map_savePoint();
+    Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
+    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
+
+signals:
+    // Ways to send updates to the js code
+    void locationChanged(QString lat, QString lng);
+    void showLocation(QString lat, QString lng, QString addr);
+    void showRouteOnMap(const QString& routeJson);
+    void travelModeChanged(int mode);
+    void resetPointsMap();
+
+
+private:
+    LocationPage* const mLocationPage;
 };
 
 class RouteWidgetItem : public CCListItem {

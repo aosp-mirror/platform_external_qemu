@@ -107,7 +107,7 @@ void LocationPage::on_loc_saveRoute_clicked() {
 }
 
 void LocationPage::on_loc_travelMode_currentIndexChanged(int index) {
-    emit travelModeChanged(index);
+    emit mMapBridge->travelModeChanged(index);
 }
 
 // Populate mRouteList with the routes that are found on disk
@@ -233,7 +233,7 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
             if (routeJson.length() <= 0) {
                 mUi->loc_playRouteButton->setEnabled(false);
             } else {
-                emit showRouteOnMap(routeJson.toStdString().c_str());
+                emit mMapBridge->showRouteOnMap(routeJson.toStdString().c_str());
 
                 mRouteTravelMode = routeElement->modeIndex;
                 mUi->loc_travelMode->setCurrentIndex(mRouteTravelMode);
@@ -446,6 +446,10 @@ void LocationPage::showPendingRouteDetails() {
                           .arg(modeString)
                           .arg(mRouteNumPoints);
     mUi->loc_routeInfo->setHtml(infoString);
+}
+
+void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson) {
+    mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson);
 }
 
 // Invoked by the Maps javascript when a route has been created
