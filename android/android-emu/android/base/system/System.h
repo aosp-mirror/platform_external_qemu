@@ -277,6 +277,10 @@ public:
     // user.
     virtual bool pathCanExec(StringView path) const = 0;
 
+    // A wrapper for int open(filename, oflag, pmode) to support unicode paths
+    // on Windows.
+    virtual int pathOpen(const char *filename, int oflag, int pmode) const = 0;
+
     // Function for deleting files. Return true iff
     // (|path| is a file and we have successfully deleted it)
     virtual bool deleteFile(StringView path) const = 0;
@@ -500,6 +504,7 @@ protected:
     static bool pathCanReadInternal(StringView path);
     static bool pathCanWriteInternal(StringView path);
     static bool pathCanExecInternal(StringView path);
+    static int pathOpenInternal(const char *filename, int oflag, int pmode);
     static bool deleteFileInternal(StringView path);
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
     static bool fileSizeInternal(int fd, FileSize* outFileSize);

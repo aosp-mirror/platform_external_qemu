@@ -217,7 +217,7 @@ bool android_pathProbeKernelVersionString(const char* kernelPath,
                                           char* dst /*[dstLen]*/,
                                           size_t dstLen) {
     const auto kernelFile =
-            ScopedFd(::open(kernelPath, O_RDONLY | O_BINARY, 0755));
+            ScopedFd(path_open(kernelPath, O_RDONLY | O_BINARY, 0755));
     System::FileSize size;
     if (!System::get()->fileSize(kernelFile.get(), &size)) {
         return false;
