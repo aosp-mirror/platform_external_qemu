@@ -36,6 +36,7 @@ public:
     void start() { mRunning = true; }
     void start(const PlayConfig& playConfig = PlayConfig()) { mRunning = true; }
     void stop() { mRunning = false; }
+    void pause() {}
     bool isRunning() const { return mRunning; }
     void videoRefresh() {}
     void scheduleRefresh(int delayMS) {}

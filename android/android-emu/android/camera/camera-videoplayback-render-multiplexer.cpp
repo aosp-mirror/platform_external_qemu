@@ -186,6 +186,14 @@ int64_t RenderMultiplexer::render() {
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
                         async_id, base::Ok(), true);
                 break;
+            case ::offworld::VideoInjectionRequest::kPause:
+                if (mPlayer == nullptr) {
+                    LOG(ERROR) << "No video loaded.";
+                    return -1;
+                }
+                switchRenderer(mVideoRenderer.get());
+                mPlayer->pause();
+                break;
             case ::offworld::VideoInjectionRequest::kLoad:
                 switchRenderer(mVideoRenderer.get());
                 //Async response will be sent within loadVideo.

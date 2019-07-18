@@ -72,6 +72,7 @@ public:
     virtual void start() = 0;
     virtual void start(const PlayConfig& playConfig) = 0;
     virtual void stop() = 0;
+    virtual void pause() = 0;
     virtual bool isRunning() const = 0;
     virtual void videoRefresh() = 0;
     virtual void scheduleRefresh(int delayMs) = 0;

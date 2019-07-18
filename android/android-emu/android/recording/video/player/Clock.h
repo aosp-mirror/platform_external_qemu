@@ -68,6 +68,10 @@ public:
 
     int getSpeed() const { return mSpeed; }
 
+    double getLastUpdated() const { return mLastUpdated; }
+
+    void setPaused(bool paused) { mPaused = paused; }
+
 private:
     // clock base
     double mPts = 0.0;
