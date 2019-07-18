@@ -415,7 +415,7 @@ parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
         // Invalid or mismatching parameters
         return false;
     }
-    if (length < 10) {
+    if (length < 8) {
         // Less than minimal length for an APDU
         return false;
     }
@@ -424,7 +424,9 @@ parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
     apdu->instruction = hex2int(commandData + 2, 2);
     apdu->param1 = hex2int(commandData + 4, 2);
     apdu->param2 = hex2int(commandData + 6, 2);
-    apdu->param3 = hex2int(commandData + 8, 2);
+    if (length > 8) {
+        apdu->param3 = hex2int(commandData + 8, 2);
+    }
     if (length > 10) {
         apdu->data = (char*)malloc(length - 10);
         parseHexCharsToBuffer(command + 10, length - 10, apdu->data);
