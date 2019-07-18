@@ -1517,7 +1517,7 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
         return amodem_printf(modem, "+CME ERROR: %d",
                             kCmeErrorInvalidCharactersInTextString);
     }
-    if (channel < 0 ||
+    if (channel <= 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
             !modem->logical_channels[channel].is_open) {
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
@@ -1656,7 +1656,7 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
         }
         else if (apduClass == 0x00 && apdu.param1 == 0x80 && apdu.param2 > 0x00 && apdu.param3 == 0x00) {
             int channel = apdu.param2; // to close this channel
-            if (channel < 0 || channel >= MAX_LOGICAL_CHANNELS || !modem->logical_channels[channel].is_open) {
+            if (channel <= 0 || channel >= MAX_LOGICAL_CHANNELS || !modem->logical_channels[channel].is_open) {
                 result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
             } else {
                 modem->logical_channels[channel].is_open = false;
