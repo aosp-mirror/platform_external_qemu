@@ -2881,6 +2881,9 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled,
                 android::featurecontrol::MultiDisplay)) {
         return;
     }
+    if (!multiDisplayParamValidate(width, height, dpi, flag)) {
+        return;
+    }
 
     {
       AutoLock lock(mMultiDisplayLock);
@@ -2936,4 +2939,40 @@ void EmulatorQtWindow::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
     if (w) {
         *w = total_w;
     }
+}
+
+bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t w, uint32_t h,
+                                                 uint32_t dpi, uint32_t flag) {
+    // According the Android 9 CDD,
+    // 120 <= dpi <= 640
+    // 320 * (dpi / 160) <= width
+    // 320 * (dpi / 160) <= height
+    // Max size is 4K (4096 * 2160)
+    // Screen aspect ratio cannot be longer (or wider) than 21:9 (or 9:21).
+
+    if (dpi < 120 || dpi > 640) {
+        showMessage("dpi should between 120 and 640",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "dpi should between 120 and 640\n");
+        return false;
+    }
+    if (320 * dpi / 160 > w || 320 * dpi / 160 > h) {
+        showMessage("width and height should >= 320dp",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "width and height should >= 320dp\n");
+        return false;
+    }
+    if (!((w <= 4096 && h <= 2160) || (w <= 2160 && h <= 4096))) {
+        showMessage("resolution should not exceed 4k (4096*2160)",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "resolution should not exceed 4k (4096*2160)\n");
+        return false;
+    }
+    if ( w * 21 < h * 9 || w * 9 > h * 21) {
+        showMessage("Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)\n");
+        return false;
+    }
+    return true;
 }
