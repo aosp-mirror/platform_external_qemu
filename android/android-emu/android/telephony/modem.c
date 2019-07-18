@@ -1566,9 +1566,11 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
         if (apduClass == 0x80 && apdu.param1 == 0xFF && apdu.param2 == 0x40) {
             // Get Data (from class and instrcution) ALL (from params) command
             char* df_name = modem->logical_channels[channel].df_name;
-            const char* rules = sim_get_access_rules(df_name);
+            char* rules = sim_get_access_rules(df_name);
             if (rules) {
                 result = amodem_printf(modem, "+CGLA: 144,0,%s", rules);
+                free(rules);
+                rules = NULL;
             }
         }
         break;
