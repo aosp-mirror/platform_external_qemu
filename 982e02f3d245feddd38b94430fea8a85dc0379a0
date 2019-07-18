@@ -188,6 +188,30 @@
       "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6da92f7b_aac6545b",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-07-18T00:20:31Z",
+      "side": 1,
+      "message": "This one is still relevant; fixed. Thanks :)",
+      "parentUuid": "8c86b384_f299f520",
+      "range": {
+        "startLine": 1356,
+        "startChar": 8,
+        "endLine": 1356,
+        "endChar": 14
+      },
+      "revId": "982e02f3d245feddd38b94430fea8a85dc0379a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
