@@ -63,6 +63,14 @@ PointWidgetItem* getItemWidget(QListWidget* list,
 }
 }  // namespace
 
+void MapBridge::map_savePoint() {
+    mLocationPage->map_savePoint();
+}
+
+void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) {
+    mLocationPage->sendLocation(lat, lng, address);
+}
+
 // Invoked when the user saves a point on the map
 void LocationPage::map_savePoint() {
     QDateTime now = QDateTime::currentDateTime();
@@ -247,7 +255,7 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
             mLastAddr = pointElement->address;
 
             // show the location on the map, but do not send it to the device
-            emit showLocation(mLastLat, mLastLng, mLastAddr);
+            emit mMapBridge->showLocation(mLastLat, mLastLng, mLastAddr);
         }
     }
 }
@@ -262,7 +270,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     QAction* theAction = popMenu->exec(QCursor::pos());
     if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
         pointWidgetItem->refresh();
-        emit showLocation(mLastLat, mLastLng, mLastAddr);
+        emit mMapBridge->showLocation(mLastLat, mLastLng, mLastAddr);
     } else if (theAction == deleteAction && deletePoint(pointWidgetItem->pointElement())) {
         mUi->loc_pointList->setCurrentItem(nullptr);
         auto item = pointWidgetItem->takeListWidgetItem();
@@ -271,7 +279,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
         mPointList.removeOne(*(pointWidgetItem->takePointElement()));
         // If the list is empty, show an overlay saying that.
         mUi->loc_noSavedPoints_mask->setVisible(mPointList.size() == 0);
-        emit resetPointsMap();
+        emit mMapBridge->resetPointsMap();
     }
 }
 
@@ -441,6 +449,7 @@ void LocationPage::writePointProtobufFullPath(
 
 void LocationPage::setUpWebEngine() {
     double initialLat, initialLng, unusedAlt, unusedVelocity, unusedHeading;
+    mMapBridge.reset(new MapBridge(this));
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
 
     // Set up two web engines: one for the Points page and one for the Routes page
@@ -529,7 +538,7 @@ void LocationPage::setUpWebEngine() {
                          mWebChannel.get(), &QWebChannel::connectTo);
 
         // setup the dialog and publish it to the QWebChannel
-        mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
+        mWebChannel->registerObject(QStringLiteral("emulocationserver"), mMapBridge.get());
 
         // Get the HTML file (either 'index.html' or route.html')
         QFile indexHtmlFile(isPoint ? ":/html/index.html" : ":/html/route.html");
@@ -550,6 +559,8 @@ void LocationPage::setUpWebEngine() {
 
 
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
+void MapBridge::map_savePoint() { }
+void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
 void LocationPage::map_savePoint() { }
 void LocationPage::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
 void LocationPage::on_loc_savePoint_clicked() { }
