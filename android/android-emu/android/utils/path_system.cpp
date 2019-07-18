@@ -51,6 +51,10 @@ ABool path_can_exec(const char* path) {
     return System::get()->pathCanExec(path);
 }
 
+int path_open(const char *filename, int oflag, int pmode) {
+    return System::get()->pathOpen(filename, oflag, pmode);
+}
+
 ABool path_is_absolute(const char* path) {
     return PathUtils::isAbsolute(path);
 }

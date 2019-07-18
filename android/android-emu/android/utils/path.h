@@ -84,6 +84,9 @@ extern ABool  path_can_write( const char*  path );
 /* checks that one can execute a given file */
 extern ABool  path_can_exec( const char* path );
 
+/* a wrapper for open(filename, oflag, pmode) to support unicode paths on Windows */
+extern int path_open(const char *filename, int oflag, int pmode);
+
 /* try to make a directory */
 extern APosixStatus   path_android_mkdir( const char*  path, int  mode );
 

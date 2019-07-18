@@ -251,6 +251,10 @@ public:
         return pathCanExecInternal(toTempRoot(path));
     }
 
+    virtual int pathOpen(const char *filename, int oflag, int pmode) const override {
+        return pathOpenInternal(filename, oflag, pmode);
+    }
+
     virtual bool deleteFile(StringView path) const override {
         return deleteFileInternal(toTempRoot(path));
     }
