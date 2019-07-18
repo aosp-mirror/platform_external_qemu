@@ -111,6 +111,9 @@ const char PermArDo::kTag[] = "DB";
 const char ArDo::kTag[] = "E3";
 const char RefArDo::kTag[] = "E2";
 const char AllRefArDo::kTag[] = "FF40";
+const char FileControlParametersDo::kTag[] = "62";
+const char FileDescriptorDo::kTag[] = "82";
+const char FileIdentifierDo::kTag[] = "83";
 
 PkgRefDo::PkgRefDo(const std::string& packageName) {
     std::string hexPackageName = stringToHexString(packageName);
@@ -119,6 +122,28 @@ PkgRefDo::PkgRefDo(const std::string& packageName) {
 
 DeviceAppIdRefDo::DeviceAppIdRefDo(const std::string& stringData) {
     populateData(kTag, { &stringData });
+}
+
+FileDescriptorDo::FileDescriptorDo(uint16_t value) {
+    std::string data(5, '0');
+    snprintf(&data[0], data.size(), "%04x", static_cast<int>(value));
+    data.resize(4);
+    populateData(kTag, { &data });
+}
+
+FileIdentifierDo::FileIdentifierDo(uint16_t value) {
+    std::string data(5, '0');
+    snprintf(&data[0], data.size(), "%04x", static_cast<int>(value));
+    data.resize(4);
+    populateData(kTag, { &data });
+}
+
+FileControlParametersDo::FileControlParametersDo(const FileDescriptorDo& fdDo) {
+    populateData(kTag, { &fdDo });
+}
+
+FileControlParametersDo::FileControlParametersDo(const FileIdentifierDo& fdDo) {
+    populateData(kTag, { &fdDo });
 }
 
 RefDo::RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo) {
