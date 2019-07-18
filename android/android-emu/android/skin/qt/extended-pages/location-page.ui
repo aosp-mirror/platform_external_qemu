@@ -33,6 +33,9 @@
      <string>Single points</string>
     </attribute>
     <widget class="QListWidget" name="loc_pointList">
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="geometry">
       <rect>
        <x>332</x>
@@ -301,6 +304,9 @@
      </property>
     </widget>
     <widget class="QListWidget" name="loc_routeList">
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="geometry">
       <rect>
        <x>332</x>
