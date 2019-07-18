@@ -189,7 +189,21 @@ typedef enum {
  * Secure Elements Access Control (SEAC) document for more instructions. */
 typedef enum {
     kSimApduGetData = 0xCA, // Global Platform SEAC section 4.1 GET DATA Command
+    kSimApduSelect = 0xA4, // Command: SELECT
+    kSimApduReadBinary = 0xB0, // Command: READ_BINARY
+    kSimApduStatus = 0xF2, // Command: STATUS
+    kSimApduManageChannel = 0x70, // Command: MANAGE_CHANNEL
 } SimApduInstruction;
+
+/* APDU class, see ETSI 102 221 and globalplatform.org's
+ * Secure Elements Access Control (SEAC) document for more instructions. */
+typedef enum {
+    kSimApduClaGetResponse = 0x00, // CLA_GET_RESPONSE
+    kSimApduClaManageChannel = 0x00, // CLA_MANAGE_CHANNEL
+    kSimApduClaReadBinary = 0x00, // CLA_READ_BINARY
+    kSimApduClaSelect = 0x00, // CLA_SELECT
+    kSimApduClaStatus = 0x80, // CLA_STATUS
+} SimApduClass;
 
 
 typedef struct {
@@ -362,6 +376,7 @@ typedef struct AModemRec_
     struct {
         char* df_name;
         bool is_open;
+        uint16_t file_id;
     } logical_channels[MAX_LOGICAL_CHANNELS];
 } AModemRec;
 
@@ -1524,6 +1539,19 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
     return "+CCHC";
 }
 
+static void swap_bytes(void* ptr, int sz) {
+    int i = 0;
+    int j = sz - 1;
+    char * cptr = ptr;
+    while(i < j) {
+        char tmp = cptr[i];
+        cptr[i] = cptr[j];
+        cptr[j] = tmp;
+        ++i;
+        --j;
+    }
+}
+
 static const char*
 handleTransmitLogicalChannel(const char* cmd, AModem modem) {
     const char* result = NULL;
@@ -1564,12 +1592,87 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
     // Now see if it's a supported instruction
     switch (apdu.instruction) {
     case kSimApduGetData:
-        if (apduClass == 0x80 && apdu.param1 == 0xFF && apdu.param2 == 0x40) {
+        if (apduClass == kSimApduClaStatus && apdu.param1 == 0xFF && apdu.param2 == 0x40) {
             // Get Data (from class and instrcution) ALL (from params) command
             char* df_name = modem->logical_channels[channel].df_name;
             const char* rules = sim_get_access_rules(df_name);
             if (rules) {
                 result = amodem_printf(modem, "+CGLA: 144,0,%s", rules);
+            }
+        }
+        break;
+    case kSimApduSelect:
+        if (apduClass == kSimApduClaSelect && apdu.param1 == 0x00 && apdu.param2 == 0x0C && apdu.param3 == 2) {
+            uint16_t *file_id = &(modem->logical_channels[channel].file_id);
+            memcpy(file_id, apdu.data, 2);
+            // change to little endian
+            swap_bytes(file_id, 2);
+
+            const char* fcpstr = sim_get_fcp(*file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                // save the fileid select status for later fetch
+                asimcard_set_fileid_status(modem->sim, fcpstr);
+                result = amodem_printf(modem, "+CGLA: 144,0");
+            }
+        } else if (apduClass == kSimApduClaSelect && apdu.param1 == 0x00 && apdu.param2 == 0x04 && apdu.param3 == 2) {
+            uint16_t *file_id = &(modem->logical_channels[channel].file_id);
+            memcpy(file_id, apdu.data, 2);
+            swap_bytes(file_id, 2);
+
+            // when p2 is 0x004, we need to return the respond right away
+            const char* fcpstr = sim_get_fcp(*file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", sim_get_fcp(*file_id));
+            }
+        }
+        break;
+    case kSimApduReadBinary:
+        if (apduClass == kSimApduClaReadBinary && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            uint16_t file_id = modem->logical_channels[channel].file_id;
+            if (file_id == 0x2FE2) {
+                // return hardcoded ICCID file content
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", "98942000001081853911");
+            }
+        }
+        break;
+    case kSimApduStatus:
+        if (apduClass != kSimApduClaStatus && apduClass != kSimApduClaGetResponse) {
+            result = amodem_printf(modem, "+CGLA: %d,%d", 0x6e, 0x00);
+        } else if (apduClass == kSimApduClaStatus && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            result = amodem_printf(modem, "+CGLA: 144,0,%s", "620483023f00");
+        } else if (apdu.param1 != 0x00 && apdu.param1 != 0x01 && apdu.param1 != 0x02) {
+            result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x86);
+        }
+        break;
+    case kSimApduManageChannel:
+        if (apduClass == kSimApduClaManageChannel && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            int channel = -1;
+            for (channel = 0; channel < MAX_LOGICAL_CHANNELS; ++channel) {
+                if (!modem->logical_channels[channel].is_open) {
+                    modem->logical_channels[channel].is_open = true;
+                    modem->logical_channels[channel].df_name = strdup("");
+                    break;
+                }
+            }
+            if (channel >= MAX_LOGICAL_CHANNELS) {
+                result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%02x", channel);
+            }
+        }
+        else if (apduClass == kSimApduClaManageChannel && apdu.param1 == 0x80 && apdu.param2 > 0x00 && apdu.param3 == 0x00) {
+            int channel = apdu.param2; // to close this channel
+            if (channel <= 0 || channel >= MAX_LOGICAL_CHANNELS || !modem->logical_channels[channel].is_open) {
+                result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
+            } else {
+                modem->logical_channels[channel].is_open = false;
+                free(modem->logical_channels[channel].df_name);
+                modem->logical_channels[channel].df_name = NULL;
+                result = amodem_printf(modem, "+CGLA: 144,0");
             }
         }
         break;
