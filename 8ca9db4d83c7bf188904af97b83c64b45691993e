@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f76ce478_36dbcdb4",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1856,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-19T01:00:34Z",
+      "side": 1,
+      "message": "you may want to follow the Win32UnicodeString pattern, such as in android/utils/path.cpp:\n\n#ifdef _WIN32\n    int fs, fd;\n    {\n        wchar_t wideSrc[PATH_MAX + 1], wideDest[PATH_MAX + 1];\n        if (Win32UnicodeString::convertFromUtf8(wideSrc, arraySize(wideSrc),\n                                                source) \u003c 0) {\n            return -1;\n        }\n        if (Win32UnicodeString::convertFromUtf8(wideDest, arraySize(wideDest),\n                                                dest) \u003c 0) {\n            return -1;\n        }\n        fs \u003d _wopen(wideSrc, _O_RDONLY | _O_BINARY);\n        fd \u003d _wopen(wideDest, _O_CREAT | _O_TRUNC | _O_RDWR | _O_BINARY);\n    }\n#else  // !_WIN32",
+      "range": {
+        "startLine": 1856,
+        "startChar": 11,
+        "endLine": 1856,
+        "endChar": 74
+      },
+      "revId": "8ca9db4d83c7bf188904af97b83c64b45691993e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
