@@ -553,6 +553,7 @@ private:
     std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
     static const int MAX_MULTIDISPLAYS = 10;
+    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 };
 
 class SkinSurfaceBitmap {
