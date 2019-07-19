@@ -22,6 +22,30 @@
       "revId": "b455ac4d42b41cf63beeb78e2831d05a8042bbf7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bd6ffbc_9d1aea33",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-19T16:26:12Z",
+      "side": 0,
+      "message": "This was a minor change in design. Previously when this was checked in, I wanted to add additional items to the existing physcial model enum for accelerometer and gyroscope. But now I decided that it\u0027s better to just use a separate enum for sensor override. Therefore these are deleted. (They were never put into actual usage and were not here before this project anyways.)",
+      "parentUuid": "213f39a0_8108f911",
+      "range": {
+        "startLine": 128,
+        "startChar": 2,
+        "endLine": 129,
+        "endChar": 83
+      },
+      "revId": "b455ac4d42b41cf63beeb78e2831d05a8042bbf7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
