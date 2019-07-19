@@ -46,6 +46,30 @@
       "revId": "8ca9db4d83c7bf188904af97b83c64b45691993e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd8f2cc1_a4274962",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1856,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-19T01:26:19Z",
+      "side": 1,
+      "message": "Ah good point, ok, lets keep the current one.",
+      "parentUuid": "1e586c1e_b7d8d9ec",
+      "range": {
+        "startLine": 1856,
+        "startChar": 11,
+        "endLine": 1856,
+        "endChar": 74
+      },
+      "revId": "8ca9db4d83c7bf188904af97b83c64b45691993e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
