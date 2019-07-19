@@ -988,6 +988,10 @@ public:
         return pathCanExecInternal(path);
     }
 
+    int pathOpen(const char *filename, int oflag, int pmode) const override {
+        return pathOpenInternal(filename, oflag, pmode);
+    }
+
     bool deleteFile(StringView path) const override {
         return deleteFileInternal(path);
     }
@@ -1654,17 +1658,25 @@ int fdStat(int fd, PathStat* st) {
 #endif  // !_WIN32
 }
 
-int pathAccess(StringView path, int mode) {
 #ifdef _WIN32
+static int GetWin32Mode(int mode) {
     // Convert |mode| to win32 permission bits.
     int win32mode = 0x0;
+
     if ((mode & R_OK) || (mode & X_OK)) {
         win32mode |= 0x4;
     }
     if (mode & W_OK) {
         win32mode |= 0x2;
     }
-    return _waccess(win32Path(path).c_str(), win32mode);
+
+    return win32mode;
+}
+#endif
+
+int pathAccess(StringView path, int mode) {
+#ifdef _WIN32
+    return _waccess(win32Path(path).c_str(), GetWin32Mode(mode));
 #else   // !_WIN32
     return HANDLE_EINTR(android_access(c_str(path), mode));
 #endif  // !_WIN32
@@ -1836,6 +1848,15 @@ bool System::pathCanExecInternal(StringView path) {
         return false;
     }
     return pathAccess(path, X_OK) == 0;
+}
+
+// static
+int System::pathOpenInternal(const char *filename, int oflag, int perm) {
+#ifdef _WIN32
+    return _wopen(win32Path(filename).c_str(), GetWin32Mode(oflag), perm);
+#else   // !_WIN32
+    return ::open(filename, oflag, perm);
+#endif  // !_WIN32
 }
 
 bool System::deleteFileInternal(StringView path) {
