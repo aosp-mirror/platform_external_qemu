@@ -35,8 +35,8 @@ typedef ::offworld::DatasetInfo DatasetInfo;
 class Mp4Dataset {
 public:
     virtual ~Mp4Dataset(){};
-    static std::unique_ptr<Mp4Dataset> create(std::string filepath,
-                                              DatasetInfo* datasetInfo);
+    static std::unique_ptr<Mp4Dataset> create(const std::string filepath,
+                                              const DatasetInfo& datasetInfo);
     virtual int getAudioStreamIndex() = 0;
     virtual int getVideoStreamIndex() = 0;
     virtual int getSensorDataStreamIndex(AndroidSensor sensor) = 0;

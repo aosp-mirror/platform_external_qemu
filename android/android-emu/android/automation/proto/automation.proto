@@ -20,7 +20,12 @@ message RecordedEvent {
     oneof stream {
         PhysicalModelEvent physical_model = 50;
         TouchEvent touch = 51;
+        SensorOverrideEvent sensor_override = 52;
     }
+}
+
+message ParameterValue {
+    repeated float data = 1 [packed = true];
 }
 
 message PhysicalModelEvent {
@@ -35,12 +40,6 @@ message PhysicalModelEvent {
         HUMIDITY = 7;
         VELOCITY = 8;
         AMBIENT_MOTION = 9;
-        ACCELERATION = 10;
-        ANGULAR_VELOCITY = 11;
-    }
-
-    message ParameterValue {
-      repeated float data = 1 [packed=true];
     }
 
     optional ParameterType type = 1;
@@ -51,4 +50,25 @@ message PhysicalModelEvent {
 message TouchEvent {
     optional float x = 1;
     optional float y = 2;
+}
+
+message SensorOverrideEvent {
+    // The following list of sensors should be kept in sync with SENSORS_LIST in
+    // hw-sensor.h
+    enum Sensor {
+        ACCELERATION = 0;
+        GYROSCOPE = 1;
+        MAGNETIC_FIELD = 2;
+        ORIENTATION = 3;
+        TEMPERATURE = 4;
+        PROXIMITY = 5;
+        LIGHT = 6;
+        PRESSURE = 7;
+        HUMIDITY = 8;
+        MAGNETIC_FIELD_UNCALIBRATED = 9;
+        GYROSCOPE_UNCALIBRATED = 10;
+    }
+
+    optional Sensor sensor = 1;
+    optional ParameterValue value = 2;
 }

@@ -14,12 +14,12 @@
 
 #pragma once
 
+#include <memory>
+
+#include "android/automation/EventSource.h"
 #include "android/base/Compiler.h"
 #include "android/base/Result.h"
-#include "android/base/async/Looper.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
-
-#include <memory>
 
 // Forward declarations.
 typedef struct PhysicalModel PhysicalModel;
@@ -30,8 +30,6 @@ class Response;
 
 namespace android {
 namespace automation {
-
-typedef android::base::Looper::DurationNs DurationNs;
 
 // Forward declarations.
 class AutomationEventSink;
@@ -120,6 +118,10 @@ public:
 
     // Stops a recording to a file.
     virtual StopResult stopRecording() = 0;
+
+    // Start a playback from an EventSource.
+    virtual StartResult startPlaybackFromSource(
+            std::shared_ptr<EventSource> source) = 0;
 
     // Start a playback from a file.
     virtual StartResult startPlayback(android::base::StringView filename) = 0;

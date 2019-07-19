@@ -35,11 +35,11 @@ typedef ::offworld::DatasetInfo DatasetInfo;
 class SensorLocationEventProvider : public automation::EventSource {
 public:
     virtual ~SensorLocationEventProvider(){};
-    static std::unique_ptr<SensorLocationEventProvider> create(
-            DatasetInfo* datasetInfo);
+    static std::shared_ptr<SensorLocationEventProvider> create(
+            const DatasetInfo& datasetInfo);
     // Create a RecordedEvent from the packet
     virtual int createEvent(const AVPacket* packet) = 0;
-    virtual pb::RecordedEvent consumeNextCommand() = 0;
+    virtual emulator_automation::RecordedEvent consumeNextCommand() = 0;
     virtual bool getNextCommandDelay(automation::DurationNs* outDelay) = 0;
 
 protected:

@@ -34,20 +34,18 @@ protected:
 
         initializeDatasetInfo();
 
-        mDataset = Mp4Dataset::create(absDataPath, mDatasetInfo.get());
+        mDataset = Mp4Dataset::create(absDataPath, mDatasetInfo);
     }
 
 private:
-    std::unique_ptr<DatasetInfo> mDatasetInfo;
+    DatasetInfo mDatasetInfo;
 
     void initializeDatasetInfo() {
-        mDatasetInfo.reset(new DatasetInfo());
-
-        auto accelInfo = mDatasetInfo->mutable_accelerometer();
+        auto accelInfo = mDatasetInfo.mutable_accelerometer();
         accelInfo->set_stream_index(1);
-        auto gyroInfo = mDatasetInfo->mutable_gyroscope();
+        auto gyroInfo = mDatasetInfo.mutable_gyroscope();
         gyroInfo->set_stream_index(2);
-        auto magInfo = mDatasetInfo->mutable_magnetic_field();
+        auto magInfo = mDatasetInfo.mutable_magnetic_field();
         magInfo->set_stream_index(3);
     }
 };

@@ -94,6 +94,11 @@ public:
     void replayEvent(const pb::PhysicalModelEvent& event);
 
     /*
+     * Replays a SensorOverrideEvent onto the current PhysicalModel state.
+     */
+    void replayOverrideEvent(const pb::SensorOverrideEvent& event);
+
+    /*
      * Sets the target value for the given physical parameter that the physical
      * model should move towards and records the result.
      * Can be called from any thread.
@@ -357,11 +362,47 @@ PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
     }
 }
 
+pb::SensorOverrideEvent_Sensor toProto(AndroidSensor param) {
+    switch (param) {
+#define SENSOR_ENUM(x) ANDROID_SENSOR_##x
+#define PROTO_ENUM(x) pb::SensorOverrideEvent_Sensor_##x
+
+#define SENSOR_(x, y, z, v, w) \
+    case SENSOR_ENUM(x):       \
+        return PROTO_ENUM(x);
+
+        SENSORS_LIST
+#undef SENSOR_
+#undef SENSOR_ENUM
+        default:
+            assert(false);  // should never happen
+            return pb::SensorOverrideEvent_Sensor_Sensor_MIN;
+    }
+}
+
+AndroidSensor fromProto(pb::SensorOverrideEvent_Sensor param) {
+    switch (param) {
+#define SENSOR_ENUM(x) ANDROID_SENSOR_##x
+#define PROTO_ENUM(x) pb::SensorOverrideEvent_Sensor_##x
+
+#define SENSOR_(x, y, z, v, w) \
+    case PROTO_ENUM(x):        \
+        return SENSOR_ENUM(x);
+
+        SENSORS_LIST
+#undef SENSOR_
+#undef SENSOR_ENUM
+        default:
+            W("%s: Unknown sensor %d.", __FUNCTION__, param);
+            return MAX_SENSORS;
+    }
+}
+
 template <typename T>
-T getProtoValue(const pb::PhysicalModelEvent_ParameterValue& parameter);
+T getProtoValue(const pb::ParameterValue& parameter);
 
 template <>
-float getProtoValue<float>(const pb::PhysicalModelEvent_ParameterValue& parameter) {
+float getProtoValue<float>(const pb::ParameterValue& parameter) {
     if (parameter.data_size() != 1) {
         W("%s: Error in parsed physics command.  Float parameters should have "
           "exactly one value.  Found %d.",
@@ -372,7 +413,7 @@ float getProtoValue<float>(const pb::PhysicalModelEvent_ParameterValue& paramete
 }
 
 template <>
-vec3 getProtoValue<vec3>(const pb::PhysicalModelEvent_ParameterValue& parameter) {
+vec3 getProtoValue<vec3>(const pb::ParameterValue& parameter) {
     if (parameter.data_size() != 3) {
         W("%s: Error in parsed physics command.  Vec3 parameters should have "
           "exactly three values.  Found %d.",
@@ -387,8 +428,7 @@ void setProtoCurrentValue(pb::PhysicalModelEvent* event, float value) {
 }
 
 void setProtoCurrentValue(pb::PhysicalModelEvent* event, vec3 value) {
-    pb::PhysicalModelEvent_ParameterValue* pbValue =
-            event->mutable_current_value();
+    pb::ParameterValue* pbValue = event->mutable_current_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
@@ -399,8 +439,7 @@ void setProtoTargetValue(pb::PhysicalModelEvent* event, float value) {
 }
 
 void setProtoTargetValue(pb::PhysicalModelEvent* event, vec3 value) {
-    pb::PhysicalModelEvent_ParameterValue* pbValue =
-            event->mutable_target_value();
+    pb::ParameterValue* pbValue = event->mutable_target_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
@@ -449,6 +488,27 @@ void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
 #undef GET_PROTO_VALUE_FUNCTION_NAME
 #undef SET_TARGET_INTERNAL_FUNCTION_NAME
 #undef PHYSICAL_PARAMETER_ENUM
+        default:
+            break;
+    }
+}
+
+void PhysicalModelImpl::replayOverrideEvent(
+        const pb::SensorOverrideEvent& event) {
+    switch (fromProto(event.sensor())) {
+#define SENSOR_ENUM(x) ANDROID_SENSOR_##x
+#define OVERRIDE_FUNCTION_NAME(x) override##x
+#define GET_PROTO_VALUE_FUNCTION_NAME(x) getProtoValue_##x
+#define SENSOR_(x, y, z, v, w)                                      \
+    case SENSOR_ENUM(x):                                            \
+        OVERRIDE_FUNCTION_NAME(z)(getProtoValue<v>(event.value())); \
+        break;
+
+        SENSORS_LIST
+#undef SENSOR_
+#undef GET_PROTO_VALUE_FUNCTION_NAME
+#undef OVERRIDE_FUNCTION_NAME
+#undef SENSOR_ENUM
         default:
             break;
     }
@@ -556,26 +616,6 @@ void PhysicalModelImpl::setTargetInternalHumidity(
     targetStateChanged();
 }
 
-// Ignore the provided interpolation mode and just directly override the accelerometer.
-void PhysicalModelImpl::setTargetInternalAcceleration(vec3 acceleration,
-        PhysicalInterpolation mode) {
-    physicalStateChanging();
-    {
-        overrideAccelerometer(acceleration);
-    }
-    targetStateChanged();
-}
-
-// Ignore the provided interpolation mode and just directly override the gyroscope.
-void PhysicalModelImpl::setTargetInternalAngularVelocity(vec3 angularVelocity,
-        PhysicalInterpolation mode) {
-    physicalStateChanging();
-    {
-        overrideGyroscope(angularVelocity);
-    }
-    targetStateChanged();
-}
-
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -636,18 +676,6 @@ float PhysicalModelImpl::getParameterHumidity(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return mAmbientEnvironment.getHumidity(parameterValueType);
-}
-
-vec3 PhysicalModelImpl::getParameterAcceleration(
-        ParameterValueType parameterValueType) const {
-    long measurementId;
-    return getAccelerometer(&measurementId);
-}
-
-vec3 PhysicalModelImpl::getParameterAngularVelocity(
-        ParameterValueType parameterValueType) const {
-    long measurementId;
-    return getGyroscope(&measurementId);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -1391,6 +1419,16 @@ void physicalModel_replayEvent(PhysicalModel* model,
         impl->replayEvent(event);
     } else {
         D("%s: Discarding sensor event", __FUNCTION__);
+    }
+}
+
+void physicalModel_replayOverrideEvent(PhysicalModel* model,
+                                       const pb::SensorOverrideEvent& event) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->replayOverrideEvent(event);
+    } else {
+        D("%s: Discarding sensor override event", __FUNCTION__);
     }
 }
 

@@ -28,6 +28,8 @@
 #include "android/camera/camera-videoplayback-video-renderer.h"
 #include "android/camera/camera-virtualscene-utils.h"
 
+typedef ::offworld::DatasetInfo DatasetInfo;
+
 namespace android {
 namespace videoplayback {
 
@@ -46,15 +48,18 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
   void uninitialize() override;
   int64_t render() override;
  private:
-  void loadVideo(const std::string& video_data, uint32_t async_id);
-  void switchRenderer(virtualscene::CameraRenderer* renderer);
+     void loadVideo(const std::string& video_data, uint32_t async_id);
+     void loadVideoWithData(const std::string& video_data,
+                            const DatasetInfo& datasetInfo,
+                            uint32_t async_id);
+     void switchRenderer(virtualscene::CameraRenderer* renderer);
 
-  std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
-  std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
-  std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
-  virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
-  bool mInitialized = false;
-  size_t mCounter = 0;
+     std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
+     std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
+     std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
+     virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
+     bool mInitialized = false;
+     size_t mCounter = 0;
 };
 
 }  // namespace videoplayback

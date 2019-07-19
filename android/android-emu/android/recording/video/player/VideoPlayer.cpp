@@ -31,7 +31,9 @@
 
 #include "android/recording/video/player/VideoPlayer.h"
 
+#include "android/automation/AutomationController.h"
 #include "android/base/Log.h"
+#include "android/base/Result.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/FunctorThread.h"
@@ -39,6 +41,8 @@
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/MP4Demuxer.h"
+#include "android/mp4/SensorLocationEventProvider.h"
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/AVScopedPtr.h"
 #include "android/recording/video/player/Clock.h"
 #include "android/recording/video/player/FrameQueue.h"
@@ -58,9 +62,11 @@ extern "C" {
 #include <cmath>
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
+using android::automation::AutomationController;
 using android::emulation::AudioOutputEngine;
 using android::mp4::Mp4Dataset;
 using android::mp4::Mp4Demuxer;
+using android::mp4::SensorLocationEventProvider;
 using android::recording::AVScopedPtr;
 using android::recording::makeAVScopedPtr;
 
@@ -182,6 +188,8 @@ public:
     virtual bool isPaused() const { return mPaused; }
     virtual void scheduleRefresh(int delayMs);
     virtual void videoRefresh();
+    virtual void loadVideoFileWithData(
+            const ::offworld::DatasetInfo& datasetInfo);
 
     AvSyncMaster getMasterSyncType();
     double getMasterClock();
@@ -275,6 +283,11 @@ private:
 
     std::unique_ptr<AudioDecoder> mAudioDecoder;
     std::unique_ptr<VideoDecoder> mVideoDecoder;
+
+    // In case when there are data streams in the input file and an event
+    // provider is needed, this is the temporary holder of the event provider
+    // object before its ownership is transferred to the AutomationController
+    std::shared_ptr<SensorLocationEventProvider> mEventProvider;
 
     // queue to store decoded audio frames
     std::unique_ptr<FrameQueue> mAudioFrameQueue = nullptr;
@@ -982,7 +995,25 @@ void VideoPlayerImpl::videoRefresh() {
         refreshFrame(&remaining_time);
     }
 
+    // If an event provider is present, then the video file also has sensor
+    // streams. Therefore, force a time advancement in AutomationController
+    if (mEventProvider.get() != nullptr) {
+        AutomationController::tryAdvanceTime();
+    }
+
     scheduleRefresh(remaining_time * 1000);
+}
+
+void VideoPlayerImpl::loadVideoFileWithData(
+        const ::offworld::DatasetInfo& datasetInfo) {
+    mDataset.reset();
+    mEventProvider.reset();
+    mDataset = Mp4Dataset::create(mVideoFile, datasetInfo);
+    if (datasetInfo.has_location() || datasetInfo.has_accelerometer() ||
+        datasetInfo.has_gyroscope() || datasetInfo.has_magnetic_field()) {
+        LOG(INFO) << "Dataset info not empty! Creating event provider!";
+        mEventProvider = SensorLocationEventProvider::create(datasetInfo);
+    }
 }
 
 // schedule a timer to start in the specified milliseconds
@@ -1011,10 +1042,14 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 }
 
 int VideoPlayerImpl::play() {
-    mDataset = Mp4Dataset::create(mVideoFile, nullptr);
-    if (mDataset == nullptr) {
-        LOG(ERROR) << ": Failed to create mp4 dataset!";
-        return -1;
+    if (mDataset.get() == nullptr) {
+        LOG(VERBOSE) << "Dataset not loaded. Create dataset instance now.";
+        loadVideoFileWithData(::offworld::DatasetInfo::default_instance());
+
+        if (mDataset.get() == nullptr) {
+            LOG(ERROR) << ": Failed to create mp4 dataset!";
+            return -1;
+        }
     }
 
     AVFormatContext* formatCtx = mDataset->getFormatContext();
@@ -1184,6 +1219,17 @@ int VideoPlayerImpl::play() {
     mDemuxer = Mp4Demuxer::create(this, mDataset.get(), &mContinueReadWaitInfo);
     mDemuxer->setAudioPacketQueue(mAudioQueue.get());
     mDemuxer->setVideoPacketQueue(mVideoQueue.get());
+    if (mEventProvider.get() != nullptr) {
+        auto startPlaybackResult =
+                AutomationController::get().startPlaybackFromSource(
+                        mEventProvider);
+        mDemuxer->setSensorLocationEventProvider(mEventProvider);
+        if (!startPlaybackResult.ok()) {
+            LOG(ERROR) << ": fail to start event playback in "
+                          "AutomationController!";
+            return -1;
+        }
+    }
     mDemuxer->demux();
 
     if (mAudioDecoder.get() != nullptr) {

@@ -31,12 +31,13 @@
 
 #pragma once
 
+#include <atomic>
+#include <memory>
+
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/utils/compiler.h"
-
-#include <atomic>
-#include <memory>
 
 namespace android {
 namespace videoplayer {
@@ -76,6 +77,8 @@ public:
     virtual bool isRunning() const = 0;
     virtual void videoRefresh() = 0;
     virtual void scheduleRefresh(int delayMs) = 0;
+    virtual void loadVideoFileWithData(
+            const ::offworld::DatasetInfo& datasetInfo) = 0;
 };
 
 }  // namespace videoplayer
