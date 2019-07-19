@@ -46,6 +46,30 @@
       "revId": "b455ac4d42b41cf63beeb78e2831d05a8042bbf7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b52ae46_ab17c31d",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-19T16:28:25Z",
+      "side": 0,
+      "message": "Ack",
+      "parentUuid": "5bd6ffbc_9d1aea33",
+      "range": {
+        "startLine": 128,
+        "startChar": 2,
+        "endLine": 129,
+        "endChar": 83
+      },
+      "revId": "b455ac4d42b41cf63beeb78e2831d05a8042bbf7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
