@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b057ed48_12a4f928",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2950,
+      "author": {
+        "id": 1097438
+      },
+      "writtenOn": "2019-07-19T01:41:18Z",
+      "side": 1,
+      "message": "This is not part of the CDD. It\u0027s optional if you want to have some sort of reasonable upper limit. You can make it larger if you like :-)",
+      "range": {
+        "startLine": 2950,
+        "startChar": 4,
+        "endLine": 2950,
+        "endChar": 35
+      },
+      "revId": "23c4b19f2eb15123e96eea7d234462c799109d21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "088c8fb7_2fb8a9b0",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2959,
+      "author": {
+        "id": 1097438
+      },
+      "writtenOn": "2019-07-19T01:41:18Z",
+      "side": 1,
+      "message": "\u003e\u003d",
+      "range": {
+        "startLine": 2959,
+        "startChar": 24,
+        "endLine": 2959,
+        "endChar": 25
+      },
+      "revId": "23c4b19f2eb15123e96eea7d234462c799109d21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93b9a794_404ff557",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2959,
+      "author": {
+        "id": 1097438
+      },
+      "writtenOn": "2019-07-19T01:41:18Z",
+      "side": 1,
+      "message": "\u003e\u003d",
+      "range": {
+        "startLine": 2959,
+        "startChar": 47,
+        "endLine": 2959,
+        "endChar": 48
+      },
+      "revId": "23c4b19f2eb15123e96eea7d234462c799109d21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be89c285_8c4b6552",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2960,
+      "author": {
+        "id": 1097438
+      },
+      "writtenOn": "2019-07-19T01:41:18Z",
+      "side": 1,
+      "message": "be",
+      "range": {
+        "startLine": 2960,
+        "startChar": 44,
+        "endLine": 2960,
+        "endChar": 45
+      },
+      "revId": "23c4b19f2eb15123e96eea7d234462c799109d21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
