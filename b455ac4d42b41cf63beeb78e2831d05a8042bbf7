@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "213f39a0_8108f911",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-19T01:16:56Z",
+      "side": 0,
+      "message": "?",
+      "range": {
+        "startLine": 128,
+        "startChar": 2,
+        "endLine": 129,
+        "endChar": 83
+      },
+      "revId": "b455ac4d42b41cf63beeb78e2831d05a8042bbf7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
