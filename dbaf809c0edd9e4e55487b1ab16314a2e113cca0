@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1e2fc69_f20bbf8e",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1595,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-07-22T16:26:54Z",
+      "side": 1,
+      "message": "Could you add comments for each combination of class and params (similar to kSimAdpuGetData) indicating what instruction is being performed?",
+      "revId": "dbaf809c0edd9e4e55487b1ab16314a2e113cca0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "41a1ad96_2bdbd8a2",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1599,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-07-22T16:26:54Z",
+      "side": 1,
+      "message": "Nit: I would replace both of these use cases with ntohs. It already exists, it will probably be more performant and it will make sure the code works on architectures that are not little-endian (if that ever happens).",
+      "revId": "dbaf809c0edd9e4e55487b1ab16314a2e113cca0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
