@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe8cd20c_2a5e84f9",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-07-22T16:01:32Z",
+      "side": 1,
+      "message": "This is returning a pointer to a local variable. I think this would either have to be strdup\u0027d and then the caller would have to free it or the caller would have to provide a buffer for it. It\u0027s kind of unfortunate because sim_get_access_rules doesn\u0027t have those limitations simply because it\u0027s returning a pointer to existing data. So it would be inconsistent between the two. Perhaps sim_get_access_rules should also be changed to behave the same way just for consistency.",
+      "revId": "8212943832bf04d8738e6046a99f1439d0c525d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
