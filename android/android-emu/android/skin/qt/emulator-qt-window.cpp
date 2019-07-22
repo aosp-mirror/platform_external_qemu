@@ -57,6 +57,7 @@
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
+#include "android/skin/mac_keycodes.h"
 #endif
 
 #define DEBUG 1
@@ -454,7 +455,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     }
 
     this->setAcceptDrops(true);
-
     QObject::connect(this, &EmulatorQtWindow::showVirtualSceneControls,
                      mToolWindow, &ToolWindow::showVirtualSceneControls);
 
@@ -2236,7 +2236,11 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     SkinEvent* skin_event = createSkinEvent(type);
     SkinEventKeyData& keyData = skin_event->u.key;
     keyData.keycode = convertKeyCode(event->key());
-
+    if (keyData.keycode == -1) {
+        D("Failed to convert key for event key %d", event->key());
+        delete skin_event;
+        return;
+    }
     Qt::KeyboardModifiers modifiers = event->modifiers();
     if (modifiers & Qt::ShiftModifier)
         keyData.mod |= kKeyModLShift;
@@ -2246,6 +2250,37 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
         keyData.mod |= kKeyModLAlt;
 
     queueSkinEvent(skin_event);
+}
+
+void EmulatorQtWindow::handleNativeKeyEvent(int keycode, int modifiers, SkinEventType eventType) {
+#if defined(__APPLE__)
+    if (eventType == kEventKeyDown) {
+        SkinEvent* skin_event = createSkinEvent(kEventTextInput);
+        SkinEventTextInputData& textInputData = skin_event->u.text;
+        textInputData.down = false;
+        int linuxKeyCode = skin_native_to_linux_keycode(keycode);
+        if (linuxKeyCode != -1) {
+            textInputData.keycode = linuxKeyCode;
+        } else {
+            return -1;
+        }
+        if (modifiers & kMacOSCmdKey)
+            textInputData.mod |= kKeyModLCtrl;
+        if (modifiers & kMacOSShiftKey)
+            textInputData.mod |= kKeyModLShift;
+        if ((modifiers & kMacOSAlphaLock) && skin_keycode_is_aplha(linuxKeyCode)) {
+            textInputData.mod |= kKeyModLShift;
+        }
+        if (modifiers & kMacOSOptionKey) {
+          textInputData.mod |= kKeyModLAlt;
+        }
+        if (modifiers & kMacOSControlKey) {
+          textInputData.mod |= kKeyModLCtrl;
+        }
+        queueSkinEvent(skin_event);
+    }
+#endif
+    return;
 }
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
@@ -2301,24 +2336,11 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
             event, QtKeyEventSource::EmulatorWindow);
 
     if (mForwardShortcutsToDevice || !qtEvent) {
-        forwardKeyEventToEmulator(type, event);
-        if (type == kEventKeyDown && event->text().length() > 0) {
-            Qt::KeyboardModifiers mods = event->modifiers();
-            mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
-            if (mods == 0) {
-                // The key event generated text without Ctrl, Alt, etc.
-                // Send an additional TextInput event to the emulator.
-                SkinEvent* skin_event = createSkinEvent(kEventTextInput);
-                skin_event->u.text.down = false;
-                strncpy((char*)skin_event->u.text.text,
-                        (const char*)event->text().toUtf8().constData(),
-                        sizeof(skin_event->u.text.text) - 1);
-                // Ensure the event's text is 0-terminated
-                skin_event->u.text.text[sizeof(skin_event->u.text.text) - 1] =
-                        0;
-                queueSkinEvent(skin_event);
-            }
+        //text inputs will be handled as native events
+        if (event->text().length() == 0) {
+            forwardKeyEventToEmulator(type, event);
         }
+
     }
 }
 

@@ -161,6 +161,10 @@ void skin_winsys_report_entering_main_loop(void);
 
 bool skin_winsys_is_folded(void);
 
+bool skin_winsys_caps_lock_is_on(void);
+
+bool skin_winsys_num_lock_is_on(void);
+
 // touch extended window and virtual sensor page objects
 void skin_winsys_touch_qt_extended_virtual_sensors(void);
 

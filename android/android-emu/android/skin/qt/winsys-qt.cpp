@@ -61,6 +61,7 @@
 #ifdef __APPLE__
 #include <Carbon/Carbon.h>
 #include <signal.h>
+#include "android/skin/qt/mac-native-event-filter.h"
 #endif
 
 using android::base::System;
@@ -103,6 +104,10 @@ static bool sMainLoopShouldExit = false;
 
 #ifdef _WIN32
 static HANDLE sWakeEvent;
+#endif
+
+#ifdef Q_OS_LINUX
+static Display *s_display = NULL;
 #endif
 
 static void enableSigChild() {
@@ -181,6 +186,10 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         // signal will not be emitted from QProcess.
         enableSigChild();
         GlobalState* g = globalState();
+#ifdef __APPLE__
+        MacNativeEventFilter* nativeEventFilter = new MacNativeEventFilter(EmulatorQtWindow::getInstance());
+        g->app->installNativeEventFilter(nativeEventFilter);
+#endif
         g->app->exec();
         D("Finished QT main loop\n");
     }
@@ -213,12 +222,14 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
     rect->size.h = CGDisplayPixelsHigh(displayId);
 #else // Linux
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
-    Display* defaultDisplay = XOpenDisplay(NULL);
+    if (!s_display) {
+        s_display = XOpenDisplay(NULL);
+    }
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL) (done)\n");
-    if (defaultDisplay) {
-        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay)\n");
-        Screen* defaultScreen = DefaultScreenOfDisplay(defaultDisplay);
-        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay) (done)\n");
+    if (s_display) {
+        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(s_display)\n");
+        Screen* defaultScreen = DefaultScreenOfDisplay(s_display);
+        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(s_display) (done)\n");
         if (defaultScreen) {
             rect->size.w = defaultScreen->width;
             rect->size.h = defaultScreen->height;
@@ -458,6 +469,10 @@ void skin_winsys_destroy() {
 #else
     delete globalState()->app;
     globalState()->app = nullptr;
+#endif
+
+#ifdef Q_OS_LINUX
+    if (s_display)  XCloseDisplay(s_display);
 #endif
 }
 
@@ -818,6 +833,41 @@ void skin_winsys_report_entering_main_loop(void) {
 extern bool skin_winsys_is_folded() {
     return ToolWindow::isFolded();
 }
+
+bool skin_winsys_caps_lock_is_on(void) {
+#ifdef Q_OS_LINUX
+    if (!s_display) {
+        s_display = XOpenDisplay(NULL);
+    }
+
+    if (s_display) {
+        XKeyboardState state;
+        XGetKeyboardControl(s_display, &state);
+        return state.led_mask & 1;
+    } else {
+        return false;
+    }
+#endif
+    return false;
+}
+
+bool skin_winsys_num_lock_is_on(void) {
+#ifdef Q_OS_LINUX
+    if (!s_display) {
+        s_display = XOpenDisplay(NULL);
+    }
+
+    if (s_display) {
+        XKeyboardState state;
+        XGetKeyboardControl(s_display, &state);
+        return state.led_mask & 2;
+    } else {
+        return false;
+    }
+#endif
+return false;
+}
+
 
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
