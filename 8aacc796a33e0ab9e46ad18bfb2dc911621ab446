@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb682359_8fc2d213",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-23T23:21:41Z",
+      "side": 1,
+      "message": "This is not being set to true anywhere. Is it going to be another CL that make use of this boolean variable?",
+      "range": {
+        "startLine": 336,
+        "startChar": 9,
+        "endLine": 336,
+        "endChar": 17
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "932ee54f_68e35e79",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-07-23T23:21:41Z",
+      "side": 1,
+      "message": "\"already\"",
+      "range": {
+        "startLine": 1531,
+        "startChar": 28,
+        "endLine": 1531,
+        "endChar": 34
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
