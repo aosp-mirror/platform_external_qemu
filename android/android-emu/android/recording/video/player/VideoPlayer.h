@@ -38,6 +38,7 @@
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/utils/compiler.h"
+#include <string>
 
 namespace android {
 namespace videoplayer {
@@ -79,6 +80,10 @@ public:
     virtual void scheduleRefresh(int delayMs) = 0;
     virtual void loadVideoFileWithData(
             const ::offworld::DatasetInfo& datasetInfo) = 0;
+
+    virtual void setErrorStatusAndRecordErrorMessage(std::string errorDetails) = 0;
+    virtual bool getErrorStatus() = 0;
+    virtual std::string getErrorMessage() = 0;
 };
 
 }  // namespace videoplayer
