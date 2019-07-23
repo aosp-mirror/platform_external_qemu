@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4129314d_18acdab5",
+        "filename": "android-qemu2-glue/emulation/virtio-input-multi-touch.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-23T21:21:56Z",
+      "side": 1,
+      "message": "nit: 4 spaces",
+      "range": {
+        "startLine": 317,
+        "startChar": 4,
+        "endLine": 317,
+        "endChar": 6
+      },
+      "revId": "c5e570d6e3d88d9e2b8b6e29a8bf5a346719553f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
