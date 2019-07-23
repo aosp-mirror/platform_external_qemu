@@ -48,6 +48,7 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
  private:
   void loadVideo(const std::string& video_data, uint32_t async_id);
   void switchRenderer(virtualscene::CameraRenderer* renderer);
+  bool videoIsLoaded(uint32_t async_id);
 
   std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
   std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
