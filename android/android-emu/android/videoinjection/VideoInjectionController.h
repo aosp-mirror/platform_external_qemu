@@ -18,6 +18,7 @@
 #include "android/base/Result.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/offworld/proto/offworld.pb.h"
+#include <string>
 
 namespace android {
 namespace videoinjection {
@@ -79,7 +80,8 @@ public:
     static void trySendAsyncResponse(
             uint32_t async_id,
             VideoInjectionResult result,
-            bool isCompleted);
+            bool isCompleted,
+            const std::string& errorDetails);
 
     // Reset the current state. Clear the queue. Send response for any pending
     // request.
@@ -108,7 +110,8 @@ public:
     virtual void sendFollowUpAsyncResponse(
             uint32_t async_id,
             android::videoinjection::VideoInjectionResult result,
-            bool isCompleted) = 0;
+            bool isCompleted,
+            const std::string& errorDetails) = 0;
 };
 
 }  // namespace videoinjection
