@@ -30,6 +30,7 @@
 // THE SOFTWARE.
 
 #include "android/recording/video/player/VideoPlayer.h"
+#include <string>
 
 #include "android/automation/AutomationController.h"
 #include "android/base/Log.h"
@@ -200,6 +201,11 @@ public:
                      int64_t pos,
                      int serial);
 
+    //Methods record and report error status and message.
+    virtual void setErrorStatusAndRecordErrorMessage(std::string errorDetails);
+    virtual bool getErrorStatus();
+    virtual std::string getErrorMessage();
+
 private:
     int play();
     void adjustWindowSize(AVCodecContext* c, int* pWidth, int* pHeight);
@@ -325,6 +331,10 @@ private:
     bool mForceRefresh = false;
 
     std::unique_ptr<base::FunctorThread> mWorkerThread;
+
+    // error status and error details
+    bool isError = false;
+    std::string errorMessage = "";
 };
 
 // Decoder implementations
@@ -1513,6 +1523,25 @@ void VideoPlayerImpl::cleanup() {
         mAudioOutputEngine->close();
         mAudioOutputEngine = nullptr;
     }
+}
+
+void VideoPlayerImpl::setErrorStatusAndRecordErrorMessage(std::string errorDetails){
+    //Only one error can be reported.
+    if(isError){
+        LOG(INFO) << "There already exists an error reported by previous action.";
+    }
+    else{
+        isError = true;
+        errorMessage = errorDetails;
+    }
+}
+
+bool VideoPlayerImpl::getErrorStatus(){
+    return isError;
+}
+
+std::string VideoPlayerImpl:: getErrorMessage(){
+    return errorMessage;
 }
 
 }  // namespace videoplayer
