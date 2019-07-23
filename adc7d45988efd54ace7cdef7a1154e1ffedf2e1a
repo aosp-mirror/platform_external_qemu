@@ -22,6 +22,30 @@
       "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dddb4fdf_c6f8afe9",
+        "filename": "android/android-grpc/control_socket.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-23T23:17:40Z",
+      "side": 1,
+      "message": "Too be honest we rely on the size of these messages to be fixed, as we do a socket read with fixed buffer length. Our options are:\n\n- Do not use protocol buffers, but our own struct. (We could get away with just 5 bytes in that case)\n- Do proper protocol buffer deserialization, read byte by byte until we have all information to reconstruct the message on the wire.\n- Leave it as is.",
+      "parentUuid": "a02c411c_b5fbdd0e",
+      "range": {
+        "startLine": 61,
+        "startChar": 4,
+        "endLine": 61,
+        "endChar": 12
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
