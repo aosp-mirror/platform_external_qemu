@@ -129,7 +129,16 @@ int64_t RenderMultiplexer::render() {
                       "multiplexer";
         return -1;
     }
-
+    std::string  errorDetails = "";
+    //Before start next execution, check if there is error of last execution.
+    if(mPlayer->getErrorStatus()){
+        errorDetails = mPlayer->getErrorMessage();
+        videoinjection::VideoInjectionController::trySendAsyncResponse(
+                ongoing_async_id,
+                base::Err(videoinjection::VideoInjectionError::InternalError),
+                true, errorDetails);
+        return -1;
+    }
     base::Optional<::android::videoinjection::RequestContext>
             maybe_next_request_context = videoinjection::
                     VideoInjectionController::tryGetNextRequestContext();
@@ -143,54 +152,61 @@ int64_t RenderMultiplexer::render() {
         switch (maybe_next_request->function_case()) {
             case ::offworld::VideoInjectionRequest::kDisplayDefaultFrame:
                 switchRenderer(mDefaultRenderer.get());
+                errorDetails = "";
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
-                        async_id, base::Ok(), true);
+                        async_id, base::Ok(), true, errorDetails);
                 break;
             case ::offworld::VideoInjectionRequest::kPlay:
             {
                 //Error in starting playing the video.
                 if (mPlayer == nullptr) {
                     LOG(ERROR) << "No video loaded.";
+                    errorDetails = "Cannot find the video to play.";
                     videoinjection::VideoInjectionController::
                             trySendAsyncResponse(
                                     async_id,
                                     base::Err(videoinjection::
                                                       VideoInjectionError::
                                                               FileIsNotLoaded),
-                                    true);
+                                    true, errorDetails);
                     return -1;
                 }
+                ongoing_async_id = async_id;
                 switchRenderer(mVideoRenderer.get());
                 videoplayer::PlayConfig playConfig(maybe_next_request->play().looping());
                 mPlayer->start(playConfig);
                 //Successfully start playing the video.
+                errorDetails = "";
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
-                        async_id, base::Ok(), false);
+                        async_id, base::Ok(), false, errorDetails);
                 break;
             }
             case ::offworld::VideoInjectionRequest::kStop:
                 //Error to stop the play as it's no video for playback.
                 if (mPlayer == nullptr) {
                     LOG(ERROR) << "No video loaded.";
+                    errorDetails = "No video in playing status.";
                     videoinjection::VideoInjectionController::
                             trySendAsyncResponse(
                                     async_id,
                                     base::Err(videoinjection::
                                                       VideoInjectionError::
                                                               FileIsNotLoaded),
-                                    true);
+                                    true, errorDetails);
                     return -1;
                 }
                 switchRenderer(mVideoRenderer.get());
                 mPlayer->stop();
+                errorDetails = "";
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
-                        async_id, base::Ok(), true);
+                        async_id, base::Ok(), true, errorDetails);
                 break;
             case ::offworld::VideoInjectionRequest::kPause:
                 if (mPlayer == nullptr) {
                     LOG(ERROR) << "No video loaded.";
                     return -1;
                 }
+                ongoing_async_id = async_id;
                 switchRenderer(mVideoRenderer.get());
                 mPlayer->pause();
                 break;
@@ -227,10 +243,11 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
     //If there is any Error in Loading.
     if (!writeStringToFile(fd.get(), video_data)) {
         LOG(ERROR) << "Failed to write video to tempfile.";
+        std::string errorDetails = "Failed to load the video.";
         videoinjection::VideoInjectionController::trySendAsyncResponse(
                 async_id,
                 base::Err(videoinjection::VideoInjectionError::FileIsNotLoaded),
-                true);
+                true, errorDetails);
         return;
     }
 
@@ -240,8 +257,9 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
                     new VideoplaybackNotifier()));
 
     //File Loaded, sends async response indicating execution completed.
+    std::string errorDetails = "";
     videoinjection::VideoInjectionController::trySendAsyncResponse(
-            async_id, base::Ok(), true);
+            async_id, base::Ok(), true, errorDetails);
     // Force the video player to be in a known stable state.
     mPlayer->stop();
 }
