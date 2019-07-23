@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a02c411c_b5fbdd0e",
+        "filename": "android/android-grpc/control_socket.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-07-23T00:52:56Z",
+      "side": 1,
+      "message": "\"Required\" is usually highly discouraged. Change it to optional? Same for the one below.",
+      "range": {
+        "startLine": 61,
+        "startChar": 4,
+        "endLine": 61,
+        "endChar": 12
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
