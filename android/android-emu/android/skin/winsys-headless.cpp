@@ -406,3 +406,11 @@ extern void skin_winsys_touch_qt_extended_virtual_sensors(void) { }
 extern "C" int sim_is_present() {
     return 1;
 }
+
+bool skin_winsys_caps_lock_is_on(void) {
+    return false;
+}
+
+bool skin_winsys_num_lock_is_on(void) {
+    return false;
+}
