@@ -244,7 +244,7 @@ TEST_F(VideoInjectionControllerTest, sendFollowUpAsyncResponse) {
                         "result: RESULT_NO_ERROR async { async_id: 1 complete: true }"))))
             .Times(1);
 
-    mController->sendFollowUpAsyncResponse(1, android::base::Ok(), true);
+    mController->sendFollowUpAsyncResponse(1, android::base::Ok(), true, "");
 
     testing::Mock::VerifyAndClearExpectations(this);
 
@@ -255,13 +255,13 @@ TEST_F(VideoInjectionControllerTest, sendFollowUpAsyncResponse) {
                         "result: RESULT_ERROR_UNKNOWN async { async_id: 2}"))))
             .Times(1);
 
-    mController->sendFollowUpAsyncResponse(2, android::base::Err(VideoInjectionError::InvalidRequest), false);
+    mController->sendFollowUpAsyncResponse(2, android::base::Err(VideoInjectionError::InvalidRequest), false, "");
 
     testing::Mock::VerifyAndClearExpectations(this);
 
     EXPECT_CALL(*this, offworldSendResponse).Times(0);
 
-    mController->sendFollowUpAsyncResponse(3, android::base::Err(VideoInjectionError::InvalidRequest), false);
+    mController->sendFollowUpAsyncResponse(3, android::base::Err(VideoInjectionError::InvalidRequest), false, "");
 
     testing::Mock::VerifyAndClearExpectations(this);
 

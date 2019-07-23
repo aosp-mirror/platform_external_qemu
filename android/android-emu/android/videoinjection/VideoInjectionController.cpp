@@ -29,7 +29,8 @@ static offworld::Response createAsyncResponse(
     uint32_t asyncId,
     uint32_t sequenceId,
     android::videoinjection::VideoInjectionResult result,
-    bool isCompleted) {
+    bool isCompleted,
+    std::string errorDetails) {
     offworld::Response response;
     if (result.ok()) {
         response.set_result(offworld::Response::RESULT_NO_ERROR);
@@ -37,7 +38,7 @@ static offworld::Response createAsyncResponse(
         response.set_result(offworld::Response::RESULT_ERROR_UNKNOWN);
         std::stringstream ss;
         ss << result.unwrapErr();
-        std::string errorString = ss.str();
+        std::string errorString = ss.str() + " : " + errorDetails;
 
         if (!errorString.empty()) {
             response.set_error_string(errorString);
@@ -113,7 +114,7 @@ public:
 
     void sendFollowUpAsyncResponse(uint32_t async_id,
                                 android::videoinjection::VideoInjectionResult result,
-                                bool isCompleted);
+                                bool isCompleted, std::string errorDetails);
 
 private:
     Lock mLock;
@@ -164,7 +165,7 @@ void VideoInjectionControllerImpl::reset() {
             requestContext.asyncId,
             requestContext.request.sequence_id(),
             Err(VideoInjectionError::InternalError),
-            false);
+            false, "");
         if (requestContext.pipe) {
             mSendMessageCallback(*requestContext.pipe, response);
         }
@@ -249,9 +250,10 @@ Optional<RequestContext> VideoInjectionControllerImpl::getNextRequestContext() {
 
 void VideoInjectionController::trySendAsyncResponse(uint32_t async_id,
                           android::videoinjection::VideoInjectionResult result,
-                          bool isCompleted) {
+                          bool isCompleted, std::string errorDetails) {
     if (sInstance) {
-        sInstance->sendFollowUpAsyncResponse(async_id, std::move(result), isCompleted);
+        sInstance->sendFollowUpAsyncResponse(async_id, std::move(result),
+                                             isCompleted, errorDetails);
     }
     else{
         LOG(ERROR) << "No controller instance to send async response.";
@@ -261,7 +263,8 @@ void VideoInjectionController::trySendAsyncResponse(uint32_t async_id,
 void VideoInjectionControllerImpl::sendFollowUpAsyncResponse(
         uint32_t async_id,
         android::videoinjection::VideoInjectionResult result,
-        bool isCompleted) {
+        bool isCompleted,
+        std::string errorDetails) {
     // Retrives the original RequestContext.
     auto itr = mAsyncRequestContextMap.find(async_id);
 
@@ -276,7 +279,7 @@ void VideoInjectionControllerImpl::sendFollowUpAsyncResponse(
 
         ::offworld::Response asyncResponse = createAsyncResponse(
                 itr->second.asyncId, itr->second.request.sequence_id(),
-                std::move(result), isCompleted);
+                std::move(result), isCompleted, errorDetails);
 
         mSendMessageCallback(*(itr->second.pipe), asyncResponse);
         mAsyncRequestContextMap.erase(itr);

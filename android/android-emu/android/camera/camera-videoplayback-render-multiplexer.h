@@ -60,6 +60,8 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
      virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
      bool mInitialized = false;
      size_t mCounter = 0;
+     //async_id for non-sequential execution, including play, pause and etc.
+     uint32_t ongoing_async_id;
 };
 
 }  // namespace videoplayback
