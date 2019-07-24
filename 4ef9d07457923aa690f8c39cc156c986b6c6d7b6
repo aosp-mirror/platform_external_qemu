@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc25fa45_06bda429",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "Nit: std::string is empty by default, the \u003d \"\" can be omitted.",
+      "range": {
+        "startLine": 132,
+        "startChar": 29,
+        "endLine": 132,
+        "endChar": 34
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1ab7613_ca9fbfef",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "It looks like every case that errorDetails is used it is immediately passed into the function, why not remove the errorDetails local entirely?\n\ntrySendAsyncResponse( ..., \"\");\n\ntrySendAsyncResponse( ..., \"Cannot find video to play.\");",
+      "range": {
+        "startLine": 155,
+        "startChar": 16,
+        "endLine": 155,
+        "endChar": 34
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ecc4621d_70c76835",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "mOngoingAsyncId, and initialize this to a default value.  Since 0 may be valid, how about\n\nuint32_t mOngoingAsyncId \u003d std::numeric_limits\u003cuint32_t\u003e::max();",
+      "range": {
+        "startLine": 64,
+        "startChar": 30,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73c4b44e_62fdcf58",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "Use mIsError and mErrorMessage for member variables",
+      "range": {
+        "startLine": 336,
+        "startChar": 9,
+        "endLine": 336,
+        "endChar": 16
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a170567_5508daf0",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1546,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "Fix formatting?",
+      "range": {
+        "startLine": 1528,
+        "startChar": 0,
+        "endLine": 1546,
+        "endChar": 0
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29e36dd1_44dbb291",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "This is unexpected.  Did you want \u003cstring\u003e ?",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 19
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11a1e23e_50fbace4",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "Since errorDetails may be empty, the \" : \" shouldn\u0027t be appended unless it is present.  How about:\n\n\n        std::stringstream ss;\n        ss \u003c\u003c result.unwrapErr();\n        if (!errorDetails.empty()) {\n          ss \u003c\u003c \": \" \u003c\u003c errorDetails;\n        }\n        std::string errorString \u003d ss.str();",
+      "range": {
+        "startLine": 41,
+        "startChar": 42,
+        "endLine": 41,
+        "endChar": 66
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5802d107_1fa8a7b3",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:26:45Z",
+      "side": 1,
+      "message": "const std::string\u0026\n\nGenerally, I recommend against passing non-const references since the caller\u0027s value can be mutated without expecting it.",
+      "range": {
+        "startLine": 117,
+        "startChar": 50,
+        "endLine": 117,
+        "endChar": 62
+      },
+      "revId": "4ef9d07457923aa690f8c39cc156c986b6c6d7b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
