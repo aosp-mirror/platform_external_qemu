@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "db7fdc2c_ab74580e",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-24T15:46:39Z",
+      "side": 1,
+      "message": "It\u0027s currently not being used. Let me remove it.",
+      "parentUuid": "e50ac129_531a59cc",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 54
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ed612e59_08c32649",
         "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
         "patchSetId": 2
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "4fddd31f_3a6af7b3",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-24T15:46:39Z",
+      "side": 1,
+      "message": "Yes.",
+      "parentUuid": "ed612e59_08c32649",
+      "range": {
+        "startLine": 238,
+        "startChar": 8,
+        "endLine": 238,
+        "endChar": 35
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "afabcf19_b4d92667",
         "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
         "patchSetId": 2
@@ -82,6 +130,30 @@
       "writtenOn": "2019-07-24T15:25:02Z",
       "side": 1,
       "message": "should this be under a lock?",
+      "range": {
+        "startLine": 345,
+        "startChar": 4,
+        "endLine": 347,
+        "endChar": 31
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ccc3df0_30871836",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-24T15:46:39Z",
+      "side": 1,
+      "message": "Yes.",
+      "parentUuid": "afabcf19_b4d92667",
       "range": {
         "startLine": 345,
         "startChar": 4,
@@ -128,6 +200,30 @@
       "writtenOn": "2019-07-24T15:25:27Z",
       "side": 1,
       "message": "it looks like we checked in httpbridge. is that intended?",
+      "range": {
+        "startLine": 17,
+        "startChar": 12,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f069b825_6c40f390",
+        "filename": "android/android-grpc/docs/grpc-samples/go/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-24T15:46:39Z",
+      "side": 1,
+      "message": "Let me remove the binary.",
+      "parentUuid": "c7f1782a_1013acf1",
       "range": {
         "startLine": 17,
         "startChar": 12,
