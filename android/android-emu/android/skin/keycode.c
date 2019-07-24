@@ -195,6 +195,9 @@ const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod) {
     if ((mod & kKeyModRAlt) != 0) {
         p = bufprint(p, end, "RAlt-");
     }
+    if ((mod & kKeyModNumLock) != 0) {
+        p = bufprint(p, end, "NumLock");
+    }
     for (nn = 0; nn < keysym_names_size; ++nn) {
         if (keysym_names[nn]._sym == keycode) {
             p = bufprint(p, end, "%s", keysym_names[nn]._str);
@@ -202,7 +205,7 @@ const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod) {
         }
     }
 
-    if (keycode >= 32 && keycode <= 127) {
+    if (keycode >= 32 && keycode <= 255) {
         p = bufprint(p, end, "%c", (int)keycode);
         return temp;
     }
@@ -267,4 +270,27 @@ bool skin_key_pair_from_string(const char* str,
         }
     }
     return false;
+}
+
+// the linux key code is alphabetical if it is within the range of the 3 rows on
+// Qwerty keyboard.
+bool skin_keycode_is_alpha(int32_t linux_key) {
+    return (linux_key >= LINUX_KEY_Q && linux_key <= LINUX_KEY_P) ||
+           (linux_key >= LINUX_KEY_A && linux_key <= LINUX_KEY_L) ||
+           (linux_key >= LINUX_KEY_Z && linux_key <= LINUX_KEY_M);
+}
+
+bool skin_keycode_is_modifier(int32_t linux_key) {
+    switch (linux_key) {
+        case LINUX_KEY_LEFTCTRL:
+        case LINUX_KEY_RIGHTCTRL:
+        case LINUX_KEY_LEFTSHIFT:
+        case LINUX_KEY_RIGHTSHIFT:
+        case LINUX_KEY_LEFTALT:
+        case LINUX_KEY_RIGHTALT:
+        case LINUX_KEY_CAPSLOCK:
+            return true;
+        default:
+            return false;
+    }
 }

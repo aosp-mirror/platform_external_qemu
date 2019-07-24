@@ -299,14 +299,13 @@ static void virtio_keyboard_init(Object *obj)
     virtio_input_init_config(vinput, virtio_keyboard_config);
     // Mandatory android keys. Reference hw/input/goldfish_events.c
     const guint16 mandatory_android_keys[] = {
-        LINUX_KEY_HOME,           LINUX_KEY_BACK,
-        LINUX_KEY_SEND,           LINUX_KEY_END,
-        LINUX_KEY_SOFT1,          LINUX_KEY_VOLUMEUP,
-        LINUX_KEY_VOLUMEDOWN,     LINUX_KEY_SOFT2,
-        LINUX_KEY_POWER,          LINUX_KEY_SEARCH,
-        LINUX_KEY_SLEEP,          ANDROID_KEY_APPSWITCH,
-        ANDROID_KEY_STEM_PRIMARY, ANDROID_KEY_STEM_1,
-        ANDROID_KEY_STEM_2,       ANDROID_KEY_STEM_3};
+        LINUX_KEY_HOME, LINUX_KEY_BACK, LINUX_KEY_SEND, LINUX_KEY_END,
+        LINUX_KEY_SOFT1, LINUX_KEY_VOLUMEUP, LINUX_KEY_VOLUMEDOWN,
+        LINUX_KEY_SOFT2, LINUX_KEY_POWER, LINUX_KEY_SEARCH, LINUX_KEY_SLEEP,
+        ANDROID_KEY_APPSWITCH, ANDROID_KEY_STEM_PRIMARY, ANDROID_KEY_STEM_1,
+        ANDROID_KEY_STEM_2, ANDROID_KEY_STEM_3,
+        // equivalent to LINUX_KEY_GRAVE in Android system qwerty.kl
+        LINUX_KEY_GREEN};
     const size_t android_keycodes_len =
         sizeof(mandatory_android_keys) / sizeof(mandatory_android_keys[0]) +
         qemu_input_map_qcode_to_linux_len;

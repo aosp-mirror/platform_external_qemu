@@ -55,10 +55,6 @@
 #include "android/utils/filelock.h"
 #include "android/virtualscene/TextureUtils.h"
 
-#if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
-#endif
-
 #define DEBUG 1
 
 #if DEBUG
@@ -99,6 +95,18 @@
 #include <array>
 #include <string>
 #include <vector>
+
+#ifdef __linux__
+// This include needs to be after all the Qt includes
+// because it defines macros/types that conflict with
+// qt's own macros/types.
+#include <xcb/xcb.h>
+#elif defined(__APPLE__)
+#include "android/skin/macos_keycodes.h"
+#include "android/skin/qt/mac-native-window.h"
+#else  // windows
+#include <windows.h>
+#endif
 
 using android::base::AutoLock;
 using android::base::c_str;
@@ -454,7 +462,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     }
 
     this->setAcceptDrops(true);
-
     QObject::connect(this, &EmulatorQtWindow::showVirtualSceneControls,
                      mToolWindow, &ToolWindow::showVirtualSceneControls);
 
@@ -2236,7 +2243,11 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     SkinEvent* skin_event = createSkinEvent(type);
     SkinEventKeyData& keyData = skin_event->u.key;
     keyData.keycode = convertKeyCode(event->key());
-
+    if (keyData.keycode == -1) {
+        D("Failed to convert key for event key %d", event->key());
+        delete skin_event;
+        return;
+    }
     Qt::KeyboardModifiers modifiers = event->modifiers();
     if (modifiers & Qt::ShiftModifier)
         keyData.mod |= kKeyModLShift;
@@ -2245,6 +2256,82 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     if (modifiers & Qt::AltModifier)
         keyData.mod |= kKeyModLAlt;
 
+    queueSkinEvent(skin_event);
+}
+
+void EmulatorQtWindow::handleNativeKeyEvent(int keycode,
+                                            int modifiers,
+                                            SkinEventType eventType) {
+    if (!isActiveWindow() || eventType != kEventKeyDown) {
+        return;
+    }
+
+    D("Raw keycode %d modifiers 0x%x", keycode, modifiers);
+
+    // Do no send modifier by itself.
+    if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
+        skin_keycode_is_modifier(keycode)) {
+        return;
+    }
+
+    SkinEvent* skin_event = createSkinEvent(kEventTextInput);
+    SkinEventTextInputData& textInputData = skin_event->u.text;
+    textInputData.down = true;
+
+    textInputData.keycode = keycode;
+    textInputData.mod = 0;
+#ifdef __linux__
+    if (modifiers & XCB_MOD_MASK_SHIFT) {
+        textInputData.mod |= kKeyModLShift;
+    }
+    if (modifiers & XCB_MOD_MASK_CONTROL) {
+      textInputData.mod |= kKeyModLCtrl;
+    }
+    if (modifiers & XCB_MOD_MASK_1) {
+      textInputData.mod |= kKeyModLAlt;
+    }
+    // Emulator uses qwerty2.kl in Android which doesn't recognize Caps lock
+    // key. Thus, we simulate "Caps Lock" key using "Shift" when "Alt" key is
+    // not pressed. Caution: Alt+Shift+base key will output different symbol
+    // from Alt+Base under some keyboard layout.
+    if ((modifiers & XCB_MOD_MASK_LOCK) && skin_keycode_is_alpha(keycode) &&
+        !(modifiers & XCB_MOD_MASK_1)) {
+        textInputData.mod |= kKeyModLShift;
+    }
+#elif defined(__APPLE__)
+
+    if (modifiers & NSEventModifierFlagShift) {
+        textInputData.mod |= kKeyModLShift;
+    }
+    if (modifiers & NSEventModifierFlagOption) {
+        textInputData.mod |= kKeyModLAlt;
+    }
+    if (modifiers & NSEventModifierFlagControl) {
+        textInputData.mod |= kKeyModLCtrl;
+    }
+    if ((modifiers & NSEventModifierFlagCapsLock) &&
+        skin_keycode_is_alpha(keycode) &&
+        !(modifiers & NSEventModifierFlagOption)) {
+        textInputData.mod |= kKeyModLShift;
+    }
+
+#else  // windows
+    if (HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0) {
+        textInputData.mod |= kKeyModLCtrl;
+    }
+    if (HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0 || (modifiers & MOD_SHIFT)) {
+        textInputData.mod |= kKeyModLShift;
+    }
+    // Left menu will be omitted.
+    if (HIWORD(GetAsyncKeyState(VK_RMENU)) != 0) {
+        textInputData.mod |= kKeyModLAlt;
+    }
+    if (LOWORD(GetKeyState(VK_CAPITAL)) != 0 &&
+        skin_keycode_is_alpha(keycode) && !(textInputData.mod & kKeyModLAlt)) {
+        textInputData.mod |= kKeyModLShift;
+    }
+#endif
+    D("Processed keycode %d modifiers 0x%x", keycode, textInputData.mod);
     queueSkinEvent(skin_event);
 }
 
@@ -2300,26 +2387,6 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     bool qtEvent = mToolWindow->handleQtKeyEvent(
             event, QtKeyEventSource::EmulatorWindow);
 
-    if (mForwardShortcutsToDevice || !qtEvent) {
-        forwardKeyEventToEmulator(type, event);
-        if (type == kEventKeyDown && event->text().length() > 0) {
-            Qt::KeyboardModifiers mods = event->modifiers();
-            mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
-            if (mods == 0) {
-                // The key event generated text without Ctrl, Alt, etc.
-                // Send an additional TextInput event to the emulator.
-                SkinEvent* skin_event = createSkinEvent(kEventTextInput);
-                skin_event->u.text.down = false;
-                strncpy((char*)skin_event->u.text.text,
-                        (const char*)event->text().toUtf8().constData(),
-                        sizeof(skin_event->u.text.text) - 1);
-                // Ensure the event's text is 0-terminated
-                skin_event->u.text.text[sizeof(skin_event->u.text.text) - 1] =
-                        0;
-                queueSkinEvent(skin_event);
-            }
-        }
-    }
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers) {

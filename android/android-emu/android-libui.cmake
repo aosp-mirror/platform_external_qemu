@@ -124,6 +124,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-window.cpp
     android/skin/qt/FramelessDetector.cpp
     android/skin/qt/ModalOverlay.cpp
+    android/skin/qt/native-event-filter-factory.cpp
     android/skin/qt/OverlayMessageCenter.cpp
     android/skin/qt/perf-stats-3d-widget.cpp
     android/skin/qt/poster-image-well.cpp
@@ -269,32 +270,42 @@ set(ANDROID_SKIN_SOURCES
 if (NOT QTWEBENGINE)
   message(STATUS "Webengine disabled." )
   set(emulator-libui_darwin-x86_64_src
+      android/skin/keycode_macos.cpp
       android/skin/qt/mac-native-window.mm
+      android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows-x86_64_src
+      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
+      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_linux-x86_64_src
+      android/skin/keycode_x11.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
 else ()
   message(STATUS "Webengine enabled")
   set(emulator-libui_darwin-x86_64_src
+      android/skin/keycode_macos.cpp
       android/skin/qt/mac-native-window.mm
+      android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_windows-x86_64_src
+      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
+      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_linux-x86_64_src
+      android/skin/keycode_x11.cpp
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
