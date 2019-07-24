@@ -114,6 +114,29 @@
       "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7f1782a_1013acf1",
+        "filename": "android/android-grpc/docs/grpc-samples/go/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-24T15:25:27Z",
+      "side": 1,
+      "message": "it looks like we checked in httpbridge. is that intended?",
+      "range": {
+        "startLine": 17,
+        "startChar": 12,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
