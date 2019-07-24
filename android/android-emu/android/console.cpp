@@ -2541,6 +2541,13 @@ do_avd_name( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_id( ControlClient  client, char*  args )
+{
+    control_write( client, "%s\r\n", android_hw->avd_id);
+    return 0;
+}
+
+static int
 do_avd_pause( ControlClient  client, char*  args )
 {
     bool success = vmopers(client)->vmPause();
@@ -2633,6 +2640,11 @@ static const CommandDefRec  vm_commands[] =
     { "bugreport", "generate bug report info.",
     "'avd bugreport' will print out bug report information which is used for the filling the template in issue tracker.\r\n",
     NULL, do_avd_bugreport, NULL},
+
+    { "id", "query virtual device ID",
+    "'avd id' will return the ID of this virtual device (possibly separate from the name)\r\n",
+    NULL, do_avd_id, NULL },
+
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 

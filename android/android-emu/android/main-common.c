@@ -505,6 +505,12 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
             dprint("could not find virtual device named '%s'", opts->avd);
             exit(1);
         }
+
+        /* Did we set an ID for this AVD? */
+        if (opts->id != NULL)
+        {
+            avdInfo_setAvdId( ret, opts->id );
+        }
     }
     else
     {
@@ -1868,6 +1874,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     str_reset(&hw->avd_name, avdInfo_getName(avd));
+    str_reset(&hw->avd_id, avdInfo_getId(avd));
 
     /* Setup screen emulation */
     if (opts->screen) {
