@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "65386b83_76636f49",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-07-24T22:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0f787d2_413029b1",
+      "range": {
+        "startLine": 94,
+        "startChar": 32,
+        "endLine": 94,
+        "endChar": 48
+      },
+      "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d39a68f1_facf3561",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0e131389_a955f4fc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-07-24T22:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d39a68f1_facf3561",
+      "range": {
+        "startLine": 103,
+        "startChar": 57,
+        "endLine": 103,
+        "endChar": 90
+      },
+      "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4bc679ce_e3a6dbb9",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-route.cpp",
         "patchSetId": 3
@@ -68,6 +116,30 @@
       "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce5d1873_c4bba29d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-route.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-07-24T22:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4bc679ce_e3a6dbb9",
+      "range": {
+        "startLine": 61,
+        "startChar": 3,
+        "endLine": 62,
+        "endChar": 21
+      },
+      "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
