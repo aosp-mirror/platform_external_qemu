@@ -1506,8 +1506,7 @@ void VideoPlayerImpl::cleanup() {
     mAudioCodecCtx.reset();
     mVideoCodecCtx.reset();
 
-    // close the video file
-    mDataset->clearFormatContext();
+    mDataset.reset();
 
     if (mAudioOutputEngine != nullptr) {
         mAudioOutputEngine->close();
