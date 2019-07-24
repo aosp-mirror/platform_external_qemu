@@ -113,6 +113,26 @@ static bool verifyImageInfo(pb::Image::Type type,
     return true;
 }
 
+const char* const sHwConfigSnapshotInsensitiveKeys[] = {
+    "hw.gpu.mode",
+    "avd.id",
+};
+
+static bool iniFileKeyMismatches(
+    const IniFile& expected,
+    const IniFile& actual,
+    const std::string& key) {
+    return !actual.hasKey(key) ||
+           (actual.getString(key, "$$$") != expected.getString(key, "$$$"));
+}
+
+static bool isKeySnapshotSensitive(const std::string& key) {
+    for (auto insensitiveKey : sHwConfigSnapshotInsensitiveKeys) {
+        if (!strcmp(key.c_str(), insensitiveKey)) return false;
+    }
+    return true;
+}
+
 bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
     // We need to explicitly check the list because when booted with -wipe-data
     // the emulator will add a line (disk.dataPartition.initPath) which should
@@ -127,21 +147,9 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
-#ifdef ALLOW_CHANGE_RENDERER
-        if (!actual.hasKey(key) || actual.getString(key, "$$$")
-                != expected.getString(key, "$$$")) {
-            if (key != "hw.gpu.mode") {
-                return false;
-            }
-        }
-#else // ALLOW_CHANGE_RENDERER
-        if (!actual.hasKey(key)) {
-            return false;
-        }
-        if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
-            return false;
-        }
-#endif // ALLOW_CHANGE_RENDERER
+
+        if (iniFileKeyMismatches(expected, actual, key) &&
+            isKeySnapshotSensitive(key)) return false;
     }
 
     for (auto&& key : actual) {
@@ -152,21 +160,8 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
-#ifdef ALLOW_CHANGE_RENDERER
-        if (!expected.hasKey(key) || actual.getString(key, "$$$")
-                != expected.getString(key, "$$$")) {
-            if (key != "hw.gpu.mode") {
-                return false;
-            }
-        }
-#else // ALLOW_CHANGE_RENDERER
-        if (!expected.hasKey(key)) {
-            return false;
-        }
-        if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
-            return false;
-        }
-#endif // ALLOW_CHANGE_RENDERER
+        if (iniFileKeyMismatches(actual, expected, key) &&
+            isKeySnapshotSensitive(key)) return false;
     }
 
     return numPathActual == numPathExpected;
@@ -623,6 +618,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
+        fprintf(stderr, "%s: hw configs not eq\n", __func__);
         if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }

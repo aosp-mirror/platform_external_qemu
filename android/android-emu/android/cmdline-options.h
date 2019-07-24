@@ -101,6 +101,7 @@ CFG_FLAG ( no_skin, "deprecated: create an AVD with no skin instead" )
 CFG_FLAG ( noskin, "same as -no-skin" )
 CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
 OPT_PARAM( ui_only, "<UI feature>", "run only the UI feature requested")
+CFG_PARAM( id, "<name>", "assign an id to this virtual device (separate from the avd name)")
 
 OPT_PARAM( cores, "<number>", "Set number of CPU cores to emulator" )
 OPT_PARAM( accel, "<mode>", "Configure emulation acceleration" )
