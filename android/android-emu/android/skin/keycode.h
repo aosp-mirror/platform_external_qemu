@@ -165,7 +165,6 @@ typedef enum {
     kKeyModLShift = (1U << 4),  // left-shift
     kKeyModRShift = (1U << 5),  // right-shift
     kKeyModNumLock = (1U << 6),  // numlock
-
 } SkinKeyMod;
 
 // Convert a pair of (SkinKeyCode,SkinKeyMod) values into a human-readable
@@ -182,4 +181,10 @@ extern bool skin_key_pair_from_string(const char* str,
                                       uint32_t* keycode,
                                       uint32_t* mod);
 
+extern bool skin_keycode_native_to_linux(int32_t* pVirtualKey,
+                                         int32_t* pModifier);
+
+extern bool skin_keycode_is_alpha(int32_t linux_key);
+
+extern bool skin_keycode_is_modifier(int32_t linux_key);
 ANDROID_END_HEADER

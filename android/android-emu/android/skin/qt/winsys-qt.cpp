@@ -19,18 +19,19 @@
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/globals.h"
+#include "android/main-common-ui.h"
 #include "android/qt/qt_path.h"
-#include "android/skin/rect.h"
-#include "android/skin/resource.h"
-#include "android/skin/winsys.h"
+#include "android/skin/qt/QtLogger.h"
 #include "android/skin/qt/emulator-no-qt-no-window.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/init-qt.h"
+#include "android/skin/qt/native-event-filter-factory.h"
 #include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/QtLogger.h"
+#include "android/skin/rect.h"
+#include "android/skin/resource.h"
+#include "android/skin/winsys.h"
 #include "android/utils/setenv.h"
-#include "android/main-common-ui.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -103,6 +104,10 @@ static bool sMainLoopShouldExit = false;
 
 #ifdef _WIN32
 static HANDLE sWakeEvent;
+#endif
+
+#ifdef Q_OS_LINUX
+static Display *s_display = NULL;
 #endif
 
 static void enableSigTermination() {
@@ -199,6 +204,9 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         enableSigChild();
         enableSigTermination();
         GlobalState* g = globalState();
+        g->app->installNativeEventFilter(
+                NativeEventFilterFactory::getEventFilter());
+
         g->app->exec();
         D("Finished QT main loop\n");
     }
@@ -231,12 +239,16 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
     rect->size.h = CGDisplayPixelsHigh(displayId);
 #else // Linux
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
-    Display* defaultDisplay = XOpenDisplay(NULL);
+    if (!s_display) {
+        s_display = XOpenDisplay(NULL);
+    }
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL) (done)\n");
-    if (defaultDisplay) {
-        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay)\n");
-        Screen* defaultScreen = DefaultScreenOfDisplay(defaultDisplay);
-        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay) (done)\n");
+    if (s_display) {
+        D("skin_winsys_get_monitor_rect: Linux: "
+          "DefaultScreenOfDisplay(s_display)\n");
+        Screen* defaultScreen = DefaultScreenOfDisplay(s_display);
+        D("skin_winsys_get_monitor_rect: Linux: "
+          "DefaultScreenOfDisplay(s_display) (done)\n");
         if (defaultScreen) {
             rect->size.w = defaultScreen->width;
             rect->size.h = defaultScreen->height;
@@ -476,6 +488,11 @@ void skin_winsys_destroy() {
 #else
     delete globalState()->app;
     globalState()->app = nullptr;
+#endif
+
+#ifdef Q_OS_LINUX
+    if (s_display)
+        XCloseDisplay(s_display);
 #endif
 }
 

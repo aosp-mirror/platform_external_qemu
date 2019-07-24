@@ -242,6 +242,9 @@ public:
     void setOnTop(bool onTop);
     void setIgnoreWheelEvent(bool ignore);
     void simulateKeyPress(int keyCode, int modifiers);
+    void handleNativeKeyEvent(int keycode,
+                              int modifiers,
+                              SkinEventType eventType);
     void simulateScrollBarChanged(int x, int y);
     void setDisplayRegion(int xOffset, int yOffset, int width, int height);
     void setDisplayRegionAndUpdate(int xOffset, int yOffset, int width, int height);
@@ -398,6 +401,7 @@ private:
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
+
     void maskWindowFrame();
     bool hasFrame() const;
 
