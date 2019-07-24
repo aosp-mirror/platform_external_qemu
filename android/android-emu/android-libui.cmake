@@ -267,6 +267,7 @@ if (NOT QTWEBENGINE)
   message(STATUS "Webengine disabled." )
   set(emulator-libui_darwin-x86_64_src
       android/skin/qt/mac-native-window.mm
+      android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows-x86_64_src
       android/skin/qt/windows-native-window.cpp
@@ -280,6 +281,7 @@ else ()
   message(STATUS "Webengine enabled")
   set(emulator-libui_darwin-x86_64_src
       android/skin/qt/mac-native-window.mm
+      android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
