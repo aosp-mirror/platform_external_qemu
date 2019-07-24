@@ -313,6 +313,9 @@ int android_virtio_input_send(int type, int code, int value) {
         return 0;
     }
     VirtIOInput* vinput = VIRTIO_INPUT(s_current_virtio_input);
+    if (vinput == NULL) {
+        return 1;
+    }
     virtio_input_event event;
     event.type = cpu_to_le16(type);
     event.code = cpu_to_le16(code);
