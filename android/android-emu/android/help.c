@@ -932,6 +932,19 @@ help_ui_only(stralloc_t*  out)
 }
 
 static void
+help_id(stralloc_t*  out)
+{
+    PRINTF(
+    "  '-id <name>' specifies the ID of the virtual device\n"
+    "  separate from the AVD name. If not specified, the ID\n"
+    "  defaults to the AVD name.\n"
+    "  This can be useful when running multiple clones of the same device.\n"
+    "  The ID associated with $device_serial can be queried via\n"
+    "  adb -s $device_serial emu avd id\n\n"
+    );
+}
+
+static void
 help_dpi_device(stralloc_t*  out)
 {
     PRINTF(

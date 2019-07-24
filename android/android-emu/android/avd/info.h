@@ -121,6 +121,9 @@ typedef struct {
  */
 AvdInfo*  avdInfo_new( const char*  name, AvdInfoParams*  params );
 
+/* Sets a custom ID for this AVD. */
+void avdInfo_setAvdId( AvdInfo* i, const char* id );
+
 /* Update the AvdInfo hardware config from a given skin name and path */
 int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath);
 
@@ -147,6 +150,10 @@ void        avdInfo_free( AvdInfo*  i );
 /* Return the name of the Android Virtual Device
  */
 const char*  avdInfo_getName( const AvdInfo*  i );
+
+/* Get the device ID, which can be different from the AVD name
+ * depending on multiple instances or the specific use case. */
+const char*  avdInfo_getId( const AvdInfo*  i );
 
 /* Return the target API level for this AVD.
  * Note that this will be some ridiculously large

@@ -121,6 +121,7 @@ struct AvdInfo {
 
     /* for the normal virtual device case */
     char*     deviceName;
+    char*     deviceId;
     char*     sdkRootPath;
     char*     searchPaths[ MAX_SEARCH_PATHS ];
     int       numSearchPaths;
@@ -210,6 +211,7 @@ avdInfo_free( AvdInfo*  i )
         }
 
         AFREE(i->deviceName);
+        AFREE(i->deviceId);
         AFREE(i);
     }
 }
@@ -936,6 +938,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
 
     ANEW0(i);
     str_reset(&i->deviceName, name);
+    str_reset(&i->deviceId, name);
     i->noChecks = false;
 
     if ( _avdInfo_getSdkRoot(i) < 0     ||
@@ -971,6 +974,13 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
 FAIL:
     avdInfo_free(i);
     return NULL;
+}
+
+void avdInfo_setAvdId( AvdInfo* i, const char* avdId)
+{
+    if (i == NULL) return;
+
+    str_reset(&i->deviceId, avdId);
 }
 
 /***************************************************************
@@ -1067,6 +1077,7 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
     _avdInfo_extractBuildProperties(i);
 
     str_reset(&i->deviceName, "<build>");
+    str_reset(&i->deviceId, "<build>");
 
     i->numSearchPaths = 1;
     i->searchPaths[0] = strdup(androidOut);
@@ -1092,6 +1103,12 @@ const char*
 avdInfo_getName( const AvdInfo*  i )
 {
     return i ? i->deviceName : NULL;
+}
+
+const char*
+avdInfo_getId( const AvdInfo*  i )
+{
+    return i ? i->deviceId : NULL;
 }
 
 const char*
@@ -1964,6 +1981,7 @@ AvdInfo* avdInfo_newCustom(
     AvdInfo* i;
     ANEW0(i);
     str_reset(&i->deviceName, name);
+    str_reset(&i->deviceId, name);
     i->noChecks = true;
 
     i->apiLevel = apiLevel;
