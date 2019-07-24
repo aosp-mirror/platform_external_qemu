@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "20935534_b9f63c57",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-07-24T00:37:04Z",
+      "side": 1,
+      "message": "This status should be update by callers using setErrorStatusAndRecordErrorMessage function. For example, in when the player tries to pause() a video, and it encounters an error, it should use the setErrorStatusAndRecordErrorMessage(\"error details go here\").",
+      "parentUuid": "bb682359_8fc2d213",
+      "range": {
+        "startLine": 336,
+        "startChar": 9,
+        "endLine": 336,
+        "endChar": 17
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "932ee54f_68e35e79",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 2
@@ -71,6 +95,54 @@
     },
     {
       "key": {
+        "uuid": "63f52d3b_b8f31e72",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-07-24T00:37:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9504386_f87bb663",
+      "range": {
+        "startLine": 1531,
+        "startChar": 63,
+        "endLine": 1531,
+        "endChar": 78
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4110431_76f9567b",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-07-24T00:37:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "932ee54f_68e35e79",
+      "range": {
+        "startLine": 1531,
+        "startChar": 28,
+        "endLine": 1531,
+        "endChar": 34
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "045ba7aa_86a89494",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "14906f7a_86818172",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-07-24T00:37:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "045ba7aa_86a89494",
+      "range": {
+        "startLine": 84,
+        "startChar": 12,
+        "endLine": 84,
+        "endChar": 36
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7219b335_e2a832b7",
         "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
         "patchSetId": 2
@@ -114,6 +210,30 @@
       "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "950032f6_56a9ceec",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1435559
+      },
+      "writtenOn": "2019-07-24T00:37:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7219b335_e2a832b7",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 36
+      },
+      "revId": "8aacc796a33e0ab9e46ad18bfb2dc911621ab446",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
