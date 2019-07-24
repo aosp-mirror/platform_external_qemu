@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0f787d2_413029b1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:37:35Z",
+      "side": 1,
+      "message": "Nit: Storing the .c_str() is error-prone, so looks like it could be a bug at first glance.  I had to check the definition of PointListElement to confirm it was valid because of an implicit cast to QString.\n\nTo make this less error-prone, I recommend using QString::fromStdString(fullPath) instead.",
+      "range": {
+        "startLine": 94,
+        "startChar": 32,
+        "endLine": 94,
+        "endChar": 48
+      },
+      "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d39a68f1_facf3561",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:37:35Z",
+      "side": 1,
+      "message": "Nit: \u0026mPointList.back()",
+      "range": {
+        "startLine": 103,
+        "startChar": 57,
+        "endLine": 103,
+        "endChar": 90
+      },
+      "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4bc679ce_e3a6dbb9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-route.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-07-24T19:37:35Z",
+      "side": 1,
+      "message": "Unused?",
+      "range": {
+        "startLine": 61,
+        "startChar": 3,
+        "endLine": 62,
+        "endChar": 21
+      },
+      "revId": "9333194f52a1fcce8acb8d6f27da3a2da0dc34e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
