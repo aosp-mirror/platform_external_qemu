@@ -43,6 +43,7 @@
 #include <QSemaphore>
 #include <QThread>
 #include <QWidget>
+#include <QAbstractNativeEventFilter>
 
 #include <string>
 
@@ -51,6 +52,7 @@
 // because it defines macros/types that conflict with
 // qt's own macros/types.
 #include <X11/Xlib.h>
+#include <xcb/xcb.h>
 #endif
 
 #ifdef _WIN32
@@ -61,6 +63,8 @@
 #ifdef __APPLE__
 #include <Carbon/Carbon.h>
 #include <signal.h>
+
+#include "android/skin/qt/mac-native-event-filter.h"
 #endif
 
 using android::base::System;
@@ -103,6 +107,33 @@ static bool sMainLoopShouldExit = false;
 
 #ifdef _WIN32
 static HANDLE sWakeEvent;
+#endif
+
+#ifdef Q_OS_LINUX
+static Display *s_display = NULL;
+
+class XcbNativeEventFilter : public QAbstractNativeEventFilter
+{
+public:
+    XcbNativeEventFilter(EmulatorQtWindow* emulatorWin) : QAbstractNativeEventFilter(), mEmuQtWindow(emulatorWin) {
+
+    }
+    bool nativeEventFilter(const QByteArray &eventType, void *message, long *) override
+    {
+        if (eventType == "xcb_generic_event_t") {
+            xcb_generic_event_t* ev = static_cast<xcb_generic_event_t *>(message);
+            if ((ev->response_type & ~0x80) == XCB_KEY_PRESS) {
+                xcb_key_press_event_t * keyEv = (xcb_key_press_event_t *)ev;
+                if(mEmuQtWindow != nullptr) {
+                    mEmuQtWindow->handleNativeKeyEvent(keyEv->detail ,keyEv->state, kEventKeyDown);
+                }
+            }
+        }
+        return false;
+    }
+private:
+    EmulatorQtWindow* mEmuQtWindow;
+};
 #endif
 
 static void enableSigChild() {
@@ -181,6 +212,16 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         // signal will not be emitted from QProcess.
         enableSigChild();
         GlobalState* g = globalState();
+#ifdef Q_OS_LINUX
+        XcbNativeEventFilter* nativeEventFilter = new XcbNativeEventFilter(EmulatorQtWindow::getInstance());
+        g->app->installNativeEventFilter(nativeEventFilter);
+#elif  defined(__APPLE__)
+        MacNativeEventFilter* nativeEventFilter =
+                new MacNativeEventFilter(EmulatorQtWindow::getInstance());
+        g->app->installNativeEventFilter(nativeEventFilter);
+#else
+
+#endif
         g->app->exec();
         D("Finished QT main loop\n");
     }
@@ -213,12 +254,16 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
     rect->size.h = CGDisplayPixelsHigh(displayId);
 #else // Linux
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
-    Display* defaultDisplay = XOpenDisplay(NULL);
+    if (!s_display) {
+        s_display = XOpenDisplay(NULL);
+    }
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL) (done)\n");
-    if (defaultDisplay) {
-        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay)\n");
-        Screen* defaultScreen = DefaultScreenOfDisplay(defaultDisplay);
-        D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay) (done)\n");
+    if (s_display) {
+        D("skin_winsys_get_monitor_rect: Linux: "
+          "DefaultScreenOfDisplay(s_display)\n");
+        Screen* defaultScreen = DefaultScreenOfDisplay(s_display);
+        D("skin_winsys_get_monitor_rect: Linux: "
+          "DefaultScreenOfDisplay(s_display) (done)\n");
         if (defaultScreen) {
             rect->size.w = defaultScreen->width;
             rect->size.h = defaultScreen->height;
@@ -458,6 +503,11 @@ void skin_winsys_destroy() {
 #else
     delete globalState()->app;
     globalState()->app = nullptr;
+#endif
+
+#ifdef Q_OS_LINUX
+    if (s_display)
+        XCloseDisplay(s_display);
 #endif
 }
 
