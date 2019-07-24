@@ -2,6 +2,121 @@
   "comments": [
     {
       "key": {
+        "uuid": "ab7e6b88_bf89f17c",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "is this a typo?",
+      "range": {
+        "startLine": 67,
+        "startChar": 37,
+        "endLine": 67,
+        "endChar": 39
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "179e4ee0_f0e914f5",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "should there be a OneToOne to be consistent with the pattern of all the other calls?",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 58
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5135d86d_3b3c79b8",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/WaterfallForwarder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "maybe rename this to StreamingToStreaming to use same naming as gRPC.",
+      "range": {
+        "startLine": 137,
+        "startChar": 11,
+        "endLine": 137,
+        "endChar": 22
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e11ca5ed_4a38649d",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/WaterfallForwarder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "UnaryToStreaming",
+      "range": {
+        "startLine": 141,
+        "startChar": 11,
+        "endLine": 141,
+        "endChar": 20
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83de57e8_f6c1c7c3",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/WaterfallForwarder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "StreamingToUnary",
+      "range": {
+        "startLine": 145,
+        "startChar": 11,
+        "endLine": 145,
+        "endChar": 20
+      },
+      "revId": "adc7d45988efd54ace7cdef7a1154e1ffedf2e1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a02c411c_b5fbdd0e",
         "filename": "android/android-grpc/control_socket.proto",
         "patchSetId": 1

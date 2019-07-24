@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d33e1a6_41b5ade1",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "it looks like this is a virtual close. Can there be a situation where different clients use the same socket (even if not at the same time)? I\u0027m not sure what implications that might have.\n\nIIUC the forwarding logic, the forwarder tries to get a socket per rpc invocation. It would be interesting to see if this could be done with a persistent socket per client session.",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 114,
+        "endChar": 55
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e50ac129_531a59cc",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "who is responsible for calling this method? I dont see it being called anywhere.",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 54
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f9aaa4b0_08cffe12",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1299362
+      },
+      "writtenOn": "2019-07-24T00:24:56Z",
+      "side": 1,
+      "message": "Is this intended or should it be Async?",
+      "range": {
+        "startLine": 33,
+        "startChar": 6,
+        "endLine": 33,
+        "endChar": 8
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
