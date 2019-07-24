@@ -48,6 +48,52 @@
     },
     {
       "key": {
+        "uuid": "ed612e59_08c32649",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-24T15:25:02Z",
+      "side": 1,
+      "message": "should we use the lock here",
+      "range": {
+        "startLine": 238,
+        "startChar": 8,
+        "endLine": 238,
+        "endChar": 35
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afabcf19_b4d92667",
+        "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-07-24T15:25:02Z",
+      "side": 1,
+      "message": "should this be under a lock?",
+      "range": {
+        "startLine": 345,
+        "startChar": 4,
+        "endLine": 347,
+        "endChar": 31
+      },
+      "revId": "2621b9988674f09cfc7f7274d9d96cfe84da666d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f9aaa4b0_08cffe12",
         "filename": "android/android-grpc/android/emulation/control/waterfall/SocketController.h",
         "patchSetId": 2
