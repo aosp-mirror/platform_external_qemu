@@ -78,80 +78,110 @@ html, body {
     padding: 0px;
 }
 #description {
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-      }
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+}
 
-      #infowindow-content .title {
-        font-weight: bold;
-      }
+.pac-card {
+    margin: 10px 10px 0 0;
+    border-radius: 2px 0 0 2px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    font-family: Roboto;
+}
 
-      #infowindow-content {
-        display: none;
-      }
+#pac-container {
+    padding-bottom: 12px;
+    margin-right: 12px;
+}
 
-      #map #infowindow-content {
-        display: inline;
-      }
+.pac-controls {
+    display: inline-block;
+    padding: 5px 11px;
+}
 
-      .pac-card {
-        margin: 10px 10px 0 0;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        background-color: #fff;
-        font-family: Roboto;
-      }
+.pac-controls label {
+    font-family: Roboto;
+    font-size: 13px;
+    font-weight: 300;
+}
+#pac-input {
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    padding: 0 11px 0 13px;
+    text-overflow: ellipsis;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
 
-      #pac-container {
-        padding-bottom: 12px;
-        margin-right: 12px;
-      }
+#pac-input:focus {
+    border: none;
+}
+#search-container {
+    display: flex;
+    width: 85%;
+    height: 36px;
+    border-color: #dadce0;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 2px;
+    margin-top: 12px;
+}
 
-      .pac-controls {
-        display: inline-block;
-        padding: 5px 11px;
-      }
+#search-icon {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #fff;
+}
+#title {
+    color: #fff;
+    background-color: #4d90fe;
+    font-size: 25px;
+    font-weight: 500;
+    padding: 6px 12px;
+}
+#target {
+    width: 345px;
+}
+.loader-container {
+    background-color: #fff;
+    height: 36px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.loader {
+    border: 3px solid #fff; /* Light grey */
+    border-top: 3px solid #3498db; /* Blue */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    width: 16px;
+    height: 16px;
+}
 
-      .pac-controls label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
-
-      #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 85%;
-        margin-top: 12px;
-        height: 36px;
-      }
-
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-
-      #title {
-        color: #fff;
-        background-color: #4d90fe;
-        font-size: 25px;
-        font-weight: 500;
-        padding: 6px 12px;
-      }
-      #target {
-        width: 345px;
-      }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
-    <input id="pac-input" class="controls" type="text" placeholder="Search">
+    <div id="search-container">
+     <input id="pac-input" class="controls" type="text" placeholder="Search">
+     <div id="search-spinner" class="loader-container" style="display: none">
+      <div class="loader"></div>
+     </div>
+     <img id="search-icon"></img>
+    </div>
     <div id="map"></div>
     <div id="pointInfoOverlay">
       <div id="pointInfoTitle" class="title">Port Authority Bus Terminal, NY</div>
@@ -170,6 +200,40 @@ html, body {
      </div>
     </div>
     <script>
+    class MockEmuLocationServer {
+        constructor() {
+            console.log("Running outside emulator. Creating fake emulocationserver.");
+            this.lat = 0.0;
+            this.lng = 0.0;
+            this.addr = "";
+        }
+
+        map_savePoint() {
+            console.log("map_savePoint() faked");
+            showPendingLocation(this.lat, this.lng, this.addr);
+        }
+
+        sendLocation(lat, lng, addr) {
+            console.log("sendLocation(" + lat + ", " + lng + ", " + addr + ") faked");
+            this.lat = lat;
+            this.lng = lng;
+            this.addr = addr;
+        }
+    }
+    class MockObjects {
+        constructor() {
+            this.emulocationserver = new MockEmuLocationServer();
+        }
+    }
+    class MockChannel {
+        constructor() {
+            this.objects = new MockObjects();
+        }
+    }    
+    // |channel| is only defined if running inside QtWebEngine.
+    if (typeof(channel) === 'undefined') {
+       channel = new MockChannel(); 
+    }
     // Googleplex!
     var lastLatLng = {lat: 37.4220919, lng: -122.0826088};
     var sevDeviceLocation;
@@ -178,6 +242,20 @@ html, body {
     var gCurrentMarker; // The blue dot
     var gPendingMarker; // The red "pin"
     var gSearchResultMarkers = [];
+
+    var searchIconSVG = 'data:image/svg+xml, \
+            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="%23757575"> \
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/> \
+                <path d="M0 0h24v24H0z" fill="none"/> \
+            </svg>';
+    var closeIconSVG = 'data:image/svg+xml, \
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23757575"> \
+             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/> \
+             <path fill="none" d="M0 0h24v24H0V0z"/> \
+            </svg>';
+    document.addEventListener('DOMContentLoaded', function(){ 
+        var searchIcon = document.getElementById('search-icon').src = searchIconSVG;
+    }, false);
 
     function savePoint() {
         // The emulator should have the point of interest already, from the
@@ -206,7 +284,6 @@ html, body {
 
     // Callback function for Maps API
     function initMap() {
-        var infoWindow = new google.maps.InfoWindow;
         // Create a map object and specify the DOM element for display.
         gMap = new google.maps.Map(document.getElementById('map'), {
             center: lastLatLng,
@@ -247,23 +324,30 @@ html, body {
             document.getElementById("savePointOverlay").style.display = "block";
         }
         function sendAddress(latLng) {
-          gGeocoder.geocode({ 'location': latLng },
-                            function(results, status) {
-                              var address = "";
-                              var elevation = 0.0;
-                              if (status === 'OK' && results[0]) {
-                                address = results[0].formatted_address;
-                                elevation = results[0].elevation;
-                              }
-                              showSavePointOverlay(address, latLng, elevation);
-                              channel.objects.emulocationserver
-                                  .sendLocation(latLng.lat(), latLng.lng(), address);
-                            });
+            gGeocoder.geocode({ 'location': latLng }, function(results, status) {
+                var address = "";
+                var elevation = 0.0;
+                if (status === 'OK' && results[0]) {
+                  address = results[0].formatted_address;
+                  elevation = results[0].elevation;
+                }
+                showSavePointOverlay(address, latLng, elevation);
+                channel.objects.emulocationserver
+                    .sendLocation(latLng.lat(), latLng.lng(), address);
+                console.log("addr=" + address);
+                document.getElementById('pac-input').value = address;
+                document.getElementById('search-icon').src = closeIconSVG;
+                document.getElementById('search-icon').style.display = 'block';
+                document.getElementById('search-spinner').style.display = 'none';
+            });
         }
 
         // Register a listener that sets a new marker wherever the
         // user clicks on the map.
         google.maps.event.addListener(gMap, 'click', function(event) {
+            // TODO: add spinner here
+            document.getElementById('search-icon').style.display = 'none';
+            document.getElementById('search-spinner').style.display = 'flex';
             showPin(event.latLng);
 
             // Send the location coordinates to the emulator
@@ -324,17 +408,22 @@ html, body {
 
         // Add Google search box
         // Create the search box and link it to the UI element.
+        var searchContainer = document.getElementById('search-container');
         var input = /** @type {HTMLInputElement} */ (
                 document.getElementById('pac-input'));
-        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(searchContainer);
 
-        var searchBox = new google.maps.places.SearchBox(
+        var autocomplete = new google.maps.places.Autocomplete(
                 /** @type {HTMLInputElement} */
                 (input));
+        autocomplete.bindTo('bounds', gMap);
+        // Set the data fields to return when the user selects a place.
+        autocomplete.setFields(
+            ['address_components', 'geometry', 'icon', 'name']);
 
         // Listen for the event fired when the user selects an item from the
         // pick list.
-        google.maps.event.addListener(searchBox, 'places_changed', function() {
+        autocomplete.addListener('place_changed', function() {
             // Clear the red pin and any existing search markers
             if (gPendingMarker != null) {
                 gPendingMarker.setMap(null);
@@ -344,53 +433,49 @@ html, body {
             }
             gSearchResultMarkers = [];
 
-            var places = searchBox.getPlaces();
-            if (places.length == 0) return;
-            // If the search gave exactly one place, use it directly
-            if (places.length == 1) {
-                lastLatLng = places[0].geometry.location;
-                showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
-                sendAddress(lastLatLng);
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                // Just ignore it.
                 return;
             }
 
-            // For each place, get the icon and location.
-            var bounds = new google.maps.LatLngBounds();
-            var place = null;
-            var viewport = null;
-            for (var i = 0; place = places[i]; i++) {
-                var image = {
-                    url: place.icon,
-                    size: new google.maps.Size(71, 71),
-                    origin: new google.maps.Point(0, 0),
-                    anchor: new google.maps.Point(17, 34),
-                    scaledSize: new google.maps.Size(25, 25)
-                };
+            lastLatLng = place.geometry.location;
+            showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
+            sendAddress(lastLatLng);
 
-                // Create a marker for each place.
-                var marker = new google.maps.Marker({
-                    map: gMap,
-                    icon: image,
-                    title: place.name,
-                    position: place.geometry.location
-                });
-                viewport = place.geometry.viewport;
-                google.maps.event.addListener(marker, 'click', markerListener);
-                gSearchResultMarkers.push(marker);
-
-                bounds.extend(place.geometry.location);
+            // If the place has a geometry, then present it on a map.
+            if (place.geometry.viewport) {
+                gMap.fitBounds(place.geometry.viewport);
+            } else {
+                gMap.setCenter(place.geometry.location);
+                gMap.setZoom(17);  // Why 17? Because it looks good.
             }
-            gMap.setCenter(bounds.getCenter());
         });
 
-        // Bias the SearchBox results towards places that are within the bounds of the
-        // current map's viewport.
-        google.maps.event.addListener(gMap, 'bounds_changed', function() {
-          var bounds = gMap.getBounds();
-          searchBox.setBounds(bounds);
+        document.getElementById('search-icon').addEventListener('click', function() {
+            if (input.value.length > 0) {
+                input.value = "";
+                this.src = searchIconSVG;
+                hideAllOverlays();
+                if (gPendingMarker != null) {
+                    gPendingMarker.setMap(null);
+                }
+            }
+        });
+        input.addEventListener('input', function() {
+            var searchIcon = document.getElementById('search-icon');
+            if (input.value.length > 0) {
+                searchIcon.src = closeIconSVG;
+            } else {
+                searchIcon.src = searchIconSVG;
+            }
         });
     }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async defer></script>
 </body>
 </html>
+
+
