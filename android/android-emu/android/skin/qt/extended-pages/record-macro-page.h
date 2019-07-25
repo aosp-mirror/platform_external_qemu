@@ -60,7 +60,7 @@ private slots:
     void updatePreviewVideoView();
     void previewVideoPlayingFinished();
     void updateElapsedTime();
-    void editButtonClicked(RecordMacroSavedItem* macroItem);
+    void editButtonClicked(CCListItem* macroItem);
     void enablePresetMacros(bool enable);
 
 protected:
