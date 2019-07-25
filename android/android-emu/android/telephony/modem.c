@@ -660,6 +660,9 @@ amodem_reset( AModem  modem )
 
     // Clear out all logical channels, none of them are open, they have no names
     memset(modem->logical_channels, 0, sizeof(modem->logical_channels));
+    // channel 0 is the basic channel and it is always open
+    modem->logical_channels[0].is_open = true;
+    modem->logical_channels[0].df_name = strdup("");
 }
 
 static AVoiceCall amodem_alloc_call( AModem   modem );
@@ -1486,8 +1489,8 @@ handleOpenLogicalChannel(const char* cmd, AModem modem)
         // Could not find an available channel, we're probably leaking channels
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
     }
-    // Note that logical channels start at 1 so use an offset here
-    return amodem_printf(modem, "%u", channel + 1);
+
+    return amodem_printf(modem, "%u", channel);
 }
 
 static const char*
@@ -1507,8 +1510,6 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
         return amodem_printf(modem, "+CME ERROR: %d",
                             kCmeErrorInvalidCharactersInTextString);
     }
-    // Logical channels start at 1, decrease by one to create an index
-    --channel;
     if (channel < 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
             !modem->logical_channels[channel].is_open) {
@@ -1541,8 +1542,6 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
                               kCmeErrorInvalidCharactersInTextString);
     }
 
-    // Logical channels start at 1, decrease by one to get a channel index
-    --channel;
     // Validate the channel number and ensure the channel is open
     if (channel < 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
