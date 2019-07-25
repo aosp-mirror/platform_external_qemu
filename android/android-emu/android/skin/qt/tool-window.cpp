@@ -1037,6 +1037,12 @@ void ToolWindow::onHostClipboardChanged() {
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
+            pane == PANE_IDX_FINGER) {
+            return;
+        }
+    }
     // Show the tabbed pane
     mExtendedWindow.get()->showPane(pane);
     mExtendedWindow.get()->raise();
