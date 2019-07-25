@@ -16,6 +16,24 @@
       "revId": "7aed9c8467f003d9b911bd610f9b2fe958671322",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6726afee_ae712f9d",
+        "filename": "android/android-emu/android/telephony/sim_card.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-07-25T20:37:13Z",
+      "side": 1,
+      "message": "oops, that is a mistake.\n\nsomehow it fooled the parsing in the guest.",
+      "parentUuid": "21089d0d_daece6f8",
+      "revId": "7aed9c8467f003d9b911bd610f9b2fe958671322",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
