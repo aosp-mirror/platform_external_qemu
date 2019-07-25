@@ -1265,15 +1265,6 @@ static void *qemu_kvm_cpu_thread_fn(void *arg)
     return NULL;
 }
 
-static void qemu_gvm_wait_io_event(CPUState *cpu)
-{
-    while (cpu_thread_is_idle(cpu)) {
-        qemu_cond_wait(cpu->halt_cond, &qemu_global_mutex);
-    }
-
-    qemu_wait_io_event_common(cpu);
-}
-
 static void *qemu_gvm_cpu_thread_fn(void *arg)
 {
     CPUState *cpu = arg;
@@ -1304,13 +1295,14 @@ static void *qemu_gvm_cpu_thread_fn(void *arg)
                 cpu_handle_guest_debug(cpu);
             }
         }
-        qemu_gvm_wait_io_event(cpu);
+        qemu_wait_io_event(cpu);
     } while (!cpu->unplug || cpu_can_run(cpu));
 
     qemu_gvm_destroy_vcpu(cpu);
     cpu->created = false;
     qemu_cond_signal(&qemu_cpu_cond);
     qemu_mutex_unlock_iothread();
+    rcu_unregister_thread();
     return NULL;
 }
 
