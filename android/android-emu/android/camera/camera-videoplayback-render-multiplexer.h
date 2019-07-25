@@ -39,20 +39,22 @@ namespace videoplayback {
 // requested. The Render Multiplexer starts with the Default Frame Renderer as
 // its initial renderer.
 class RenderMultiplexer : public virtualscene::CameraRenderer {
- public:
-  RenderMultiplexer() = default;
-  ~RenderMultiplexer() = default;
-  bool initialize(const GLESv2Dispatch* gles2,
-                  int width,
-                  int height) override;
-  void uninitialize() override;
-  int64_t render() override;
- private:
-     void loadVideo(const std::string& video_data, uint32_t async_id);
-     void loadVideoWithData(const std::string& video_data,
-                            const DatasetInfo& datasetInfo,
-                            uint32_t async_id);
-     void switchRenderer(virtualscene::CameraRenderer* renderer);
+public:
+    RenderMultiplexer() = default;
+    ~RenderMultiplexer() = default;
+    bool initialize(const GLESv2Dispatch* gles2,
+                    int width,
+                    int height) override;
+    void uninitialize() override;
+    int64_t render() override;
+
+private:
+    void loadVideo(const std::string& video_data, uint32_t async_id);
+    void loadVideoWithData(const std::string& video_data,
+                           const DatasetInfo& datasetInfo,
+                           uint32_t async_id);
+    void switchRenderer(virtualscene::CameraRenderer* renderer);
+    bool videoIsLoaded(uint32_t async_id);
 
      std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
      std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;

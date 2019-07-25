@@ -33,6 +33,7 @@ namespace videoplayback {
 
 using ::android::base::Looper;
 using ::android::base::ThreadLooper;
+using videoinjection::VideoInjectionController;
 
 class VideoplaybackNotifier : public android::videoplayer::VideoPlayerNotifier {
 public:
@@ -148,16 +149,7 @@ int64_t RenderMultiplexer::render() {
                 break;
             case ::offworld::VideoInjectionRequest::kPlay:
             {
-                //Error in starting playing the video.
-                if (mPlayer == nullptr) {
-                    LOG(ERROR) << "No video loaded.";
-                    videoinjection::VideoInjectionController::
-                            trySendAsyncResponse(
-                                    async_id,
-                                    base::Err(videoinjection::
-                                                      VideoInjectionError::
-                                                              FileIsNotLoaded),
-                                    true);
+                if (!videoIsLoaded(async_id)) {
                     return -1;
                 }
                 switchRenderer(mVideoRenderer.get());
@@ -169,16 +161,7 @@ int64_t RenderMultiplexer::render() {
                 break;
             }
             case ::offworld::VideoInjectionRequest::kStop:
-                //Error to stop the play as it's no video for playback.
-                if (mPlayer == nullptr) {
-                    LOG(ERROR) << "No video loaded.";
-                    videoinjection::VideoInjectionController::
-                            trySendAsyncResponse(
-                                    async_id,
-                                    base::Err(videoinjection::
-                                                      VideoInjectionError::
-                                                              FileIsNotLoaded),
-                                    true);
+                if (!videoIsLoaded(async_id)) {
                     return -1;
                 }
                 switchRenderer(mVideoRenderer.get());
@@ -187,12 +170,13 @@ int64_t RenderMultiplexer::render() {
                         async_id, base::Ok(), true);
                 break;
             case ::offworld::VideoInjectionRequest::kPause:
-                if (mPlayer == nullptr) {
-                    LOG(ERROR) << "No video loaded.";
+                if (!videoIsLoaded(async_id)) {
                     return -1;
                 }
                 switchRenderer(mVideoRenderer.get());
                 mPlayer->pause();
+                videoinjection::VideoInjectionController::trySendAsyncResponse(
+                        async_id, base::Ok(), true);
                 break;
             case ::offworld::VideoInjectionRequest::kLoad:
                 switchRenderer(mVideoRenderer.get());
@@ -282,6 +266,26 @@ void RenderMultiplexer::switchRenderer(
     }
 
     mCurrentRenderer = nextRenderer;
+}
+
+// Helper function to check whether video file is loaded before executing
+// video player requests. Sends async response through VideoInjectionController
+// if video is not loaded.
+//
+// Returns: true if video is loaded, false if video is not loaded
+bool RenderMultiplexer::videoIsLoaded(uint32_t async_id) {
+    if (mPlayer == nullptr) {
+        LOG(ERROR) << "No video loaded.";
+        videoinjection::VideoInjectionController::
+                trySendAsyncResponse(
+                        async_id,
+                        base::Err(videoinjection::
+                                          VideoInjectionError::
+                                                  FileIsNotLoaded),
+                        true);
+        return false;
+    }
+    return true;
 }
 
 }  // namespace videoplayback
