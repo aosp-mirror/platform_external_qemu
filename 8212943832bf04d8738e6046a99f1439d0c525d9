@@ -16,6 +16,24 @@
       "revId": "8212943832bf04d8738e6046a99f1439d0c525d9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d774cb75_1198fb12",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-07-25T17:11:34Z",
+      "side": 1,
+      "message": "thanks Bjoern, that is a good catch\nI have updated both to return a strdup.",
+      "parentUuid": "fe8cd20c_2a5e84f9",
+      "revId": "8212943832bf04d8738e6046a99f1439d0c525d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
