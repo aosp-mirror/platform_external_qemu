@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c235da50_994a6387",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-07-25T23:12:05Z",
+      "side": 0,
+      "message": "Do we want DEBUG to be set?",
+      "revId": "71e2263615e2952a0795674ee030259d1448455f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
