@@ -153,6 +153,85 @@ static GVMSlot *gvm_lookup_matching_slot(GVMMemoryListener *kml,
     return NULL;
 }
 
+void* gvm_gpa2hva(uint64_t gpa, bool *found) {
+    int i = 0;
+    GVMState *s = gvm_state;
+    GVMMemoryListener* gml = &s->memory_listener;
+
+    *found = false;
+
+    for (i = 0; i < s->nr_slots; i++) {
+        GVMSlot *mem = &gml->slots[i];
+        if (gpa >= mem->start_addr &&
+            gpa < mem->start_addr + mem->memory_size) {
+            *found = true;
+            return (void*)((char*)(mem->ram) + (gpa - mem->start_addr));
+        }
+    }
+
+    return NULL;
+}
+
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
+                uint64_t* gpa, uint64_t* size) {
+    int count = 0, i = 0;
+    GVMState *s = gvm_state;
+    GVMMemoryListener* gml = &s->memory_listener;
+
+    for (i = 0; i < s->nr_slots; i++) {
+        size_t hva_start_num, hva_num;
+        GVMSlot *mem = &gml->slots[i];
+
+        hva_start_num = (size_t)mem->ram;
+        hva_num = (size_t)hva;
+        // Start of this hva region is in this slot.
+        if (hva_num >= hva_start_num &&
+            hva_num < hva_start_num + mem->memory_size) {
+            if (count < array_size) {
+                gpa[count] = mem->start_addr + (hva_num - hva_start_num);
+                size[count] = min(length,
+                                  mem->memory_size - (hva_num - hva_start_num));
+            }
+            count++;
+        // End of this hva region is in this slot.
+        // Its start is outside of this slot.
+        } else if (hva_num + length <= hva_start_num + mem->memory_size &&
+                   hva_num + length > hva_start_num) {
+            if (count < array_size) {
+                gpa[count] = mem->start_addr;
+                size[count] = hva_num + length - hva_start_num;
+            }
+            count++;
+        // This slot belongs to this hva region completely.
+        } else if (hva_num + length > hva_start_num + mem->memory_size &&
+                   hva_num < hva_start_num)  {
+            if (count < array_size) {
+                gpa[count] = mem->start_addr;
+                size[count] = mem->memory_size;
+            }
+            count++;
+        }
+    }
+    return count;
+}
+
+int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags) {
+    GVMState *s = gvm_state;
+
+    struct gvm_ram_protect info = {
+        .pa = gpa,
+        .size = size,
+        .flags = flags,
+        .reserved = 0,
+    };
+
+    return gvm_ioctl(s, GVM_RAM_PROTECT, &info, sizeof(info), NULL, 0);
+}
+
 /*
  * Find overlapping slot with lowest start address
  */
@@ -1307,6 +1386,17 @@ static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
     return -1;
 }
 
+static int gvm_handle_ram_prot(uint64_t gpa, uint64_t size)
+{
+    bool found = false;
+    void* hva = gvm_gpa2hva(gpa, &found);
+    if (found) {
+        qemu_ram_load(hva, size);
+        return 0;
+    }
+    return -1;
+}
+
 void gvm_raise_event(CPUState *cpu)
 {
     GVMState *s = gvm_state;
@@ -1470,6 +1560,10 @@ int gvm_cpu_exec(CPUState *cpu)
                 ret = gvm_arch_handle_exit(cpu, run);
                 break;
             }
+            break;
+        case GVM_EXIT_RAM_PROT:
+            ret = gvm_handle_ram_prot(run->rp.gfn << TARGET_PAGE_BITS,
+                                     TARGET_PAGE_SIZE);
             break;
         default:
             DPRINTF("gvm_arch_handle_exit\n");
