@@ -53,10 +53,9 @@ public:
     }
 
     bool registerMemoryRange(void* start, size_t length) {
-        static constexpr int hax_max_slots = 32;
-        uint64_t gpa[hax_max_slots];
-        uint64_t size[hax_max_slots];
-        int count = hva2gpa_call(start, length, hax_max_slots, gpa, size);
+        uint64_t gpa[125];
+        uint64_t size[125];
+        int count = hva2gpa_call(start, length, 125, gpa, size);
         for (int i = 0; i < count; ++i) {
             guest_mem_protect_call(gpa[i], size[i], 0);
         }
@@ -109,7 +108,7 @@ public:
             memcpy(start, data, length);
         }
 
-        if (mAccel == CPU_ACCELERATOR_HAX) {
+        if (mAccel == CPU_ACCELERATOR_HAX || mAccel == CPU_ACCELERATOR_GVM) {
             uint64_t gpa, size;
             int count = hva2gpa_call(start, 1, 1, &gpa, &size);
             if (count) {
@@ -122,27 +121,27 @@ public:
     // Unprotects all pages in the range. Note that the VM must be stopped.
     void initBulkFill(void* startPtr, size_t length) {
         android::base::AutoLock lock(mLock);
-
-        uint64_t gpa[32];
-        uint64_t size[32];
-
         protectHostRange(startPtr, length, PAGE_READWRITE);
-
-        if (mAccel == CPU_ACCELERATOR_HAX) {
-            int count = hva2gpa_call(startPtr, length, 32, gpa, size);
-            for (int i = 0; i < count; ++i) {
-                guest_mem_protect_call(gpa[i], size[i], PROT_READ | PROT_WRITE | PROT_EXEC);
-            }
-        }
     }
 
     bool fillPageBulk(void* startPtr, size_t length, const void* data,
                   bool isQuickboot) {
         android::base::AutoLock lock(mLock);
+
+        uint64_t gpa[125];
+        uint64_t size[125];
+
         if (!data) {
             mBulkZero.add((uintptr_t)startPtr, length);
         } else {
             memcpy(startPtr, data, length);
+        }
+
+        if (mAccel == CPU_ACCELERATOR_HAX || mAccel == CPU_ACCELERATOR_GVM) {
+            int count = hva2gpa_call(startPtr, length, 125, gpa, size);
+            for (int i = 0; i < count; ++i) {
+                guest_mem_protect_call(gpa[i], size[i], PROT_READ | PROT_WRITE | PROT_EXEC);
+            }
         }
         return true;
     }
@@ -222,8 +221,7 @@ bool MemoryAccessWatch::isSupported() {
         && guest_mem_protect_call)
         return guest_mem_protection_supported_call();
 
-    return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HAX &&
-           guest_mem_protect_call;
+    return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_GVM;
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,

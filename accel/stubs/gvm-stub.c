@@ -155,4 +155,21 @@ bool gvm_has_free_slot(MachineState *ms)
 {
     return false;
 }
+
+void* gvm_gpa2hva(uint64_t gpa, bool* found)
+{
+    *found = false;
+    return NULL;
+}
+
+int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
+                uint64_t* gpa, uint64_t* size)
+{
+    return 0;
+}
+
+int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags)
+{
+    return -EFAULT;
+}
 #endif

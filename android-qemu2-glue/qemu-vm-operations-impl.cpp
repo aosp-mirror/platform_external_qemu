@@ -41,6 +41,7 @@ extern "C" {
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
 #include "sysemu/whpx.h"
+#include "sysemu/gvm.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
@@ -497,6 +498,9 @@ static void set_snapshot_callbacks(void* opaque,
             set_address_translation_funcs(0, whpx_gpa2hva);
             // Skip snapshot save on WHPX
             set_skip_snapshot_save(true);
+        case android::CPU_ACCELERATOR_GVM:
+            set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
+            set_memory_mapping_funcs(NULL, NULL, gvm_gpa_protect, NULL, NULL);
             break;
         default: // KVM
 #ifdef __linux__
