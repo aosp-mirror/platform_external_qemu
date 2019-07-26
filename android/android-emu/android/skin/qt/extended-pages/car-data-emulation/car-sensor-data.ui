@@ -42,8 +42,8 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>30</y>
-      <width>170</width>
+      <y>28</y>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
@@ -63,9 +63,9 @@
    <widget class="QLabel" name="car_speedLabel">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>30</y>
-      <width>61</width>
+      <x>165</x>
+      <y>29</y>
+      <width>60</width>
       <height>17</height>
      </rect>
     </property>
@@ -77,9 +77,9 @@
   <widget class="QComboBox" name="comboBox_speedUnit">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>45</y>
-     <width>60</width>
+     <x>205</x>
+     <y>47</y>
+     <width>85</width>
      <height>18</height>
     </rect>
    </property>
