@@ -114,9 +114,10 @@ struct LazyInstanceState {
 
 static_assert(std::is_standard_layout<LazyInstanceState>::value,
               "LazyInstanceState is not a standard layout type");
+#ifndef _MSC_VER
 static_assert(is_trivially_default_constructible<LazyInstanceState>::value,
               "LazyInstanceState can't be trivially default constructed");
-
+#endif
 }  // namespace internal
 
 class Lock;
@@ -178,10 +179,12 @@ T* LazyInstance<T>::ptrInternal() const {
     // NB: this can't go in a class scope as class is still incomplete there.
     static_assert(std::is_standard_layout<LazyInstance>::value,
                   "LazyInstance<T> is not a standard layout type");
+#ifndef _MSC_VER
+    // These checks are not working in vs2019.. 
     static_assert(
             internal::is_trivially_default_constructible<LazyInstance>::value,
             "LazyInstance<T> can't be trivially default constructed");
-
+#endif
     if (mState.needConstruction()) {
         new (&mStorage) T();
         mState.doneConstructing();
