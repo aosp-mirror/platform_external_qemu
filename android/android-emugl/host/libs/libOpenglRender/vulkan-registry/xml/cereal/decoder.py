@@ -471,6 +471,8 @@ custom_decodes = {
     "vkCmdBindPipeline" : emit_global_state_wrapped_decoding,
     "vkCmdBindDescriptorSets" : emit_global_state_wrapped_decoding,
 
+    "vkCreateRenderPass" : emit_global_state_wrapped_decoding,
+
     # VK_ANDROID_native_buffer
     "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,
     "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
