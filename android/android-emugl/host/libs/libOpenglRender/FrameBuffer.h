@@ -221,7 +221,8 @@ public:
     // Destroy a given WindowSurface instance. |p_surcace| is its handle
     // value as returned by createWindowSurface().
     void DestroyWindowSurface(HandleType p_surface);
-    void DestroyWindowSurfaceLocked(HandleType p_surface);
+    // Returns the set of ColorBuffers destroyed (for further cleanup)
+    std::vector<HandleType> DestroyWindowSurfaceLocked(HandleType p_surface);
 
     // Increment the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
@@ -530,11 +531,13 @@ private:
     bool bindSubwin_locked();
     bool bindFakeWindow_locked();
     bool removeSubWindow_locked();
-    void cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
+    // Returns the set of ColorBuffers destroyed (for further cleanup)
+    std::vector<HandleType> cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
 
     void markOpened(ColorBufferRef* cbRef);
     void closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
-    void decColorBufferRefCountLocked(HandleType p_colorbuffer);
+    // Returns true if this was the last ref and we need to destroy stuff.
+    bool decColorBufferRefCountLocked(HandleType p_colorbuffer);
     // Close all expired color buffers for real.
     // Treat all delayed color buffers as expired if forced=true
     void performDelayedColorBufferCloseLocked(bool forced = false);

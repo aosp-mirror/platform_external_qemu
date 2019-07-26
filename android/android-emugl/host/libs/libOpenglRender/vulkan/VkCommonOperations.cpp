@@ -1194,7 +1194,12 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
     auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
 
     // Already setup
-    if (infoPtr) return true;
+    if (infoPtr) {
+        // Update the allocation size to what the host driver wanted, or we
+        // might get VK_ERROR_OUT_OF_DEVICE_MEMORY and a host crash
+        if (allocSize) *allocSize = infoPtr->memory.size;
+        return true;
+    }
 
     VkFormat vkFormat = glFormat2VkFormat(internalformat);
 

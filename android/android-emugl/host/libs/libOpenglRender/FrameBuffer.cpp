@@ -1157,21 +1157,32 @@ void FrameBuffer::drainWindowSurface() {
         return;
     }
 
+    std::vector<HandleType> colorBuffersToCleanup;
+
     AutoLock mutex(m_lock);
     ScopedBind bind(m_colorBufferHelper);
     for (const HandleType winHandle : tinfo->m_windowSet) {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                if (m_refCountPipeEnabled)
-                    decColorBufferRefCountLocked(oldColorBufferHandle);
-                else
+                if (m_refCountPipeEnabled) {
+                    if (decColorBufferRefCountLocked(oldColorBufferHandle)) {
+                        colorBuffersToCleanup.push_back(oldColorBufferHandle);
+                    }
+                } else {
                     closeColorBufferLocked(oldColorBufferHandle);
+                }
                 m_windows.erase(winIt);
             }
         }
     }
     tinfo->m_windowSet.clear();
+
+    m_lock.unlock();
+
+    for (auto handle: colorBuffersToCleanup) {
+        goldfish_vk::teardownVkColorBuffer(handle);
+    }
 }
 
 void FrameBuffer::DestroyRenderContext(HandleType p_context) {
@@ -1198,17 +1209,27 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
         return;
     }
     AutoLock mutex(m_lock);
-    DestroyWindowSurfaceLocked(p_surface);
+    auto colorBuffersToCleanup = DestroyWindowSurfaceLocked(p_surface);
+
+    mutex.unlock();
+
+    for (auto handle : colorBuffersToCleanup) {
+        goldfish_vk::teardownVkColorBuffer(handle);
+    }
 }
 
-void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
+std::vector<HandleType> FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
+    std::vector<HandleType> colorBuffersToCleanUp;
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         ScopedBind bind(m_colorBufferHelper);
-        if (m_refCountPipeEnabled)
-            decColorBufferRefCountLocked(w->second.second);
-        else
+        if (m_refCountPipeEnabled) {
+            if (decColorBufferRefCountLocked(w->second.second)) {
+                colorBuffersToCleanUp.push_back(w->second.second);
+            }
+        } else {
             closeColorBufferLocked(w->second.second);
+        }
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
@@ -1221,6 +1242,7 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
             tinfo->m_windowSet.erase(p_surface);
         }
     }
+    return colorBuffersToCleanUp;
 }
 
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
@@ -1324,8 +1346,9 @@ void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
            it->ts + kColorBufferClosingDelaySec <= now)) {
         if (it->cbHandle != 0) {
             const auto& cb = m_colorbuffers.find(it->cbHandle);
-            if (cb != m_colorbuffers.end())
+            if (cb != m_colorbuffers.end()) {
                 m_colorbuffers.erase(cb);
+            }
         }
         ++it;
     }
@@ -1356,7 +1379,7 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
     AutoLock mutex(m_lock);
-    cleanupProcGLObjects_locked(puid);
+    auto colorBuffersToCleanup = cleanupProcGLObjects_locked(puid);
 
     // Run other cleanup callbacks
     // Avoid deadlock by first storing a separate list of callbacks
@@ -1374,12 +1397,17 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
 
     mutex.unlock();
 
+    for (auto handle : colorBuffersToCleanup) {
+        goldfish_vk::teardownVkColorBuffer(handle);
+    }
+
     for (auto cb : callbacks) {
         cb();
     }
 }
 
-void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
+std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
+    std::vector<HandleType> colorBuffersToCleanup;
     {
         ScopedBind bind(m_colorBufferHelper);
         // Clean up window surfaces
@@ -1388,10 +1416,13 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
-                    if (m_refCountPipeEnabled)
-                        decColorBufferRefCountLocked(w->second.second);
-                    else
+                    if (m_refCountPipeEnabled) {
+                        if (decColorBufferRefCountLocked(w->second.second)) {
+                            colorBuffersToCleanup.push_back(w->second.second);
+                        }
+                    } else {
                         closeColorBufferLocked(w->second.second, forced);
+                    }
                     m_windows.erase(w);
                 }
                 m_procOwnedWindowSurfaces.erase(procIte);
@@ -1437,6 +1468,8 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             m_procOwnedRenderContext.erase(procIte);
         }
     }
+
+    return colorBuffersToCleanup;
 }
 
 void FrameBuffer::markOpened(ColorBufferRef* cbRef) {
@@ -2150,23 +2183,25 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
     AutoLock mutex(m_lock);
-    decColorBufferRefCountLocked((HandleType)handle);
+    bool needCleanup = decColorBufferRefCountLocked((HandleType)handle);
+    mutex.unlock();
+    if (needCleanup) goldfish_vk::teardownVkColorBuffer(handle);
 }
 
-void FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
+bool FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
     const auto& it = m_colorbuffers.find(p_colorbuffer);
     if (it != m_colorbuffers.end()) {
         it->second.refcount -= 1;
         if (it->second.refcount == 0) {
-            // Teardown Vulkan image if necessary
-            goldfish_vk::teardownVkColorBuffer(p_colorbuffer);
             m_colorbuffers.erase(p_colorbuffer);
+            return true;
         }
     } else {
         fprintf(stderr,
                 "Trying to erase a non-existent color buffer with handle %d \n",
                 p_colorbuffer);
     }
+    return false;
 }
 
 bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
@@ -2306,21 +2341,31 @@ bool FrameBuffer::onLoad(Stream* stream,
             m_windows.clear();
             m_colorbuffers.clear();
         } else {
+            std::vector<HandleType> colorBuffersToCleanup;
+
             while (m_procOwnedWindowSurfaces.size()) {
-                cleanupProcGLObjects_locked(
+                auto cleanupHandles = cleanupProcGLObjects_locked(
                         m_procOwnedWindowSurfaces.begin()->first, true);
+                colorBuffersToCleanup.insert(colorBuffersToCleanup.end(),
+                    cleanupHandles.begin(), cleanupHandles.end());
             }
             while (m_procOwnedColorBuffers.size()) {
-                cleanupProcGLObjects_locked(
+                auto cleanupHandles = cleanupProcGLObjects_locked(
                         m_procOwnedColorBuffers.begin()->first, true);
+                colorBuffersToCleanup.insert(colorBuffersToCleanup.end(),
+                    cleanupHandles.begin(), cleanupHandles.end());
             }
             while (m_procOwnedEGLImages.size()) {
-                cleanupProcGLObjects_locked(
+                auto cleanupHandles = cleanupProcGLObjects_locked(
                         m_procOwnedEGLImages.begin()->first, true);
+                colorBuffersToCleanup.insert(colorBuffersToCleanup.end(),
+                    cleanupHandles.begin(), cleanupHandles.end());
             }
             while (m_procOwnedRenderContext.size()) {
-                cleanupProcGLObjects_locked(
+                auto cleanupHandles = cleanupProcGLObjects_locked(
                         m_procOwnedRenderContext.begin()->first, true);
+                colorBuffersToCleanup.insert(colorBuffersToCleanup.end(),
+                    cleanupHandles.begin(), cleanupHandles.end());
             }
 
             std::vector<std::function<void()>> cleanupCallbacks;
@@ -2339,8 +2384,11 @@ bool FrameBuffer::onLoad(Stream* stream,
 
             lock.unlock();
 
+            for (auto colorBufferHandle : colorBuffersToCleanup) {
+                goldfish_vk::teardownVkColorBuffer(colorBufferHandle);
+            }
+
             for (auto cb : cleanupCallbacks) {
-                fprintf(stderr, "%s: run cleanup callback\n", __func__);
                 cb();
             }
 
