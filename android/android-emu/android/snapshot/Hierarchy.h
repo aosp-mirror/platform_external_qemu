@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 
+#include <string>
 #include <functional>
 #include <map>
 #include <vector>

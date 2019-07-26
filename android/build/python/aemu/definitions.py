@@ -13,14 +13,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum
+import json
 import os
 import platform
 import shutil
-import aemu.process
+import subprocess
+from enum import Enum
 
-from absl import flags
-from absl import logging
+from absl import flags, logging
+
+import aemu.process
 
 FLAGS = flags.FLAGS
 
@@ -63,16 +65,30 @@ def get_ctest():
 
 
 def get_visual_studio():
-    '''Gets the path to visual studio, or None if not found.
+    '''Gets the path to visual studio, or None if not found.'''
+    try:
+        prgrfiles = os.getenv('ProgramFiles(x86)','C:\Program Files (x86)')
+        res = subprocess.check_output([os.path.join(prgrfiles, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe'), '-requires',
+                                       'Microsoft.VisualStudio.Workload.NativeDesktop', '-format', 'json', '-utf8'])
+        vsresult = json.loads(res)
+        if len(vsresult) == 0:
+            raise ValueError(
+                "No visual studio with the native desktop load available.")
 
-    TODO(jansene): Use https://github.com/Microsoft/vswhere vs this here'''
-    candidates = recursive_iglob(os.path.join(os.sep, "Program Files (x86)", "Microsoft Visual Studio",
-                                  "2017"), [lambda f: f.endswith('vcvars64.bat')])
-    # Create a preference ordering, we prefer not to use build tools..
-    pref = sorted(candidates, reverse=True)
-    vs_release = next(iter(pref), None)
-    logging.info("Using visual studio %s", vs_release)
-    return vs_release
+        for install in vsresult:
+            logging.info("Considering %s", install['displayName'])
+            candidates = list(recursive_iglob(install['installationPath'], [
+                              lambda f: f.endswith('vcvars64.bat')]))
+            if len(candidates) > 0:
+                logging.info('Accepted, setting env with "%s"', candidates[0])
+                return candidates[0]
+    except:
+        logging.error(
+            "Error while trying to detect visual studio install", exc_info=True)
+    logging.error(
+        "Unable to detect a visual studio installation with the native desktop workload.")
+    return None
+
 
 def fixup_windows_clang():
     '''Fixes the clang-cl symlinks in our repo.
@@ -82,14 +98,15 @@ def fixup_windows_clang():
     treat clang.exe as clang-cl.exe, so it will properly configure it self.'''
 
     clang_base_dir = os.path.join(get_aosp_root(), 'prebuilts',
-                             'clang', 'host', 'windows-x86')
+                                  'clang', 'host', 'windows-x86')
     for clang_ver in os.listdir(clang_base_dir):
         if clang_ver.startswith('clang') and os.path.isdir(os.path.join(clang_base_dir, clang_ver)):
             clang_dir = os.path.join(clang_base_dir, clang_ver, 'bin')
             clang_cl = os.path.join(clang_dir, 'clang-cl.exe')
             if not os.path.exists(clang_cl):
                 logging.info("Setting symlink for %s", clang_cl)
-                aemu.process.run(['mklink', clang_cl, os.path.join(clang_dir, 'clang.exe')])
+                aemu.process.run(
+                    ['mklink', clang_cl, os.path.join(clang_dir, 'clang.exe')])
 
 
 # Functions that determine if a file is executable.
@@ -109,6 +126,7 @@ def recursive_iglob(rootdir, pattern_fns):
                 if pattern_fn(fname):
                     yield fname
 
+
 def read_simple_properties(fname):
     res = {}
     with open(fname, 'r') as props:
@@ -116,6 +134,7 @@ def read_simple_properties(fname):
             k, v = line.split('=')
             res[k.strip()] = v.strip()
     return res
+
 
 class ArgEnum(Enum):
     '''A class that can parse argument enums'''
