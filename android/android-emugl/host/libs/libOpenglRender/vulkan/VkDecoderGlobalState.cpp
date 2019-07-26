@@ -2970,6 +2970,53 @@ public:
         }
     }
 
+    VkResult on_vkCreateRenderPass(android::base::Pool* pool,
+                                   VkDevice boxed_device,
+                                   const VkRenderPassCreateInfo* pCreateInfo,
+                                   const VkAllocationCallbacks* pAllocator,
+                                   VkRenderPass* pRenderPass) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        VkRenderPassCreateInfo createInfo;
+        bool needReformat = false;
+        AutoLock lock(mLock);
+
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        if (deviceInfoIt->second.emulateTextureEtc2) {
+            for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++) {
+                auto format = pCreateInfo->pAttachments[i].format;
+                if (format != getDecompFormat(format)) {
+                    needReformat = true;
+                    break;
+                }
+            }
+        }
+        std::vector<VkAttachmentDescription> attachments;
+        if (needReformat) {
+            createInfo = *pCreateInfo;
+            attachments.assign(
+                    pCreateInfo->pAttachments,
+                    pCreateInfo->pAttachments + pCreateInfo->attachmentCount);
+            createInfo.pAttachments = attachments.data();
+            for (auto& attachment : attachments) {
+                attachment.format = getDecompFormat(attachment.format);
+            }
+            pCreateInfo = &createInfo;
+        }
+        VkResult res = vk->vkCreateRenderPass(device, pCreateInfo, pAllocator,
+                                              pRenderPass);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+
+        *pRenderPass = new_boxed_non_dispatchable_VkRenderPass(*pRenderPass);
+
+        return res;
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -3719,7 +3766,7 @@ private:
         }
     }
 
-    VkFormat getDecompFormat(VkFormat compFmt) {
+    static VkFormat getDecompFormat(VkFormat compFmt) {
         switch (compFmt) {
             case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
             case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
@@ -5053,6 +5100,16 @@ void VkDecoderGlobalState::on_vkCmdBindDescriptorSets(
                                       layout, firstSet, descriptorSetCount,
                                       pDescriptorSets, dynamicOffsetCount,
                                       pDynamicOffsets);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateRenderPass(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        const VkRenderPassCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkRenderPass* pRenderPass) {
+    return mImpl->on_vkCreateRenderPass(pool, boxed_device, pCreateInfo,
+                                        pAllocator, pRenderPass);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
