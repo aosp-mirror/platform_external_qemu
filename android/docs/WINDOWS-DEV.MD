@@ -154,3 +154,14 @@ Make sure you have configured the proper user name and email address:
     C:\>git config --global user.name "I just copy pasted this without looking"
     C:\>git config --global user.email wrong-do-it-again@badrobot.com
   ```
+
+
+# Known Issues
+
+## I can't compile under visual studio code
+
+Our cmake files rely on the visual studio environment variables to be set as
+they are used to properly configure the compiler toolchain.
+The easiest workaround is to start visual studio code from the command line
+after loading the visual studio variables. Look for the line: `Accepted,
+setting env with` in the output from `rebuild.cmd`.
