@@ -33,6 +33,24 @@
       "revId": "440e585bf636a6c3e9b2a0ab23d978375f86e233",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "81573fb5_9e6fa854",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1622,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-07-26T18:43:10Z",
+      "side": 1,
+      "message": "will do;\nafter merging from qt-dev, there seems to be some problem , once I figure it out\nwill put up an updated version.",
+      "parentUuid": "f5ea5684_2fbd1043",
+      "revId": "440e585bf636a6c3e9b2a0ab23d978375f86e233",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
