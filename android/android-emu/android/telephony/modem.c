@@ -1510,7 +1510,7 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
         return amodem_printf(modem, "+CME ERROR: %d",
                             kCmeErrorInvalidCharactersInTextString);
     }
-    if (channel < 0 ||
+    if (channel <= 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
             !modem->logical_channels[channel].is_open) {
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
