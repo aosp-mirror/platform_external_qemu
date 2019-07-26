@@ -125,6 +125,20 @@ static android::base::LazyInstance<SimAccessRules> sSimAccessRules = {};
 
 }  // namespace android
 
-extern "C" const char* sim_get_access_rules(const char* name) {
-    return android::sSimAccessRules->getRule(name);
+extern "C" char* sim_get_fcp(uint16_t file_id) {
+    if (file_id != 0x2FE2 &&
+        file_id != 0x3F00 &&
+        file_id != 0x2F06) {
+        return NULL;
+    }
+
+    android::FileIdentifierDo fidDo(file_id);
+    android::FileControlParametersDo fcpDo(fidDo);
+    return strdup(fcpDo.c_str());
+}
+
+extern "C" char* sim_get_access_rules(const char* name) {
+    const char* cstr = android::sSimAccessRules->getRule(name);
+    if (!cstr) return NULL;
+    return strdup(cstr);
 }
