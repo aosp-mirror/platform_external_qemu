@@ -51,6 +51,24 @@
       "revId": "440e585bf636a6c3e9b2a0ab23d978375f86e233",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b153feb_f11b0821",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1622,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-07-26T20:33:52Z",
+      "side": 1,
+      "message": "I somehow forgot to merge a cl into qt-emu-dev: go/ag/8951470\nand as a result qt-emu-dev\u0027 phone service is crashing after one of those\niccTransmit*channel tests.",
+      "parentUuid": "81573fb5_9e6fa854",
+      "revId": "440e585bf636a6c3e9b2a0ab23d978375f86e233",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
