@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "38556e54_a35a96b2",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-07-26T17:47:44Z",
+      "side": 1,
+      "message": "Could you also replace these with ntohs? I was thinking about it and I really think that would more clearly explain the purpose and be more portable.",
+      "revId": "440e585bf636a6c3e9b2a0ab23d978375f86e233",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5ea5684_2fbd1043",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1622,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-07-26T17:47:44Z",
+      "side": 1,
+      "message": "And this one",
+      "revId": "440e585bf636a6c3e9b2a0ab23d978375f86e233",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
