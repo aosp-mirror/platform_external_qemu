@@ -1656,7 +1656,8 @@ public:
         }
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
 
-        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if ((physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) &&
+            vk->vkGetImageMemoryRequirements2) {
             vk->vkGetImageMemoryRequirements2(device, pInfo,
                     pMemoryRequirements);
         } else if (hasInstanceExtension(instance,
