@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "69913076_da8f6eba",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-26T21:07:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "44fd53fb_5856f95a",
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "94eaae14_d77b9c7a",
         "filename": "android/android-emu/android/skin/keycode.c",
         "patchSetId": 9
@@ -84,6 +102,30 @@
     },
     {
       "key": {
+        "uuid": "4bd7a5d6_18a8829e",
+        "filename": "android/android-emu/android/skin/keycode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-26T21:07:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b2c0b5ed_201d60e3",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 22
+      },
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c90788b7_93c125cf",
         "filename": "android/android-emu/android/skin/keycode.c",
         "patchSetId": 9
@@ -119,6 +161,24 @@
     },
     {
       "key": {
+        "uuid": "074cc327_a8f36a13",
+        "filename": "android/android-emu/android/skin/keycode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-26T21:07:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d422a19_bdeffe29",
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55d87f0d_4bab03c5",
         "filename": "android/android-emu/android/skin/keycode.c",
         "patchSetId": 9
@@ -133,6 +193,24 @@
       "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75f0145a_0a17898f",
+        "filename": "android/android-emu/android/skin/keycode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-26T21:07:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55d87f0d_4bab03c5",
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -288,6 +366,24 @@
     },
     {
       "key": {
+        "uuid": "12e5f776_09581a63",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 2276,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-26T21:07:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "38ae02f4_c49c5d41",
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bab75dbf_7339a53e",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 9
@@ -372,6 +468,24 @@
       "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "846fce0d_a8dc96a9",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-07-26T21:07:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb7cef4e_880f04df",
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
