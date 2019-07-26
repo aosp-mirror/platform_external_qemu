@@ -37,6 +37,29 @@
     },
     {
       "key": {
+        "uuid": "94eaae14_d77b9c7a",
+        "filename": "android/android-emu/android/skin/keycode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-07-26T01:08:29Z",
+      "side": 1,
+      "message": "Can we move each of these platform definitions into it\u0027s own file? For example, keycode_linux.c, keycode_windows.c, etc. Then define skin_native_to_linux_keycode() per platform, and include the correct one at build time. IMO, much easier to read than having a bunch of #ifdefs.",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 22
+      },
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c90788b7_93c125cf",
         "filename": "android/android-emu/android/skin/keycode.c",
         "patchSetId": 9
@@ -118,6 +141,29 @@
       "side": 1,
       "message": "I will make this a table actually. This code is copied then edited from Angle. That\u0027s why.",
       "parentUuid": "aa976211_04749103",
+      "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5d763aa_0e52cb0f",
+        "filename": "android/android-emu/android/skin/keycode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-07-26T01:08:29Z",
+      "side": 1,
+      "message": "alpha?",
+      "range": {
+        "startLine": 718,
+        "startChar": 21,
+        "endLine": 718,
+        "endChar": 26
+      },
       "revId": "9018a9ab037e1e1aeee86889f152dea089fb49f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
