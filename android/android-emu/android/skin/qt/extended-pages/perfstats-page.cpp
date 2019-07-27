@@ -17,6 +17,7 @@ PerfStatsPage::PerfStatsPage(QWidget* parent)
     : QFrame(parent), mUi(new Ui::PerfStatsPage()) {
     mUi->setupUi(this);
 
+    setAttribute(Qt::WA_DeleteOnClose, false);
     connect(this, SIGNAL(windowVisible()),
             this, SLOT(enableCollection()));
 
@@ -40,4 +41,10 @@ void PerfStatsPage::enableCollection() {
 
 void PerfStatsPage::disableCollection() {
     mUi->perfstatsWidget->onCollectionDisabled();
+}
+
+void PerfStatsPage::closeEvent(QCloseEvent *event)
+{
+    hide();
+    event->ignore();
 }
