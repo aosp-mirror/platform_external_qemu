@@ -26,7 +26,7 @@ public:
 
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
-
+    void closeEvent(QCloseEvent *event) override;
 signals:
 
     void windowVisible();

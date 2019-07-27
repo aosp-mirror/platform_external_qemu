@@ -41,3 +41,9 @@ void PerfStatsPage::enableCollection() {
 void PerfStatsPage::disableCollection() {
     mUi->perfstatsWidget->onCollectionDisabled();
 }
+
+void PerfStatsPage::closeEvent(QCloseEvent *event)
+{
+    hide();
+    event->ignore();
+}
