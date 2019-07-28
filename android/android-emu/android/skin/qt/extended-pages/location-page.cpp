@@ -154,10 +154,8 @@ LocationPage::LocationPage(QWidget *parent) :
         setUpWebEngine(); // Set up the Points and Routes web engines
 
         scanForPoints();
-        populatePointListWidget();
-
         scanForRoutes();
-        populateRouteListWidget();
+
         mUi->loc_playRouteButton->setEnabled(false);
         mUi->loc_saveRoute->setEnabled(false);
 #endif
