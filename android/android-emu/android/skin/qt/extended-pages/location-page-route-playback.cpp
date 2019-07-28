@@ -37,9 +37,15 @@ bool LocationPage::parsePointsFromJson() {
     if (!mRouteJson.isEmpty()) {
         // Use the unsaved route we recently received
         jsonString = mRouteJson;
-    } else if (!mSelectedRouteName.isEmpty()) {
+    } else {
         // Read a saved route JSON file
-        jsonString = readRouteJsonFile(mSelectedRouteName);
+        auto* currentItem = mUi->loc_routeList->currentItem();
+        if (currentItem == nullptr) {
+            LOG(ERROR) << "No route set to play";
+            return false;
+        }
+        RouteWidgetItem* item = qobject_cast<RouteWidgetItem*>(mUi->loc_routeList->itemWidget(currentItem));
+        jsonString = readRouteJsonFile(item->routeElement().protoFilePath);
     }
     QJsonDocument routeDoc = QJsonDocument::fromJson(jsonString.toUtf8());
 

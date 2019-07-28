@@ -44,13 +44,12 @@ public:
     {
     }
 
-    PointWidgetItem* addPoint(PointListElement* p) {
-        QListWidgetItem* listItem = new QListWidgetItem(mListWidget);
-        PointWidgetItem* pointWidgetItem = new PointWidgetItem(p, listItem);
-        listItem->setSizeHint(QSize(0, 50));
-        mListWidget->addItem(listItem);
-        mListWidget->setItemWidget(listItem, pointWidgetItem);
-        return pointWidgetItem;
+    void addPoint(PointListElement&& p, LocationPage* const locationPage) {
+        PointWidgetItem* pointWidgetItem = new PointWidgetItem(std::move(p), mListWidget);
+        locationPage->connect(pointWidgetItem,
+                SIGNAL(editButtonClickedSignal(CCListItem*)), locationPage,
+                SLOT(pointWidget_editButtonClicked(CCListItem*)));
+        mListWidget->setCurrentItem(pointWidgetItem->listWidgetItem());
     }
 
 private:
@@ -86,7 +85,6 @@ void LocationPage::map_savePoint() {
     ptMetadata.set_address(mLastAddr.toStdString());
 
     std::string fullPath = writePointProtobufByName(pointName, ptMetadata);
-    mSelectedPointName = QString::fromStdString(fullPath);
 
     // Add the new point to the list
     PointListElement listElement;
@@ -97,14 +95,10 @@ void LocationPage::map_savePoint() {
     listElement.longitude = ptMetadata.longitude();
     listElement.address = QString::fromStdString(ptMetadata.address());
 
-    mPointList.append(listElement);
-
     PointItemBuilder builder(mUi->loc_pointList);
-    PointWidgetItem* pointWidgetItem = builder.addPoint(&mPointList[mPointList.size() - 1]);
-    connect(pointWidgetItem,
-            SIGNAL(editButtonClickedSignal(CCListItem*)), this,
-            SLOT(pointWidget_editButtonClicked(CCListItem*)));
-    mUi->loc_pointList->setCurrentItem(pointWidgetItem->getListWidgetItem());
+    builder.addPoint(std::move(listElement), this);
+
+    mUi->loc_noSavedPoints_mask->setVisible(false);
 }
 
 // Invoked when the user clicks on the map
@@ -113,7 +107,6 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
     mLastLng = lng;
     mLastAddr = address;
     // Make nothing selected now
-    mSelectedPointName.clear();
     mUi->loc_pointList->setCurrentItem(nullptr);
 }
 
@@ -131,7 +124,6 @@ void LocationPage::on_loc_savePoint_clicked() {
     ptMetadata.set_address(mLastAddr.toStdString());
 
     std::string fullPath = writePointProtobufByName(pointName, ptMetadata);
-    mSelectedPointName = QString::fromStdString(fullPath);
 
     // Add the new point to the list
     PointListElement listElement;
@@ -142,24 +134,19 @@ void LocationPage::on_loc_savePoint_clicked() {
     listElement.longitude = ptMetadata.longitude();
     listElement.address = QString::fromStdString(ptMetadata.address());
 
-    mPointList.append(listElement);
-
     PointItemBuilder builder(mUi->loc_pointList);
-    PointWidgetItem* pointWidgetItem = builder.addPoint(&mPointList.back());
-    connect(pointWidgetItem,
-            SIGNAL(editButtonClickedSignal(CCListItem*)), this,
-            SLOT(pointWidget_editButtonClicked(CCListItem*)));
-
-    mUi->loc_pointList->setCurrentItem(pointWidgetItem->getListWidgetItem());
+    builder.addPoint(std::move(listElement), this);
 }
 
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
     sendMostRecentUiLocation();
 }
 
-// Populate mPointList with the points that are found on disk
+// Populate the QListWidget with the points that are found on disk
 void LocationPage::scanForPoints() {
-    mPointList.clear();
+    mUi->loc_pointList->clear();
+    // Disable sorting while we're updating the table
+    mUi->loc_pointList->setSortingEnabled(false);
 
     // Get the directory
     std::string pointDirectoryName = android::base::PathUtils::
@@ -176,6 +163,7 @@ void LocationPage::scanForPoints() {
     pointDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList pointList(pointDir.entryList());
 
+    PointItemBuilder builder(mUi->loc_pointList);
     // Look at all the directories and create an entry for each valid point
     for (const QString& pointName : pointList) {
         // Read the point protobuf
@@ -198,31 +186,14 @@ void LocationPage::scanForPoints() {
         listElement.longitude = pointMetadata->longitude();
         listElement.address = QString::fromStdString(pointMetadata->address());
 
-        mPointList.append(listElement);
-    }
-}
-
-// Update mPointList and populate the UI list of points
-void LocationPage::populatePointListWidget() {
-    mUi->loc_pointList->clear();
-    // Disable sorting while we're updating the table
-    mUi->loc_pointList->setSortingEnabled(false);
-
-    int nItems = mPointList.size();
-
-    PointItemBuilder builder(mUi->loc_pointList);
-    for (int idx = 0; idx < nItems; idx++) {
-        PointWidgetItem* pointWidgetItem = builder.addPoint(&mPointList[idx]);
-        connect(pointWidgetItem,
-                SIGNAL(editButtonClickedSignal(CCListItem*)), this,
-                SLOT(pointWidget_editButtonClicked(CCListItem*)));
+        builder.addPoint(std::move(listElement), this);
     }
 
     // All done updating. Enable sorting now.
     mUi->loc_pointList->setSortingEnabled(true);
-
+    mUi->loc_pointList->setCurrentItem(nullptr);
     // If the list is empty, show an overlay saying that.
-    mUi->loc_noSavedPoints_mask->setVisible(nItems <= 0);
+    mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
 }
 
 void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
@@ -238,20 +209,11 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
         if (item != nullptr) {
             item->setSelected(true);
             // update the selected point
-            auto* pointElement = item->pointElement();
-            if (pointElement == nullptr || mSelectedPointName == pointElement->protoFilePath) {
-                // No change in the selection
-                return;
-            }
-
-            mSelectedPointName = pointElement->protoFilePath;
-
-            mLastLat = QString::number(pointElement->latitude, 'g', 12);
-            mLastLng = QString::number(pointElement->longitude, 'g', 12);
-            mLastAddr = pointElement->address;
-
+            auto& pointElement = item->pointElement();
             // show the location on the map, but do not send it to the device
-            emit mMapBridge->showLocation(mLastLat, mLastLng, mLastAddr);
+            emit mMapBridge->showLocation(QString::number(pointElement.latitude, 'g', 12),
+                                          QString::number(pointElement.longitude, 'g', 12),
+                                          pointElement.address);
         }
     }
 }
@@ -262,31 +224,32 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     QAction* editAction   = popMenu->addAction(tr("Edit"));
     QAction* deleteAction = popMenu->addAction(tr("Delete"));
 
-    mUi->loc_pointList->setCurrentItem(pointWidgetItem->getListWidgetItem());
+    mUi->loc_pointList->setCurrentItem(pointWidgetItem->listWidgetItem());
     QAction* theAction = popMenu->exec(QCursor::pos());
     if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
         pointWidgetItem->refresh();
-        emit mMapBridge->showLocation(mLastLat, mLastLng, mLastAddr);
+        auto& pointElement = pointWidgetItem->pointElement();
+        // show the location on the map, but do not send it to the device
+        emit mMapBridge->showLocation(QString::number(pointElement.latitude, 'g', 12),
+                                      QString::number(pointElement.longitude, 'g', 12),
+                                      pointElement.address);
     } else if (theAction == deleteAction && deletePoint(pointWidgetItem->pointElement())) {
         mUi->loc_pointList->setCurrentItem(nullptr);
-        auto item = pointWidgetItem->takeListWidgetItem();
-        mUi->loc_pointList->removeItemWidget(item);
-        delete item;
-        mPointList.removeOne(*(pointWidgetItem->takePointElement()));
+        pointWidgetItem->removeFromListWidget();
         // If the list is empty, show an overlay saying that.
-        mUi->loc_noSavedPoints_mask->setVisible(mPointList.size() == 0);
+        mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
         emit mMapBridge->resetPointsMap();
     }
 }
 
-bool LocationPage::editPoint(PointListElement* pointElement) {
+bool LocationPage::editPoint(PointListElement& pointElement) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
     // Name
     dialogLayout->addWidget(new QLabel(tr("Name")));
     QLineEdit* nameEdit = new QLineEdit(this);
-    QString oldName = pointElement->logicalName;
+    QString oldName = pointElement.logicalName;
     nameEdit->setText(oldName);
     nameEdit->selectAll();
     dialogLayout->addWidget(nameEdit);
@@ -294,28 +257,28 @@ bool LocationPage::editPoint(PointListElement* pointElement) {
     // Address
     dialogLayout->addWidget(new QLabel(tr("Address")));
     QLineEdit* addrField = new QLineEdit(this);
-    addrField->setText(pointElement->address);
+    addrField->setText(pointElement.address);
     addrField->setReadOnly(true);
     dialogLayout->addWidget(addrField);
 
     // Description
     dialogLayout->addWidget(new QLabel(tr("Description")));
     QPlainTextEdit* descriptionEdit = new QPlainTextEdit(this);
-    QString oldDescription = pointElement->description;
+    QString oldDescription = pointElement.description;
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
     // Latitude
     dialogLayout->addWidget(new QLabel(tr("Latitude")));
     QLineEdit* latitudeField = new QLineEdit(this);
-    latitudeField->setText(QString::number(pointElement->latitude, 'g', 12));
+    latitudeField->setText(QString::number(pointElement.latitude, 'g', 12));
     latitudeField->setReadOnly(true);
     dialogLayout->addWidget(latitudeField);
 
     // Longitude
     dialogLayout->addWidget(new QLabel(tr("Longitude")));
     QLineEdit* longitudeField = new QLineEdit(this);
-    longitudeField->setText(QString::number(pointElement->longitude, 'g', 12));
+    longitudeField->setText(QString::number(pointElement.longitude, 'g', 12));
     longitudeField->setReadOnly(true);
     dialogLayout->addWidget(longitudeField);
 
@@ -351,7 +314,7 @@ bool LocationPage::editPoint(PointListElement* pointElement) {
         // update it, and write it back out.
         QApplication::setOverrideCursor(Qt::WaitCursor);
 
-        android::location::Point point(pointElement->protoFilePath.toStdString().c_str());
+        android::location::Point point(pointElement.protoFilePath.toStdString().c_str());
 
         const emulator_location::PointMetadata* oldPointMetadata = point.getProtoInfo();
         if (oldPointMetadata == nullptr) return false;
@@ -360,27 +323,27 @@ bool LocationPage::editPoint(PointListElement* pointElement) {
 
         if (!newName.isEmpty()) {
             pointMetadata.set_logical_name(newName.toStdString().c_str());
-            pointElement->logicalName = newName;
+            pointElement.logicalName = newName;
         }
         pointMetadata.set_description(newDescription.toStdString().c_str());
-        pointElement->description = newDescription;
+        pointElement.description = newDescription;
 
-        mLastLat = QString::number(pointElement->latitude, 'g', 12);
-        mLastLng = QString::number(pointElement->longitude, 'g', 12);
+        mLastLat = QString::number(pointElement.latitude, 'g', 12);
+        mLastLng = QString::number(pointElement.longitude, 'g', 12);
 
-        writePointProtobufFullPath(pointElement->protoFilePath, pointMetadata);
+        writePointProtobufFullPath(pointElement.protoFilePath, pointMetadata);
         QApplication::restoreOverrideCursor();
     }
 
     return true;
 }
 
-bool LocationPage::deletePoint(const PointListElement* pointElement) {
+bool LocationPage::deletePoint(const PointListElement& pointElement) {
     bool ret = false;
     QMessageBox msgBox(QMessageBox::Warning,
                        tr("Delete point"),
                        tr("Do you want to permanently delete<br>point \"%1\"?")
-                               .arg(pointElement->logicalName),
+                               .arg(pointElement.logicalName),
                        QMessageBox::Cancel,
                        this);
     QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
@@ -390,14 +353,13 @@ bool LocationPage::deletePoint(const PointListElement* pointElement) {
 
     if (selection == QMessageBox::Ok) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        std::string protobufName = pointElement->protoFilePath.toStdString();
+        std::string protobufName = pointElement.protoFilePath.toStdString();
         android::base::StringView dirName;
         bool haveDirName = android::base::PathUtils::split(protobufName,
                                                            &dirName,
                                                            nullptr /* base name */);
         if (haveDirName) {
             path_delete_dir(dirName.str().c_str());
-            mSelectedPointName.clear();
             ret = true;
         }
 
@@ -562,10 +524,9 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 void LocationPage::on_loc_savePoint_clicked() { }
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
-void LocationPage::populatePointListWidget() { }
 void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous) { }
-bool LocationPage::editPoint(PointListElement* pointElement) { }
-bool LocationPage::deletePoint(const PointListElement* pointElement) { }
+bool LocationPage::editPoint(PointListElement& pointElement) { }
+bool LocationPage::deletePoint(const PointListElement& pointElement) { }
 std::string LocationPage::writePointProtobufByName(
         const QString& pointFormalName,
         const emulator_location::PointMetadata& protobuf) { return ""; }
