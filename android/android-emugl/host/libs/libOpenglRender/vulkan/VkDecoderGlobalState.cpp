@@ -390,6 +390,8 @@ public:
         pFeatures->features.textureCompressionETC2 = true;
     }
 
+    static constexpr VkImageFormatProperties kNotSupportedImageFormat =
+            {{0, 0, 0}, 0, 0, 0, 0};
     VkResult on_vkGetPhysicalDeviceImageFormatProperties(
             android::base::Pool* pool,
             VkPhysicalDevice boxed_physicalDevice,
@@ -405,6 +407,10 @@ public:
         if (needEmulatedEtc2(physicalDevice, vk)) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
             if (cmpInfo.isCompressed) {
+                if (usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+                    *pImageFormatProperties = kNotSupportedImageFormat;
+                    return;
+                }
                 flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
                 flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
                 usage |= VK_IMAGE_USAGE_STORAGE_BIT;
@@ -429,6 +435,12 @@ public:
             CompressedImageInfo cmpInfo =
                 createCompressedImageInfo(pImageFormatInfo->format);
             if (cmpInfo.isCompressed) {
+                if (pImageFormatInfo->usage &
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+                    pImageFormatProperties->imageFormatProperties =
+                            kNotSupportedImageFormat;
+                    return;
+                }
                 imageFormatInfo = *pImageFormatInfo;
                 pImageFormatInfo = &imageFormatInfo;
                 imageFormatInfo.flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
@@ -4311,6 +4323,9 @@ private:
     std::vector<uint64_t> mCreatedHandlesForSnapshotLoad;
     size_t mCreatedHandlesForSnapshotLoadIndex = 0;
 };
+
+constexpr VkImageFormatProperties
+        VkDecoderGlobalState::Impl::kNotSupportedImageFormat;
 
 VkDecoderGlobalState::VkDecoderGlobalState()
     : mImpl(new VkDecoderGlobalState::Impl()) {}
