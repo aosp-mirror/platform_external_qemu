@@ -116,7 +116,7 @@ static int gvm_get_tsc(CPUState *cs)
     msr_data.entries[0].index = MSR_IA32_TSC;
     env->tsc_valid = !runstate_is_running();
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
             &msr_data, sizeof(msr_data),
             NULL, 0);
     if (ret < 0) {
@@ -152,7 +152,7 @@ static struct gvm_cpuid *try_get_cpuid(GVMState *s, int max)
     size = sizeof(*cpuid) + max * sizeof(*cpuid->entries);
     cpuid = g_malloc0(size);
     cpuid->nent = max;
-    r = gvm_ioctl(s, GVM_GET_SUPPORTED_CPUID, 
+    r = gvm_ioctl(s, GVM_GET_SUPPORTED_CPUID,
             cpuid, size, cpuid, size);
     if (r == 0 && cpuid->nent >= max) {
         r = -E2BIG;
@@ -498,7 +498,7 @@ static int gvm_get_supported_msrs(GVMState *s)
         /* Obtain MSR list from GVM.  These are the MSRs that we must
          * save/restore */
         msr_list.nmsrs = 0;
-        ret = gvm_ioctl(s, GVM_GET_MSR_INDEX_LIST, 
+        ret = gvm_ioctl(s, GVM_GET_MSR_INDEX_LIST,
                 &msr_list, sizeof(msr_list),
                 &msr_list, sizeof(msr_list));
         if (ret < 0 && ret != -E2BIG) {
@@ -602,7 +602,7 @@ int gvm_arch_init(MachineState *ms, GVMState *s)
 
     /* Set TSS base one page after EPT identity map. */
     tss_base = identity_base + 0x1000;
-    ret = gvm_vm_ioctl(s, GVM_SET_TSS_ADDR, 
+    ret = gvm_vm_ioctl(s, GVM_SET_TSS_ADDR,
             &tss_base, sizeof(tss_base),
             NULL, 0);
     if (ret < 0) {
@@ -688,7 +688,7 @@ static int gvm_getput_regs(X86CPU *cpu, int set)
     int ret = 0;
 
     if (!set) {
-        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_REGS, 
+        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_REGS,
                 NULL, 0, &regs, sizeof(regs));
         if (ret < 0) {
             return ret;
@@ -718,7 +718,7 @@ static int gvm_getput_regs(X86CPU *cpu, int set)
     gvm_getput_reg(&regs.rip, &env->eip, set);
 
     if (set) {
-        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_REGS, 
+        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_REGS,
                 &regs, sizeof(regs), NULL, 0);
     }
 
@@ -748,7 +748,7 @@ static int gvm_put_fpu(X86CPU *cpu)
     }
     fpu.mxcsr = env->mxcsr;
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_FPU, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_FPU,
             &fpu, sizeof(fpu), NULL, 0);
 }
 
@@ -845,7 +845,7 @@ static int gvm_put_xsave(X86CPU *cpu)
             16 * sizeof env->xmm_regs[16]);
     memcpy(&xsave->pkru_state, &env->pkru, sizeof env->pkru);
 #endif
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_XSAVE, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_XSAVE,
             xsave, sizeof(*xsave), NULL, 0);
 }
 
@@ -862,7 +862,7 @@ static int gvm_put_xcrs(X86CPU *cpu)
     xcrs.flags = 0;
     xcrs.xcrs[0].xcr = 0;
     xcrs.xcrs[0].value = env->xcr0;
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_XCRS, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_XCRS,
             &xcrs, sizeof(xcrs), NULL, 0);
 }
 
@@ -913,7 +913,7 @@ static int gvm_put_sregs(X86CPU *cpu)
 
     sregs.efer = env->efer;
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_SREGS, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_SREGS,
             &sregs, sizeof(sregs), NULL, 0);
 }
 
@@ -948,8 +948,8 @@ static int gvm_put_tscdeadline_msr(X86CPU *cpu)
     gvm_msr_buf_reset(cpu);
     gvm_msr_entry_add(cpu, MSR_IA32_TSCDEADLINE, env->tsc_deadline);
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS, 
-            cpu->gvm_msr_buf, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS,
+            cpu->gvm_msr_buf,
             sizeof(struct gvm_msrs) + sizeof(struct gvm_msr_entry),
             NULL, 0);
     if (ret < 0) {
@@ -978,8 +978,8 @@ static int gvm_put_msr_feature_control(X86CPU *cpu)
     gvm_msr_entry_add(cpu, MSR_IA32_FEATURE_CONTROL,
                       cpu->env.msr_ia32_feature_control);
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS, 
-            cpu->gvm_msr_buf, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS,
+            cpu->gvm_msr_buf,
             sizeof(struct gvm_msrs) + sizeof(struct gvm_msr_entry),
             NULL, 0);
     if (ret < 0) {
@@ -1131,7 +1131,7 @@ static int gvm_get_fpu(X86CPU *cpu)
     struct gvm_fpu fpu;
     int i, ret;
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_FPU, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_FPU,
             NULL, 0,
             &fpu, sizeof(fpu));
     if (ret < 0) {
@@ -1168,7 +1168,7 @@ static int gvm_get_xsave(X86CPU *cpu)
         return gvm_get_fpu(cpu);
     }
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_XSAVE, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_XSAVE,
             NULL, 0, xsave, sizeof(*xsave));
     if (ret < 0) {
         return ret;
@@ -1228,7 +1228,7 @@ static int gvm_get_xcrs(X86CPU *cpu)
         return 0;
     }
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_XCRS, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_XCRS,
             NULL, 0, &xcrs, sizeof(xcrs));
     if (ret < 0) {
         return ret;
@@ -1251,7 +1251,7 @@ static int gvm_get_sregs(X86CPU *cpu)
     uint32_t hflags;
     int bit, i, ret;
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_SREGS, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_SREGS,
             NULL, 0, &sregs, sizeof(sregs));
     if (ret < 0) {
         return ret;
@@ -1440,7 +1440,7 @@ static int gvm_get_msrs(X86CPU *cpu)
 
     bufsize = sizeof(struct gvm_msrs) + cpu->gvm_msr_buf->nmsrs *
         sizeof(struct gvm_msr_entry);
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
             cpu->gvm_msr_buf, bufsize,
             cpu->gvm_msr_buf, bufsize);
     if (ret < 0) {
@@ -1640,7 +1640,7 @@ static int gvm_put_mp_state(X86CPU *cpu)
 {
     struct gvm_mp_state mp_state = { .mp_state = cpu->env.mp_state };
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MP_STATE, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MP_STATE,
             &mp_state, sizeof(mp_state), NULL, 0);
 }
 
@@ -1651,7 +1651,7 @@ static int gvm_get_mp_state(X86CPU *cpu)
     struct gvm_mp_state mp_state;
     int ret;
 
-    ret = gvm_vcpu_ioctl(cs, GVM_GET_MP_STATE, 
+    ret = gvm_vcpu_ioctl(cs, GVM_GET_MP_STATE,
             NULL, 0, &mp_state, sizeof(mp_state));
     if (ret < 0) {
         return ret;
@@ -1670,7 +1670,7 @@ static int gvm_get_apic(X86CPU *cpu)
     int ret;
 
     if (apic && gvm_irqchip_in_kernel()) {
-        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_LAPIC, 
+        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_LAPIC,
                 NULL, 0, &kapic, sizeof(kapic));
         if (ret < 0) {
             return ret;
@@ -1689,7 +1689,7 @@ static int gvm_put_apic(X86CPU *cpu)
     if (apic && gvm_irqchip_in_kernel()) {
         gvm_put_apic_state(apic, &kapic);
 
-        return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_LAPIC, 
+        return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_LAPIC,
                 &kapic, sizeof(kapic), NULL, 0);
     }
     return 0;
@@ -1746,7 +1746,7 @@ static int gvm_put_vcpu_events(X86CPU *cpu, int level)
             GVM_VCPUEVENT_VALID_NMI_PENDING | GVM_VCPUEVENT_VALID_SIPI_VECTOR;
     }
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_VCPU_EVENTS, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_VCPU_EVENTS,
             &events, sizeof(events), NULL, 0);
 }
 
@@ -1761,7 +1761,7 @@ static int gvm_get_vcpu_events(X86CPU *cpu)
     }
 
     memset(&events, 0, sizeof(events));
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_VCPU_EVENTS, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_VCPU_EVENTS,
             NULL, 0, &events, sizeof(events));
     if (ret < 0) {
        return ret;
@@ -1859,7 +1859,7 @@ static int gvm_put_debugregs(X86CPU *cpu)
     dbgregs.dr7 = env->dr[7];
     dbgregs.flags = 0;
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_DEBUGREGS, 
+    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_DEBUGREGS,
             &dbgregs, sizeof(dbgregs), NULL, 0);
 }
 
@@ -1873,7 +1873,7 @@ static int gvm_get_debugregs(X86CPU *cpu)
         return 0;
     }
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_DEBUGREGS, 
+    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_DEBUGREGS,
             &dbgregs, sizeof(dbgregs), NULL, 0);
     if (ret < 0) {
         return ret;
@@ -2066,7 +2066,7 @@ void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
 
                 intr.irq = irq;
                 DPRINTF("injected interrupt %d\n", irq);
-                ret = gvm_vcpu_ioctl(cpu, GVM_INTERRUPT, 
+                ret = gvm_vcpu_ioctl(cpu, GVM_INTERRUPT,
                         &intr, sizeof(intr), NULL, 0);
                 if (ret < 0) {
                     fprintf(stderr,

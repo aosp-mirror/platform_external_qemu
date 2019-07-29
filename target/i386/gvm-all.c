@@ -363,7 +363,7 @@ static HANDLE gvm_get_vcpu(GVMState *s, unsigned long vcpu_id)
         }
     }
 
-    ret = gvm_vm_ioctl(s, GVM_CREATE_VCPU, 
+    ret = gvm_vm_ioctl(s, GVM_CREATE_VCPU,
             &vcpu_id, sizeof(vcpu_id), &vcpu_fd, sizeof(vcpu_fd));
     if (ret)
         return INVALID_HANDLE_VALUE;
@@ -391,7 +391,7 @@ int gvm_init_vcpu(CPUState *cpu)
     cpu->gvm_state = s;
     cpu->gvm_vcpu_dirty = true;
 
-    ret = gvm_ioctl(s, GVM_GET_VCPU_MMAP_SIZE, 
+    ret = gvm_ioctl(s, GVM_GET_VCPU_MMAP_SIZE,
             NULL, 0, &mmap_size, sizeof(mmap_size));
     if (ret) {
         DPRINTF("GVM_GET_VCPU_MMAP_SIZE failed\n");
@@ -559,7 +559,7 @@ static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
         memset(d.dirty_bitmap, 0, allocated_size);
 
         d.slot = mem->slot | (kml->as_id << 16);
-        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG, 
+        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG,
                     NULL, 0, &d, sizeof(d)) < 0) {
             DPRINTF("ioctl failed %d\n", errno);
             ret = -1;
@@ -586,7 +586,7 @@ int gvm_check_extension(GVMState *s, unsigned int extension)
     }
 
     ret = gvm_ioctl(s, GVM_CHECK_EXTENSION,
-            &extension, sizeof(extension), 
+            &extension, sizeof(extension),
             &result, sizeof(result));
 
     if (ret) {
@@ -602,7 +602,7 @@ int gvm_vm_check_extension(GVMState *s, unsigned int extension)
     int ret;
     int result;
 
-    ret = gvm_vm_ioctl(s, GVM_CHECK_EXTENSION, 
+    ret = gvm_vm_ioctl(s, GVM_CHECK_EXTENSION,
             &extension, sizeof(extension),
             &result, sizeof(result));
     if (ret < 0) {
@@ -881,7 +881,7 @@ void gvm_irqchip_commit_routes(GVMState *s)
     s->irq_routes->flags = 0;
     irq_routing_size = sizeof(struct gvm_irq_routing) +
                        s->irq_routes->nr * sizeof(struct gvm_irq_routing_entry);
-    ret = gvm_vm_ioctl(s, GVM_SET_GSI_ROUTING, 
+    ret = gvm_vm_ioctl(s, GVM_SET_GSI_ROUTING,
             s->irq_routes, irq_routing_size, NULL, 0);
     assert(ret == 0);
 }
@@ -1615,7 +1615,7 @@ int gvm_vm_ioctl(GVMState *s, int type,
     int ret;
     DWORD byteRet;
 
-    ret = DeviceIoControl(s->vmfd, type, 
+    ret = DeviceIoControl(s->vmfd, type,
             input, input_size,
             output, output_size,
             &byteRet, NULL);
@@ -1640,7 +1640,7 @@ int gvm_vcpu_ioctl(CPUState *cpu, int type,
     int ret;
     DWORD byteRet;
 
-    ret = DeviceIoControl(cpu->gvm_fd, type, 
+    ret = DeviceIoControl(cpu->gvm_fd, type,
             input, input_size,
             output, output_size,
             &byteRet, NULL);

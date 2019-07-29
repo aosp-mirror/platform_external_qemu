@@ -38,7 +38,7 @@ static void gvm_pic_get(PICCommonState *s)
     int ret;
 
     chip.chip_id = s->master ? GVM_IRQCHIP_PIC_MASTER : GVM_IRQCHIP_PIC_SLAVE;
-    ret = gvm_vm_ioctl(gvm_state, GVM_GET_IRQCHIP, 
+    ret = gvm_vm_ioctl(gvm_state, GVM_GET_IRQCHIP,
             &chip, sizeof(chip), NULL, 0);
     if (ret < 0) {
         fprintf(stderr, "GVM_GET_IRQCHIP failed: %s\n", strerror(ret));
@@ -92,7 +92,7 @@ static void gvm_pic_put(PICCommonState *s)
     kpic->elcr = s->elcr;
     kpic->elcr_mask = s->elcr_mask;
 
-    ret = gvm_vm_ioctl(gvm_state, GVM_SET_IRQCHIP, 
+    ret = gvm_vm_ioctl(gvm_state, GVM_SET_IRQCHIP,
             &chip, sizeof(chip), NULL, 0);
     if (ret < 0) {
         fprintf(stderr, "GVM_GET_IRQCHIP failed: %s\n", strerror(ret));
