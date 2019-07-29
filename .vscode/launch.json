@@ -79,14 +79,18 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 // You will likely have to change these for emulator launch..
+                "@P",
+                "-verbose",
+                "-grpc",
+                "9090",
             ],
             "linux": {
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                     "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
                     "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
-                ]
-            }
+                },
+            },
             "osx": {
                 "args": [
                     "@28_X64",
