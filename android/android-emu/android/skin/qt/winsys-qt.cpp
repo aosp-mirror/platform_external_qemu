@@ -105,6 +105,23 @@ static bool sMainLoopShouldExit = false;
 static HANDLE sWakeEvent;
 #endif
 
+static void enableSigTermination() {
+    // The issue only occurs on Darwin so to be safe just do this on Darwin
+    // to prevent potential issues. The function exists on all platforms to
+    // make the calling code look cleaner.
+#ifdef __APPLE__
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGHUP);
+    sigaddset(&set, SIGINT);
+    int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
+    if (result != 0) {
+        D("Could not set thread sigmask: %d", result);
+    }
+#endif
+}
+
 static void enableSigChild() {
     // The issue only occurs on Darwin so to be safe just do this on Darwin
     // to prevent potential issues. The function exists on all platforms to
@@ -180,6 +197,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         // it doesn't wait the process will be left as a zombie and the finished
         // signal will not be emitted from QProcess.
         enableSigChild();
+        enableSigTermination();
         GlobalState* g = globalState();
         g->app->exec();
         D("Finished QT main loop\n");
