@@ -599,6 +599,12 @@ public:
                                     const VkDescriptorSet* pDescriptorSets,
                                     uint32_t dynamicOffsetCount,
                                     const uint32_t* pDynamicOffsets);
+
+    VkResult on_vkCreateRenderPass(android::base::Pool* pool,
+                                   VkDevice device,
+                                   const VkRenderPassCreateInfo* pCreateInfo,
+                                   const VkAllocationCallbacks* pAllocator,
+                                   VkRenderPass* pRenderPass);
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
