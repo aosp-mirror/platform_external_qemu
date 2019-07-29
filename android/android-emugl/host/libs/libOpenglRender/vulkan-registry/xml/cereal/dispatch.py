@@ -40,10 +40,6 @@ getProcAddrFuncs = [
     "vkDestroyDevice",
     "vkEnumerateDeviceExtensionProperties",
     "vkEnumerateDeviceLayerProperties",
-    "vkGetDeviceQueue",
-    "vkQueueSubmit",
-    "vkQueueWaitIdle",
-    "vkDeviceWaitIdle",
 ]
 
 getInstanceProcAddrNoInstanceFuncs = [
@@ -66,6 +62,19 @@ getInstanceProcAddrFuncs = [
     "vkGetPhysicalDeviceXlibPresentationSupportKHR",
     "vkCreateXcbSurfaceKHR",
     "vkGetPhysicalDeviceXcbPresentationSupportKHR",
+    "vkGetPhysicalDeviceSparseImageFormatProperties",
+    "vkEnumerateInstanceVersion",
+    "vkEnumeratePhysicalDeviceGroups",
+    "vkGetPhysicalDeviceFeatures2",
+    "vkGetPhysicalDeviceProperties2",
+    "vkGetPhysicalDeviceFormatProperties2",
+    "vkGetPhysicalDeviceImageFormatProperties2",
+    "vkGetPhysicalDeviceQueueFamilyProperties2",
+    "vkGetPhysicalDeviceMemoryProperties2",
+    "vkGetPhysicalDeviceSparseImageFormatProperties2",
+    "vkGetPhysicalDeviceExternalBufferProperties",
+    "vkGetPhysicalDeviceExternalFenceProperties",
+    "vkGetPhysicalDeviceExternalSemaphoreProperties",
 ]
 
 # Implicitly, everything else is going to be obtained
@@ -153,8 +162,30 @@ void init_vulkan_dispatch_from_device(
     VulkanDispatch* dispatch_out);
 """)
 
+        # After populating a VulkanDispatch with the above methods,
+        # it can be useful to check whether the Vulkan 1.0 or 1.1 methods
+        # are all there.
+        def emit_feature_check_decl(cgen, tag, featureToCheck):
+            cgen.line("""
+bool vulkan_dispatch_check_%s_%s(
+    const VulkanDispatch* vk);
+""" % (tag, featureToCheck))
+
+        emit_feature_check_decl(self.cgenHeader, "instance", "VK_VERSION_1_0")
+        emit_feature_check_decl(self.cgenHeader, "instance", "VK_VERSION_1_1")
+        emit_feature_check_decl(self.cgenHeader, "device", "VK_VERSION_1_0")
+        emit_feature_check_decl(self.cgenHeader, "device", "VK_VERSION_1_1")
+
         self.cgenHeader.line("struct VulkanDispatch {")
         self.module.appendHeader(self.cgenHeader.swapCode())
+
+    def syncFeatureQuiet(self, cgen, feature):
+        if self.featureForCodegen != feature:
+            if feature == "":
+                self.featureForCodegen = feature
+                return
+
+            self.featureForCodegen = feature
 
     def syncFeature(self, cgen, feature):
         if self.featureForCodegen != feature:
@@ -266,6 +297,41 @@ void init_vulkan_dispatch_from_device(
 
         self.syncFeature(self.cgenImpl, "")
         self.cgenImpl.endBlock()
+
+        # Check Vulkan 1.0 / 1.1 functions
+
+        def emit_check_impl(cgen, dispatchVar, feature, featureToCheck, apiName):
+            if feature == featureToCheck:
+                cgen.beginIf("!%s->%s" % (dispatchVar, apiName))
+                cgen.stmt("fprintf(stderr, \"%s check failed: %s not found\\n\")" % (featureToCheck, apiName))
+                cgen.stmt("good = false")
+                cgen.endIf()
+
+        def emit_feature_check_impl(context, cgen, tag, featureToCheck, apis):
+            cgen.line("""
+bool vulkan_dispatch_check_%s_%s(
+    const VulkanDispatch* vk)
+""" % (tag, featureToCheck))
+
+            cgen.beginBlock()
+
+            cgen.stmt("bool good = true")
+
+            for vulkanApi, typeDecl, feature in apis:
+                context.syncFeatureQuiet(self.cgenImpl, feature)
+                emit_check_impl(cgen, "vk", feature, featureToCheck, vulkanApi.name)
+
+            context.syncFeatureQuiet(self.cgenImpl, "")
+
+            cgen.stmt("return good")
+            cgen.endBlock()
+
+        instanceApis = self.apisToGet["global-instance"] + self.apisToGet["instance"]
+
+        emit_feature_check_impl(self, self.cgenImpl, "instance", "VK_VERSION_1_0", instanceApis)
+        emit_feature_check_impl(self, self.cgenImpl, "instance", "VK_VERSION_1_1", instanceApis)
+        emit_feature_check_impl(self, self.cgenImpl, "device", "VK_VERSION_1_0", self.apisToGet["device"])
+        emit_feature_check_impl(self, self.cgenImpl, "device", "VK_VERSION_1_1", self.apisToGet["device"])
 
         self.module.appendImpl(self.cgenImpl.swapCode())
 
