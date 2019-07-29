@@ -22,6 +22,30 @@
       "revId": "87b527d27e305476c23e6cd97379e37d7cbd6208",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2fb7bad_b9cf5cbe",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 4328,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-07-29T20:10:25Z",
+      "side": 1,
+      "message": "Done. Actually I found that I should just memset them to 0.",
+      "parentUuid": "00259731_3e6a6aeb",
+      "range": {
+        "startLine": 4327,
+        "startChar": 0,
+        "endLine": 4328,
+        "endChar": 61
+      },
+      "revId": "87b527d27e305476c23e6cd97379e37d7cbd6208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
