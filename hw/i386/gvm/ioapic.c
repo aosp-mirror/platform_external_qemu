@@ -71,7 +71,7 @@ static void gvm_ioapic_get(IOAPICCommonState *s)
     int ret, i;
 
     chip.chip_id = GVM_IRQCHIP_IOAPIC;
-    ret = gvm_vm_ioctl(gvm_state, GVM_GET_IRQCHIP, 
+    ret = gvm_vm_ioctl(gvm_state, GVM_GET_IRQCHIP,
             &chip, sizeof(chip), NULL, 0);
     if (ret < 0) {
         fprintf(stderr, "GVM_GET_IRQCHIP failed: %s\n", strerror(ret));
@@ -105,7 +105,7 @@ static void gvm_ioapic_put(IOAPICCommonState *s)
         kioapic->redirtbl[i].bits = s->ioredtbl[i];
     }
 
-    ret = gvm_vm_ioctl(gvm_state, GVM_SET_IRQCHIP, 
+    ret = gvm_vm_ioctl(gvm_state, GVM_SET_IRQCHIP,
             &chip, sizeof(chip), NULL, 0);
     if (ret < 0) {
         fprintf(stderr, "GVM_GET_IRQCHIP failed: %s\n", strerror(ret));
