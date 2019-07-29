@@ -915,6 +915,7 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         mPlayingFromFile = false;
         mPlaybackEventSource.reset();
         mOffworldEventSource = nullptr;
+        mNextPlaybackCommandTime = 0;
 
         if (mOnStopCallback) {
             mOnStopCallback();
