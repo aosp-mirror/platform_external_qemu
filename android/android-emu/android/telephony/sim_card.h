@@ -39,6 +39,7 @@ extern const char*  asimcard_get_pin( ASimCard  sim );
 extern const char*  asimcard_get_puk( ASimCard  sim );
 extern void         asimcard_set_pin( ASimCard  sim, const char*  pin );
 extern void         asimcard_set_puk( ASimCard  sim, const char*  puk );
+extern void         asimcard_set_fileid_status( ASimCard sim, const char* str );
 
 extern int         asimcard_check_pin( ASimCard  sim, const char*  pin );
 extern int         asimcard_check_puk( ASimCard  sim, const char*  puk, const char*  pin );

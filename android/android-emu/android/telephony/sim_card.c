@@ -32,6 +32,7 @@ typedef struct ASimCardRec_ {
     char        puk[ A_SIM_PUK_SIZE+1 ];
     int         pin_retries;
     int         port;
+    char        curr_fileid_status[256];
 
     char        out_buff[ 256 ];
     int         out_size;
@@ -57,6 +58,12 @@ asimcard_destroy( ASimCard  card )
 {
     /* nothing really */
     card=card;
+}
+
+void
+asimcard_set_fileid_status( ASimCard sim, const char* str )
+{
+    snprintf(sim->curr_fileid_status, sizeof(sim->curr_fileid_status), "%s", str);
 }
 
 static __inline__ int
@@ -557,6 +564,11 @@ asimcard_io( ASimCard  sim, const char*  cmd )
                                     phone_number[14]);
         return sim->out_buff;
         }
+
+    if (!strcmp("+CRSM=242,0,0,0,0", cmd)) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,%s", sim->curr_fileid_status);
+        return sim->out_buff;
+    }
 
     for (nn = 0; answers[nn].cmd != NULL; nn++) {
         if ( !strcmp( answers[nn].cmd, cmd ) ) {
