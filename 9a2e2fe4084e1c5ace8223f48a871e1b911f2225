@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4d9121b_9cde6d26",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1645,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-07-29T15:54:50Z",
+      "side": 1,
+      "message": "Does this need a NULL check like the other call to sim_get_fcp or can this not return NULL for these parameters?",
+      "revId": "9a2e2fe4084e1c5ace8223f48a871e1b911f2225",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
