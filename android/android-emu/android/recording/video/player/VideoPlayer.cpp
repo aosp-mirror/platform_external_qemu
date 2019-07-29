@@ -1507,6 +1507,10 @@ void VideoPlayerImpl::cleanup() {
     mVideoCodecCtx.reset();
 
     mDataset.reset();
+    if (mEventProvider.get() != nullptr) {
+        mEventProvider.get();
+        AutomationController::get().stopPlayback();
+    }
 
     if (mAudioOutputEngine != nullptr) {
         mAudioOutputEngine->close();
