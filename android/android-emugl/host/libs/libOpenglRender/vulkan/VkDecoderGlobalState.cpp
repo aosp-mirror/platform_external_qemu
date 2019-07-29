@@ -405,6 +405,11 @@ public:
         if (needEmulatedEtc2(physicalDevice, vk)) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
             if (cmpInfo.isCompressed) {
+                if (usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+                    memset(pImageFormatProperties, 0,
+                           sizeof(*pImageFormatProperties));
+                    return VK_ERROR_FORMAT_NOT_SUPPORTED;
+                }
                 flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
                 flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
                 usage |= VK_IMAGE_USAGE_STORAGE_BIT;
@@ -429,6 +434,12 @@ public:
             CompressedImageInfo cmpInfo =
                 createCompressedImageInfo(pImageFormatInfo->format);
             if (cmpInfo.isCompressed) {
+                if (pImageFormatInfo->usage &
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+                    memset(&pImageFormatProperties->imageFormatProperties, 0,
+                           sizeof(pImageFormatProperties->imageFormatProperties));
+                    return VK_ERROR_FORMAT_NOT_SUPPORTED;
+                }
                 imageFormatInfo = *pImageFormatInfo;
                 pImageFormatInfo = &imageFormatInfo;
                 imageFormatInfo.flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
