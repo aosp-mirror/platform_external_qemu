@@ -510,6 +510,20 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     auto ivk = sVkEmulation->ivk;
 
+    if (!vulkan_dispatch_check_instance_VK_VERSION_1_0(ivk)) {
+        fprintf(stderr, "%s: Warning: Vulkan 1.0 APIs missing from instance\n", __func__);
+    }
+
+    if (ivk->vkEnumerateInstanceVersion) {
+        uint32_t instanceVersion;
+        VkResult enumInstanceRes = ivk->vkEnumerateInstanceVersion(&instanceVersion);
+        if (enumInstanceRes >= VK_MAKE_VERSION(1, 1, 0)) {
+            if (!vulkan_dispatch_check_instance_VK_VERSION_1_1(ivk)) {
+                fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from instance\n", __func__);
+            }
+        }
+    }
+
     if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
         sVkEmulation->getImageFormatProperties2Func = reinterpret_cast<
                 PFN_vkGetPhysicalDeviceImageFormatProperties2KHR>(
@@ -730,6 +744,16 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         ivk, sVkEmulation->device, sVkEmulation->dvk);
 
     auto dvk = sVkEmulation->dvk;
+
+    // Check if the dispatch table has everything 1.1 related
+    if (!vulkan_dispatch_check_device_VK_VERSION_1_0(dvk)) {
+        fprintf(stderr, "%s: Warning: Vulkan 1.0 APIs missing from device.\n", __func__);
+    }
+    if (deviceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if (!vulkan_dispatch_check_device_VK_VERSION_1_1(dvk)) {
+            fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from device\n", __func__);
+        }
+    }
 
     if (sVkEmulation->deviceInfo.supportsExternalMemory) {
         sVkEmulation->deviceInfo.getImageMemoryRequirements2Func =

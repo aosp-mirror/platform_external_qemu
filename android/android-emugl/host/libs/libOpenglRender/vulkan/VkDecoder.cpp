@@ -4494,10 +4494,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkCreateRenderPass 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pRenderPass);
                 }
                 VkResult vkCreateRenderPass_VkResult_return = (VkResult)0;
-                vkCreateRenderPass_VkResult_return =
-                        m_state->on_vkCreateRenderPass(&m_pool, device,
-                                                       pCreateInfo, pAllocator,
-                                                       pRenderPass);
+                vkCreateRenderPass_VkResult_return = m_state->on_vkCreateRenderPass(&m_pool, device, pCreateInfo, pAllocator, pRenderPass);
                 vkStream->unsetHandleMapping();
                 // Begin manual non dispatchable handle create for pRenderPass;
                 vkStream->unsetHandleMapping();
