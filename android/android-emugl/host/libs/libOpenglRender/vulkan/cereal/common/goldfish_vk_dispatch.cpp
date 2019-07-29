@@ -1788,4 +1788,843 @@ void init_vulkan_dispatch_from_device(
 #endif
 }
 
+bool vulkan_dispatch_check_VK_VERSION_1_0(
+    const VulkanDispatch* vk)
+
+{
+    if (!vk->vkDestroyInstance)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyInstance not found\n");
+        return false;
+    }
+    if (!vk->vkEnumeratePhysicalDevices)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkEnumeratePhysicalDevices not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceFeatures)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceFeatures not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceFormatProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceFormatProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceImageFormatProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceImageFormatProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceQueueFamilyProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceQueueFamilyProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceMemoryProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceMemoryProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetInstanceProcAddr)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetInstanceProcAddr not found\n");
+        return false;
+    }
+    if (!vk->vkCreateDevice)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateDevice not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyDevice)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyDevice not found\n");
+        return false;
+    }
+    if (!vk->vkEnumerateDeviceExtensionProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkEnumerateDeviceExtensionProperties not found\n");
+        return false;
+    }
+    if (!vk->vkEnumerateDeviceLayerProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkEnumerateDeviceLayerProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetDeviceQueue)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetDeviceQueue not found\n");
+        return false;
+    }
+    if (!vk->vkQueueSubmit)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkQueueSubmit not found\n");
+        return false;
+    }
+    if (!vk->vkQueueWaitIdle)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkQueueWaitIdle not found\n");
+        return false;
+    }
+    if (!vk->vkDeviceWaitIdle)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDeviceWaitIdle not found\n");
+        return false;
+    }
+    if (!vk->vkCreateInstance)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateInstance not found\n");
+        return false;
+    }
+    if (!vk->vkEnumerateInstanceExtensionProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkEnumerateInstanceExtensionProperties not found\n");
+        return false;
+    }
+    if (!vk->vkEnumerateInstanceLayerProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkEnumerateInstanceLayerProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetDeviceProcAddr)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetDeviceProcAddr not found\n");
+        return false;
+    }
+    if (!vk->vkAllocateMemory)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkAllocateMemory not found\n");
+        return false;
+    }
+    if (!vk->vkFreeMemory)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkFreeMemory not found\n");
+        return false;
+    }
+    if (!vk->vkMapMemory)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkMapMemory not found\n");
+        return false;
+    }
+    if (!vk->vkUnmapMemory)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkUnmapMemory not found\n");
+        return false;
+    }
+    if (!vk->vkFlushMappedMemoryRanges)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkFlushMappedMemoryRanges not found\n");
+        return false;
+    }
+    if (!vk->vkInvalidateMappedMemoryRanges)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkInvalidateMappedMemoryRanges not found\n");
+        return false;
+    }
+    if (!vk->vkGetDeviceMemoryCommitment)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetDeviceMemoryCommitment not found\n");
+        return false;
+    }
+    if (!vk->vkBindBufferMemory)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkBindBufferMemory not found\n");
+        return false;
+    }
+    if (!vk->vkBindImageMemory)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkBindImageMemory not found\n");
+        return false;
+    }
+    if (!vk->vkGetBufferMemoryRequirements)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetBufferMemoryRequirements not found\n");
+        return false;
+    }
+    if (!vk->vkGetImageMemoryRequirements)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetImageMemoryRequirements not found\n");
+        return false;
+    }
+    if (!vk->vkGetImageSparseMemoryRequirements)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetImageSparseMemoryRequirements not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceSparseImageFormatProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPhysicalDeviceSparseImageFormatProperties not found\n");
+        return false;
+    }
+    if (!vk->vkQueueBindSparse)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkQueueBindSparse not found\n");
+        return false;
+    }
+    if (!vk->vkCreateFence)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateFence not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyFence)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyFence not found\n");
+        return false;
+    }
+    if (!vk->vkResetFences)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkResetFences not found\n");
+        return false;
+    }
+    if (!vk->vkGetFenceStatus)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetFenceStatus not found\n");
+        return false;
+    }
+    if (!vk->vkWaitForFences)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkWaitForFences not found\n");
+        return false;
+    }
+    if (!vk->vkCreateSemaphore)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateSemaphore not found\n");
+        return false;
+    }
+    if (!vk->vkDestroySemaphore)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroySemaphore not found\n");
+        return false;
+    }
+    if (!vk->vkCreateEvent)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateEvent not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyEvent)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyEvent not found\n");
+        return false;
+    }
+    if (!vk->vkGetEventStatus)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetEventStatus not found\n");
+        return false;
+    }
+    if (!vk->vkSetEvent)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkSetEvent not found\n");
+        return false;
+    }
+    if (!vk->vkResetEvent)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkResetEvent not found\n");
+        return false;
+    }
+    if (!vk->vkCreateQueryPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateQueryPool not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyQueryPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyQueryPool not found\n");
+        return false;
+    }
+    if (!vk->vkGetQueryPoolResults)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetQueryPoolResults not found\n");
+        return false;
+    }
+    if (!vk->vkCreateBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCreateBufferView)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateBufferView not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyBufferView)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyBufferView not found\n");
+        return false;
+    }
+    if (!vk->vkCreateImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateImage not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyImage not found\n");
+        return false;
+    }
+    if (!vk->vkGetImageSubresourceLayout)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetImageSubresourceLayout not found\n");
+        return false;
+    }
+    if (!vk->vkCreateImageView)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateImageView not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyImageView)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyImageView not found\n");
+        return false;
+    }
+    if (!vk->vkCreateShaderModule)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateShaderModule not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyShaderModule)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyShaderModule not found\n");
+        return false;
+    }
+    if (!vk->vkCreatePipelineCache)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreatePipelineCache not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyPipelineCache)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyPipelineCache not found\n");
+        return false;
+    }
+    if (!vk->vkGetPipelineCacheData)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetPipelineCacheData not found\n");
+        return false;
+    }
+    if (!vk->vkMergePipelineCaches)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkMergePipelineCaches not found\n");
+        return false;
+    }
+    if (!vk->vkCreateGraphicsPipelines)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateGraphicsPipelines not found\n");
+        return false;
+    }
+    if (!vk->vkCreateComputePipelines)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateComputePipelines not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyPipeline)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyPipeline not found\n");
+        return false;
+    }
+    if (!vk->vkCreatePipelineLayout)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreatePipelineLayout not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyPipelineLayout)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyPipelineLayout not found\n");
+        return false;
+    }
+    if (!vk->vkCreateSampler)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateSampler not found\n");
+        return false;
+    }
+    if (!vk->vkDestroySampler)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroySampler not found\n");
+        return false;
+    }
+    if (!vk->vkCreateDescriptorSetLayout)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateDescriptorSetLayout not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyDescriptorSetLayout)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyDescriptorSetLayout not found\n");
+        return false;
+    }
+    if (!vk->vkCreateDescriptorPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateDescriptorPool not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyDescriptorPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyDescriptorPool not found\n");
+        return false;
+    }
+    if (!vk->vkResetDescriptorPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkResetDescriptorPool not found\n");
+        return false;
+    }
+    if (!vk->vkAllocateDescriptorSets)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkAllocateDescriptorSets not found\n");
+        return false;
+    }
+    if (!vk->vkFreeDescriptorSets)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkFreeDescriptorSets not found\n");
+        return false;
+    }
+    if (!vk->vkUpdateDescriptorSets)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkUpdateDescriptorSets not found\n");
+        return false;
+    }
+    if (!vk->vkCreateFramebuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateFramebuffer not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyFramebuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyFramebuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCreateRenderPass)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateRenderPass not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyRenderPass)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyRenderPass not found\n");
+        return false;
+    }
+    if (!vk->vkGetRenderAreaGranularity)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkGetRenderAreaGranularity not found\n");
+        return false;
+    }
+    if (!vk->vkCreateCommandPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCreateCommandPool not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyCommandPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkDestroyCommandPool not found\n");
+        return false;
+    }
+    if (!vk->vkResetCommandPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkResetCommandPool not found\n");
+        return false;
+    }
+    if (!vk->vkAllocateCommandBuffers)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkAllocateCommandBuffers not found\n");
+        return false;
+    }
+    if (!vk->vkFreeCommandBuffers)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkFreeCommandBuffers not found\n");
+        return false;
+    }
+    if (!vk->vkBeginCommandBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkBeginCommandBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkEndCommandBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkEndCommandBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkResetCommandBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkResetCommandBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBindPipeline)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBindPipeline not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetViewport)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetViewport not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetScissor)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetScissor not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetLineWidth)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetLineWidth not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetDepthBias)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetDepthBias not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetBlendConstants)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetBlendConstants not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetDepthBounds)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetDepthBounds not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetStencilCompareMask)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetStencilCompareMask not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetStencilWriteMask)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetStencilWriteMask not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetStencilReference)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetStencilReference not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBindDescriptorSets)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBindDescriptorSets not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBindIndexBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBindIndexBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBindVertexBuffers)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBindVertexBuffers not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDraw)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdDraw not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDrawIndexed)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdDrawIndexed not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDrawIndirect)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdDrawIndirect not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDrawIndexedIndirect)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdDrawIndexedIndirect not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDispatch)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdDispatch not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDispatchIndirect)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdDispatchIndirect not found\n");
+        return false;
+    }
+    if (!vk->vkCmdCopyBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdCopyBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCmdCopyImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdCopyImage not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBlitImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBlitImage not found\n");
+        return false;
+    }
+    if (!vk->vkCmdCopyBufferToImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdCopyBufferToImage not found\n");
+        return false;
+    }
+    if (!vk->vkCmdCopyImageToBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdCopyImageToBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCmdUpdateBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdUpdateBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCmdFillBuffer)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdFillBuffer not found\n");
+        return false;
+    }
+    if (!vk->vkCmdClearColorImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdClearColorImage not found\n");
+        return false;
+    }
+    if (!vk->vkCmdClearDepthStencilImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdClearDepthStencilImage not found\n");
+        return false;
+    }
+    if (!vk->vkCmdClearAttachments)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdClearAttachments not found\n");
+        return false;
+    }
+    if (!vk->vkCmdResolveImage)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdResolveImage not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetEvent)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdSetEvent not found\n");
+        return false;
+    }
+    if (!vk->vkCmdResetEvent)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdResetEvent not found\n");
+        return false;
+    }
+    if (!vk->vkCmdWaitEvents)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdWaitEvents not found\n");
+        return false;
+    }
+    if (!vk->vkCmdPipelineBarrier)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdPipelineBarrier not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBeginQuery)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBeginQuery not found\n");
+        return false;
+    }
+    if (!vk->vkCmdEndQuery)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdEndQuery not found\n");
+        return false;
+    }
+    if (!vk->vkCmdResetQueryPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdResetQueryPool not found\n");
+        return false;
+    }
+    if (!vk->vkCmdWriteTimestamp)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdWriteTimestamp not found\n");
+        return false;
+    }
+    if (!vk->vkCmdCopyQueryPoolResults)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdCopyQueryPoolResults not found\n");
+        return false;
+    }
+    if (!vk->vkCmdPushConstants)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdPushConstants not found\n");
+        return false;
+    }
+    if (!vk->vkCmdBeginRenderPass)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdBeginRenderPass not found\n");
+        return false;
+    }
+    if (!vk->vkCmdNextSubpass)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdNextSubpass not found\n");
+        return false;
+    }
+    if (!vk->vkCmdEndRenderPass)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdEndRenderPass not found\n");
+        return false;
+    }
+    if (!vk->vkCmdExecuteCommands)
+    {
+        fprintf(stderr, "VK_VERSION_1_0 check failed: vkCmdExecuteCommands not found\n");
+        return false;
+    }
+    return true;
+}
+
+bool vulkan_dispatch_check_VK_VERSION_1_1(
+    const VulkanDispatch* vk)
+
+{
+    if (!vk->vkEnumeratePhysicalDeviceGroups)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkEnumeratePhysicalDeviceGroups not found\n");
+        return false;
+    }
+    if (!vk->vkEnumerateInstanceVersion)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkEnumerateInstanceVersion not found\n");
+        return false;
+    }
+    if (!vk->vkBindBufferMemory2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkBindBufferMemory2 not found\n");
+        return false;
+    }
+    if (!vk->vkBindImageMemory2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkBindImageMemory2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetDeviceGroupPeerMemoryFeatures)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetDeviceGroupPeerMemoryFeatures not found\n");
+        return false;
+    }
+    if (!vk->vkCmdSetDeviceMask)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkCmdSetDeviceMask not found\n");
+        return false;
+    }
+    if (!vk->vkCmdDispatchBase)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkCmdDispatchBase not found\n");
+        return false;
+    }
+    if (!vk->vkGetImageMemoryRequirements2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetImageMemoryRequirements2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetBufferMemoryRequirements2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetBufferMemoryRequirements2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetImageSparseMemoryRequirements2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetImageSparseMemoryRequirements2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceFeatures2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceFeatures2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceProperties2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceProperties2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceFormatProperties2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceFormatProperties2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceImageFormatProperties2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceImageFormatProperties2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceQueueFamilyProperties2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceQueueFamilyProperties2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceMemoryProperties2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceMemoryProperties2 not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceSparseImageFormatProperties2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceSparseImageFormatProperties2 not found\n");
+        return false;
+    }
+    if (!vk->vkTrimCommandPool)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkTrimCommandPool not found\n");
+        return false;
+    }
+    if (!vk->vkGetDeviceQueue2)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetDeviceQueue2 not found\n");
+        return false;
+    }
+    if (!vk->vkCreateSamplerYcbcrConversion)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkCreateSamplerYcbcrConversion not found\n");
+        return false;
+    }
+    if (!vk->vkDestroySamplerYcbcrConversion)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkDestroySamplerYcbcrConversion not found\n");
+        return false;
+    }
+    if (!vk->vkCreateDescriptorUpdateTemplate)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkCreateDescriptorUpdateTemplate not found\n");
+        return false;
+    }
+    if (!vk->vkDestroyDescriptorUpdateTemplate)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkDestroyDescriptorUpdateTemplate not found\n");
+        return false;
+    }
+    if (!vk->vkUpdateDescriptorSetWithTemplate)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkUpdateDescriptorSetWithTemplate not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceExternalBufferProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceExternalBufferProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceExternalFenceProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceExternalFenceProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetPhysicalDeviceExternalSemaphoreProperties)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetPhysicalDeviceExternalSemaphoreProperties not found\n");
+        return false;
+    }
+    if (!vk->vkGetDescriptorSetLayoutSupport)
+    {
+        fprintf(stderr, "VK_VERSION_1_1 check failed: vkGetDescriptorSetLayoutSupport not found\n");
+        return false;
+    }
+    return true;
+}
+
 } // namespace goldfish_vk

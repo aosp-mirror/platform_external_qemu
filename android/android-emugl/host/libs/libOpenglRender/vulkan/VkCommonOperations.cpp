@@ -731,6 +731,13 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     auto dvk = sVkEmulation->dvk;
 
+    // Check if the dispatch table has everything 1.1 related
+    if (deviceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if (!vulkan_dispatch_check_VK_VERSION_1_1(dvk)) {
+            fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from device claiming 1.1 support.\n", __func__);
+        }
+    }
+
     if (sVkEmulation->deviceInfo.supportsExternalMemory) {
         sVkEmulation->deviceInfo.getImageMemoryRequirements2Func =
             reinterpret_cast<PFN_vkGetImageMemoryRequirements2KHR>(

@@ -153,8 +153,28 @@ void init_vulkan_dispatch_from_device(
     VulkanDispatch* dispatch_out);
 """)
 
+        # After populating a VulkanDispatch with the above methods,
+        # it can be useful to check whether the Vulkan 1.0 or 1.1 methods
+        # are all there.
+        def emit_feature_check_decl(cgen, featureToCheck):
+            cgen.line("""
+bool vulkan_dispatch_check_%s(
+    const VulkanDispatch* vk);
+""" % featureToCheck)
+
+        emit_feature_check_decl(self.cgenHeader, "VK_VERSION_1_0")
+        emit_feature_check_decl(self.cgenHeader, "VK_VERSION_1_1")
+
         self.cgenHeader.line("struct VulkanDispatch {")
         self.module.appendHeader(self.cgenHeader.swapCode())
+
+    def syncFeatureQuiet(self, cgen, feature):
+        if self.featureForCodegen != feature:
+            if feature == "":
+                self.featureForCodegen = feature
+                return
+
+            self.featureForCodegen = feature
 
     def syncFeature(self, cgen, feature):
         if self.featureForCodegen != feature:
@@ -266,6 +286,35 @@ void init_vulkan_dispatch_from_device(
 
         self.syncFeature(self.cgenImpl, "")
         self.cgenImpl.endBlock()
+
+        # Check Vulkan 1.0 / 1.1 functions
+
+        def emit_check_impl(cgen, dispatchVar, feature, featureToCheck, apiName):
+            if feature == featureToCheck:
+                cgen.beginIf("!%s->%s" % (dispatchVar, apiName))
+                cgen.stmt("fprintf(stderr, \"%s check failed: %s not found\\n\")" % (featureToCheck, apiName))
+                cgen.stmt("return false")
+                cgen.endIf()
+
+        def emit_feature_check_impl(context, cgen, featureToCheck):
+            cgen.line("""
+bool vulkan_dispatch_check_%s(
+    const VulkanDispatch* vk)
+""" % featureToCheck)
+
+            cgen.beginBlock()
+
+            for vulkanApi, typeDecl, feature in apis:
+                context.syncFeatureQuiet(self.cgenImpl, feature)
+                emit_check_impl(cgen, "vk", feature, featureToCheck, vulkanApi.name)
+
+            context.syncFeatureQuiet(self.cgenImpl, "")
+
+            cgen.stmt("return true")
+            cgen.endBlock()
+
+        emit_feature_check_impl(self, self.cgenImpl, "VK_VERSION_1_0")
+        emit_feature_check_impl(self, self.cgenImpl, "VK_VERSION_1_1")
 
         self.module.appendImpl(self.cgenImpl.swapCode())
 
