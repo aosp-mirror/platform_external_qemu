@@ -135,8 +135,6 @@ void LocationPage::locationPlaybackStart_v2()
     mSegmentDurationMs = 0.0;
     mMsIntoSegment = mSegmentDurationMs + 1.0; // Force us to advance to the [0,1] segment
 
-    mUi->loc_saveRoute->setEnabled(false);
-
     // The timer will be triggered as soon as
     // this function returns
     mTimer.setInterval(0);

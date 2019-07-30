@@ -199,36 +199,6 @@
     <attribute name="title">
      <string>Routes</string>
     </attribute>
-    <widget class="RaisedMaterialButton" name="loc_saveRoute">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>520</y>
-       <width>132</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>SAVE ROUTE</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Button</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="RaisedMaterialButton" name="loc_playRouteButton">
      <property name="geometry">
       <rect>
@@ -329,9 +299,9 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>50</y>
+       <y>20</y>
        <width>300</width>
-       <height>460</height>
+       <height>490</height>
       </rect>
      </property>
     </widget>
@@ -349,39 +319,6 @@
        <family>Roboto</family>
       </font>
      </property>
-    </widget>
-    <widget class="QComboBox" name="loc_travelMode">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>140</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string>Driving</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Walking</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Bicycling</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Transit</string>
-      </property>
-     </item>
     </widget>
     <widget class="QComboBox" name="loc_routeSpeed">
      <property name="geometry">
@@ -474,13 +411,11 @@
      </property>
     </widget>
     <zorder>loc_routeList</zorder>
-    <zorder>loc_saveRoute</zorder>
     <zorder>loc_playRouteButton</zorder>
     <zorder>loc_savedRoutesLabel_2</zorder>
     <zorder>loc_routeWebEngineView</zorder>
     <zorder>loc_routeInfo</zorder>
     <zorder>loc_noSavedRoutes_mask</zorder>
-    <zorder>loc_travelMode</zorder>
     <zorder>loc_routeSpeed</zorder>
     <zorder>loc_repeatLabel</zorder>
     <zorder>loc_repeatRoute</zorder>

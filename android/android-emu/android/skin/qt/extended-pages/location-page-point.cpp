@@ -60,6 +60,28 @@ PointWidgetItem* getItemWidget(QListWidget* list,
                                QListWidgetItem* listItem) {
     return qobject_cast<PointWidgetItem*>(list->itemWidget(listItem));
 }
+
+bool addJavascriptFromResource(QWebEnginePage* const webEnginePage,
+                               QString qrcFile,
+                               QString scriptName,
+                               const QString& appendString) {
+    QFile jsFile(qrcFile);
+    QWebEngineScript script;
+    if(!jsFile.open(QIODevice::ReadOnly)) {
+        qDebug() << QString("Couldn't open %1: %2").arg(qrcFile).arg(jsFile.errorString());
+        return false;
+    }
+
+    QByteArray jscode = jsFile.readAll();
+    jscode.append(appendString);
+    script.setSourceCode(jscode);
+    script.setName(scriptName);
+    script.setWorldId(QWebEngineScript::MainWorld);
+    script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+    script.setRunsOnSubFrames(false);
+    webEnginePage->scripts().insert(script);
+    return true;
+}
 }  // namespace
 
 void MapBridge::map_savePoint() {
@@ -410,27 +432,27 @@ void LocationPage::setUpWebEngine() {
     mMapBridge.reset(new MapBridge(this));
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
 
+    QObject::connect(this, &LocationPage::signal_saveRoute,
+                     this, &LocationPage::map_saveRoute,
+                     Qt::QueuedConnection);
+
     // Set up two web engines: one for the Points page and one for the Routes page
     for (int webEnginePageIdx = 0; webEnginePageIdx < 2; webEnginePageIdx++) {
         bool isPoint = (webEnginePageIdx == 0);
         QWebEnginePage* webEnginePage = isPoint ? mUi->loc_pointWebEngineView->page()
                                                 : mUi->loc_routeWebEngineView->page();
-        QFile webChannelJsFile(":/html/js/qwebchannel.js");
-        if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
-            qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
-            continue;
-        }
-        QByteArray webChannelJs = webChannelJsFile.readAll();
+
+        QString appendString;
 
         // Send the current location to each page
-        webChannelJs.append(
+        appendString.append(
                 "\n"
                 "var initialLat = '");
-        webChannelJs.append(QString::number(initialLat, 'g', 12));
-        webChannelJs.append(
+        appendString.append(QString::number(initialLat, 'g', 12));
+        appendString.append(
                 "'; var initialLng = '");
-        webChannelJs.append(QString::number(initialLng, 'g', 12));
-        webChannelJs.append(
+        appendString.append(QString::number(initialLng, 'g', 12));
+        appendString.append(
                 "';\n"
                 "var wsUri = 'ws://localhost:12345';"
                 "var socket = new WebSocket(wsUri);"
@@ -447,39 +469,50 @@ void LocationPage::setUpWebEngine() {
                         "});");
         if (isPoint) {
             // Define Points-specific interfaces
-            webChannelJs.append(
+            appendString.append(
                         "channel.objects.emulocationserver.showLocation.connect(function(lat, lng, addr) {"
                             "if (showPendingLocation) showPendingLocation(lat, lng, addr);"
                         "});");
-            webChannelJs.append(
+            appendString.append(
                         "channel.objects.emulocationserver.resetPointsMap.connect(function() {"
                             "if (resetPointsMap) resetPointsMap();"
                         "});");
         } else {
             // Define Routes-specific interfaces
-            webChannelJs.append(
-                        "channel.objects.emulocationserver.travelModeChanged.connect(function(mode) {"
-                            "if (setTravelMode) setTravelMode(mode);"
-                        "});"
+            appendString.append(
                         "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson) {"
                             "if (setRouteOnMap) setRouteOnMap(routeJson);"
                         "});");
         }
-        webChannelJs.append(
+        appendString.append(
                     "});"
                     "if (typeof setDeviceLocation != 'undefined' && setDeviceLocation != null) {"
                         "setDeviceLocation(initialLat, initialLng);"
                     "}"
                 "}");
 
-        QWebEngineScript script;
-        script.setSourceCode(webChannelJs);
-        script.setName("qwebchannel.js");
-        script.setWorldId(QWebEngineScript::MainWorld);
-        script.setInjectionPoint(QWebEngineScript::DocumentCreation);
-        script.setRunsOnSubFrames(false);
+        if (!addJavascriptFromResource(webEnginePage,
+                                       ":/html/js/qwebchannel.js",
+                                       "qwebchannel.js",
+                                       appendString)) {
+            continue;
+        }
+        if (!addJavascriptFromResource(webEnginePage,
+                                       ":/html/js/common.js",
+                                       "common.js",
+                                       "")) {
+            continue;
+        }
 
-        webEnginePage->scripts().insert(script);
+        QString pointRouteJsQrc(isPoint ? ":/html/js/points.js" : ":/html/js/routes.js");
+        QString pointRouteJsName(isPoint ? "points.js" : "routes.js");
+        
+        if (!addJavascriptFromResource(webEnginePage,
+                                       pointRouteJsQrc,
+                                       pointRouteJsName,
+                                       "")) {
+            continue;
+        }
 
         mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
                             QWebSocketServer::NonSecureMode));

@@ -65,43 +65,6 @@ RouteWidgetItem* getItemWidget(QListWidget* list,
 }
 }  // namespace
 
-void LocationPage::on_loc_saveRoute_clicked() {
-    mUi->loc_saveRoute->setEnabled(false);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    // Create the protobuf describing this route
-    QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
-
-    emulator_location::RouteMetadata routeMetadata;
-    routeMetadata.set_logical_name(routeName.toStdString().c_str());
-    routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
-    routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
-    routeMetadata.set_number_of_points(mRouteNumPoints);
-    routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
-    std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
-
-    // Write the JSON to a file
-    writeRouteJsonFile(protoPath);
-
-    // Add the new route to the list
-    RouteListElement listElement;
-    listElement.protoFilePath = QString::fromStdString(protoPath);
-    listElement.logicalName   = QString::fromStdString(routeMetadata.logical_name());
-    listElement.description   = QString::fromStdString(routeMetadata.description());
-    listElement.modeIndex     = routeMetadata.mode_of_travel();
-    listElement.numPoints     = routeMetadata.number_of_points();
-    listElement.duration      = routeMetadata.duration();
-
-    RouteItemBuilder builder(mUi->loc_routeList);
-    builder.addRoute(std::move(listElement), this);
-    mUi->loc_noSavedRoutes_mask->setVisible(false);
-
-    QApplication::restoreOverrideCursor();
-}
-
-void LocationPage::on_loc_travelMode_currentIndexChanged(int index) {
-    emit mMapBridge->travelModeChanged(index);
-}
-
 // Populate the saved routes list with the routes that are found on disk
 void LocationPage::scanForRoutes() {
     // Get the directory
@@ -203,10 +166,8 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
                 emit mMapBridge->showRouteOnMap(routeJson.toStdString().c_str());
 
                 mRouteTravelMode = routeElement.modeIndex;
-                mUi->loc_travelMode->setCurrentIndex(mRouteTravelMode);
                 mUi->loc_playRouteButton->setEnabled(true);
             }
-            mUi->loc_saveRoute->setEnabled(false);
         }
     }
 }
@@ -413,26 +374,60 @@ void LocationPage::showPendingRouteDetails() {
     mUi->loc_routeInfo->setHtml(infoString);
 }
 
-void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson) {
-    mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson);
+void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
+    mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson, mode);
 }
 
 // Invoked by the Maps javascript when a route has been created
-void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson) {
+void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
     mRouteNumPoints = numPoints;
     if (mRouteNumPoints > 0) {
         mRouteTotalTime = durationSeconds;
         mRouteCreationTime = QDateTime::currentDateTime();
-        mRouteTravelMode = mUi->loc_travelMode->currentIndex();
+        mRouteTravelMode = RouteWidgetItem::travelModeToInt(mode);
         mRouteJson = routeJson;
     }
 
     mUi->loc_routeList->setCurrentItem(nullptr);
     showPendingRouteDetails();
-    mUi->loc_saveRoute->setEnabled(mRouteNumPoints > 0);
     mUi->loc_playRouteButton->setEnabled(mRouteNumPoints > 0);
 }
 
+void MapBridge::saveRoute() {
+    emit mLocationPage->signal_saveRoute();
+}
+
+void LocationPage::map_saveRoute() {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    // Create the protobuf describing this route
+    QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
+
+    emulator_location::RouteMetadata routeMetadata;
+    routeMetadata.set_logical_name(routeName.toStdString().c_str());
+    routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
+    routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
+    routeMetadata.set_number_of_points(mRouteNumPoints);
+    routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
+    std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
+
+    // Write the JSON to a file
+    writeRouteJsonFile(protoPath);
+
+    // Add the new route to the list
+    RouteListElement listElement;
+    listElement.protoFilePath = QString::fromStdString(protoPath);
+    listElement.logicalName   = QString::fromStdString(routeMetadata.logical_name());
+    listElement.description   = QString::fromStdString(routeMetadata.description());
+    listElement.modeIndex     = routeMetadata.mode_of_travel();
+    listElement.numPoints     = routeMetadata.number_of_points();
+    listElement.duration      = routeMetadata.duration();
+
+    RouteItemBuilder builder(mUi->loc_routeList);
+    builder.addRoute(std::move(listElement), this);
+    mUi->loc_noSavedRoutes_mask->setVisible(false);
+
+    QApplication::restoreOverrideCursor();
+}
 // Write a protobuf into the specified directory.
 // This code determines the parent directory. The
 // full path of output file is returned.

@@ -110,15 +110,19 @@ public:
     // Handlers for point/route map callbacks
     void map_savePoint();
     void sendLocation(const QString& lat, const QString& lng, const QString& address);
-    void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
+    void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
 
 signals:
+    void signal_saveRoute();
+
     void locationUpdateRequired(double latitude, double longitude, double altitude,
                                 double velocity, double heading);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
 
 private slots:
+    void map_saveRoute();
+
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
@@ -160,12 +164,10 @@ private slots:
                                          QListWidgetItem* previous);
     void pointWidget_editButtonClicked(CCListItem* listItem);
 
-    void on_loc_travelMode_currentIndexChanged(int index);
     void on_loc_playRouteButton_clicked();
     void on_loc_routeList_currentItemChanged(QListWidgetItem* current,
                                          QListWidgetItem* previous);
     void routeWidget_editButtonClicked(CCListItem* listItem);
-    void on_loc_saveRoute_clicked();
 
 private:
     void finishGeoDataLoading(
@@ -318,16 +320,17 @@ public:
                        QObject* parent = nullptr) :
             mLocationPage(locationPage),
             QObject(parent) {}
+    // Javascript ==> Qt C++ code
     Q_INVOKABLE void map_savePoint();
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
-    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
+    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
+    Q_INVOKABLE void saveRoute();
 
 signals:
-    // Ways to send updates to the js code
+    // Qt C++ code ==> Javascript
     void locationChanged(QString lat, QString lng);
     void showLocation(QString lat, QString lng, QString addr);
     void showRouteOnMap(const QString& routeJson);
-    void travelModeChanged(int mode);
     void resetPointsMap();
 
 
@@ -351,6 +354,23 @@ public:
         refresh();
     }
 
+    static int travelModeToInt(const QString& mode) {
+        // These strings come from https://developers.google.com/maps/documentation/javascript/directions#TravelModes
+        if (mode == "DRIVING") {
+            return 0;
+        }
+        if (mode == "WALKING") {
+            return 1;
+        }
+        if (mode == "BICYCLING") {
+            return 2;
+        }
+        if (mode == "TRANSIT") {
+            return 3;
+        }
+       
+        return -1;
+    }
     // Call if the |routeElement|'s data changes to refresh the list item.
     void refresh() {
         setTitle(mRouteElement.logicalName);

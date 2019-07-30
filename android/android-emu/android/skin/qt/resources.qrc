@@ -16,6 +16,10 @@
         <file alias="html/index.html">html/index.html</file>
         <file alias="html/route.html">html/route.html</file>
         <file alias="html/js/qwebchannel.js">../../../html/js/qwebchannel.js</file>
+        <file alias="html/css/common.css">html/css/common.css</file>
+        <file alias="html/js/common.js">html/js/common.js</file>
+        <file alias="html/js/points.js">html/js/points.js</file>
+        <file alias="html/js/routes.js">html/js/routes.js</file>
     </qresource>
     <qresource prefix="/lib/fonts">
          <!-- The names 'Roboto*' are used to load the fonts in
