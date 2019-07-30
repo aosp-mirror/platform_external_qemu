@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f0b7135e_932db564",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1181,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-07-30T17:00:12Z",
+      "side": 1,
+      "message": "This look inconsistent with \"mutex.unlock();\" below. It also looks weird. Can this be done with adding scopes to use ~AutoLock instead?",
+      "range": {
+        "startLine": 1181,
+        "startChar": 4,
+        "endLine": 1181,
+        "endChar": 10
+      },
+      "revId": "4b51eabaef8c5313c10e385e3a156c734ddcc7ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
