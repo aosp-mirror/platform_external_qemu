@@ -23,7 +23,7 @@
 namespace android {
 namespace videoplayback {
 
-VideoplaybackVideoRenderer::VideoplaybackVideoRenderer() {}
+VideoplaybackVideoRenderer::VideoplaybackVideoRenderer(): mLooper(base::ThreadLooper::get()){}
 VideoplaybackVideoRenderer::~VideoplaybackVideoRenderer() {}
 
 bool VideoplaybackVideoRenderer::initialize(const GLESv2Dispatch* gles2,
@@ -41,7 +41,7 @@ void VideoplaybackVideoRenderer::uninitialize() {
 
 int64_t VideoplaybackVideoRenderer::render() {
   mRenderTarget->renderBuffer();
-  return 0;
+  return mLooper->nowNs(base::Looper::ClockType::kVirtual);
 }
 
 VideoplaybackRenderTarget* VideoplaybackVideoRenderer::renderTarget() {

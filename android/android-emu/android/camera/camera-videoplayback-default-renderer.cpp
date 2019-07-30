@@ -16,6 +16,7 @@
 
 #include "android/camera/camera-videoplayback-default-renderer.h"
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/offworld/proto/offworld.pb.h"
@@ -27,22 +28,25 @@ class DefaultFrameRendererImpl {
 public:
     DefaultFrameRendererImpl(const GLESv2Dispatch* gles2,
                              int width,
-                             int height);
+                             int height,
+                             base::Looper* looper);
     ~DefaultFrameRendererImpl() = default;
 
     bool initialize();
     void render();
-
+    int64_t nowNs();
 private:
     const GLESv2Dispatch* const mGles2;
     const int mRenderWidth;
     const int mRenderHeight;
+    base::Looper* const mLooper;
 };
 
 DefaultFrameRendererImpl::DefaultFrameRendererImpl(const GLESv2Dispatch* gles2,
                                                    int width,
-                                                   int height)
-    : mGles2(gles2), mRenderWidth(width), mRenderHeight(height) {
+                                                   int height,
+                                                   base::Looper* looper)
+    : mGles2(gles2), mRenderWidth(width), mRenderHeight(height), mLooper(looper) {
 }
 
 bool DefaultFrameRendererImpl::initialize() {
@@ -61,6 +65,11 @@ void DefaultFrameRendererImpl::render() {
     mGles2->glUseProgram(0);
 }
 
+int64_t DefaultFrameRendererImpl::nowNs() {
+  return mLooper->nowNs(base::Looper::ClockType::kVirtual);
+}
+
+
 DefaultFrameRenderer::DefaultFrameRenderer() {}
 DefaultFrameRenderer::~DefaultFrameRenderer() {}
 
@@ -68,7 +77,7 @@ bool DefaultFrameRenderer::initialize(const GLESv2Dispatch* gles2,
                                       int width,
                                       int height) {
     mImpl = std::unique_ptr<DefaultFrameRendererImpl>(
-            new DefaultFrameRendererImpl(gles2, width, height));
+            new DefaultFrameRendererImpl(gles2, width, height, base::ThreadLooper::get()));
     return mImpl->initialize();
 }
 
@@ -78,7 +87,7 @@ void DefaultFrameRenderer::uninitialize() {
 
 int64_t DefaultFrameRenderer::render() {
     mImpl->render();
-    return 0;
+    return mImpl->nowNs();
 }
 
 }  // namespace videoplayback
