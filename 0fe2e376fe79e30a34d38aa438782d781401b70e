@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21f184a7_b232d20c",
+        "filename": "android/android-emu/android/skin/qt/mac-native-event-filter.mm",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-07-30T22:18:24Z",
+      "side": 1,
+      "message": "Could you please use QByteArray::compare to avoid allocating of QString?",
+      "range": {
+        "startLine": 26,
+        "startChar": 18,
+        "endLine": 26,
+        "endChar": 42
+      },
+      "revId": "0fe2e376fe79e30a34d38aa438782d781401b70e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "852dcf40_9076ab93",
+        "filename": "android/android-emu/android/skin/qt/native-event-filter-factory.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-07-30T22:18:24Z",
+      "side": 1,
+      "message": "Could you please use QByteArray::compare to avoid allocating of QString?",
+      "range": {
+        "startLine": 35,
+        "startChar": 22,
+        "endLine": 35,
+        "endChar": 46
+      },
+      "revId": "0fe2e376fe79e30a34d38aa438782d781401b70e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b4bd844_beade090",
+        "filename": "android/android-emu/android/skin/qt/native-event-filter-factory.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-07-30T22:18:24Z",
+      "side": 1,
+      "message": "Could you please use QByteArray::compare to avoid allocating of QString?",
+      "range": {
+        "startLine": 59,
+        "startChar": 22,
+        "endLine": 59,
+        "endChar": 46
+      },
+      "revId": "0fe2e376fe79e30a34d38aa438782d781401b70e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
