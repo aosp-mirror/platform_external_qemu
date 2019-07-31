@@ -1601,11 +1601,16 @@ int gvm_ioctl(GVMState *s, int type,
         case ERROR_MORE_DATA:
             ret = -E2BIG;
             break;
+        case ERROR_RETRY:
+            ret = -EAGAIN;
+            break;
         default:
             ret = -EFAULT;
         }
+    } else {
+        ret = 0;
     }
-    return 0;
+    return ret;
 }
 
 int gvm_vm_ioctl(GVMState *s, int type,
@@ -1626,11 +1631,16 @@ int gvm_vm_ioctl(GVMState *s, int type,
         case ERROR_MORE_DATA:
             ret = -E2BIG;
             break;
+        case ERROR_RETRY:
+            ret = -EAGAIN;
+            break;
         default:
             ret = -EFAULT;
         }
+    } else {
+        ret = 0;
     }
-    return 0;
+    return ret;
 }
 
 int gvm_vcpu_ioctl(CPUState *cpu, int type,
