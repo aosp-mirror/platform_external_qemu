@@ -185,6 +185,10 @@ int64_t RenderMultiplexer::render() {
                     return -1;
                 }
                 mOngoingAsyncId = async_id;
+                if (mPlaysData) {
+                  LOG(ERROR) << "Pause not implemented for data playback.";
+                  return -1;
+                }
                 switchRenderer(mVideoRenderer.get());
                 mPlayer->pause();
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
@@ -192,7 +196,8 @@ int64_t RenderMultiplexer::render() {
                 break;
             case ::offworld::VideoInjectionRequest::kLoad:
                 switchRenderer(mVideoRenderer.get());
-                if (maybe_next_request->load().has_dataset_info()) {
+                mPlaysData = maybe_next_request->load().has_dataset_info();
+                if (mPlaysData) {
                     LOG(VERBOSE) << "Load video with dataset info";
                     loadVideoWithData(maybe_next_request->load().video_data(),
                                       maybe_next_request->load().dataset_info(),
