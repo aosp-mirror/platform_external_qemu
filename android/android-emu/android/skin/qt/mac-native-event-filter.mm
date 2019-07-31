@@ -16,6 +16,7 @@
 
 #include "android/skin/qt/mac-native-event-filter.h"
 
+#include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
 #import <AppKit/AppKit.h>
@@ -27,8 +28,13 @@ bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
         NSEvent* event = static_cast<NSEvent*>(message);
         if ([event type] == NSKeyDown) {
             if (EmulatorQtWindow::getInstance() != nullptr) {
+                unsigned short keycode = [event keyCode];
+                if (([event modifierFlags] & NSEventModifierFlagNumericPad) &&
+                        skin_keycode_native_is_keypad(keycode)) {
+                    keycode = skin_keycode_native_map_keypad(keycode);
+                }
                 EmulatorQtWindow::getInstance()->handleNativeKeyEvent(
-                        [event keyCode], [event modifierFlags], kEventKeyDown);
+                       keycode , [event modifierFlags], kEventKeyDown);
             }
         }
     }
