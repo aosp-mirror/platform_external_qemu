@@ -184,7 +184,12 @@ extern bool skin_key_pair_from_string(const char* str,
 extern bool skin_keycode_native_to_linux(int32_t* pVirtualKey,
                                          int32_t* pModifier);
 
+extern bool skin_keycode_native_is_keypad(int32_t virtualKey);
+
+extern int32_t skin_keycode_native_map_keypad(int32_t virtualKey);
+
 extern bool skin_keycode_is_alpha(int32_t linux_key);
 
 extern bool skin_keycode_is_modifier(int32_t linux_key);
+
 ANDROID_END_HEADER
