@@ -62,6 +62,7 @@ private:
      virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
      bool mInitialized = false;
      size_t mCounter = 0;
+     bool mPlaysData = false;
 };
 
 }  // namespace videoplayback
