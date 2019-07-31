@@ -25,7 +25,7 @@
 #define  DEBUG  1
 
 #if DEBUG
-#  define  D(...)  VERBOSE_PRINT(keys,__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(keys, __VA_ARGS__)
 #else
 #  define  D(...)  ((void)0)
 #endif
@@ -167,6 +167,9 @@ static int map_cros_key(int* code) {
     case KEY_APPSWITCH:
         *code = LINUX_KEY_F5;
         return 0;
+    case LINUX_KEY_GREEN:
+        *code = LINUX_KEY_GRAVE;
+        return 0;
     }
     return -1;
 }
@@ -229,19 +232,30 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              */
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
-        // TODO(digit): For each Unicode value in the input text.
-        const uint8_t* text = ev->u.text.text;
-        const uint8_t* end = text + sizeof(ev->u.text.text);
-        while (text < end && *text) {
-            uint32_t codepoint = 0;
-            int len = android_utf8_decode(text, end - text, &codepoint);
-            if (len < 0) {
-                break;
-            }
-            skin_keyboard_process_unicode_event(kb, codepoint, 1);
-            skin_keyboard_process_unicode_event(kb, codepoint, 0);
-            text += len;
+        int doShiftL = ev->u.text.mod & kKeyModLShift;
+        int doAltL = ev->u.text.mod & kKeyModLAlt;
+        int doCltrL = ev->u.text.mod & kKeyModLCtrl;
+
+        if (doShiftL) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
+        if (doAltL) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, 1);
+        }
+        if (doCltrL) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 1);
+        }
+
+        D("event type: kTextInput key code=%d mod=0x%x str=%s",
+          ev->u.text.keycode, ev->u.text.mod,
+          skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
+
+        if (android_hw->hw_arc) {
+            map_cros_key(&ev->u.text.keycode);
+        }
+        skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
+        skin_keyboard_add_key_event(kb, ev->u.text.keycode, 0);
+
         if (android_hw->hw_arc && mod) {
             /* If the tracked shift status was pressed, restore it by
              * telling sync_modifier_key there is a shift pressed event.
@@ -251,6 +265,17 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
                               LINUX_KEY_LEFTSHIFT, 0, 1);
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
+
+        if (doShiftL) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 0);
+        }
+        if (doAltL) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, 0);
+        }
+        if (doCltrL) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 0);
+        }
+
         skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
@@ -345,8 +370,10 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
     if (!kb->charmap) {
         // Charmap name was not found. Default to "qwerty2" */
         kb->charmap = skin_charmap_get_by_name(DEFAULT_ANDROID_CHARMAP);
-        fprintf(stderr, "### warning, skin requires unknown '%s' charmap, reverting to '%s'\n",
-                charmap_name, kb->charmap->name );
+        fprintf(stderr,
+                "warning, skin requires unknown '%s' charmap, reverting to "
+                "'%s'\n",
+                charmap_name, kb->charmap->name);
     }
     skin_keycode_buffer_init(kb->keycodes, keycode_flush);
     skin_keyboard_set_rotation(kb, dpad_rotation);

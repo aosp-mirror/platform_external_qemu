@@ -67,6 +67,8 @@ typedef struct {
 typedef struct {
     uint8_t text[32];
     bool down;
+    int32_t keycode;
+    int32_t mod;
 } SkinEventTextInputData;
 
 typedef struct {
