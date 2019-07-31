@@ -181,3 +181,40 @@ bool skin_keycode_native_to_linux(int32_t* pVirtualKey, int32_t* pModifier) {
     }
     return false;
 }
+
+static struct keypad_num_mapping {
+    int32_t keypad;
+    int32_t digit;
+} sKeypadNumMapping[] = {
+        {79, 16},  // KP_7 --> 7
+        {80, 17},  // KP_8 --> 8
+        {81, 18},  // KP_9 --> 9
+        {83, 13},  // KP_4 --> 4
+        {84, 14},  // KP_5 --> 5
+        {85, 15},  // KP_6 --> 6
+        {87, 10},  // KP_1 --> 1
+        {88, 11},  // KP_2 --> 2
+        {89, 12},  // KP_3 --> 3
+        {90, 19},  // KP_0 --> 0
+        {91, 60},  // KP_DOT --> DOT
+};
+
+bool skin_keycode_native_is_keypad(int32_t virtualKey) {
+    for (size_t nn = 0; nn < android::base::arraySize(sKeypadNumMapping);
+         nn++) {
+        if (virtualKey == sKeypadNumMapping[nn].keypad) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t skin_keycode_native_map_keypad(int32_t virtualKey) {
+    for (size_t nn = 0; nn < android::base::arraySize(sKeypadNumMapping);
+         nn++) {
+        if (virtualKey == sKeypadNumMapping[nn].keypad) {
+            return sKeypadNumMapping[nn].digit;
+        }
+    }
+    return -1;
+}
