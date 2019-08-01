@@ -110,6 +110,8 @@ private:
             abort();
         }
 
+        if (!mWritePos) return;
+
         int written =
             mStream->writeFully(mWriteBuffer.data(), mWritePos);
 

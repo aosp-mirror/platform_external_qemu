@@ -703,10 +703,11 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
         break;
     }
 
-    case PIPE_CMD_POLL:
+    case PIPE_CMD_POLL:{
         dev->status = service_ops->guest_poll(pipe->host_pipe);
         DD("%s: CMD_POLL > status=%d", __func__, dev->status);
         break;
+                       }
 
     case PIPE_CMD_READ: {
         /* Translate guest physical address into emulator memory. */
@@ -828,6 +829,11 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
     commandBuffer->status = 0;
 }
 
+static uint64_t pipe_dev_curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_usec + tv.tv_sec * 1000000ULL;
+}
 static void pipeDevice_doCommand_v2(HwPipe* pipe) {
     assert(pipe);
     assert(pipe->command_buffer->cmd != PIPE_CMD_OPEN);
@@ -853,12 +859,19 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             break;
         }
 
-        case PIPE_CMD_POLL:
+        case PIPE_CMD_POLL: {
+        uint64_t poll_start = pipe_dev_curr_time_us();
             pipe->command_buffer->status =
                     service_ops->guest_poll(pipe->host_pipe);
+        uint64_t poll_end = pipe_dev_curr_time_us();
+        if (poll_end - poll_start > 10000ULL) {
+            fprintf(stderr, "%s: long poll. time: %f ms\n", __func__,
+                    ((float)(poll_end - poll_start) / 1000.0f));
+        }
             DD("%s: CMD_POLL > status=%d", __func__,
                pipe->command_buffer->status);
             break;
+                            }
 
         case PIPE_CMD_READ:
         case PIPE_CMD_WRITE:
@@ -1007,14 +1020,14 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             // TODO(zyy): create an extended version of send()/recv() functions
             // to return both transferred size and resulting status in single
             // call.
-            if (isCall) {
+            // if (isCall) {
                 pipe->command_buffer->rw_params.consumed_size = consumed_size;
                 pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
-            } else {
-                pipe->command_buffer->status = status;
-                pipe->command_buffer->rw_params.consumed_size =
-                    status < 0 ? 0 : status;
-            }
+            // } else {
+                // pipe->command_buffer->status = status;
+                // pipe->command_buffer->rw_params.consumed_size =
+                    // status < 0 ? 0 : status;
+            // }
 
             DD("%s: CMD_%s id=%d buffers=%d > status=%d", __func__,
                (willModifyData ? (isCall ? "CALL" : "READ") : "WRITE"),
@@ -1191,11 +1204,6 @@ static void pipe_dev_write_v1(PipeDevice* dev,
     }
 }
 
-static uint64_t pipe_dev_curr_time_us() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return tv.tv_usec + tv.tv_sec * 1000000ULL;
-}
 
 #define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
 

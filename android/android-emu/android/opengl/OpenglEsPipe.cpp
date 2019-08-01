@@ -11,6 +11,7 @@
 #include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/Optional.h"
+#include "android/base/RateEstimator.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"
@@ -51,6 +52,7 @@ using emugl::RenderChannel;
 using emugl::RenderChannelPtr;
 using ChannelState = emugl::RenderChannel::State;
 using IoResult = emugl::RenderChannel::IoResult;
+using android::base::RateEstimator;
 using android::base::Stopwatch;
 using android::snapshot::Snapshotter;
 
@@ -264,6 +266,10 @@ public:
         mChannel->setEventCallback([this](RenderChannel::State events) {
             onChannelHostEvent(events);
         });
+
+        char tag[256] = {};
+        snprintf(tag, sizeof(tag), "eagain-%p", this);
+        mEagainRate = new RateEstimator(tag, 1000000ULL);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -285,6 +291,7 @@ public:
         // Make sure there's no operation scheduled for this pipe instance to
         // run on the main thread.
         abortPendingOperation();
+        delete mEagainRate;
         delete this;
     }
 
@@ -325,6 +332,7 @@ public:
         while (buff != buffEnd) {
             if (mDataForReadingLeft == 0) {
                 if (android::opengl::recvMode == android::opengl::RecvMode::Android) {
+                // if (false) {
                     // No data left, read a new chunk from the channel.
                     int spinCount = 20;
                     for (;;) {
@@ -351,6 +359,8 @@ public:
                             continue;
                         }
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                        // fprintf(stderr, "%s: eagain\n", __func__);
+                        mEagainRate->addEvent();
                         return PIPE_ERROR_AGAIN;
                     }
                 } else { // Fuchsia, default (Not using switch because of break; overload)
@@ -388,6 +398,8 @@ public:
                         }
 
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                        // fprintf(stderr, "%s: eagain\n", __func__);
+                        mEagainRate->addEvent();
                         return PIPE_ERROR_AGAIN;
                     }
                     mDataForReadingLeft = mDataForReading.size();
@@ -527,6 +539,8 @@ private:
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
     uint32_t mDataForReadingLeft = 0;
     ChannelBuffer mDataForReading;
+
+    android::base::RateEstimator* mEagainRate = nullptr;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);
 };
