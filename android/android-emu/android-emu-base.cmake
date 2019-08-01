@@ -36,6 +36,7 @@ set(android-emu-base_src
     android/base/network/IpAddress.cpp
     android/base/network/NetworkUtils.cpp
     android/base/Pool.cpp
+    android/base/RateEstimator.cpp
     android/base/Stopwatch.cpp
     android/base/StringFormat.cpp
     android/base/StringParse.cpp

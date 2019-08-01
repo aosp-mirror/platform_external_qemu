@@ -620,6 +620,7 @@ set(android-emu_unittests_src
     android/base/perflogger/Benchmark_unittest.cpp
     android/base/Pool_unittest.cpp
     android/base/ProcessControl_unittest.cpp
+    android/base/RateEstimator_unittest.cpp
     android/base/Result_unittest.cpp
     android/base/sockets/ScopedSocket_unittest.cpp
     android/base/sockets/SocketDrainer_unittest.cpp
