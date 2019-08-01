@@ -57,6 +57,22 @@ void init_vulkan_dispatch_from_device(
     VkDevice device,
     VulkanDispatch* dispatch_out);
 
+
+bool vulkan_dispatch_check_instance_VK_VERSION_1_0(
+    const VulkanDispatch* vk);
+
+
+bool vulkan_dispatch_check_instance_VK_VERSION_1_1(
+    const VulkanDispatch* vk);
+
+
+bool vulkan_dispatch_check_device_VK_VERSION_1_0(
+    const VulkanDispatch* vk);
+
+
+bool vulkan_dispatch_check_device_VK_VERSION_1_1(
+    const VulkanDispatch* vk);
+
 struct VulkanDispatch {
 #ifdef VK_VERSION_1_0
 PFN_vkCreateInstance vkCreateInstance;

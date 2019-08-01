@@ -408,6 +408,13 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     android_unix_pipes_init();
     android_init_opengles_pipe();
+
+    if (android_qemu_mode) {
+        android_opengles_pipe_set_recv_mode(0 /* android */);
+    } else {
+        android_opengles_pipe_set_recv_mode(1 /* fuchsia */);
+    }
+
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
     if (fc::isEnabled(fc::RefCountPipe))

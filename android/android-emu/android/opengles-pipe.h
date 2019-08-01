@@ -26,4 +26,9 @@ ANDROID_BEGIN_HEADER
 // |dummyLooper| is now unused, this will be removed in a future patch.
 void android_init_opengles_pipe(void);
 
+// Set the way in which the pipe processes guest recv depending on the OS
+// 0: Android
+// 1: Fuchsia
+void android_opengles_pipe_set_recv_mode(int);
+
 ANDROID_END_HEADER
