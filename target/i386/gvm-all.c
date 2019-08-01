@@ -882,7 +882,7 @@ int gvm_set_irq(GVMState *s, int irq, int level)
     event.level = level;
     event.irq = irq;
     ret = gvm_vm_ioctl(s, GVM_IRQ_LINE_STATUS,
-            &event, sizeof(event), NULL, 0);
+            &event, sizeof(event), &event, sizeof(event));
 
     if (ret < 0) {
         perror("gvm_set_irq");
