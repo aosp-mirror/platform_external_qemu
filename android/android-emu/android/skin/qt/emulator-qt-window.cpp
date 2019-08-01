@@ -25,8 +25,8 @@
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -36,6 +36,8 @@
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
+#include "android/skin/keyboard.h"
+#include "android/skin/keyboard.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/QtLooper.h"
@@ -691,6 +693,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                     });
                 }
             });
+    mLayoutChangeDetector = Ui::KeyboardLayoutChangeDetector::create((*mAdbInterface),
+                                mLooper, 3 * 1000); // every 3 seconds
+    mLayoutChangeDetector->start();
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -705,6 +710,11 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mApkInstallCommand) {
         mApkInstallCommand->cancel();
     }
+
+    if (mLayoutChangeDetector) {
+      mLayoutChangeDetector->stop();
+    }
+
     mInstallDialog.clear();
     mPushDialog.clear();
 
@@ -2273,7 +2283,6 @@ void EmulatorQtWindow::handleNativeKeyEvent(int keycode,
         skin_keycode_is_modifier(keycode)) {
         return;
     }
-
     SkinEvent* skin_event = createSkinEvent(kEventTextInput);
     SkinEventTextInputData& textInputData = skin_event->u.text;
     textInputData.down = true;
