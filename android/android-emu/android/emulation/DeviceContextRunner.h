@@ -22,6 +22,15 @@
 #include <memory>
 #include <vector>
 
+#include <sys/time.h>
+
+static uint64_t dev_curr_time() {
+    uint64_t res;
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return (uint64_t)(tv.tv_sec * 1000000ULL + tv.tv_usec);
+}
+
 namespace android {
 // All operations that change the global VM state (e.g.
 // virtual device operations) should happen in a thread
@@ -117,10 +126,12 @@ protected:
     // Otherwise, we need to add the request to a pending
     // set of requests, to be finished later when we do have the VM lock.
     void queueDeviceOperation(const T& op) {
+        mLastQueueTime = dev_curr_time();
         if (mContextRunMode == ContextRunMode::DeferIfNotLocked &&
             mVmLock->isLockedBySelf()) {
             // Perform the operation correctly since the current thread
             // already holds the lock that protects the global VM state.
+            mLastPerformTime = dev_curr_time();
             performDeviceOperation(op);
         } else {
             // Queue the operation in the mPendingMap structure, then
@@ -159,7 +170,18 @@ protected:
 private:
     void onTimerEvent() {
         AutoLock lock(mLock);
+        int i = 0;
         for (const auto& elt : mPending) {
+            if (i == 0) {
+        mLastPerformTime = dev_curr_time();
+        if (mLastPerformTime > mLastQueueTime) {
+            auto delay = mLastPerformTime - mLastQueueTime;
+            if (delay > 10000ULL) {
+                fprintf(stderr, "%s: %p long queue time. %f ms\n", __func__, this, ((float)delay) / 1000.0f);
+            }
+        }
+            }
+        ++i;
             performDeviceOperation(elt);
         }
         mPending.clear();
@@ -171,6 +193,8 @@ private:
     mutable Lock mLock;
     PendingList mPending;
     std::unique_ptr<Looper::Timer> mTimer;
+    uint64_t mLastQueueTime = 0;
+    uint64_t mLastPerformTime = 0;
 };
 
 }  // namespace android

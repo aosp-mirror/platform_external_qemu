@@ -11,6 +11,7 @@
 #include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/Optional.h"
+#include "android/base/RateEstimator.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"
@@ -30,6 +31,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 // Set to 1 or 2 for debug traces
 #define DEBUG 0
@@ -51,6 +53,7 @@ using emugl::RenderChannel;
 using emugl::RenderChannelPtr;
 using ChannelState = emugl::RenderChannel::State;
 using IoResult = emugl::RenderChannel::IoResult;
+using android::base::RateEstimator;
 using android::base::Stopwatch;
 using android::snapshot::Snapshotter;
 
@@ -264,6 +267,10 @@ public:
         mChannel->setEventCallback([this](RenderChannel::State events) {
             onChannelHostEvent(events);
         });
+
+        // char tag[256] = {};
+        // snprintf(tag, sizeof(tag), "eagain-%p", this);
+        // mEagainRate = new RateEstimator(tag, 1000000ULL);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -285,6 +292,7 @@ public:
         // Make sure there's no operation scheduled for this pipe instance to
         // run on the main thread.
         abortPendingOperation();
+        // delete mEagainRate;
         delete this;
     }
 
@@ -325,6 +333,7 @@ public:
         while (buff != buffEnd) {
             if (mDataForReadingLeft == 0) {
                 if (android::opengl::recvMode == android::opengl::RecvMode::Android) {
+                // if (false) {
                     // No data left, read a new chunk from the channel.
                     int spinCount = 20;
                     for (;;) {
@@ -351,6 +360,8 @@ public:
                             continue;
                         }
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                        // fprintf(stderr, "%s: eagain\n", __func__);
+                        // mEagainRate->addEvent();
                         return PIPE_ERROR_AGAIN;
                     }
                 } else { // Fuchsia, default (Not using switch because of break; overload)
@@ -388,6 +399,8 @@ public:
                         }
 
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                        // fprintf(stderr, "%s: eagain\n", __func__);
+                        // mEagainRate->addEvent();
                         return PIPE_ERROR_AGAIN;
                     }
                     mDataForReadingLeft = mDataForReading.size();
@@ -414,9 +427,18 @@ public:
         return len;
     }
 
+    uint64_t curr_time_us() {
+        uint64_t res;
+        struct timeval tv;
+        gettimeofday(&tv, 0);
+        return (uint64_t)(tv.tv_sec * 1000000ULL + tv.tv_usec);
+    }
+
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
                             int numBuffers) override {
         DD("%s", __func__);
+
+        auto start = curr_time_us();
 
         if (!mIsWorking) {
             DD("%s: pipe already closed!", __func__);
@@ -445,6 +467,12 @@ public:
             D("%s: tryWrite() failed with %d", __func__, (int)result);
             return result == IoResult::Error ? PIPE_ERROR_IO : PIPE_ERROR_AGAIN;
         }
+        auto end = curr_time_us();
+
+        auto delay = end - start;
+        if (delay > 10000ULL) {
+            fprintf(stderr, "%s: took too long. %f ms\n", __func__, ((float)delay) / 1000.0f);
+        }
 
         return count;
     }
@@ -461,21 +489,32 @@ public:
             wanted |= ChannelState::CanWrite;
         }
 
-        // Signal events that are already available now.
-        ChannelState state = mChannel->state();
-        ChannelState available = state & wanted;
-        DD("%s: state=%d wanted=%d available=%d", __func__, (int)state,
-           (int)wanted, (int)available);
-        if (available != ChannelState::Empty) {
-            DD("%s: signaling events %d", __func__, (int)available);
-            signalState(available);
-            wanted &= ~available;
+        bool availNow = false;
+
+        if (mDataForReadingLeft > 0) {
+            availNow = true;
         }
 
         // Ask the channel to be notified of remaining events.
         if (wanted != ChannelState::Empty) {
             DD("%s: waiting for events %d", __func__, (int)wanted);
             mChannel->setWantedEvents(wanted);
+            mChannel->queueWantedWake(wanted);
+        }
+
+        // Signal events that are already available now.
+        ChannelState state = mChannel->state();
+        ChannelState available = state & wanted;
+        DD("%s: state=%d wanted=%d available=%d", __func__, (int)state,
+           (int)wanted, (int)available);
+
+        if (available != ChannelState::Empty) {
+            availNow = true;
+        }
+
+        if (availNow) {
+            signalState(wanted);
+            wanted &= ~available;
         }
     }
 
@@ -527,6 +566,8 @@ private:
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
     uint32_t mDataForReadingLeft = 0;
     ChannelBuffer mDataForReading;
+
+    // android::base::RateEstimator* mEagainRate = nullptr;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);
 };

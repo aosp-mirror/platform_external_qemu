@@ -110,6 +110,9 @@ public:
     // Callback function when snapshotting the virtual machine.
     virtual void onSave(android::base::Stream* stream) = 0;
 
+    virtual void queueWantedWake(State) = 0;
+    virtual bool tryDequeueWantedWake() = 0;
+
 protected:
     ~RenderChannel() = default;
 };

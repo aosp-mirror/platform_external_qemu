@@ -151,11 +151,11 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             printf("emulator: Increasing screen off timeout, "
                     "logcat buffer size to 2M.\n");
 
-            adbInterface->enqueueCommand(
-                { "shell", "settings", "put", "system",
-                  "screen_off_timeout", "2147483647" });
-            adbInterface->enqueueCommand(
-                { "shell", "logcat", "-G", "2M" });
+            // adbInterface->enqueueCommand(
+                // { "shell", "settings", "put", "system",
+                  // "screen_off_timeout", "2147483647" });
+            // adbInterface->enqueueCommand(
+                // { "shell", "logcat", "-G", "2M" });
 
             // If we allowed host audio, don't revoke
             // microphone perms.
@@ -168,10 +168,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                        "for Google App.\n");
             }
 
-            adbInterface->enqueueCommand(
-                { "shell", "pm", "revoke",
-                  "com.google.android.googlequicksearchbox",
-                  "android.permission.RECORD_AUDIO" });
+            // adbInterface->enqueueCommand(
+                // { "shell", "pm", "revoke",
+                  // "com.google.android.googlequicksearchbox",
+                  // "android.permission.RECORD_AUDIO" });
 
             if (restart_when_stalled > 0 && num_watchdog == 0) {
                 std::thread{watchDogFunction, 1}.detach();
@@ -183,11 +183,11 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             // start multi-display service after boot completion
             if (fc::isEnabled(fc::MultiDisplay)) {
-                adbInterface->enqueueCommand(
-                        {"shell", "am", "broadcast", "-a",
-                         "com.android.emulator.multidisplay.START", "-n",
-                         "com.android.emulator.multidisplay/"
-                         ".MultiDisplayServiceReceiver"});
+                // adbInterface->enqueueCommand(
+                        // {"shell", "am", "broadcast", "-a",
+                         // "com.android.emulator.multidisplay.START", "-n",
+                         // "com.android.emulator.multidisplay/"
+                         // ".MultiDisplayServiceReceiver"});
             }
 
             if (changing_language_country_locale) {

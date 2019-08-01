@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <sys/time.h>
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
@@ -44,6 +45,13 @@ static constexpr size_t kGuestToHostQueueCapacity = 32U;
 static constexpr size_t kGuestToHostQueueCapacity = 1024U;
 #endif
 static constexpr size_t kHostToGuestQueueCapacity = 16U;
+
+uint64_t curr_time_us() {
+    uint64_t res;
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return (uint64_t)(tv.tv_sec * 1000000ULL + tv.tv_usec);
+}
 
 RenderChannelImpl::RenderChannelImpl(android::base::Stream* loadStream)
     : mFromGuest(kGuestToHostQueueCapacity, mLock),
@@ -96,6 +104,16 @@ IoResult RenderChannelImpl::tryWrite(Buffer&& buffer) {
 IoResult RenderChannelImpl::tryRead(Buffer* buffer) {
     D("enter");
     AutoLock lock(mLock);
+
+    auto mLastGuestReadTime = curr_time_us();
+
+    if (mLastGuestReadTime > mLastWriteToGuestTime) {
+        auto delay = mLastGuestReadTime - mLastWriteToGuestTime;
+        if (delay > 10000ULL) {
+            fprintf(stderr, "%s: %p warning: long delay between last write and read. %f ms\n", __func__, this, ((float)delay) / 1000.0f);
+        }
+    }
+
     auto result = mToGuest.tryPopLocked(buffer);
     updateStateLocked();
     DD("mToGuest.tryPopLocked() returned %d, buffer size %d, state %d",
@@ -128,6 +146,13 @@ bool RenderChannelImpl::writeToGuest(Buffer&& buffer) {
     updateStateLocked();
     D("mToGuest.pushLocked() returned %d, state %d", (int)result, (int)mState);
     notifyStateChangeLocked();
+    mLastWriteToGuestTime = curr_time_us();
+    if (mLastWriteToGuestTime > mLastWantedReadTime) {
+        auto delay = mLastWantedReadTime - mLastWantedReadTime;
+        if (delay > 10000ULL) {
+            fprintf(stderr, "%s: %p warning: long delay between last wanted read and writeToGuest. %f ms\n", __func__, this, ((float)delay) / 1000.0f);
+        }
+    }
     return result == IoResult::Ok;
 }
 
@@ -180,6 +205,17 @@ void RenderChannelImpl::resume() {
     mToGuest.setSnapshotModeLocked(false);
 }
 
+void RenderChannelImpl::queueWantedWake(State state) {
+    AutoLock lock(mLock);
+    mLastWantedReadTime = curr_time_us();
+    mWakeQueue.send(state);
+}
+
+bool RenderChannelImpl::tryDequeueWantedWake() {
+    State state;
+    return mWakeQueue.tryReceive(&state);
+}
+
 RenderChannelImpl::~RenderChannelImpl() {
     // Make sure the render thread is stopped before the channel is gone.
     mRenderThread->wait();
@@ -203,7 +239,7 @@ void RenderChannelImpl::updateStateLocked() {
 void RenderChannelImpl::notifyStateChangeLocked() {
     // Always report stop events, event if not explicitly asked for.
     State available = mState & (mWantedEvents | State::Stopped);
-    if (available != 0) {
+    if (available != 0 || tryDequeueWantedWake()) {
         D("callback with %d", (int)available);
         mWantedEvents &= ~mState;
         mEventCallback(available);

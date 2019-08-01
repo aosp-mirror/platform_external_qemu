@@ -14,6 +14,7 @@
 #pragma once
 
 #include "android/base/containers/BufferQueue.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "OpenglRender/RenderChannel.h"
 #include "RendererImpl.h"
 
@@ -63,6 +64,10 @@ public:
     // Callback function when snapshotting the virtual machine.
     virtual void onSave(android::base::Stream* stream) override;
 
+    // Ask the channel for a wake.
+    virtual void queueWantedWake(State state) override;
+    virtual bool tryDequeueWantedWake() override;
+
     /////////////////////////////////////////////////////////////////
     // These functions are called from the host render thread or renderer.
 
@@ -111,6 +116,12 @@ private:
     State mWantedEvents = State::Empty;
     BufferQueue<RenderChannel::Buffer> mFromGuest;
     BufferQueue<RenderChannel::Buffer> mToGuest;
+
+    uint64_t mLastWriteToGuestTime = 0;
+    uint64_t mLastGuestReadTime = 0;
+    uint64_t mLastWantedReadTime = 0;
+
+    android::base::MessageChannel<State, 16U> mWakeQueue;
 };
 
 }  // namespace emugl

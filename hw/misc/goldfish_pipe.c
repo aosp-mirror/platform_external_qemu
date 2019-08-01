@@ -364,6 +364,12 @@ struct PipeDevice {
     uint64_t wake_us;
     uint64_t read_start_us;
     uint64_t read_end_us;
+    uint64_t openclose_start_us;
+    uint64_t openclose_end_us;
+    uint64_t cmd_start_us;
+    uint64_t cmd_end_us;
+    uint64_t xfer_start_us;
+    uint64_t xfer_end_us;
 };
 
 
@@ -703,10 +709,11 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
         break;
     }
 
-    case PIPE_CMD_POLL:
+    case PIPE_CMD_POLL:{
         dev->status = service_ops->guest_poll(pipe->host_pipe);
         DD("%s: CMD_POLL > status=%d", __func__, dev->status);
         break;
+                       }
 
     case PIPE_CMD_READ: {
         /* Translate guest physical address into emulator memory. */
@@ -828,6 +835,23 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
     commandBuffer->status = 0;
 }
 
+static uint64_t pipe_dev_curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_usec + tv.tv_sec * 1000000ULL;
+}
+
+#define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
+
+static void pipe_dev_warn_long_duration(
+    const char* tag, uint64_t start_us, uint64_t end_us) {
+    float ms = (end_us - start_us) / 1000.0f;
+    if (ms > LONG_PIPE_TRANSACTION_THRESHOLD_MS) {
+        fprintf(stderr, "%s: high latency for [%s]: %f ms\n",
+                __func__, tag, ms);
+    }
+}
+
 static void pipeDevice_doCommand_v2(HwPipe* pipe) {
     assert(pipe);
     assert(pipe->command_buffer->cmd != PIPE_CMD_OPEN);
@@ -844,21 +868,37 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
     switch (command) {
         case PIPE_CMD_CLOSE: {
             DD("%s: CMD_CLOSE id=%d", __func__, (int)pipe->id);
+            dev->openclose_start_us = pipe_dev_curr_time_us();
             // Remove from device's lists.
             dev->pipes[pipe->id] = NULL;
             wanted_pipes_remove_v2(dev, pipe);
             pipe->command_buffer->status = 0;
             unmap_command_buffer(pipe->command_buffer);
             hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_GRACEFUL);
+            dev->openclose_end_us = pipe_dev_curr_time_us();
+            if (dev->measure_latency) {
+                pipe_dev_warn_long_duration(
+                    "pipe_close",
+                    dev->openclose_start_us,
+                    dev->openclose_end_us);
+            }
             break;
         }
 
-        case PIPE_CMD_POLL:
+        case PIPE_CMD_POLL: {
+        uint64_t poll_start = pipe_dev_curr_time_us();
+        service_ops->guest_wake_on(pipe->host_pipe, pipe->wanted);
             pipe->command_buffer->status =
                     service_ops->guest_poll(pipe->host_pipe);
+        uint64_t poll_end = pipe_dev_curr_time_us();
+        if (poll_end - poll_start > 10000ULL) {
+            fprintf(stderr, "%s: long poll. time: %f ms\n", __func__,
+                    ((float)(poll_end - poll_start) / 1000.0f));
+        }
             DD("%s: CMD_POLL > status=%d", __func__,
                pipe->command_buffer->status);
             break;
+                            }
 
         case PIPE_CMD_READ:
         case PIPE_CMD_WRITE:
@@ -868,6 +908,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             pipe->command_buffer->rw_params.consumed_size = 0;
             unsigned buffers_count =
                     pipe->command_buffer->rw_params.buffers_count;
+            dev->xfer_start_us = pipe_dev_curr_time_us();
             if (buffers_count > pipe->rw_params_max_count) {
                 buffers_count = pipe->rw_params_max_count;
             }
@@ -1007,14 +1048,14 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             // TODO(zyy): create an extended version of send()/recv() functions
             // to return both transferred size and resulting status in single
             // call.
-            if (isCall) {
+            // if (isCall) {
                 pipe->command_buffer->rw_params.consumed_size = consumed_size;
                 pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
-            } else {
-                pipe->command_buffer->status = status;
-                pipe->command_buffer->rw_params.consumed_size =
-                    status < 0 ? 0 : status;
-            }
+            // } else {
+                // pipe->command_buffer->status = status;
+                // pipe->command_buffer->rw_params.consumed_size =
+                    // status < 0 ? 0 : status;
+            // }
 
             DD("%s: CMD_%s id=%d buffers=%d > status=%d", __func__,
                (willModifyData ? (isCall ? "CALL" : "READ") : "WRITE"),
@@ -1024,6 +1065,13 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 const int j = unmapIndex[i];
                 cpu_physical_memory_unmap(buffers[j].data, buffers[j].size,
                                           willModifyData, buffers[j].size);
+            }
+            dev->xfer_end_us = pipe_dev_curr_time_us();
+            if (dev->measure_latency) {
+                pipe_dev_warn_long_duration(
+                        "pipe_xfer",
+                        dev->xfer_start_us,
+                        dev->xfer_end_us);
             }
             break;
         }
@@ -1191,22 +1239,6 @@ static void pipe_dev_write_v1(PipeDevice* dev,
     }
 }
 
-static uint64_t pipe_dev_curr_time_us() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return tv.tv_usec + tv.tv_sec * 1000000ULL;
-}
-
-#define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
-
-static void pipe_dev_warn_long_duration(
-    const char* tag, uint64_t start_us, uint64_t end_us) {
-    float ms = (end_us - start_us) / 1000.0f;
-    if (ms > LONG_PIPE_TRANSACTION_THRESHOLD_MS) {
-        fprintf(stderr, "%s: high latency for [%s]: %f ms\n",
-                __func__, tag, ms);
-    }
-}
 
 static void pipe_dev_write_v2(PipeDevice* dev,
                                   hwaddr offset,
