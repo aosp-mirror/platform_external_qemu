@@ -33,6 +33,8 @@
 #include "qemu/event_notifier.h"
 #include "trace.h"
 #include "hw/irq.h"
+#include "exec/memory-remap.h"
+#include "qemu/abort.h"
 
 #include "hw/boards.h"
 
@@ -800,6 +802,67 @@ void gvm_memory_listener_register(GVMState *s, GVMMemoryListener *kml,
     memory_listener_register(&kml->listener, as);
 }
 
+// User backed memory region API
+static int user_backed_flags_to_gvm_flags(int flags)
+{
+    int gvm_flags = 0;
+    if (!(flags & USER_BACKED_RAM_FLAGS_WRITE)) {
+        gvm_flags |= GVM_MEM_READONLY;
+    }
+    return gvm_flags;
+}
+
+static void gvm_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size,
+                                    int flags)
+{
+    GVMSlot *slot;
+    GVMMemoryListener* kml;
+    int err;
+
+    if (!gvm_state) {
+        qemu_abort("%s: attempted to map RAM before GVM initialized\n", __func__);
+    }
+
+    kml = &gvm_state->memory_listener;
+
+    slot = gvm_alloc_slot(kml);
+
+    slot->memory_size = size;
+    slot->start_addr = gpa;
+    slot->ram = hva;
+    slot->flags = user_backed_flags_to_gvm_flags(flags);
+    err = gvm_set_user_memory_region(kml, slot);
+
+    if (err) {
+        qemu_abort("%s: error registering slot: %s\n", __func__,
+                strerror(-err));
+    }
+}
+
+static void gvm_user_backed_ram_unmap(hwaddr gpa, hwaddr size)
+{
+    GVMSlot *slot;
+    GVMMemoryListener* kml;
+    int err;
+
+    if (!gvm_state) {
+        qemu_abort("%s: attempted to map RAM before GVM initialized\n", __func__);
+    }
+
+    slot = gvm_lookup_matching_slot(kml, gpa, size);
+    if (!slot) {
+        return;
+    }
+
+    /* unregister the slot */
+    slot->memory_size = 0;
+    err = gvm_set_user_memory_region(kml, slot);
+    if (err) {
+        qemu_abort("%s: error unregistering slot: %s\n",
+                __func__, strerror(-err));
+    }
+}
+
 static void gvm_handle_interrupt(CPUState *cpu, int mask)
 {
     cpu->interrupt_request |= mask;
@@ -1326,6 +1389,11 @@ static int gvm_init(MachineState *ms)
                                  &address_space_memory, 0);
 
     cpu_interrupt_handler = gvm_handle_interrupt;
+
+    qemu_set_user_backed_mapping_funcs(
+        gvm_user_backed_ram_map,
+        gvm_user_backed_ram_unmap);
+
 
     return 0;
 
