@@ -12,6 +12,10 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"  /* for SkinRotation */
@@ -37,3 +41,8 @@ extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  u
 
 extern void           skin_keyboard_add_key_event( SkinKeyboard*  k, unsigned code, unsigned  down );
 extern void           skin_keyboard_flush( SkinKeyboard*  kb );
+extern const char*    skin_keyboard_current_active_layout();
+extern const char*    skin_translate_host_kb_layout_to_android(const char* name);
+extern const char**   skin_get_android_kb_layout(int* p_size);
+
+ANDROID_END_HEADER
