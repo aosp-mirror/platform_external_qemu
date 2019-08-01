@@ -23,6 +23,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
+#include "android/skin/qt/KeyboardLayoutChangeDetector.h"
 #include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-overlay.h"
@@ -44,7 +45,6 @@
 #include <QPainter>
 #include <QProgressDialog>
 #include <QWidget>
-
 #include <functional>
 #include <memory>
 #include <string>
@@ -527,7 +527,7 @@ private:
                                            CustomInitProgressDialog::InitFunc>;
     OnDemandProgressDialog mInstallDialog;
     OnDemandProgressDialog mPushDialog;
-
+    Ui::KeyboardLayoutChangeDetector::Ptr mLayoutChangeDetector;
     bool mIgnoreWheelEvent = false;
     QTimer mWheelScrollTimer;
     QPoint mWheelScrollPos;
