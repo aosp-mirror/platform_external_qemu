@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4df25ca8_32b86761",
+        "filename": "android/android-grpc/docs/grpc-samples/js/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-01T20:55:13Z",
+      "side": 1,
+      "message": "these instructions could use a more detailed end-to-end example using what is prebuilt; that assumes only an environment where emulator binary and AVDs are available, starting from -grpc flag, and noting form what directory to run make and how to deal with any missing dependency errors when running make deps; also if we set up a public google drive or something with prebuilt webrtc server and react app, the user might be able to skip the \u0027make\u0027 stuff",
+      "revId": "8ef0af2deedd89ef4bc9b2c91820d27067374aa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
