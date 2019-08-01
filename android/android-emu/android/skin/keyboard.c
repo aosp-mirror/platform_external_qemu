@@ -401,3 +401,55 @@ skin_keyboard_free( SkinKeyboard*  keyboard )
         AFREE(keyboard);
     }
 }
+
+static const char* s_android_kb_layout_file[] = {
+        "keyboard_layout_english_uk",
+        "keyboard_layout_english_us",
+        "keyboard_layout_english_us_intl",
+        "keyboard_layout_english_us_colemak",
+        "keyboard_layout_english_us_dvorak",
+        "keyboard_layout_english_us_workman",
+        "keyboard_layout_german",
+        "keyboard_layout_french",
+        "keyboard_layout_french_ca",
+        "keyboard_layout_russian",
+        "keyboard_layout_russian_mac",
+        "keyboard_layout_spanish",
+        "keyboard_layout_spanish_latin",
+        "keyboard_layout_swiss_french",
+        "keyboard_layout_swiss_german",
+        "keyboard_layout_belgian",
+        "keyboard_layout_bulgarian",
+        "keyboard_layout_italian",
+        "keyboard_layout_danish",
+        "keyboard_layout_norwegian",
+        "keyboard_layout_swedish",
+        "keyboard_layout_finnish",
+        "keyboard_layout_croatian",
+        "keyboard_layout_czech",
+        "keyboard_layout_estonian",
+        "keyboard_layout_hungarian",
+        "keyboard_layout_icelandic",
+        "keyboard_layout_brazilian",
+        "keyboard_layout_portuguese",
+        "keyboard_layout_slovak",
+        "keyboard_layout_slovenian",
+        "keyboard_layout_turkish",
+        "keyboard_layout_ukrainian",
+        "keyboard_layout_arabic",
+        "keyboard_layout_greek",
+        "keyboard_layout_hebrew",
+        "keyboard_layout_lithuanian",
+        "keyboard_layout_latvian",
+        "keyboard_layout_persian",
+        "keyboard_layout_azerbaijani",
+        "keyboard_layout_polish",
+};
+
+const char** skin_get_android_kb_layout(int* p_size) {
+    if (p_size) {
+        *p_size = sizeof(s_android_kb_layout_file) /
+                  sizeof(s_android_kb_layout_file[0]);
+    }
+    return s_android_kb_layout_file;
+}
