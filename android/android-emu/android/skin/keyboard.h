@@ -37,3 +37,5 @@ extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  u
 
 extern void           skin_keyboard_add_key_event( SkinKeyboard*  k, unsigned code, unsigned  down );
 extern void           skin_keyboard_flush( SkinKeyboard*  kb );
+extern const char*    skin_keyboard_current_active_layout();
+extern const char*    skin_translate_host_kb_layout_to_android(const char* name);
