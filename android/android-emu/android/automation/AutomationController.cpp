@@ -741,6 +741,7 @@ StopResult AutomationControllerImpl::stopPlayback() {
 
     mPlayingFromFile = false;
     mPlaybackEventSource.reset();
+    mNextPlaybackCommandTime = 0;
     return Ok();
 }
 
@@ -915,6 +916,7 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         mPlayingFromFile = false;
         mPlaybackEventSource.reset();
         mOffworldEventSource = nullptr;
+        mNextPlaybackCommandTime = 0;
 
         if (mOnStopCallback) {
             mOnStopCallback();
