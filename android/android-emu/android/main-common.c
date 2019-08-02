@@ -1254,7 +1254,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                              ? minRamVmHeapSize
                              : minApiLevelVmHeapSize;
     const int maxVmHeapSize =
-            4 * minApiLevelVmHeapSize > 576 ? 576 : 4 * minApiLevelVmHeapSize;
+            4 * minApiLevelVmHeapSize > 576 ? 576 : 4 * minVmHeapSize;
 
     if (minVmHeapSize > maxVmHeapSize) {
         minVmHeapSize = maxVmHeapSize;
