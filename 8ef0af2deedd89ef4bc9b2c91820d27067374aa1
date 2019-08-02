@@ -16,6 +16,24 @@
       "revId": "8ef0af2deedd89ef4bc9b2c91820d27067374aa1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eab514e2_40ff6db1",
+        "filename": "android/android-grpc/docs/grpc-samples/js/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-08-02T12:12:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4df25ca8_32b86761",
+      "revId": "8ef0af2deedd89ef4bc9b2c91820d27067374aa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
