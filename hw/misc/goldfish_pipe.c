@@ -1012,8 +1012,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 pipe->command_buffer->status = consumed_size > 0 ? 0 : status;
             } else {
                 pipe->command_buffer->status = status;
-                pipe->command_buffer->rw_params.consumed_size =
-                    status < 0 ? 0 : status;
+                pipe->command_buffer->rw_params.consumed_size = consumed_size;
             }
 
             DD("%s: CMD_%s id=%d buffers=%d > status=%d", __func__,

@@ -424,6 +424,10 @@ public:
             wanted &= ~available;
         }
 
+        // TODO: Race condition: In RenderThread, mChannel gets a new
+        // notification and wants to wake, but it is before setWantedEvents
+        // below, which makes the guest not notice a wake from the host.
+
         // Ask the channel to be notified of remaining events.
         if (wanted != ChannelState::Empty) {
             DD("%s: waiting for events %d", __func__, (int)wanted);
