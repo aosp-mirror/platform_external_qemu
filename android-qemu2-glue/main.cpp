@@ -97,6 +97,7 @@ extern "C" {
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
+#include <signal.h>
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -630,6 +631,23 @@ static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHw
             args.add("virtio-keyboard-pci");
         }
     }
+}
+
+static void enableSignalTermination() {
+    // The issue only occurs on Darwin so to be safe just do this on Darwin
+    // to prevent potential issues. The function exists on all platforms to
+    // make the calling code look cleaner.
+#ifdef __APPLE__
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGHUP);
+    sigaddset(&set, SIGINT);
+    int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
+    if (result != 0) {
+        D("Could not set thread sigmask: %d", result);
+    }
+#endif
 }
 
 }  // namespace
@@ -1792,6 +1810,12 @@ extern "C" int main(int argc, char** argv) {
         /* Setup SDL UI just before calling the code */
         android::base::Thread::maskAllSignals();
 
+        /* BUG: 138377082 On Mac OS, user can't quit the program by ctrl-c after
+         * all signals are blocked on QT main loop thread.
+         * Thus, we explicitly remove signals SIGINT, SIGHUP and SIGTERM from the
+         * blocking mask of the QT main loop thread.
+         */
+        enableSignalTermination();
 #if (SNAPSHOT_PROFILE > 1)
         printf("skin_winsys_init and UI starting at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
