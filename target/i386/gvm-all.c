@@ -768,6 +768,7 @@ static void gvm_region_del(MemoryListener *listener,
     memory_region_unref(section->mr);
 }
 
+#if 0
 static void gvm_log_sync(MemoryListener *listener,
                          MemoryRegionSection *section)
 {
@@ -778,6 +779,18 @@ static void gvm_log_sync(MemoryListener *listener,
     if (r < 0) {
         abort();
     }
+}
+#endif
+static void gvm_log_sync(MemoryListener *listener,
+                         MemoryRegionSection *section)
+{
+    MemoryRegion *mr = section->mr;
+
+    if (!memory_region_is_ram(mr)) {
+        return;
+    }
+
+    memory_region_set_dirty(mr, 0, int128_get64(section->size));
 }
 
 void gvm_memory_listener_register(GVMState *s, GVMMemoryListener *kml,
@@ -794,8 +807,8 @@ void gvm_memory_listener_register(GVMState *s, GVMMemoryListener *kml,
 
     kml->listener.region_add = gvm_region_add;
     kml->listener.region_del = gvm_region_del;
-    kml->listener.log_start = gvm_log_start;
-    kml->listener.log_stop = gvm_log_stop;
+    //kml->listener.log_start = gvm_log_start;
+    //kml->listener.log_stop = gvm_log_stop;
     kml->listener.log_sync = gvm_log_sync;
     kml->listener.priority = 10;
 
@@ -1512,6 +1525,16 @@ static void do_gvm_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
 void gvm_cpu_synchronize_post_init(CPUState *cpu)
 {
     run_on_cpu(cpu, do_gvm_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
+}
+
+static void do_gvm_cpu_synchronize_pre_loadvm(CPUState *cpu, run_on_cpu_data arg)
+{
+    cpu->vcpu_dirty = true;
+}
+
+void gvm_cpu_synchronize_pre_loadvm(CPUState *cpu)
+{
+    run_on_cpu(cpu, do_gvm_cpu_synchronize_pre_loadvm, RUN_ON_CPU_NULL);
 }
 
 int gvm_cpu_exec(CPUState *cpu)

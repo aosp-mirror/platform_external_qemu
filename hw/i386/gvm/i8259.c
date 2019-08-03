@@ -39,7 +39,7 @@ static void gvm_pic_get(PICCommonState *s)
 
     chip.chip_id = s->master ? GVM_IRQCHIP_PIC_MASTER : GVM_IRQCHIP_PIC_SLAVE;
     ret = gvm_vm_ioctl(gvm_state, GVM_GET_IRQCHIP,
-            &chip, sizeof(chip), NULL, 0);
+            &chip, sizeof(chip), &chip, sizeof(chip));
     if (ret < 0) {
         fprintf(stderr, "GVM_GET_IRQCHIP failed: %s\n", strerror(ret));
         abort();
