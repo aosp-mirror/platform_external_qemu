@@ -88,7 +88,12 @@ class VkDecoderGlobalState::Impl {
 public:
     Impl() :
         m_vk(emugl::vkDispatch()),
-        m_emu(getGlobalVkEmulation()) { }
+        m_emu(getGlobalVkEmulation()) {
+        mSnapshotsEnabled =
+            emugl::emugl_feature_is_enabled(
+                android::featurecontrol::VulkanSnapshots);
+    }
+
     ~Impl() = default;
 
     // Resets all internal tracking info.
@@ -120,6 +125,10 @@ public:
         mCreatedHandlesForSnapshotLoadIndex = 0;
 
         mGlobalHandleStore.clear();
+    }
+
+    bool snapshotsEnabled() const {
+        return mSnapshotsEnabled;
     }
 
     void save(android::base::Stream* stream) {
@@ -4146,6 +4155,7 @@ private:
 
     VulkanDispatch* m_vk;
     VkEmulation* m_emu;
+    bool mSnapshotsEnabled = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
@@ -4338,6 +4348,10 @@ VkDecoderGlobalState* VkDecoderGlobalState::get() {
 }
 
 // Snapshots
+bool VkDecoderGlobalState::snapshotsEnabled() const {
+    return mImpl->snapshotsEnabled();
+}
+
 void VkDecoderGlobalState::save(android::base::Stream* stream) {
     mImpl->save(stream);
 }
