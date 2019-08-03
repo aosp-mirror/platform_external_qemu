@@ -72,7 +72,7 @@ static void gvm_ioapic_get(IOAPICCommonState *s)
 
     chip.chip_id = GVM_IRQCHIP_IOAPIC;
     ret = gvm_vm_ioctl(gvm_state, GVM_GET_IRQCHIP,
-            &chip, sizeof(chip), NULL, 0);
+            &chip, sizeof(chip), &chip, sizeof(chip));
     if (ret < 0) {
         fprintf(stderr, "GVM_GET_IRQCHIP failed: %s\n", strerror(ret));
         abort();
