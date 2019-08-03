@@ -44,9 +44,6 @@
     do { } while (0)
 #endif
 
-#define MSR_GVM_WALL_CLOCK  0x11
-#define MSR_GVM_SYSTEM_TIME 0x12
-
 /* A 4096-byte buffer can hold the 8-byte gvm_msrs header, plus
  * 255 gvm_msr_entry structs */
 #define MSR_BUF_SIZE 4096
@@ -118,7 +115,7 @@ static int gvm_get_tsc(CPUState *cs)
 
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
             &msr_data, sizeof(msr_data),
-            NULL, 0);
+            &msr_data, sizeof(msr_data));
     if (ret < 0) {
         return ret;
     }
@@ -1041,19 +1038,6 @@ static int gvm_put_msrs(X86CPU *cpu, int level)
      */
     if (level >= GVM_PUT_RESET_STATE) {
         gvm_msr_entry_add(cpu, MSR_IA32_TSC, env->tsc);
-#if 0
-        gvm_msr_entry_add(cpu, MSR_GVM_SYSTEM_TIME, env->system_time_msr);
-        gvm_msr_entry_add(cpu, MSR_GVM_WALL_CLOCK, env->wall_clock_msr);
-        if (has_msr_async_pf_en) {
-            gvm_msr_entry_add(cpu, MSR_GVM_ASYNC_PF_EN, env->async_pf_en_msr);
-        }
-        if (has_msr_pv_eoi_en) {
-            gvm_msr_entry_add(cpu, MSR_GVM_PV_EOI_EN, env->pv_eoi_en_msr);
-        }
-        if (has_msr_gvm_steal_time) {
-            gvm_msr_entry_add(cpu, MSR_GVM_STEAL_TIME, env->steal_time_msr);
-        }
-#endif
         if (has_msr_architectural_pmu) {
             /* Stop the counter.  */
             gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
@@ -1392,19 +1376,6 @@ static int gvm_get_msrs(X86CPU *cpu)
         gvm_msr_entry_add(cpu, MSR_LSTAR, 0);
     }
 #endif
-#if 0
-    gvm_msr_entry_add(cpu, MSR_GVM_SYSTEM_TIME, 0);
-    gvm_msr_entry_add(cpu, MSR_GVM_WALL_CLOCK, 0);
-    if (has_msr_async_pf_en) {
-        gvm_msr_entry_add(cpu, MSR_GVM_ASYNC_PF_EN, 0);
-    }
-    if (has_msr_pv_eoi_en) {
-        gvm_msr_entry_add(cpu, MSR_GVM_PV_EOI_EN, 0);
-    }
-    if (has_msr_gvm_steal_time) {
-        gvm_msr_entry_add(cpu, MSR_GVM_STEAL_TIME, 0);
-    }
-#endif
     if (has_msr_architectural_pmu) {
         gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
         gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL, 0);
@@ -1518,12 +1489,6 @@ static int gvm_get_msrs(X86CPU *cpu)
         case MSR_VM_HSAVE_PA:
             env->vm_hsave = msrs[i].data;
             break;
-        case MSR_GVM_SYSTEM_TIME:
-            env->system_time_msr = msrs[i].data;
-            break;
-        case MSR_GVM_WALL_CLOCK:
-            env->wall_clock_msr = msrs[i].data;
-            break;
         case MSR_MCG_STATUS:
             env->mcg_status = msrs[i].data;
             break;
@@ -1554,17 +1519,6 @@ static int gvm_get_msrs(X86CPU *cpu)
                 env->mce_banks[msrs[i].index - MSR_MC0_CTL] = msrs[i].data;
             }
             break;
-#if 0
-        case MSR_GVM_ASYNC_PF_EN:
-            env->async_pf_en_msr = msrs[i].data;
-            break;
-        case MSR_GVM_PV_EOI_EN:
-            env->pv_eoi_en_msr = msrs[i].data;
-            break;
-        case MSR_GVM_STEAL_TIME:
-            env->steal_time_msr = msrs[i].data;
-            break;
-#endif
         case MSR_CORE_PERF_FIXED_CTR_CTRL:
             env->msr_fixed_ctr_ctrl = msrs[i].data;
             break;

@@ -967,10 +967,6 @@ void cpu_synchronize_all_states(void)
             hvf_cpu_synchronize_state(cpu);
         }
 #endif
-#ifdef CONFIG_GVM
-        if (gvm_enabled())
-            gvm_cpu_synchronize_state(cpu);
-#endif
     }
 }
 
@@ -984,10 +980,6 @@ void cpu_synchronize_all_post_reset(void)
         if (hvf_enabled())
             hvf_cpu_synchronize_post_reset(cpu);
 #endif
-#ifdef CONFIG_GVM
-        if (gvm_enabled())
-            gvm_cpu_synchronize_post_reset(cpu);
-#endif
     }
 }
 
@@ -1000,10 +992,6 @@ void cpu_synchronize_all_post_init(void)
 #ifdef CONFIG_HVF
         if (hvf_enabled())
             hvf_cpu_synchronize_post_init(cpu);
-#endif
-#ifdef CONFIG_GVM
-        if (gvm_enabled())
-            gvm_cpu_synchronize_post_init(cpu);
 #endif
     }
 }

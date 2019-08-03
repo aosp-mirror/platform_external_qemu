@@ -314,6 +314,7 @@ void gvm_raise_event(CPUState *cpu);
 void gvm_cpu_synchronize_state(CPUState *cpu);
 void gvm_cpu_synchronize_post_reset(CPUState *cpu);
 void gvm_cpu_synchronize_post_init(CPUState *cpu);
+void gvm_cpu_synchronize_pre_loadvm(CPUState *cpu);
 
 /**
  * gvm_irqchip_add_msi_route - Add MSI route for specific vector

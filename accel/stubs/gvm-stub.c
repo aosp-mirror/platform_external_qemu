@@ -53,6 +53,10 @@ void gvm_cpu_synchronize_post_init(CPUState *cpu)
 {
 }
 
+void gvm_cpu_synchronize_post_loadvm(CPUState *cpu)
+{
+}
+
 int gvm_cpu_exec(CPUState *cpu)
 {
     abort();
