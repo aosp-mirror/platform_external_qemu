@@ -360,7 +360,9 @@ public:
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
 
         vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
-        pFeatures->textureCompressionETC2 = true;
+        pFeatures->textureCompressionETC2 =
+            !emugl::emugl_feature_is_enabled(
+                android::featurecontrol::PlayStoreImage);
     }
 
     void on_vkGetPhysicalDeviceFeatures2(
@@ -396,7 +398,9 @@ public:
             vk->vkGetPhysicalDeviceFeatures(physicalDevice, &pFeatures->features);
         }
 
-        pFeatures->features.textureCompressionETC2 = true;
+        pFeatures->features.textureCompressionETC2 =
+            !emugl::emugl_feature_is_enabled(
+                android::featurecontrol::PlayStoreImage);
     }
 
     VkResult on_vkGetPhysicalDeviceImageFormatProperties(
@@ -2715,6 +2719,7 @@ public:
             registerDescriptorUpdateTemplate(
                     *pDescriptorUpdateTemplate,
                     descriptorUpdateTemplateInfo);
+
             *pDescriptorUpdateTemplate = new_boxed_non_dispatchable_VkDescriptorUpdateTemplate(*pDescriptorUpdateTemplate);
         }
 
@@ -3755,8 +3760,13 @@ private:
 
     static bool needEmulatedEtc2(VkPhysicalDevice physicalDevice,
             goldfish_vk::VulkanDispatch* vk) {
+
+        if (emugl::emugl_feature_is_enabled(
+                android::featurecontrol::PlayStoreImage)) return false;
+
         VkPhysicalDeviceFeatures feature;
         vk->vkGetPhysicalDeviceFeatures(physicalDevice, &feature);
+
         return !feature.textureCompressionETC2;
     }
 

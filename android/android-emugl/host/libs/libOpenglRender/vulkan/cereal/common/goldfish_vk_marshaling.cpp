@@ -95,8 +95,11 @@ void unmarshal_VkApplicationInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     if (vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT)
@@ -166,8 +169,11 @@ void unmarshal_VkInstanceCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkInstanceCreateFlags*)&forUnmarshaling->flags, sizeof(VkInstanceCreateFlags));
@@ -794,8 +800,11 @@ void unmarshal_VkDeviceQueueCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceQueueCreateFlags*)&forUnmarshaling->flags, sizeof(VkDeviceQueueCreateFlags));
@@ -846,8 +855,11 @@ void unmarshal_VkDeviceCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceCreateFlags*)&forUnmarshaling->flags, sizeof(VkDeviceCreateFlags));
@@ -955,8 +967,11 @@ void unmarshal_VkSubmitInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
@@ -1016,8 +1031,11 @@ void unmarshal_VkMemoryAllocateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceSize*)&forUnmarshaling->allocationSize, sizeof(VkDeviceSize));
@@ -1053,8 +1071,11 @@ void unmarshal_VkMappedMemoryRange(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_29;
@@ -1354,8 +1375,11 @@ void unmarshal_VkBindSparseInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
@@ -1421,8 +1445,11 @@ void unmarshal_VkFenceCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkFenceCreateFlags*)&forUnmarshaling->flags, sizeof(VkFenceCreateFlags));
@@ -1453,8 +1480,11 @@ void unmarshal_VkSemaphoreCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSemaphoreCreateFlags*)&forUnmarshaling->flags, sizeof(VkSemaphoreCreateFlags));
@@ -1485,8 +1515,11 @@ void unmarshal_VkEventCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkEventCreateFlags*)&forUnmarshaling->flags, sizeof(VkEventCreateFlags));
@@ -1520,8 +1553,11 @@ void unmarshal_VkQueryPoolCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkQueryPoolCreateFlags*)&forUnmarshaling->flags, sizeof(VkQueryPoolCreateFlags));
@@ -1566,8 +1602,11 @@ void unmarshal_VkBufferCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBufferCreateFlags*)&forUnmarshaling->flags, sizeof(VkBufferCreateFlags));
@@ -1615,8 +1654,11 @@ void unmarshal_VkBufferViewCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBufferViewCreateFlags*)&forUnmarshaling->flags, sizeof(VkBufferViewCreateFlags));
@@ -1671,8 +1713,11 @@ void unmarshal_VkImageCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkImageCreateFlags*)&forUnmarshaling->flags, sizeof(VkImageCreateFlags));
@@ -1792,8 +1837,11 @@ void unmarshal_VkImageViewCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkImageViewCreateFlags*)&forUnmarshaling->flags, sizeof(VkImageViewCreateFlags));
@@ -1834,8 +1882,11 @@ void unmarshal_VkShaderModuleCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkShaderModuleCreateFlags*)&forUnmarshaling->flags, sizeof(VkShaderModuleCreateFlags));
@@ -1872,8 +1923,11 @@ void unmarshal_VkPipelineCacheCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineCacheCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCacheCreateFlags));
@@ -1967,8 +2021,11 @@ void unmarshal_VkPipelineShaderStageCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineShaderStageCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineShaderStageCreateFlags));
@@ -2059,8 +2116,11 @@ void unmarshal_VkPipelineVertexInputStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineVertexInputStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineVertexInputStateCreateFlags));
@@ -2105,8 +2165,11 @@ void unmarshal_VkPipelineInputAssemblyStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineInputAssemblyStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineInputAssemblyStateCreateFlags));
@@ -2140,8 +2203,11 @@ void unmarshal_VkPipelineTessellationStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineTessellationStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineTessellationStateCreateFlags));
@@ -2267,8 +2333,11 @@ void unmarshal_VkPipelineViewportStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineViewportStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineViewportStateCreateFlags));
@@ -2331,8 +2400,11 @@ void unmarshal_VkPipelineRasterizationStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineRasterizationStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineRasterizationStateCreateFlags));
@@ -2385,8 +2457,11 @@ void unmarshal_VkPipelineMultisampleStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineMultisampleStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineMultisampleStateCreateFlags));
@@ -2464,8 +2539,11 @@ void unmarshal_VkPipelineDepthStencilStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineDepthStencilStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineDepthStencilStateCreateFlags));
@@ -2541,8 +2619,11 @@ void unmarshal_VkPipelineColorBlendStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineColorBlendStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineColorBlendStateCreateFlags));
@@ -2584,8 +2665,11 @@ void unmarshal_VkPipelineDynamicStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineDynamicStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineDynamicStateCreateFlags));
@@ -2680,8 +2764,11 @@ void unmarshal_VkGraphicsPipelineCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
@@ -2785,8 +2872,11 @@ void unmarshal_VkComputePipelineCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
@@ -2856,8 +2946,11 @@ void unmarshal_VkPipelineLayoutCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineLayoutCreateFlags));
@@ -2918,8 +3011,11 @@ void unmarshal_VkSamplerCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSamplerCreateFlags*)&forUnmarshaling->flags, sizeof(VkSamplerCreateFlags));
@@ -3016,8 +3112,11 @@ void unmarshal_VkDescriptorSetLayoutCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDescriptorSetLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
@@ -3076,8 +3175,11 @@ void unmarshal_VkDescriptorPoolCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDescriptorPoolCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorPoolCreateFlags));
@@ -3125,8 +3227,11 @@ void unmarshal_VkDescriptorSetAllocateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_100;
@@ -3255,8 +3360,11 @@ void unmarshal_VkWriteDescriptorSet(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_113;
@@ -3336,8 +3444,11 @@ void unmarshal_VkCopyDescriptorSet(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_120;
@@ -3392,8 +3503,11 @@ void unmarshal_VkFramebufferCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkFramebufferCreateFlags*)&forUnmarshaling->flags, sizeof(VkFramebufferCreateFlags));
@@ -3603,8 +3717,11 @@ void unmarshal_VkRenderPassCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
@@ -3654,8 +3771,11 @@ void unmarshal_VkCommandPoolCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkCommandPoolCreateFlags*)&forUnmarshaling->flags, sizeof(VkCommandPoolCreateFlags));
@@ -3691,8 +3811,11 @@ void unmarshal_VkCommandBufferAllocateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_131;
@@ -3736,8 +3859,11 @@ void unmarshal_VkCommandBufferInheritanceInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_134;
@@ -3784,8 +3910,11 @@ void unmarshal_VkCommandBufferBeginInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkCommandBufferUsageFlags*)&forUnmarshaling->flags, sizeof(VkCommandBufferUsageFlags));
@@ -4042,8 +4171,11 @@ void unmarshal_VkMemoryBarrier(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
@@ -4083,8 +4215,11 @@ void unmarshal_VkBufferMemoryBarrier(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
@@ -4132,8 +4267,11 @@ void unmarshal_VkImageMemoryBarrier(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
@@ -4190,8 +4328,11 @@ void unmarshal_VkRenderPassBeginInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_145;
@@ -4298,8 +4439,11 @@ void unmarshal_VkBaseOutStructure(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((VkBaseOutStructure*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
 }
@@ -4328,8 +4472,11 @@ void unmarshal_VkBaseInStructure(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((VkBaseInStructure*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
 }
@@ -4364,8 +4511,11 @@ void unmarshal_VkPhysicalDeviceSubgroupProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->subgroupSize, sizeof(uint32_t));
@@ -4405,8 +4555,11 @@ void unmarshal_VkBindBufferMemoryInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_150;
@@ -4449,8 +4602,11 @@ void unmarshal_VkBindImageMemoryInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_154;
@@ -4490,8 +4646,11 @@ void unmarshal_VkPhysicalDevice16BitStorageFeatures(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer16BitAccess, sizeof(VkBool32));
@@ -4526,8 +4685,11 @@ void unmarshal_VkMemoryDedicatedRequirements(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->prefersDedicatedAllocation, sizeof(VkBool32));
@@ -4564,8 +4726,11 @@ void unmarshal_VkMemoryDedicatedAllocateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_158;
@@ -4602,8 +4767,11 @@ void unmarshal_VkMemoryAllocateFlagsInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkMemoryAllocateFlags*)&forUnmarshaling->flags, sizeof(VkMemoryAllocateFlags));
@@ -4640,8 +4808,11 @@ void unmarshal_VkDeviceGroupRenderPassBeginInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->deviceMask, sizeof(uint32_t));
@@ -4678,8 +4849,11 @@ void unmarshal_VkDeviceGroupCommandBufferBeginInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->deviceMask, sizeof(uint32_t));
@@ -4715,8 +4889,11 @@ void unmarshal_VkDeviceGroupSubmitInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
@@ -4756,8 +4933,11 @@ void unmarshal_VkDeviceGroupBindSparseInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->resourceDeviceIndex, sizeof(uint32_t));
@@ -4790,8 +4970,11 @@ void unmarshal_VkBindBufferMemoryDeviceGroupInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->deviceIndexCount, sizeof(uint32_t));
@@ -4830,8 +5013,11 @@ void unmarshal_VkBindImageMemoryDeviceGroupInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->deviceIndexCount, sizeof(uint32_t));
@@ -4872,8 +5058,11 @@ void unmarshal_VkPhysicalDeviceGroupProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->physicalDeviceCount, sizeof(uint32_t));
@@ -4913,8 +5102,11 @@ void unmarshal_VkDeviceGroupDeviceCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->physicalDeviceCount, sizeof(uint32_t));
@@ -4955,8 +5147,11 @@ void unmarshal_VkBufferMemoryRequirementsInfo2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_163;
@@ -4991,8 +5186,11 @@ void unmarshal_VkImageMemoryRequirementsInfo2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_165;
@@ -5027,8 +5225,11 @@ void unmarshal_VkImageSparseMemoryRequirementsInfo2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_167;
@@ -5061,8 +5262,11 @@ void unmarshal_VkMemoryRequirements2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(&forUnmarshaling->memoryRequirements));
@@ -5093,8 +5297,11 @@ void unmarshal_VkSparseImageMemoryRequirements2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkSparseImageMemoryRequirements(vkStream, (VkSparseImageMemoryRequirements*)(&forUnmarshaling->memoryRequirements));
@@ -5125,8 +5332,11 @@ void unmarshal_VkPhysicalDeviceFeatures2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkPhysicalDeviceFeatures(vkStream, (VkPhysicalDeviceFeatures*)(&forUnmarshaling->features));
@@ -5157,8 +5367,11 @@ void unmarshal_VkPhysicalDeviceProperties2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkPhysicalDeviceProperties(vkStream, (VkPhysicalDeviceProperties*)(&forUnmarshaling->properties));
@@ -5189,8 +5402,11 @@ void unmarshal_VkFormatProperties2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkFormatProperties(vkStream, (VkFormatProperties*)(&forUnmarshaling->formatProperties));
@@ -5221,8 +5437,11 @@ void unmarshal_VkImageFormatProperties2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkImageFormatProperties(vkStream, (VkImageFormatProperties*)(&forUnmarshaling->imageFormatProperties));
@@ -5257,8 +5476,11 @@ void unmarshal_VkPhysicalDeviceImageFormatInfo2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
@@ -5293,8 +5515,11 @@ void unmarshal_VkQueueFamilyProperties2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkQueueFamilyProperties(vkStream, (VkQueueFamilyProperties*)(&forUnmarshaling->queueFamilyProperties));
@@ -5325,8 +5550,11 @@ void unmarshal_VkPhysicalDeviceMemoryProperties2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkPhysicalDeviceMemoryProperties(vkStream, (VkPhysicalDeviceMemoryProperties*)(&forUnmarshaling->memoryProperties));
@@ -5357,8 +5585,11 @@ void unmarshal_VkSparseImageFormatProperties2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(&forUnmarshaling->properties));
@@ -5393,8 +5624,11 @@ void unmarshal_VkPhysicalDeviceSparseImageFormatInfo2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
@@ -5429,8 +5663,11 @@ void unmarshal_VkPhysicalDevicePointClippingProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPointClippingBehavior*)&forUnmarshaling->pointClippingBehavior, sizeof(VkPointClippingBehavior));
@@ -5483,8 +5720,11 @@ void unmarshal_VkRenderPassInputAttachmentAspectCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->aspectReferenceCount, sizeof(uint32_t));
@@ -5520,8 +5760,11 @@ void unmarshal_VkImageViewUsageCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkImageUsageFlags*)&forUnmarshaling->usage, sizeof(VkImageUsageFlags));
@@ -5552,8 +5795,11 @@ void unmarshal_VkPipelineTessellationDomainOriginStateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkTessellationDomainOrigin*)&forUnmarshaling->domainOrigin, sizeof(VkTessellationDomainOrigin));
@@ -5589,8 +5835,11 @@ void unmarshal_VkRenderPassMultiviewCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
@@ -5631,8 +5880,11 @@ void unmarshal_VkPhysicalDeviceMultiviewFeatures(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->multiview, sizeof(VkBool32));
@@ -5666,8 +5918,11 @@ void unmarshal_VkPhysicalDeviceMultiviewProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxMultiviewViewCount, sizeof(uint32_t));
@@ -5700,8 +5955,11 @@ void unmarshal_VkPhysicalDeviceVariablePointerFeatures(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->variablePointersStorageBuffer, sizeof(VkBool32));
@@ -5733,8 +5991,11 @@ void unmarshal_VkPhysicalDeviceProtectedMemoryFeatures(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->protectedMemory, sizeof(VkBool32));
@@ -5765,8 +6026,11 @@ void unmarshal_VkPhysicalDeviceProtectedMemoryProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->protectedNoFault, sizeof(VkBool32));
@@ -5799,8 +6063,11 @@ void unmarshal_VkDeviceQueueInfo2(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceQueueCreateFlags*)&forUnmarshaling->flags, sizeof(VkDeviceQueueCreateFlags));
@@ -5833,8 +6100,11 @@ void unmarshal_VkProtectedSubmitInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->protectedSubmit, sizeof(VkBool32));
@@ -5872,8 +6142,11 @@ void unmarshal_VkSamplerYcbcrConversionCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
@@ -5913,8 +6186,11 @@ void unmarshal_VkSamplerYcbcrConversionInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_169;
@@ -5947,8 +6223,11 @@ void unmarshal_VkBindImagePlaneMemoryInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkImageAspectFlagBits*)&forUnmarshaling->planeAspect, sizeof(VkImageAspectFlagBits));
@@ -5979,8 +6258,11 @@ void unmarshal_VkImagePlaneMemoryRequirementsInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkImageAspectFlagBits*)&forUnmarshaling->planeAspect, sizeof(VkImageAspectFlagBits));
@@ -6011,8 +6293,11 @@ void unmarshal_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->samplerYcbcrConversion, sizeof(VkBool32));
@@ -6043,8 +6328,11 @@ void unmarshal_VkSamplerYcbcrConversionImageFormatProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->combinedImageSamplerDescriptorCount, sizeof(uint32_t));
@@ -6115,8 +6403,11 @@ void unmarshal_VkDescriptorUpdateTemplateCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDescriptorUpdateTemplateCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorUpdateTemplateCreateFlags));
@@ -6180,8 +6471,11 @@ void unmarshal_VkPhysicalDeviceExternalImageFormatInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalMemoryHandleTypeFlagBits));
@@ -6212,8 +6506,11 @@ void unmarshal_VkExternalImageFormatProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkExternalMemoryProperties(vkStream, (VkExternalMemoryProperties*)(&forUnmarshaling->externalMemoryProperties));
@@ -6246,8 +6543,11 @@ void unmarshal_VkPhysicalDeviceExternalBufferInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBufferCreateFlags*)&forUnmarshaling->flags, sizeof(VkBufferCreateFlags));
@@ -6280,8 +6580,11 @@ void unmarshal_VkExternalBufferProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkExternalMemoryProperties(vkStream, (VkExternalMemoryProperties*)(&forUnmarshaling->externalMemoryProperties));
@@ -6316,8 +6619,11 @@ void unmarshal_VkPhysicalDeviceIDProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint8_t*)forUnmarshaling->deviceUUID, VK_UUID_SIZE * sizeof(uint8_t));
@@ -6352,8 +6658,11 @@ void unmarshal_VkExternalMemoryImageCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlags*)&forUnmarshaling->handleTypes, sizeof(VkExternalMemoryHandleTypeFlags));
@@ -6384,8 +6693,11 @@ void unmarshal_VkExternalMemoryBufferCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlags*)&forUnmarshaling->handleTypes, sizeof(VkExternalMemoryHandleTypeFlags));
@@ -6416,8 +6728,11 @@ void unmarshal_VkExportMemoryAllocateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlags*)&forUnmarshaling->handleTypes, sizeof(VkExternalMemoryHandleTypeFlags));
@@ -6448,8 +6763,11 @@ void unmarshal_VkPhysicalDeviceExternalFenceInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalFenceHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalFenceHandleTypeFlagBits));
@@ -6482,8 +6800,11 @@ void unmarshal_VkExternalFenceProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalFenceHandleTypeFlags*)&forUnmarshaling->exportFromImportedHandleTypes, sizeof(VkExternalFenceHandleTypeFlags));
@@ -6516,8 +6837,11 @@ void unmarshal_VkExportFenceCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalFenceHandleTypeFlags*)&forUnmarshaling->handleTypes, sizeof(VkExternalFenceHandleTypeFlags));
@@ -6548,8 +6872,11 @@ void unmarshal_VkExportSemaphoreCreateInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalSemaphoreHandleTypeFlags*)&forUnmarshaling->handleTypes, sizeof(VkExternalSemaphoreHandleTypeFlags));
@@ -6580,8 +6907,11 @@ void unmarshal_VkPhysicalDeviceExternalSemaphoreInfo(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalSemaphoreHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalSemaphoreHandleTypeFlagBits));
@@ -6614,8 +6944,11 @@ void unmarshal_VkExternalSemaphoreProperties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalSemaphoreHandleTypeFlags*)&forUnmarshaling->exportFromImportedHandleTypes, sizeof(VkExternalSemaphoreHandleTypeFlags));
@@ -6649,8 +6982,11 @@ void unmarshal_VkPhysicalDeviceMaintenance3Properties(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxPerSetDescriptors, sizeof(uint32_t));
@@ -6682,8 +7018,11 @@ void unmarshal_VkDescriptorSetLayoutSupport(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->supported, sizeof(VkBool32));
@@ -6714,8 +7053,11 @@ void unmarshal_VkPhysicalDeviceShaderDrawParameterFeatures(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->shaderDrawParameters, sizeof(VkBool32));
@@ -6823,8 +7165,11 @@ void unmarshal_VkSwapchainCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSwapchainCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkSwapchainCreateFlagsKHR));
@@ -6903,8 +7248,11 @@ void unmarshal_VkPresentInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
@@ -6963,8 +7311,11 @@ void unmarshal_VkImageSwapchainCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_191;
@@ -7000,8 +7351,11 @@ void unmarshal_VkBindImageMemorySwapchainInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_193;
@@ -7045,8 +7399,11 @@ void unmarshal_VkAcquireNextImageInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_197;
@@ -7088,8 +7445,11 @@ void unmarshal_VkDeviceGroupPresentCapabilitiesKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)forUnmarshaling->presentMask, VK_MAX_DEVICE_GROUP_SIZE * sizeof(uint32_t));
@@ -7123,8 +7483,11 @@ void unmarshal_VkDeviceGroupPresentInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->swapchainCount, sizeof(uint32_t));
@@ -7158,8 +7521,11 @@ void unmarshal_VkDeviceGroupSwapchainCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceGroupPresentModeFlagsKHR*)&forUnmarshaling->modes, sizeof(VkDeviceGroupPresentModeFlagsKHR));
@@ -7259,8 +7625,11 @@ void unmarshal_VkDisplayModeCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDisplayModeCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkDisplayModeCreateFlagsKHR));
@@ -7351,8 +7720,11 @@ void unmarshal_VkDisplaySurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDisplaySurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkDisplaySurfaceCreateFlagsKHR));
@@ -7396,8 +7768,11 @@ void unmarshal_VkDisplayPresentInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkRect2D(vkStream, (VkRect2D*)(&forUnmarshaling->srcRect));
@@ -7440,8 +7815,11 @@ void unmarshal_VkXlibSurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkXlibSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkXlibSurfaceCreateFlagsKHR));
@@ -7490,8 +7868,11 @@ void unmarshal_VkXcbSurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkXcbSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkXcbSurfaceCreateFlagsKHR));
@@ -7546,8 +7927,11 @@ void unmarshal_VkWaylandSurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkWaylandSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkWaylandSurfaceCreateFlagsKHR));
@@ -7608,8 +7992,11 @@ void unmarshal_VkMirSurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkMirSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkMirSurfaceCreateFlagsKHR));
@@ -7663,8 +8050,11 @@ void unmarshal_VkAndroidSurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkAndroidSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkAndroidSurfaceCreateFlagsKHR));
@@ -7706,8 +8096,11 @@ void unmarshal_VkWin32SurfaceCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkWin32SurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkWin32SurfaceCreateFlagsKHR));
@@ -7762,8 +8155,11 @@ void unmarshal_VkImportMemoryWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalMemoryHandleTypeFlagBits));
@@ -7804,8 +8200,11 @@ void unmarshal_VkExportMemoryWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     // WARNING PTR CHECK
@@ -7844,8 +8243,11 @@ void unmarshal_VkMemoryWin32HandlePropertiesKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeBits, sizeof(uint32_t));
@@ -7879,8 +8281,11 @@ void unmarshal_VkMemoryGetWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_225;
@@ -7917,8 +8322,11 @@ void unmarshal_VkImportMemoryFdInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalMemoryHandleTypeFlagBits));
@@ -7950,8 +8358,11 @@ void unmarshal_VkMemoryFdPropertiesKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeBits, sizeof(uint32_t));
@@ -7985,8 +8396,11 @@ void unmarshal_VkMemoryGetFdInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_227;
@@ -8040,8 +8454,11 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->acquireCount, sizeof(uint32_t));
@@ -8107,8 +8524,11 @@ void unmarshal_VkImportSemaphoreWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_233;
@@ -8153,8 +8573,11 @@ void unmarshal_VkExportSemaphoreWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     // WARNING PTR CHECK
@@ -8208,8 +8631,11 @@ void unmarshal_VkD3D12FenceSubmitInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreValuesCount, sizeof(uint32_t));
@@ -8258,8 +8684,11 @@ void unmarshal_VkSemaphoreGetWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_241;
@@ -8300,8 +8729,11 @@ void unmarshal_VkImportSemaphoreFdInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_243;
@@ -8340,8 +8772,11 @@ void unmarshal_VkSemaphoreGetFdInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_245;
@@ -8377,8 +8812,11 @@ void unmarshal_VkPhysicalDevicePushDescriptorPropertiesKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxPushDescriptors, sizeof(uint32_t));
@@ -8475,8 +8913,11 @@ void unmarshal_VkPresentRegionsKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->swapchainCount, sizeof(uint32_t));
@@ -8529,8 +8970,11 @@ void unmarshal_VkAttachmentDescription2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkAttachmentDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
@@ -8571,8 +9015,11 @@ void unmarshal_VkAttachmentReference2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->attachment, sizeof(uint32_t));
@@ -8636,8 +9083,11 @@ void unmarshal_VkSubpassDescription2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSubpassDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkSubpassDescriptionFlags));
@@ -8709,8 +9159,11 @@ void unmarshal_VkSubpassDependency2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->srcSubpass, sizeof(uint32_t));
@@ -8765,8 +9218,11 @@ void unmarshal_VkRenderPassCreateInfo2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
@@ -8818,8 +9274,11 @@ void unmarshal_VkSubpassBeginInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSubpassContents*)&forUnmarshaling->contents, sizeof(VkSubpassContents));
@@ -8849,8 +9308,11 @@ void unmarshal_VkSubpassEndInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
 }
@@ -8882,8 +9344,11 @@ void unmarshal_VkSharedPresentSurfaceCapabilitiesKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkImageUsageFlags*)&forUnmarshaling->sharedPresentSupportedUsageFlags, sizeof(VkImageUsageFlags));
@@ -8926,8 +9391,11 @@ void unmarshal_VkImportFenceWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_255;
@@ -8972,8 +9440,11 @@ void unmarshal_VkExportFenceWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     // WARNING PTR CHECK
@@ -9015,8 +9486,11 @@ void unmarshal_VkFenceGetWin32HandleInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_259;
@@ -9057,8 +9531,11 @@ void unmarshal_VkImportFenceFdInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_261;
@@ -9097,8 +9574,11 @@ void unmarshal_VkFenceGetFdInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_263;
@@ -9138,8 +9618,11 @@ void unmarshal_VkPhysicalDeviceSurfaceInfo2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_265;
@@ -9172,8 +9655,11 @@ void unmarshal_VkSurfaceCapabilities2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkSurfaceCapabilitiesKHR(vkStream, (VkSurfaceCapabilitiesKHR*)(&forUnmarshaling->surfaceCapabilities));
@@ -9204,8 +9690,11 @@ void unmarshal_VkSurfaceFormat2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkSurfaceFormatKHR(vkStream, (VkSurfaceFormatKHR*)(&forUnmarshaling->surfaceFormat));
@@ -9240,8 +9729,11 @@ void unmarshal_VkDisplayProperties2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkDisplayPropertiesKHR(vkStream, (VkDisplayPropertiesKHR*)(&forUnmarshaling->displayProperties));
@@ -9272,8 +9764,11 @@ void unmarshal_VkDisplayPlaneProperties2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkDisplayPlanePropertiesKHR(vkStream, (VkDisplayPlanePropertiesKHR*)(&forUnmarshaling->displayPlaneProperties));
@@ -9304,8 +9799,11 @@ void unmarshal_VkDisplayModeProperties2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkDisplayModePropertiesKHR(vkStream, (VkDisplayModePropertiesKHR*)(&forUnmarshaling->displayModeProperties));
@@ -9339,8 +9837,11 @@ void unmarshal_VkDisplayPlaneInfo2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_267;
@@ -9374,8 +9875,11 @@ void unmarshal_VkDisplayPlaneCapabilities2KHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkDisplayPlaneCapabilitiesKHR(vkStream, (VkDisplayPlaneCapabilitiesKHR*)(&forUnmarshaling->capabilities));
@@ -9417,8 +9921,11 @@ void unmarshal_VkImageFormatListCreateInfoKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->viewFormatCount, sizeof(uint32_t));
@@ -9463,8 +9970,11 @@ void unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
@@ -9510,8 +10020,11 @@ void unmarshal_VkNativeBufferANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     // WARNING PTR CHECK
@@ -9564,8 +10077,11 @@ void unmarshal_VkDebugReportCallbackCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDebugReportFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDebugReportFlagsEXT));
@@ -9612,8 +10128,11 @@ void unmarshal_VkPipelineRasterizationStateRasterizationOrderAMD(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkRasterizationOrderAMD*)&forUnmarshaling->rasterizationOrder, sizeof(VkRasterizationOrderAMD));
@@ -9652,8 +10171,11 @@ void unmarshal_VkDebugMarkerObjectNameInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDebugReportObjectTypeEXT*)&forUnmarshaling->objectType, sizeof(VkDebugReportObjectTypeEXT));
@@ -9691,8 +10213,11 @@ void unmarshal_VkDebugMarkerObjectTagInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDebugReportObjectTypeEXT*)&forUnmarshaling->objectType, sizeof(VkDebugReportObjectTypeEXT));
@@ -9729,8 +10254,11 @@ void unmarshal_VkDebugMarkerMarkerInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->loadStringInPlace((char**)&forUnmarshaling->pMarkerName);
@@ -9766,8 +10294,11 @@ void unmarshal_VkDedicatedAllocationImageCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->dedicatedAllocation, sizeof(VkBool32));
@@ -9798,8 +10329,11 @@ void unmarshal_VkDedicatedAllocationBufferCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->dedicatedAllocation, sizeof(VkBool32));
@@ -9835,8 +10369,11 @@ void unmarshal_VkDedicatedAllocationMemoryAllocateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_278;
@@ -9882,8 +10419,11 @@ void unmarshal_VkTextureLODGatherFormatPropertiesAMD(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->supportsTextureGatherLODBiasAMD, sizeof(VkBool32));
@@ -9994,8 +10534,11 @@ void unmarshal_VkExternalMemoryImageCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagsNV*)&forUnmarshaling->handleTypes, sizeof(VkExternalMemoryHandleTypeFlagsNV));
@@ -10026,8 +10569,11 @@ void unmarshal_VkExportMemoryAllocateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagsNV*)&forUnmarshaling->handleTypes, sizeof(VkExternalMemoryHandleTypeFlagsNV));
@@ -10061,8 +10607,11 @@ void unmarshal_VkImportMemoryWin32HandleInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagsNV*)&forUnmarshaling->handleType, sizeof(VkExternalMemoryHandleTypeFlagsNV));
@@ -10101,8 +10650,11 @@ void unmarshal_VkExportMemoryWin32HandleInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     // WARNING PTR CHECK
@@ -10160,8 +10712,11 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->acquireCount, sizeof(uint32_t));
@@ -10218,8 +10773,11 @@ void unmarshal_VkValidationFlagsEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->disabledValidationCheckCount, sizeof(uint32_t));
@@ -10261,8 +10819,11 @@ void unmarshal_VkViSurfaceCreateInfoNN(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkViSurfaceCreateFlagsNN*)&forUnmarshaling->flags, sizeof(VkViSurfaceCreateFlagsNN));
@@ -10310,8 +10871,11 @@ void unmarshal_VkConditionalRenderingBeginInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_293;
@@ -10347,8 +10911,11 @@ void unmarshal_VkPhysicalDeviceConditionalRenderingFeaturesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->conditionalRendering, sizeof(VkBool32));
@@ -10380,8 +10947,11 @@ void unmarshal_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->conditionalRenderingEnable, sizeof(VkBool32));
@@ -10414,8 +10984,11 @@ void unmarshal_VkDeviceGeneratedCommandsFeaturesNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->computeBindingPointSupport, sizeof(VkBool32));
@@ -10450,8 +11023,11 @@ void unmarshal_VkDeviceGeneratedCommandsLimitsNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectCommandsLayoutTokenCount, sizeof(uint32_t));
@@ -10534,8 +11110,11 @@ void unmarshal_VkIndirectCommandsLayoutCreateInfoNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
@@ -10595,8 +11174,11 @@ void unmarshal_VkCmdProcessCommandsInfoNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_301;
@@ -10656,8 +11238,11 @@ void unmarshal_VkCmdReserveSpaceForCommandsInfoNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_308;
@@ -10702,8 +11287,11 @@ void unmarshal_VkObjectTableCreateInfoNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->objectCount, sizeof(uint32_t));
@@ -10910,8 +11498,11 @@ void unmarshal_VkPipelineViewportWScalingStateCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->viewportWScalingEnable, sizeof(VkBool32));
@@ -10969,8 +11560,11 @@ void unmarshal_VkSurfaceCapabilities2EXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->minImageCount, sizeof(uint32_t));
@@ -11013,8 +11607,11 @@ void unmarshal_VkDisplayPowerInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDisplayPowerStateEXT*)&forUnmarshaling->powerState, sizeof(VkDisplayPowerStateEXT));
@@ -11045,8 +11642,11 @@ void unmarshal_VkDeviceEventInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceEventTypeEXT*)&forUnmarshaling->deviceEvent, sizeof(VkDeviceEventTypeEXT));
@@ -11077,8 +11677,11 @@ void unmarshal_VkDisplayEventInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDisplayEventTypeEXT*)&forUnmarshaling->displayEvent, sizeof(VkDisplayEventTypeEXT));
@@ -11109,8 +11712,11 @@ void unmarshal_VkSwapchainCounterCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSurfaceCounterFlagsEXT*)&forUnmarshaling->surfaceCounters, sizeof(VkSurfaceCounterFlagsEXT));
@@ -11205,8 +11811,11 @@ void unmarshal_VkPresentTimesInfoGOOGLE(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->swapchainCount, sizeof(uint32_t));
@@ -11255,8 +11864,11 @@ void unmarshal_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->perViewPositionAllComponents, sizeof(VkBool32));
@@ -11320,8 +11932,11 @@ void unmarshal_VkPipelineViewportSwizzleStateCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineViewportSwizzleStateCreateFlagsNV*)&forUnmarshaling->flags, sizeof(VkPipelineViewportSwizzleStateCreateFlagsNV));
@@ -11365,8 +11980,11 @@ void unmarshal_VkPhysicalDeviceDiscardRectanglePropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxDiscardRectangles, sizeof(uint32_t));
@@ -11409,8 +12027,11 @@ void unmarshal_VkPipelineDiscardRectangleStateCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineDiscardRectangleStateCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkPipelineDiscardRectangleStateCreateFlagsEXT));
@@ -11463,8 +12084,11 @@ void unmarshal_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((float*)&forUnmarshaling->primitiveOverestimationSize, sizeof(float));
@@ -11505,8 +12129,11 @@ void unmarshal_VkPipelineRasterizationConservativeStateCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineRasterizationConservativeStateCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkPipelineRasterizationConservativeStateCreateFlagsEXT));
@@ -11566,8 +12193,11 @@ void unmarshal_VkHdrMetadataEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkXYColorEXT(vkStream, (VkXYColorEXT*)(&forUnmarshaling->displayPrimaryRed));
@@ -11614,8 +12244,11 @@ void unmarshal_VkIOSSurfaceCreateInfoMVK(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkIOSSurfaceCreateFlagsMVK*)&forUnmarshaling->flags, sizeof(VkIOSSurfaceCreateFlagsMVK));
@@ -11662,8 +12295,11 @@ void unmarshal_VkMacOSSurfaceCreateInfoMVK(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkMacOSSurfaceCreateFlagsMVK*)&forUnmarshaling->flags, sizeof(VkMacOSSurfaceCreateFlagsMVK));
@@ -11722,8 +12358,11 @@ void unmarshal_VkDebugUtilsObjectNameInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkObjectType*)&forUnmarshaling->objectType, sizeof(VkObjectType));
@@ -11773,8 +12412,11 @@ void unmarshal_VkDebugUtilsObjectTagInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkObjectType*)&forUnmarshaling->objectType, sizeof(VkObjectType));
@@ -11811,8 +12453,11 @@ void unmarshal_VkDebugUtilsLabelEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->loadStringInPlace((char**)&forUnmarshaling->pLabelName);
@@ -11893,8 +12538,11 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDebugUtilsMessengerCallbackDataFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDebugUtilsMessengerCallbackDataFlagsEXT));
@@ -11984,8 +12632,11 @@ void unmarshal_VkDebugUtilsMessengerCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDebugUtilsMessengerCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDebugUtilsMessengerCreateFlagsEXT));
@@ -12028,8 +12679,11 @@ void unmarshal_VkAndroidHardwareBufferUsageANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint64_t*)&forUnmarshaling->androidHardwareBufferUsage, sizeof(uint64_t));
@@ -12061,8 +12715,11 @@ void unmarshal_VkAndroidHardwareBufferPropertiesANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceSize*)&forUnmarshaling->allocationSize, sizeof(VkDeviceSize));
@@ -12101,8 +12758,11 @@ void unmarshal_VkAndroidHardwareBufferFormatPropertiesANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
@@ -12140,8 +12800,11 @@ void unmarshal_VkImportAndroidHardwareBufferInfoANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->alloc((void**)&forUnmarshaling->buffer, sizeof(AHardwareBuffer));
@@ -12175,8 +12838,11 @@ void unmarshal_VkMemoryGetAndroidHardwareBufferInfoANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_351;
@@ -12209,8 +12875,11 @@ void unmarshal_VkExternalFormatANDROID(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint64_t*)&forUnmarshaling->externalFormat, sizeof(uint64_t));
@@ -12243,8 +12912,11 @@ void unmarshal_VkSamplerReductionModeCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSamplerReductionModeEXT*)&forUnmarshaling->reductionMode, sizeof(VkSamplerReductionModeEXT));
@@ -12276,8 +12948,11 @@ void unmarshal_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
@@ -12341,8 +13016,11 @@ void unmarshal_VkSampleLocationsInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->sampleLocationsPerPixel, sizeof(VkSampleCountFlagBits));
@@ -12421,8 +13099,11 @@ void unmarshal_VkRenderPassSampleLocationsBeginInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentInitialSampleLocationsCount, sizeof(uint32_t));
@@ -12465,8 +13146,11 @@ void unmarshal_VkPipelineSampleLocationsStateCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->sampleLocationsEnable, sizeof(VkBool32));
@@ -12502,8 +13186,11 @@ void unmarshal_VkPhysicalDeviceSampleLocationsPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkSampleCountFlags*)&forUnmarshaling->sampleLocationSampleCounts, sizeof(VkSampleCountFlags));
@@ -12538,8 +13225,11 @@ void unmarshal_VkMultisamplePropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->maxSampleLocationGridSize));
@@ -12572,8 +13262,11 @@ void unmarshal_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->advancedBlendCoherentOperations, sizeof(VkBool32));
@@ -12609,8 +13302,11 @@ void unmarshal_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->advancedBlendMaxColorAttachments, sizeof(uint32_t));
@@ -12648,8 +13344,11 @@ void unmarshal_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->srcPremultiplied, sizeof(VkBool32));
@@ -12686,8 +13385,11 @@ void unmarshal_VkPipelineCoverageToColorStateCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineCoverageToColorStateCreateFlagsNV*)&forUnmarshaling->flags, sizeof(VkPipelineCoverageToColorStateCreateFlagsNV));
@@ -12732,8 +13434,11 @@ void unmarshal_VkPipelineCoverageModulationStateCreateInfoNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineCoverageModulationStateCreateFlagsNV*)&forUnmarshaling->flags, sizeof(VkPipelineCoverageModulationStateCreateFlagsNV));
@@ -12783,8 +13488,11 @@ void unmarshal_VkValidationCacheCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkValidationCacheCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkValidationCacheCreateFlagsEXT));
@@ -12820,8 +13528,11 @@ void unmarshal_VkShaderModuleValidationCacheCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     uint64_t cgen_var_357;
@@ -12857,8 +13568,11 @@ void unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
@@ -12910,8 +13624,11 @@ void unmarshal_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
@@ -12983,8 +13700,11 @@ void unmarshal_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
@@ -13038,8 +13758,11 @@ void unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->descriptorSetCount, sizeof(uint32_t));
@@ -13072,8 +13795,11 @@ void unmarshal_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxVariableDescriptorCount, sizeof(uint32_t));
@@ -13108,8 +13834,11 @@ void unmarshal_VkDeviceQueueGlobalPriorityCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkQueueGlobalPriorityEXT*)&forUnmarshaling->globalPriority, sizeof(VkQueueGlobalPriorityEXT));
@@ -13149,8 +13878,11 @@ void unmarshal_VkImportMemoryHostPointerInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkExternalMemoryHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalMemoryHandleTypeFlagBits));
@@ -13188,8 +13920,11 @@ void unmarshal_VkMemoryHostPointerPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeBits, sizeof(uint32_t));
@@ -13220,8 +13955,11 @@ void unmarshal_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDeviceSize*)&forUnmarshaling->minImportedHostPointerAlignment, sizeof(VkDeviceSize));
@@ -13269,8 +14007,11 @@ void unmarshal_VkPhysicalDeviceShaderCorePropertiesAMD(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->shaderEngineCount, sizeof(uint32_t));
@@ -13316,8 +14057,11 @@ void unmarshal_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxVertexAttribDivisor, sizeof(uint32_t));
@@ -13368,8 +14112,11 @@ void unmarshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->vertexBindingDivisorCount, sizeof(uint32_t));
@@ -13409,8 +14156,11 @@ void unmarshal_VkQueueFamilyCheckpointPropertiesNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineStageFlags*)&forUnmarshaling->checkpointExecutionStageMask, sizeof(VkPipelineStageFlags));
@@ -13448,8 +14198,11 @@ void unmarshal_VkCheckpointDataNV(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkPipelineStageFlagBits*)&forUnmarshaling->stage, sizeof(VkPipelineStageFlagBits));
@@ -13491,8 +14244,11 @@ void unmarshal_VkImportColorBufferGOOGLE(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->colorBuffer, sizeof(uint32_t));
@@ -13527,8 +14283,11 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
     forUnmarshaling->pNext = nullptr;
     if (pNext_size)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
         vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size(forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint64_t*)&forUnmarshaling->physicalAddress, sizeof(uint64_t));
