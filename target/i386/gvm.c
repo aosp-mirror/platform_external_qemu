@@ -116,9 +116,10 @@ static int gvm_get_tsc(CPUState *cs)
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
             &msr_data, sizeof(msr_data),
             &msr_data, sizeof(msr_data));
-    if (ret < 0) {
+    if (ret < 0)
         return ret;
-    }
+    else
+        ret = msr_data.info.nmsrs;
 
     assert(ret == 1);
     env->tsc = msr_data.entries[0].data;
@@ -948,10 +949,11 @@ static int gvm_put_tscdeadline_msr(X86CPU *cpu)
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS,
             cpu->gvm_msr_buf,
             sizeof(struct gvm_msrs) + sizeof(struct gvm_msr_entry),
-            NULL, 0);
-    if (ret < 0) {
+            cpu->gvm_msr_buf, sizeof(struct gvm_msrs));
+    if (ret < 0)
         return ret;
-    }
+    else
+        ret = cpu->gvm_msr_buf->nmsrs;
 
     assert(ret == 1);
     return 0;
@@ -978,10 +980,11 @@ static int gvm_put_msr_feature_control(X86CPU *cpu)
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS,
             cpu->gvm_msr_buf,
             sizeof(struct gvm_msrs) + sizeof(struct gvm_msr_entry),
-            NULL, 0);
-    if (ret < 0) {
+            cpu->gvm_msr_buf, sizeof(struct gvm_msrs));
+    if (ret < 0)
         return ret;
-    }
+    else
+        ret = cpu->gvm_msr_buf->nmsrs;
 
     assert(ret == 1);
     return 0;
@@ -1100,7 +1103,7 @@ static int gvm_put_msrs(X86CPU *cpu, int level)
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS, cpu->gvm_msr_buf,
             sizeof(struct gvm_msrs) + cpu->gvm_msr_buf->nmsrs *
                 sizeof(struct  gvm_msr_entry),
-            NULL, 0);
+            cpu->gvm_msr_buf, sizeof(struct gvm_msrs));
     if (ret < 0) {
         return ret;
     }
@@ -1414,9 +1417,10 @@ static int gvm_get_msrs(X86CPU *cpu)
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
             cpu->gvm_msr_buf, bufsize,
             cpu->gvm_msr_buf, bufsize);
-    if (ret < 0) {
+    if (ret < 0)
         return ret;
-    }
+    else
+        ret = cpu->gvm_msr_buf->nmsrs;
 
     /*
      * MTRR masks: Each mask consists of 5 parts
