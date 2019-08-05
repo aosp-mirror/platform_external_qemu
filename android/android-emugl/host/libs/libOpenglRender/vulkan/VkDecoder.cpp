@@ -4296,15 +4296,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkCreateDescriptorPool 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pDescriptorPool);
                 }
                 VkResult vkCreateDescriptorPool_VkResult_return = (VkResult)0;
-                vkCreateDescriptorPool_VkResult_return = vk->vkCreateDescriptorPool(unboxed_device, pCreateInfo, pAllocator, pDescriptorPool);
+                vkCreateDescriptorPool_VkResult_return = m_state->on_vkCreateDescriptorPool(&m_pool, device, pCreateInfo, pAllocator, pDescriptorPool);
                 vkStream->unsetHandleMapping();
-                // Begin auto non dispatchable handle create for pDescriptorPool;
-                if (vkCreateDescriptorPool_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
+                // Begin manual non dispatchable handle create for pDescriptorPool;
+                vkStream->unsetHandleMapping();
                 uint64_t cgen_var_232;
                 static_assert(8 == sizeof(VkDescriptorPool), "handle map overwrite requres VkDescriptorPool to be 8 bytes long");
                 vkStream->handleMapping()->mapHandles_VkDescriptorPool((VkDescriptorPool*)pDescriptorPool, 1);
                 vkStream->write((VkDescriptorPool*)pDescriptorPool, 8 * 1);
-                // Begin auto non dispatchable handle create for pDescriptorPool;
+                // Begin manual non dispatchable handle create for pDescriptorPool;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDescriptorPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -4355,7 +4355,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkDestroyDescriptorPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)pAllocator);
                 }
-                vk->vkDestroyDescriptorPool(unboxed_device, descriptorPool, pAllocator);
+                m_state->on_vkDestroyDescriptorPool(&m_pool, device, descriptorPool, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
@@ -4390,7 +4390,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkResetDescriptorPool 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)flags);
                 }
                 VkResult vkResetDescriptorPool_VkResult_return = (VkResult)0;
-                vkResetDescriptorPool_VkResult_return = vk->vkResetDescriptorPool(unboxed_device, descriptorPool, flags);
+                vkResetDescriptorPool_VkResult_return = m_state->on_vkResetDescriptorPool(&m_pool, device, descriptorPool, flags);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetDescriptorPool_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -4440,10 +4440,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkAllocateDescriptorSets 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAllocateInfo, (unsigned long long)pDescriptorSets);
                 }
                 VkResult vkAllocateDescriptorSets_VkResult_return = (VkResult)0;
-                vkAllocateDescriptorSets_VkResult_return = vk->vkAllocateDescriptorSets(unboxed_device, pAllocateInfo, pDescriptorSets);
+                vkAllocateDescriptorSets_VkResult_return = m_state->on_vkAllocateDescriptorSets(&m_pool, device, pAllocateInfo, pDescriptorSets);
                 vkStream->unsetHandleMapping();
-                // Begin auto non dispatchable handle create for pDescriptorSets;
-                if (vkAllocateDescriptorSets_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
+                // Begin manual non dispatchable handle create for pDescriptorSets;
+                vkStream->unsetHandleMapping();
                 if (pAllocateInfo->descriptorSetCount)
                 {
                     uint64_t* cgen_var_240;
@@ -4452,7 +4452,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkStream->handleMapping()->mapHandles_VkDescriptorSet((VkDescriptorSet*)pDescriptorSets, pAllocateInfo->descriptorSetCount);
                     vkStream->write((VkDescriptorSet*)pDescriptorSets, 8 * pAllocateInfo->descriptorSetCount);
                 }
-                // Begin auto non dispatchable handle create for pDescriptorSets;
+                // Begin manual non dispatchable handle create for pDescriptorSets;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkAllocateDescriptorSets_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -4508,7 +4508,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkFreeDescriptorSets 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)descriptorSetCount, (unsigned long long)pDescriptorSets);
                 }
                 VkResult vkFreeDescriptorSets_VkResult_return = (VkResult)0;
-                vkFreeDescriptorSets_VkResult_return = vk->vkFreeDescriptorSets(unboxed_device, descriptorPool, descriptorSetCount, pDescriptorSets);
+                vkFreeDescriptorSets_VkResult_return = m_state->on_vkFreeDescriptorSets(&m_pool, device, descriptorPool, descriptorSetCount, pDescriptorSets);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkFreeDescriptorSets_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
