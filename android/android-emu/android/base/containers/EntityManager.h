@@ -138,6 +138,10 @@ public:
                nextCapacity);
 
         if (neededCapacity > mEntries.size()) {
+            if (neededCapacity > 1000000) {
+                fprintf(stderr, "%s: ERROR: needing way too many things\n", __func__);
+                abort();
+            }
             mEntries.resize(nextCapacity);
             for (size_t i = currentCapacity; i < nextCapacity; ++i) {
                 mEntries[i].handle = makeHandle(i, 0, type);
@@ -193,6 +197,10 @@ public:
                nextCapacity);
 
         if (neededCapacity > mEntries.size()) {
+            if (neededCapacity > 1000000) {
+                fprintf(stderr, "%s: ERROR: needing way too many things\n", __func__);
+                abort();
+            }
             mEntries.resize(nextCapacity);
             for (size_t i = currentCapacity; i < nextCapacity; ++i) {
                 mEntries[i].handle = makeHandle(i, 0, type);
@@ -488,6 +496,10 @@ public:
         size_t index = indexOfEntity(h);
 
         if (index + 1 > mItems.size()) {
+            if (index > 1000000) {
+                fprintf(stderr, "%s: ERROR: needing way too many things\n", __func__);
+                abort();
+            }
             mItems.resize((index + 1) * 2);
         }
 
