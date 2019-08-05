@@ -305,14 +305,20 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         if self.direction == "read":
             if self.dynAlloc:
                 self.cgen.stmt( \
-                    "%s->alloc((void**)&%s, %s_size)" %
-                    (self.streamVarName, access, vulkanType.paramName))
+                    "%s->alloc((void**)&%s, sizeof(VkStructureType))" %
+                    (self.streamVarName, access))
             castedAccessExpr = "(%s)(%s)" % ("void*", access)
         else:
             castedAccessExpr = access
 
         if self.dynAlloc or self.direction == "write":
             self.genStreamCall(vulkanType, access, "sizeof(VkStructureType)")
+            if self.direction == "read":
+                self.cgen.stmt("VkStructureType extType = *(VkStructureType*)(%s)" % access)
+                self.cgen.stmt( \
+                    "%s->alloc((void**)&%s, goldfish_vk_extension_struct_size(%s))" %
+                    (self.streamVarName, access, access))
+                self.cgen.stmt("*(VkStructureType*)%s = extType" % access)
         else:
             self.cgen.stmt("uint64_t pNext_placeholder")
             placeholderAccess = "(&pNext_placeholder)"
