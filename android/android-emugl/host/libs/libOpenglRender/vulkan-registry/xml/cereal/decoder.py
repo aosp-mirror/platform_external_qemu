@@ -261,7 +261,8 @@ def emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=True):
 
         if autobox and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin auto non dispatchable handle create for %s" % p.paramName)
-            cgen.stmt("%s->setHandleMapping(&m_boxedHandleCreateMapping)" % WRITE_STREAM)
+            cgen.stmt("if (%s == VK_SUCCESS) %s->setHandleMapping(&m_boxedHandleCreateMapping)" % \
+                      (api.getRetVarExpr(), WRITE_STREAM))
 
         if (not autobox) and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin manual non dispatchable handle create for %s" % p.paramName)
@@ -450,6 +451,12 @@ custom_decodes = {
     "vkGetImageMemoryRequirements" : emit_global_state_wrapped_decoding,
     "vkGetImageMemoryRequirements2" : emit_global_state_wrapped_decoding,
     "vkGetImageMemoryRequirements2KHR" : emit_global_state_wrapped_decoding,
+
+    "vkCreateDescriptorPool" : emit_global_state_wrapped_decoding,
+    "vkDestroyDescriptorPool" : emit_global_state_wrapped_decoding,
+    "vkResetDescriptorPool" : emit_global_state_wrapped_decoding,
+    "vkAllocateDescriptorSets" : emit_global_state_wrapped_decoding,
+    "vkFreeDescriptorSets" : emit_global_state_wrapped_decoding,
 
     "vkUpdateDescriptorSets" : emit_global_state_wrapped_decoding,
 

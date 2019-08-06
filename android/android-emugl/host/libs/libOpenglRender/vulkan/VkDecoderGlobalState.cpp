@@ -1480,6 +1480,149 @@ public:
         vk->vkDestroySemaphore(device, semaphore, pAllocator);
     }
 
+    VkResult on_vkCreateDescriptorPool(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        const VkDescriptorPoolCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDescriptorPool* pDescriptorPool) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        auto res =
+            vk->vkCreateDescriptorPool(device, pCreateInfo, pAllocator, pDescriptorPool);
+
+        if (res == VK_SUCCESS) {
+            AutoLock lock(mLock);
+            auto& info = mDescriptorPoolInfo[*pDescriptorPool];
+            *pDescriptorPool = new_boxed_non_dispatchable_VkDescriptorPool(*pDescriptorPool);
+        }
+
+        return res;
+    }
+
+    void cleanupDescriptorPoolAllocedSetsLocked(VkDescriptorPool descriptorPool) {
+        auto info = android::base::find(mDescriptorPoolInfo, descriptorPool);
+
+        if (!info) return;
+
+        for (auto it : info->allocedSetsToBoxed) {
+            auto unboxedSet = it.first;
+            auto boxedSet = it.second;
+            mDescriptorSetToPool.erase(boxedSet);
+            delete_boxed_non_dispatchable_VkDescriptorSet(boxedSet);
+        }
+    }
+
+    void on_vkDestroyDescriptorPool(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        VkDescriptorPool descriptorPool,
+        const VkAllocationCallbacks* pAllocator) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        vk->vkDestroyDescriptorPool(device, descriptorPool, pAllocator);
+
+        AutoLock lock(mLock);
+        cleanupDescriptorPoolAllocedSetsLocked(descriptorPool);
+        mDescriptorPoolInfo.erase(descriptorPool);
+    }
+
+    VkResult on_vkResetDescriptorPool(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        VkDescriptorPool descriptorPool,
+        VkDescriptorPoolResetFlags flags) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        auto res = vk->vkResetDescriptorPool(device, descriptorPool, flags);
+
+        if (res == VK_SUCCESS) {
+            AutoLock lock(mLock);
+            cleanupDescriptorPoolAllocedSetsLocked(descriptorPool);
+        }
+
+        return res;
+    }
+
+    VkResult on_vkAllocateDescriptorSets(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        const VkDescriptorSetAllocateInfo* pAllocateInfo,
+        VkDescriptorSet* pDescriptorSets) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        auto res = vk->vkAllocateDescriptorSets(device, pAllocateInfo, pDescriptorSets);
+        if (res == VK_SUCCESS) {
+            AutoLock lock(mLock);
+
+            auto poolInfo = android::base::find(mDescriptorPoolInfo, pAllocateInfo->descriptorPool);
+
+            if (!poolInfo) return res;
+
+            for (uint32_t i = 0; i < pAllocateInfo->descriptorSetCount; ++i) {
+                mDescriptorSetToPool[pDescriptorSets[i]] = pAllocateInfo->descriptorPool;
+                auto unboxed = pDescriptorSets[i];
+                pDescriptorSets[i] = new_boxed_non_dispatchable_VkDescriptorSet(pDescriptorSets[i]);
+                poolInfo->allocedSetsToBoxed[unboxed] = pDescriptorSets[i];
+            }
+        }
+
+        return res;
+    }
+
+    VkResult on_vkFreeDescriptorSets(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        VkDescriptorPool descriptorPool,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSet* pDescriptorSets) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        auto res = vk->vkFreeDescriptorSets(
+            device, descriptorPool,
+            descriptorSetCount, pDescriptorSets);
+
+        if (res == VK_SUCCESS) {
+            AutoLock lock(mLock);
+
+            for (uint32_t i = 0; i < descriptorSetCount; ++i) {
+                auto pool = android::base::find(
+                    mDescriptorSetToPool, pDescriptorSets[i]);
+
+                if (!pool) continue;
+
+                auto poolInfo =
+                    android::base::find(
+                        mDescriptorPoolInfo, *pool);
+
+                if (!poolInfo) continue;
+
+                auto descSetAllocedEntry =
+                    android::base::find(
+                        poolInfo->allocedSetsToBoxed, pDescriptorSets[i]);
+
+                if (!descSetAllocedEntry) continue;
+
+                poolInfo->allocedSetsToBoxed.erase(pDescriptorSets[i]);
+
+                mDescriptorSetToPool.erase(pDescriptorSets[i]);
+            }
+
+        }
+
+        return res;
+    }
+
     void on_vkUpdateDescriptorSets(
             android::base::Pool* pool,
             VkDevice boxed_device,
@@ -4243,6 +4386,10 @@ private:
             VK_EXT_MEMORY_HANDLE_INVALID;
     };
 
+    struct DescriptorPoolInfo {
+        std::unordered_map<VkDescriptorSet, VkDescriptorSet> allocedSetsToBoxed;
+    };
+
     template <class T>
     class BoxedHandleManager {
     public:
@@ -4322,6 +4469,10 @@ private:
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
+
+    std::unordered_map<VkDescriptorPool, DescriptorPoolInfo> mDescriptorPoolInfo;
+    std::unordered_map<VkDescriptorSet, VkDescriptorPool> mDescriptorSetToPool;
+
 #ifdef _WIN32
     int mSemaphoreId = 1;
     int genSemaphoreId() {
@@ -4687,6 +4838,52 @@ void VkDecoderGlobalState::on_vkDestroySemaphore(
     VkSemaphore semaphore,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroySemaphore(pool, device, semaphore, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateDescriptorPool(
+    android::base::Pool* pool,
+    VkDevice device,
+    const VkDescriptorPoolCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkDescriptorPool* pDescriptorPool) {
+    return mImpl->on_vkCreateDescriptorPool(pool, device, pCreateInfo, pAllocator, pDescriptorPool);
+}
+
+void VkDecoderGlobalState::on_vkDestroyDescriptorPool(
+    android::base::Pool* pool,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyDescriptorPool(
+        pool, device, descriptorPool, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkResetDescriptorPool(
+    android::base::Pool* pool,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    VkDescriptorPoolResetFlags flags) {
+    return mImpl->on_vkResetDescriptorPool(
+        pool, device, descriptorPool, flags);
+}
+
+VkResult VkDecoderGlobalState::on_vkAllocateDescriptorSets(
+    android::base::Pool* pool,
+    VkDevice device,
+    const VkDescriptorSetAllocateInfo* pAllocateInfo,
+    VkDescriptorSet* pDescriptorSets) {
+    return mImpl->on_vkAllocateDescriptorSets(
+        pool, device, pAllocateInfo, pDescriptorSets);
+}
+
+VkResult VkDecoderGlobalState::on_vkFreeDescriptorSets(
+    android::base::Pool* pool,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSet* pDescriptorSets) {
+    return mImpl->on_vkFreeDescriptorSets(
+        pool, device, descriptorPool, descriptorSetCount, pDescriptorSets);
 }
 
 void VkDecoderGlobalState::on_vkUpdateDescriptorSets(
