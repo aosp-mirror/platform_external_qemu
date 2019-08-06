@@ -92,10 +92,6 @@ bool gvm_gsi_direct_mapping;
 bool gvm_allowed;
 bool gvm_readonly_mem_allowed;
 
-static const GVMCapabilityInfo gvm_required_capabilites[] = {
-    GVM_CAP_LAST_INFO
-};
-
 int gvm_get_max_memslots(void)
 {
     GVMState *s = GVM_STATE(current_machine->accelerator);
@@ -613,18 +609,6 @@ int gvm_vm_check_extension(GVMState *s, unsigned int extension)
     }
 
     return result;
-}
-
-static const GVMCapabilityInfo *
-gvm_check_extension_list(GVMState *s, const GVMCapabilityInfo *list)
-{
-    while (list->name) {
-        if (!gvm_check_extension(s, list->value)) {
-            return list;
-        }
-        list++;
-    }
-    return NULL;
 }
 
 static void gvm_set_phys_mem(GVMMemoryListener *kml,
@@ -1358,16 +1342,6 @@ static int gvm_init(MachineState *ms)
     }
 
     s->vmfd = vmfd;
-    missing_cap = gvm_check_extension_list(s, gvm_required_capabilites);
-    if (!missing_cap) {
-        missing_cap =
-            gvm_check_extension_list(s, gvm_arch_required_capabilities);
-    }
-    if (missing_cap) {
-        ret = -EINVAL;
-        fprintf(stderr, "gvm does not support %s\n", missing_cap->name);
-        goto err;
-    }
 
 #ifdef GVM_CAP_VCPU_EVENTS
     s->vcpu_events = gvm_check_extension(s, GVM_CAP_VCPU_EVENTS);
