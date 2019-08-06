@@ -261,7 +261,8 @@ def emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=True):
 
         if autobox and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin auto non dispatchable handle create for %s" % p.paramName)
-            cgen.stmt("%s->setHandleMapping(&m_boxedHandleCreateMapping)" % WRITE_STREAM)
+            cgen.stmt("if (%s == VK_SUCCESS) %s->setHandleMapping(&m_boxedHandleCreateMapping)" % \
+                      (api.getRetVarExpr(), WRITE_STREAM))
 
         if (not autobox) and p.nonDispatchableHandleCreate:
             cgen.stmt("// Begin manual non dispatchable handle create for %s" % p.paramName)
