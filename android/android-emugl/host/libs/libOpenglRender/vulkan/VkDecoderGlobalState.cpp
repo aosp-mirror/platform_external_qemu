@@ -1031,10 +1031,7 @@ public:
         VkImageCreateInfo& sizeCompInfo = cmpInfo.sizeCompImgCreateInfo;
         VkImageCreateInfo decompInfo;
         if (deviceInfoIt->second.emulateTextureEtc2) {
-            cmpInfo = createCompressedImageInfo(
-                    pCreateInfo->format
-                    );
-            cmpInfo.device = device;
+            cmpInfo = createCompressedImageInfo(pCreateInfo->format);
             if (cmpInfo.isCompressed) {
                 cmpInfo.imageType = pCreateInfo->imageType;
                 cmpInfo.extent = pCreateInfo->extent;
@@ -1071,6 +1068,7 @@ public:
                 pCreateInfo = &decompInfo;
             }
         }
+        cmpInfo.device = device;
 
         AndroidNativeBufferInfo anbInfo;
         const VkNativeBufferANDROID* nativeBufferANDROID =
@@ -1591,6 +1589,74 @@ public:
                 pDescriptorCopies);
     }
 
+    void on_vkCmdCopyImage(android::base::Pool* pool,
+                           VkCommandBuffer boxed_commandBuffer,
+                           VkImage srcImage,
+                           VkImageLayout srcImageLayout,
+                           VkImage dstImage,
+                           VkImageLayout dstImageLayout,
+                           uint32_t regionCount,
+                           const VkImageCopy* pRegions) {
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+
+        AutoLock lock(mLock);
+        auto srcIt = mImageInfo.find(srcImage);
+        if (srcIt == mImageInfo.end()) {
+            return;
+        }
+        auto dstIt = mImageInfo.find(dstImage);
+        if (dstIt == mImageInfo.end()) {
+            return;
+        }
+        VkDevice device = srcIt->second.cmpInfo.device;
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return;
+        }
+        if ((!srcIt->second.cmpInfo.isCompressed &&
+             !dstIt->second.cmpInfo.isCompressed) ||
+            !deviceInfoIt->second.emulateTextureEtc2) {
+            vk->vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout,
+                               dstImage, dstImageLayout, regionCount, pRegions);
+            return;
+        }
+        VkImage srcImageMip = srcImage;
+        VkImage dstImageMip = dstImage;
+        for (uint32_t r = 0; r < regionCount; r++) {
+            VkImageCopy region = pRegions[r];
+            if (srcIt->second.cmpInfo.isCompressed) {
+                uint32_t mipLevel = region.srcSubresource.mipLevel;
+                srcImageMip = srcIt->second.cmpInfo.sizeCompImgs[mipLevel];
+                region.srcSubresource.mipLevel = 0;
+                region.srcOffset.x /= kCompressedTexBlockSize;
+                region.srcOffset.y /= kCompressedTexBlockSize;
+                uint32_t width =
+                        srcIt->second.cmpInfo.sizeCompMipmapWidth(mipLevel);
+                uint32_t height =
+                        srcIt->second.cmpInfo.sizeCompMipmapHeight(mipLevel);
+                // region.extent uses pixel size for source image
+                region.extent.width =
+                        (region.extent.width + kCompressedTexBlockSize - 1) /
+                        kCompressedTexBlockSize;
+                region.extent.height =
+                        (region.extent.height + kCompressedTexBlockSize - 1) /
+                        kCompressedTexBlockSize;
+                region.extent.width = std::min(region.extent.width, width);
+                region.extent.height = std::min(region.extent.height, height);
+            }
+            if (dstIt->second.cmpInfo.isCompressed) {
+                uint32_t mipLevel = region.dstSubresource.mipLevel;
+                dstImageMip = dstIt->second.cmpInfo.sizeCompImgs[mipLevel];
+                region.dstSubresource.mipLevel = 0;
+                region.dstOffset.x /= kCompressedTexBlockSize;
+                region.dstOffset.y /= kCompressedTexBlockSize;
+            }
+            vk->vkCmdCopyImage(commandBuffer, srcImageMip, srcImageLayout,
+                               dstImageMip, dstImageLayout, 1, &region);
+        }
+    }
+
     void on_vkCmdCopyImageToBuffer(android::base::Pool* pool,
             VkCommandBuffer boxed_commandBuffer,
             VkImage srcImage,
@@ -1603,8 +1669,9 @@ public:
 
         AutoLock lock(mLock);
         auto it = mImageInfo.find(srcImage);
-        if (it == mImageInfo.end())
+        if (it == mImageInfo.end()) {
             return;
+        }
         auto bufferInfoIt = mBufferInfo.find(dstBuffer);
         if (bufferInfoIt == mBufferInfo.end()) {
             return;
@@ -4713,6 +4780,17 @@ void VkDecoderGlobalState::on_vkCmdCopyBufferToImage(
             dstImageLayout, regionCount, pRegions);
 }
 
+void VkDecoderGlobalState::on_vkCmdCopyImage(android::base::Pool* pool,
+                                             VkCommandBuffer commandBuffer,
+                                             VkImage srcImage,
+                                             VkImageLayout srcImageLayout,
+                                             VkImage dstImage,
+                                             VkImageLayout dstImageLayout,
+                                             uint32_t regionCount,
+                                             const VkImageCopy* pRegions) {
+    mImpl->on_vkCmdCopyImage(pool, commandBuffer, srcImage, srcImageLayout,
+                             dstImage, dstImageLayout, regionCount, pRegions);
+}
 void VkDecoderGlobalState::on_vkCmdCopyImageToBuffer(
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,

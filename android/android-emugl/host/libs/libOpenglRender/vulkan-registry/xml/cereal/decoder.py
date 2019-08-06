@@ -446,6 +446,7 @@ custom_decodes = {
     "vkDestroyImageView" : emit_global_state_wrapped_decoding,
     "vkDestroySampler" : emit_global_state_wrapped_decoding,
     "vkCmdCopyBufferToImage" : emit_global_state_wrapped_decoding,
+    "vkCmdCopyImage" : emit_global_state_wrapped_decoding,
     "vkCmdCopyImageToBuffer" : emit_global_state_wrapped_decoding,
     "vkGetImageMemoryRequirements" : emit_global_state_wrapped_decoding,
     "vkGetImageMemoryRequirements2" : emit_global_state_wrapped_decoding,
