@@ -66,14 +66,12 @@ static bool has_msr_tsc_adjust;
 static bool has_msr_tsc_deadline;
 static bool has_msr_feature_control;
 #if 0
-static bool has_msr_async_pf_en;
 static bool has_msr_pv_eoi_en;
 #endif
 static bool has_msr_misc_enable;
 static bool has_msr_smbase;
 static bool has_msr_bndcfgs;
 //static bool has_msr_gvm_steal_time;
-static int lm_capable_kernel;
 static bool has_msr_mtrr;
 static bool has_msr_xss;
 
@@ -1028,12 +1026,10 @@ static int gvm_put_msrs(X86CPU *cpu, int level)
         gvm_msr_entry_add(cpu, MSR_IA32_XSS, env->xss);
     }
 #ifdef TARGET_X86_64
-    if (lm_capable_kernel) {
-        gvm_msr_entry_add(cpu, MSR_CSTAR, env->cstar);
-        gvm_msr_entry_add(cpu, MSR_KERNELGSBASE, env->kernelgsbase);
-        gvm_msr_entry_add(cpu, MSR_FMASK, env->fmask);
-        gvm_msr_entry_add(cpu, MSR_LSTAR, env->lstar);
-    }
+    gvm_msr_entry_add(cpu, MSR_CSTAR, env->cstar);
+    gvm_msr_entry_add(cpu, MSR_KERNELGSBASE, env->kernelgsbase);
+    gvm_msr_entry_add(cpu, MSR_FMASK, env->fmask);
+    gvm_msr_entry_add(cpu, MSR_LSTAR, env->lstar);
 #endif
     /*
      * The following MSRs have side effects on the guest or are too heavy
@@ -1372,12 +1368,10 @@ static int gvm_get_msrs(X86CPU *cpu)
     }
 
 #ifdef TARGET_X86_64
-    if (lm_capable_kernel) {
-        gvm_msr_entry_add(cpu, MSR_CSTAR, 0);
-        gvm_msr_entry_add(cpu, MSR_KERNELGSBASE, 0);
-        gvm_msr_entry_add(cpu, MSR_FMASK, 0);
-        gvm_msr_entry_add(cpu, MSR_LSTAR, 0);
-    }
+    gvm_msr_entry_add(cpu, MSR_CSTAR, 0);
+    gvm_msr_entry_add(cpu, MSR_KERNELGSBASE, 0);
+    gvm_msr_entry_add(cpu, MSR_FMASK, 0);
+    gvm_msr_entry_add(cpu, MSR_LSTAR, 0);
 #endif
     if (has_msr_architectural_pmu) {
         gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
