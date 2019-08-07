@@ -26,7 +26,7 @@ layout(binding = 1, rgba8ui) writeonly uniform uimage${type} u_image1;
 void main(void) {
     ivec3 pos = ivec3(gl_GlobalInvocationID.xyz);
     pos.z += int(u_pushConstant.baseLayer);
-    uvec4 srcBlock = uvec4(imageLoad(u_image0, pos));
+    uvec4 srcBlock = uvec4(imageLoad(u_image0, getPos${type}(pos)));
 
     uint[16] decompressedAlpha = eac_decode_single_channel_block(
             flip32(srcBlock[0]), flip32(srcBlock[1]), false);
@@ -34,9 +34,10 @@ void main(void) {
     ivec4[16] decompressed = etc2_decode_rgb_block(
             int(flip32(srcBlock[2])), int(flip32(srcBlock[3])), false);
 
-    for (int y = 0; y < 4; y++) {
+    for (int y = 0; y < BLOCK_Y_SIZE_${type}; y++) {
         for (int x = 0; x < 4; x++) {
-            imageStore(u_image1, ivec3(pos.xy * 4 + ivec2(x, y), pos.z),
+            imageStore(u_image1,
+                       getPos${type}(ivec3(pos.xy * 4 + ivec2(x, y), pos.z)),
                        ivec4(decompressed[y * 4 + x].rgb,
                              decompressedAlpha[y * 4 + x]));
         }

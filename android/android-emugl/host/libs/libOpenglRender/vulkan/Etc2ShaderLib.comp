@@ -398,3 +398,19 @@ uint flip32(uint a) {
     return ((a & 0xff) << 24) | ((a & 0xff00) << 8) | ((a & 0xff0000) >> 8) |
            ((a & 0xff000000) >> 24);
 }
+
+ivec2 getPos1DArray(ivec3 pos) {
+    return ivec2(pos.x, pos.z);
+}
+
+ivec3 getPos2DArray(ivec3 pos) {
+    return pos;
+}
+
+ivec3 getPos3D(ivec3 pos) {
+    return pos;
+}
+
+#define BLOCK_Y_SIZE_1DArray 1
+#define BLOCK_Y_SIZE_2DArray 4
+#define BLOCK_Y_SIZE_3D 4
