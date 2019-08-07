@@ -4180,15 +4180,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkCreateDescriptorSetLayout 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSetLayout);
                 }
                 VkResult vkCreateDescriptorSetLayout_VkResult_return = (VkResult)0;
-                vkCreateDescriptorSetLayout_VkResult_return = vk->vkCreateDescriptorSetLayout(unboxed_device, pCreateInfo, pAllocator, pSetLayout);
+                vkCreateDescriptorSetLayout_VkResult_return = m_state->on_vkCreateDescriptorSetLayout(&m_pool, device, pCreateInfo, pAllocator, pSetLayout);
                 vkStream->unsetHandleMapping();
-                // Begin auto non dispatchable handle create for pSetLayout;
-                if (vkCreateDescriptorSetLayout_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
+                // Begin manual non dispatchable handle create for pSetLayout;
+                vkStream->unsetHandleMapping();
                 uint64_t cgen_var_225;
                 static_assert(8 == sizeof(VkDescriptorSetLayout), "handle map overwrite requres VkDescriptorSetLayout to be 8 bytes long");
                 vkStream->handleMapping()->mapHandles_VkDescriptorSetLayout((VkDescriptorSetLayout*)pSetLayout, 1);
                 vkStream->write((VkDescriptorSetLayout*)pSetLayout, 8 * 1);
-                // Begin auto non dispatchable handle create for pSetLayout;
+                // Begin manual non dispatchable handle create for pSetLayout;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateDescriptorSetLayout_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -4239,7 +4239,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkDestroyDescriptorSetLayout 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorSetLayout, (unsigned long long)pAllocator);
                 }
-                vk->vkDestroyDescriptorSetLayout(unboxed_device, descriptorSetLayout, pAllocator);
+                m_state->on_vkDestroyDescriptorSetLayout(&m_pool, device, descriptorSetLayout, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
@@ -6010,9 +6010,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkCmdCopyImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcImage, (unsigned long long)srcImageLayout, (unsigned long long)dstImage, (unsigned long long)dstImageLayout, (unsigned long long)regionCount, (unsigned long long)pRegions);
                 }
-                m_state->on_vkCmdCopyImage(
-                        &m_pool, commandBuffer, srcImage, srcImageLayout,
-                        dstImage, dstImageLayout, regionCount, pRegions);
+                m_state->on_vkCmdCopyImage(&m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
