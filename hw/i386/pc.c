@@ -780,7 +780,8 @@ static FWCfgState *bochs_bios_init(AddressSpace *as, PCMachineState *pcms)
     fw_cfg_add_i64(fw_cfg, FW_CFG_RAM_SIZE, (uint64_t)ram_size);
     fw_cfg_add_bytes(fw_cfg, FW_CFG_ACPI_TABLES,
                      acpi_tables, acpi_tables_len);
-    fw_cfg_add_i32(fw_cfg, FW_CFG_IRQ0_OVERRIDE, kvm_allows_irq0_override());
+    fw_cfg_add_i32(fw_cfg, FW_CFG_IRQ0_OVERRIDE,
+                   gvm_enabled() || kvm_allows_irq0_override());
 
     fw_cfg_add_bytes(fw_cfg, FW_CFG_E820_TABLE,
                      &e820_reserve, sizeof(e820_reserve));
@@ -1257,7 +1258,7 @@ void pc_guest_info_init(PCMachineState *pcms)
 {
     int i;
 
-    pcms->apic_xrupt_override = kvm_allows_irq0_override();
+    pcms->apic_xrupt_override = gvm_enabled() || kvm_allows_irq0_override();
     pcms->numa_nodes = nb_numa_nodes;
     pcms->node_mem = g_malloc0(pcms->numa_nodes *
                                     sizeof *pcms->node_mem);
@@ -2184,6 +2185,8 @@ bool pc_machine_is_smm_enabled(PCMachineState *pcms)
         smm_available = true;
     } else if (kvm_enabled()) {
         smm_available = kvm_has_smm();
+    } else if (gvm_enabled()) {
+        smm_available = false;
 #ifdef CONFIG_HAX
     } else if (hax_enabled()) {
         smm_available = false;

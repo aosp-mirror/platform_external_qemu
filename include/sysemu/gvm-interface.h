@@ -61,19 +61,6 @@
 #define XM_VECTOR 19
 #define VE_VECTOR 20
 
-/* Select x86 specific features in <linux/gvm.h> */
-#define __GVM_HAVE_IOAPIC
-#define __GVM_HAVE_IRQ_LINE
-#define __GVM_HAVE_MSI
-#define __GVM_HAVE_USER_NMI
-#define __GVM_HAVE_GUEST_DEBUG
-#define __GVM_HAVE_MSIX
-#define __GVM_HAVE_VCPU_EVENTS
-#define __GVM_HAVE_DEBUGREGS
-#define __GVM_HAVE_XSAVE
-#define __GVM_HAVE_XCRS
-#define __GVM_HAVE_READONLY_MEM
-
 /* Architectural interrupt line count. */
 #define GVM_NR_INTERRUPTS 256
 
@@ -392,9 +379,7 @@ struct gvm_irqchip {
         union {
 		char dummy[512];  /* reserving space */
                 struct gvm_pic_state pic;
-#ifdef __GVM_HAVE_IOAPIC
 		struct gvm_ioapic_state ioapic;
-#endif
 	} chip;
 };
 
@@ -658,28 +643,14 @@ struct gvm_enable_cap {
 #define GVM_CAP_SYNC_MMU 16  /* Changes to host mmap are reflected in guest */
 #define GVM_CAP_IOMMU 18
 #define GVM_CAP_USER_NMI 22
-#ifdef __GVM_HAVE_GUEST_DEBUG
-#define GVM_CAP_SET_GUEST_DEBUG 23
-#endif
 #define GVM_CAP_IRQ_ROUTING 25
 #define GVM_CAP_SET_BOOT_CPU_ID 34
 #define GVM_CAP_SET_IDENTITY_MAP_ADDR 37
-#ifdef __GVM_HAVE_VCPU_EVENTS
-#define GVM_CAP_VCPU_EVENTS 41
-#endif
 #define GVM_CAP_PCI_SEGMENT 47
 #define GVM_CAP_INTR_SHADOW 49
-#ifdef __GVM_HAVE_DEBUGREGS
-#define GVM_CAP_DEBUGREGS 50
-#endif
-#define GVM_CAP_X86_ROBUST_SINGLESTEP 51
 #define GVM_CAP_ENABLE_CAP 54
-#ifdef __GVM_HAVE_XSAVE
 #define GVM_CAP_XSAVE 55
-#endif
-#ifdef __GVM_HAVE_XCRS
 #define GVM_CAP_XCRS 56
-#endif
 #define GVM_CAP_MAX_VCPUS 66       /* returns max vcpus per vm */
 #define GVM_CAP_SW_TLB 69
 #define GVM_CAP_SYNC_REGS 74
