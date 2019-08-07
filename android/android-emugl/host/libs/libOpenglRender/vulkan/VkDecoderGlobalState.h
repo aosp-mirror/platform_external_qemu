@@ -270,6 +270,19 @@ public:
         VkSampler sampler,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkCreateDescriptorSetLayout(
+        android::base::Pool* pool,
+        VkDevice device,
+        const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDescriptorSetLayout* pSetLayout);
+
+    void on_vkDestroyDescriptorSetLayout(
+        android::base::Pool* pool,
+        VkDevice device,
+        VkDescriptorSetLayout descriptorSetLayout,
+        const VkAllocationCallbacks* pAllocator);
+
     VkResult on_vkCreateDescriptorPool(
         android::base::Pool* pool,
         VkDevice device,
