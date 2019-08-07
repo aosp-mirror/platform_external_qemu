@@ -6010,7 +6010,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkCmdCopyImage 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)srcImage, (unsigned long long)srcImageLayout, (unsigned long long)dstImage, (unsigned long long)dstImageLayout, (unsigned long long)regionCount, (unsigned long long)pRegions);
                 }
-                vk->vkCmdCopyImage(unboxed_commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
+                m_state->on_vkCmdCopyImage(
+                        &m_pool, commandBuffer, srcImage, srcImageLayout,
+                        dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();

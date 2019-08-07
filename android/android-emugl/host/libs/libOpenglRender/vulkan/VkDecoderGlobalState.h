@@ -319,6 +319,14 @@ public:
         uint32_t regionCount,
         const VkBufferImageCopy* pRegions);
 
+    void on_vkCmdCopyImage(android::base::Pool* pool,
+                           VkCommandBuffer commandBuffer,
+                           VkImage srcImage,
+                           VkImageLayout srcImageLayout,
+                           VkImage dstImage,
+                           VkImageLayout dstImageLayout,
+                           uint32_t regionCount,
+                           const VkImageCopy* pRegions);
     void on_vkCmdCopyImageToBuffer(android::base::Pool* pool,
                                    VkCommandBuffer commandBuffer,
                                    VkImage srcImage,
