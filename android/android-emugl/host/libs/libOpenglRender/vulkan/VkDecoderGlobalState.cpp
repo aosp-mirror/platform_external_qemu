@@ -3412,8 +3412,12 @@ private:
                 kCompressedTexBlockSize;
         }
         uint32_t sizeCompMipmapHeight(uint32_t level) {
-            return (mipmapHeight(level) + kCompressedTexBlockSize - 1) /
-                kCompressedTexBlockSize;
+            if (imageType != VK_IMAGE_TYPE_1D) {
+                return (mipmapHeight(level) + kCompressedTexBlockSize - 1) /
+                       kCompressedTexBlockSize;
+            } else {
+                return 1;
+            }
         }
         uint32_t sizeCompMipmapDepth(uint32_t level) {
             return mipmapDepth(level);
@@ -3459,9 +3463,20 @@ private:
             VkImageViewCreateInfo imageViewInfo = {};
             imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             imageViewInfo.image = image;
-            imageViewInfo.viewType = imageType == VK_IMAGE_TYPE_3D
-                ? VK_IMAGE_VIEW_TYPE_3D
-                : VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+            switch (imageType) {
+                case VK_IMAGE_TYPE_1D:
+                    imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+                    break;
+                case VK_IMAGE_TYPE_2D:
+                    imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+                    break;
+                case VK_IMAGE_TYPE_3D:
+                    imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_3D;
+                    break;
+                default:
+                    imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+                    break;
+            }
             imageViewInfo.format = format;
             imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
             imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
@@ -3529,7 +3544,9 @@ private:
                     shaderSrcFileName = "Etc2RGB8_";
                     break;
             }
-            if (imageType == VK_IMAGE_TYPE_3D) {
+            if (imageType == VK_IMAGE_TYPE_1D) {
+                shaderSrcFileName += "1DArray.spv";
+            } else if (imageType == VK_IMAGE_TYPE_3D) {
                 shaderSrcFileName += "3D.spv";
             } else {
                 shaderSrcFileName += "2DArray.spv";
