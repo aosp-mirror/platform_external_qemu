@@ -117,8 +117,7 @@ static GVMSlot *gvm_alloc_slot(GVMMemoryListener *kml)
         return slot;
     }
 
-    fprintf(stderr, "%s: no free slot available\n", __func__);
-    abort();
+    qemu_abort("%s: no free slot available\n", __func__);
 }
 
 static GVMSlot *gvm_lookup_matching_slot(GVMMemoryListener *kml,
@@ -220,31 +219,27 @@ int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags) {
 }
 
 /*
- * Find overlapping slot with lowest start address
+ * Calculate and align the start address and the size of the section.
+ * Return the size. If the size is 0, the aligned section is empty.
  */
-static GVMSlot *gvm_lookup_overlapping_slot(GVMMemoryListener *kml,
-                                            hwaddr start_addr,
-                                            hwaddr end_addr)
+static hwaddr gvm_align_section(MemoryRegionSection *section,
+                                hwaddr *start)
 {
-    GVMState *s = gvm_state;
-    GVMSlot *found = NULL;
-    int i;
+    hwaddr size = int128_get64(section->size);
+    hwaddr delta, aligned;
 
-    for (i = 0; i < s->nr_slots; i++) {
-        GVMSlot *mem = &kml->slots[i];
-
-        if (mem->memory_size == 0 ||
-            (found && found->start_addr < mem->start_addr)) {
-            continue;
-        }
-
-        if (end_addr > mem->start_addr &&
-            start_addr < mem->start_addr + mem->memory_size) {
-            found = mem;
-        }
+    /* kvm works in page size chunks, but the function may be called
+       with sub-page size and unaligned start address. Pad the start
+       address to next and truncate size to previous page boundary. */
+    aligned = ROUND_UP(section->offset_within_address_space,
+                       qemu_real_host_page_size);
+    delta = aligned - section->offset_within_address_space;
+    *start = aligned;
+    if (delta > size) {
+        return 0;
     }
 
-    return found;
+    return (size - delta) & qemu_real_host_page_mask;
 }
 
 int gvm_physical_memory_addr_from_host(GVMState *s, void *ram,
@@ -458,7 +453,7 @@ static void gvm_log_start(MemoryListener *listener,
 
     r = gvm_section_update_flags(kml, section);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: dirty pages log change\n", __func__);
     }
 }
 
@@ -475,7 +470,7 @@ static void gvm_log_stop(MemoryListener *listener,
 
     r = gvm_section_update_flags(kml, section);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: dirty pages log change\n", __func__);
     }
 }
 
@@ -483,14 +478,11 @@ static void gvm_log_stop(MemoryListener *listener,
 static int gvm_get_dirty_pages_log_range(MemoryRegionSection *section,
                                          unsigned long *bitmap)
 {
-    //XXX
-#if 0
     ram_addr_t start = section->offset_within_region +
                        memory_region_get_ram_addr(section->mr);
     ram_addr_t pages = int128_get64(section->size) / getpagesize();
 
     cpu_physical_memory_set_dirty_lebitmap(bitmap, start, pages);
-#endif
     return 0;
 }
 
@@ -509,18 +501,16 @@ static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
                                           MemoryRegionSection *section)
 {
     GVMState *s = gvm_state;
-    unsigned long size, allocated_size = 0;
     struct gvm_dirty_log d = {};
     GVMSlot *mem;
-    int ret = 0;
-    hwaddr start_addr = section->offset_within_address_space;
-    hwaddr end_addr = start_addr + int128_get64(section->size);
+    hwaddr start_addr, size;
 
-    d.dirty_bitmap = NULL;
-    while (start_addr < end_addr) {
-        mem = gvm_lookup_overlapping_slot(kml, start_addr, end_addr);
-        if (mem == NULL) {
-            break;
+    size = gvm_align_section(section, &start_addr);
+    if (size) {
+        mem = gvm_lookup_matching_slot(kml, start_addr, size);
+        if (!mem) {
+            /* We don't have a slot if we want to trap every access. */
+            return 0;
         }
 
         /* XXX bad kernel interface alert
@@ -537,28 +527,20 @@ static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
          */
         size = ALIGN(((mem->memory_size) >> TARGET_PAGE_BITS),
                      /*HOST_LONG_BITS*/ 64) / 8;
-        if (!d.dirty_bitmap) {
-            d.dirty_bitmap = g_malloc(size);
-        } else if (size > allocated_size) {
-            d.dirty_bitmap = g_realloc(d.dirty_bitmap, size);
-        }
-        allocated_size = size;
-        memset(d.dirty_bitmap, 0, allocated_size);
+        d.dirty_bitmap = g_malloc0(size);
 
         d.slot = mem->slot | (kml->as_id << 16);
-        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG,
-                    NULL, 0, &d, sizeof(d)) < 0) {
+        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG, NULL, 0, &d, sizeof(d))) {
             DPRINTF("ioctl failed %d\n", errno);
-            ret = -1;
-            break;
+            g_free(d.dirty_bitmap);
+            return -1;
         }
 
         gvm_get_dirty_pages_log_range(section, d.dirty_bitmap);
-        start_addr = mem->start_addr + mem->memory_size;
+        g_free(d.dirty_bitmap);
     }
-    g_free(d.dirty_bitmap);
 
-    return ret;
+    return 0;
 }
 
 int gvm_check_extension(GVMState *s, unsigned int extension)
@@ -603,30 +585,14 @@ int gvm_vm_check_extension(GVMState *s, unsigned int extension)
 static void gvm_set_phys_mem(GVMMemoryListener *kml,
                              MemoryRegionSection *section, bool add)
 {
-    GVMSlot *mem, old;
+    GVMSlot *mem;
     int err;
     MemoryRegion *mr = section->mr;
     bool writeable = !mr->readonly && !mr->rom_device;
-    hwaddr start_addr = section->offset_within_address_space;
-    ram_addr_t size = int128_get64(section->size);
-    void *ram = NULL;
-    unsigned delta;
+    hwaddr start_addr, size;
+    void *ram;
 
     if (memory_region_is_user_backed(mr)) return;
-    /* gvm works in page size chunks, but the function may be called
-       with sub-page size and unaligned start address. Pad the start
-       address to next and truncate size to previous page boundary. */
-    delta = qemu_real_host_page_size - (start_addr & ~qemu_real_host_page_mask);
-    delta &= ~qemu_real_host_page_mask;
-    if (delta > size) {
-        return;
-    }
-    start_addr += delta;
-    size -= delta;
-    size &= qemu_real_host_page_mask;
-    if (!size || (start_addr & ~qemu_real_host_page_mask)) {
-        return;
-    }
 
     if (!memory_region_is_ram(mr)) {
         if (writeable) {
@@ -638,77 +604,35 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
         }
     }
 
-    ram = memory_region_get_ram_ptr(mr) + section->offset_within_region + delta;
+    size = gvm_align_section(section, &start_addr);
+    if (!size) {
+        return;
+    }
 
-    while (1) {
-        mem = gvm_lookup_overlapping_slot(kml, start_addr, start_addr + size);
+    /* use aligned delta to align the ram address */
+    ram = memory_region_get_ram_ptr(mr) + section->offset_within_region +
+          (start_addr - section->offset_within_address_space);
+
+    if (!add) {
+        mem = gvm_lookup_matching_slot(kml, start_addr, size);
         if (!mem) {
-            break;
-        }
-
-        if (add && start_addr >= mem->start_addr &&
-            (start_addr + size <= mem->start_addr + mem->memory_size) &&
-            (ram - start_addr == mem->ram - mem->start_addr)) {
-            /* The new slot fits into the existing one and comes with
-             * identical parameters - update flags and done. */
-            gvm_slot_update_flags(kml, mem, mr);
             return;
         }
-
-        old = *mem;
-
         if (mem->flags & GVM_MEM_LOG_DIRTY_PAGES) {
             gvm_physical_sync_dirty_bitmap(kml, section);
         }
 
-        /* unregister the overlapping slot */
+        /* unregister the slot */
         mem->memory_size = 0;
         err = gvm_set_user_memory_region(kml, mem);
         if (err) {
-            fprintf(stderr, "%s: error unregistering overlapping slot: %s\n",
+            qemu_abort("%s: error unregistering overlapping slot: %s\n",
                     __func__, strerror(-err));
-            abort();
         }
-
-        /* register prefix slot */
-        if (old.start_addr < start_addr) {
-            mem = gvm_alloc_slot(kml);
-            mem->memory_size = start_addr - old.start_addr;
-            mem->start_addr = old.start_addr;
-            mem->ram = old.ram;
-            mem->flags =  gvm_mem_flags(mr);
-
-            err = gvm_set_user_memory_region(kml, mem);
-            if (err) {
-                fprintf(stderr, "%s: error registering prefix slot: %s\n",
-                        __func__, strerror(-err));
-                abort();
-            }
-        }
-
-        /* register suffix slot */
-        if (old.start_addr + old.memory_size > start_addr + size) {
-            ram_addr_t size_delta;
-
-            mem = gvm_alloc_slot(kml);
-            mem->start_addr = start_addr + size;
-            size_delta = mem->start_addr - old.start_addr;
-            mem->memory_size = old.memory_size - size_delta;
-            mem->ram = old.ram + size_delta;
-            mem->flags = gvm_mem_flags(mr);
-
-            err = gvm_set_user_memory_region(kml, mem);
-            if (err) {
-                fprintf(stderr, "%s: error registering suffix slot: %s\n",
-                        __func__, strerror(-err));
-                abort();
-            }
-        }
-    }
-
-    if (!add) {
         return;
     }
+
+    /* register the new slot */
     mem = gvm_alloc_slot(kml);
     mem->memory_size = size;
     mem->start_addr = start_addr;
@@ -717,9 +641,8 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
 
     err = gvm_set_user_memory_region(kml, mem);
     if (err) {
-        fprintf(stderr, "%s: error registering slot: %s\n", __func__,
+        qemu_abort("%s: error registering slot: %s\n", __func__,
                 strerror(-err));
-        abort();
     }
 }
 
@@ -741,7 +664,6 @@ static void gvm_region_del(MemoryListener *listener,
     memory_region_unref(section->mr);
 }
 
-#if 0
 static void gvm_log_sync(MemoryListener *listener,
                          MemoryRegionSection *section)
 {
@@ -750,20 +672,8 @@ static void gvm_log_sync(MemoryListener *listener,
 
     r = gvm_physical_sync_dirty_bitmap(kml, section);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: sync dirty bitmap\n", __func__);
     }
-}
-#endif
-static void gvm_log_sync(MemoryListener *listener,
-                         MemoryRegionSection *section)
-{
-    MemoryRegion *mr = section->mr;
-
-    if (!memory_region_is_ram(mr)) {
-        return;
-    }
-
-    memory_region_set_dirty(mr, 0, int128_get64(section->size));
 }
 
 void gvm_memory_listener_register(GVMState *s, GVMMemoryListener *kml,
@@ -780,8 +690,8 @@ void gvm_memory_listener_register(GVMState *s, GVMMemoryListener *kml,
 
     kml->listener.region_add = gvm_region_add;
     kml->listener.region_del = gvm_region_del;
-    //kml->listener.log_start = gvm_log_start;
-    //kml->listener.log_stop = gvm_log_stop;
+    kml->listener.log_start = gvm_log_start;
+    kml->listener.log_stop = gvm_log_stop;
     kml->listener.log_sync = gvm_log_sync;
     kml->listener.priority = 10;
 
