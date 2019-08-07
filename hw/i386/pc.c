@@ -2186,7 +2186,7 @@ bool pc_machine_is_smm_enabled(PCMachineState *pcms)
     } else if (kvm_enabled()) {
         smm_available = kvm_has_smm();
     } else if (gvm_enabled()) {
-        smm_available = false;
+        smm_available = true;
 #ifdef CONFIG_HAX
     } else if (hax_enabled()) {
         smm_available = false;
