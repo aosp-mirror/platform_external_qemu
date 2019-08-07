@@ -21,11 +21,7 @@
 
 GVMState *gvm_state;
 bool gvm_kernel_irqchip;
-bool gvm_async_interrupts_allowed;
-bool gvm_gsi_routing_allowed;
-bool gvm_gsi_direct_mapping;
 bool gvm_allowed;
-bool gvm_readonly_mem_allowed;
 
 int gvm_destroy_vcpu(CPUState *cpu)
 {
