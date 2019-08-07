@@ -62,20 +62,6 @@ int gvm_cpu_exec(CPUState *cpu)
     abort();
 }
 
-int gvm_has_sync_mmu(void)
-{
-    return 0;
-}
-
-int gvm_has_many_ioeventfds(void)
-{
-    return 0;
-}
-
-void gvm_setup_guest_memory(void *start, size_t size)
-{
-}
-
 int gvm_update_guest_debug(CPUState *cpu, unsigned long reinject_trap)
 {
     return -ENOSYS;
@@ -139,18 +125,6 @@ void gvm_irqchip_commit_routes(GVMState *s)
 }
 
 int gvm_irqchip_add_adapter_route(GVMState *s, AdapterInfo *adapter)
-{
-    return -ENOSYS;
-}
-
-int gvm_irqchip_add_irqfd_notifier_gsi(GVMState *s, EventNotifier *n,
-                                       EventNotifier *rn, int virq)
-{
-    return -ENOSYS;
-}
-
-int gvm_irqchip_remove_irqfd_notifier_gsi(GVMState *s, EventNotifier *n,
-                                          int virq)
 {
     return -ENOSYS;
 }
