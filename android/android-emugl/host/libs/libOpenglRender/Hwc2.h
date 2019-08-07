@@ -101,5 +101,12 @@ typedef struct compose_device {
     uint32_t numLayers;
     struct compose_layer layer[0];
 } ComposeDevice;
+typedef struct compose_device_v2 {
+    uint32_t version;
+    uint32_t displayId;
+    uint32_t targetHandle;
+    uint32_t numLayers;
+    struct compose_layer layer[0];
+} ComposeDevice_v2;
 
 #endif
