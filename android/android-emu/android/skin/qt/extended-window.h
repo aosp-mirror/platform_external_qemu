@@ -67,7 +67,6 @@ public:
 
     void connectVirtualSceneWindow(
             VirtualSceneControlWindow* virtualSceneWindow);
-    void hideRotationButtons(bool hide);
 
 private slots:
     void switchFrameAlways(bool showFrame);
