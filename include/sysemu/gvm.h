@@ -125,14 +125,6 @@ int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
                 uint64_t* gpa, uint64_t* size);
 int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags);
 bool gvm_has_free_slot(MachineState *ms);
-int gvm_has_sync_mmu(void);
-int gvm_has_vcpu_events(void);
-int gvm_has_robust_singlestep(void);
-int gvm_has_debugregs(void);
-int gvm_has_pit_state2(void);
-int gvm_has_many_ioeventfds(void);
-int gvm_has_gsi_routing(void);
-int gvm_has_intx_set_mask(void);
 
 int gvm_init_vcpu(CPUState *cpu);
 int gvm_cpu_exec(CPUState *cpu);
@@ -141,7 +133,6 @@ int gvm_destroy_vcpu(CPUState *cpu);
 #ifdef NEED_CPU_H
 #include "cpu.h"
 
-void gvm_setup_guest_memory(void *start, size_t size);
 void gvm_flush_coalesced_mmio_buffer(void);
 
 int gvm_insert_breakpoint(CPUState *cpu, target_ulong addr,

@@ -64,12 +64,7 @@ struct GVMState
     int nr_slots;
     HANDLE fd;
     HANDLE vmfd;
-    int vcpu_events;
-    int robust_singlestep;
-    int debugregs;
-#ifdef GVM_CAP_SET_GUEST_DEBUG
     struct gvm_sw_breakpoint_head gvm_sw_breakpoints;
-#endif
     int intx_set_mask;
     unsigned int sigmask_len;
     GHashTable *gsimap;
@@ -1290,9 +1285,7 @@ static int gvm_init(MachineState *ms)
 
     s->sigmask_len = 8;
 
-#ifdef GVM_CAP_SET_GUEST_DEBUG
     QTAILQ_INIT(&s->gvm_sw_breakpoints);
-#endif
     QLIST_INIT(&s->gvm_parked_vcpus);
     s->vmfd = INVALID_HANDLE_VALUE;
     s->fd = gvm_open_device();
@@ -1342,19 +1335,6 @@ static int gvm_init(MachineState *ms)
     }
 
     s->vmfd = vmfd;
-
-#ifdef GVM_CAP_VCPU_EVENTS
-    s->vcpu_events = gvm_check_extension(s, GVM_CAP_VCPU_EVENTS);
-#endif
-
-    s->robust_singlestep =
-        gvm_check_extension(s, GVM_CAP_X86_ROBUST_SINGLESTEP);
-
-#ifdef GVM_CAP_DEBUGREGS
-    s->debugregs = gvm_check_extension(s, GVM_CAP_DEBUGREGS);
-#endif
-
-    s->intx_set_mask = gvm_check_extension(s, GVM_CAP_PCI_2_3);
 
 #ifdef GVM_CAP_READONLY_MEM
     gvm_readonly_mem_allowed =
@@ -1738,46 +1718,6 @@ int gvm_vcpu_ioctl(CPUState *cpu, int type,
     return ret;
 }
 
-int gvm_has_sync_mmu(void)
-{
-    return gvm_check_extension(gvm_state, GVM_CAP_SYNC_MMU);
-}
-
-int gvm_has_vcpu_events(void)
-{
-    return gvm_state->vcpu_events;
-}
-
-int gvm_has_robust_singlestep(void)
-{
-    return gvm_state->robust_singlestep;
-}
-
-int gvm_has_debugregs(void)
-{
-    return gvm_state->debugregs;
-}
-
-int gvm_has_intx_set_mask(void)
-{
-    return gvm_state->intx_set_mask;
-}
-
-void gvm_setup_guest_memory(void *start, size_t size)
-{
-    if (!gvm_has_sync_mmu()) {
-        int ret = qemu_madvise(start, size, QEMU_MADV_DONTFORK);
-
-        if (ret) {
-            perror("qemu_madvise");
-            fprintf(stderr,
-                    "Need MADV_DONTFORK in absence of synchronous GVM MMU\n");
-            exit(1);
-        }
-    }
-}
-
-#ifdef GVM_CAP_SET_GUEST_DEBUG
 struct gvm_sw_breakpoint *gvm_find_sw_breakpoint(CPUState *cpu,
                                                  target_ulong pc)
 {
@@ -1928,30 +1868,6 @@ void gvm_remove_all_breakpoints(CPUState *cpu)
         gvm_update_guest_debug(cpu, 0);
     }
 }
-
-#else /* !GVM_CAP_SET_GUEST_DEBUG */
-
-int gvm_update_guest_debug(CPUState *cpu, unsigned long reinject_trap)
-{
-    return -EINVAL;
-}
-
-int gvm_insert_breakpoint(CPUState *cpu, target_ulong addr,
-                          target_ulong len, int type)
-{
-    return -EINVAL;
-}
-
-int gvm_remove_breakpoint(CPUState *cpu, target_ulong addr,
-                          target_ulong len, int type)
-{
-    return -EINVAL;
-}
-
-void gvm_remove_all_breakpoints(CPUState *cpu)
-{
-}
-#endif /* !GVM_CAP_SET_GUEST_DEBUG */
 
 static void gvm_accel_class_init(ObjectClass *oc, void *data)
 {
