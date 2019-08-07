@@ -654,7 +654,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_MAX_VCPUS 66       /* returns max vcpus per vm */
 #define GVM_CAP_SW_TLB 69
 #define GVM_CAP_SYNC_REGS 74
-#define GVM_CAP_PCI_2_3 75
 #define GVM_CAP_READONLY_MEM 81
 #define GVM_CAP_EXT_EMUL_CPUID 95
 #define GVM_CAP_IOAPIC_POLARITY_IGNORED 97

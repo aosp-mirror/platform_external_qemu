@@ -79,13 +79,7 @@ struct GVMState
 
 GVMState *gvm_state;
 bool gvm_kernel_irqchip;
-bool gvm_split_irqchip;
-bool gvm_async_interrupts_allowed;
-bool gvm_halt_in_kernel_allowed;
-bool gvm_gsi_routing_allowed;
-bool gvm_gsi_direct_mapping;
 bool gvm_allowed;
-bool gvm_readonly_mem_allowed;
 
 int gvm_get_max_memslots(void)
 {
@@ -415,7 +409,7 @@ static int gvm_mem_flags(MemoryRegion *mr)
     if (memory_region_get_dirty_log_mask(mr) != 0) {
         flags |= GVM_MEM_LOG_DIRTY_PAGES;
     }
-    if (readonly && gvm_readonly_mem_allowed) {
+    if (readonly) {
         flags |= GVM_MEM_READONLY;
     }
     return flags;
@@ -635,7 +629,7 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
     }
 
     if (!memory_region_is_ram(mr)) {
-        if (writeable || !gvm_readonly_mem_allowed) {
+        if (writeable) {
             return;
         } else if (!mr->romd_mode) {
             /* If the memory device is not in romd_mode, then we actually want
@@ -869,8 +863,6 @@ int gvm_set_irq(GVMState *s, int irq, int level)
     struct gvm_irq_level event;
     int ret;
 
-    assert(gvm_async_interrupts_enabled());
-
     event.level = level;
     event.irq = irq;
     ret = gvm_vm_ioctl(s, GVM_IRQ_LINE_STATUS,
@@ -916,22 +908,12 @@ void gvm_init_irq_routing(GVMState *s)
     for (i = 0; i < GVM_MSI_HASHTAB_SIZE; i++) {
         QTAILQ_INIT(&s->msi_hashtab[i]);
     }
-
-    gvm_arch_init_irq_routing(s);
 }
 
 void gvm_irqchip_commit_routes(GVMState *s)
 {
     int ret;
     size_t irq_routing_size;
-
-    if (gvm_gsi_direct_mapping()) {
-        return;
-    }
-
-    if (!gvm_gsi_routing_enabled()) {
-        return;
-    }
 
     s->irq_routes->flags = 0;
     irq_routing_size = sizeof(struct gvm_irq_routing) +
@@ -1009,10 +991,6 @@ void gvm_irqchip_release_virq(GVMState *s, int virq)
 {
     struct gvm_irq_routing_entry *e;
     int i;
-
-    if (gvm_gsi_direct_mapping()) {
-        return;
-    }
 
     for (i = 0; i < s->irq_routes->nr; i++) {
         e = &s->irq_routes->entries[i];
@@ -1128,14 +1106,6 @@ int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
         msg = pci_get_msi_message(dev, vector);
     }
 
-    if (gvm_gsi_direct_mapping()) {
-        return gvm_arch_msi_data_to_gsi(msg.data);
-    }
-
-    if (!gvm_gsi_routing_enabled()) {
-        return -ENOSYS;
-    }
-
     virq = gvm_irqchip_get_virq(s);
     if (virq < 0) {
         return virq;
@@ -1159,14 +1129,6 @@ int gvm_irqchip_update_msi_route(GVMState *s, int virq, MSIMessage msg,
                                  PCIDevice *dev)
 {
     struct gvm_irq_routing_entry kroute = {};
-
-    if (gvm_gsi_direct_mapping()) {
-        return 0;
-    }
-
-    if (!gvm_irqchip_in_kernel()) {
-        return -ENOSYS;
-    }
 
     kroute.gsi = virq;
     kroute.type = GVM_IRQ_ROUTING_MSI;
@@ -1204,11 +1166,6 @@ static void gvm_irqchip_create(MachineState *machine, GVMState *s)
     }
 
     gvm_kernel_irqchip = true;
-    /* If we have an in-kernel IRQ chip then we must have asynchronous
-     * interrupt delivery (though the reverse is not necessarily true)
-     */
-    gvm_async_interrupts_allowed = true;
-    gvm_halt_in_kernel_allowed = true;
 
     gvm_init_irq_routing(s);
 
@@ -1335,11 +1292,6 @@ static int gvm_init(MachineState *ms)
     }
 
     s->vmfd = vmfd;
-
-#ifdef GVM_CAP_READONLY_MEM
-    gvm_readonly_mem_allowed =
-        (gvm_check_extension(s, GVM_CAP_READONLY_MEM) > 0);
-#endif
 
     ret = gvm_arch_init(ms, s);
     if (ret < 0) {

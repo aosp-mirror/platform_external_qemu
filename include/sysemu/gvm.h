@@ -30,11 +30,6 @@
 
 extern bool gvm_allowed;
 extern bool gvm_kernel_irqchip;
-extern bool gvm_async_interrupts_allowed;
-extern bool gvm_halt_in_kernel_allowed;
-extern bool gvm_gsi_routing_allowed;
-extern bool gvm_gsi_direct_mapping;
-extern bool gvm_readonly_mem_allowed;
 
 #if defined CONFIG_GVM
 #define gvm_enabled()           (gvm_allowed)
@@ -51,55 +46,9 @@ extern bool gvm_readonly_mem_allowed;
  */
 #define gvm_irqchip_in_kernel() (gvm_kernel_irqchip)
 
-/**
- * gvm_async_interrupts_enabled:
- *
- * Returns: true if we can deliver interrupts to GVM
- * asynchronously (ie by ioctl from any thread at any time)
- * rather than having to do interrupt delivery synchronously
- * (where the vcpu must be stopped at a suitable point first).
- */
-#define gvm_async_interrupts_enabled() (gvm_async_interrupts_allowed)
-
-/**
- * gvm_halt_in_kernel
- *
- * Returns: true if halted cpus should still get a GVM_RUN ioctl to run
- * inside of kernel space. This only works if MP state is implemented.
- */
-#define gvm_halt_in_kernel() (gvm_halt_in_kernel_allowed)
-
-/**
- * gvm_gsi_routing_enabled:
- *
- * Returns: true if GSI routing is enabled (ie the kernel supports
- * it and we're running in a configuration that permits it).
- */
-#define gvm_gsi_routing_enabled() (gvm_gsi_routing_allowed)
-
-/**
- * gvm_gsi_direct_mapping:
- *
- * Returns: true if GSI direct mapping is enabled.
- */
-#define gvm_gsi_direct_mapping() (gvm_gsi_direct_mapping)
-
-/**
- * gvm_readonly_mem_enabled:
- *
- * Returns: true if GVM readonly memory is enabled (ie the kernel
- * supports it and we're running in a configuration that permits it).
- */
-#define gvm_readonly_mem_enabled() (gvm_readonly_mem_allowed)
-
 #else
 #define gvm_enabled()           (0)
 #define gvm_irqchip_in_kernel() (false)
-#define gvm_async_interrupts_enabled() (false)
-#define gvm_halt_in_kernel() (false)
-#define gvm_gsi_routing_allowed() (false)
-#define gvm_gsi_direct_mapping() (false)
-#define gvm_readonly_mem_enabled() (false)
 #endif
 
 struct gvm_run;
@@ -147,12 +96,6 @@ int gvm_set_signal_mask(CPUState *cpu, const sigset_t *sigset);
 
 int gvm_on_sigbus_vcpu(CPUState *cpu, int code, void *addr);
 int gvm_on_sigbus(int code, void *addr);
-
-#if 0
-/* interface with exec.c */
-
-void phys_mem_set_alloc(void *(*alloc)(size_t, uint64_t *align));
-#endif
 
 /* internal API */
 
@@ -212,8 +155,6 @@ int gvm_arch_add_msi_route_post(struct gvm_irq_routing_entry *route,
                                 int vector, PCIDevice *dev);
 /* Notify arch about released MSI routes */
 int gvm_arch_release_virq_post(int virq);
-
-int gvm_arch_msi_data_to_gsi(uint32_t data);
 
 int gvm_set_irq(GVMState *s, int irq, int level);
 int gvm_irqchip_send_msi(GVMState *s, MSIMessage msg);
