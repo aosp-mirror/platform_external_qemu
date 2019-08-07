@@ -20,6 +20,7 @@
 #include "gvm_i386.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/gvm_int.h"
+#include "sysemu/hw_accel.h"
 
 #include "exec/gdbstub.h"
 #include "qemu/host-utils.h"
@@ -2233,12 +2234,11 @@ void gvm_arch_remove_all_hw_breakpoints(void)
     nb_hw_breakpoint = 0;
 }
 
-//static CPUWatchpoint hw_watchpoint;
+static CPUWatchpoint hw_watchpoint;
 
 static int gvm_handle_debug(X86CPU *cpu,
                             struct gvm_debug_exit_arch *arch_info)
 {
-#if 0
     CPUState *cs = CPU(cpu);
     CPUX86State *env = &cpu->env;
     int ret = 0;
@@ -2259,13 +2259,13 @@ static int gvm_handle_debug(X86CPU *cpu,
                     case 0x1:
                         ret = EXCP_DEBUG;
                         cs->watchpoint_hit = &hw_watchpoint;
-                        hw_watchpoint.vaddr = hw_breakpoint[n].addr;
+                        hw_watchpoint.vaddress = hw_breakpoint[n].addr;
                         hw_watchpoint.flags = BP_MEM_WRITE;
                         break;
                     case 0x3:
                         ret = EXCP_DEBUG;
                         cs->watchpoint_hit = &hw_watchpoint;
-                        hw_watchpoint.vaddr = hw_breakpoint[n].addr;
+                        hw_watchpoint.vaddress = hw_breakpoint[n].addr;
                         hw_watchpoint.flags = BP_MEM_ACCESS;
                         break;
                     }
@@ -2285,8 +2285,6 @@ static int gvm_handle_debug(X86CPU *cpu,
     }
 
     return ret;
-#endif
-    return 0;
 }
 
 void gvm_arch_update_guest_debug(CPUState *cpu, struct gvm_guest_debug *dbg)
@@ -2398,15 +2396,6 @@ bool gvm_arch_stop_on_emulation_error(CPUState *cs)
            ((env->segs[R_CS].selector  & 3) != 3);
 }
 
-void gvm_arch_init_irq_routing(GVMState *s)
-{
-    /* We know at this point that we're using the in-kernel
-     * irqchip, so we can use irqfds, and on x86 we know
-     * we can use msi via irqfd and GSI routing.
-     */
-    gvm_gsi_routing_allowed = true;
-}
-
 int gvm_arch_irqchip_create(MachineState *ms, GVMState *s)
 {
     return 0;
@@ -2455,10 +2444,5 @@ int gvm_arch_release_virq_post(int virq)
         }
     }
     return 0;
-}
-
-int gvm_arch_msi_data_to_gsi(uint32_t data)
-{
-    abort();
 }
 
