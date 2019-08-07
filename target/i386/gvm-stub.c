@@ -14,17 +14,7 @@
 #include "cpu.h"
 #include "gvm_i386.h"
 
-bool gvm_allows_irq0_override(void)
-{
-    return 1;
-}
-
 #ifndef __OPTIMIZE__
-bool gvm_has_smm(void)
-{
-    return 1;
-}
-
 /* This function is only called inside conditionals which we
  * rely on the compiler to optimize out when CONFIG_GVM is not
  * defined.

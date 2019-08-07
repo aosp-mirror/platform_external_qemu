@@ -83,16 +83,6 @@ static int has_xcrs;
 
 static struct gvm_cpuid *cpuid_cache;
 
-bool gvm_has_smm(void)
-{
-    return gvm_check_extension(gvm_state, GVM_CAP_X86_SMM);
-}
-
-bool gvm_allows_irq0_override(void)
-{
-    return true;
-}
-
 static int gvm_get_tsc(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
@@ -560,17 +550,14 @@ static int gvm_get_supported_msrs(GVMState *s)
 
 int gvm_arch_init(MachineState *ms, GVMState *s)
 {
-    uint64_t identity_base = 0xfffbc000;
+    /* Allows up to 16M BIOSes. */
+    uint64_t identity_base = 0xfeffc000;
     uint64_t tss_base;
     int ret;
 
-#ifdef GVM_CAP_XSAVE
     has_xsave = gvm_check_extension(s, GVM_CAP_XSAVE);
-#endif
 
-#ifdef GVM_CAP_XCRS
     has_xcrs = gvm_check_extension(s, GVM_CAP_XCRS);
-#endif
 
     ret = gvm_get_supported_msrs(s);
     if (ret < 0) {
@@ -584,17 +571,11 @@ int gvm_arch_init(MachineState *ms, GVMState *s)
      * them, both by setting their start addresses in the kernel and by
      * creating a corresponding e820 entry. We need 4 pages before the BIOS.
      */
-    if (gvm_check_extension(s, GVM_CAP_SET_IDENTITY_MAP_ADDR)) {
-        /* Allows up to 16M BIOSes. */
-        identity_base = 0xfeffc000;
-
-        ret = gvm_vm_ioctl(s, GVM_SET_IDENTITY_MAP_ADDR,
-                &identity_base, sizeof(identity_base),
-                NULL, 0);
-        if (ret < 0) {
-            return ret;
-        }
-    }
+    ret = gvm_vm_ioctl(s, GVM_SET_IDENTITY_MAP_ADDR,
+            &identity_base, sizeof(identity_base),
+            NULL, 0);
+    if (ret < 0)
+        return ret;
 
     /* Set TSS base one page after EPT identity map. */
     tss_base = identity_base + 0x1000;
@@ -1653,10 +1634,6 @@ static int gvm_put_vcpu_events(X86CPU *cpu, int level)
     CPUX86State *env = &cpu->env;
     struct gvm_vcpu_events events = {};
 
-    if (!gvm_has_vcpu_events()) {
-        return 0;
-    }
-
     events.exception.injected = (env->exception_injected >= 0);
     events.exception.nr = env->exception_injected;
     events.exception.has_error_code = env->has_error_code;
@@ -1707,10 +1684,6 @@ static int gvm_get_vcpu_events(X86CPU *cpu)
     CPUX86State *env = &cpu->env;
     struct gvm_vcpu_events events;
     int ret;
-
-    if (!gvm_has_vcpu_events()) {
-        return 0;
-    }
 
     memset(&events, 0, sizeof(events));
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_VCPU_EVENTS,
@@ -1763,46 +1736,11 @@ static int gvm_get_vcpu_events(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_guest_debug_workarounds(X86CPU *cpu)
-{
-    CPUState *cs = CPU(cpu);
-    CPUX86State *env = &cpu->env;
-    int ret = 0;
-    unsigned long reinject_trap = 0;
-
-    if (!gvm_has_vcpu_events()) {
-        if (env->exception_injected == 1) {
-            reinject_trap = GVM_GUESTDBG_INJECT_DB;
-        } else if (env->exception_injected == 3) {
-            reinject_trap = GVM_GUESTDBG_INJECT_BP;
-        }
-        env->exception_injected = -1;
-    }
-
-    /*
-     * Kernels before GVM_CAP_X86_ROBUST_SINGLESTEP overwrote flags.TF
-     * injected via SET_GUEST_DEBUG while updating GP regs. Work around this
-     * by updating the debug state once again if single-stepping is on.
-     * Another reason to call gvm_update_guest_debug here is a pending debug
-     * trap raise by the guest. On kernels without SET_VCPU_EVENTS we have to
-     * reinject them via SET_GUEST_DEBUG.
-     */
-    if (reinject_trap ||
-        (!gvm_has_robust_singlestep() && cs->singlestep_enabled)) {
-        ret = gvm_update_guest_debug(cs, reinject_trap);
-    }
-    return ret;
-}
-
 static int gvm_put_debugregs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
     struct gvm_debugregs dbgregs;
     int i;
-
-    if (!gvm_has_debugregs()) {
-        return 0;
-    }
 
     for (i = 0; i < 4; i++) {
         dbgregs.db[i] = env->dr[i];
@@ -1820,10 +1758,6 @@ static int gvm_get_debugregs(X86CPU *cpu)
     CPUX86State *env = &cpu->env;
     struct gvm_debugregs dbgregs;
     int i, ret;
-
-    if (!gvm_has_debugregs()) {
-        return 0;
-    }
 
     ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_DEBUGREGS,
             &dbgregs, sizeof(dbgregs), NULL, 0);
@@ -1894,11 +1828,6 @@ int gvm_arch_put_registers(CPUState *cpu, int level)
         return ret;
     }
     ret = gvm_put_debugregs(x86_cpu);
-    if (ret < 0) {
-        return ret;
-    }
-    /* must be last */
-    ret = gvm_guest_debug_workarounds(x86_cpu);
     if (ret < 0) {
         return ret;
     }
