@@ -1121,11 +1121,11 @@ static HANDLE gvm_open_device(void)
 {
     HANDLE hDevice;
 
-    hDevice = CreateFile("\\\\.\\gvm", GENERIC_ALL, 0, NULL,
-        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    hDevice = CreateFile("\\\\.\\gvm", GENERIC_READ | GENERIC_WRITE, 0, NULL,
+        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (hDevice == INVALID_HANDLE_VALUE)
-        DPRINTF("Failed to open the gvm device! Error code %lx\n",
+        fprintf(stderr, "Failed to open the gvm device! Error code %lx\n",
                 GetLastError());
     return hDevice;
 }
