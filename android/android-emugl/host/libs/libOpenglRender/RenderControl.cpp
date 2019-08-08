@@ -177,7 +177,7 @@ static constexpr android::base::StringView kGLESDynamicVersion_3_0 = "ANDROID_EM
 static constexpr android::base::StringView kGLESDynamicVersion_3_1 = "ANDROID_EMU_gles_max_version_3_1";
 
 // HWComposer Host Composition
-static constexpr android::base::StringView kHostCompositionV1 = "ANDROID_EMU_host_composition_v1";
+static constexpr android::base::StringView kHostCompositionV2 = "ANDROID_EMU_host_composition_v2";
 
 static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_no_host_error";
 
@@ -433,7 +433,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     }
 
     if (hostCompositionEnabled && name == GL_EXTENSIONS) {
-        glStr += kHostCompositionV1;
+        glStr += kHostCompositionV2;
         glStr += " ";
     }
 

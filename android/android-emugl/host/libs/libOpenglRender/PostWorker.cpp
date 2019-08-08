@@ -146,6 +146,47 @@ void PostWorker::compose(ComposeDevice* p) {
     mFb->getTextureDraw()->cleanupForDrawLayer();
 }
 
+void PostWorker::compose(ComposeDevice_v2* p) {
+    // bind the subwindow eglSurface
+    if (!m_initialized) {
+        m_initialized = mBindSubwin();
+    }
+
+    ComposeLayer* l = (ComposeLayer*)p->layer;
+    GLint vport[4] = { 0, };
+    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+    s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
+    if (!m_composeFbo) {
+        s_gles2.glGenFramebuffers(1, &m_composeFbo);
+    }
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
+    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                   GL_COLOR_ATTACHMENT0_OES,
+                                   GL_TEXTURE_2D,
+                                   mFb->findColorBuffer(p->targetHandle)->getTexture(),
+                                   0);
+
+    DBG("worker compose %d layers\n", p->numLayers);
+    mFb->getTextureDraw()->prepareForDrawLayer();
+    for (int i = 0; i < p->numLayers; i++, l++) {
+        DBG("\tcomposeMode %d color %d %d %d %d blendMode "
+               "%d alpha %f transform %d %d %d %d %d "
+               "%f %f %f %f\n",
+               l->composeMode, l->color.r, l->color.g, l->color.b,
+               l->color.a, l->blendMode, l->alpha, l->transform,
+               l->displayFrame.left, l->displayFrame.top,
+               l->displayFrame.right, l->displayFrame.bottom,
+               l->crop.left, l->crop.top, l->crop.right,
+               l->crop.bottom);
+        composeLayer(l);
+    }
+
+    mFb->findColorBuffer(p->targetHandle)->setSync();
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+    mFb->getTextureDraw()->cleanupForDrawLayer();
+}
+
 void PostWorker::composeLayer(ComposeLayer* l) {
     if (l->composeMode == HWC2_COMPOSITION_DEVICE) {
         ColorBufferPtr cb = mFb->findColorBuffer(l->cbHandle);
