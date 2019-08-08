@@ -73,6 +73,7 @@ kEmulatedExtensions[] = {
     "VK_FUCHSIA_buffer_collection",
     "VK_FUCHSIA_external_memory",
     "VK_FUCHSIA_external_semaphore",
+    "VK_EXT_queue_family_foreign",
     "VK_KHR_external_memory",
     "VK_KHR_external_memory_capabilities",
     "VK_KHR_external_semaphore",
@@ -2054,6 +2055,22 @@ public:
         }
     }
 
+    inline void convertQueueFamilyForeignToExternal(uint32_t* queueFamilyIndexPtr) {
+        if (*queueFamilyIndexPtr == VK_QUEUE_FAMILY_FOREIGN_EXT) {
+            *queueFamilyIndexPtr = VK_QUEUE_FAMILY_EXTERNAL;
+        }
+    }
+
+    inline void convertQueueFamilyForeignToExternal_VkBufferMemoryBarrier(VkBufferMemoryBarrier* barrier) {
+        convertQueueFamilyForeignToExternal(&barrier->srcQueueFamilyIndex);
+        convertQueueFamilyForeignToExternal(&barrier->dstQueueFamilyIndex);
+    }
+
+    inline void convertQueueFamilyForeignToExternal_VkImageMemoryBarrier(VkImageMemoryBarrier* barrier) {
+        convertQueueFamilyForeignToExternal(&barrier->srcQueueFamilyIndex);
+        convertQueueFamilyForeignToExternal(&barrier->dstQueueFamilyIndex);
+    }
+
     void on_vkCmdPipelineBarrier(
             android::base::Pool* pool,
             VkCommandBuffer boxed_commandBuffer,
@@ -2066,8 +2083,20 @@ public:
             const VkBufferMemoryBarrier* pBufferMemoryBarriers,
             uint32_t imageMemoryBarrierCount,
             const VkImageMemoryBarrier* pImageMemoryBarriers) {
+
         auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
         auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+
+        for (uint32_t i = 0; i < bufferMemoryBarrierCount; ++i) {
+            convertQueueFamilyForeignToExternal_VkBufferMemoryBarrier(
+                ((VkBufferMemoryBarrier*)pBufferMemoryBarriers) + i);
+        }
+
+        for (uint32_t i = 0; i < imageMemoryBarrierCount; ++i) {
+            convertQueueFamilyForeignToExternal_VkImageMemoryBarrier(
+                ((VkImageMemoryBarrier*)pImageMemoryBarriers) + i);
+        }
+
         if (imageMemoryBarrierCount == 0) {
             vk->vkCmdPipelineBarrier(
                     commandBuffer, srcStageMask, dstStageMask, dependencyFlags,
