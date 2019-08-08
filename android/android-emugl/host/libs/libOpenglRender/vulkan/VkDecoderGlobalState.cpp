@@ -5684,7 +5684,7 @@ VkDecoderSnapshot* VkDecoderGlobalState::snapshot() {
         mImpl->transformImpl_##type##_tohost(val, count); \
     } \
     void VkDecoderGlobalState::transformImpl_##type##_fromhost(const type* val, uint32_t count) { \
-        mImpl->transformImpl_##type##_tohost(val, count); \
+        mImpl->transformImpl_##type##_fromhost(val, count); \
     } \
 
 LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
