@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4c49ec9_e85f3f91",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-08T01:15:00Z",
+      "side": 1,
+      "message": "isn\u0027t it covered by the previous if statement?",
+      "range": {
+        "startLine": 162,
+        "startChar": 18,
+        "endLine": 174,
+        "endChar": 17
+      },
+      "revId": "372fb3bc312819952f1c28ca9b3c920bd994ffee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "363587f2_bd10f06a",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-08T01:15:00Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 190,
+        "startChar": 16,
+        "endLine": 203,
+        "endChar": 17
+      },
+      "revId": "372fb3bc312819952f1c28ca9b3c920bd994ffee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fe7e5c4_b63ad337",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-08T01:15:00Z",
+      "side": 1,
+      "message": "remove the white space",
+      "range": {
+        "startLine": 170,
+        "startChar": 17,
+        "endLine": 170,
+        "endChar": 18
+      },
+      "revId": "372fb3bc312819952f1c28ca9b3c920bd994ffee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8992b23c_e966b4fb",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-08T01:15:00Z",
+      "side": 1,
+      "message": "why this method is public? Did you plan to call it from outside the class?",
+      "range": {
+        "startLine": 266,
+        "startChar": 35,
+        "endLine": 266,
+        "endChar": 60
+      },
+      "revId": "372fb3bc312819952f1c28ca9b3c920bd994ffee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cab6f6ed_4b49823d",
+        "filename": "android/android-emu/android/videoinjection/VideoInjectionController_unittest.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-08T01:15:00Z",
+      "side": 1,
+      "message": "remove the whitespace",
+      "range": {
+        "startLine": 256,
+        "startChar": 0,
+        "endLine": 256,
+        "endChar": 4
+      },
+      "revId": "372fb3bc312819952f1c28ca9b3c920bd994ffee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
