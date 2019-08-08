@@ -453,6 +453,8 @@ custom_decodes = {
     "vkGetImageMemoryRequirements2" : emit_global_state_wrapped_decoding,
     "vkGetImageMemoryRequirements2KHR" : emit_global_state_wrapped_decoding,
 
+    "vkCreateDescriptorSetLayout" : emit_global_state_wrapped_decoding,
+    "vkDestroyDescriptorSetLayout" : emit_global_state_wrapped_decoding,
     "vkCreateDescriptorPool" : emit_global_state_wrapped_decoding,
     "vkDestroyDescriptorPool" : emit_global_state_wrapped_decoding,
     "vkResetDescriptorPool" : emit_global_state_wrapped_decoding,
