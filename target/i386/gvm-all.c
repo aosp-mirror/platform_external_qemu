@@ -537,7 +537,7 @@ static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
         d.dirty_bitmap = g_malloc0(size);
 
         d.slot = mem->slot | (kml->as_id << 16);
-        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG, NULL, 0, &d, sizeof(d))) {
+        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG, &d, sizeof(d), &d, sizeof(d))) {
             DPRINTF("ioctl failed %d\n", errno);
             g_free(d.dirty_bitmap);
             return -1;
