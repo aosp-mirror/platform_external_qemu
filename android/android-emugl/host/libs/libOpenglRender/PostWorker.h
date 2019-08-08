@@ -35,6 +35,9 @@ public:
     // compose: compse the layers into final framebuffer
     void compose(ComposeDevice* p);
 
+    // compose: compse the layers into final framebuffer, version 2
+    void compose(ComposeDevice_v2* p);
+
     // clear: blanks out emulator display when refreshing the subwindow
     // if there is no last posted color buffer to show yet.
     void clear();
