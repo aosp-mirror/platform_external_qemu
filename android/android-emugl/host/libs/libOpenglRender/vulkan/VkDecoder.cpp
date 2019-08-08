@@ -8403,7 +8403,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalBufferProperties 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalBufferInfo, (unsigned long long)pExternalBufferProperties);
                 }
-                vk->vkGetPhysicalDeviceExternalBufferProperties(unboxed_physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+                m_state->on_vkGetPhysicalDeviceExternalBufferProperties(&m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 vkStream->unsetHandleMapping();
                 if (pExternalBufferProperties)
                 {
@@ -11295,7 +11295,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkGetPhysicalDeviceExternalBufferPropertiesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pExternalBufferInfo, (unsigned long long)pExternalBufferProperties);
                 }
-                vk->vkGetPhysicalDeviceExternalBufferPropertiesKHR(unboxed_physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+                m_state->on_vkGetPhysicalDeviceExternalBufferPropertiesKHR(&m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 vkStream->unsetHandleMapping();
                 if (pExternalBufferProperties)
                 {

@@ -435,6 +435,12 @@ public:
                 pImageFormatProperties);
     }
 
+#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
+
+    bool hasUnsupportedExternalMemoryHandleBits(VkExternalMemoryHandleTypeFlagBits bits) {
+        return bits & (~(GUEST_EXTERNAL_MEMORY_HANDLE_TYPES));
+    }
+
     VkResult on_vkGetPhysicalDeviceImageFormatProperties2(
             android::base::Pool* pool,
             VkPhysicalDevice boxed_physicalDevice,
@@ -469,14 +475,16 @@ public:
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
 
+        VkResult res = VK_ERROR_INITIALIZATION_FAILED;
+
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
         if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-            return vk->vkGetPhysicalDeviceImageFormatProperties2(
+            res = vk->vkGetPhysicalDeviceImageFormatProperties2(
                     physicalDevice, pImageFormatInfo, pImageFormatProperties);
         } else if (hasInstanceExtension(
                     instance,
                     "VK_KHR_get_physical_device_properties2")) {
-            return vk->vkGetPhysicalDeviceImageFormatProperties2KHR(
+            res = vk->vkGetPhysicalDeviceImageFormatProperties2KHR(
                     physicalDevice, pImageFormatInfo, pImageFormatProperties);
         } else {
             // No instance extension, fake it!!!!
@@ -491,12 +499,28 @@ public:
                 VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2,
                 0,
             };
-            return vk->vkGetPhysicalDeviceImageFormatProperties(
+            res = vk->vkGetPhysicalDeviceImageFormatProperties(
                     physicalDevice, pImageFormatInfo->format,
                     pImageFormatInfo->type, pImageFormatInfo->tiling,
                     pImageFormatInfo->usage, pImageFormatInfo->flags,
                     &pImageFormatProperties->imageFormatProperties);
         }
+
+        const VkPhysicalDeviceExternalImageFormatInfo* extImageFormatInfo =
+            vk_find_struct<VkPhysicalDeviceExternalImageFormatInfo>(pImageFormatInfo);
+
+        VkExternalImageFormatProperties* extImageFormatProperties =
+            vk_find_struct<VkExternalImageFormatProperties>(pImageFormatProperties);
+
+        if (extImageFormatInfo && extImageFormatProperties) {
+            if (hasUnsupportedExternalMemoryHandleBits(
+                extImageFormatInfo->handleType)) {
+                memset(&extImageFormatProperties->externalMemoryProperties, 0,
+                       sizeof(VkExternalMemoryProperties));
+            }
+        }
+
+        return res;
     }
 
     void on_vkGetPhysicalDeviceFormatProperties(
@@ -3011,6 +3035,54 @@ public:
         pExternalSemaphoreProperties->externalSemaphoreFeatures = 0;
     }
 
+    void on_vkGetPhysicalDeviceExternalBufferProperties(
+        android::base::Pool* pool,
+        VkPhysicalDevice boxed_physicalDevice,
+        const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
+        VkExternalBufferProperties* pExternalBufferProperties) {
+
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!physicalDevice) {
+            return;
+        }
+
+        if (hasUnsupportedExternalMemoryHandleBits(
+                pExternalBufferInfo->handleType)) {
+            memset(&pExternalBufferProperties->externalMemoryProperties, 0,
+                   sizeof(VkExternalMemoryProperties));
+            return;
+        }
+
+        vk->vkGetPhysicalDeviceExternalBufferProperties(
+            physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+    }
+
+    void on_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
+        android::base::Pool* pool,
+        VkPhysicalDevice boxed_physicalDevice,
+        const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
+        VkExternalBufferProperties* pExternalBufferProperties) {
+
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!physicalDevice) {
+            return;
+        }
+
+        if (hasUnsupportedExternalMemoryHandleBits(
+                pExternalBufferInfo->handleType)) {
+            memset(&pExternalBufferProperties->externalMemoryProperties, 0,
+                   sizeof(VkExternalMemoryProperties));
+            return;
+        }
+
+        vk->vkGetPhysicalDeviceExternalBufferPropertiesKHR(
+            physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+    }
+
     VkResult on_vkCreateDescriptorUpdateTemplate(
             android::base::Pool* pool,
             VkDevice boxed_device,
@@ -3355,8 +3427,6 @@ public:
 
         return res;
     }
-
-#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
 
@@ -5483,6 +5553,24 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     return mImpl->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
             pool, physicalDevice, pExternalSemaphoreInfo,
             pExternalSemaphoreProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalBufferProperties(
+    android::base::Pool* pool,
+    VkPhysicalDevice physicalDevice,
+    const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
+    VkExternalBufferProperties* pExternalBufferProperties) {
+    mImpl->on_vkGetPhysicalDeviceExternalBufferProperties(
+        pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
+    android::base::Pool* pool,
+    VkPhysicalDevice physicalDevice,
+    const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
+    VkExternalBufferProperties* pExternalBufferProperties) {
+    mImpl->on_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
+        pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
 }
 
 // Descriptor update templates

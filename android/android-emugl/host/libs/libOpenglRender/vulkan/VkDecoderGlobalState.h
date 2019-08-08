@@ -540,6 +540,18 @@ public:
         const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
         VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
 
+    void on_vkGetPhysicalDeviceExternalBufferProperties(
+        android::base::Pool* pool,
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
+        VkExternalBufferProperties* pExternalBufferProperties);
+
+    void on_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
+        android::base::Pool* pool,
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
+        VkExternalBufferProperties* pExternalBufferProperties);
+
     VkResult on_vkCreateSemaphore(
         android::base::Pool* pool,
         VkDevice device,
