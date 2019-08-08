@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f7a3fd2_38cf1ae8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1010465
+      },
+      "writtenOn": "2019-08-08T23:16:26Z",
+      "side": 1,
+      "message": "is there any delta from comppose()? If not, why duplicate all of it?",
+      "range": {
+        "startLine": 149,
+        "startChar": 17,
+        "endLine": 149,
+        "endChar": 46
+      },
+      "revId": "13f4551b3763afa7e11b14a51926384011387425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
