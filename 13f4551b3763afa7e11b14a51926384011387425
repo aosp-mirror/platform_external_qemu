@@ -46,6 +46,30 @@
       "revId": "13f4551b3763afa7e11b14a51926384011387425",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90fcd461_15c70992",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-08T23:36:41Z",
+      "side": 1,
+      "message": "There is no delta yet, it\u0027s a simple duplicate for now. Of course, when real features are on, it will be different.\n\nI wanted to commit simple CLs to make sure backward compatibility is maintained, before adding real logic to deal with multi displays.\n\nWe may change the struct quite differently form now on, and v1 won\u0027t change at all, so I\u0027d rather copy all fields, and not keeping a copy of original data struct.",
+      "parentUuid": "a85eb6fa_4c67e4ce",
+      "range": {
+        "startLine": 149,
+        "startChar": 17,
+        "endLine": 149,
+        "endChar": 46
+      },
+      "revId": "13f4551b3763afa7e11b14a51926384011387425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
