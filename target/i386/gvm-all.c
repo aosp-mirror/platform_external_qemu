@@ -122,7 +122,7 @@ static GVMSlot *gvm_alloc_slot(GVMMemoryListener *kml)
 
 static GVMSlot *gvm_lookup_matching_slot(GVMMemoryListener *kml,
                                          hwaddr start_addr,
-                                         hwaddr end_addr)
+                                         hwaddr size)
 {
     GVMState *s = gvm_state;
     int i;
@@ -130,8 +130,7 @@ static GVMSlot *gvm_lookup_matching_slot(GVMMemoryListener *kml,
     for (i = 0; i < s->nr_slots; i++) {
         GVMSlot *mem = &kml->slots[i];
 
-        if (start_addr == mem->start_addr &&
-            end_addr == mem->start_addr + mem->memory_size) {
+        if (start_addr == mem->start_addr && size == mem->memory_size) {
             return mem;
         }
     }
@@ -285,12 +284,14 @@ static int gvm_set_user_memory_region(GVMMemoryListener *kml, GVMSlot *slot)
          * value. This is needed based on KVM commit 75d61fbc. */
         mem.memory_size = 0;
 	dump_user_memory_region(&mem);
+        fprintf(stderr, "%08x\t%08llx\t%08llx\t%08x\n", mem.slot, mem.guest_phys_addr >> 12, mem.memory_size >> 12, mem.flags);
         r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
                 &mem, sizeof(mem), NULL, 0);
 	DPRINTF("ioctl return value %d\n", r);
     }
     mem.memory_size = slot->memory_size;
     dump_user_memory_region(&mem);
+    fprintf(stderr, "%08x\t%08llx\t%08llx\t%08x\n", mem.slot, mem.guest_phys_addr >> 12, mem.memory_size >> 12, mem.flags);
     r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
             &mem, sizeof(mem), NULL, 0);
     DPRINTF("ioctl return value %d\n", r);
@@ -429,15 +430,21 @@ static int gvm_slot_update_flags(GVMMemoryListener *kml, GVMSlot *mem,
 static int gvm_section_update_flags(GVMMemoryListener *kml,
                                     MemoryRegionSection *section)
 {
-    hwaddr phys_addr = section->offset_within_address_space;
-    ram_addr_t size = int128_get64(section->size);
-    GVMSlot *mem = gvm_lookup_matching_slot(kml, phys_addr, phys_addr + size);
+    hwaddr start_addr, size;
+    GVMSlot *mem;
 
-    if (mem == NULL)  {
+    size = gvm_align_section(section, &start_addr);
+    if (!size) {
         return 0;
-    } else {
-        return gvm_slot_update_flags(kml, mem, section->mr);
     }
+
+    mem = gvm_lookup_matching_slot(kml, start_addr, size);
+    if (!mem) {
+        /* We don't have a slot if we want to trap every access. */
+        return 0;
+    }
+
+    return gvm_slot_update_flags(kml, mem, section->mr);
 }
 
 static void gvm_log_start(MemoryListener *listener,
