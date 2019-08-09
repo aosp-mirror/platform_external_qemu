@@ -54,6 +54,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.marshalPrefix = marshalPrefix
 
         self.exprAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = True)
+        self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
 
@@ -278,7 +279,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             self.cgen.stmt("%s->loadStringArrayInPlace(%s&%s)" % (self.streamVarName, castExpr, access))
 
     def onStaticArr(self, vulkanType):
-        access = self.exprAccessor(vulkanType)
+        access = self.exprValueAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
         finalLenExpr = "%s * %s" % (lenAccess, self.cgen.sizeofExpr(vulkanType))
         self.genStreamCall(vulkanType, access, finalLenExpr)

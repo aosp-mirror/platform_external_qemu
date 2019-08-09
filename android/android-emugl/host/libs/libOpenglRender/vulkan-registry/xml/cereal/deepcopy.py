@@ -163,8 +163,8 @@ class DeepcopyCodegen(VulkanTypeIterator):
         self.cgen.endIf()
 
     def onStaticArr(self, vulkanType):
-        accessLhs = self.exprAccessorLhs(vulkanType)
-        accessRhs = self.exprAccessorRhs(vulkanType)
+        accessLhs = self.exprAccessorValueLhs(vulkanType)
+        accessRhs = self.exprAccessorValueRhs(vulkanType)
 
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
 
