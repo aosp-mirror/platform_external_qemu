@@ -466,14 +466,17 @@ public:
         }
 
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
+
+        VkResult res = VK_ERROR_INITIALIZATION_FAILED;
+
         if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-            return vk->vkGetPhysicalDeviceImageFormatProperties2(
-                    physicalDevice, pImageFormatInfo, pImageFormatProperties);
+            res = vk->vkGetPhysicalDeviceImageFormatProperties2(
+                physicalDevice, pImageFormatInfo, pImageFormatProperties);
         } else if (hasInstanceExtension(
                     instance,
                     "VK_KHR_get_physical_device_properties2")) {
-            return vk->vkGetPhysicalDeviceImageFormatProperties2KHR(
-                    physicalDevice, pImageFormatInfo, pImageFormatProperties);
+            res = vk->vkGetPhysicalDeviceImageFormatProperties2KHR(
+                physicalDevice, pImageFormatInfo, pImageFormatProperties);
         } else {
             // No instance extension, fake it!!!!
             if (pImageFormatProperties->pNext) {
@@ -487,12 +490,25 @@ public:
                 VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2,
                 0,
             };
-            return vk->vkGetPhysicalDeviceImageFormatProperties(
-                    physicalDevice, pImageFormatInfo->format,
-                    pImageFormatInfo->type, pImageFormatInfo->tiling,
-                    pImageFormatInfo->usage, pImageFormatInfo->flags,
-                    &pImageFormatProperties->imageFormatProperties);
+            res = vk->vkGetPhysicalDeviceImageFormatProperties(
+                physicalDevice, pImageFormatInfo->format,
+                pImageFormatInfo->type, pImageFormatInfo->tiling,
+                pImageFormatInfo->usage, pImageFormatInfo->flags,
+                &pImageFormatProperties->imageFormatProperties);
         }
+
+        const VkPhysicalDeviceExternalImageFormatInfo* extImageFormatInfo =
+            vk_find_struct<VkPhysicalDeviceExternalImageFormatInfo>(pImageFormatInfo);
+        VkExternalImageFormatProperties* extImageFormatProps =
+            vk_find_struct<VkExternalImageFormatProperties>(pImageFormatProperties);
+
+        // Only allow dedicated allocations for external images.
+        if (extImageFormatInfo && extImageFormatProps) {
+            extImageFormatProps->externalMemoryProperties.externalMemoryFeatures |=
+                VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT;
+        }
+
+        return res;
     }
 
     void on_vkGetPhysicalDeviceFormatProperties(
