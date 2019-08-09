@@ -142,6 +142,8 @@ void PacketQueue::flush() {
     mNumPkts = 0;
     mSize = 0;
 
+    internalPut(&sFlushPkt);
+
     pwi->lock.unlock();
 }
 
