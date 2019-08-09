@@ -93,7 +93,6 @@
 #endif
 
 #include <array>
-#include <mutex>
 #include <string>
 #include <vector>
 
@@ -2969,15 +2968,6 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled,
          "com.android.emulator.multidisplay/"
          ".MultiDisplayServiceReceiver"});
     const auto uiAgent = mToolWindow->getUiEmuAgent();
-    // BUG: 135756686 Touch extended window and virtual sensor page
-    // before we try to hide rotation button in the virtual sensor.
-    // Because setMultiDisplay could be invoked in very early stage.
-    // Otherwise, emulator will hang when multiple display is configured
-    // through config.ini
-    static std::once_flag once_flag;
-    std::call_once(once_flag, [](){
-        skin_winsys_touch_qt_extended_virtual_sensors();
-    });
     uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
 }
 
