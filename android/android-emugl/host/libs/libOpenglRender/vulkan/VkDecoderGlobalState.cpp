@@ -444,7 +444,8 @@ public:
                 createCompressedImageInfo(pImageFormatInfo->format);
             if (cmpInfo.isCompressed) {
                 if (!supportEmulatedCompressedImageFormatProperty(
-                    pImageFormatInfo->format, pImageFormatInfo->type, pImageFormatInfo->tiling, pImageFormatInfo->usage, pImageFormatInfo->flags)) {
+                    pImageFormatInfo->format, pImageFormatInfo->type, pImageFormatInfo->tiling,
+                    pImageFormatInfo->usage, pImageFormatInfo->flags)) {
                     return VK_ERROR_FORMAT_NOT_SUPPORTED;
                 }
                 imageFormatInfo = *pImageFormatInfo;
@@ -4001,7 +4002,6 @@ private:
 
             PushConstant pushConstant = {.compFormat = compFormat,
                 .baseLayer = baseLayer};
-            printf("cmdDecompress layer count %d\n", _layerCount);
             int dispatchZ = _layerCount;
             if (extent.depth > 1) {
                 // 3D texture
