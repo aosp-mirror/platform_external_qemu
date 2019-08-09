@@ -84,7 +84,8 @@ public:
             AVCodecContext* avctx,
             PacketQueue* queue,
             FrameQueue* frameQueue,
-            VideoPlayerWaitInfo* empty_queue_cond);
+            VideoPlayerWaitInfo* empty_queue_cond,
+            Mp4Demuxer* mDemuxer);
     virtual ~Decoder();
 
     int getPktSerial() const { return mPktSerial; }
@@ -119,6 +120,7 @@ protected:
     AVCodecContext* mAvCtx = nullptr;
     PacketQueue* mPacketQueue = nullptr;
     FrameQueue* mFrameQueue = nullptr;
+    Mp4Demuxer* mDemuxer;
     // this condition is to control packet reading speed
     // we don't want to use too much memory to keep packets
     // the main reading loop will wait when queue is full
@@ -134,8 +136,9 @@ public:
                  AVCodecContext* avctx,
                  PacketQueue* queue,
                  FrameQueue* frameQueue,
-                 VideoPlayerWaitInfo* empty_queue_cond)
-        : Decoder(player, avctx, queue, frameQueue, empty_queue_cond) {}
+                 VideoPlayerWaitInfo* empty_queue_cond,
+                 Mp4Demuxer* demuxer)
+        : Decoder(player, avctx, queue, frameQueue, empty_queue_cond, demuxer) {}
 
     virtual void workerThreadFunc();
 
@@ -150,8 +153,9 @@ public:
                  AVCodecContext* avctx,
                  PacketQueue* queue,
                  FrameQueue* frameQueue,
-                 VideoPlayerWaitInfo* empty_queue_cond)
-        : Decoder(player, avctx, queue, frameQueue, empty_queue_cond) {}
+                 VideoPlayerWaitInfo* empty_queue_cond,
+                 Mp4Demuxer* demuxer)
+        : Decoder(player, avctx, queue, frameQueue, empty_queue_cond, demuxer) {}
 
     virtual void workerThreadFunc();
 
@@ -183,9 +187,9 @@ public:
     virtual void start(const PlayConfig& playConfig);
     virtual void stop();
     virtual void pause();
-    virtual void internalPause();
-    virtual void internalResume();
+    virtual void pauseAt(double timestamp);
     virtual bool isRunning() const { return mRunning; }
+    virtual bool isLooping() const { return mPlayConfig.looping; }
     virtual bool isPaused() const { return mPaused; }
     virtual void scheduleRefresh(int delayMs);
     virtual void videoRefresh();
@@ -208,6 +212,11 @@ public:
 
 private:
     int play();
+
+    void internalPause();
+    void internalResume();
+    void internalSeek(double timestamp); // timestamp in seconds
+
     void adjustWindowSize(AVCodecContext* c, int* pWidth, int* pHeight);
 
     static bool isRealTimeFormat(AVFormatContext* s);
@@ -258,6 +267,7 @@ private:
     std::atomic<bool> mRunning {true};
     std::atomic<bool> mPaused {false};
     std::atomic<bool> mWorkerThreadStarted {false};
+    std::atomic<bool> mPauseAtRequest {false};
 
     PlayConfig mPlayConfig;
 
@@ -343,13 +353,15 @@ Decoder::Decoder(VideoPlayerImpl* player,
                  AVCodecContext* avctx,
                  PacketQueue* queue,
                  FrameQueue* frameQueue,
-                 VideoPlayerWaitInfo* empty_queue_cond)
+                 VideoPlayerWaitInfo* empty_queue_cond,
+                 Mp4Demuxer* demuxer)
     : mPlayer(player),
       mAvCtx(avctx),
       mPacketQueue(queue),
       mFrameQueue(frameQueue),
       mEmptyQueueCond(empty_queue_cond),
-      mWorkerThread([this]() { workerThreadFunc(); }) {}
+      mWorkerThread([this]() { workerThreadFunc(); }),
+      mDemuxer(demuxer) {}
 
 Decoder::~Decoder() {
     av_packet_unref(&mPkt);
@@ -359,11 +371,10 @@ int Decoder::fetchPacket() {
     if (!mPacketPending || mPacketQueue->getSerial() != mPktSerial) {
         AVPacket pkt;
         do {
-            if (mPacketQueue->getNumPackets() == 0 &&
-                mEmptyQueueCond != nullptr) {
-                mEmptyQueueCond->lock.lock();
-                mEmptyQueueCond->done = true;
-                mEmptyQueueCond->cvDone.signalAndUnlock(&mEmptyQueueCond->lock);
+            while (mPacketQueue->getNumPackets() == 0) {
+                if (mDemuxer->demuxNextPacket() < 0) {
+                    return -1;
+                }
             }
             if (mPacketQueue->get(&pkt, true, &mPktSerial) < 0) {
                 return -1;
@@ -927,7 +938,7 @@ retry:
             this->mFrameTimer = av_gettime_relative() / 1000000.0;
         }
 
-        if (!mPaused) {
+        if (!mPaused || mPauseAtRequest) {
             double delay;
             // compute nominal last_duration
             double last_duration = computeVideoFrameDuration(lastvp, vp);
@@ -970,6 +981,11 @@ retry:
                     redisplay = 0;
                     goto retry;
                 }
+            }
+
+            if (mPauseAtRequest) {
+                internalPause();
+                mPauseAtRequest = false;
             }
         }
 
@@ -1052,6 +1068,7 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 }
 
 int VideoPlayerImpl::play() {
+
     if (mDataset.get() == nullptr) {
         LOG(VERBOSE) << "Dataset not loaded. Create dataset instance now.";
         loadVideoFileWithData(::offworld::DatasetInfo::default_instance());
@@ -1079,6 +1096,19 @@ int VideoPlayerImpl::play() {
 
     // we do this before mAudioClock since audio callback uses it
     mExternalClock.init(mExternalClock.getSerialPtr());
+
+    mDemuxer = Mp4Demuxer::create(this, mDataset.get(), &mContinueReadWaitInfo);
+    if (mEventProvider.get() != nullptr) {
+        auto startPlaybackResult =
+                AutomationController::get().startPlaybackFromSource(
+                        mEventProvider);
+        mDemuxer->setSensorLocationEventProvider(mEventProvider);
+        if (!startPlaybackResult.ok()) {
+            LOG(ERROR) << ": fail to start event playback in "
+                          "AutomationController!";
+            return -1;
+        }
+    }
 
     if (audioStream != -1) {
         mAudioOutputEngine = AudioOutputEngine::get();
@@ -1146,6 +1176,7 @@ int VideoPlayerImpl::play() {
 
         mAudioQueue.reset(new PacketQueue(this));
         mAudioQueue->start();
+        mDemuxer->setAudioPacketQueue(mAudioQueue.get());
 
         mAudioClock.init(mAudioQueue->getSerialPtr());
 
@@ -1154,8 +1185,7 @@ int VideoPlayerImpl::play() {
 
         mAudioDecoder.reset(new AudioDecoder(
                 this, mAudioCodecCtx.get(), mAudioQueue.get(), mAudioFrameQueue.get(),
-                &mContinueReadWaitInfo));
-        mAudioDecoder->start();
+                &mContinueReadWaitInfo, mDemuxer.get()));
     }
 
     if (videoStream != -1) {
@@ -1212,6 +1242,7 @@ int VideoPlayerImpl::play() {
 
         mVideoQueue.reset(new PacketQueue(this));
         mVideoQueue->start();
+        mDemuxer->setVideoPacketQueue(mVideoQueue.get());
 
         mVideoClock.init(mVideoQueue->getSerialPtr());
 
@@ -1220,28 +1251,23 @@ int VideoPlayerImpl::play() {
 
         mVideoDecoder.reset(new VideoDecoder(
                 this, mVideoCodecCtx.get(), mVideoQueue.get(), mVideoFrameQueue.get(),
-                &mContinueReadWaitInfo));
+                &mContinueReadWaitInfo, mDemuxer.get()));
+    }
+
+    // seek before starting to play for playAt request
+    if (mPlayConfig.seekTimestamp != 0) {
+        internalSeek(mPlayConfig.seekTimestamp);
+    }
+
+    // start decoders after demuxer is completely set up
+    if (audioStream != -1) {
+        mAudioDecoder->start();
+    }
+    if (videoStream != -1) {
         mVideoDecoder->start();
     }
 
-    // Start the demuxer to read frames from the video file and dispatch them to
-    // corresponding packet queues
-    mDemuxer = Mp4Demuxer::create(this, mDataset.get(), &mContinueReadWaitInfo);
-    mDemuxer->setAudioPacketQueue(mAudioQueue.get());
-    mDemuxer->setVideoPacketQueue(mVideoQueue.get());
-    if (mEventProvider.get() != nullptr) {
-        auto startPlaybackResult =
-                AutomationController::get().startPlaybackFromSource(
-                        mEventProvider);
-        mDemuxer->setSensorLocationEventProvider(mEventProvider);
-        if (!startPlaybackResult.ok()) {
-            LOG(ERROR) << ": fail to start event playback in "
-                          "AutomationController!";
-            return -1;
-        }
-    }
-    mDemuxer->demux();
-
+    // block and wait for decoders to complete work
     if (mAudioDecoder.get() != nullptr) {
         mAudioDecoder->wait();
         mAudioDecoder.reset();
@@ -1267,17 +1293,9 @@ int VideoPlayerImpl::play() {
     return 0;
 }
 
-
 void VideoPlayerImpl::workerThreadFunc() {
-    while (true) {
-      int rc = play();
-
-      base::AutoLock lock(mLock);
-      if (rc || !mPlayConfig.looping) {
-        mWorkerThreadStarted = false;
-        break;
-      }
-    }
+    play();
+    mWorkerThreadStarted = false;
 }
 
 // get an audio frame from the decoded queue, and convert it to buffer
@@ -1400,10 +1418,17 @@ void VideoPlayerImpl::start(const PlayConfig& playConfig) {
     }
 
     if (!started) {
-       mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
-       mWorkerThreadStarted = true;
-       mWorkerThread->start();
-    } else if (mRunning && mPaused) {
+        mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
+        mWorkerThreadStarted = true;
+        mWorkerThread->start();
+        return;
+    }
+
+    // worker thread was previously started
+    if (mPlayConfig.seekTimestamp != 0) {
+        internalSeek(mPlayConfig.seekTimestamp);
+    }
+    if (mRunning && mPaused) {
         internalResume();
     }
 }
@@ -1439,9 +1464,29 @@ void VideoPlayerImpl::pause() {
     }
 }
 
+void VideoPlayerImpl::pauseAt(double timestamp) {
+    if (!mWorkerThreadStarted) { // demuxer, decoders, etc. not setup
+        mPauseAtRequest = true;
+        PlayConfig config(timestamp, false);
+        start(config);
+    } else {
+        internalSeek(timestamp);
+        if (mPaused) {
+            internalResume();
+        }
+        mPauseAtRequest = true;
+    }
+}
+
+void VideoPlayerImpl::internalSeek(double timestamp) {
+    mDemuxer->seek(timestamp);
+    mExternalClock.set(timestamp / (double)AV_TIME_BASE, 0);
+}
+
 void VideoPlayerImpl::stop() {
     mRunning = false;
     mPaused = false;
+    mPauseAtRequest = false;
     mPlayConfig = PlayConfig();
 
     mNotifier->stopTimer();
