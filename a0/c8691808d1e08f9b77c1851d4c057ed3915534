@@ -1,0 +1,8 @@
+Code-Review+1: Sophia He <hejiaqi@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Sophia He <hejiaqi@google.com>
+Submitted-at: Fri, 09 Aug 2019 20:25:27 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1099720
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
