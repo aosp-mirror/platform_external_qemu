@@ -44,12 +44,17 @@ namespace android {
 namespace videoplayer {
 
 struct PlayConfig {
+    // absolute timestamp from the beginning of the video, measured in seconds
+    std::atomic<double> seekTimestamp;
+    // play in looping mode or not
     std::atomic<bool> looping;
 
-    PlayConfig(bool looping_ = false) : looping(looping_) {}
+    PlayConfig(double timestamp = 0, bool looping_ = false)
+        : seekTimestamp(timestamp), looping(looping_) {}
 
-    // Copy constructor and assignment operator because std::atomic deletes them
+    // assignment operator because std::atomic deletes it
     PlayConfig& operator=(const PlayConfig& other) {
+        seekTimestamp.exchange(other.seekTimestamp);
         looping.exchange(other.looping);
         return *this;
     }
@@ -75,9 +80,14 @@ public:
     virtual void start(const PlayConfig& playConfig) = 0;
     virtual void stop() = 0;
     virtual void pause() = 0;
+    virtual void pauseAt(double timestamp) = 0;
+
     virtual bool isRunning() const = 0;
+    virtual bool isLooping() const = 0;
+
     virtual void videoRefresh() = 0;
     virtual void scheduleRefresh(int delayMs) = 0;
+
     virtual void loadVideoFileWithData(
             const ::offworld::DatasetInfo& datasetInfo) = 0;
 

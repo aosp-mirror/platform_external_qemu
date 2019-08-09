@@ -36,18 +36,19 @@ typedef ::offworld::DatasetInfo DatasetInfo;
 
 class Mp4DatasetImpl : public Mp4Dataset {
 public:
-    Mp4DatasetImpl(){};
-    virtual ~Mp4DatasetImpl(){};
-    int init(const std::string filepath, const DatasetInfo& datasetInfo);
-    int getAudioStreamIndex() { return mAudioStreamIdx; }
-    int getVideoStreamIndex() { return mVideoStreamIdx; }
-    int getSensorDataStreamIndex(AndroidSensor sensor) {
+    Mp4DatasetImpl() { }
+    virtual ~Mp4DatasetImpl() { }
+
+    virtual int getAudioStreamIndex() { return mAudioStreamIdx; }
+    virtual int getVideoStreamIndex() { return mVideoStreamIdx; }
+    virtual int getSensorDataStreamIndex(AndroidSensor sensor) {
         return mSensorStreamsIdx[sensor];
     }
-    int getLocationDataStreamIndex() { return mLocationStreamIdx; }
-    AVFormatContext* getFormatContext() { return mFormatCtx.get(); }
-    void clearFormatContext() { mFormatCtx.reset(); }
+    virtual int getLocationDataStreamIndex() { return mLocationStreamIdx; }
+    virtual AVFormatContext* getFormatContext() { return mFormatCtx.get(); }
+    virtual void clearFormatContext() { mFormatCtx.reset(); }
 
+    int init(const std::string filepath, const DatasetInfo& datasetInfo);
 private:
     AVScopedPtr<AVFormatContext> mFormatCtx;
     int mAudioStreamIdx = -1;
