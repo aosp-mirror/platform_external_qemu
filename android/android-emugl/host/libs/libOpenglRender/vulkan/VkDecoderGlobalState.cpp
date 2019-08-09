@@ -415,9 +415,8 @@ public:
         if (needEmulatedEtc2(physicalDevice, vk)) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
             if (cmpInfo.isCompressed) {
-                if (usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
-                    memset(pImageFormatProperties, 0,
-                           sizeof(*pImageFormatProperties));
+                if (!supportEmulatedCompressedImageFormatProperty(
+                    format, type, tiling, usage, flags)) {
                     return VK_ERROR_FORMAT_NOT_SUPPORTED;
                 }
                 flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
@@ -444,10 +443,8 @@ public:
             CompressedImageInfo cmpInfo =
                 createCompressedImageInfo(pImageFormatInfo->format);
             if (cmpInfo.isCompressed) {
-                if (pImageFormatInfo->usage &
-                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
-                    memset(&pImageFormatProperties->imageFormatProperties, 0,
-                           sizeof(pImageFormatProperties->imageFormatProperties));
+                if (!supportEmulatedCompressedImageFormatProperty(
+                    pImageFormatInfo->format, pImageFormatInfo->type, pImageFormatInfo->tiling, pImageFormatInfo->usage, pImageFormatInfo->flags)) {
                     return VK_ERROR_FORMAT_NOT_SUPPORTED;
                 }
                 imageFormatInfo = *pImageFormatInfo;
@@ -3528,6 +3525,19 @@ private:
         return false;
     }
 
+    bool supportEmulatedCompressedImageFormatProperty(
+        VkFormat compressedFormat,
+        VkImageType type,
+        VkImageTiling tiling,
+        VkImageUsageFlags usage,
+        VkImageCreateFlags flags
+    ) {
+        // BUG: 139193497
+        return !(usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+            && !(usage & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT &&
+                type == VK_IMAGE_TYPE_1D);
+    }
+
     std::vector<const char*>
         filteredExtensionNames(
                 uint32_t count, const char* const* extNames) {
@@ -3991,6 +4001,7 @@ private:
 
             PushConstant pushConstant = {.compFormat = compFormat,
                 .baseLayer = baseLayer};
+            printf("cmdDecompress layer count %d\n", _layerCount);
             int dispatchZ = _layerCount;
             if (extent.depth > 1) {
                 // 3D texture

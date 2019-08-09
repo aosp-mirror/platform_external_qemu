@@ -19,7 +19,7 @@ glslangValidator_path = os.path.join(prebuilts_path, "android-emulator-build", "
 shader_source_path = os.path.join(qemu_path, "android", "android-emugl", "host", "libs", "libOpenglRender", "vulkan")
 shader_lib_name = "Etc2ShaderLib"
 shader_source_names = {"Etc2RGB8", "Etc2RGBA8", "EacR11Unorm", "EacR11Snorm", "EacRG11Unorm", "EacRG11Snorm"}
-image_types = {"2DArray", "3D"}
+image_types = {"1DArray", "2DArray", "3D"}
 
 shader_sources = ["", ""]
 file_name = os.path.join(shader_source_path, shader_lib_name + ".comp")
