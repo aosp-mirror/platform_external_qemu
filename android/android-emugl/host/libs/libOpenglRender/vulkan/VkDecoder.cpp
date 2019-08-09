@@ -5421,7 +5421,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->read((float*)&blendConstants, 4 * sizeof(const float));
+                vkReadStream->read((float*)blendConstants, 4 * sizeof(const float));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkCmdSetBlendConstants 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)blendConstants);
