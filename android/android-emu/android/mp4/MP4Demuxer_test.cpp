@@ -20,6 +20,7 @@
 #include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
+#include "string.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -42,10 +43,15 @@ public:
     void videoRefresh() {}
     void scheduleRefresh(int delayMS) {}
     void loadVideoFileWithData(const ::offworld::DatasetInfo& datasetInfo) {}
+    void setErrorStatusAndRecordErrorMessage(std::string errorDetails){};
+    bool getErrorStatus(){};
+    std::string getErrorMessage(){};
 
 private:
     bool mRunning = false;
     int mPktSerial = 0;
+    bool isError = false;
+    std::string errorMessage = "";
 };
 
 class Mp4DemuxerTest : public testing::Test {

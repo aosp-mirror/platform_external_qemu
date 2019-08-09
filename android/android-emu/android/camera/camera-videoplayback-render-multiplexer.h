@@ -62,6 +62,8 @@ private:
      virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
      bool mInitialized = false;
      size_t mCounter = 0;
+     // async_id for ongoing non-sequential execution, including but not limited to play, pause.
+     uint32_t mOngoingAsyncId = std::numeric_limits<uint32_t>::max();
 };
 
 }  // namespace videoplayback
