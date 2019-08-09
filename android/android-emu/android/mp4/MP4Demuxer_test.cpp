@@ -39,7 +39,10 @@ public:
     void start(const PlayConfig& playConfig = PlayConfig()) { mRunning = true; }
     void stop() { mRunning = false; }
     void pause() {}
+    void pauseAt(double timestamp) {}
+    void seek(double timestamp) {}
     bool isRunning() const { return mRunning; }
+    bool isLooping() const { return 0; }
     void videoRefresh() {}
     void scheduleRefresh(int delayMS) {}
     void loadVideoFileWithData(const ::offworld::DatasetInfo& datasetInfo) {}
@@ -85,24 +88,55 @@ protected:
         mMockedVideoPlayer->start();
         mAudioQueue->start();
         mVideoQueue->start();
-        mDemuxer->demux();
     }
 
     virtual void TearDown() override { mMockedVideoPlayer->stop(); }
 };
 
-TEST_F(Mp4DemuxerTest, demux) {
-    AVPacket pkt1, pkt2;
-    // Discard the first flush packet
-    mVideoQueue->get(&pkt1, true, nullptr);
-    // Inspect the first video packet
-    EXPECT_FALSE(mVideoQueue->get(&pkt1, true, nullptr) < 0);
-    EXPECT_EQ(pkt1.stream_index, 0);
-    EXPECT_EQ(pkt1.pts, 0);
-    // Inspect the second video packet
-    EXPECT_FALSE(mVideoQueue->get(&pkt2, true, nullptr) < 0);
-    EXPECT_EQ(pkt2.stream_index, 0);
-    EXPECT_EQ(pkt2.pts, 300);
-    // Check that audio packet queue only has one (flush) packet
-    EXPECT_EQ(mAudioQueue->getNumPackets(), 1);
+TEST_F(Mp4DemuxerTest, demuxNextPacket) {
+    AVPacket audioPkt, videoPkt;
+
+    LOG(ERROR) << "audio queue size = " << mAudioQueue->getNumPackets();
+    LOG(ERROR) << "video queue size = " << mVideoQueue->getNumPackets();
+
+    // // Check that the first and only packet in each queue is flush packet
+    // EXPECT_EQ(mAudioQueue->getNumPackets(), 1);
+    // EXPECT_EQ(mVideoQueue->getNumPackets(), 1);
+    // mVideoQueue->get(&videoPkt, true, nullptr);
+    // EXPECT_EQ(videoPkt.data, PacketQueue::sFlushPkt.data);
+    // mAudioQueue->get(&audioPkt, true, nullptr);
+    // EXPECT_EQ(audioPkt.data, PacketQueue::sFlushPkt.data);
+
+    // // Inspect the first video packet
+    // mDemuxer->demuxNextPacket();
+    // EXPECT_EQ(mVideoQueue->getNumPackets(), 1);
+    // EXPECT_FALSE(mVideoQueue->get(&videoPkt, true, nullptr) < 0);
+    // EXPECT_EQ(mVideoQueue->getNumPackets(), 0);
+    // EXPECT_EQ(videoPkt.stream_index, 0);
+    // EXPECT_EQ(videoPkt.pts, 0);
+
+    // // Inspect the second video packet
+    // mDemuxer->demuxNextPacket();
+    // EXPECT_EQ(mVideoQueue->getNumPackets(), 1);
+    // EXPECT_FALSE(mVideoQueue->get(&videoPkt, true, nullptr) < 0);
+    // EXPECT_EQ(mVideoQueue->getNumPackets(), 0);
+    // EXPECT_EQ(videoPkt.stream_index, 0);
+    // EXPECT_EQ(videoPkt.pts, 300);
 }
+
+// TEST_F(Mp4DemuxerTest, seek) {
+//     AVPacket pkt;
+
+//     // Discard the first flush packet
+//     mVideoQueue->get(&pkt, true, nullptr);
+
+//     mDemuxer->demuxNextPacket();
+//     mDemuxer->demuxNextPacket();
+//     EXPECT_EQ(mVideoQueue->getNumPackets(), 2);
+//     mDemuxer->seek(0.5);
+
+//     // Seek should clear the packet queue and put a flush packet
+//     EXPECT_EQ(mVideoQueue->getNumPackets(), 1);
+//     mVideoQueue->get(&pkt, true, nullptr);
+//     EXPECT_EQ(pkt.data, PacketQueue::sFlushPkt.data);
+// }

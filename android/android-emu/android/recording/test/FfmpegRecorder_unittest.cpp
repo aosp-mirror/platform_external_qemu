@@ -316,7 +316,7 @@ TEST(FfmpegRecorder, AddAudioTrack) {
     }
 }
 
-TEST(FfmpegRecorder, AddVideoTrack) {
+TEST(FfmpegRecorder, DISABLED_AddVideoTrack) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
