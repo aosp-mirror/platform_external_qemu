@@ -66,13 +66,9 @@ static bool has_msr_tsc_aux;
 static bool has_msr_tsc_adjust;
 static bool has_msr_tsc_deadline;
 static bool has_msr_feature_control;
-#if 0
-static bool has_msr_pv_eoi_en;
-#endif
 static bool has_msr_misc_enable;
 static bool has_msr_smbase;
 static bool has_msr_bndcfgs;
-//static bool has_msr_gvm_steal_time;
 static bool has_msr_mtrr;
 static bool has_msr_xss;
 
