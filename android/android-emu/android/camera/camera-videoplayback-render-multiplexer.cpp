@@ -162,11 +162,16 @@ int64_t RenderMultiplexer::render() {
                 }
                 mOngoingAsyncId = async_id;
                 switchRenderer(mVideoRenderer.get());
+                if (maybe_next_request->play().has_offset_in_seconds() &&
+                    maybe_next_request->play().offset_in_seconds() < 0) {
+                    // TODO: send error response through VideoInjectionController
+                    return -1;
+                }
                 videoplayer::PlayConfig playConfig(
-                        maybe_next_request->play().looping());
+                    maybe_next_request->play().offset_in_seconds(),
+                    maybe_next_request->play().looping());
                 mPlayer->start(playConfig);
-                // Successfully start playing the video.
-
+                // Successfully started playing the video.
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
                         async_id, base::Ok(), false, "");
                 break;
@@ -190,7 +195,17 @@ int64_t RenderMultiplexer::render() {
                 }
                 mOngoingAsyncId = async_id;
                 switchRenderer(mVideoRenderer.get());
-                mPlayer->pause();
+                if (!maybe_next_request->pause().has_offset_in_seconds()) {
+                    // pause request
+                    mPlayer->pause();
+                } else {
+                    // pauseAt request
+                    if (maybe_next_request->pause().offset_in_seconds() < 0) {
+                        // TODO: send error response through VideoInjectionController
+                        return -1;
+                    }
+                    mPlayer->pauseAt(maybe_next_request->pause().offset_in_seconds());
+                }
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
                         async_id, base::Ok(), true, "");
                 break;

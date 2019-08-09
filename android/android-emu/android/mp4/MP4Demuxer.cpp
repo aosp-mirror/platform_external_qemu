@@ -45,7 +45,8 @@ public:
           mContinueReadWaitInfo(readingWaitInfo) {}
     ~Mp4DemuxerImpl() {}
 
-    void demux();
+    int demuxNextPacket();
+    void seek(double timestamp);
 
     void setAudioPacketQueue(PacketQueue* audioPacketQueue) {
         mAudioPacketQueue = audioPacketQueue;
@@ -70,6 +71,9 @@ private:
     PacketQueue* mAudioPacketQueue = nullptr;
     PacketQueue* mVideoPacketQueue = nullptr;
     std::shared_ptr<SensorLocationEventProvider> mEventProvider;
+
+    // lock to protect demuxer functions from being called at the same time
+    android::base::Lock mLock;
 };
 
 std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
@@ -81,15 +85,16 @@ std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
     return std::move(demuxer);
 }
 
-void Mp4DemuxerImpl::demux() {
-    int ret = 0;
+int Mp4DemuxerImpl::demuxNextPacket() {
+    base::AutoLock lock(mLock);
     AVPacket packet;
     AVFormatContext* formatCtx = mDataset->getFormatContext();
     const int audioStreamIndex = mDataset->getAudioStreamIndex();
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
 
-    while (mPlayer->isRunning() &&
-           (ret = av_read_frame(formatCtx, &packet)) >= 0) {
+    int ret = av_read_frame(formatCtx, &packet);
+
+    if (ret >= 0) {
         if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0 &&
             packet.stream_index == audioStreamIndex) {
             mAudioPacketQueue->put(&packet);
@@ -109,41 +114,49 @@ void Mp4DemuxerImpl::demux() {
             // stream we care about. Wipe the packet here.
             av_packet_unref(&packet);
         }
-
-        // if the queues are full, no need to read more
-        int curent_queues_total_size = 0;
-        if (mAudioPacketQueue != nullptr) {
-            curent_queues_total_size += mAudioPacketQueue->getSize();
-        }
-        if (mVideoPacketQueue != nullptr) {
-            curent_queues_total_size += mVideoPacketQueue->getSize();
-        }
-
-        if ((curent_queues_total_size > kMaxQueueSize ||
-             (formatCtx->streams[videoStreamIndex]->disposition &
-              AV_DISPOSITION_ATTACHED_PIC)) &&
-            mContinueReadWaitInfo != nullptr) {
-            // wait 10 ms
-            android::base::System::Duration timeoutMs = 10ll;
-            mContinueReadWaitInfo->lock.lock();
-            const auto deadlineUs =
-                    android::base::System::get()->getUnixTimeUs() +
-                    timeoutMs * 1000;
-            while (android::base::System::get()->getUnixTimeUs() < deadlineUs) {
-                mContinueReadWaitInfo->cvDone.timedWait(
-                        &mContinueReadWaitInfo->lock, deadlineUs);
-            }
-            mContinueReadWaitInfo->lock.unlock();
-        }
+        return 0;
     }
 
     if (ret == AVERROR_EOF || avio_feof(formatCtx->pb)) {
+        auto stream = formatCtx->streams[videoStreamIndex];
+        // seek to start of the streams in looping mode
+        if (mPlayer->isLooping()) {
+            auto stream = formatCtx->streams[videoStreamIndex];
+            avio_seek(formatCtx->pb, 0, SEEK_SET);
+            avformat_seek_file(formatCtx, videoStreamIndex, 0, 0, stream->duration, 0);
+            return 0;
+        }
+
         if (videoStreamIndex >= 0 && mVideoPacketQueue != nullptr) {
             mVideoPacketQueue->putNullPacket(videoStreamIndex);
         }
         if (audioStreamIndex >= 0 && mAudioPacketQueue != nullptr) {
             mAudioPacketQueue->putNullPacket(audioStreamIndex);
         }
+        return 0;
+    } else { // other errors
+        return -1;
+    }
+}
+
+void Mp4DemuxerImpl::seek(double timestamp) {
+    base::AutoLock lock(mLock);
+    AVFormatContext* formatCtx = mDataset->getFormatContext();
+    const int audioStreamIndex = mDataset->getAudioStreamIndex();
+    const int videoStreamIndex = mDataset->getVideoStreamIndex();
+
+    int64_t convertedTimestamp = timestamp * (double) (AV_TIME_BASE);
+    int ret = avformat_seek_file(formatCtx, -1, INT64_MIN, convertedTimestamp, INT64_MAX, 0);
+
+    if (ret < 0) {
+        LOG(ERROR) << "avformat_seek_file returned error";
+        return;
+    }
+    if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0) {
+        mAudioPacketQueue->flush();
+    }
+    if (mVideoPacketQueue != nullptr && videoStreamIndex >= 0) {
+        mVideoPacketQueue->flush();
     }
 }
 
