@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d119ca0f_da66a4f6",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-10T05:50:58Z",
+      "side": 1,
+      "message": "nit: extra spaces",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 101,
+        "endChar": 4
+      },
+      "revId": "289f8b7e1a8c25c29cd08aed45419f686f8b48cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
