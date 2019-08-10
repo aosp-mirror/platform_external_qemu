@@ -278,6 +278,7 @@ public:
                          uint32_t* dpi,
                          uint32_t* flag,
                          bool* enabled);
+    bool isMultiDisplayEnabled();
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
 
