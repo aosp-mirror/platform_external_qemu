@@ -67,7 +67,6 @@ public:
 
     void connectVirtualSceneWindow(
             VirtualSceneControlWindow* virtualSceneWindow);
-    void hideRotationButtons(bool hide);
 
 private slots:
     void switchFrameAlways(bool showFrame);
@@ -75,6 +74,7 @@ private slots:
     void switchToTheme(SettingsTheme theme);
     void disableMouseWheel(bool disabled);
     void showMacroRecordPage();
+    void hideRotationButtons();
 
     // Master tabs
     void on_batteryButton_clicked();

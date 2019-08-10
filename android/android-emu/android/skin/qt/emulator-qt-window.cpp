@@ -2927,6 +2927,11 @@ bool EmulatorQtWindow::getMultiDisplay(uint32_t id,
     return mMultiDisplay[id].enabled;
 }
 
+bool EmulatorQtWindow::isMultiDisplayEnabled() {
+    AutoLock lock(mMultiDisplayLock);
+    return countEnabledMultiDisplayLocked() > 0;
+}
+
 int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
     // Not counting 0, the default Android display
     return std::count_if(

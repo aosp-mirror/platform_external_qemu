@@ -99,6 +99,8 @@ ExtendedWindow::ExtendedWindow(
             SLOT(switchMultiDisplay(bool, uint32_t, int32_t, int32_t, uint32_t,
                                     uint32_t, uint32_t, uint32_t)));
 
+    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()), this,
+            SLOT(hideRotationButtons()));
     // clang-format off
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
@@ -304,7 +306,6 @@ void ExtendedWindow::connectVirtualSceneWindow(
     connect(mExtendedUi->virtualSensorsPage,
             SIGNAL(virtualSensorsInteraction()), virtualSceneWindow,
             SLOT(virtualSensorsInteraction()));
-
     connect(mExtendedUi->recordAndPlaybackPage,
             SIGNAL(setRecordingStateSignal(bool)), virtualSceneWindow,
             SLOT(setRecordingState(bool)));
@@ -424,6 +425,7 @@ void ExtendedWindow::showMacroRecordPage() {
     mExtendedUi->recordAndPlaybackPage->focusMacroRecordTab();
 }
 
-void ExtendedWindow::hideRotationButtons(bool hide) {
-    mExtendedUi->virtualSensorsPage->hideRotationButtons(hide);
+void ExtendedWindow::hideRotationButtons() {
+    mExtendedUi->virtualSensorsPage->hideRotationButtons(
+            mEmulatorWindow->isMultiDisplayEnabled());
 }
