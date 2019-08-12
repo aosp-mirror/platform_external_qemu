@@ -492,6 +492,9 @@ static void set_snapshot_callbacks(void* opaque,
             set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
                                      hax_gpa_protection_supported);
             break;
+        case android::CPU_ACCELERATOR_WHPX:
+            set_address_translation_funcs(0, whpx_gpa2hva);
+            break;
         default: // KVM
 #ifdef __linux__
             set_address_translation_funcs(0, kvm_gpa2hva);
@@ -578,7 +581,10 @@ static bool vm_resume() {
 }
 
 static void* physical_memory_get_addr(uint64_t gpa) {
-    if (!gpa2hva_call) return nullptr;
+    if (!gpa2hva_call) {
+        fprintf(stderr, "%s: ERROR: No gpa2hva!\n", __func__);
+        return nullptr;
+    }
     bool found;
     void* res = gpa2hva_call(gpa, &found);
     return found ? res : nullptr;

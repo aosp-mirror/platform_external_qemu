@@ -13,6 +13,8 @@
 #include "cpu.h"
 #include "sysemu/whpx.h"
 
+#include <stdio.h>
+
 int whpx_init_vcpu(CPUState *cpu)
 {
     return -1;
@@ -45,4 +47,11 @@ void whpx_cpu_synchronize_post_init(CPUState *cpu)
 
 void whpx_cpu_synchronize_pre_loadvm(CPUState *cpu)
 {
+}
+
+void* whpx_gpa2hva(uint64_t gpa, bool* found)
+{
+    fprintf(stderr, "%s: error; using stub!\n", __func__);
+    *found = false;
+    return NULL;
 }
