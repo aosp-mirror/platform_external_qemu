@@ -61,7 +61,10 @@ class EmulatorControllerImpl final : public EmulatorController::Service {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents,
                            RtcBridge* rtcBridge)
-        : mAgents(agents), mRtcBridge(rtcBridge), mLogcatBuffer(k128KB) {
+        : mAgents(agents),
+          mRtcBridge(rtcBridge),
+          mLogcatBuffer(k128KB),
+          mKeyEventSender(agents) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -196,8 +199,7 @@ public:
     Status sendKey(ServerContext* context,
                    const KeyboardEvent* request,
                    ::google::protobuf::Empty* reply) override {
-        keyboard::EmulatorKeyEventSender keyEvent(mAgents);
-        keyEvent.send(request);
+        mKeyEventSender.send(request);
         return Status::OK;
     }
 
@@ -330,8 +332,10 @@ public:
 
 private:
     const AndroidConsoleAgents* mAgents;
+    keyboard::EmulatorKeyEventSender mKeyEventSender;
     RtcBridge* mRtcBridge;
-    RingStreambuf mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+    RingStreambuf
+            mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
     static constexpr uint16_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;

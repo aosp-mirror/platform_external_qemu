@@ -6,6 +6,9 @@
 #include "android/emulation/control/keyboard/dom_key.h"
 #include "android/utils/utf8_utils.h"
 
+
+#define KEYEVENT_QUEUE_LENGTH 128
+
 namespace android {
 namespace emulation {
 namespace control {
@@ -179,7 +182,24 @@ const size_t kNonPrintableCodeEntries = ARRAY_SIZE(kNonPrintableCodeMap);
 
 EmulatorKeyEventSender::EmulatorKeyEventSender(
         const AndroidConsoleAgents* const consoleAgents)
-    : mAgents(consoleAgents) {}
+    : mAgents(consoleAgents),
+      mEventQueue(KEYEVENT_QUEUE_LENGTH, mEventLock),
+      mWorkerThread([this] { workerThread(); }) {
+          mWorkerThread.start();
+      }
+
+EmulatorKeyEventSender::~EmulatorKeyEventSender() {
+    AutoLock alock(mEventLock);
+    mEventQueue.closeLocked();
+}
+
+void EmulatorKeyEventSender::workerThread() {
+    KeyboardEvent event;
+    AutoLock alock(mEventLock);
+    while (mEventQueue.popLocked(&event) == base::BufferQueueResult::Ok) {
+        doSend(&event);
+    }
+}
 
 void EmulatorKeyEventSender::sendUtf8String(const std::string str) {
     mAgents->libui->convertUtf8ToKeyCodeEvents(
@@ -202,7 +222,14 @@ void EmulatorKeyEventSender::sendKeyCode(
     }
 }  // namespace keyboard
 
-void EmulatorKeyEventSender::send(const KeyboardEvent* request) {
+bool EmulatorKeyEventSender::send(const KeyboardEvent* request) {
+    AutoLock pushLock(mEventLock);
+    bool queued =  (mEventQueue.tryPushLocked(KeyboardEvent(*request)) ==
+            base::BufferQueueResult::Ok);
+    return queued;
+}
+
+void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
     if (request->key().size() > 0) {
         keyboard::DomKey domkey = browserKeyToDomKey(request->key());
         if (domkey != keyboard::DomKey::NONE) {
