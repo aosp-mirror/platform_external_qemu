@@ -4,6 +4,8 @@
 #include <string>
 
 #include "android/base/ArraySize.h"
+#include "android/base/containers/BufferQueue.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/console.h"
 #include "android/emulation/control/emulator_controller.pb.h"
 #include "android/emulation/control/keyboard/dom_key.h"
@@ -61,12 +63,18 @@ struct DomKeyMapEntry {
 #undef DOM_KEY_MAP
 #undef DOM_KEY_UNI
 
+using KeyEventQueue = base::BufferQueue<KeyboardEvent>;
+using base::AutoLock;
+using base::FunctorThread;
+using base::Lock;
 class EmulatorKeyEventSender {
 public:
     EmulatorKeyEventSender(const AndroidConsoleAgents* const consoleAgents);
-    void send(const KeyboardEvent* request);
+    ~EmulatorKeyEventSender();
+    bool send(const KeyboardEvent* request);
 
 private:
+    void doSend(const KeyboardEvent* request);
     void sendUtf8String(const std::string);
     void sendKeyCode(int32_t code,
                      const KeyboardEvent::KeyCodeType codeType,
@@ -74,6 +82,8 @@ private:
     uint32_t domCodeToEvDevKeycode(DomCode key);
     DomCode domKeyAsNonPrintableDomCode(DomKey key);
     DomKey browserKeyToDomKey(std::string key);
+
+    void workerThread();
 
     // Converts the incoming code type to evdev code that the emulator
     // understands.
@@ -84,6 +94,9 @@ private:
             offsetof(KeycodeMapEntry, mac)};
 
     const AndroidConsoleAgents* const mAgents;
+    FunctorThread mWorkerThread;
+    KeyEventQueue mEventQueue;
+    Lock mEventLock;
 };
 
 }  // namespace keyboard
