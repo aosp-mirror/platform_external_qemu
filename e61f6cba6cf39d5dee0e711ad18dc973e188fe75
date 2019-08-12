@@ -22,6 +22,30 @@
       "revId": "e61f6cba6cf39d5dee0e711ad18dc973e188fe75",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "789423ed_b74f320d",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-08-12T18:52:54Z",
+      "side": 1,
+      "message": "This can block, but it is not expected to block very long.\n\ndoSend will do the following:\n\n- translate the keyevent into a qemu key code\n- invoke the qemu key event handler\n\nThe qemu event handler will take a mutex, we don\u0027t expect to block too long",
+      "parentUuid": "b3acb076_e2e16ef7",
+      "range": {
+        "startLine": 200,
+        "startChar": 8,
+        "endLine": 200,
+        "endChar": 14
+      },
+      "revId": "e61f6cba6cf39d5dee0e711ad18dc973e188fe75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
