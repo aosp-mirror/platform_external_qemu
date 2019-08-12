@@ -417,6 +417,7 @@ public:
             if (cmpInfo.isCompressed) {
                 if (!supportEmulatedCompressedImageFormatProperty(
                     format, type, tiling, usage, flags)) {
+                    memset(pImageFormatProperties, 0, sizeof(VkImageFormatProperties));
                     return VK_ERROR_FORMAT_NOT_SUPPORTED;
                 }
                 flags &= ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
@@ -446,6 +447,8 @@ public:
                 if (!supportEmulatedCompressedImageFormatProperty(
                     pImageFormatInfo->format, pImageFormatInfo->type, pImageFormatInfo->tiling,
                     pImageFormatInfo->usage, pImageFormatInfo->flags)) {
+                    memset(&pImageFormatProperties->imageFormatProperties, 0,
+                        sizeof(VkImageFormatProperties));
                     return VK_ERROR_FORMAT_NOT_SUPPORTED;
                 }
                 imageFormatInfo = *pImageFormatInfo;
