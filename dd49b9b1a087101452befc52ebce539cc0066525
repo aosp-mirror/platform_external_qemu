@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "fd36bcca_975e8adf",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-12T20:19:01Z",
+      "side": 1,
+      "message": "a leading space",
+      "range": {
+        "startLine": 174,
+        "startChar": 18,
+        "endLine": 174,
+        "endChar": 19
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f86c1f8b_44efa4f5",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-12T20:19:01Z",
+      "side": 1,
+      "message": "move to next line",
+      "range": {
+        "startLine": 194,
+        "startChar": 76,
+        "endLine": 194,
+        "endChar": 92
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c48a1ae5_b49a36a3",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-12T20:19:01Z",
+      "side": 1,
+      "message": "pause?",
+      "range": {
+        "startLine": 197,
+        "startChar": 44,
+        "endLine": 197,
+        "endChar": 48
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "36cd1631_4ccc0674",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -18,6 +87,52 @@
         "startChar": 25,
         "endLine": 190,
         "endChar": 41
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1792a7d_41abefd5",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-12T20:19:01Z",
+      "side": 1,
+      "message": "can we use an enum for all states?",
+      "range": {
+        "startLine": 267,
+        "startChar": 0,
+        "endLine": 270,
+        "endChar": 46
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e87caad8_093630d5",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1270,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-12T20:19:01Z",
+      "side": 1,
+      "message": "upper case",
+      "range": {
+        "startLine": 1270,
+        "startChar": 6,
+        "endLine": 1270,
+        "endChar": 8
       },
       "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
