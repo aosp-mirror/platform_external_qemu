@@ -21,10 +21,41 @@
 
 #import <AppKit/AppKit.h>
 
+static void handleNativeKeyEvent(int keycode,
+                                 int modifiers,
+                                 SkinEventType eventType) {
+    // Do no send modifier by itself.
+    if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
+        skin_keycode_is_modifier(keycode)) {
+        return;
+    }
+
+    SkinEvent* skin_event =
+            EmulatorQtWindow::getInstance()->createSkinEvent(kEventTextInput);
+    SkinEventTextInputData& textInputData = skin_event->u.text;
+    textInputData.down = true;
+
+    textInputData.keycode = keycode;
+    textInputData.mod = 0;
+    if (modifiers & NSEventModifierFlagShift) {
+        textInputData.mod |= kKeyModLShift;
+    }
+    if (modifiers & NSEventModifierFlagOption) {
+        textInputData.mod |= kKeyModRAlt;
+    }
+    if ((modifiers & NSEventModifierFlagCapsLock) &&
+        skin_keycode_is_alpha(keycode) &&
+        !(modifiers & NSEventModifierFlagOption)) {
+        textInputData.mod |= kKeyModLShift;
+    }
+    EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event);
+}
+
 bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
                                              void* message,
                                              long*) {
-    if (eventType.compare("mac_generic_NSEvent") == 0) {
+    if (EmulatorQtWindow::getInstance()->isActiveWindow() &&
+        eventType.compare("mac_generic_NSEvent") == 0) {
         NSEvent* event = static_cast<NSEvent*>(message);
         if ([event type] == NSKeyDown) {
             if (EmulatorQtWindow::getInstance() != nullptr) {
@@ -33,8 +64,8 @@ bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
                         skin_keycode_native_is_keypad(keycode)) {
                     keycode = skin_keycode_native_map_keypad(keycode);
                 }
-                EmulatorQtWindow::getInstance()->handleNativeKeyEvent(
-                       keycode , [event modifierFlags], kEventKeyDown);
+                handleNativeKeyEvent(keycode, [event modifierFlags],
+                                     kEventKeyDown);
             }
         }
     }
