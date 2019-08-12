@@ -23,6 +23,7 @@
 #include "sysemu/whpx.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
+#include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "hw/boards.h"
 #include "qemu/error-report.h"
@@ -1316,12 +1317,151 @@ void whpx_vcpu_kick(CPUState *cpu)
  * Memory support.
  */
 
+#define WHPX_MAX_SLOTS 64
+
+struct whpx_slot {
+    int present;
+    uint64_t size;
+    uint64_t gpa_start;
+    uint64_t gva;
+    void* hva;
+};
+
+struct whpx_slot whpx_slots[WHPX_MAX_SLOTS];
+
+void* whpx_gpa2hva(uint64_t gpa, bool* found) {
+    struct whpx_slot *mslot;
+    *found = false;
+    uint32_t i;
+
+    for (i = 0; i < WHPX_MAX_SLOTS; i++) {
+        mslot = &whpx_slots[i];
+        if (!mslot->size) continue;
+        if (gpa >= mslot->gpa_start &&
+            gpa < mslot->gpa_start + mslot->size) {
+            *found = true;
+            return (void*)((char*)(mslot->hva) + (gpa - mslot->gpa_start));
+        }
+    }
+
+    return 0;
+}
+
+struct whpx_slot* whpx_next_free_slot() {
+    struct whpx_slot *mem = 0;
+    int x;
+
+    for (x = 0; x < WHPX_MAX_SLOTS; ++x) {
+        mem = whpx_slots + x;
+        if (!mem->size) return mem;
+    }
+
+    return mem;
+}
+
+struct whpx_slot* whpx_find_overlap_slot(uint64_t start, uint64_t end, bool* coincident) {
+    struct whpx_slot *slot = 0;
+    int x;
+
+    if (coincident) *coincident = false;
+
+    for (x = 0; x < WHPX_MAX_SLOTS; ++x) {
+        slot = whpx_slots + x;
+        if (slot->size && start < (slot->gpa_start + slot->size) && end > slot->gpa_start) {
+            // Is [start, end) describing the same range?
+            if ((start == slot->gpa_start) &&
+                (end == slot->gpa_start + slot->size)) {
+                if (coincident) *coincident = true;
+            }
+            return slot;
+        }
+    }
+
+    return slot;
+}
+
+static HRESULT whpx_set_ram(
+    VOID* SourceAddress,
+    WHV_GUEST_PHYSICAL_ADDRESS GuestAddress,
+    UINT64 SizeInBytes,
+    WHV_MAP_GPA_RANGE_FLAGS Flags,
+    int add) {
+
+    struct whpx_state *whpx = &whpx_global;
+    HRESULT hr;
+
+    WHV_PARTITION_HANDLE partition = whpx->partition;
+
+    if (add) {
+        hr = whp_dispatch.WHvMapGpaRange(partition,
+                                         SourceAddress,
+                                         GuestAddress,
+                                         SizeInBytes,
+                                         Flags);
+    } else {
+        hr = whp_dispatch.WHvUnmapGpaRange(partition,
+                                           GuestAddress,
+                                           SizeInBytes);
+    }
+
+    if (FAILED(hr)) {
+        error_report("WHPX: Failed to %s GPA range PA:%p, Size:%p bytes,"
+                     " Host:%p, hr=%08lx",
+                     (add ? "MAP" : "UNMAP"),
+                     (void *)(uintptr_t)GuestAddress, (void *)SizeInBytes, SourceAddress, hr);
+        return hr;
+    }
+
+    // Success. Update our internal slots.
+    {
+        // Could have overlapped with existing slot.
+        // If so, and not coincident, reset the old mapping.
+        bool coincident;
+        struct whpx_slot* overlap_slot =
+            whpx_find_overlap_slot(
+                GuestAddress,
+                GuestAddress + SizeInBytes,
+                &coincident);
+
+        if (overlap_slot && coincident) {
+            if (add) {
+                // Nothing to do because the slot overlaps, return.
+                return hr;
+            } else {
+                // Coincident overlap slot; delete
+                overlap_slot->size = 0;
+                return hr;
+            }
+        }
+
+        // Delete existing overlap slot, and add the new one to a free slot,
+        // if we are adding a new region.
+        if (overlap_slot) {
+            overlap_slot->size = 0;
+        }
+
+        if (add) {
+            struct whpx_slot* new_slot = 0;
+            new_slot = whpx_next_free_slot();
+
+            if (!new_slot) {
+                qemu_abort("%s: no free slots\n", __func__);
+            }
+
+            new_slot->size = SizeInBytes;
+            new_slot->gpa_start = GuestAddress;
+            new_slot->hva = SourceAddress;
+        }
+    }
+
+    return hr;
+}
+
 static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
                                 void *host_va, int add, int rom,
                                 const char *name)
 {
     struct whpx_state *whpx = &whpx_global;
-    HRESULT hr;
 
     /*
     if (add) {
@@ -1334,26 +1474,13 @@ static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
     }
     */
 
-    if (add) {
-        hr = whp_dispatch.WHvMapGpaRange(whpx->partition,
-                                         host_va,
-                                         start_pa,
-                                         size,
-                                         (WHvMapGpaRangeFlagRead |
-                                          WHvMapGpaRangeFlagExecute |
-                                          (rom ? 0 : WHvMapGpaRangeFlagWrite)));
-    } else {
-        hr = whp_dispatch.WHvUnmapGpaRange(whpx->partition,
-                                           start_pa,
-                                           size);
-    }
-
-    if (FAILED(hr)) {
-        error_report("WHPX: Failed to %s GPA range '%s' PA:%p, Size:%p bytes,"
-                     " Host:%p, hr=%08lx",
-                     (add ? "MAP" : "UNMAP"), name,
-                     (void *)(uintptr_t)start_pa, (void *)size, host_va, hr);
-    }
+    whpx_set_ram(host_va,
+                 start_pa,
+                 size,
+                 (WHvMapGpaRangeFlagRead |
+                  WHvMapGpaRangeFlagExecute |
+                  (rom ? 0 : WHvMapGpaRangeFlagWrite)),
+                 add);
 }
 
 static void whpx_process_section(MemoryRegionSection *section, int add)
@@ -1411,9 +1538,7 @@ static void whpx_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int
     struct whpx_state *whpx = &whpx_global;
     HRESULT hr;
 
-    hr = whp_dispatch.WHvMapGpaRange(
-        whpx->partition, hva, gpa, size,
-        user_backed_flags_to_whpx(flags));
+    hr = whpx_set_ram(hva, gpa, size, user_backed_flags_to_whpx(flags), 1 /* add */);
 
     if (FAILED(hr)) {
         error_report(
@@ -1429,9 +1554,8 @@ static void whpx_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
     struct whpx_state *whpx = &whpx_global;
     HRESULT hr;
 
-    hr = whp_dispatch.WHvUnmapGpaRange(whpx->partition,
-                                       gpa,
-                                       size);
+    hr = whpx_set_ram(0, gpa, size, 0 /* no flags */, 0 /* for delete */);
+
     if (FAILED(hr)) {
         error_report(
             "WHPX: Failed to unmap GPA range "
@@ -1522,6 +1646,8 @@ static int whpx_accel_init(MachineState *ms)
     }
 
     memset(whpx, 0, sizeof(struct whpx_state));
+    memset(whpx_slots, 0, sizeof(whpx_slots));
+
     whpx->mem_quota = ms->ram_size;
 
     hr = whp_dispatch.WHvGetCapability(
