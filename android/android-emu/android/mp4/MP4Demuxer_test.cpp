@@ -59,8 +59,8 @@ protected:
     std::unique_ptr<Mp4Dataset> mDataset;
     std::unique_ptr<Mp4Demuxer> mDemuxer;
     std::unique_ptr<VideoPlayer> mMockedVideoPlayer;
-    std::unique_ptr<PacketQueue> mAudioQueue;
-    std::unique_ptr<PacketQueue> mVideoQueue;
+    std::shared_ptr<PacketQueue> mAudioQueue;
+    std::shared_ptr<PacketQueue> mVideoQueue;
 
     virtual void SetUp() override {
         std::string absDataPath = android::base::PathUtils::join(
@@ -77,10 +77,10 @@ protected:
         PacketQueue::init();
 
         mAudioQueue.reset(new PacketQueue(mMockedVideoPlayer.get()));
-        mDemuxer->setAudioPacketQueue(mAudioQueue.get());
+        mDemuxer->setAudioPacketQueue(mAudioQueue);
 
         mVideoQueue.reset(new PacketQueue(mMockedVideoPlayer.get()));
-        mDemuxer->setVideoPacketQueue(mVideoQueue.get());
+        mDemuxer->setVideoPacketQueue(mVideoQueue);
 
         mMockedVideoPlayer->start();
         mAudioQueue->start();

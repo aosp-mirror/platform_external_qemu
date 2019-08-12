@@ -41,6 +41,7 @@ public:
     virtual int getVideoStreamIndex() = 0;
     virtual int getSensorDataStreamIndex(AndroidSensor sensor) = 0;
     virtual int getLocationDataStreamIndex() = 0;
+    virtual int getVideoMetadataStreamIndex() = 0;
     virtual AVFormatContext* getFormatContext() = 0;
     virtual void clearFormatContext() = 0;
 

@@ -20,6 +20,7 @@
 #include "android/hw-sensors.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/SensorLocationEventProvider.h"
+#include "android/mp4/VideoMetadataProvider.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
@@ -47,17 +48,21 @@ public:
 
     void demux();
 
-    void setAudioPacketQueue(PacketQueue* audioPacketQueue) {
-        mAudioPacketQueue = audioPacketQueue;
+    void setAudioPacketQueue(std::shared_ptr<PacketQueue> audioPacketQueue) {
+        mAudioPacketQueue = std::move(audioPacketQueue);
     }
 
-    void setVideoPacketQueue(PacketQueue* videoPacketQueue) {
-        mVideoPacketQueue = videoPacketQueue;
+    void setVideoPacketQueue(std::shared_ptr<PacketQueue> videoPacketQueue) {
+        mVideoPacketQueue = std::move(videoPacketQueue);
     }
 
     void setSensorLocationEventProvider(
             std::shared_ptr<SensorLocationEventProvider> eventProvider) {
         mEventProvider = std::move(eventProvider);
+    }
+
+    void setVideoMetadataProvider(std::shared_ptr<VideoMetadataProvider> metadataProvider) {
+        mVideoMetadataProvider = std::move(metadataProvider);
     }
 
 private:
@@ -67,9 +72,10 @@ private:
     const ::android::videoplayer::VideoPlayer* const mPlayer = nullptr;
     Mp4Dataset* mDataset;
     VideoPlayerWaitInfo* mContinueReadWaitInfo;
-    PacketQueue* mAudioPacketQueue = nullptr;
-    PacketQueue* mVideoPacketQueue = nullptr;
+    std::shared_ptr<PacketQueue> mAudioPacketQueue;
+    std::shared_ptr<PacketQueue> mVideoPacketQueue;
     std::shared_ptr<SensorLocationEventProvider> mEventProvider;
+    std::shared_ptr<VideoMetadataProvider> mVideoMetadataProvider;
 };
 
 std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
@@ -87,15 +93,18 @@ void Mp4DemuxerImpl::demux() {
     AVFormatContext* formatCtx = mDataset->getFormatContext();
     const int audioStreamIndex = mDataset->getAudioStreamIndex();
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
+    const int videoMetadataIndex = mDataset->getVideoMetadataStreamIndex();
 
     while (mPlayer->isRunning() &&
            (ret = av_read_frame(formatCtx, &packet)) >= 0) {
-        if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0 &&
+        if (mAudioPacketQueue.get() != nullptr && audioStreamIndex >= 0 &&
             packet.stream_index == audioStreamIndex) {
             mAudioPacketQueue->put(&packet);
-        } else if (mVideoPacketQueue != nullptr && videoStreamIndex >= 0 &&
+        } else if (mVideoPacketQueue.get() != nullptr && videoStreamIndex >= 0 &&
                    packet.stream_index == videoStreamIndex) {
             mVideoPacketQueue->put(&packet);
+        } else if (mVideoMetadataProvider.get() != nullptr && videoMetadataIndex > 0 && packet.stream_index == videoMetadataIndex) {
+            mVideoMetadataProvider->createVideoMetadata(&packet);
         } else {
             // Create an event from this packet if it's from one of the known
             // data stream that carries event info
