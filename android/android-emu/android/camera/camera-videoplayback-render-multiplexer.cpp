@@ -132,7 +132,7 @@ int64_t RenderMultiplexer::render() {
     }
 
     // Before start next execution, check if there is error of last execution.
-    if (mPlayer->getErrorStatus()) {
+    if (mPlayer && mPlayer->getErrorStatus()) {
         std::string errorDetails = mPlayer->getErrorMessage();
         videoinjection::VideoInjectionController::trySendAsyncResponse(
                 mOngoingAsyncId,
