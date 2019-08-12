@@ -233,17 +233,13 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
         int doShiftL = ev->u.text.mod & kKeyModLShift;
-        int doAltL = ev->u.text.mod & kKeyModLAlt;
-        int doCltrL = ev->u.text.mod & kKeyModLCtrl;
+        int doAltR = ev->u.text.mod & kKeyModRAlt;
 
         if (doShiftL) {
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
-        if (doAltL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, 1);
-        }
-        if (doCltrL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 1);
+        if (doAltR) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTALT, 1);
         }
 
         D("event type: kTextInput key code=%d mod=0x%x str=%s",
@@ -269,11 +265,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         if (doShiftL) {
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 0);
         }
-        if (doAltL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, 0);
-        }
-        if (doCltrL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 0);
+        if (doAltR) {
+            skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTALT, 0);
         }
 
         skin_keyboard_flush(kb);
