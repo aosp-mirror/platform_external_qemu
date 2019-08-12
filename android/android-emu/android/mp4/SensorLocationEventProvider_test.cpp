@@ -36,6 +36,11 @@ protected:
         initializeDatasetInfo();
         mProvider = SensorLocationEventProvider::create(mDatasetInfo);
         initializePackets();
+        mProvider->startFromTimestamp(1000000000);
+    }
+
+    virtual void TearDown() override {
+        mProvider->stop();
     }
 
 private:
@@ -94,4 +99,7 @@ TEST_F(SensorLocationEventProviderTest, createConsumeEvents) {
     EXPECT_EQ(event2.sensor_override().value().data_size(), 1);
     EXPECT_EQ(event2.sensor_override().value().data(0),
               static_cast<float>(400));
+    
+    // Check that there is no more events
+    EXPECT_FALSE(mProvider->getNextCommandDelay(&delay));
 }

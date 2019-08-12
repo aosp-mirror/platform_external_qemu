@@ -17,6 +17,7 @@
 #include "android/hw-sensors.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/SensorLocationEventProvider.h"
+#include "android/mp4/VideoMetadataProvider.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
@@ -62,6 +63,7 @@ public:
     virtual void setVideoPacketQueue(PacketQueue* videoPacketQueue) = 0;
     virtual void setSensorLocationEventProvider(
             std::shared_ptr<SensorLocationEventProvider> eventProvider) = 0;
+    virtual void setVideoMetadataProvider(std::shared_ptr<VideoMetadataProvider> metadataProvider) = 0;
 
 protected:
     Mp4Demuxer() = default;

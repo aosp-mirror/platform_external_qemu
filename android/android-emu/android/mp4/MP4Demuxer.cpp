@@ -20,6 +20,7 @@
 #include "android/hw-sensors.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/SensorLocationEventProvider.h"
+#include "android/mp4/VideoMetadataProvider.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
@@ -62,6 +63,10 @@ public:
         mEventProvider = eventProvider.get();
     }
 
+    void setVideoMetadataProvider(std::shared_ptr<VideoMetadataProvider> metadataProvider) {
+        mVideoMetadataProvider = metadataProvider.get();
+    }
+
 private:
     bool isDataStreamIndex(int index);
 
@@ -72,6 +77,7 @@ private:
     PacketQueue* mAudioPacketQueue = nullptr;
     PacketQueue* mVideoPacketQueue = nullptr;
     SensorLocationEventProvider* mEventProvider = nullptr;
+    VideoMetadataProvider* mVideoMetadataProvider = nullptr;
 
     // lock to protect demuxer functions from being called at the same time
     android::base::Lock mLock;
@@ -92,6 +98,7 @@ int Mp4DemuxerImpl::demuxNextPacket() {
     AVFormatContext* formatCtx = mDataset->getFormatContext();
     const int audioStreamIndex = mDataset->getAudioStreamIndex();
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
+    const int videoMetadataIndex = mDataset->getVideoMetadataStreamIndex();
 
     int ret = av_read_frame(formatCtx, &packet);
 
@@ -102,6 +109,8 @@ int Mp4DemuxerImpl::demuxNextPacket() {
         } else if (mVideoPacketQueue != nullptr && videoStreamIndex >= 0 &&
                    packet.stream_index == videoStreamIndex) {
             mVideoPacketQueue->put(&packet);
+        } else if (mVideoMetadataProvider != nullptr && videoMetadataIndex > 0 && packet.stream_index == videoMetadataIndex) {
+            mVideoMetadataProvider->createVideoMetadata(&packet);
         } else {
             // Create an event from this packet if it's from one of the known
             // data stream that carries event info

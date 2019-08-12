@@ -43,6 +43,7 @@
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/MP4Demuxer.h"
 #include "android/mp4/SensorLocationEventProvider.h"
+#include "android/mp4/VideoMetadataProvider.h"
 #include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/AVScopedPtr.h"
 #include "android/recording/video/player/Clock.h"
@@ -68,6 +69,8 @@ using android::emulation::AudioOutputEngine;
 using android::mp4::Mp4Dataset;
 using android::mp4::Mp4Demuxer;
 using android::mp4::SensorLocationEventProvider;
+using android::mp4::VideoMetadata;
+using android::mp4::VideoMetadataProvider;
 using android::recording::AVScopedPtr;
 using android::recording::makeAVScopedPtr;
 
@@ -298,16 +301,19 @@ private:
 
     std::unique_ptr<Mp4Demuxer> mDemuxer;
 
-    std::unique_ptr<PacketQueue> mAudioQueue;
-    std::unique_ptr<PacketQueue> mVideoQueue;
+    std::shared_ptr<PacketQueue> mAudioQueue;
+    std::shared_ptr<PacketQueue> mVideoQueue;
 
     std::unique_ptr<AudioDecoder> mAudioDecoder;
     std::unique_ptr<VideoDecoder> mVideoDecoder;
 
-    // In case when there are data streams in the input file and an event
-    // provider is needed, this is the temporary holder of the event provider
-    // object before its ownership is transferred to the AutomationController
+    // This provider convert data from data stream packets to sensor events
+    // and provide events to AutomationController
     std::shared_ptr<SensorLocationEventProvider> mEventProvider;
+
+    // This provider convert data from data stream packets to metadata of each video frame
+    // that are used to synchronize video frames and sensor events
+    std::shared_ptr<VideoMetadataProvider> mVideoMetadataProvider;
 
     // queue to store decoded audio frames
     std::unique_ptr<FrameQueue> mAudioFrameQueue = nullptr;
@@ -997,6 +1003,12 @@ retry:
 
         // display picture */
         displayVideoFrame(mVideoFrameQueue->peek());
+        LOG(VERBOSE) << "Display frame";
+        // Realign the sensor stream to the current frame's timestamp at each frame rendering
+        if (mVideoMetadataProvider.get() != nullptr && mEventProvider.get() != nullptr) {
+            VideoMetadata curMetadata = mVideoMetadataProvider->getNextFrameMetadata();
+            mEventProvider->startFromTimestamp(curMetadata.timestamp);
+        }
 
         mVideoFrameQueue->next();
     }
@@ -1029,7 +1041,14 @@ void VideoPlayerImpl::videoRefresh() {
 
     // If an event provider is present, then the video file also has sensor
     // streams. Therefore, force a time advancement in AutomationController
+    // to potentially refresh sensor values
     if (mEventProvider.get() != nullptr) {
+        // If video metadata provider is not populated, then the sensor streams
+        // do not need to be aligned with video metadata. Start refreshing sensor
+        // values immediately.
+        if (mVideoMetadataProvider.get() == nullptr) {
+            mEventProvider->start();
+        }
         AutomationController::tryAdvanceTime();
     }
 
@@ -1040,11 +1059,18 @@ void VideoPlayerImpl::loadVideoFileWithData(
         const ::offworld::DatasetInfo& datasetInfo) {
     mDataset.reset();
     mEventProvider.reset();
+    mVideoMetadataProvider.reset();
+    LOG(VERBOSE) << "Load dataset!";
     mDataset = Mp4Dataset::create(mVideoFile, datasetInfo);
+    LOG(VERBOSE) << "Find decode info";
     if (datasetInfo.has_location() || datasetInfo.has_accelerometer() ||
         datasetInfo.has_gyroscope() || datasetInfo.has_magnetic_field()) {
         LOG(INFO) << "Dataset info not empty! Creating event provider!";
         mEventProvider = SensorLocationEventProvider::create(datasetInfo);
+    }
+    if (datasetInfo.has_video_metadata()) {
+        LOG(INFO) << "Creating video metadata provider!";
+        mVideoMetadataProvider = VideoMetadataProvider::create(datasetInfo);
     }
 }
 
@@ -1562,10 +1588,6 @@ void VideoPlayerImpl::cleanup() {
     mVideoCodecCtx.reset();
 
     mDataset.reset();
-    if (mEventProvider.get() != nullptr) {
-        mEventProvider.reset();
-        AutomationController::get().stopPlayback();
-    }
 
     if (mAudioOutputEngine != nullptr) {
         mAudioOutputEngine->close();
