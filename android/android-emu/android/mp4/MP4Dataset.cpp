@@ -44,9 +44,11 @@ public:
     virtual int getSensorDataStreamIndex(AndroidSensor sensor) {
         return mSensorStreamsIdx[sensor];
     }
-    virtual int getLocationDataStreamIndex() { return mLocationStreamIdx; }
-    virtual AVFormatContext* getFormatContext() { return mFormatCtx.get(); }
-    virtual void clearFormatContext() { mFormatCtx.reset(); }
+    int getLocationDataStreamIndex() { return mLocationStreamIdx; }
+    int getVideoMetadataStreamIndex() { return mVideoMetadataStreamIdx; }
+
+    AVFormatContext* getFormatContext() { return mFormatCtx.get(); }
+    void clearFormatContext() { mFormatCtx.reset(); }
 
     int init(const std::string filepath, const DatasetInfo& datasetInfo);
 private:
@@ -56,6 +58,7 @@ private:
     int mSensorStreamsIdx[MAX_SENSORS] = {-1, -1, -1, -1, -1, -1,
                                           -1, -1, -1, -1, -1};
     int mLocationStreamIdx = -1;
+    int mVideoMetadataStreamIdx = -1;
 };
 
 std::unique_ptr<Mp4Dataset> Mp4Dataset::create(const std::string filepath,
@@ -124,6 +127,9 @@ int Mp4DatasetImpl::init(const std::string filepath,
     if (datasetInfo.has_magnetic_field()) {
         mSensorStreamsIdx[ANDROID_SENSOR_MAGNETIC_FIELD] =
                 datasetInfo.magnetic_field().stream_index();
+    }
+    if (datasetInfo.has_video_metadata()) {
+        mVideoMetadataStreamIdx = datasetInfo.video_metadata().stream_index();
     }
     return 0;
 }
