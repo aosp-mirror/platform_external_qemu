@@ -465,6 +465,7 @@ static const QEMUFileHooks sLoadHooks = {
             return 0;
         }};
 
+static void set_skip_snapshot_save(bool used);
 static void set_snapshot_callbacks(void* opaque,
                                    const SnapshotCallbacks* callbacks) {
     if (!opaque || !callbacks) {
@@ -494,6 +495,8 @@ static void set_snapshot_callbacks(void* opaque,
             break;
         case android::CPU_ACCELERATOR_WHPX:
             set_address_translation_funcs(0, whpx_gpa2hva);
+            // Skip snapshot save on WHPX
+            set_skip_snapshot_save(true);
             break;
         default: // KVM
 #ifdef __linux__
