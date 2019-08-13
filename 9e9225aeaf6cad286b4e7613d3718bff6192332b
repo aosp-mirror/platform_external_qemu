@@ -22,6 +22,30 @@
       "revId": "9e9225aeaf6cad286b4e7613d3718bff6192332b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d318c36b_0d19d96d",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-08-13T16:21:12Z",
+      "side": 0,
+      "message": "That is a good point. I am working on a new CL where we no longer distinguish between modifier key and regular key. So that things like doShiftL should all be deleted.",
+      "parentUuid": "95031d43_27aaac31",
+      "range": {
+        "startLine": 242,
+        "startChar": 0,
+        "endLine": 248,
+        "endChar": 0
+      },
+      "revId": "9e9225aeaf6cad286b4e7613d3718bff6192332b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
