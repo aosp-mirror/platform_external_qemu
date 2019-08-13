@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "09323779_0cc269a3",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T21:13:32Z",
+      "side": 1,
+      "message": "Done. Also included state machine diagram in the commit message.",
+      "parentUuid": "ca142d54_4a52f1bb",
+      "range": {
+        "startLine": 262,
+        "startChar": 7,
+        "endLine": 267,
+        "endChar": 6
+      },
+      "revId": "81c382b900171aa410ec204f66f2fa597bca5807",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4822ef0_a7695a5d",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "81c382b900171aa410ec204f66f2fa597bca5807",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "420d5fc4_2db68bb4",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T21:13:32Z",
+      "side": 1,
+      "message": "Actually not needed anymore - removed the lock.",
+      "parentUuid": "a4822ef0_a7695a5d",
+      "range": {
+        "startLine": 1423,
+        "startChar": 7,
+        "endLine": 1423,
+        "endChar": 35
+      },
+      "revId": "81c382b900171aa410ec204f66f2fa597bca5807",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
