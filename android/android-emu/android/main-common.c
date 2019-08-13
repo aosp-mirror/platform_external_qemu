@@ -1859,19 +1859,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         hw->vm_heapSize = heapSize;
     }
 
-    if (opts->camera_front) {
-        /* Validate parameter. */
-        if (memcmp(opts->camera_front, "webcam", 6) &&
-            strcmp(opts->camera_front, "emulated") &&
-            strcmp(opts->camera_front, "none")) {
-            derror("Invalid value for -camera-front <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
-                   opts->camera_front);
-            return false;
-        }
-        str_reset(&hw->hw_camera_front, opts->camera_front);
-    }
-
     str_reset(&hw->avd_name, avdInfo_getName(avd));
     str_reset(&hw->avd_id, avdInfo_getId(avd));
 
@@ -1986,10 +1973,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
                                              AvdInfo* avd,
                                              AndroidHwConfig* hw) {
+    bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
+    bool supportsVideoPlayback = feature_is_enabled(kFeature_VideoPlayback);
+
     if (opts->camera_back) {
-        bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
         bool isVirtualScene = !strcmp(opts->camera_back, "virtualscene");
-        bool supportsVideoPlayback = feature_is_enabled(kFeature_VideoPlayback);
         bool isVideoPlayback = !strcmp(opts->camera_back, "videoplayback");
         /* Validate parameter. */
         if (memcmp(opts->camera_back, "webcam", 6) &&
@@ -2007,6 +1995,24 @@ bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
         }
         str_reset(&hw->hw_camera_back, opts->camera_back);
     }
+
+    if (opts->camera_front) {
+        bool isVideoPlayback = !strcmp(opts->camera_front, "videoplayback");
+        /* Validate parameter. */
+        if (memcmp(opts->camera_front, "webcam", 6) &&
+            strcmp(opts->camera_front, "emulated") &&
+            (!isVideoPlayback || !supportsVideoPlayback) &&
+            strcmp(opts->camera_front, "none")) {
+            derror("Invalid value for -camera-front <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>'%s, "
+                   "or 'none'\n",
+                   opts->camera_front,
+                   supportsVideoPlayback ? ", 'videoplayback'" : "");
+            return false;
+        }
+        str_reset(&hw->hw_camera_front, opts->camera_front);
+    }
+
     return true;
 }
 

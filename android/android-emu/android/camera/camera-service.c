@@ -328,8 +328,9 @@ static void _virtualscenecamera_setup(CameraServiceDesc* csd) {
 /* Initialize video playback camera record in camera service descriptor.
  * Param:
  *  csd - Camera service descriptor to initialize a record in.
+ *  dir - Direction ('back', or 'front') that emulated camera is facing.
  */
-static void _videoplaybackcamera_setup(CameraServiceDesc* csd) {
+static void _videoplaybackcamera_setup(CameraServiceDesc* csd, const char* dir) {
     /* Array containing emulated camera frame dimensions
      * expected by framework. */
     static const CameraFrameDim kEmulateDims[] = {
@@ -359,7 +360,7 @@ static void _videoplaybackcamera_setup(CameraServiceDesc* csd) {
 
         csd->camera_info[csd->camera_count].pixel_format =
                 camera_videoplayback_preferred_format();
-        csd->camera_info[csd->camera_count].direction = ASTRDUP("back");
+        csd->camera_info[csd->camera_count].direction = ASTRDUP(dir);
         csd->camera_info[csd->camera_count].in_use = 0;
     }
 
@@ -421,8 +422,12 @@ _camera_service_init(CameraServiceDesc* csd)
         _virtualscenecamera_setup(csd);
     }
 
-    if (androidHwConfig_hasVideoPlaybackCamera(android_hw)) {
-        _videoplaybackcamera_setup(csd);
+    if (androidHwConfig_hasVideoPlaybackBackCamera(android_hw)) {
+        _videoplaybackcamera_setup(csd, "back");
+    }
+
+    if (androidHwConfig_hasVideoPlaybackFrontCamera(android_hw)) {
+        _videoplaybackcamera_setup(csd, "front");
     }
 
     /* Lets see if HW config uses emulated cameras. */
