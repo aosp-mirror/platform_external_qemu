@@ -420,3 +420,19 @@ html, body {
 #startAddress #routeCreatorOverlay {
     height: auto;
 }
+#locationInfoOverlay {
+    display: none;
+    position: fixed;
+    width: auto;
+    justify-content: center;
+    flex-direction: column;
+    bottom: 0;
+    z-index: 2;
+    background-color: #fff;
+    padding: 6px;
+    margin-left: 6px;
+    margin-bottom: 6px;
+    -moz-box-shadow: 0 0 3px #ccc;
+    -webkit-box-shadow: 0 0 3px #ccc;
+    box-shadow: 0 0 3px #ccc;
+}

@@ -18,6 +18,9 @@ var gTravelModeString = "DRIVING";
 var gGeocoder;
 var gAutocompleteService;
 var gLastFocusedAddrBox;
+var gMapClickedListener;
+var gSearchContainer;
+var kMaxSearchResults = 5;
 
 class WaypointInfo {
     constructor() {
@@ -84,6 +87,9 @@ function showStartInfoOverlay(address, latLng, elevation) {
 
 function showRouteCreatorOverlay(isSavedRoute) {
     document.getElementById("routeCreatorOverlay").style.display = "flex";
+    if (isSavedRoute) {
+        setTransportMode(gTravelModeString);
+    }
 }
 
 function inRouteCreatorMode() {
@@ -291,14 +297,79 @@ function onReverseButtonClicked() {
     calcRoute();
 }
 
+function showRoutePlaybackOverlay(visible) {
+    if (visible) {
+        // in route playback mode
+        hideAllOverlays();
+        google.maps.event.removeListener(gMapClickedListener);
+        gMapClickedListener = null;
+        gMap.setOptions({zoomControl: false});
+        document.getElementById('locationInfoOverlay').style.display = 'flex';
+        gSearchContainer = gMap.controls[google.maps.ControlPosition.TOP_CENTER].pop();
+    } else {
+        showRouteCreatorOverlay(true);
+        gMap.setOptions({zoomControl: true});
+        document.getElementById('locationInfoOverlay').style.display = 'none';
+        gMapClickedListener = google.maps.event.addListener(gMap, 'click', mapClickedEvent);
+        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(gSearchContainer);
+    }
+}
+
+function mapClickedEvent(event) {
+    if (inRouteCreatorMode()) {
+        if (setWaypointForEmptyAddressBox(event.latLng)) {
+            calcRoute();
+        }
+    } else {
+        showDestinationPoint(event.latLng);
+    }
+}
+
+function showDestinationPoint(latLng) {
+    showSearchSpinner(true);
+    gEndLatLng = latLng;
+
+    // Clear current pin
+    gEndWaypoint.invalidate();
+
+    gEndWaypoint.setLatLng(latLng);
+    gEndWaypoint.setMarker(new google.maps.Marker({
+        map: gMap,
+        position: latLng
+    }));
+    // Remove the old path
+    clearDirections();
+
+    // Ensure that the starting point is visible
+    if (!gMap.getBounds().contains(latLng)) {
+        gMap.setCenter(latLng);
+    }
+    // Give the Emulator an empty route, so it knows we've
+    // got something new under way.
+    channel.objects.emulocationserver.sendFullRouteToEmu(0, 0.0, null, null);
+
+    gGeocoder.geocode({ 'location': latLng }, function(results, status) {
+        var address = "";
+        var elevation = 0.0;
+        if (status === 'OK' && results[0]) {
+          address = results[0].formatted_address;
+          elevation = results[0].elevation;
+        }
+        gEndWaypoint.setAddress(address);
+        showStartInfoOverlay(address, latLng, elevation);
+        document.getElementById('pac-input').value = address;
+        showSearchSpinner(false);
+    });
+}
+
 // Callback function for Maps API
 function initMap() {
-    var infoWindow = new google.maps.InfoWindow;
     // Create a map object and specify the DOM element for display.
     gMap = new google.maps.Map(document.getElementById('map'), {
         center: lastLatLng,
         zoom: 10,
         zoomControl: true,
+        controlSize: 18,
         disableDefaultUI: true
     });
 
@@ -315,52 +386,7 @@ function initMap() {
 
     // Register a listener that sets a new marker wherever user clicks
     // on the map.
-    google.maps.event.addListener(gMap, 'click', function(event) {
-        if (inRouteCreatorMode()) {
-            if (setWaypointForEmptyAddressBox(event.latLng)) {
-                calcRoute();
-            }
-        } else {
-            showDestinationPoint(event.latLng);
-        }
-    });
-
-    function showDestinationPoint(latLng) {
-        showSearchSpinner(true);
-        gEndLatLng = latLng;
-
-        // Clear current pin
-        gEndWaypoint.invalidate();
-
-        gEndWaypoint.setLatLng(latLng);
-        gEndWaypoint.setMarker(new google.maps.Marker({
-            map: gMap,
-            position: latLng
-        }));
-        // Remove the old path
-        clearDirections();
-
-        // Ensure that the starting point is visible
-        if (!gMap.getBounds().contains(latLng)) {
-            gMap.setCenter(latLng);
-        }
-        // Give the Emulator an empty route, so it knows we've
-        // got something new under way.
-        channel.objects.emulocationserver.sendFullRouteToEmu(0, 0.0, null, null);
-
-        gGeocoder.geocode({ 'location': latLng }, function(results, status) {
-            var address = "";
-            var elevation = 0.0;
-            if (status === 'OK' && results[0]) {
-              address = results[0].formatted_address;
-              elevation = results[0].elevation;
-            }
-            gEndWaypoint.setAddress(address);
-            showStartInfoOverlay(address, latLng, elevation);
-            document.getElementById('pac-input').value = address;
-            showSearchSpinner(false);
-        });
-    }
+    gMapClickedListener = google.maps.event.addListener(gMap, 'click', mapClickedEvent);
 
     setDeviceLocation = function(lat, lng) {
         // Called from Qt code to show the blue marker to display the emulator location on the map.
@@ -385,6 +411,7 @@ function initMap() {
         };
         gBlueMarker.setIcon(image);
         gMap.setCenter(latLng);
+        document.getElementById('locationInfoOverlay').innerHTML = lat.toString() + ", " + lng.toString();
     }
 
     // Receive the selected route from the host
@@ -484,11 +511,13 @@ function initMap() {
             return;
         }
 
-        predictions.forEach(function(prediction) {
-            addSearchResultItem(prediction.structured_formatting.main_text,
-                                prediction.structured_formatting.secondary_text,
-                                prediction.place_id);
-        });
+        clearSearchResults();
+        var numResults = predictions.length > 5 ? kMaxSearchResults : predictions.length;
+        for (var i = 0; i < numResults; ++i) {
+            addSearchResultItem(predictions[i].structured_formatting.main_text,
+                                predictions[i].structured_formatting.secondary_text,
+                                predictions[i].place_id);
+        }
     };
 
     document.getElementById('startAddress').addEventListener('input', function() {

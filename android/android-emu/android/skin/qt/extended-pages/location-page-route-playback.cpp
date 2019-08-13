@@ -21,8 +21,10 @@ void LocationPage::on_loc_playRouteButton_clicked() {
     if (mNowPlaying) {
         // STOP
         locationPlaybackStop_v2();
+        emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
         // START
+        emit mMapBridge->showRoutePlaybackOverlay(true);
         mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
         if (parsePointsFromJson()) {
             locationPlaybackStart_v2();

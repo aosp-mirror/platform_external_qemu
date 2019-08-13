@@ -332,7 +332,7 @@ signals:
     void showLocation(QString lat, QString lng, QString addr);
     void showRouteOnMap(const QString& routeJson);
     void resetPointsMap();
-
+    void showRoutePlaybackOverlay(bool visible);
 
 private:
     LocationPage* const mLocationPage;

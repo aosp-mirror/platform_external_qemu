@@ -39,6 +39,7 @@ function initMap() {
         center: lastLatLng,
         zoom: 10,
         zoomControl: true,
+        controlSize: 18,
         disableDefaultUI: true
     });
     gGeocoder = new google.maps.Geocoder;

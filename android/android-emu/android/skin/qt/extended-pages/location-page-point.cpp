@@ -483,6 +483,10 @@ void LocationPage::setUpWebEngine() {
                         "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson) {"
                             "if (setRouteOnMap) setRouteOnMap(routeJson);"
                         "});");
+            appendString.append(
+                        "channel.objects.emulocationserver.showRoutePlaybackOverlay.connect(function(visible) {"
+                            "if (showRoutePlaybackOverlay) showRoutePlaybackOverlay(visible);"
+                        "});");
         }
         appendString.append(
                     "});"
