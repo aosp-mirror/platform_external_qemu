@@ -135,6 +135,8 @@ set(crypto_sources
     ${BORING_SSL_ROOT}/src/crypto/evp/p_ed25519_asn1.c
     ${BORING_SSL_ROOT}/src/crypto/evp/p_rsa.c
     ${BORING_SSL_ROOT}/src/crypto/evp/p_rsa_asn1.c
+    ${BORING_SSL_ROOT}/src/crypto/evp/p_x25519.c
+    ${BORING_SSL_ROOT}/src/crypto/evp/p_x25519_asn1.c
     ${BORING_SSL_ROOT}/src/crypto/evp/pbkdf.c
     ${BORING_SSL_ROOT}/src/crypto/evp/print.c
     ${BORING_SSL_ROOT}/src/crypto/evp/scrypt.c
@@ -175,6 +177,7 @@ set(crypto_sources
     ${BORING_SSL_ROOT}/src/crypto/refcount_lock.c
     ${BORING_SSL_ROOT}/src/crypto/rsa_extra/rsa_asn1.c
     ${BORING_SSL_ROOT}/src/crypto/rsa_extra/rsa_print.c
+    ${BORING_SSL_ROOT}/src/crypto/siphash/siphash.c
     ${BORING_SSL_ROOT}/src/crypto/stack/stack.c
     ${BORING_SSL_ROOT}/src/crypto/thread.c
     ${BORING_SSL_ROOT}/src/crypto/thread_none.c
@@ -262,7 +265,12 @@ set(crypto_sources
     ${BORING_SSL_ROOT}/src/crypto/x509v3/v3_skey.c
     ${BORING_SSL_ROOT}/src/crypto/x509v3/v3_sxnet.c
     ${BORING_SSL_ROOT}/src/crypto/x509v3/v3_utl.c
-    ${BORING_SSL_ROOT}/src/third_party/fiat/curve25519.c)
+    ${BORING_SSL_ROOT}/src/third_party/fiat/curve25519.c
+    ${BORING_SSL_ROOT}/src/third_party/sike/fpx.c
+    ${BORING_SSL_ROOT}/src/third_party/sike/isogeny.c
+    ${BORING_SSL_ROOT}/src/third_party/sike/curve_params.c
+    ${BORING_SSL_ROOT}/src/third_party/sike/sike.c
+    ${BORING_SSL_ROOT}/src/third_party/sike/asm/fp_generic.c)
 
 set(tool_sources
     ${BORING_SSL_ROOT}/src/tool/args.cc
@@ -302,6 +310,7 @@ set(crypto_sources_linux-x86_64
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/x86_64-mont.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/fipsmodule/x86_64-mont5.S
     ${BORING_SSL_ROOT}/linux-x86_64/crypto/test/trampoline-x86_64.S
+    ${BORING_SSL_ROOT}/linux-x86_64/crypto/third_party/sike/asm/fp-x86_64.S
     ${BORING_SSL_ROOT}/src/crypto/hrss/asm/poly_rq_mul.S)
 
 set(crypto_sources_darwin-x86_64
@@ -324,7 +333,8 @@ set(crypto_sources_darwin-x86_64
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/vpaes-x86_64.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/x86_64-mont.S
     ${BORING_SSL_ROOT}/mac-x86_64/crypto/fipsmodule/x86_64-mont5.S
-    ${BORING_SSL_ROOT}/mac-x86_64/crypto/test/trampoline-x86_64.S)
+    ${BORING_SSL_ROOT}/mac-x86_64/crypto/test/trampoline-x86_64.S
+    ${BORING_SSL_ROOT}/mac-x86_64/crypto/third_party/sike/asm/fp-x86_64.S)
 
 set(crypto_sources_windows_msvc-x86_64
     ${BORING_SSL_ROOT}/win-x86_64/crypto/chacha/chacha-x86_64.asm
@@ -346,7 +356,8 @@ set(crypto_sources_windows_msvc-x86_64
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/vpaes-x86_64.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/x86_64-mont.asm
     ${BORING_SSL_ROOT}/win-x86_64/crypto/fipsmodule/x86_64-mont5.asm
-    ${BORING_SSL_ROOT}/win-x86_64/crypto/test/trampoline-x86_64.asm)
+    ${BORING_SSL_ROOT}/win-x86_64/crypto/test/trampoline-x86_64.asm
+    ${BORING_SSL_ROOT}/win-x86_64/crypto/third_party/sike/asm/fp-x86_64.asm)
 
 set(ssl_src ${ssl_sources})
 android_add_library(ssl)
@@ -439,6 +450,7 @@ set(boringssl_crypto_unittests_src
     ${BORING_SSL_ROOT}/src/crypto/refcount_test.cc
     ${BORING_SSL_ROOT}/src/crypto/rsa_extra/rsa_test.cc
     ${BORING_SSL_ROOT}/src/crypto/self_test.cc
+    ${BORING_SSL_ROOT}/src/crypto/siphash/siphash_test.cc
     ${BORING_SSL_ROOT}/src/crypto/stack/stack_test.cc
     ${BORING_SSL_ROOT}/src/crypto/test/abi_test.cc
     ${BORING_SSL_ROOT}/src/crypto/test/file_test_gtest.cc
@@ -447,7 +459,8 @@ set(boringssl_crypto_unittests_src
     ${BORING_SSL_ROOT}/src/crypto/x509/x509_test.cc
     ${BORING_SSL_ROOT}/src/crypto/x509/x509_time_test.cc
     ${BORING_SSL_ROOT}/src/crypto/x509v3/tab_test.cc
-    ${BORING_SSL_ROOT}/src/crypto/x509v3/v3name_test.cc)
+    ${BORING_SSL_ROOT}/src/crypto/x509v3/v3name_test.cc
+    ${BORING_SSL_ROOT}/src/third_party/sike/sike_test.cc)
 
 android_add_test(boringssl_crypto_unittests)
 target_link_libraries(boringssl_crypto_unittests PRIVATE gmock_main crypto boringssl_test_support)
