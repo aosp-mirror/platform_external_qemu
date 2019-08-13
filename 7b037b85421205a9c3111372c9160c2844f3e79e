@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4b1c76e8_17b912c9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-13T20:26:02Z",
+      "side": 1,
+      "message": "The real code is not in yet, that will make it different. In addition, since we will leave v1 code here mainly for backward compatibility purpose, using a new method is better, from now on, we can change the new method.",
+      "parentUuid": "81bb250d_091021e6",
+      "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b8ebc879_a2aa51d0",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "e1558bf8_4197f31b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-13T20:26:02Z",
+      "side": 1,
+      "message": "I thought we don\u0027t want to declare to support v1 and v2 at the same time. Once we switch to v2, we will still maintain backward compatibility, but we don\u0027t say that we still support v1. Correct me if I am wrong.\n\nIf we tell system image we support both v1 and v2, it would be confusing, right?",
+      "parentUuid": "b8ebc879_a2aa51d0",
+      "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "646f209f_ff3f07d7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2019-08-13T19:56:21Z",
       "side": 1,
       "message": "don\u0027t remove v1 for backward compatibility",
+      "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d63aaca_1de205d1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-13T20:26:02Z",
+      "side": 1,
+      "message": "same as my previous reply.",
+      "parentUuid": "646f209f_ff3f07d7",
       "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
