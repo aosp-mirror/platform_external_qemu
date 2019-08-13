@@ -393,6 +393,7 @@ set(boringssl_ssl_unittests_src
     ${BORING_SSL_ROOT}/src/crypto/test/abi_test.cc
     ${BORING_SSL_ROOT}/src/crypto/test/gtest_main.cc
     ${BORING_SSL_ROOT}/src/ssl/span_test.cc
+    ${BORING_SSL_ROOT}/src/ssl/ssl_c_test.c
     ${BORING_SSL_ROOT}/src/ssl/ssl_test.cc)
 
 android_add_test(boringssl_ssl_unittests)
