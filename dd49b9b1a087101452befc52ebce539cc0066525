@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c7b78274_aaa9f585",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T18:22:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd36bcca_975e8adf",
+      "range": {
+        "startLine": 174,
+        "startChar": 18,
+        "endLine": 174,
+        "endChar": 19
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f86c1f8b_44efa4f5",
         "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05424ef3_1b9b6e5c",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T18:22:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f86c1f8b_44efa4f5",
+      "range": {
+        "startLine": 194,
+        "startChar": 76,
+        "endLine": 194,
+        "endChar": 92
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "705e8d6a_cb04f445",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T18:22:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c48a1ae5_b49a36a3",
+      "range": {
+        "startLine": 197,
+        "startChar": 44,
+        "endLine": 197,
+        "endChar": 48
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36cd1631_4ccc0674",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1cbc3ba2_f2a8dc9b",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T18:22:29Z",
+      "side": 1,
+      "message": "Good point! However, the field in offworld.proto is a float that represents timestamp in seconds; the clocks used in the video player also store time as double, so I kept made it consistent with these internal timestamp representations in the video player.",
+      "parentUuid": "36cd1631_4ccc0674",
+      "range": {
+        "startLine": 190,
+        "startChar": 25,
+        "endLine": 190,
+        "endChar": 41
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "27f22a2b_88c95270",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T18:22:29Z",
+      "side": 1,
+      "message": "Discussed offline - used enum for all states instead of boolean variables.",
+      "parentUuid": "f1792a7d_41abefd5",
+      "range": {
+        "startLine": 267,
+        "startChar": 0,
+        "endLine": 270,
+        "endChar": 46
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e87caad8_093630d5",
         "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
         "patchSetId": 1
@@ -137,6 +257,30 @@
       "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cad31de5_864f8ad1",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1270,
+      "author": {
+        "id": 1508769
+      },
+      "writtenOn": "2019-08-13T18:22:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e87caad8_093630d5",
+      "range": {
+        "startLine": 1270,
+        "startChar": 6,
+        "endLine": 1270,
+        "endChar": 8
+      },
+      "revId": "dd49b9b1a087101452befc52ebce539cc0066525",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
