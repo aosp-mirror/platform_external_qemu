@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca142d54_4a52f1bb",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-13T20:38:11Z",
+      "side": 1,
+      "message": "Please add some comments on these states.",
+      "range": {
+        "startLine": 262,
+        "startChar": 7,
+        "endLine": 267,
+        "endChar": 6
+      },
+      "revId": "81c382b900171aa410ec204f66f2fa597bca5807",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4822ef0_a7695a5d",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-08-13T20:38:11Z",
+      "side": 1,
+      "message": "what does this lock guard?",
+      "range": {
+        "startLine": 1423,
+        "startChar": 7,
+        "endLine": 1423,
+        "endChar": 35
+      },
+      "revId": "81c382b900171aa410ec204f66f2fa597bca5807",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
