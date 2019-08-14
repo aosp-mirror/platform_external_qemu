@@ -214,6 +214,28 @@ static bool has_modifier_key(int keycode, int mod)
     return false;
 }
 
+// left-ctrl and right-ctrl
+static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
+    if (ev->u.text.mod & kKeyModRShift) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTSHIFT, down);
+    }
+    if (ev->u.text.mod & kKeyModLShift) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, down);
+    }
+    if (ev->u.text.mod & kKeyModRAlt) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTALT, down);
+    }
+    if (ev->u.text.mod & kKeyModLAlt) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, down);
+    }
+    if (ev->u.text.mod & kKeyModNumLock) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_NUMLOCK, down);
+    }
+    if (ev->u.text.mod & kKeyModCapsLock) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_CAPSLOCK, down);
+    }
+}
+
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
@@ -224,7 +246,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              * key events based on text. Since we've already send shift
              * key events to guest in cros case, we have to make sure
              * it's in released status. Otherwise shift key will
-             * interfer capslock. Here, we tell sync_modifier_key
+             * interfere capslock. Here, we tell sync_modifier_key
              * there is a key down event without any modifier key.
              * sync_modifier_key will generate one shift release event
              * if the old status for shift is in pressed status. The
@@ -232,19 +254,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              */
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
-        int doShiftL = ev->u.text.mod & kKeyModLShift;
-        int doAltL = ev->u.text.mod & kKeyModLAlt;
-        int doCltrL = ev->u.text.mod & kKeyModLCtrl;
-
-        if (doShiftL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
-        }
-        if (doAltL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, 1);
-        }
-        if (doCltrL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 1);
-        }
+        process_modifier_key(kb, ev, 1);
 
         D("event type: kTextInput key code=%d mod=0x%x str=%s",
           ev->u.text.keycode, ev->u.text.mod,
@@ -265,16 +275,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
                               LINUX_KEY_LEFTSHIFT, 0, 1);
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
-
-        if (doShiftL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 0);
-        }
-        if (doAltL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, 0);
-        }
-        if (doCltrL) {
-            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 0);
-        }
+        process_modifier_key(kb, ev, 0);
 
         skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
@@ -308,6 +309,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         if (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
             code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
             code == kKeyCodeSym) {
+            skin_keyboard_add_key_event(kb, code, down);
+            skin_keyboard_flush(kb);
             return;
         }
 
