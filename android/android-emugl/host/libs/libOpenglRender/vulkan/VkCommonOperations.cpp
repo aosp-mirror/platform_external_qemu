@@ -1174,10 +1174,12 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
                                 &internalformat)) {
+        printf("isColorBufferVulkanCompatible cb not found\n");
         return false;
     }
 
     VkFormat vkFormat = glFormat2VkFormat(internalformat);
+    printf("isColorBufferVulkanCompatible vkFormat %d\n", vkFormat);
 
     for (const auto& supportInfo : sVkEmulation->imageSupportInfo) {
         if (supportInfo.format == vkFormat && supportInfo.supported) {
@@ -1198,7 +1200,10 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
 }
 
 bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize) {
-    if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
+    if (!isColorBufferVulkanCompatible(colorBufferHandle)) {
+        printf("setupVkColorBuffer not compatible 0x%x\n", colorBufferHandle);
+        return false;
+    }
 
     auto vk = sVkEmulation->dvk;
 

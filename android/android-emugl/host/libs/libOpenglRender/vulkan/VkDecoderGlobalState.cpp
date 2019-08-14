@@ -1030,7 +1030,7 @@ public:
             const VkImageCreateInfo* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkImage* pImage) {
-
+        printf("vkCreateImage format %d\n", pCreateInfo->format);
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
@@ -1098,12 +1098,14 @@ public:
                 prepareAndroidNativeBufferImage(
                         vk, device, pCreateInfo, nativeBufferANDROID, pAllocator,
                         memProps, &anbInfo);
+            printf("prepareAndroidNativeBufferImage result %d\n", createRes);
             if (createRes == VK_SUCCESS) {
                 *pImage = anbInfo.image;
             }
         } else {
             createRes =
                 vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+            printf("vkCreateImage result %d\n", createRes);
         }
 
         if (createRes != VK_SUCCESS) return createRes;
@@ -1501,11 +1503,21 @@ public:
 
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
+        VkDescriptorSetLayoutCreateInfo setLayout = *pCreateInfo;
+        VkDescriptorSetLayoutBinding bindings;
+        if (setLayout.pBindings) {
+            bindings = *setLayout.pBindings;
+            bindings.pImmutableSamplers = nullptr;
+            setLayout.pBindings = &bindings;
+        }
 
         auto res =
-            vk->vkCreateDescriptorSetLayout(device, pCreateInfo, pAllocator, pSetLayout);
+            vk->vkCreateDescriptorSetLayout(device, &setLayout, pAllocator, pSetLayout);
 
         if (res == VK_SUCCESS) {
+            if (pCreateInfo->pBindings->pImmutableSamplers) {
+                printf("vkCreateDescriptorSetLayout pImmutableSamplers %p\n", pCreateInfo->pBindings->pImmutableSamplers);
+            }
             AutoLock lock(mLock);
             auto& info = mDescriptorSetLayoutInfo[*pSetLayout];
             *pSetLayout = new_boxed_non_dispatchable_VkDescriptorSetLayout(*pSetLayout);

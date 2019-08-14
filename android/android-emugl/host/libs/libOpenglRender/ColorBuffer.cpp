@@ -419,7 +419,7 @@ void ColorBuffer::subUpdate(int x,
                             int height,
                             GLenum p_format,
                             GLenum p_type,
-                            void* pixels) {
+                            void* pixels) {    
     const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
     RecursiveScopedHelperContext context(m_helper);
 
@@ -438,6 +438,7 @@ void ColorBuffer::subUpdate(int x,
 
     if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
         m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+        printf("sub-update color buffer YUV\n");
         assert(m_yuv_converter.get());
 
         // This FBO will convert the YUV frame to RGB

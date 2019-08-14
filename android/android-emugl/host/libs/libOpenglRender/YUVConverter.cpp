@@ -108,6 +108,8 @@ static void createYUVGLTex(GLenum texture_unit,
     s_gles2.glBindTexture(GL_TEXTURE_2D, *texName_out);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     if (uvInterleaved) {
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA,
                              width, height, 0,
@@ -199,7 +201,8 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = 0.96*(texture2D(usampler, cutoffCoordsC).r - 0.5);
+    //yuv[1] = 0.96*(texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = (texture2D(usampler, cutoffCoordsC).r - 0.5);
     yuv[2] = texture2D(vsampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -292,7 +295,8 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = 0.96 * (texture2D(vusampler, cutoffCoordsC).a - 0.5);
+    //yuv[1] = 0.96 * (texture2D(vusampler, cutoffCoordsC).a - 0.5);
+    yuv[1] = (texture2D(vusampler, cutoffCoordsC).a - 0.5);
     yuv[2] = texture2D(vusampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -355,6 +359,12 @@ static void createYUVGLFullscreenQuad(GLuint* vbuf_out,
         -1, +1, +0, +0, +1,
         -1, -1, +0, +0, +0,
     };
+    /*static const float kVertices[] = {
+        +1, -1, +0, +1, +1,
+        +1, +1, +0, +1, +0,
+        -1, +1, +0, +0, +0,
+        -1, -1, +0, +0, +1,
+    };*/
 
     static const GLubyte kIndices[] = { 0, 1, 2, 2, 3, 0 };
 
@@ -493,6 +503,62 @@ void YUVConverter::restoreGLState() {
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
 }
 
+static void write_bmp(int w, int h, int c, const unsigned char* data,
+        const char* filename) {
+    int filesize = 54 + 3 * w * h;  //w is your image width, h is image height, both int
+
+    unsigned char* img = (unsigned char *)malloc(3*w*h);
+
+    for(int i=0; i<w; i++)
+    {
+        for(int j=0; j<h; j++)
+        {
+            unsigned r, g, b;
+            int x=i;
+            int y=(h-1)-j;
+            //int y=j;
+            if (c == 3 || c == 4) {
+                r = data[(i + j * w) * c];
+                g = data[(i + j * w) * c + 1];
+                b = data[(i + j * w) * c + 2];
+            } else {
+                assert(c == 1);
+                r = g = b = data[i + j * w];
+            }
+            img[(x+y*w)*3+2] = r;
+            img[(x+y*w)*3+1] = g;
+            img[(x+y*w)*3+0] = b;
+        }
+    }
+
+    unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
+    unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
+    unsigned char bmppad[3] = {0,0,0};
+
+    bmpfileheader[ 2] = (unsigned char)(filesize    );
+    bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
+    bmpfileheader[ 4] = (unsigned char)(filesize>>16);
+    bmpfileheader[ 5] = (unsigned char)(filesize>>24);
+
+    bmpinfoheader[ 4] = (unsigned char)(       w    );
+    bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
+    bmpinfoheader[ 6] = (unsigned char)(       w>>16);
+    bmpinfoheader[ 7] = (unsigned char)(       w>>24);
+    bmpinfoheader[ 8] = (unsigned char)(       h    );
+    bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
+    bmpinfoheader[10] = (unsigned char)(       h>>16);
+    bmpinfoheader[11] = (unsigned char)(       h>>24);
+
+    FILE* f = fopen(filename,"wb");
+    fwrite(bmpfileheader,1,14,f);
+    fwrite(bmpinfoheader,1,40,f);
+    for(int i=0; i<h; i++)
+    {
+        fwrite(img+(w*(h-i-1)*3),3,w,f);
+        fwrite(bmppad,1,(4-(w*3)%4)%4,f);
+    }
+}
+
 // drawConvert: per-frame updates.
 // Update YUV textures, then draw the fullscreen
 // quad set up above, which results in a framebuffer
@@ -518,6 +584,7 @@ void YUVConverter::drawConvert(int x, int y,
     if (emugl::emugl_feature_is_enabled(
         android::featurecontrol::YUV420888toNV21)) {
         if (mFormat == FRAMEWORK_FORMAT_YV12) {
+            printf("draw yv12 converter\n");
             subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
                               x, y, cwidth, cheight,
                               pixels + uoff, false);
@@ -539,7 +606,12 @@ void YUVConverter::drawConvert(int x, int y,
                                 mYWidthCutoff,
                                 mCWidthCutoff,
                                 false);
+            printf("tex size %d %d %d %d\n", x, y, width, height);
+            std::vector<unsigned char> buffer(width*height*4);
+            s_gles2.glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
+            write_bmp(width, height, 4, buffer.data(), "tmp.bmp");
         } else if (mFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+            printf("draw yuv420 converter\n");
             subUpdateYUVGLTex(GL_TEXTURE1, mVUtex,
                               x, y, cwidth, cheight,
                               pixels + voff, true);
@@ -562,6 +634,7 @@ void YUVConverter::drawConvert(int x, int y,
             FATAL("Input not a YUV format!");
         }
     } else {
+        printf("draw ??? converter\n");
         subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
                           x, y, cwidth, cheight,
                           pixels + uoff, false);
