@@ -21,6 +21,46 @@
 
 #import <AppKit/AppKit.h>
 
+static void handleNativeKeyEvent(int keycode,
+                                 int modifiers,
+                                 SkinEventType eventType) {
+    // Do no send modifier by itself.
+    if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
+        skin_keycode_is_modifier(keycode)) {
+        return;
+    }
+
+    SkinEvent* skin_event_down =
+            EmulatorQtWindow::getInstance()->createSkinEvent(kEventTextInput);
+    SkinEventTextInputData& textInputData = skin_event_down->u.text;
+    textInputData.down = true;
+    textInputData.keycode = keycode;
+    textInputData.mod = 0;
+    if (modifiers & NSEventModifierFlagShift) {
+        textInputData.mod |= kKeyModLShift;
+    }
+    // Map to right-alt instead of left-alt because Mac OS doesn't
+    // differentiate between left or right alt but Linux does.
+    // In Android, many key character map use right-alt as the alt-gr key.
+    if (modifiers & NSEventModifierFlagOption) {
+        textInputData.mod |= kKeyModRAlt;
+    }
+
+    if (modifiers & NSEventModifierFlagCapsLock) {
+        textInputData.mod |= kKeyModCapsLock;
+    }
+    // TODO (wdu@) use a guest feature flag to enable this hack. Only applicable
+    // to system images where caps locks is not accepted. In that case,
+    // substitute caps lock with shift.
+    if ((modifiers & NSEventModifierFlagCapsLock) &&
+        skin_keycode_is_alpha(keycode) &&
+        !(modifiers & NSEventModifierFlagOption)) {
+        textInputData.mod |= kKeyModLShift;
+    }
+
+    EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event_down);
+}
+
 bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
                                              void* message,
                                              long*) {
@@ -33,8 +73,10 @@ bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
                         skin_keycode_native_is_keypad(keycode)) {
                     keycode = skin_keycode_native_map_keypad(keycode);
                 }
-                EmulatorQtWindow::getInstance()->handleNativeKeyEvent(
-                       keycode , [event modifierFlags], kEventKeyDown);
+                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                    handleNativeKeyEvent(keycode, [event modifierFlags],
+                                         kEventKeyDown);
+                }
             }
         }
     }
