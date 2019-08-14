@@ -92,9 +92,9 @@ bool skin_keycode_native_to_linux(int32_t* pVirtualKey, int32_t* pModifier) {
                                       // XF86ClearGrab
         { 64, LINUX_KEY_LEFTALT },   // Alt_L Meta_L Alt_L Meta_L
         { 65, LINUX_KEY_SPACE },     // space NoSymbol space space space space
-        //{ 66, LINUX_KEY_CAPSLOCK },  // Caps_Lock ISO_Next_Group Caps_Lock
+        { 66, LINUX_KEY_CAPSLOCK },  // Caps_Lock ISO_Next_Group Caps_Lock
                                     // ISO_Next_Group
-        //{ 77, LINUX_KEY_NUMLOCK },     // Num_Lock NoSymbol Num_Lock
+        { 77, LINUX_KEY_NUMLOCK },     // Num_Lock NoSymbol Num_Lock
         { 79, LINUX_KEY_KP7 },         // KP_Home KP_7 KP_Home KP_7
         { 80, LINUX_KEY_KP8 },         // KP_Up KP_8 KP_Up KP_8
         { 81, LINUX_KEY_KP9 },         // KP_Prior KP_9 KP_Prior KP_9

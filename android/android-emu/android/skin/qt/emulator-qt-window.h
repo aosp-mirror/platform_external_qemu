@@ -231,6 +231,7 @@ public:
                           bool skipSync = false);
     void panHorizontal(bool left);
     void panVertical(bool up);
+    SkinEvent* createSkinEvent(SkinEventType type);
     void queueSkinEvent(SkinEvent* event);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint& focus, const QPoint& viewportFocus);
@@ -242,9 +243,6 @@ public:
     void setOnTop(bool onTop);
     void setIgnoreWheelEvent(bool ignore);
     void simulateKeyPress(int keyCode, int modifiers);
-    void handleNativeKeyEvent(int keycode,
-                              int modifiers,
-                              SkinEventType eventType);
     void simulateScrollBarChanged(int x, int y);
     void setDisplayRegion(int xOffset, int yOffset, int width, int height);
     void setDisplayRegionAndUpdate(int xOffset, int yOffset, int width, int height);
@@ -398,7 +396,6 @@ private:
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
 
-    SkinEvent* createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
