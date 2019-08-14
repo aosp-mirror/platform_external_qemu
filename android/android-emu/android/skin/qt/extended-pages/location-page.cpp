@@ -154,12 +154,9 @@ LocationPage::LocationPage(QWidget *parent) :
         setUpWebEngine(); // Set up the Points and Routes web engines
 
         scanForPoints();
-        populatePointListWidget();
-
         scanForRoutes();
-        populateRouteListWidget();
+
         mUi->loc_playRouteButton->setEnabled(false);
-        mUi->loc_saveRoute->setEnabled(false);
 #endif
     } else { // !useLocationV2
         mUi->loc_latitudeInput->setMinValue(-90.0);
@@ -264,10 +261,6 @@ void LocationPage::updateTheme() {
     //  to include QComboBox items that have icons. I could find all
     //  QComboBox items that have icons, but I could not read their
     //  properties to get 'iconThemeName'.)
-    mUi->loc_travelMode->setItemIcon(0, getIconForCurrentTheme("car"));
-    mUi->loc_travelMode->setItemIcon(1, getIconForCurrentTheme("walk"));
-    mUi->loc_travelMode->setItemIcon(2, getIconForCurrentTheme("bike"));
-    mUi->loc_travelMode->setItemIcon(3, getIconForCurrentTheme("transit"));
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()

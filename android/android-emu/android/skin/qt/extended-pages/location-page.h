@@ -56,9 +56,13 @@ public:
         double  longitude;
         QString address;
 
+        PointListElement() = default;
         bool operator ==(const PointListElement& other) const {
             return this->protoFilePath == other.protoFilePath;
         }
+
+        PointListElement(PointListElement&& p) = default;
+        PointListElement& operator=(PointListElement&& p) = default;
     } PointListElement;
 
     typedef struct RouteListElement {
@@ -68,9 +72,14 @@ public:
         int     modeIndex;
         int     numPoints;
         int     duration; // Route duration at 1x (seconds)
+
+        RouteListElement() = default;
         bool operator ==(const RouteListElement& other) const {
             return this->protoFilePath == other.protoFilePath;
         }
+
+        RouteListElement(RouteListElement&& r) = default;
+        RouteListElement& operator=(RouteListElement&& r) = default;
     } RouteListElement;
 
     typedef struct {
@@ -101,15 +110,19 @@ public:
     // Handlers for point/route map callbacks
     void map_savePoint();
     void sendLocation(const QString& lat, const QString& lng, const QString& address);
-    void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
+    void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
 
 signals:
+    void signal_saveRoute();
+
     void locationUpdateRequired(double latitude, double longitude, double altitude,
                                 double velocity, double heading);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
 
 private slots:
+    void map_saveRoute();
+
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
@@ -151,12 +164,10 @@ private slots:
                                          QListWidgetItem* previous);
     void pointWidget_editButtonClicked(CCListItem* listItem);
 
-    void on_loc_travelMode_currentIndexChanged(int index);
     void on_loc_playRouteButton_clicked();
     void on_loc_routeList_currentItemChanged(QListWidgetItem* current,
                                          QListWidgetItem* previous);
     void routeWidget_editButtonClicked(CCListItem* listItem);
-    void on_loc_saveRoute_clicked();
 
 private:
     void finishGeoDataLoading(
@@ -175,7 +186,7 @@ private:
     int getLocationPlaybackSpeedFromSettings();
 
     void showPendingRouteDetails();
-    void showRouteDetails(const RouteListElement* theElement);
+    void showRouteDetails(const RouteListElement& theElement);
     std::string writePointProtobufByName(const QString& pointFormalName,
                                          const emulator_location::PointMetadata& protobuf);
     void writePointProtobufFullPath(const QString& protoFullPath,
@@ -231,25 +242,17 @@ private:
     QString mLastAddr = "";
     QString mMapsApiKey = "";
 
-    bool editPoint(PointListElement* pointElement);
-    bool deletePoint(const PointListElement* pointElement);
-    void populatePointListWidget();
+    bool editPoint(PointListElement& pointElement);
+    bool deletePoint(const PointListElement& pointElement);
     void scanForPoints();
 
-    bool editRoute(RouteListElement* routeElement);
-    bool deleteRoute(const RouteListElement* routeElement);
-    void populateRouteListWidget();
+    bool editRoute(RouteListElement& routeElement);
+    bool deleteRoute(const RouteListElement& routeElement);
     void scanForRoutes();
 
     std::unique_ptr<QWebSocketServer> mServer;
     std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
     std::unique_ptr<QWebChannel> mWebChannel;
-
-    QVector<PointListElement> mPointList;
-    QString mSelectedPointName;
-
-    QVector<RouteListElement> mRouteList;
-    QString                   mSelectedRouteName;
 
     std::unique_ptr<MapBridge> mMapBridge;
 };
@@ -257,56 +260,54 @@ private:
 class PointWidgetItem : public CCListItem {
     Q_OBJECT
 public:
-    explicit PointWidgetItem(LocationPage::PointListElement* boundPointElement,
-                             QListWidgetItem* listItem,
-                             QWidget* parent = nullptr) :
-        CCListItem(parent),
-        mPointElement(boundPointElement),
-        mListItem(listItem)
+    explicit PointWidgetItem(LocationPage::PointListElement&& boundPointElement,
+                             QListWidget* const listWidget) :
+        CCListItem(listWidget),
+        mListWidget(listWidget),
+        mPointElement(std::move(boundPointElement))
     {
+        mListItem = new QListWidgetItem(listWidget);
+        mListItem->setSizeHint(QSize(0, 50));
+        listWidget->addItem(mListItem);
+        listWidget->setItemWidget(mListItem, this);
         refresh();
     }
 
     // Call if the |pointElement|'s data changes to refresh the list item.
     void refresh() {
-        if (mPointElement != nullptr) {
-            setTitle(mPointElement->logicalName);
-            QString subtitle;
-            subtitle.sprintf("%.4f, %.4f",
-                             mPointElement->latitude,
-                             mPointElement->longitude);
-            setSubtitle(subtitle);
+        setTitle(mPointElement.logicalName);
+        QString subtitle;
+        subtitle.sprintf("%.4f, %.4f",
+                         mPointElement.latitude,
+                         mPointElement.longitude);
+        setSubtitle(subtitle);
+    }
+
+    void removeFromListWidget() {
+        auto* item = mListWidget->takeItem(mListWidget->row(mListItem));
+        if (item != nullptr) {
+            delete item;
+            mListItem = nullptr;
         }
     }
 
-    QListWidgetItem* const getListWidgetItem() const {
+    QListWidgetItem* const listWidgetItem() const {
         return mListItem;
     }
 
-    QListWidgetItem* takeListWidgetItem() {
-        auto ret = mListItem;
-        mListItem = nullptr;
-        return ret;
-    }
-
-    LocationPage::PointListElement* const pointElement() const {
+    LocationPage::PointListElement& pointElement() {
         return mPointElement;
-    }
-
-    LocationPage::PointListElement* takePointElement() {
-        auto ret = mPointElement;
-        mPointElement = nullptr;
-        return ret;
     }
 
     // Sort by the logical name
     bool operator < (const QListWidgetItem &other) const {
-        const LocationPage::PointListElement* otherElement = ((PointWidgetItem&)other).mPointElement;
-        return mPointElement->logicalName < otherElement->logicalName;
+        const LocationPage::PointListElement& otherElement = ((PointWidgetItem&)other).mPointElement;
+        return mPointElement.logicalName < otherElement.logicalName;
     }
 private:
-    LocationPage::PointListElement* mPointElement;
+    LocationPage::PointListElement mPointElement;
     QListWidgetItem* mListItem;
+    QListWidget* const mListWidget;
 };
 
 // Class to communicate between the html page and the LocationPage code.
@@ -319,18 +320,19 @@ public:
                        QObject* parent = nullptr) :
             mLocationPage(locationPage),
             QObject(parent) {}
+    // Javascript ==> Qt C++ code
     Q_INVOKABLE void map_savePoint();
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
-    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
+    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
+    Q_INVOKABLE void saveRoute();
 
 signals:
-    // Ways to send updates to the js code
+    // Qt C++ code ==> Javascript
     void locationChanged(QString lat, QString lng);
     void showLocation(QString lat, QString lng, QString addr);
     void showRouteOnMap(const QString& routeJson);
-    void travelModeChanged(int mode);
     void resetPointsMap();
-
+    void showRoutePlaybackOverlay(bool visible);
 
 private:
     LocationPage* const mLocationPage;
@@ -339,71 +341,86 @@ private:
 class RouteWidgetItem : public CCListItem {
     Q_OBJECT
 public:
-    explicit RouteWidgetItem(LocationPage::RouteListElement* boundRouteElement,
-                             QListWidgetItem* listItem,
-                             QWidget* parent = nullptr) :
-        CCListItem(parent),
-        mRouteElement(boundRouteElement),
-        mListItem(listItem)
+    explicit RouteWidgetItem(LocationPage::RouteListElement&& boundRouteElement,
+                             QListWidget* const listWidget) :
+        CCListItem(listWidget),
+        mListWidget(listWidget),
+        mRouteElement(std::move(boundRouteElement))
     {
+        mListItem = new QListWidgetItem(listWidget);
+        mListItem->setSizeHint(QSize(0, 50));
+        listWidget->addItem(mListItem);
+        listWidget->setItemWidget(mListItem, this);
         refresh();
     }
 
+    static int travelModeToInt(const QString& mode) {
+        // These strings come from https://developers.google.com/maps/documentation/javascript/directions#TravelModes
+        if (mode == "DRIVING") {
+            return 0;
+        }
+        if (mode == "WALKING") {
+            return 1;
+        }
+        if (mode == "BICYCLING") {
+            return 2;
+        }
+        if (mode == "TRANSIT") {
+            return 3;
+        }
+       
+        return -1;
+    }
     // Call if the |routeElement|'s data changes to refresh the list item.
     void refresh() {
-        if (mRouteElement != nullptr) {
-            setTitle(mRouteElement->logicalName);
-            setSubtitle(mRouteElement->description);
-            QString modeIconName;
-            switch (mRouteElement->modeIndex) {
-                case 0:
-                    modeIconName = "car";
-                    break;
-                case 1:
-                    modeIconName = "walk";
-                    break;
-                case 2:
-                    modeIconName = "bike";
-                    break;
-                case 3:
-                    modeIconName = "transit";
-                    break;
-            }
-            QIcon modeIcon = getIconForCurrentTheme(modeIconName);
-            QPixmap modeIconPix = modeIcon.pixmap(kIconSize, kIconSize);
-            setExtraLabelPixmap(modeIconPix);
+        setTitle(mRouteElement.logicalName);
+        setSubtitle(mRouteElement.description);
+        QString modeIconName;
+        switch (mRouteElement.modeIndex) {
+            case 0:
+                modeIconName = "car";
+                break;
+            case 1:
+                modeIconName = "walk";
+                break;
+            case 2:
+                modeIconName = "bike";
+                break;
+            case 3:
+                modeIconName = "transit";
+                break;
+        }
+        QIcon modeIcon = getIconForCurrentTheme(modeIconName);
+        QPixmap modeIconPix = modeIcon.pixmap(kIconSize, kIconSize);
+        setExtraLabelPixmap(modeIconPix);
+    }
+
+    void removeFromListWidget() {
+        auto* item = mListWidget->takeItem(mListWidget->row(mListItem));
+        if (item != nullptr) {
+            delete item;
+            mListItem = nullptr;
         }
     }
 
-    QListWidgetItem* const getListWidgetItem() const {
+    QListWidgetItem* const listWidgetItem() const {
         return mListItem;
     }
 
-    QListWidgetItem* takeListWidgetItem() {
-        auto ret = mListItem;
-        mListItem = nullptr;
-        return ret;
-    }
-
-    LocationPage::RouteListElement* const routeElement() const {
+    LocationPage::RouteListElement& routeElement() {
         return mRouteElement;
-    }
-
-    LocationPage::RouteListElement* takeRouteElement() {
-        auto ret = mRouteElement;
-        mRouteElement = nullptr;
-        return ret;
     }
 
     // Sort by the logical name
     bool operator < (const QListWidgetItem &other) const {
-        const LocationPage::RouteListElement* otherElement = ((RouteWidgetItem&)other).mRouteElement;
-        return mRouteElement->logicalName < otherElement->logicalName;
+        const LocationPage::RouteListElement& otherElement = ((RouteWidgetItem&)other).mRouteElement;
+        return mRouteElement.logicalName < otherElement.logicalName;
     }
 private:
     static constexpr int kIconSize = 20;
-    LocationPage::RouteListElement* mRouteElement;
+    LocationPage::RouteListElement mRouteElement;
     QListWidgetItem* mListItem;
+    QListWidget* const mListWidget;
 };
 
 class GeoDataLoaderThread : public QThread {

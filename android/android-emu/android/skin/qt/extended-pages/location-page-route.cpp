@@ -47,13 +47,12 @@ public:
     {
     }
 
-    RouteWidgetItem* addRoute(RouteListElement* p) {
-        QListWidgetItem* listItem = new QListWidgetItem(mListWidget);
-        RouteWidgetItem* routeWidgetItem = new RouteWidgetItem(p, listItem);
-        listItem->setSizeHint(QSize(0, 50));
-        mListWidget->addItem(listItem);
-        mListWidget->setItemWidget(listItem, routeWidgetItem);
-        return routeWidgetItem;
+    void addRoute(RouteListElement&& p, LocationPage* const locationPage) {
+        RouteWidgetItem* routeWidgetItem = new RouteWidgetItem(std::move(p), mListWidget);
+        locationPage->connect(routeWidgetItem,
+                SIGNAL(editButtonClickedSignal(CCListItem*)), locationPage,
+                SLOT(routeWidget_editButtonClicked(CCListItem*)));
+        mListWidget->setCurrentItem(routeWidgetItem->listWidgetItem());
     }
 
 private:
@@ -66,54 +65,8 @@ RouteWidgetItem* getItemWidget(QListWidget* list,
 }
 }  // namespace
 
-void LocationPage::on_loc_saveRoute_clicked() {
-    mUi->loc_saveRoute->setEnabled(false);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    // Create the protobuf describing this route
-    QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
-
-    emulator_location::RouteMetadata routeMetadata;
-    routeMetadata.set_logical_name(routeName.toStdString().c_str());
-    routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
-    routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
-    routeMetadata.set_number_of_points(mRouteNumPoints);
-    routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
-    std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
-    // Make this new item the selected item
-    mSelectedRouteName = QString::fromStdString(protoPath);
-
-    // Write the JSON to a file
-    writeRouteJsonFile(protoPath);
-
-    // Add the new route to the list
-    RouteListElement listElement;
-    listElement.protoFilePath = QString::fromStdString(protoPath);
-    listElement.logicalName   = QString::fromStdString(routeMetadata.logical_name());
-    listElement.description   = QString::fromStdString(routeMetadata.description());
-    listElement.modeIndex     = routeMetadata.mode_of_travel();
-    listElement.numPoints     = routeMetadata.number_of_points();
-    listElement.duration      = routeMetadata.duration();
-
-    mRouteList.append(listElement);
-
-    RouteItemBuilder builder(mUi->loc_routeList);
-    RouteWidgetItem* routeWidgetItem = builder.addRoute(&mRouteList.back());
-    connect(routeWidgetItem,
-            SIGNAL(editButtonClickedSignal(CCListItem*)), this,
-            SLOT(routeWidget_editButtonClicked(CCListItem*)));
-    mUi->loc_routeList->setCurrentItem(routeWidgetItem->getListWidgetItem());
-
-    QApplication::restoreOverrideCursor();
-}
-
-void LocationPage::on_loc_travelMode_currentIndexChanged(int index) {
-    emit mMapBridge->travelModeChanged(index);
-}
-
-// Populate mRouteList with the routes that are found on disk
+// Populate the saved routes list with the routes that are found on disk
 void LocationPage::scanForRoutes() {
-    mRouteList.clear();
-
     // Get the directory
     std::string locationsDirectoryName = android::base::PathUtils::
             join(::android::ConfigDirs::getUserDirectory().c_str(),
@@ -129,6 +82,8 @@ void LocationPage::scanForRoutes() {
     locationsDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList routeList(locationsDir.entryList());
 
+    mUi->loc_routeList->setSortingEnabled(false);
+    RouteItemBuilder builder(mUi->loc_routeList);
     // Look at all the directories and create an entry for each valid route
     for (const QString& routeName : routeList) {
         // Read the route protobuf
@@ -151,32 +106,14 @@ void LocationPage::scanForRoutes() {
         listElement.numPoints     = routeMetadata->number_of_points();
         listElement.duration      = routeMetadata->duration();
 
-        mRouteList.append(listElement);
+        builder.addRoute(std::move(listElement), this);
     }
-}
-
-// Populate the UI list of routes from mRouteList
-void LocationPage::populateRouteListWidget() {
-    mUi->loc_routeList->clear();
-    // Disable sorting while we're updating the table
-    mUi->loc_routeList->setSortingEnabled(false);
-
-    int nItems = mRouteList.size();
-
-    RouteItemBuilder builder(mUi->loc_routeList);
-    for (int idx = 0; idx < nItems; idx++) {
-        RouteWidgetItem* routeWidgetItem = builder.addRoute(&mRouteList[idx]);
-        connect(routeWidgetItem,
-                SIGNAL(editButtonClickedSignal(CCListItem*)), this,
-                SLOT(routeWidget_editButtonClicked(CCListItem*)));
-    }
-
     // All done updating. Enable sorting now.
     mUi->loc_routeList->setSortingEnabled(true);
     mUi->loc_routeList->setCurrentItem(nullptr);
 
     // If the list is empty, show an overlay saying that.
-    mUi->loc_noSavedRoutes_mask->setVisible(nItems <= 0);
+    mUi->loc_noSavedRoutes_mask->setVisible(mUi->loc_routeList->count() <= 0);
 }
 
 void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
@@ -190,14 +127,13 @@ void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
         // We don't need to send any updates to the map since we aren't editing any
         // of the routing points.
         routeWidgetItem->refresh();
+        // Redraw the table to show the new selection
+        showRouteDetails(routeWidgetItem->routeElement());
     } else if (theAction == deleteAction && deleteRoute(routeWidgetItem->routeElement())) {
         mUi->loc_routeList->setCurrentItem(nullptr);
-        auto item = routeWidgetItem->takeListWidgetItem();
-        mUi->loc_routeList->removeItemWidget(item);
-        delete item;
-        mRouteList.removeOne(*(routeWidgetItem->takeRouteElement()));
+        routeWidgetItem->removeFromListWidget();
         // If the list is empty, show an overlay saying that.
-        mUi->loc_noSavedRoutes_mask->setVisible(mRouteList.size() == 0);
+        mUi->loc_noSavedRoutes_mask->setVisible(mUi->loc_routeList->count() == 0);
     }
 }
 
@@ -209,49 +145,41 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
             item->setSelected(false);
         }
     }
-    if (current) {
+    if (!current) {
+        mUi->loc_routeInfo->clear();
+    } else {
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, current);
         if (item != nullptr) {
             item->setSelected(true);
-            auto routeElement = item->routeElement();
+            auto& routeElement = item->routeElement();
 
             mRouteJson = ""; // Forget any unsaved route we may have received
-
-            if (routeElement == nullptr || mSelectedRouteName == routeElement->protoFilePath) {
-                // No change in the selection
-                return;
-            }
-
-            mSelectedRouteName = routeElement->protoFilePath;
-            mRouteNumPoints = routeElement->numPoints;
 
             // Redraw the table to show the new selection
             showRouteDetails(routeElement);
 
             // Read the JSON route file and pass it to the javascript to display it
-            const QString& routeJson = readRouteJsonFile(routeElement->protoFilePath);
+            const QString& routeJson = readRouteJsonFile(routeElement.protoFilePath);
             if (routeJson.length() <= 0) {
                 mUi->loc_playRouteButton->setEnabled(false);
             } else {
                 emit mMapBridge->showRouteOnMap(routeJson.toStdString().c_str());
 
-                mRouteTravelMode = routeElement->modeIndex;
-                mUi->loc_travelMode->setCurrentIndex(mRouteTravelMode);
+                mRouteTravelMode = routeElement.modeIndex;
                 mUi->loc_playRouteButton->setEnabled(true);
             }
-            mUi->loc_saveRoute->setEnabled(false);
         }
     }
 }
 
-bool LocationPage::editRoute(RouteListElement* routeElement) {
+bool LocationPage::editRoute(RouteListElement& routeElement) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
     // Name
     dialogLayout->addWidget(new QLabel(tr("Name")));
     QLineEdit* nameEdit = new QLineEdit(this);
-    QString oldName = routeElement->logicalName;
+    QString oldName = routeElement.logicalName;
     nameEdit->setText(oldName);
     nameEdit->selectAll();
     dialogLayout->addWidget(nameEdit);
@@ -259,7 +187,7 @@ bool LocationPage::editRoute(RouteListElement* routeElement) {
     // Description
     dialogLayout->addWidget(new QLabel(tr("Description")));
     QPlainTextEdit* descriptionEdit = new QPlainTextEdit(this);
-    QString oldDescription = routeElement->description;
+    QString oldDescription = routeElement.description;
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
@@ -295,7 +223,7 @@ bool LocationPage::editRoute(RouteListElement* routeElement) {
     // update it, and write it back out.
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    android::location::Route route(routeElement->protoFilePath.toStdString().c_str());
+    android::location::Route route(routeElement.protoFilePath.toStdString().c_str());
 
     const emulator_location::RouteMetadata* oldRouteMetadata = route.getProtoInfo();
     if (oldRouteMetadata == nullptr) return false;
@@ -304,22 +232,22 @@ bool LocationPage::editRoute(RouteListElement* routeElement) {
 
     if (!newName.isEmpty()) {
         routeMetadata.set_logical_name(newName.toStdString().c_str());
-        routeElement->logicalName = newName;
+        routeElement.logicalName = newName;
     }
     routeMetadata.set_description(newDescription.toStdString().c_str());
-    routeElement->description = newDescription;
+    routeElement.description = newDescription;
 
-    writeRouteProtobufFullPath(routeElement->protoFilePath, routeMetadata);
+    writeRouteProtobufFullPath(routeElement.protoFilePath, routeMetadata);
     QApplication::restoreOverrideCursor();
     return true;
 }
 
-bool LocationPage::deleteRoute(const RouteListElement* routeElement) {
+bool LocationPage::deleteRoute(const RouteListElement& routeElement) {
     bool ret = false;
     QMessageBox msgBox(QMessageBox::Warning,
                        tr("Delete route"),
                        tr("Do you want to permanently delete<br>route \"%1\"?")
-                               .arg(routeElement->logicalName),
+                               .arg(routeElement.logicalName),
                        QMessageBox::Cancel,
                        this);
     QPushButton *deleteButton = msgBox.addButton(QMessageBox::Apply);
@@ -329,16 +257,14 @@ bool LocationPage::deleteRoute(const RouteListElement* routeElement) {
 
     if (selection == QMessageBox::Apply) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        std::string protobufName = routeElement->protoFilePath.toStdString();
+        std::string protobufName = routeElement.protoFilePath.toStdString();
         android::base::StringView dirName;
         bool haveDirName = android::base::PathUtils::split(protobufName,
                                                            &dirName,
                                                            nullptr /* base name */);
         if (haveDirName) {
             path_delete_dir(dirName.str().c_str());
-            mSelectedRouteName.clear();
             mUi->loc_routeList->setCurrentItem(nullptr);
-            populateRouteListWidget();
             ret = true;
         }
         QApplication::restoreOverrideCursor();
@@ -347,17 +273,17 @@ bool LocationPage::deleteRoute(const RouteListElement* routeElement) {
 }
 
 // Display the details of the selected route
-void LocationPage::showRouteDetails(const RouteListElement* theElement) {
+void LocationPage::showRouteDetails(const RouteListElement& theElement) {
     // Show the route info in the details window.
     QString modeString;
-    switch (theElement->modeIndex) {
+    switch (theElement.modeIndex) {
         default:
         case 0:  modeString = tr("Driving");    break;
         case 1:  modeString = tr("Walking");    break;
         case 2:  modeString = tr("Bicycling");  break;
         case 3:  modeString = tr("Transit");    break;
     }
-    std::string protobufName = theElement->protoFilePath.toStdString();
+    std::string protobufName = theElement.protoFilePath.toStdString();
     android::base::StringView dirPath;
     android::base::StringView dirTail;
     bool splitSucceeded = android::base::PathUtils::split(protobufName,
@@ -376,7 +302,7 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
             dirTail = "";
         }
     }
-    int durationSeconds = theElement->duration;
+    int durationSeconds = theElement.duration;
     int durationHours = durationSeconds / (60 * 60);
     durationSeconds -= durationHours * (60 * 60);
     int durationMinutes = durationSeconds / 60;
@@ -398,12 +324,12 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
                             "&nbsp;&nbsp;Number of points: <b>%4</b><br>"
                             "&nbsp;&nbsp;Directory: <b>%5</b><br>"
                             "<b>%6</b>")
-                          .arg(theElement->logicalName)
+                          .arg(theElement.logicalName)
                           .arg(durationString)
                           .arg(modeString)
-                          .arg(theElement->numPoints)
+                          .arg(theElement.numPoints)
                           .arg(dirTail.str().c_str())
-                          .arg(theElement->description);
+                          .arg(theElement.description);
     mUi->loc_routeInfo->setHtml(infoString);
 }
 
@@ -448,27 +374,60 @@ void LocationPage::showPendingRouteDetails() {
     mUi->loc_routeInfo->setHtml(infoString);
 }
 
-void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson) {
-    mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson);
+void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
+    mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson, mode);
 }
 
 // Invoked by the Maps javascript when a route has been created
-void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson) {
+void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
     mRouteNumPoints = numPoints;
     if (mRouteNumPoints > 0) {
         mRouteTotalTime = durationSeconds;
         mRouteCreationTime = QDateTime::currentDateTime();
-        mRouteTravelMode = mUi->loc_travelMode->currentIndex();
+        mRouteTravelMode = RouteWidgetItem::travelModeToInt(mode);
         mRouteJson = routeJson;
     }
 
-    mSelectedRouteName = "";
     mUi->loc_routeList->setCurrentItem(nullptr);
     showPendingRouteDetails();
-    mUi->loc_saveRoute->setEnabled(mRouteNumPoints > 0);
     mUi->loc_playRouteButton->setEnabled(mRouteNumPoints > 0);
 }
 
+void MapBridge::saveRoute() {
+    emit mLocationPage->signal_saveRoute();
+}
+
+void LocationPage::map_saveRoute() {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    // Create the protobuf describing this route
+    QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
+
+    emulator_location::RouteMetadata routeMetadata;
+    routeMetadata.set_logical_name(routeName.toStdString().c_str());
+    routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
+    routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
+    routeMetadata.set_number_of_points(mRouteNumPoints);
+    routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
+    std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
+
+    // Write the JSON to a file
+    writeRouteJsonFile(protoPath);
+
+    // Add the new route to the list
+    RouteListElement listElement;
+    listElement.protoFilePath = QString::fromStdString(protoPath);
+    listElement.logicalName   = QString::fromStdString(routeMetadata.logical_name());
+    listElement.description   = QString::fromStdString(routeMetadata.description());
+    listElement.modeIndex     = routeMetadata.mode_of_travel();
+    listElement.numPoints     = routeMetadata.number_of_points();
+    listElement.duration      = routeMetadata.duration();
+
+    RouteItemBuilder builder(mUi->loc_routeList);
+    builder.addRoute(std::move(listElement), this);
+    mUi->loc_noSavedRoutes_mask->setVisible(false);
+
+    QApplication::restoreOverrideCursor();
+}
 // Write a protobuf into the specified directory.
 // This code determines the parent directory. The
 // full path of output file is returned.
