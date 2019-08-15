@@ -724,7 +724,11 @@ FrameBuffer::postWorkerFunc(const Post& post) {
                                    post.viewport.height);
             break;
         case PostCmd::Compose:
-            m_postWorker->compose(post.d);
+            if (post.d->version <= 1) {
+                m_postWorker->compose(post.d);
+            } else {
+                m_postWorker->compose((ComposeDevice_v2*)post.d);
+            }
             break;
         case PostCmd::Clear:
             m_postWorker->clear();
@@ -2213,7 +2217,12 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     composeCmd.d = p;
     sendPostWorkerCmd(composeCmd);
 
-    post(p->targetHandle, false);
+    if (p->version <= 1) {
+        post(p->targetHandle, false);
+    } else {
+       ComposeDevice_v2* p2 = (ComposeDevice_v2*)buffer;
+       post(p2->targetHandle, false);
+    }
     return true;
 }
 
