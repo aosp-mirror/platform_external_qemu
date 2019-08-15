@@ -119,6 +119,16 @@ TEST(RingStreambuf, stream_not_yet_available_no_block) {
     EXPECT_STREQ("", res.second.c_str());
 }
 
+TEST(RingStreambuf, stream_not_yet_available_no_block_gives_proper_distance) {
+    RingStreambuf buf(4);
+    std::ostream stream(&buf);
+    stream << "aaaaaaa";
+
+    auto res = buf.bufferAtOffset(200);
+    EXPECT_EQ(res.first, 7);
+    EXPECT_STREQ("", res.second.c_str());
+}
+
 TEST(RingStreambuf, stream_offset_blocks_until_available) {
     RingStreambuf buf(4);
     std::ostream stream(&buf);
