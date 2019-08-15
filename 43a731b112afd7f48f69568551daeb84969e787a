@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed6fceb2_ddddbe60",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-mock-web-channel.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-08-15T22:48:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0de82bc_9a3bdcfb",
+      "range": {
+        "startLine": 38,
+        "startChar": 1,
+        "endLine": 38,
+        "endChar": 5
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89b0c066_fb533dea",
         "filename": "android/android-emu/android/skin/qt/html/js/location-mock-web-channel.js",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "43a731b112afd7f48f69568551daeb84969e787a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e9f0479_74b38a69",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-mock-web-channel.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-08-15T22:48:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89b0c066_fb533dea",
+      "range": {
+        "startLine": 41,
+        "startChar": 29,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "d4710bfd_7a889249",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-point-overlay.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-08-15T22:48:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b3dad51_1199e938",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 4
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c0b2624_d9d474ab",
         "filename": "android/android-emu/android/skin/qt/html/js/location-point.js",
         "patchSetId": 2
@@ -91,6 +163,30 @@
       "revId": "43a731b112afd7f48f69568551daeb84969e787a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a38f05b2_6863df3d",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-point.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-08-15T22:48:26Z",
+      "side": 1,
+      "message": "It will be used in a future change. Need to handle the brief period before the map is completely loaded and the search box gets moved into position more gracefully.",
+      "parentUuid": "4c0b2624_d9d474ab",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 10
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "f54a3571_c04ce983",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-search-box.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-08-15T22:48:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5e110a2_aa3ceb58",
+      "range": {
+        "startLine": 68,
+        "startChar": 11,
+        "endLine": 68,
+        "endChar": 19
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d8f3e6cf_250f5769",
         "filename": "android/android-emu/android/skin/qt/html/js/location-search-box.js",
         "patchSetId": 2
@@ -137,6 +257,30 @@
       "revId": "43a731b112afd7f48f69568551daeb84969e787a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdec73b7_eae2b60d",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-search-box.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-08-15T22:48:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d8f3e6cf_250f5769",
+      "range": {
+        "startLine": 84,
+        "startChar": 41,
+        "endLine": 84,
+        "endChar": 49
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
