@@ -33,6 +33,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/gps.h"
 #include "android/hw-sensors.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/physics/PhysicalModel.h"
@@ -40,6 +41,8 @@
 using namespace android::base;
 
 static constexpr uint32_t kFileVersion = 2;
+
+namespace pb = emulator_automation;
 
 namespace {
 
@@ -52,9 +55,22 @@ static offworld::Response createAsyncResponse(uint32_t asyncId) {
     return response;
 }
 
-}  // namespace.
+static void
+sendLocationOverride(const pb::LocationOverrideEvent& location_override) {
+    timeval timeVal = {};
+    timeVal.tv_sec = location_override.timestamp_in_us() / 1000000;
+    timeVal.tv_usec = location_override.timestamp_in_us() % 1000000;
 
-namespace pb = emulator_automation;
+    android_gps_send_location(
+        location_override.latitude(),
+        location_override.longitude(),
+        location_override.meters_elevation(),
+        location_override.speed_knots(),
+        location_override.heading_degrees(),
+        location_override.num_satellites(),
+        &timeVal);
+}
+}  // namespace.
 
 namespace android {
 namespace automation {
@@ -899,6 +915,8 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
                                               event.sensor_override());
             break;
         }
+        case pb::RecordedEvent::StreamCase::kLocationOverride:
+            break;
         case pb::RecordedEvent::StreamCase::STREAM_NOT_SET:
             // Last event for files to simulate recordings.
             break;
