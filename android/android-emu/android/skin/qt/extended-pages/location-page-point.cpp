@@ -501,22 +501,6 @@ void LocationPage::setUpWebEngine() {
                                        appendString)) {
             continue;
         }
-        if (!addJavascriptFromResource(webEnginePage,
-                                       ":/html/js/common.js",
-                                       "common.js",
-                                       "")) {
-            continue;
-        }
-
-        QString pointRouteJsQrc(isPoint ? ":/html/js/points.js" : ":/html/js/routes.js");
-        QString pointRouteJsName(isPoint ? "points.js" : "routes.js");
-        
-        if (!addJavascriptFromResource(webEnginePage,
-                                       pointRouteJsQrc,
-                                       pointRouteJsName,
-                                       "")) {
-            continue;
-        }
 
         mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
                             QWebSocketServer::NonSecureMode));
@@ -546,7 +530,7 @@ void LocationPage::setUpWebEngine() {
                 // Change the placeholder to the real Maps API key
                 htmlByteArray.replace("YOUR_API_KEY", mMapsApiKey.toUtf8());
                 // Publish it
-                webEnginePage->setHtml(htmlByteArray);
+                webEnginePage->setHtml(htmlByteArray, QUrl(isPoint ? "qrc:/html/index.html" : "qrc:/html/route.html"));
             }
         }
     }

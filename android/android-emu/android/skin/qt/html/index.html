@@ -4,30 +4,9 @@
     <title>Android Emulator Location Picker</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <script>
-     // |channel| is only defined if running inside QtWebEngine.
-     // This will allow us to load the file whether opening in a browser
-     // or in QtWebEngine.
-     var head = document.getElementsByTagName('head')[0];
-     var link = document.createElement('link');
-     link.rel = 'stylesheet';
-     link.type = 'text/css';
-     link.media = 'all';
-     if (typeof(channel) === 'undefined') {
-         // For some reason, we can't load the javascript resources here with QtWebEngine.
-         // So we'll just dynamically load it in the Qt code.
-         link.href = 'css/common.css';
-         var commonScript = document.createElement('script');
-         commonScript.src = 'js/common.js';
-         var pointsScript = document.createElement('script');
-         pointsScript.src = 'js/points.js';
-         head.appendChild(commonScript);
-         head.appendChild(pointsScript);
-     } else {
-         link.href = 'qrc:/html/css/common.css';
-     }
-     head.appendChild(link);
-    </script>
+    <link rel="stylesheet" href="css/common.css">
+    <script src="js/common.js"></script>
+    <script src="js/points.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async defer></script>
 </head>
 <body>
