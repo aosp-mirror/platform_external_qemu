@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7c8e541e_513f0a2d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-15T19:11:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4b1c76e8_17b912c9",
+      "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8ebc879_a2aa51d0",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 4
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "e0b44866_b2c362bb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-15T19:11:39Z",
+      "side": 1,
+      "message": "got it, we need to support the old version of android guest, so we will need to keep both.",
+      "parentUuid": "e1558bf8_4197f31b",
+      "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "646f209f_ff3f07d7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 4
@@ -104,6 +140,24 @@
       "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab96f772_d8d0e0ed",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-15T19:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d63aaca_1de205d1",
+      "revId": "7b037b85421205a9c3111372c9160c2844f3e79e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
