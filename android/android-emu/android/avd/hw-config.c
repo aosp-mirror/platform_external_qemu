@@ -528,6 +528,10 @@ int androidHwConfig_hasVirtualSceneCamera(AndroidHwConfig* config) {
     return strcmp(config->hw_camera_back, "virtualscene") == 0;
 }
 
-int androidHwConfig_hasVideoPlaybackCamera(AndroidHwConfig* config) {
+int androidHwConfig_hasVideoPlaybackFrontCamera(AndroidHwConfig* config) {
+    return strcmp(config->hw_camera_front, "videoplayback") == 0;
+}
+
+int androidHwConfig_hasVideoPlaybackBackCamera(AndroidHwConfig* config) {
     return strcmp(config->hw_camera_back, "videoplayback") == 0;
 }
