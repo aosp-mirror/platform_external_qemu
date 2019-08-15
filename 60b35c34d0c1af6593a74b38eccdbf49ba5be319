@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "71c26d94_50be2a6c",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-15T22:29:29Z",
+      "side": 1,
+      "message": "apiLevel variable should be available in this function",
+      "range": {
+        "startLine": 95,
+        "startChar": 30,
+        "endLine": 95,
+        "endChar": 38
+      },
+      "revId": "60b35c34d0c1af6593a74b38eccdbf49ba5be319",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a35dc023_3072cb59",
         "filename": "android/android-emu/android/main-kernel-parameters.cpp",
         "patchSetId": 1
@@ -37,6 +60,30 @@
       "side": 1,
       "message": "Sure, what\u0027s the best way of doing that? A feature flag?",
       "parentUuid": "a35dc023_3072cb59",
+      "range": {
+        "startLine": 193,
+        "startChar": 51,
+        "endLine": 193,
+        "endChar": 73
+      },
+      "revId": "60b35c34d0c1af6593a74b38eccdbf49ba5be319",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e813de74_891d7513",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-15T22:29:29Z",
+      "side": 1,
+      "message": "see other comment",
+      "parentUuid": "7293140d_08bad2df",
       "range": {
         "startLine": 193,
         "startChar": 51,
