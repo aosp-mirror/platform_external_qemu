@@ -63,7 +63,8 @@ std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
         memcpy(mRingbuffer.data(), s + bytesUntilTheEnd, n - bytesUntilTheEnd);
         mHead = n - bytesUntilTheEnd;
 
-        // We are checking the case where the tail got overwritten from the front.
+        // We are checking the case where the tail got overwritten from the
+        // front.
         updateTail |= mTail <= mHead;
     } else {
         // Case 2b: We are not falling off the edge of the world.
@@ -148,10 +149,21 @@ std::pair<int, std::string> RingStreambuf::bufferAtOffset(
     std::streamsize startOffset = mHeadOffset - toRead;
     std::streamsize skip = std::max(startOffset, offset) - startOffset;
 
+
     // Let's find the starting point where we should be reading.
     uint16_t read = (mTail + skip) & (capacity - 1);
-     // We are falling over the edge, or not:
-     res.reserve(toRead);
+
+    // We are looking for an offset that is in the future...
+    // Return the current start offset, without anything
+    if (skip > toRead) {
+        return std::make_pair(mHeadOffset, res);
+    }
+
+    // Actual size of bytes we are going to read.
+    toRead -= skip;
+
+    // We are falling over the edge, or not:
+    res.reserve(toRead);
     if (read + toRead > capacity) {
         // We wrap around
         std::streamsize bytesUntilTheEnd = capacity - read;
