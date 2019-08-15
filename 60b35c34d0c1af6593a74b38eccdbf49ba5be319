@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a35dc023_3072cb59",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-15T21:40:51Z",
+      "side": 1,
+      "message": "lets apply this only for API level 29 or later so that P use case stays the same",
+      "range": {
+        "startLine": 193,
+        "startChar": 51,
+        "endLine": 193,
+        "endChar": 73
+      },
+      "revId": "60b35c34d0c1af6593a74b38eccdbf49ba5be319",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
