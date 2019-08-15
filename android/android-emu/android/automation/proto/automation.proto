@@ -21,6 +21,7 @@ message RecordedEvent {
         PhysicalModelEvent physical_model = 50;
         TouchEvent touch = 51;
         SensorOverrideEvent sensor_override = 52;
+        LocationOverrideEvent location_override = 53;
     }
 }
 
@@ -71,4 +72,14 @@ message SensorOverrideEvent {
 
     optional Sensor sensor = 1;
     optional ParameterValue value = 2;
+}
+
+message LocationOverrideEvent {
+    optional double latitude = 1;
+    optional double longitude = 2;
+    optional double meters_elevation = 3;
+    optional double speed_knots = 4;
+    optional double heading_degrees = 5;
+    optional uint32 num_satellites = 6;
+    optional uint64 timestamp_in_us = 7;
 }
