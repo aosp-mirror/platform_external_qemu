@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0de82bc_9a3bdcfb",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-mock-web-channel.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-08-15T22:29:26Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 38,
+        "startChar": 1,
+        "endLine": 38,
+        "endChar": 5
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "89b0c066_fb533dea",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-mock-web-channel.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-08-15T22:29:26Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 41,
+        "startChar": 29,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b3dad51_1199e938",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-point-overlay.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-08-15T22:29:26Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 4
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c0b2624_d9d474ab",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-point.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-08-15T22:29:26Z",
+      "side": 1,
+      "message": "Unused?",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 10
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5e110a2_aa3ceb58",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-search-box.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-08-15T22:29:26Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 68,
+        "startChar": 11,
+        "endLine": 68,
+        "endChar": 19
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8f3e6cf_250f5769",
+        "filename": "android/android-emu/android/skin/qt/html/js/location-search-box.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-08-15T22:29:26Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 84,
+        "startChar": 41,
+        "endLine": 84,
+        "endChar": 49
+      },
+      "revId": "43a731b112afd7f48f69568551daeb84969e787a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
