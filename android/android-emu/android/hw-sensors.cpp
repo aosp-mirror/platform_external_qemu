@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/time.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -346,10 +347,27 @@ SENSORS_LIST
     sensor->serialized.measurement_id = measurement_id;
 }
 
+uint64_t hw_sensor_curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return (uint64_t)(tv.tv_usec + 1000000ULL * tv.tv_sec);
+}
+
+static uint64_t last_tick_time_us = 0;
+
 /* this function is called periodically to send sensor reports
  * to the HAL module, and re-arm the timer if necessary
  */
 static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
+    uint64_t this_tick_time = hw_sensor_curr_time_us();
+
+    uint64_t since_last_tick = this_tick_time - last_tick_time_us;
+
+    last_tick_time_us = this_tick_time;
+
+    fprintf(stderr, "%s: sensor tick time since last: %f ms\n", __func__,
+            (float)(since_last_tick) / 1000.0f);
+
     auto cl = static_cast<HwSensorClient*>(opaque);
     int64_t delay_ms = cl->delay_ms;
     const uint32_t mask = cl->enabledMask;
@@ -449,6 +467,7 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
      */
     if (msglen > 10 && !memcmp(msg, "set-delay:", 10)) {
         cl->delay_ms = atoi((const char*)msg + 10);
+        fprintf(stderr, "%s: set delay: [%d]\n", __func__, cl->delay_ms);
         if (cl->enabledMask != 0)
             _hwSensorClient_tick(cl, cl->timer);
 

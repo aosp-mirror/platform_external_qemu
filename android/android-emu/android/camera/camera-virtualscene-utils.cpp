@@ -95,21 +95,23 @@ int RenderedCameraDevice::readFrame(ClientFrame* resultFrame,
                                         float gScale,
                                         float bScale,
                                         float expComp) {
-    auto context = makeEglCurrent();
-    if (!context.isValid()) {
-        return -1;
-    }
+    return 0;
 
-    resultFrame->frame_time = renderer->render();
-    mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
-    mGles2->glReadPixels(0, 0, mFramebufferWidth, mFramebufferHeight, GL_RGBA,
-                         GL_UNSIGNED_BYTE, mFramebufferData.data());
+    // auto context = makeEglCurrent();
+    // if (!context.isValid()) {
+    //     return -1;
+    // }
 
-    // Convert frame to the receiving buffers.
-    return convert_frame(mFramebufferData.data(), VIRTUALSCENE_PIXEL_FORMAT,
-                         mFramebufferData.size(), mFramebufferWidth,
-                         mFramebufferHeight, resultFrame, rScale, gScale,
-                         bScale, expComp);
+    // resultFrame->frame_time = renderer->render();
+    // mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
+    // mGles2->glReadPixels(0, 0, mFramebufferWidth, mFramebufferHeight, GL_RGBA,
+    //                      GL_UNSIGNED_BYTE, mFramebufferData.data());
+
+    // // Convert frame to the receiving buffers.
+    // return convert_frame(mFramebufferData.data(), VIRTUALSCENE_PIXEL_FORMAT,
+    //                      mFramebufferData.size(), mFramebufferWidth,
+    //                      mFramebufferHeight, resultFrame, rScale, gScale,
+    //                      bScale, expComp);
 }
 
 bool RenderedCameraDevice::initializeEgl() {
