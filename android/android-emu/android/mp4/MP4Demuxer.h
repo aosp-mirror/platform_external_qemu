@@ -35,12 +35,29 @@ namespace mp4 {
 // streams.
 class Mp4Demuxer {
 public:
-    virtual ~Mp4Demuxer(){};
+    virtual ~Mp4Demuxer() {};
     static std::unique_ptr<Mp4Demuxer> create(
             ::android::videoplayer::VideoPlayer* player,
             Mp4Dataset* dataset,
             VideoPlayerWaitInfo* readingWaitInfo);
-    virtual void demux() = 0;
+
+    // Reads the next packet from the MP4 file, and puts the packet into its
+    // corresponding PacketQueue if it is from audio/video stream, or creates
+    // an event if it is from a known data stream that carries event info.
+    //
+    // When EOF is reached, puts a null packet in each PacketQueue if the video
+    // player is not in looping mode, or seeks back to the start of the file if
+    // the video player is in looping mode.
+    //
+    // Returns 0 on success, -1 on error.
+    virtual int demuxNextPacket() = 0;
+
+    // Seeks the MP4 file to timestamp and flushes packet queues.
+    //
+    // Parameter: timestamp is an absolute offset from the start of a video
+    //            measured in seconds.
+    virtual void seek(double timestamp) = 0;
+
     virtual void setAudioPacketQueue(PacketQueue* audioPacketQueue) = 0;
     virtual void setVideoPacketQueue(PacketQueue* videoPacketQueue) = 0;
     virtual void setSensorLocationEventProvider(
