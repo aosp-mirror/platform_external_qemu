@@ -372,7 +372,7 @@ int gvm_init_vcpu(CPUState *cpu)
 
     cpu->gvm_fd = vcpu_fd;
     cpu->gvm_state = s;
-    cpu->gvm_vcpu_dirty = true;
+    cpu->vcpu_dirty = true;
 
     ret = gvm_ioctl(s, GVM_GET_VCPU_MMAP_SIZE,
             NULL, 0, &mmap_size, sizeof(mmap_size));
@@ -1315,15 +1315,15 @@ void gvm_raise_event(CPUState *cpu)
 
 static void do_gvm_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
 {
-    if (!cpu->gvm_vcpu_dirty) {
+    if (!cpu->vcpu_dirty) {
         gvm_arch_get_registers(cpu);
-        cpu->gvm_vcpu_dirty = true;
+        cpu->vcpu_dirty = true;
     }
 }
 
 void gvm_cpu_synchronize_state(CPUState *cpu)
 {
-    if (!cpu->gvm_vcpu_dirty) {
+    if (!cpu->vcpu_dirty) {
         run_on_cpu(cpu, do_gvm_cpu_synchronize_state, RUN_ON_CPU_NULL);
     }
 }
@@ -1331,7 +1331,7 @@ void gvm_cpu_synchronize_state(CPUState *cpu)
 static void do_gvm_cpu_synchronize_post_reset(CPUState *cpu, run_on_cpu_data arg)
 {
     gvm_arch_put_registers(cpu, GVM_PUT_RESET_STATE);
-    cpu->gvm_vcpu_dirty = false;
+    cpu->vcpu_dirty = false;
 }
 
 void gvm_cpu_synchronize_post_reset(CPUState *cpu)
@@ -1342,7 +1342,7 @@ void gvm_cpu_synchronize_post_reset(CPUState *cpu)
 static void do_gvm_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
 {
     gvm_arch_put_registers(cpu, GVM_PUT_FULL_STATE);
-    cpu->gvm_vcpu_dirty = false;
+    cpu->vcpu_dirty = false;
 }
 
 void gvm_cpu_synchronize_post_init(CPUState *cpu)
@@ -1377,9 +1377,9 @@ int gvm_cpu_exec(CPUState *cpu)
     do {
         MemTxAttrs attrs;
 
-        if (cpu->gvm_vcpu_dirty) {
+        if (cpu->vcpu_dirty) {
             gvm_arch_put_registers(cpu, GVM_PUT_RUNTIME_STATE);
-            cpu->gvm_vcpu_dirty = false;
+            cpu->vcpu_dirty = false;
         }
 
         gvm_arch_pre_run(cpu, run);
