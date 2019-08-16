@@ -50,6 +50,12 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkResetCommandBuffer",
     "vkCreateImageView",
     "vkCreateSampler",
+    "vkGetPhysicalDeviceExternalFenceProperties",
+    "vkGetPhysicalDeviceExternalFencePropertiesKHR",
+    "vkCreateFence",
+    "vkResetFences",
+    "vkImportFenceFdKHR",
+    "vkGetFenceFdKHR",
 ]
 
 SUCCESS_VAL = {
