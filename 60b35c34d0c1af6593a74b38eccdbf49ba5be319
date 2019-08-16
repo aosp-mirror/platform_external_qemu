@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eab82272_882f87f9",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-08-16T00:43:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "71c26d94_50be2a6c",
+      "range": {
+        "startLine": 95,
+        "startChar": 30,
+        "endLine": 95,
+        "endChar": 38
+      },
+      "revId": "60b35c34d0c1af6593a74b38eccdbf49ba5be319",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a35dc023_3072cb59",
         "filename": "android/android-emu/android/main-kernel-parameters.cpp",
         "patchSetId": 1
@@ -93,6 +117,30 @@
       "revId": "60b35c34d0c1af6593a74b38eccdbf49ba5be319",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc239610_fb304f1d",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2019-08-16T00:43:27Z",
+      "side": 1,
+      "message": "Great, I moved away from addIf because the statement just became kind of cumbersome.",
+      "parentUuid": "e813de74_891d7513",
+      "range": {
+        "startLine": 193,
+        "startChar": 51,
+        "endLine": 193,
+        "endChar": 73
+      },
+      "revId": "60b35c34d0c1af6593a74b38eccdbf49ba5be319",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
