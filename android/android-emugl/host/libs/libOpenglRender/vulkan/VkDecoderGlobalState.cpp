@@ -79,6 +79,9 @@ kEmulatedExtensions[] = {
     "VK_KHR_external_semaphore",
     "VK_KHR_external_semaphore_capabilities",
     "VK_KHR_external_semaphore_fd",
+    "VK_KHR_external_fence_capabilities",
+    "VK_KHR_external_fence",
+    "VK_KHR_external_fence_fd",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
