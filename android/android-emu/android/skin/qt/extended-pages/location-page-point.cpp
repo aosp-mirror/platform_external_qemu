@@ -436,6 +436,26 @@ void LocationPage::setUpWebEngine() {
                      this, &LocationPage::map_saveRoute,
                      Qt::QueuedConnection);
 
+    mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
+                        QWebSocketServer::NonSecureMode));
+    if (!mServer->listen(QHostAddress::LocalHost)) {
+        printf("Unable to open web socket port %d.\n", mServer->serverPort());
+    } else {
+        printf("WebSocketServer listening on port %d\n", mServer->serverPort());
+    }
+
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
+
+    // setup the channel
+    mWebChannel.reset(new QWebChannel());
+    QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
+                     mWebChannel.get(), &QWebChannel::connectTo);
+
+    // setup the dialog and publish it to the QWebChannel
+    mWebChannel->registerObject(QStringLiteral("emulocationserver"), mMapBridge.get());
+
+
     // Set up two web engines: one for the Points page and one for the Routes page
     for (int webEnginePageIdx = 0; webEnginePageIdx < 2; webEnginePageIdx++) {
         bool isPoint = (webEnginePageIdx == 0);
@@ -454,7 +474,10 @@ void LocationPage::setUpWebEngine() {
         appendString.append(QString::number(initialLng, 'g', 12));
         appendString.append(
                 "';\n"
-                "var wsUri = 'ws://localhost:12345';"
+                "var wsUri = 'ws://localhost:");
+        appendString.append(QString::number(mServer->serverPort()));
+        appendString.append(
+                "';"
                 "var socket = new WebSocket(wsUri);"
                 "socket.onclose = function() {"
                     "console.error('web channel closed');"
@@ -501,23 +524,6 @@ void LocationPage::setUpWebEngine() {
                                        appendString)) {
             continue;
         }
-
-        mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
-                            QWebSocketServer::NonSecureMode));
-        if (!mServer->listen(QHostAddress::LocalHost, 12345)) {
-            printf("Unable to open web socket port 12345.");
-        }
-
-        // wrap WebSocket clients in QWebChannelAbstractTransport objects
-        mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
-
-        // setup the channel
-        mWebChannel.reset(new QWebChannel(webEnginePage));
-        QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
-                         mWebChannel.get(), &QWebChannel::connectTo);
-
-        // setup the dialog and publish it to the QWebChannel
-        mWebChannel->registerObject(QStringLiteral("emulocationserver"), mMapBridge.get());
 
         // Get the HTML file (either 'index.html' or route.html')
         QFile indexHtmlFile(isPoint ? ":/html/index.html" : ":/html/route.html");
