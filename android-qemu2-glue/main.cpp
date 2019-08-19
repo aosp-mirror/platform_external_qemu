@@ -991,11 +991,20 @@ extern "C" int main(int argc, char** argv) {
                 }
 
                 initialize_virtio_input_devs(args, hw);
+                auto vulkanIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
+                const char* defaultGpuMode;
+
+                if (vulkanIcd == "swiftshader") {
+                    defaultGpuMode = "swiftshader_indirect";
+                } else {
+                    defaultGpuMode = "host";
+                }
+
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
                     "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
-                    opts->gpu ? opts->gpu : "host", opts->no_window, lcdWidth, lcdHeight,
+                    opts->gpu ? opts->gpu : defaultGpuMode, opts->no_window, lcdWidth, lcdHeight,
                     // LCD DPI, orientation
                     96, "landscape",
                     opts, hw, &android_avdInfo);
