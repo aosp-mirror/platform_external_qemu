@@ -132,6 +132,7 @@ void PostWorker::compose(ComposeDevice* p) {
     DBG("worker compose %d layers\n", p->numLayers);
     mFb->getTextureDraw()->prepareForDrawLayer();
     for (int i = 0; i < p->numLayers; i++, l++) {
+#if 0
         DBG("\tcomposeMode %d color %d %d %d %d blendMode "
                "%d alpha %f transform %d %d %d %d %d "
                "%f %f %f %f\n",
@@ -141,6 +142,7 @@ void PostWorker::compose(ComposeDevice* p) {
                l->displayFrame.right, l->displayFrame.bottom,
                l->crop.left, l->crop.top, l->crop.right,
                l->crop.bottom);
+#endif
         composeLayer(l);
     }
 
