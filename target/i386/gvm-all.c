@@ -259,15 +259,6 @@ int gvm_physical_memory_addr_from_host(GVMState *s, void *ram,
     return 0;
 }
 
-static void dump_user_memory_region(struct gvm_userspace_memory_region *mem)
-{
-    DPRINTF("mem id\t %x\n", mem->slot);
-    DPRINTF("mem gpa\t %llx\n", mem->guest_phys_addr);
-    DPRINTF("mem uva\t %llx\n", mem->userspace_addr);
-    DPRINTF("mem fl\t %x\n", mem->flags);
-    DPRINTF("mem sz\t %llx\n", mem->memory_size);
-}
-
 static int gvm_set_user_memory_region(GVMMemoryListener *kml, GVMSlot *slot)
 {
     GVMState *s = gvm_state;
@@ -283,18 +274,12 @@ static int gvm_set_user_memory_region(GVMMemoryListener *kml, GVMSlot *slot)
         /* Set the slot size to 0 before setting the slot to the desired
          * value. This is needed based on KVM commit 75d61fbc. */
         mem.memory_size = 0;
-	dump_user_memory_region(&mem);
-        fprintf(stderr, "%08x\t%08llx\t%08llx\t%08x\n", mem.slot, mem.guest_phys_addr >> 12, mem.memory_size >> 12, mem.flags);
         r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
                 &mem, sizeof(mem), NULL, 0);
-	DPRINTF("ioctl return value %d\n", r);
     }
     mem.memory_size = slot->memory_size;
-    dump_user_memory_region(&mem);
-    fprintf(stderr, "%08x\t%08llx\t%08llx\t%08x\n", mem.slot, mem.guest_phys_addr >> 12, mem.memory_size >> 12, mem.flags);
     r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
             &mem, sizeof(mem), NULL, 0);
-    DPRINTF("ioctl return value %d\n", r);
     return r;
 }
 
