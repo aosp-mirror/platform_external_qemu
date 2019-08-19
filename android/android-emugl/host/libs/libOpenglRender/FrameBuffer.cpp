@@ -554,6 +554,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             s_egl.eglQueryVulkanInteropSupportANDROID();
     }
 
+    // TODO: 0-copy gl interop on swiftshader vk
+    if (System::get()->envGet("ANDROID_EMU_VK_ICD") == "swiftshader") {
+        fb->m_vulkanInteropSupported = false;
+    }
+
     //
     // Keep the singleton framebuffer pointer
     //
