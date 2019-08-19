@@ -1579,11 +1579,18 @@ static const VMStateDescription vmstate_slirp = {
 static void slirp_state_save(QEMUFile *f, void *opaque)
 {
     Slirp *slirp = opaque;
+    struct socket *so;
     struct ex_list *ex_ptr;
+
+    for (so = slirp->tcb.so_next; so != &slirp->tcb;
+        so = so->so_next) {
+        qemu_put_byte(f, 42);
+        vmstate_save_state(f, &vmstate_slirp_socket, so, NULL);
+    }
+    qemu_put_byte(f, 0);
 
     for (ex_ptr = slirp->exec_list; ex_ptr; ex_ptr = ex_ptr->ex_next)
         if (ex_ptr->ex_pty == 3) {
-            struct socket *so;
             so = slirp_find_ctl_socket(slirp, ex_ptr->ex_addr,
                                        ntohs(ex_ptr->ex_fport));
             if (!so)
@@ -1597,17 +1604,110 @@ static void slirp_state_save(QEMUFile *f, void *opaque)
     vmstate_save_state(f, &vmstate_slirp, slirp, NULL);
 }
 
+void print_so(struct socket* head, struct socket* tail) {
+    struct socket *tmpSocket;
+    char printBuffer[100];
+    int tcpCount = 0;
+    tmpSocket = head;
+    while (tmpSocket != tail) {
+        if (tmpSocket->so_ffamily == AF_INET6) {
+            printf("so %s\n", inet_ntop(AF_INET6, &tmpSocket->so_faddr6,
+                printBuffer, sizeof(printBuffer)));
+        } else {
+            printf("so %s\n", inet_ntop(AF_INET, &tmpSocket->so_faddr,
+                printBuffer, sizeof(printBuffer)));
+        }
+        tmpSocket = tmpSocket->so_next;
+        tcpCount ++;
+    }
+    printf("so counts %d\n", tcpCount);
+
+}
+
+static int is_same_addr(const union slirp_sockaddr* so1,
+        const union slirp_sockaddr* so2) {
+    if (so1->ss.ss_family != so2->ss.ss_family) {
+        return 0;
+    }
+    return (so1->ss.ss_family == AF_INET &&
+            so1->sin.sin_addr.s_addr == so2->sin.sin_addr.s_addr &&
+            so1->sin.sin_port == so2->sin.sin_port) ||
+        (so1->ss.ss_family == AF_INET6 &&
+            !memcmp(&so1->sin6.sin6_addr, &so2->sin6.sin6_addr,
+                sizeof(struct in6_addr)) &&
+            so1->sin6.sin6_port == so2->sin6.sin6_port);
+}
 
 static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
 {
     Slirp *slirp = opaque;
     struct ex_list *ex_ptr;
+    struct socket *tcp_old_head = slirp->tcb.so_next;
+    struct socket *next_so;
+    int loaded_so = 0;
 
     // Clean up stale connections
     // ip_cleanup cleans up both IPv4 and IPv6 connections, and ip6_cleanup
     // cleans up extra data structures for IPv6. (Naming is confusing.)
     if (enable_cleanup_ip_on_load) {
         ip_cleanup(slirp);
+    }
+
+    printf("udp:\n");
+    print_so(slirp->udb.so_next, &slirp->udb);
+
+    printf("tcp:\n");
+    print_so(slirp->tcb.so_next, &slirp->tcb);
+
+    printf("icmp:\n");
+    print_so(slirp->icmp.so_next, &slirp->icmp);
+
+    slirp->tcb.so_next = &slirp->tcb;
+    slirp->tcp_last_so = &slirp->tcb;
+
+    while (qemu_get_byte(f)) {
+        int ret;
+        struct socket *so = socreate(slirp);
+
+        if (!so) {
+            printf("ENOMEM\n");
+            return -ENOMEM;
+        }
+
+        ret = vmstate_load_state(f, &vmstate_slirp_socket, so, version_id);
+
+        if (ret < 0) {
+            printf("vmstate_load_state error %d\n", ret);
+            return ret;
+        }
+
+        /*if ((so->so_faddr.s_addr & slirp->vnetwork_mask.s_addr) !=
+            slirp->vnetwork_addr.s_addr) {
+            printf("EINVAL\n");
+            return -EINVAL;
+        }*/
+    }
+
+    // Clean up stale TCP connections
+    while (tcp_old_head != &slirp->tcb) {
+        next_so = tcp_old_head->so_next;
+        // Check if it is in the new list
+        int should_keep = 0;
+        struct socket *so;
+        for (so = slirp->tcb.so_next; so != &slirp->tcb; so = so->so_next) {
+            if (is_same_addr(&so->fhost, &tcp_old_head->fhost)
+                && is_same_addr(&so->lhost, &tcp_old_head->lhost)) {
+                should_keep = true;
+                break;
+            }
+        }
+        if (!should_keep) {
+            closesocket(tcp_old_head->s);
+        }
+        free(tcp_old_head->so_rcv.sb_data);
+        free(tcp_old_head->so_snd.sb_data);
+        free(tcp_old_head);
+        tcp_old_head = next_so;
     }
 
     while (qemu_get_byte(f)) {
@@ -1637,7 +1737,11 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
             return -EINVAL;
 
         so->extra = (void *)ex_ptr->ex_exec;
+        loaded_so ++;
     }
+    printf("after load tcp:\n");
+    print_so(slirp->tcb.so_next, &slirp->tcb);
+    printf("loaded so %d\n", loaded_so);
 
     return vmstate_load_state(f, &vmstate_slirp, slirp, version_id);
 }
