@@ -17,8 +17,13 @@
         <file alias="html/route.html">html/route.html</file>
         <file alias="html/js/qwebchannel.js">../../../html/js/qwebchannel.js</file>
         <file alias="html/css/common.css">html/css/common.css</file>
+        <file alias="html/css/location.css">html/css/location.css</file>
         <file alias="html/js/common.js">html/js/common.js</file>
         <file alias="html/js/points.js">html/js/points.js</file>
+        <file alias="html/js/location-mock-web-channel.js">html/js/location-mock-web-channel.js</file>
+        <file alias="html/js/location-point-overlay.js">html/js/location-point-overlay.js</file>
+        <file alias="html/js/location-point.js">html/js/location-point.js</file>
+        <file alias="html/js/location-search-box.js">html/js/location-search-box.js</file>
         <file alias="html/js/routes.js">html/js/routes.js</file>
     </qresource>
     <qresource prefix="/lib/fonts">
