@@ -158,13 +158,14 @@ extern const char* skin_key_code_str(int index);
 
 // Bit flag for key modifiers like Ctrl or Alt.
 typedef enum {
-    kKeyModLCtrl  = (1U << 0),  // left-control key
-    kKeyModRCtrl  = (1U << 1),  // right-control
-    kKeyModLAlt   = (1U << 2),  // left-alt
-    kKeyModRAlt   = (1U << 3),  // right-alt
-    kKeyModLShift = (1U << 4),  // left-shift
-    kKeyModRShift = (1U << 5),  // right-shift
-    kKeyModNumLock = (1U << 6),  // numlock
+    kKeyModLCtrl = (1U << 0),     // left-control key
+    kKeyModRCtrl = (1U << 1),     // right-control
+    kKeyModLAlt = (1U << 2),      // left-alt
+    kKeyModRAlt = (1U << 3),      // right-alt
+    kKeyModLShift = (1U << 4),    // left-shift
+    kKeyModRShift = (1U << 5),    // right-shift
+    kKeyModNumLock = (1U << 6),   // numlock
+    kKeyModCapsLock = (1U << 7),  // capslock
 } SkinKeyMod;
 
 // Convert a pair of (SkinKeyCode,SkinKeyMod) values into a human-readable

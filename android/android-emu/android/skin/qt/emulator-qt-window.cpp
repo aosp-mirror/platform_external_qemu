@@ -100,9 +100,7 @@
 // This include needs to be after all the Qt includes
 // because it defines macros/types that conflict with
 // qt's own macros/types.
-#include <xcb/xcb.h>
 #elif defined(__APPLE__)
-#include "android/skin/macos_keycodes.h"
 #include "android/skin/qt/mac-native-window.h"
 #else  // windows
 #include <windows.h>
@@ -2256,82 +2254,6 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     if (modifiers & Qt::AltModifier)
         keyData.mod |= kKeyModLAlt;
 
-    queueSkinEvent(skin_event);
-}
-
-void EmulatorQtWindow::handleNativeKeyEvent(int keycode,
-                                            int modifiers,
-                                            SkinEventType eventType) {
-    if (!isActiveWindow() || eventType != kEventKeyDown) {
-        return;
-    }
-
-    D("Raw keycode %d modifiers 0x%x", keycode, modifiers);
-
-    // Do no send modifier by itself.
-    if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
-        skin_keycode_is_modifier(keycode)) {
-        return;
-    }
-
-    SkinEvent* skin_event = createSkinEvent(kEventTextInput);
-    SkinEventTextInputData& textInputData = skin_event->u.text;
-    textInputData.down = true;
-
-    textInputData.keycode = keycode;
-    textInputData.mod = 0;
-#ifdef __linux__
-    if (modifiers & XCB_MOD_MASK_SHIFT) {
-        textInputData.mod |= kKeyModLShift;
-    }
-    if (modifiers & XCB_MOD_MASK_CONTROL) {
-      textInputData.mod |= kKeyModLCtrl;
-    }
-    if (modifiers & XCB_MOD_MASK_1) {
-      textInputData.mod |= kKeyModLAlt;
-    }
-    // Emulator uses qwerty2.kl in Android which doesn't recognize Caps lock
-    // key. Thus, we simulate "Caps Lock" key using "Shift" when "Alt" key is
-    // not pressed. Caution: Alt+Shift+base key will output different symbol
-    // from Alt+Base under some keyboard layout.
-    if ((modifiers & XCB_MOD_MASK_LOCK) && skin_keycode_is_alpha(keycode) &&
-        !(modifiers & XCB_MOD_MASK_1)) {
-        textInputData.mod |= kKeyModLShift;
-    }
-#elif defined(__APPLE__)
-
-    if (modifiers & NSEventModifierFlagShift) {
-        textInputData.mod |= kKeyModLShift;
-    }
-    if (modifiers & NSEventModifierFlagOption) {
-        textInputData.mod |= kKeyModLAlt;
-    }
-    if (modifiers & NSEventModifierFlagControl) {
-        textInputData.mod |= kKeyModLCtrl;
-    }
-    if ((modifiers & NSEventModifierFlagCapsLock) &&
-        skin_keycode_is_alpha(keycode) &&
-        !(modifiers & NSEventModifierFlagOption)) {
-        textInputData.mod |= kKeyModLShift;
-    }
-
-#else  // windows
-    if (HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0) {
-        textInputData.mod |= kKeyModLCtrl;
-    }
-    if (HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0 || (modifiers & MOD_SHIFT)) {
-        textInputData.mod |= kKeyModLShift;
-    }
-    // Left menu will be omitted.
-    if (HIWORD(GetAsyncKeyState(VK_RMENU)) != 0) {
-        textInputData.mod |= kKeyModLAlt;
-    }
-    if (LOWORD(GetKeyState(VK_CAPITAL)) != 0 &&
-        skin_keycode_is_alpha(keycode) && !(textInputData.mod & kKeyModLAlt)) {
-        textInputData.mod |= kKeyModLShift;
-    }
-#endif
-    D("Processed keycode %d modifiers 0x%x", keycode, textInputData.mod);
     queueSkinEvent(skin_event);
 }
 

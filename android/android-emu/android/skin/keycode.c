@@ -289,6 +289,7 @@ bool skin_keycode_is_modifier(int32_t linux_key) {
         case LINUX_KEY_LEFTALT:
         case LINUX_KEY_RIGHTALT:
         case LINUX_KEY_CAPSLOCK:
+        case LINUX_KEY_NUMLOCK:
             return true;
         default:
             return false;
