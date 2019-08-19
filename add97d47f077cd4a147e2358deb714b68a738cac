@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a1c19af_4b3a5979",
+        "filename": "android/android-emu/android/mp4/MP4Demuxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-08-19T23:35:13Z",
+      "side": 1,
+      "message": "This will seek to the nearest keyframe.  To seek to the nearest frame, it looks like you can pass AVSEEK_FLAG_ANY: http://dranger.com/ffmpeg/functions.html#av_seek_frame",
+      "range": {
+        "startLine": 148,
+        "startChar": 63,
+        "endLine": 148,
+        "endChar": 64
+      },
+      "revId": "add97d47f077cd4a147e2358deb714b68a738cac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
