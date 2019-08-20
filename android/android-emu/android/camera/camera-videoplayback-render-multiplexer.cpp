@@ -163,10 +163,17 @@ int64_t RenderMultiplexer::render() {
                 mOngoingAsyncId = async_id;
                 switchRenderer(mVideoRenderer.get());
                 if (maybe_next_request->play().has_offset_in_seconds() &&
+                    mPlaysData) {
+                  LOG(ERROR) << "Seeking is not implemented for data playback.";
+                  return -1;
+                }
+
+                if (maybe_next_request->play().has_offset_in_seconds() &&
                     maybe_next_request->play().offset_in_seconds() < 0) {
                     // TODO: send error response through VideoInjectionController
                     return -1;
                 }
+
                 videoplayer::PlayConfig playConfig(
                     maybe_next_request->play().offset_in_seconds(),
                     maybe_next_request->play().looping());
