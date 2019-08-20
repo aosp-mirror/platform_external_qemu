@@ -14,6 +14,7 @@
 
 #include "android/mp4/MP4Demuxer.h"
 
+#include "android/automation/proto/automation.pb.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
@@ -46,6 +47,9 @@ public:
     void videoRefresh() {}
     void scheduleRefresh(int delayMS) {}
     void loadVideoFileWithData(const ::offworld::DatasetInfo& datasetInfo) {}
+    bool setAutomationEvent(const ::emulator_automation::RecordedEvent& event) {
+      return true;
+    }
     void setErrorStatusAndRecordErrorMessage(std::string errorDetails){};
     bool getErrorStatus(){};
     std::string getErrorMessage(){};

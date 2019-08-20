@@ -356,6 +356,12 @@ private:
         }
     }
 
+    void handleSensorMockRequest(
+        const offworld::SensorMockRequest& request) {
+      using sm = offworld::SensorMockRequest;
+      const uint32_t asyncId = mNextAsyncId++;
+    }
+
     void sendResponse(const offworld::Response& response) {
         send(std::move(protoToVector(response)));
     }

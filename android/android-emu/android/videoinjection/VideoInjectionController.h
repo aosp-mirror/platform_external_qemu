@@ -19,6 +19,7 @@
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/offworld/proto/offworld.pb.h"
 #include <string>
+#include <variant>
 
 namespace android {
 namespace videoinjection {
@@ -33,8 +34,15 @@ enum class VideoInjectionError {
     InternalError,
 };
 
+enum class RequestType {
+    VideoInjection,
+    SensorMock,
+};
+
 struct RequestContext {
+    RequestType type;
     ::offworld::VideoInjectionRequest request;
+    ::offworld::SensorMockRequest mock_request;
     base::Optional<android::AsyncMessagePipeHandle> pipe;
     uint32_t asyncId;
 };
@@ -73,7 +81,7 @@ public:
                 sendMessageCallback = nullptr);
 
     // Return the next video injection request in the queue if any and the
-    // VideoInjectionController has been created. The
+    // VideoInjectionController has been created.
     static base::Optional<android::videoinjection::RequestContext> tryGetNextRequestContext();
 
     //Try to send the async response back to java video injection controller
@@ -100,6 +108,12 @@ public:
     virtual VideoInjectionResult handleRequest(
         android::AsyncMessagePipeHandle pipe,
         ::offworld::VideoInjectionRequest event,
+        uint32_t asyncId) = 0;
+
+    // Handle a sensor mock request and add it into the queue.
+    virtual VideoInjectionResult handleSensorMockRequest(
+        android::AsyncMessagePipeHandle pipe,
+        ::offworld::SensorMockRequest event,
         uint32_t asyncId) = 0;
 
     // Called on pipe close, to cancel any pending operations.
