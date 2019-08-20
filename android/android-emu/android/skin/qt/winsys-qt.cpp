@@ -652,6 +652,49 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
+void skin_winsys_parse_multidisplay_args(uint32_t* count, uint32_t* para) {
+    EmulatorQtWindow* qtWindow = EmulatorQtWindow::getInstance();
+    *count = 0;
+    if (!qtWindow || !android_cmdLineOptions || !android_cmdLineOptions->multidisplay) {
+        return;
+    }
+    std::string s = android_cmdLineOptions->multidisplay;
+    std::vector<uint32_t> params;
+    size_t last = 0, next = 0;
+    while ((next = s.find(",", last)) != std::string::npos) {
+        params.push_back(std::stoi(s.substr(last, next - last)));
+        last = next + 1;
+    }
+    params.push_back(std::stoi(s.substr(last)));
+    if (params.size() < 5 || params.size() % 5 != 0) {
+        fprintf(stderr, "Not enough parameters for multidisplay\n");
+        return;
+    }
+    int i = 0;
+    for (i = 0; i < params.size(); i+=5) {
+        if (params[i] == 0 || params[i] > 3) {
+            fprintf(stderr, "multidisplay index should only be 1, 2, or 3\n");
+            return;
+        }
+        if (!qtWindow->multiDisplayParamValidate(params[i + 1],
+                                                 params[i + 2],
+                                                 params[i + 3],
+                                                 params[i + 4])) {
+            fprintf(stderr, "Invalid width/height/dpi settings for multidisplay\n");
+            return;
+        }
+        if (para) {
+            *para++ = params[i];
+            *para++ = params[i + 1];
+            *para++ = params[i + 2];
+            *para++ = params[i + 3];
+            *para++ = params[i + 4];
+        }
+    }
+
+    *count = params.size() / 5;
+}
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QtLogger* q = QtLogger::get();
@@ -804,25 +847,60 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                 settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
 
             window->toolWindow()->switchClipboardSharing(enableClipboard);
-            if (android_hw->hw_display1_width != 0 &&
-                android_hw->hw_display1_height != 0) {
-                window->switchMultiDisplay(true, 1,
-                                           android_hw->hw_display1_xOffset,
-                                           android_hw->hw_display1_yOffset,
-                                           android_hw->hw_display1_width,
-                                           android_hw->hw_display1_height,
-                                           android_hw->hw_display1_density,
-                                           android_hw->hw_display1_flag);
+
+            // Get the multidisplay configs from startup parameters, if yes,
+            // override the configs in config.ini
+            uint32_t multidisplay_cnt;
+            skin_winsys_parse_multidisplay_args(&multidisplay_cnt, nullptr);
+            std::vector<uint32_t> multidisplay_args;
+            if (multidisplay_cnt) {
+                multidisplay_args.resize(multidisplay_cnt * 5);
+                skin_winsys_parse_multidisplay_args(&multidisplay_cnt,
+                                                    multidisplay_args.data());
             }
-            if (android_hw->hw_display2_width != 0 &&
-                android_hw->hw_display2_height != 0) {
-                window->switchMultiDisplay(true, 2,
-                                           android_hw->hw_display2_xOffset,
-                                           android_hw->hw_display2_yOffset,
-                                           android_hw->hw_display2_width,
-                                           android_hw->hw_display2_height,
-                                           android_hw->hw_display2_density,
-                                           android_hw->hw_display2_flag);
+            if (multidisplay_cnt) {
+                int i = 0;
+                for (int cnt = 0; cnt < multidisplay_cnt; cnt++) {
+                    window->switchMultiDisplay(true,
+                                               multidisplay_args[i++],
+                                               -1, -1,
+                                               multidisplay_args[i++],
+                                               multidisplay_args[i++],
+                                               multidisplay_args[i++],
+                                               multidisplay_args[i++]);
+                }
+            }
+            else {
+                if (android_hw->hw_display1_width != 0 &&
+                    android_hw->hw_display1_height != 0) {
+                    window->switchMultiDisplay(true, 1,
+                                               android_hw->hw_display1_xOffset,
+                                               android_hw->hw_display1_yOffset,
+                                               android_hw->hw_display1_width,
+                                               android_hw->hw_display1_height,
+                                               android_hw->hw_display1_density,
+                                               android_hw->hw_display1_flag);
+                }
+                if (android_hw->hw_display2_width != 0 &&
+                    android_hw->hw_display2_height != 0) {
+                    window->switchMultiDisplay(true, 2,
+                                               android_hw->hw_display2_xOffset,
+                                               android_hw->hw_display2_yOffset,
+                                               android_hw->hw_display2_width,
+                                               android_hw->hw_display2_height,
+                                               android_hw->hw_display2_density,
+                                               android_hw->hw_display2_flag);
+                }
+                if (android_hw->hw_display3_width != 0 &&
+                    android_hw->hw_display3_height != 0) {
+                    window->switchMultiDisplay(true, 2,
+                                               android_hw->hw_display3_xOffset,
+                                               android_hw->hw_display3_yOffset,
+                                               android_hw->hw_display3_width,
+                                               android_hw->hw_display3_height,
+                                               android_hw->hw_display3_density,
+                                               android_hw->hw_display3_flag);
+                }
             }
         });
     }

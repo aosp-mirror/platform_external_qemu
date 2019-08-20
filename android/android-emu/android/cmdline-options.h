@@ -238,6 +238,8 @@ OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for t
 OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrtc video bridge.")
 #endif
 
+OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

@@ -1745,6 +1745,19 @@ help_sim_access_rules_file(stralloc_t* out)
     );
 }
 
+static void
+help_multidisplay(stralloc_t* out)
+{
+    PRINTF(
+    "  Create displays besides the default android display. Format:\n"
+    "  -multidisplay <index> <width> <height> <dpi> <flag>\n"
+    "    1 <= index <= 3\n"
+    "  as an example,\n"
+    "  -multidisplay 1,1200,800,240,0 will create display 1 with dimension\n"
+    "  1200x800, dpi 240 and the default flag\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

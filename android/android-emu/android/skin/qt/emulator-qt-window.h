@@ -128,6 +128,7 @@ public:
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
+    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 
     // In Qt, signals are normally events of interest that a class can emit,
     // which can be hooked up to arbitrary slots. Here we use this mechanism for
@@ -555,7 +556,6 @@ private:
     std::unordered_map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mMultiDisplayLock;
     static const int MAX_MULTIDISPLAYS = 10;
-    bool multiDisplayParamValidate(uint32_t w, uint32_t h, uint32_t dpi, uint32_t flag);
 };
 
 class SkinSurfaceBitmap {
