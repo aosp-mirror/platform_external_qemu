@@ -203,6 +203,18 @@ message FieldInfo {
   optional Type type = 2;
 }
 
+message SensorMockRequest {
+  optional uint64 timestamp_us = 1;
+
+  message LocationMock {
+    optional LocationDataPacketInfo location_data = 1;
+  }
+
+  oneof function {
+    LocationMock mock_location = 50;
+  }
+}
+
 
 //
 // Responses
