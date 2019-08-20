@@ -105,6 +105,24 @@
       "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69d1e3b4_152cb967",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-20T17:59:32Z",
+      "side": 1,
+      "message": "Added in patch 3.",
+      "parentUuid": "0cb74751_eb17851e",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
