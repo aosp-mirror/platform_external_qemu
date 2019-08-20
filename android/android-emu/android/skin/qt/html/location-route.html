@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Android Emulator Location Picker</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/location.css">
+    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="js/location-mock-web-channel.js"></script>
+    <script src="js/location-point-overlay.js"></script>
+    <script src="js/location-search-box.js"></script>
+    <script src="js/location-routes.js"></script>
+</head>
+
+<body>
+    <div id="search-container" class="search-container mdc-ripple-surface">
+        <input id="search-input" class="search-input" type="text" placeholder="Search">
+        <div id="search-spinner" class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+        <div id="search-icon" class="search-icon material-icons">search</div>
+    </div>
+    <div id="map"></div>
+    <div id="startInfoOverlay" class="pointOverlaySlideOut">
+        <div id="startNavButton" class="circular-button mdc-ripple-surface">
+            <div class="directions-icon"></div>
+        </div>
+        <div id="startInfoTitle" class="title">Port Authority Bus Terminal, NY</div>
+        <div id="startInfoSubtitle" class="subtitle">40.134832, -74.832453, 14.34</div>
+    </div>
+    <div id="locationInfoOverlay">
+    </div>
+    <div id="routeCreatorOverlay" class="routeCreatorOverlayHidden">
+        <div id="upperbox">
+            <div style="display: flex; width: 100%;">
+                <div style="display: flex; width: 100%; padding-left: 48px;">
+                    <label class="transport-mode-container">
+                        <input id="transportModeCar" type="radio" checked="checked" name="transportMode"
+                            value="DRIVING">
+                        <div>
+                            <img class="transport-mode-car"></img>
+                        </div>
+                    </label>
+                    <label class="transport-mode-container">
+                        <input id="transportModeTransit" type="radio" name="transportMode" value="TRANSIT">
+                        <div>
+                            <img class="transport-mode-transit"></img>
+                        </div>
+                    </label>
+                    <label class="transport-mode-container">
+                        <input id="transportModeBike" type="radio" name="transportMode" value="BICYCLING">
+                        <div>
+                            <img class="transport-mode-bike"></img>
+                        </div>
+                    </label>
+                    <label class="transport-mode-container">
+                        <input id="transportModeWalk" type="radio" name="transportMode" value="WALKING">
+                        <div>
+                            <img class="transport-mode-walk"></img>
+                        </div>
+                    </label>
+                </div>
+                <div id="closeRouteCreatorButton" class="close-icon"></div>
+            </div>
+            <div id="waypoints-container">
+                <div id="waypoints-icons-container">
+                    <div class="widget-directions-icon start-dot-icon"></div>
+                    <div class="widget-directions-icon waypoints-icon"></div>
+                    <div class="widget-directions-icon end-marker-icon"></div>
+                </div>
+                <div id="waypoints-addrs-container">
+                    <input id="startAddress" name="waypoints" class="waypoint-addr-input" type="text"
+                        placeholder="Choose starting point, or click on the map..." />
+                    <input id="endAddress" name="waypoints" class="waypoint-addr-input" type="text"
+                        placeholder="The destination" />
+                </div>
+                <div id="waypoints-reverse-container">
+                    <div class="widget-directions-icon reverse-icon" onclick="onReverseButtonClicked()"></div>
+                </div>
+            </div>
+        </div>
+        <div id="lowerbox" style="justify-content: space-between">
+            <div
+                style="height: 100%; display: flex; flex-direction: column; justify-content: center; margin-left: 12px;">
+                <div class="location-icons material-icons">add_circle_outline</div>
+            </div>
+            <div id="saveRouteButton" class="common-button" onclick="saveRouteButton_clicked()">
+                SAVE ROUTE
+            </div>
+        </div>
+        <div id="searchResultsOverlay"></div>
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async
+            defer></script>
+        <script src="js/location-loader.js"></script>
+</body>
+
+</html>

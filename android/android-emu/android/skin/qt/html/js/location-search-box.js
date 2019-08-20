@@ -1,7 +1,8 @@
 class LocationSearchBox {
-    init(map) {
+    init(map, searchResultsMarkers, placeChangedHandler, clearSearchResultsHandler) {
         // Add Google search box
         // Create the search box and link it to the UI element.
+        var self = this;
         var searchContainer = document.getElementById('search-container');
         var input = /** @type {HTMLInputElement} */ (
             document.getElementById('search-input'));
@@ -14,18 +15,13 @@ class LocationSearchBox {
         // Set the data fields to return when the user selects a place.
         autocomplete.setFields(
             ['address_components', 'geometry', 'icon', 'name']);
-
         // Listen for the event fired when the user selects an item from the
         // pick list.
         autocomplete.addListener('place_changed', function () {
-            // Clear the red pin and any existing search markers
-            if (gPendingMarker != null) {
-                gPendingMarker.setMap(null);
-            }
-            for (marker in gSearchResultMarkers) {
+            for (marker in searchResultsMarkers) {
                 marker.setMap(null);
             }
-            gSearchResultMarkers = [];
+            searchResultsMarkers = [];
 
             var place = autocomplete.getPlace();
             if (!place.geometry) {
@@ -36,8 +32,7 @@ class LocationSearchBox {
             }
 
             lastLatLng = place.geometry.location;
-            showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
-            sendAddress(lastLatLng);
+            placeChangedHandler(lastLatLng);
 
             // If the place has a geometry, then present it on a map.
             if (place.geometry.viewport) {
@@ -51,28 +46,24 @@ class LocationSearchBox {
         document.getElementById('search-icon').addEventListener('click', function () {
             if (input.value.length > 0) {
                 input.value = "";
-                this.innerText = "search";
-                gPointOverlay.hide()
-                if (gPendingMarker != null) {
-                    gPendingMarker.setMap(null);
-                }
+                self._showSearchIcon();
+                clearSearchResultsHandler();
             }
         });
         input.addEventListener('input', function () {
-            var searchIcon = $('#search-icon');
             if (input.value.length > 0) {
-                searchIcon.text("close");
+                self._showCloseIcon();
             } else {
-                searchIcon.text("search");
+                self._showSearchIcon();
             }
         });
     }
 
     update(address) {
         $('#search-input').val(address);
-        $('#search-icon').text("close");
         $('#search-icon').css("display", "block");
         $('#search-spinner').css("display", "none");
+        this._showCloseIcon();
     }
 
     showSpinner() {
@@ -80,7 +71,22 @@ class LocationSearchBox {
         $('#search-spinner').css('display', 'flex');
     }
 
+    hideSpinner() {
+        $('#search-icon').css('display', 'block');
+        $('#search-spinner').css('display', 'none');
+    }
+
     clear() {
+        this._showSearchIcon();
+    }
+
+    _showSearchIcon() {
         $('#search-icon').text("search");
+        $('#search-icon').css("color", "#b1b1b1");
+    }
+
+    _showCloseIcon() {
+        $('#search-icon').text("close");
+        $('#search-icon').css("color", "#555555");
     }
 }
