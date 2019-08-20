@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "14bf1c7b_0d400073",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-20T17:37:37Z",
+      "side": 1,
+      "message": "Yes, this is another option for the cmd line. \nThe current implementation is to inline with the console command.",
+      "parentUuid": "81300a37_d0821597",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e909151a_8056b82f",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2019-08-20T17:34:15Z",
       "side": 1,
       "message": "If we limit the total display up to 3, we should also add \"hw_display3\" in config.ini to be consistent.",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7297ce8c_fd8ba9e3",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-20T17:37:37Z",
+      "side": 1,
+      "message": "Sure, we can add that is a separate CL.",
+      "parentUuid": "e909151a_8056b82f",
       "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
