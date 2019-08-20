@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a6f2a87_2508b61e",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-08-20T20:25:37Z",
+      "side": 1,
+      "message": "opt_list has different meaning from opt_param here. User could do emulator @avd -multdisplay 1,1200,800,240,0 -multidisplay 2,1000,900,240,0.\n\nCould you take a look at the example in opt_list(feature)",
+      "revId": "f6f5b37b2ba6e33a9bf2189a2b4026497cfa0734",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
