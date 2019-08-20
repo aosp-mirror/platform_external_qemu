@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81300a37_d0821597",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-08-20T17:34:15Z",
+      "side": 1,
+      "message": "I wonder if the command line option could look like \n\"emulator @\u003cAVD_name\u003e -multi-display displayId\u003d1,width\u003d\u003cwidth\u003e,height\u003d\u003cheight\u003e,dpi\u003d\u003cdpi\u003e,flag\u003d\u003cflag\u003e\". It would be more readable.",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e909151a_8056b82f",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-08-20T17:34:15Z",
+      "side": 1,
+      "message": "If we limit the total display up to 3, we should also add \"hw_display3\" in config.ini to be consistent.",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
