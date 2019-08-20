@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b3bfb84_f8a4b34c",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2019-08-20T02:16:22Z",
+      "side": 1,
+      "message": "nit: are tabs and spaces mixed together in these lines?",
+      "revId": "2ffb2da8c3dca76a4ebae7fa85d3975d94390074",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
