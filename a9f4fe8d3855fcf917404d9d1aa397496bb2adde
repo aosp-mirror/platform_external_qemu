@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3840e69b_176cefe3",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2019-08-20T13:52:29Z",
+      "side": 1,
+      "message": "do we need this when we already support the -gpu flag? fuchsia support swiftshader already by passing -gpu swiftshader_indirect. see https://cs.corp.google.com/fuchsia/fuchsia-mirror/tools/devshell/aemu?l\u003d127",
+      "range": {
+        "startLine": 994,
+        "startChar": 0,
+        "endLine": 1001,
+        "endChar": 17
+      },
+      "revId": "a9f4fe8d3855fcf917404d9d1aa397496bb2adde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "700995d1_a52140d7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2019-08-20T13:52:29Z",
+      "side": 1,
+      "message": "does this work with \"-gpu swiftshader_indirect\" flag?",
+      "revId": "a9f4fe8d3855fcf917404d9d1aa397496bb2adde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
