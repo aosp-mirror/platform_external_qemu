@@ -20,10 +20,14 @@
 void LocationPage::on_loc_playRouteButton_clicked() {
     if (mNowPlaying) {
         // STOP
+        mUi->loc_routePlayingList->hide();
+        mUi->loc_routeList->show();
         locationPlaybackStop_v2();
         emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
         // START
+        mUi->loc_routeList->hide();
+        mUi->loc_routePlayingList->show();
         emit mMapBridge->showRoutePlaybackOverlay(true);
         mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
         if (parsePointsFromJson()) {
