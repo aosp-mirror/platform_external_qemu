@@ -525,8 +525,8 @@ void LocationPage::setUpWebEngine() {
             continue;
         }
 
-        // Get the HTML file (either 'index.html' or route.html')
-        QFile indexHtmlFile(isPoint ? ":/html/index.html" : ":/html/route.html");
+        // Get the HTML file (either 'location-point.html' or 'location-route.html')
+        QFile indexHtmlFile(isPoint ? ":/html/location-point.html" : ":/html/location-route.html");
 
         // Insert the Maps API key into the HTML and publish
         // that to QWebChannel
@@ -536,7 +536,7 @@ void LocationPage::setUpWebEngine() {
                 // Change the placeholder to the real Maps API key
                 htmlByteArray.replace("YOUR_API_KEY", mMapsApiKey.toUtf8());
                 // Publish it
-                webEnginePage->setHtml(htmlByteArray, QUrl(isPoint ? "qrc:/html/index.html" : "qrc:/html/route.html"));
+                webEnginePage->setHtml(htmlByteArray, QUrl(isPoint ? "qrc:/html/location-point.html" : "qrc:/html/location-route.html"));
             }
         }
     }
