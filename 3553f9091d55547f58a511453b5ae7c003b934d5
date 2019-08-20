@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5b23a5db_df60aa34",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-20T17:42:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "14bf1c7b_0d400073",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e909151a_8056b82f",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 2
@@ -69,6 +87,24 @@
       "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0cb74751_eb17851e",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-20T17:42:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7297ce8c_fd8ba9e3",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
