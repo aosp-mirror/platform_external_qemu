@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "b7309cb8_ae43d08a",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-08-20T18:50:33Z",
+      "side": 1,
+      "message": "ok. Let\u0027s revisit in the future then if chanage needs to be made.",
+      "parentUuid": "5b23a5db_df60aa34",
+      "revId": "3553f9091d55547f58a511453b5ae7c003b934d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e909151a_8056b82f",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 2
