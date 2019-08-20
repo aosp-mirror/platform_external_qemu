@@ -67,6 +67,10 @@
 *[ColorGroup="Countdown"] {
     color: #CA4644;
 }
+*[ColorGroup="RoutePlaybackTitleItem"] {
+    background-color: #4285F4;
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;

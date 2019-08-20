@@ -13,6 +13,8 @@
 
 #include "ui_cc-list-item.h"
 
+#include "android/skin/qt/common-controls/cc-layout-direction.h"
+
 #include <QWidget>
 #include <memory>
 
@@ -29,8 +31,10 @@ public:
     void setTitle(QString title);
     std::string getTitle() const;
     void setSubtitle(QString displayInfo);
-    void setExtraLabelText(QString extraText);
-    void setExtraLabelPixmap(QPixmap pixmap);
+    // Only support CCLayoutDirection Left and Right
+    void setLabelText(QString extraText, CCLayoutDirection direction = CCLayoutDirection::Right);
+    void setLabelPixmap(QPixmap pixmap, CCLayoutDirection direction = CCLayoutDirection::Right);
+    void setLabelSize(int width, int height, CCLayoutDirection direction = CCLayoutDirection::Right);
     void setEditButtonEnabled(bool enabled);
     void setSelected(bool selected);
 

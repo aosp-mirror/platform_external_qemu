@@ -26,6 +26,22 @@
     <number>6</number>
    </property>
    <item>
+    <widget class="QLabel" name="leftLabel">
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="GroupColor" stdset="0">
+      <string>ListItem</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
       <number>0</number>
@@ -90,7 +106,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="extraLabel">
+    <widget class="QLabel" name="rightLabel">
      <property name="font">
       <font>
        <family>Roboto</family>
@@ -98,7 +114,7 @@
       </font>
      </property>
      <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <set>Qt::AlignCenter</set>
      </property>
      <property name="GroupColor" stdset="0">
       <string>ListItem</string>

@@ -295,6 +295,57 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QWidget">
+     <property name="ColorGroup" stdset="0">
+      <string>RoutePlaybackTitleItem</string>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>38</y>
+       <width>272</width>
+       <height>80</height>
+      </rect>
+     </property>
+     <widget class="RoutePlaybackTitleItem" name="loc_routePlayingTitleItem">
+      <property name="visible">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>272</width>
+        <height>80</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QListWidget" name="loc_routePlayingList">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>118</y>
+       <width>272</width>
+       <height>372</height>
+      </rect>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="autoScroll">
+      <bool>false</bool>
+     </property>
+     <property name="selectionRectVisible">
+      <bool>true</bool>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+    </widget>
     <widget class="QWebEngineView" name="loc_routeWebEngineView" native="true">
      <property name="geometry">
       <rect>
@@ -1012,6 +1063,13 @@
    <header>android/skin/qt/angle-input-widget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>RoutePlaybackTitleItem</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/location-route-playback-item.h</header>
+   <container>1</container>
+  </customwidget>
+
  </customwidgets>
  <resources>
   <include location="../resources.qrc"/>

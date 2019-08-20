@@ -392,7 +392,7 @@ public:
         }
         QIcon modeIcon = getIconForCurrentTheme(modeIconName);
         QPixmap modeIconPix = modeIcon.pixmap(kIconSize, kIconSize);
-        setExtraLabelPixmap(modeIconPix);
+        setLabelPixmap(modeIconPix);
     }
 
     void removeFromListWidget() {

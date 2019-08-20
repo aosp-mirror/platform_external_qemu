@@ -41,12 +41,37 @@ void CCListItem::setSubtitle(QString subtitle) {
     mUi->subtitle->setText(subtitle);
 }
 
-void CCListItem::setExtraLabelText(QString extraText) {
-    mUi->extraLabel->setText(extraText);
+void CCListItem::setLabelText(QString extraText, CCLayoutDirection direction) {
+    switch (direction) {
+    case CCLayoutDirection::Left:
+        mUi->leftLabel->setText(extraText);
+        break;
+    case CCLayoutDirection::Right:
+        mUi->rightLabel->setText(extraText);
+        break;
+    }
 }
 
-void CCListItem::setExtraLabelPixmap(QPixmap pixmap) {
-    mUi->extraLabel->setPixmap(pixmap);
+void CCListItem::setLabelPixmap(QPixmap pixmap, CCLayoutDirection direction) {
+    switch (direction) {
+    case CCLayoutDirection::Left:
+        mUi->leftLabel->setPixmap(pixmap);
+        break;
+    case CCLayoutDirection::Right:
+        mUi->rightLabel->setPixmap(pixmap);
+        break;
+    }
+}
+
+void CCListItem::setLabelSize(int width, int height, CCLayoutDirection direction) {
+    switch (direction) {
+    case CCLayoutDirection::Left:
+        mUi->leftLabel->setFixedSize(width, height);
+        break;
+    case CCLayoutDirection::Right:
+        mUi->rightLabel->setFixedSize(width, height);
+        break;
+    }
 }
 
 void CCListItem::setSubtitleOpacity(double opacity) {
@@ -71,10 +96,12 @@ void CCListItem::setSelected(bool selected) {
     if (selected) {
         mUi->title->setStyleSheet("color: white");
         mUi->subtitle->setStyleSheet("color: white");
-        mUi->extraLabel->setStyleSheet("color: white");
+        mUi->leftLabel->setStyleSheet("color: white");
+        mUi->rightLabel->setStyleSheet("color: white");
     } else {
         mUi->title->setStyleSheet("");
         mUi->subtitle->setStyleSheet("");
-        mUi->extraLabel->setStyleSheet("");
+        mUi->leftLabel->setStyleSheet("");
+        mUi->rightLabel->setStyleSheet("");
     }
 }

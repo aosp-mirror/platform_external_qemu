@@ -28,7 +28,7 @@ void RecordMacroSavedItem::setDisplayInfo(QString displayInfo) {
 }
 
 void RecordMacroSavedItem::setDisplayTime(QString displayTime) {
-    setExtraLabelText(displayTime);
+    setLabelText(displayTime);
 }
 
 bool RecordMacroSavedItem::isPreset() {

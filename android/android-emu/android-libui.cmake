@@ -224,6 +224,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/google-play-page.h
     android/skin/qt/extended-pages/help-page.h
     android/skin/qt/extended-pages/location-page.h
+    android/skin/qt/extended-pages/location-route-playback-item.h
     android/skin/qt/extended-pages/microphone-page.h
     android/skin/qt/extended-pages/record-and-playback-page.h
     android/skin/qt/extended-pages/record-macro-edit-dialog.h
