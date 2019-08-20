@@ -17,13 +17,21 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#ifdef USE_WEBENGINE
 void LocationPage::on_loc_playRouteButton_clicked() {
     if (mNowPlaying) {
         // STOP
+        mUi->loc_routePlayingList->hide();
+        mUi->loc_routePlayingTitleItem->hide();
+        mUi->loc_routeList->show();
         locationPlaybackStop_v2();
         emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
         // START
+        mUi->loc_routePlayingList->clear();
+        mUi->loc_routeList->hide();
+        mUi->loc_routePlayingList->show();
+        mUi->loc_routePlayingTitleItem->show();
         emit mMapBridge->showRoutePlaybackOverlay(true);
         mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
         if (parsePointsFromJson()) {
@@ -36,9 +44,12 @@ bool LocationPage::parsePointsFromJson() {
     mPlaybackElements.clear();
     mPlaybackElements.reserve(mRouteNumPoints);
     QString jsonString;
+    QString titleString;
+
     if (!mRouteJson.isEmpty()) {
         // Use the unsaved route we recently received
         jsonString = mRouteJson;
+        titleString = "Route not saved..";
     } else {
         // Read a saved route JSON file
         auto* currentItem = mUi->loc_routeList->currentItem();
@@ -48,6 +59,7 @@ bool LocationPage::parsePointsFromJson() {
         }
         RouteWidgetItem* item = qobject_cast<RouteWidgetItem*>(mUi->loc_routeList->itemWidget(currentItem));
         jsonString = readRouteJsonFile(item->routeElement().protoFilePath);
+        titleString = item->routeElement().logicalName;
     }
     QJsonDocument routeDoc = QJsonDocument::fromJson(jsonString.toUtf8());
 
@@ -69,6 +81,7 @@ bool LocationPage::parsePointsFromJson() {
         mRouteNumPoints = 0;
         return false;
     }
+
     double previousLat = firstLocationObject.value("lat").toDouble();
     double previousLng = firstLocationObject.value("lng").toDouble();
 
@@ -79,9 +92,38 @@ bool LocationPage::parsePointsFromJson() {
                                    .toObject().value("legs").toArray();
     int nLegs = legsArray.size();
 
+    QString endAddr = legsArray.at(nLegs - 1).toObject().value("end_address").toString();
+    QString startAddr = legsArray.at(0).toObject().value("start_address").toString();
+    mUi->loc_routePlayingTitleItem->setTitle(titleString);
+    // Build a string for the titleitem. The format is <start_addr> - <end_addr>
+    mUi->loc_routePlayingTitleItem->setSubtitle(QString("%1 - %2").arg(startAddr).arg(endAddr));
+    mUi->loc_routePlayingTitleItem->setTransportMode(mRouteTravelMode);
+
+
     // Look at each routes[0].legs[]
     for (int legIdx = 0; legIdx < nLegs; legIdx++) {
         QJsonObject thisLegObject = legsArray.at(legIdx).toObject();
+
+        QJsonObject startLocation = thisLegObject.value("start_location").toObject();
+        QString thisStartAddr = thisLegObject.value("start_address").toString();
+        auto* startWaypointItem = new RoutePlaybackWaypointItem(
+                thisStartAddr,
+                QString("%1, %2").arg(startLocation.value("lat").toDouble()).arg(startLocation.value("lng").toDouble()),
+                (legIdx == 0 ?
+                        RoutePlaybackWaypointItem::WaypointType::Start :
+                        RoutePlaybackWaypointItem::WaypointType::Intermediate),
+                mUi->loc_routePlayingList);
+
+        if (legIdx == nLegs - 1) {
+            QJsonObject endLocation = thisLegObject.value("end_location").toObject();
+            QString thisEndAddr = thisLegObject.value("end_address").toString();
+            auto* endWaypointItem = new RoutePlaybackWaypointItem(
+                    thisEndAddr,
+                    QString("%1, %2").arg(endLocation.value("lat").toDouble()).arg(endLocation.value("lng").toDouble()),
+                    RoutePlaybackWaypointItem::WaypointType::End,
+                    mUi->loc_routePlayingList);
+        }
+
         // We only care about the steps[] within routes[0].legs[]
         QJsonArray stepsArray = thisLegObject.value("steps").toArray();
         int nSteps = stepsArray.size();
@@ -180,3 +222,11 @@ double LocationPage::getDistanceMeters(double startLat, double startLng, double 
     static constexpr double METERS_PER_NM = 1852.0; // Exactly
     return getDistanceNm(startLat, startLng, endLat, endLng) * METERS_PER_NM;
 }
+
+#else
+void LocationPage::on_loc_playRouteButton_clicked() { }
+bool LocationPage::parsePointsFromJson() { return true; }
+void LocationPage::locationPlaybackStart_v2() { }
+double LocationPage::getDistanceNm(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
+double LocationPage::getDistanceMeters(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
+#endif

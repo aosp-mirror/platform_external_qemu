@@ -154,6 +154,9 @@
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
         <file alias="transit">images/light/ic_directions_transit_222_48dp.svg</file>
         <file alias="trash">images/light/ic_delete_777_48px.svg</file>
+        <file alias="trip_origin">images/light/ic_trip_origin_24dp.svg</file>
+        <file alias="trip_waypoint">images/light/ic_directions_waypoint_dot_24dp.svg</file>
+        <file alias="trip_destination">images/light/ic_directions_destination_24dp.svg</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
         <file alias="walk">images/light/ic_directions_walk_222_48dp.svg</file>
     </qresource>
@@ -279,6 +282,9 @@
         <file alias="toggle_on_disabled">images/dark/toggle_on_disabled_dark.png</file>
         <file alias="transit">images/dark/ic_directions_transit_EEE_48dp.svg</file>
         <file alias="trash">images/dark/ic_delete_bcc_48px.svg</file>
+        <file alias="trip_origin">images/dark/ic_trip_origin_white_24dp.svg</file>
+        <file alias="trip_waypoint">images/dark/ic_directions_waypoint_dot_white_24dp.svg</file>
+        <file alias="trip_destination">images/dark/ic_directions_destination_white_24dp.svg</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
         <file alias="walk">images/dark/ic_directions_walk_EEE_48dp.svg</file>
     </qresource>
