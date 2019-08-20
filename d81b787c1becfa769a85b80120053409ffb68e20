@@ -22,6 +22,53 @@
       "revId": "d81b787c1becfa769a85b80120053409ffb68e20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a0e60f9_8c666316",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-08-20T00:54:07Z",
+      "side": 1,
+      "message": "+1, missing line below?",
+      "parentUuid": "9e1031cf_00818f78",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 20
+      },
+      "revId": "d81b787c1becfa769a85b80120053409ffb68e20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ef339e5_61d61002",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-08-20T00:54:07Z",
+      "side": 1,
+      "message": "Extract out constant, maybe kMicrosecondsPerSecond",
+      "range": {
+        "startLine": 61,
+        "startChar": 59,
+        "endLine": 61,
+        "endChar": 66
+      },
+      "revId": "d81b787c1becfa769a85b80120053409ffb68e20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
