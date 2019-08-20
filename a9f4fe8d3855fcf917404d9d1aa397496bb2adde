@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d10118b3_829394b8",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-20T15:14:53Z",
+      "side": 1,
+      "message": "likely we don\u0027t need it; just want to ensure that the default path ends up not trying to use host gpu when using swiftshader icd",
+      "parentUuid": "3840e69b_176cefe3",
+      "range": {
+        "startLine": 994,
+        "startChar": 0,
+        "endLine": 1001,
+        "endChar": 17
+      },
+      "revId": "a9f4fe8d3855fcf917404d9d1aa397496bb2adde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "700995d1_a52140d7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2019-08-20T13:52:29Z",
       "side": 1,
       "message": "does this work with \"-gpu swiftshader_indirect\" flag?",
+      "revId": "a9f4fe8d3855fcf917404d9d1aa397496bb2adde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82c91b38_4898cedc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-20T15:14:53Z",
+      "side": 1,
+      "message": "gl/vk interop is not supported in swiftshader even when using -gpu swiftshader_indirect",
+      "parentUuid": "700995d1_a52140d7",
       "revId": "a9f4fe8d3855fcf917404d9d1aa397496bb2adde",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
