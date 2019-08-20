@@ -122,9 +122,7 @@ int Mp4DemuxerImpl::demuxNextPacket() {
         auto stream = formatCtx->streams[videoStreamIndex];
         // seek to start of the streams in looping mode
         if (mPlayer->isLooping()) {
-            auto stream = formatCtx->streams[videoStreamIndex];
-            avio_seek(formatCtx->pb, 0, SEEK_SET);
-            avformat_seek_file(formatCtx, videoStreamIndex, 0, 0, stream->duration, 0);
+            av_seek_frame(formatCtx, -1, 0, 0);
             return 0;
         }
 
@@ -147,10 +145,10 @@ void Mp4DemuxerImpl::seek(double timestamp) {
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
 
     int64_t convertedTimestamp = timestamp * (double) (AV_TIME_BASE);
-    int ret = avformat_seek_file(formatCtx, -1, INT64_MIN, convertedTimestamp, INT64_MAX, 0);
+    int ret = av_seek_frame(formatCtx, -1, convertedTimestamp, AVSEEK_FLAG_ANY);
 
     if (ret < 0) {
-        LOG(ERROR) << "avformat_seek_file returned error";
+        LOG(ERROR) << "av_seek_frame returned error";
         return;
     }
     if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0) {
