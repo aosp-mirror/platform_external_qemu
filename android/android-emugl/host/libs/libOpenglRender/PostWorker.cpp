@@ -61,6 +61,10 @@ void PostWorker::post(ColorBuffer* cb) {
                 (iter.second.width == 0 || iter.second.height == 0 || iter.second.cb == 0)) {
                 continue;
             }
+            // don't render 2nd cb to primary display
+            if (iter.first == 0 && cb->getDisplay() != 0) {
+                continue;
+            }
             ColorBuffer* multiDisplayCb = iter.first == 0 ? cb :
                 mFb->findColorBuffer(iter.second.cb).get();
             if (multiDisplayCb == nullptr) {

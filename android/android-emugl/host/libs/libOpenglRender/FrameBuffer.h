@@ -497,6 +497,7 @@ public:
     int createDisplay(uint32_t *displayId);
     int destroyDisplay(uint32_t displayId);
     int setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer);
+    int setDisplayColorBufferUnlocked(uint32_t displayId, uint32_t colorBuffer);
     int getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer);
     int getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId);
     int getDisplayPose(uint32_t displayId,
