@@ -1101,6 +1101,7 @@ static void rcSetPuid(uint64_t puid) {
 static int rcCompose(uint32_t bufferSize, void* buffer) {
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
+printf("rcCompose(): fb=%p\n", fb);
     if (!fb) {
         return -1;
     }
@@ -1133,7 +1134,7 @@ static int rcSetDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
         return -1;
     }
 
-    return fb->setDisplayColorBuffer(displayId, colorBuffer);
+    return fb->setDisplayColorBufferLocked(displayId, colorBuffer);
 }
 
 static int rcGetDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
