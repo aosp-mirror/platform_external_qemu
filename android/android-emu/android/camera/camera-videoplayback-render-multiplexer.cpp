@@ -168,6 +168,11 @@ int64_t RenderMultiplexer::render() {
                   return -1;
                 }
 
+                if (maybe_next_request->play().looping() && mPlaysData) {
+                  LOG(ERROR) << "Looping is not implemented for data playback.";
+                  return -1;
+                }
+
                 if (maybe_next_request->play().has_offset_in_seconds() &&
                     maybe_next_request->play().offset_in_seconds() < 0) {
                     // TODO: send error response through VideoInjectionController
