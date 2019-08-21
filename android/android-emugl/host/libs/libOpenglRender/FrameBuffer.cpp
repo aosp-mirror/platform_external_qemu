@@ -2598,8 +2598,8 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
         return 0;
     }
     if (*displayId == s_invalidIdMultiDisplay) {
-        while (m_displays.find(++s_nextDisplayId) != m_displays.end()) { }
-        *displayId = s_nextDisplayId;
+        while (m_displays.find(s_nextDisplayId++) != m_displays.end()) { }
+        *displayId = s_nextDisplayId - 1;
     }
     if (m_displays.size() == 1) {
         emugl::get_emugl_window_operations().setNoSkin();
