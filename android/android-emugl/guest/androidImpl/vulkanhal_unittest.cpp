@@ -767,7 +767,8 @@ TEST_F(VulkanHalTest, Hide1_1FunctionPointers) {
 
 // Tests VK_ANDROID_external_memory_android_hardware_buffer's allocation API.
 // The simplest: export allocate device local memory.
-TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ExportDeviceLocal) {
+// Disabled for now: currently goes down invalid paths in the GL side
+TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ExportDeviceLocal) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     VkDeviceMemory memory;
@@ -780,7 +781,8 @@ TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ExportDeviceLocal) {
 }
 
 // Test AHB allocation via import.
-TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ImportDeviceLocal) {
+// Disabled for now: currently goes down invalid paths in the GL side
+TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ImportDeviceLocal) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     AHardwareBuffer* testBuf = allocateAndroidHardwareBuffer();
@@ -800,7 +802,8 @@ TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ImportDeviceLocal) {
 }
 
 // Test AHB allocation via export, but with a dedicated allocation (image).
-TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_Dedicated_Export) {
+// Disabled for now: currently goes down invalid paths in the GL side
+TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Export) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     VkImage testAhbImage;
@@ -826,7 +829,8 @@ TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_Dedicated_Export) {
 }
 
 // Test AHB allocation via import, but with a dedicated allocation (image).
-TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_Dedicated_Import) {
+// Disabled for now: currently goes down invalid paths in the GL side
+TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Import) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     AHardwareBuffer* testBuf =
@@ -1010,6 +1014,7 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
 // remapping of virtual addrs and is functionality that does not exist on
 // Linux/macOS. It would ironically require a hypervisor (or an OS that
 // supports freer ways of mapping memory) in order to test properly.
+// Disabled for now: currently goes down invalid paths in the GL side
 TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {

@@ -60,9 +60,15 @@ static void initIcdPaths(bool forTesting) {
         if (path_exists(libPath.c_str())) {
             LOG(VERBOSE) << "Swiftshader library exists";
         } else {
-            LOG(VERBOSE) << "Swiftshader library doesn't";
+            LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
+            libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
+            if (path_exists(libPath.c_str())) {
+                LOG(VERBOSE) << "Swiftshader library found in launcher path";
+            } else {
+                LOG(VERBOSE) << "Swiftshader library not found in program nor launcher path";
+            }
         }
-        setIcdPath(pj(res, "vk_swiftshader_icd.json"));
+        setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
     } else {
         LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
