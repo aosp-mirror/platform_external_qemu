@@ -186,6 +186,14 @@ static struct virtio_input_config multi_touch_config[] = {
                 .size = sizeof(virtio_input_absinfo),
                 .u.abs.max = const_le32(0x100),
         },
+        {       // Needed for fold/unfold (EV_SW)
+                .select    = VIRTIO_INPUT_CFG_EV_BITS,
+                .subsel    = EV_SW,
+                .size      = 1,
+                .u.bitmap  = {
+                    1,
+                },
+        },
         {/* end of list */},
 };
 
@@ -309,9 +317,10 @@ static const TypeInfo types[] = {
 DEFINE_TYPES(types)
 
 int android_virtio_input_send(int type, int code, int value) {
-    if (type != EV_ABS && type != EV_SYN) {
+    if (type != EV_ABS && type != EV_SYN && type != EV_SW) {
         return 0;
     }
+
     VirtIOInput* vinput = VIRTIO_INPUT(s_current_virtio_input);
     if (vinput == NULL) {
         return 1;
