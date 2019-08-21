@@ -1002,5 +1002,8 @@ DEF("restart-when-stalled", 0, QEMU_OPTION_restart_when_stalled,
 
 DEF("perf-stat", HAS_ARG, QEMU_OPTION_perf_stat,
 "perf-stat <file> Run periodic perf stat reporter in the background and write output to specified file.", QEMU_ARCH_ALL)
+
+DEF("multidisplay", HAS_ARG, QEMU_OPTION_multi_display,
+"-multidisplay config a number of (MAX 3) multidisplays", QEMU_ARCH_ALL)
 #endif  // CONFIG_ANDROID
 
