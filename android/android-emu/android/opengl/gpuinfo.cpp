@@ -98,6 +98,7 @@ void GpuInfoList::clear() {
     blacklist_status = false;
     Anglelist_status = false;
     SyncBlacklist_status = false;
+    VulkanBlacklist_status = false;
     infos.clear();
 }
 
@@ -362,6 +363,9 @@ public:
 #endif
               mGpuInfoList.SyncBlacklist_status = gpuinfo_query_blacklist(
                       &mGpuInfoList, sSyncBlacklist, arraySize(sSyncBlacklist));
+
+              mGpuInfoList.VulkanBlacklist_status =
+                getVulkanBlacklistStatusNative();
 
           }) {
         mAsyncLoadThread.start();

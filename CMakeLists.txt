@@ -114,7 +114,7 @@ else()
   if(WINDOWS_X86_64)
     add_c_flag("-O2")
   else()
-    add_c_flag("-O3 -g3")
+    add_c_flag("-O2")
   endif()
 endif()
 

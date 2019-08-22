@@ -335,3 +335,53 @@ void getGpuInfoListNative(GpuInfoList* gpus) {
         parse_gpu_info_list_windows(gpuInfoWmic, gpus);
     }
 }
+
+// windows: blacklist depending on amdvlk and certain versions of vulkan-1.dll
+// Based on chromium/src/gpu/config/gpu_info_collector_win.cc
+bool badAmdVulkanDriverVersion() {
+    int major, minor, build_1, build_2;
+
+    if (!System::queryFileVersionInfo("amdvlk64.dll", &major, &minor, &build_1, &build_2)) {
+        if (!System::queryFileVersionInfo("amdvlk32.dll", &major, &minor, &build_1, &build_2)) {
+            // Information about amdvlk64 not availble; not blacklisted
+            return false;
+        }
+    }
+
+    bool isBad = (major == 1 && minor == 0 && build_1 <= 54);
+
+    if (isBad) {
+        fprintf(stderr, "%s: bad AMD Vulkani driver detected. Version: %d.%d.%d.%d\n",
+                __func__, major, minor, build_1, build_2);
+    }
+
+    return isBad;
+}
+
+bool badVulkanDllVersion() {
+    int major, minor, build_1, build_2;
+
+    if (!System::queryFileVersionInfo("vulkan-1.dll", &major, &minor, &build_1, &build_2)) {
+        // Information about vulkan-1.dll not available; not blacklisted
+        return false;
+    }
+
+    bool isBad =
+        (major == 0 && minor == 0 && build_1 == 0 && build_2 == 0) ||
+        (major == 1 && minor == 0 && build_1 == 26 && build_2 == 0) ||
+        (major == 1 && minor == 0 && build_1 == 33 && build_2 == 0) ||
+        (major == 1 && minor == 0 && build_1 == 42 && build_2 == 0) ||
+        (major == 1 && minor == 0 && build_1 == 42 && build_2 == 1) ||
+        (major == 1 && minor == 0 && build_1 == 51 && build_2 == 0);
+
+    if (isBad) {
+        fprintf(stderr, "%s: bad vulkan-1.dll detected. Version: %d.%d.%d.%d\n",
+                __func__, major, minor, build_1, build_2);
+    }
+
+    return isBad;
+}
+
+bool getVulkanBlacklistStatusNative() {
+    return badAmdVulkanDriverVersion() || badVulkanDllVersion();
+}
