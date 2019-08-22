@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8e215d4_738e5d00",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2227,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-22T03:01:15Z",
+      "side": 1,
+      "message": "Merging this part with part from line 2237 could make code more friendly.",
+      "revId": "e7c3d51984465e591386cbd0ef12698fcdfcd464",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0c9a1d5_585a9931",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2233,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-08-22T03:01:15Z",
+      "side": 1,
+      "message": "Can we use switch(p-\u003eversion) here?\nAssume we have V3 in the future, old emulator will log error with the version mismatdch.",
+      "revId": "e7c3d51984465e591386cbd0ef12698fcdfcd464",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
