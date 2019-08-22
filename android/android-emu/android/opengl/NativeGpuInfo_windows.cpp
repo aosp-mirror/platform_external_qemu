@@ -335,3 +335,9 @@ void getGpuInfoListNative(GpuInfoList* gpus) {
         parse_gpu_info_list_windows(gpuInfoWmic, gpus);
     }
 }
+
+// windows: blacklist depending on amdvlk and certain versions of vulkan-1.dll
+// Based on chromium/src/gpu/config/gpu_info_collector_win.cc
+bool getVulkanBlacklistStatusNative() {
+    return true;
+}
