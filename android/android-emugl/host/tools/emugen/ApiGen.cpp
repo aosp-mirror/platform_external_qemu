@@ -368,7 +368,7 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n\n");
 
     fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
-    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void* data, uint32_t sz) { return 0; }\n");
+    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void*, uint32_t) { return 0; }\n");
     fprintf(fp, "};\n\n");
 
     fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
