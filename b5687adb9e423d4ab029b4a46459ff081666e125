@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3936ecaf_abb84591",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2662,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-22T01:14:30Z",
+      "side": 1,
+      "message": "nit: the standard is to call this setDisplayColorBufferLocked (i.e., that it is called assuming m_lock is \"Locked\", not that the function itself leaves things \"Unlocked\")",
+      "range": {
+        "startLine": 2662,
+        "startChar": 11,
+        "endLine": 2662,
+        "endChar": 40
+      },
+      "revId": "b5687adb9e423d4ab029b4a46459ff081666e125",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
