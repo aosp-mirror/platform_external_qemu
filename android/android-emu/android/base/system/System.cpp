@@ -2834,5 +2834,91 @@ CpuTime System::cpuTime() {
     return res;
 }
 
+#ifdef _WIN32
+// Based on chromium/src/base/file_version_info_win.cc's CreateFileVersionInfoWin
+// Currently used to query Vulkan DLL's on the system and blacklist known
+// problematic DLLs
+// static
+typedef DWORD (*get_file_version_info_size_w_t)(LPCWSTR, LPDWORD);
+typedef DWORD (*get_file_version_info_w_t)(LPCWSTR, DWORD, DWORD, LPVOID);
+typedef WINBOOL (*ver_query_value_w_t)(LPCVOID, LPCWSTR, LPVOID, PUINT);
+
+static get_file_version_info_size_w_t getFileVersionInfoSizeW_func = 0;
+static get_file_version_info_w_t getFileVersionInfoW_func = 0;
+static ver_query_value_w_t verQueryValueW_func = 0;
+static bool getFileVersionInfoFuncsAvailable = false;
+
+bool initFileVersionInfoFuncs() {
+    if (getFileVersionInfoFuncsAvailable) return true;
+
+    HMODULE kernelLib = GetModuleHandle("kernel32");
+
+    if (!kernelLib) return false;
+
+    getFileVersionInfoSizeW_func = 
+        (get_file_version_info_size_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoSizeW");
+
+    if (!getFileVersionInfoSizeW_func) return false;
+
+    getFileVersionInfoW_func = 
+        (get_file_version_info_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoW");
+
+    if (!getFileVersionInfoW_func) return false;
+
+    verQueryValueW_func = 
+        (ver_query_value_w_t)GetProcAddress(kernelLib, "VerQueryValueW");
+
+    if (!verQueryValueW_func) return false;
+
+    getFileVersionInfoFuncsAvailable = true;
+    return true;
+}
+
+bool System::queryFileVersionInfo(StringView path, int* major, int* minor, int* build_1, int* build_2) {
+
+    if (!initFileVersionInfoFuncs()) return false;
+
+    const Win32UnicodeString pathWide(path);
+    DWORD dummy;
+    const DWORD length = getFileVersionInfoSizeW_func(pathWide.c_str(), &dummy);
+
+    if (length == 0) {
+        return false;
+    }
+
+    std::vector<uint8_t> data(length, 0);
+
+    if (!getFileVersionInfoW_func(pathWide.c_str(), dummy, length, data.data())) {
+        return false;
+    }
+
+    VS_FIXEDFILEINFO* fixedFileInfo = nullptr;
+    UINT fixedFileInfoLength;
+
+    if (!verQueryValueW_func(
+            data.data(),
+            L"\\",
+            reinterpret_cast<void**>(&fixedFileInfo),
+            &fixedFileInfoLength)) {
+        return false;
+    }
+
+    if (major) *major = HIWORD(fixedFileInfo->dwFileVersionMS);
+    if (minor) *minor = LOWORD(fixedFileInfo->dwFileVersionMS);
+    if (build_1) *build_1 = HIWORD(fixedFileInfo->dwFileVersionLS);
+    if (build_2) *build_2 = LOWORD(fixedFileInfo->dwFileVersionLS);
+
+    return true;
+}
+
+#else
+
+
+bool System::queryFileVersionInfo(StringView, int*, int*, int*, int*) {
+    return false;
+}
+
+#endif // _WIN32
+
 }  // namespace base
 }  // namespace android
