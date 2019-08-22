@@ -21,10 +21,10 @@
 #include "rtc_base/criticalsection.h"
 #include "rtc_base/timeutils.h"
 
-#define DEBUG 2
+#define DEBUG 1
 
 #if DEBUG >= 2
-#define DD(str) RTC_LOG(INFO) << str
+#define DD(str) RTC_LOG(INFO) << this << " : " << str
 #else
 #define DD(...) (void)0
 #endif
@@ -38,8 +38,13 @@ namespace videocapturemodule {
 
 static const int kRGB8888BytesPerPixel = 4;
 
+VideoShareCapture::VideoShareCapture(VideoCaptureCapability settings)
+    : mSettings(settings), mSharedMemory("", 0) {
+    DD("Created");
+}
+
 VideoShareCapture::~VideoShareCapture() {
-    RTC_LOG(INFO) << "~VideoShareCapture";
+    DD("Destroyed");
 }
 
 static void colorConvert(uint32_t* argb, uint32_t* abgr, size_t bufferSize) {
@@ -59,16 +64,21 @@ bool VideoShareCapture::CaptureProcess() {
     if (sleeptime > 0)
         usleep(sleeptime);
 
-    if (mCaptureStarted && mVideoInfo->frameNumber != mPrevframeNumber) {
+    // Initially we deliver every individual frame, this guarantees that the
+    // encoder pipeline will have frames and can generate keyframes for the web
+    // endpoint, after a while we back down and only provide frames when we know
+    // a frame has changed (b/139871418)
+    if ((now < mDeliverAllUntilTs) ||
+        (mCaptureStarted && mVideoInfo->frameNumber != mPrevframeNumber)) {
         DD("Frames: " << mVideoInfo->frameNumber << ", skipped: "
                       << mVideoInfo->frameNumber - mPrevframeNumber);
         DD("Delivery delay: " << (rtc::TimeMicros() - mVideoInfo->tsUs)
                               << " frame delay: "
                               << (mVideoInfo->tsUs - mPrevtsUs));
-        IncomingFrame((uint8_t*) mPixelBuffer, mPixelBufferSize, mSettings);
+        IncomingFrame((uint8_t*)mPixelBuffer, mPixelBufferSize, mSettings);
 
-         mPrevframeNumber = mVideoInfo->frameNumber;
-         mPrevtsUs = mVideoInfo->tsUs;
+        mPrevframeNumber = mVideoInfo->frameNumber;
+        mPrevtsUs = mVideoInfo->tsUs;
     }
 
     mPrevTimestamp = rtc::TimeMicros();
@@ -76,6 +86,7 @@ bool VideoShareCapture::CaptureProcess() {
 }
 
 int32_t VideoShareCapture::StopCapture() {
+    DD("StopCapture");
     if (mCaptureThread) {
         // Make sure the capture thread stop stop using the critsect.
         mCaptureThread->Stop();
@@ -90,17 +101,22 @@ int32_t VideoShareCapture::StopCapture() {
 
 int32_t VideoShareCapture::StartCapture(
         const VideoCaptureCapability& capability) {
-    if (mCaptureStarted)
+    DD("StartCapture: " << mCaptureStarted);
+    if (mCaptureStarted) {
+        DD("Already running!");
         return 0;
+    }
 
     rtc::CritScope cs(&mCaptureCS);
 
     // Let's always try to capture at the maximum supported FPS..
     uint8_t minFps = std::min(capability.maxFPS, kInitialFrameRate);
     mMaxFrameDelayUs = kUsPerSecond / capability.maxFPS;
+    mDeliverAllUntilTs = kInitialDelivery + rtc::TimeMicros();
 
     // start capture thread;
     if (!mCaptureThread) {
+        DD("Creating capture thread.");
         mCaptureThread.reset(new rtc::PlatformThread(
                 VideoShareCapture::CaptureThread, this, "CaptureThread"));
         mCaptureThread->Start();
@@ -118,6 +134,7 @@ static size_t getBytesPerFrame(const VideoCaptureCapability& capability) {
 }
 
 int32_t VideoShareCapture::Init(std::string handle) {
+    DD("Init: " << handle);
     mSharedMemory =
             SharedMemory(handle, getBytesPerFrame(mSettings) +
                                          sizeof(VideoShareInfo::VideoInfo));
