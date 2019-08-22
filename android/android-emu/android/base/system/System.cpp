@@ -43,6 +43,7 @@
 #include <winioctl.h>
 #include <ntddscsi.h>
 #include <tlhelp32.h>
+#include <verrsrc.h>
 #endif
 
 #ifdef __APPLE__
@@ -2833,6 +2834,54 @@ CpuTime System::cpuTime() {
 #endif
     return res;
 }
+
+#ifdef _WIN32
+// Based on chromium/src/base/file_version_info_win.cc's CreateFileVersionInfoWin
+// Currently used to query Vulkan DLL's on the system and blacklist known
+// problematic DLLs
+// static
+bool System::queryFileVersionInfo(StringView path, int* major, int* minor, int* build_1, int* build_2) {
+    const Win32UnicodeString pathWide(path);
+    DWORD dummy;
+    const DWORD length = ::GetFileVersionInfoSize(pathWide.c_str(), &dummy);
+
+    if (length == 0) {
+        return false;
+    }
+
+    std::vector<uint8_t> data(length, 0);
+
+    if (!::GetFileVersionInfo(path.c_str(), dummy, length, data.data())) {
+        return false;
+    }
+
+    VS_FIXEDFILEINFO* fixedFileInfo = nullptr;
+    UINT fixedFileInfoLength;
+
+    if (!::VerQueryValue(
+            data.data(),
+            L"\\",
+            reinterpret_cast<void**>(&fixedFileInfo),
+            &fixedFileInfoLength)) {
+        return false;
+    }
+
+    if (major) *major = HIWORD(fixedFileInfo->dwFileVersionMS);
+    if (minor) *minor = LOWORD(fixedFileInfo->dwFileVersionMS);
+    if (build_1) *build_1 = HIWORD(fixedFileInfo->dwFileVersionLS);
+    if (build_2) *build_2 = LOWORD(fixedFileInfo->dwFileVersionLS);
+
+    return true;
+}
+
+#else
+
+
+bool System::queryFileVersionInfo(StringView, int*, int*, int*, int*) {
+    return false;
+}
+
+#endif // _WIN32
 
 }  // namespace base
 }  // namespace android
