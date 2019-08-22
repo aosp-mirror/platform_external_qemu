@@ -2,7 +2,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/console.h"
-#include "android/emulation/control/emulator_controller.pb.h"
+#include "emulator_controller.pb.h"
 #include "android/emulation/control/keyboard/dom_key.h"
 #include "android/utils/utf8_utils.h"
 

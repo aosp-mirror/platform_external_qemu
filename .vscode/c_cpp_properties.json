@@ -15,6 +15,7 @@
             "${workspaceFolder}/../tinyobjloader",
             "${workspaceFolder}/android-qemu2-glue/config/target-x86_64",
             "${workspaceFolder}/android/android-emu",
+            "${workspaceFolder}/android/android-grpc",
             "${workspaceFolder}/android/android-emugl/guest",
             "${workspaceFolder}/android/android-emugl/guest/androidImpl",
             "${workspaceFolder}/android/android-emugl/host/include",

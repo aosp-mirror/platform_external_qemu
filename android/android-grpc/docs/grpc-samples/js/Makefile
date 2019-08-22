@@ -54,44 +54,50 @@ QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../../..)
 CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
 OUT_DIR := $(CURRENT_DIR)/src/
 WEBPROXY = $(GOPATH)/bin/grpcwebproxy
-CONTROLPB = $(OUT_DIR)/android_emulation_control/emulator_controller_pb.js
-GRPCPB = $(OUT_DIR)/android_emulation_control/emulator_controller_grpc_web_pb.js
-PROTODIR = $(CURRENT_DIR)/android_emulation_control
-PROTO = $(PROTODIR)/emulator_controller.proto
 
 CXX = g++
 CPPFLAGS += -I$(PROTOHEADER) -pthread
 CXXFLAGS += -std=c++11
 LDFLAGS += -L$(PROTOLIB) -lprotoc -lprotobuf -lpthread -ldl
 
+
+# Protobuf settings.
+GRPC_ROOT     := $(QEMU_ROOT)/android/android-grpc
+PROTODIR      := $(OUT_DIR)/android_emulation_control/
+PROTOSRCDIR   := $(if $(wildcard $(GRPC_ROOT)/*.proto), $(GRPC_ROOT), $(ANDROID_SDK_ROOT)/emulator/lib)
+PROTOSRC      := $(wildcard $(PROTOSRCDIR)/*.proto)
+PROTO_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTOSRC:.proto=_pb.js)))
+PROTO_GRPC_JS := $(addprefix $(PROTODIR)/, $(notdir $(PROTOSRC:.proto=_grpc_web_pb.js)))
+
 .PHONY: build-release run-release
 
-all: develop
-
 clean:
-	rm $(WEBPROXY) $(PROTO)
+	rm -f $(WEBPROXY) $(PROTO_OBJS) $(PROTO_GRPC_JS)
 
-$(PROTO):
-		mkdir -p $(PROTODIR)
-ifeq (,$(wildcard $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto))
-		cp  $(ANDROID_SDK_ROOT)/emulator/lib/emulator_controller.proto  $(PROTO)
-else
-		cp  $(QEMU_ROOT)/android/android-grpc/android/emulation/control/emulator_controller.proto  $(PROTO)
-endif
-
+# Javascript grpc plugin
 protoc-gen-grpc-web: protoc-plugin/grpc_generator.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-$(CONTROLPB) $(GRPCPB): $(PROTO) protoc-gen-grpc-web
-	@mkdir -p $(OUT_DIR)/android_emulation_control
-	$(PROTOC)  -I/usr/local/include -I$(PROTODIR) \
-			--plugin=protoc-gen-grpc-web=$(CURRENT_DIR)/protoc-gen-grpc-web \
-			--js_out=import_style=commonjs:/tmp \
-			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:/tmp \
-			$(PROTO)
-	@echo "/* eslint-disable */" > $(CONTROLPB)
-	@cat /tmp/emulator_controller_pb.js >>  $(CONTROLPB)
-	@cp  /tmp/emulator_controller_grpc_web_pb.js $(GRPCPB)
+$(PROTODIR):
+	@mkdir -p $(PROTODIR)
+
+# Grpc service def --> js
+$(PROTODIR)/%_grpc_web_pb.js : $(PROTOSRCDIR)/%.proto $(PROTODIR) protoc-gen-grpc-web
+	$(PROTOC)  -I/usr/local/include -I$(PROTOSRCDIR) \
+		--plugin=protoc-gen-grpc-web=$(CURRENT_DIR)/protoc-gen-grpc-web \
+		--grpc-web_out=import_style=commonjs,mode=grpcwebtext:$(PROTODIR) \
+		$<
+	touch $@
+	sed -i '1s/^/\/* eslint-disable *\/\n/' $@
+
+# Protobuf --> js
+$(PROTODIR)/%_pb.js : $(PROTOSRCDIR)/%.proto $(PROTODIR)
+	$(PROTOC)  -I/usr/local/include -I$(PROTOSRCDIR) \
+		--plugin=protoc-gen-grpc-web=$(CURRENT_DIR)/protoc-gen-grpc-web \
+		--js_out=import_style=commonjs:$(PROTODIR) \
+		$<
+	sed -i '1s/^/\/* eslint-disable *\/\n/' $@
+
 
 $(WEBPROXY):
 	@rm -rf $(GOPATH)/src/grpc-web
@@ -99,10 +105,11 @@ $(WEBPROXY):
 	@cp -r $(CURRENT_DIR)/grpc-web $(GOPATH)/src
 	cd $(GOPATH)/src/grpc-web/ && dep ensure -v && go install ./go/grpcwebproxy
 
-deps: $(WEBPROXY) $(CONTROLPB) $(GRPCPB) system-check
+deps: $(WEBPROXY) system-check
 	@npm install
 
-develop:
+
+develop: $(PROTO_OBJS) $(PROTO_GRPC_JS) $(WEBPROXY) system-check
 	$(WEBPROXY) \
 		--backend_addr localhost:5556 \
 		--backend_tls=false \
@@ -110,7 +117,7 @@ develop:
 		--allow_all_origins &
 	npm start
 
-build-release:  $(CONTROLPB) $(GRPCPB) system-check
+build-release: $(PROTO_OBJS) $(PROTO_GRPC_JS) system-check
 	 docker-compose -f docker/docker-compose.yaml build
 
 run-release: build-release
@@ -125,8 +132,8 @@ system-check:
 ifneq ($(HAS_VALID_PROTOC),true)
 	@echo " DEPENDENCY ERROR"
 	@echo
-	@echo "You don't have protoc 3.6.0 installed in your path."
-	@echo "Please install Google protocol buffers 3.6.0 and its compiler."
+	@echo "You don't have protoc 3.6.0 or newer installed in your path."
+	@echo "Please install Google protocol buffers 3.6.0 or newer and its compiler."
 	@echo "You can find it here:"
 	@echo
 	@echo "   https://github.com/google/protobuf/releases/tag/v3.6.0"
