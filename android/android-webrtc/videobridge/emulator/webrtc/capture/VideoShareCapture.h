@@ -29,8 +29,7 @@ namespace videocapturemodule {
 class VideoShareCapture
     : public ::webrtc::videocapturemodule::VideoCaptureImpl {
 public:
-    VideoShareCapture(VideoCaptureCapability settings)
-        : mSettings(settings), mSharedMemory("", 0) {}
+    VideoShareCapture(VideoCaptureCapability settings);
     ~VideoShareCapture();
 
     int32_t Init(std::string handle);
@@ -53,19 +52,24 @@ private:
     const int32_t kInitialFrameRate = 10;
     const int64_t kUsPerSecond = 1 * 1000 * 1000;
 
+    // We initially want to provide all frames, to make sure we
+    // don't start with a black screen due to missing key frames.
+    const int64_t kInitialDelivery = 5 * kUsPerSecond;
+
     std::unique_ptr<rtc::PlatformThread> mCaptureThread;
     rtc::CriticalSection mCaptureCS;
     VideoCaptureCapability mSettings;
     SharedMemory mSharedMemory;
     VideoShareInfo::VideoInfo* mVideoInfo;
     void* mPixelBuffer;
-    uint32_t mPixelBufferSize;
+    uint32_t mPixelBufferSize = 0;
     uint64_t mPrevTimestamp = 0;
     int64_t mMaxFrameDelayUs = kUsPerSecond / kInitialFrameRate;
 
-    uint32_t mPrevframeNumber = 0;  // Frames are ordered
-    uint64_t mPrevtsUs = 0;         // Timestamp when this frame was received.
-    bool mCaptureStarted;
+    uint32_t mPrevframeNumber = 0;   // Frames are ordered
+    uint64_t mPrevtsUs = 0;          // Timestamp when this frame was received.
+    uint64_t mDeliverAllUntilTs = 0; // We initially deliver all frames to the encoder.
+    bool mCaptureStarted = false;
 };
 
 }  // namespace videocapturemodule
