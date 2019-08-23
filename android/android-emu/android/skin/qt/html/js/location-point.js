@@ -8,10 +8,6 @@ var gPendingMarker; // The red "pin"
 var gSearchResultMarkers = [];
 var gPointOverlay = new LocationPointOverlay();
 
-document.addEventListener('DOMContentLoaded', function () {
-
-}, false);
-
 function savePoint() {
     // The emulator should have the point of interest already, from the
     // sendAddress() call.
@@ -30,17 +26,31 @@ function initMap() {
         zoom: 10,
         zoomControl: true,
         disableDefaultUI: true,
-        controlSize: 24
+        controlSize: 20
     });
     gGeocoder = new google.maps.Geocoder;
 
     gSearchBox = new LocationSearchBox();
-    gSearchBox.init(gMap);
+    gSearchBox.init(gMap,
+        gSearchResultMarkers,
+        (lastLatLng) => {
+            // Clear the red pin and any existing search markers
+            if (gPendingMarker != null) {
+                gPendingMarker.setMap(null);
+            }
+            showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
+            sendAddress(lastLatLng);
+        },
+        () => {
+            gPointOverlay.hide()
+            if (gPendingMarker != null) {
+                gPendingMarker.setMap(null);
+            }
+        });
 
     // Register a listener that sets a new marker wherever the
     // user clicks on the map.
     google.maps.event.addListener(gMap, 'click', function (event) {
-        // TODO: add spinner here
         gSearchBox.showSpinner();
 
         showPin(event.latLng);
@@ -58,12 +68,14 @@ function showPendingLocation(lat, lng, addr) {
     showPin(latLng);
     // TODO: no support for elevation yet.
     gPointOverlay.show(addr, latLng, null, true);
+    gSearchBox.update(addr);
+    gMap.panTo(latLng);
 }
 
 function setDeviceLocation(lat, lng) {
     // Called from Qt code to show the blue marker to display the emulator location on the map.
     // Code to set location marker on the map. Move this to a signal event handler.
-
+    console.log('setDeviceLocation', lat, lng);
     // Clear any existing blue dot and red pin
     if (gCurrentMarker != null) {
         gCurrentMarker.setMap(null);
@@ -133,6 +145,7 @@ function sendAddress(latLng) {
             elevation = results[0].elevation;
         }
         gPointOverlay.show(address, latLng, elevation);
+        gMap.panTo(latLng);
         channel.objects.emulocationserver
             .sendLocation(latLng.lat(), latLng.lng(), address);
         console.log("addr=" + address);
