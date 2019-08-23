@@ -2053,6 +2053,8 @@ bool configAndStartRenderer(
         str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
     }
 
+    bool hostGpuVulkanBlacklisted = true;
+
     if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
@@ -2062,7 +2064,8 @@ bool configAndStartRenderer(
                 &hw->hw_gpu_mode,
                 0,
                 opts->no_window,
-                uiPreferredBackend)) {
+                uiPreferredBackend,
+                &hostGpuVulkanBlacklisted)) {
         derror("%s", config.status);
         config_out->openglAlive = 0;
 
@@ -2073,6 +2076,65 @@ bool configAndStartRenderer(
         AFREE(api_arch);
 
         return false;
+    }
+
+    // Also write the selected renderer.
+    config_out->selectedRenderer =
+        emuglConfig_get_current_renderer();
+
+    // Determine whether to enable Vulkan (if in android qemu mode)
+
+    if (android_qemu_mode) {
+        bool shouldEnableVulkan = true;
+
+        crashhandler_append_message_format(
+            "Deciding if Vulkan should be enabled. "
+            "Selected renderer: %d "
+            "API level: %d host GPU blacklisted? %d\n",
+            config_out->selectedRenderer,
+            api_level, hostGpuVulkanBlacklisted);
+        switch (config_out->selectedRenderer) {
+            // Host gpu: enable as long as not on blacklist
+            // and api >= 29
+            case SELECTED_RENDERER_HOST:
+                shouldEnableVulkan =
+                    (api_level >= 29) &&
+                    !hostGpuVulkanBlacklisted;
+                if (shouldEnableVulkan) {
+                    crashhandler_append_message_format(
+                        "Host GPU selected, enabling Vulkan.\n");
+                } else {
+                    crashhandler_append_message_format(
+                        "Host GPU selected, not enabling Vulkan because either API level is < 29 or host GPU driver is blacklisted.\n");
+                }
+                break;
+            // Swiftshader: always enable if api level >= 29
+            case SELECTED_RENDERER_SWIFTSHADER_INDIRECT:
+                shouldEnableVulkan = api_level >= 29;
+                if (shouldEnableVulkan) {
+                    crashhandler_append_message_format(
+                        "Swiftshader selected, enabling Vulkan.\n");
+                } else {
+                    crashhandler_append_message_format(
+                        "Swiftshader selected, not enabling Vulkan because API level is < 29.\n");
+                }
+                break;
+            // Other renderers (such as angle, mesa):
+            default:
+                shouldEnableVulkan = false;
+                crashhandler_append_message_format(
+                    "Some other renderer selected, not enabling Vulkan.\n");
+        }
+
+        if (shouldEnableVulkan) {
+            crashhandler_append_message_format("Enabling Vulkan");
+            feature_set_if_not_overridden(kFeature_GLDirectMem, true);
+            feature_set_if_not_overridden(kFeature_Vulkan, true);
+        } else {
+            crashhandler_append_message_format(
+                "Not enabling Vulkan here "
+                "(feature flag may be turned on manually)");
+        }
     }
 
     AFREE(api_arch);
@@ -2181,10 +2243,6 @@ bool configAndStartRenderer(
         hw->hw_lcd_width *
         hw->hw_lcd_height *
         pixelSizeBytes;
-
-    // Also write the selected renderer.
-    config_out->selectedRenderer =
-        emuglConfig_get_current_renderer();
 
     lastRendererConfig = *config_out;
     return true;
