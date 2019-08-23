@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fc19c6d_191828cb",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2870,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-08-23T17:11:43Z",
+      "side": 1,
+      "message": "This handle is expected to \"leak\" to keep the functions available, correct? OTOH, I think we should release the handle if initFileVersionInfoFuncs fails.",
+      "range": {
+        "startLine": 2870,
+        "startChar": 12,
+        "endLine": 2870,
+        "endChar": 21
+      },
+      "revId": "d20f5528a57cbd70d48c5de0ee98cf14d08fb64e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
