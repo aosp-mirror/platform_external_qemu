@@ -33,8 +33,11 @@ service EmulatorController {
     rpc getGps(google.protobuf.Empty) returns (GpsState) {}
     rpc setGps(GpsState) returns (GpsState) {}
 
-    rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
+    rpc sendFingerprint(FingerprintEvent) returns (google.protobuf.Empty) {}
     rpc sendKey(KeyboardEvent) returns (google.protobuf.Empty) {}
+
+    // Note that touch events can be used instead of mouse events if desired.
+    rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
     rpc sendRotary(RotaryEvent) returns (google.protobuf.Empty) {}
 
@@ -53,7 +56,7 @@ service EmulatorController {
 
     // The following endpoints are needed to establish the webrtc protocol
     // Due to limitiations in Javascript we cannot make use of bidirectional
-    // endpoints See this (blog)[https://grpc.io/blog/state-of-grpc-web] for
+    // endpoints See this [blog](https://grpc.io/blog/state-of-grpc-web) for
     // details.
 
     // This function will generate a new identifier that the client
@@ -98,22 +101,22 @@ message JsepMsg {
     //        configure the new connection. This can include the
     //        turn configuration the serve is using. This dictionary can be
     //        passed in directly to the
-    //        (RTCPeerConnection)[https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection]
+    //        [RTCPeerConnection](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection)
     //        object.
     //
     // - candidate:
     //        The WebRTC API's RTCIceCandidateInit dictionary, which
     //        contains the information needed to fundamentally describe an
     //        RTCIceCandidate. See
-    //        (RTCIceCandidate)[https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate]
-    //        and (Session
-    //        Lifetime)[https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Session_lifetime]
+    //        [RTCIceCandidate](https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate)
+    //        and [Session
+    //        Lifetime](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Session_lifetime)
     //        for more details.
     //
     // - sdp:
     //        RTCSessionDescriptionInit dictionary containing the values
     //        to that can be assigned to a
-    //        (RTCSessionDescription)[https://developer.mozilla.org/en-US/docs/Web/API/RTCSessionDescription]
+    //        [RTCSessionDescription](https://developer.mozilla.org/en-US/docs/Web/API/RTCSessionDescription)
     string message = 2;
 }
 
@@ -150,10 +153,86 @@ message RotaryEvent {
     int32 delta = 1;
 }
 
-message MouseEvent {
+// The Touch interface represents a single contact point on a touch-sensitive
+// device. The contact point is commonly a finger or stylus and the device may
+// be a touchscreen or trackpad.
+message Touch {
+    // The horizontal coordinate. This is the physical location on the screen
+    // For example 0 indicates the leftmost coordinate.
     int32 x = 1;
+
+    // The vertical coordinate. This is the physical location on the screen
+    // For example 0 indicates the top left coordinate.
     int32 y = 2;
+
+    // The identifier is an arbitrary non-negative integer that is used to
+    // identify and track each tool independently when multiple tools are
+    // active. For example, when multiple fingers are touching the device, each
+    // finger should be assigned a distinct tracking id that is used as long as
+    // the finger remains in contact. Tracking ids may be reused when their
+    // associated tools move out of range.
+    //
+    // The emulator currently supports up to 10 concurrent touch events. The
+    // identifier should be a value from the set [0, 10]
+    int32 identifier = 3;
+
+    // Reports the physical pressure applied to the tip of the tool or the
+    // signal strength of the touch contact.
+    //
+    // The values reported must be non-zero when the tool is touching the device
+    // and zero otherwise to indicate that the touch event is completed.
+    //
+    // Make sure to deliver a pressure of 0 for the given identifier when the
+    // touch event is completed, otherwise the touch identifier will not be
+    // unregistered!
+    int32 pressure = 4;
+
+    // Optionally reports the cross-sectional area of the touch contact, or the
+    // length of the longer dimension of the touch contact.
+    int32 touch_major = 5;
+
+    // Optionally reports the length of the shorter dimension of the touch
+    // contact. This axis will be ignored if touch_major is reporting an area
+    // measurement greater than 0.
+    int32 touch_minor = 6;
+}
+
+// A TouchEvent contains a list of Touch objects that are in contact with the
+// touch surface.
+//
+// Touch events are delivered in sequence as specified in the touchList.
+//
+// TouchEvents are delivered to the emulated devices using ["Protocol
+// B"](https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt)
+message TouchEvent {
+    // The list of Touch objects, note that these do not need to be unique
+    repeated Touch touches = 1;
+
+    // The display device where the touch event occurred.
+    // Omitting or using the value 0 indicates the main display.
+    int32 device = 2;
+}
+
+// The MouseEvent interface represents events that occur due to the user
+// interacting with a pointing device (such as a mouse).
+message MouseEvent {
+    // The horizontal coordinate. This is the physical location on the screen
+    // For example 0 indicates the leftmost coordinate.
+    int32 x = 1;
+
+    // The vertical coordinate. This is the physical location on the screen
+    // For example 0 indicates the top left coordinate.
+    int32 y = 2;
+
+    // Indicates which buttons are pressed.
+    // 0: No button was pressed
+    // 1: Primary button (left)
+    // 2: Secondary button (right)
     int32 buttons = 3;
+
+    // The display device where the mouse event occurred.
+    // Omitting or using the value 0 indicates the main display.
+    int32 device = 4;
 }
 
 // KeyboardEvent objects describe a user interaction with the keyboard; each
@@ -168,8 +247,7 @@ message KeyboardEvent {
     // Code types that the emulator can receive. Note that the emulator
     // will do its best to translate the code to an evdev value that
     // will be send to the emulator. This translation is based on
-    // the chromium translation tables.
-    // See
+    // the chromium translation tables. See
     // https://chromium.googlesource.com/chromium/src/+/lkgr/ui/events/keycodes/dom/keycode_converter_data.inc
     // for details on the translation.
     enum KeyCodeType {
@@ -229,7 +307,7 @@ message KeyboardEvent {
     string text = 5;
 }
 
-message TouchEvent {
+message FingerprintEvent {
     bool isTouching = 1;
     int32 touchId = 2;
 }

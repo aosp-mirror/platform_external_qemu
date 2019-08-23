@@ -27,9 +27,10 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
-#include "android/emulation/control/waterfall/WaterfallForwarder.h"
 #include "android/emulation/control/waterfall/SocketController.h"
+#include "android/emulation/control/waterfall/WaterfallForwarder.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
 #include "emulator_controller.grpc.pb.h"
@@ -140,7 +141,8 @@ public:
         : mAgents(agents),
           mRtcBridge(rtcBridge),
           mLogcatBuffer(k128KB),
-          mKeyEventSender(agents) {
+          mKeyEventSender(agents),
+          mTouchEventSender(agents) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -263,10 +265,10 @@ public:
         return Status::OK;
     }
 
-    Status sendTouch(ServerContext* context,
-                     const TouchEvent* request,
-                     ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << "sendTouch: touching: " << request->istouching()
+    Status sendFingerprint(ServerContext* context,
+                           const FingerprintEvent* request,
+                           ::google::protobuf::Empty* reply) override {
+        LOG(VERBOSE) << "sendFingerprint: touching: " << request->istouching()
                      << ", id: " << request->touchid();
         mAgents->finger->setTouch(request->istouching(), request->touchid());
         return Status::OK;
@@ -288,6 +290,14 @@ public:
 
         mAgents->user_event->sendMouseEvent(request->x(), request->y(), 0,
                                             request->buttons(), 0);
+        return Status::OK;
+    }
+
+    Status sendTouch(ServerContext* context,
+                     const TouchEvent* request,
+                     ::google::protobuf::Empty* reply) override {
+        LOG(VERBOSE) << request->DebugString();
+        mTouchEventSender.send(request);
         return Status::OK;
     }
 
@@ -408,6 +418,7 @@ public:
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
+    TouchEventSender mTouchEventSender;
     RtcBridge* mRtcBridge;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.

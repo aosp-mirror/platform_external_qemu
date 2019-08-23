@@ -90,6 +90,37 @@ export default class Emulator extends Component {
     })
   }
 
+  setTouches = (touches) => {
+    // It is totally possible that we send clicks that are offscreen..
+    const { width, height, scale } = this.props
+    var touchList = []
+    for(var i = 0; i < touches.length; i++) {
+      const touch = touches[i]
+      var te = new Proto.Touch()
+      te.setX(Math.round((touch.clientX * width) / (width * scale)))
+      te.setY(Math.round((touch.clientY * height) / (height * scale)))
+      te.setIdentifier(touch.identifier)
+      te.setPressure(touch.force)
+      touchList.push(te)
+    }
+
+
+    var request = new Proto.TouchEvent()
+    request.setTouchesList(touchList)
+    this.emulatorService.sendTouch(request, {}, function (
+      err,
+      _response
+    ) {
+      if (err) {
+        console.error(
+          "Grpc: " + err.code + ", msg: " + err.message,
+          "Emulator:setCoordinates"
+        )
+      }
+    })
+  }
+
+
   handleKey = e => {
     var request = new Proto.KeyboardEvent()
     request.setKey(e.key)
@@ -126,6 +157,19 @@ export default class Emulator extends Component {
     this.setCoordinates(true, offsetX, offsetY)
   }
 
+  handleTouchEnd = e => {
+    this.setTouches(e.changedTouches)
+  }
+
+  handleTouchStart = e => {
+    this.setTouches(e.touches)
+  }
+
+
+  handleTouchMove = e => {
+    this.setTouches(e.changedTouches)
+  }
+
   onLogcat = msg => {
     console.log(msg)
   }
@@ -141,6 +185,10 @@ export default class Emulator extends Component {
         onMouseMove={this.handleMouseMove}
         onMouseUp={this.handleMouseUp}
         onMouseOut={this.handleMouseUp}
+        onTouchStart={this.handleTouchStart}
+        onTouchEnd={this.handleTouchEnd}
+        onTouchCancel={this.handleTouchEnd}
+        onTouchMove={this.handleTouchMove}
         onKeyDown={this.handleKey}
       >
         <SpecificView
