@@ -47,7 +47,6 @@ class LogcatView extends Component {
     }
 
     asItems = loglines => {
-        console.log(loglines)
         return loglines.map(line => (<p>{line}</p>))
     }
 

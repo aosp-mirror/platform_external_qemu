@@ -18,6 +18,7 @@ set(android-grpc_src
     android/emulation/control/EmulatorService.cpp
     android/emulation/control/EmulatorServiceStub.cpp
     android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
+    android/emulation/control/keyboard/TouchEventSender.cpp
     android/emulation/control/GrpcServices.cpp
     android/emulation/control/logcat/RingStreambuf.cpp
     android/emulation/control/waterfall/SocketController.cpp)

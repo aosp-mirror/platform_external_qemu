@@ -26,7 +26,6 @@ export default class App extends Component {
                 <button onClick={() => this.setState({view: 'webrtc'})}>Webrtc</button>
                 <button onClick={() => this.setState({view: 'png'})}>Png</button>
                 <div className='leftpanel'><Emulator uri={URI} view={view} /></div>
-                <div className='rightpanel'><LogcatView uri={URI} maxHistory='15' /></div>
             </div>
         )
     }
