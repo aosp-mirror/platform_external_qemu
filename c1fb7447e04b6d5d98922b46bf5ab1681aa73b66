@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "968eb1ae_d9d0a7e7",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_darwin.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-08-23T17:06:18Z",
+      "side": 1,
+      "message": "Could you please consider using a positive statement?\n\nImproving Readability With Positive Booleans\ngo/tott/387",
+      "range": {
+        "startLine": 114,
+        "startChar": 14,
+        "endLine": 114,
+        "endChar": 23
+      },
+      "revId": "c1fb7447e04b6d5d98922b46bf5ab1681aa73b66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5415a95_07d1c869",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-08-23T17:06:18Z",
+      "side": 1,
+      "message": "Do we have std::tupple available?\n\nver \u003d std::make_tupple(major, minor, build_1, build_2)\nbadVer2 \u003d std::make_tupple(1, 0, 26, 0)\nisBad \u003d (ver \u003d\u003d badVer1) || (ver \u003d\u003d badVer2) ...",
+      "range": {
+        "startLine": 401,
+        "startChar": 8,
+        "endLine": 401,
+        "endChar": 69
+      },
+      "revId": "c1fb7447e04b6d5d98922b46bf5ab1681aa73b66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
