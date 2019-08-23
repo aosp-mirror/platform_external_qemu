@@ -28,6 +28,7 @@ ANDROID_BEGIN_HEADER
 // of 0 means use the current program's bitness.
 // |noWindow| is true iff the -no-window option was used.
 // |uiPreferredBackend| communicates the preferred GLES backend from the UI.
+// |hostGpuVulkanBlacklisted| stores whether it is a bad idea to use host GPU Vulkan.
 // The UI setting can be overridden if the user is logging in through remote desktop.
 // On success, initializes |config| and returns true. Return false on failure.
 bool androidEmuglConfigInit(EmuglConfig* config,
@@ -39,6 +40,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             char** hwGpuModePtr,
                             int wantedBitness,
                             bool noWindow,
-                            enum WinsysPreferredGlesBackend uiPreferredBackend);
+                            enum WinsysPreferredGlesBackend uiPreferredBackend,
+                            bool* hostGpuVulkanBlacklisted);
 
 ANDROID_END_HEADER
