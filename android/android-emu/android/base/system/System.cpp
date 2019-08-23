@@ -24,6 +24,7 @@
 #include "android/base/misc/FileUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/threads/Thread.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
@@ -2833,6 +2834,164 @@ CpuTime System::cpuTime() {
 #endif
     return res;
 }
+
+#ifdef _WIN32
+// Based on chromium/src/base/file_version_info_win.cc's CreateFileVersionInfoWin
+// Currently used to query Vulkan DLL's on the system and blacklist known
+// problematic DLLs
+// static
+
+// Windows 10 funcs
+typedef DWORD (*get_file_version_info_size_w_t)(LPCWSTR, LPDWORD);
+typedef DWORD (*get_file_version_info_w_t)(LPCWSTR, DWORD, DWORD, LPVOID);
+
+// Windows 8 funcs
+typedef DWORD (*get_file_version_info_size_ex_w_t)(DWORD, LPCWSTR, LPDWORD);
+typedef DWORD (*get_file_version_info_ex_w_t)(DWORD, LPCWSTR, DWORD, DWORD, LPVOID);
+
+// common
+typedef WINBOOL (*ver_query_value_w_t)(LPCVOID, LPCWSTR, LPVOID, PUINT);
+
+static get_file_version_info_size_w_t getFileVersionInfoSizeW_func = 0;
+static get_file_version_info_w_t getFileVersionInfoW_func = 0;
+static get_file_version_info_size_ex_w_t getFileVersionInfoSizeExW_func = 0;
+static get_file_version_info_ex_w_t getFileVersionInfoExW_func = 0;
+static ver_query_value_w_t verQueryValueW_func = 0;
+
+static bool getFileVersionInfoFuncsAvailable = false;
+static bool getFileVersionInfoExFuncsAvailable = false;
+static bool canQueryFileVersion = false;
+
+bool initFileVersionInfoFuncs() {
+    crashhandler_append_message_format("querying file version info API...\n");
+
+    if (canQueryFileVersion) return true;
+
+    HMODULE kernelLib = GetModuleHandle("kernelbase");
+
+    if (!kernelLib) return false;
+
+    crashhandler_append_message_format("found kernelbase.dll\n");
+
+    getFileVersionInfoSizeW_func =
+        (get_file_version_info_size_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoSizeW");
+
+    if (!getFileVersionInfoSizeW_func) {
+        crashhandler_append_message_format("GetFileVersionInfoSizeW not found. Not on Windows 10?\n");
+    } else {
+        crashhandler_append_message_format("GetFileVersionInfoSizeW found. On Windows 10?\n");
+    }
+
+    getFileVersionInfoW_func =
+        (get_file_version_info_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoW");
+
+    if (!getFileVersionInfoW_func) {
+        getFileVersionInfoFuncsAvailable = false;
+    } else {
+        fprintf(stderr, "%s: found GetFileVersionInfoW\n", __func__);
+    }
+
+    getFileVersionInfoFuncsAvailable =
+        getFileVersionInfoSizeW_func && getFileVersionInfoW_func;
+
+    if (!getFileVersionInfoFuncsAvailable) {
+        getFileVersionInfoSizeExW_func =
+            (get_file_version_info_size_ex_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoSizeExW");
+        getFileVersionInfoExW_func =
+            (get_file_version_info_ex_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoExW");
+
+        getFileVersionInfoExFuncsAvailable =
+            getFileVersionInfoSizeExW_func && getFileVersionInfoExW_func;
+    }
+
+    if (!getFileVersionInfoFuncsAvailable &&
+        !getFileVersionInfoExFuncsAvailable) {
+        fprintf(stderr, "%s: fail, cannot get file version info funcs\n", __func__);
+        return false;
+    }
+
+    verQueryValueW_func =
+        (ver_query_value_w_t)GetProcAddress(kernelLib, "VerQueryValueW");
+
+    if (!verQueryValueW_func) {
+        fprintf(stderr, "%s: fail, VerQueryValueW not found\n", __func__);
+        return false;
+    }
+
+    fprintf(stderr, "%s: found VerQueryValueW\n", __func__);
+    canQueryFileVersion = true;
+
+    return true;
+}
+
+bool System::queryFileVersionInfo(StringView path, int* major, int* minor, int* build_1, int* build_2) {
+
+    if (!initFileVersionInfoFuncs()) return false;
+    if (!canQueryFileVersion) return false;
+
+    const Win32UnicodeString pathWide(path);
+    DWORD dummy;
+    DWORD length = 0;
+    const DWORD fileVerGetNeutral = 0x02;
+
+    if (getFileVersionInfoFuncsAvailable) {
+        length = getFileVersionInfoSizeW_func(pathWide.c_str(), &dummy);
+    } else if (getFileVersionInfoExFuncsAvailable) {
+        length = getFileVersionInfoSizeExW_func(fileVerGetNeutral, pathWide.c_str(), &dummy);
+    }
+
+    if (length == 0) {
+        fprintf(stderr, "%s: path not found: %s\n", __func__, path.str().c_str());
+        return false;
+    }
+
+    std::vector<uint8_t> data(length, 0);
+
+    if (getFileVersionInfoFuncsAvailable) {
+        if (!getFileVersionInfoW_func(pathWide.c_str(), dummy, length, data.data())) {
+            fprintf(stderr, "%s: GetFileVersionInfoW failed\n", __func__);
+            return false;
+        }
+    } else if (getFileVersionInfoExFuncsAvailable) {
+        if (!getFileVersionInfoExW_func(fileVerGetNeutral, pathWide.c_str(), dummy, length, data.data())) {
+            fprintf(stderr, "%s: GetFileVersionInfoExW failed\n", __func__);
+            return false;
+        }
+    }
+
+    VS_FIXEDFILEINFO* fixedFileInfo = nullptr;
+    UINT fixedFileInfoLength;
+
+    if (!verQueryValueW_func(
+            data.data(),
+            L"\\",
+            reinterpret_cast<void**>(&fixedFileInfo),
+            &fixedFileInfoLength)) {
+        fprintf(stderr, "%s: VerQueryValueW failed\n", __func__);
+        return false;
+    }
+
+    if (major) *major = HIWORD(fixedFileInfo->dwFileVersionMS);
+    if (minor) *minor = LOWORD(fixedFileInfo->dwFileVersionMS);
+    if (build_1) *build_1 = HIWORD(fixedFileInfo->dwFileVersionLS);
+    if (build_2) *build_2 = LOWORD(fixedFileInfo->dwFileVersionLS);
+
+    if (major && minor && build_1 && build_2) {
+        fprintf(stderr, "%s: file %s: %d.%d.%d.%d\n", __func__,
+                path.str().c_str(),
+                *major, *minor, *build_1, *build_2);
+    }
+    return true;
+}
+
+#else
+
+
+bool System::queryFileVersionInfo(StringView, int*, int*, int*, int*) {
+    return false;
+}
+
+#endif // _WIN32
 
 }  // namespace base
 }  // namespace android
