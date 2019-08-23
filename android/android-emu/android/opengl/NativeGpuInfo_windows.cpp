@@ -24,6 +24,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/crashreport/crash-handler.h"
 
 #include "android/utils/path.h"
 
@@ -34,6 +35,7 @@
 
 #include <algorithm>
 #include <string>
+#include <tuple>
 
 using android::base::makeCustomScopedPtr;
 using android::base::PathUtils;
@@ -297,6 +299,10 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
             gpu.make = vendoridBuf;
             gpu.device_id = deviceidBuf;
             gpu.model = &descriptionBuf[0];
+            crashhandler_append_message_format(
+                "gpu found. vendor id %04x device id 0x%04x\n",
+                (unsigned int)(id.VendorId),
+                (unsigned int)(id.DeviceId));
             return true;
         }
     }
@@ -306,6 +312,9 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
 
 void getGpuInfoListNative(GpuInfoList* gpus) {
     if (queryGpuInfoD3D(gpus)) return;
+
+    crashhandler_append_message_format(
+        "d3d gpu query failed.\n");
 
     DISPLAY_DEVICEW device = { sizeof(device) };
 
@@ -334,4 +343,91 @@ void getGpuInfoListNative(GpuInfoList* gpus) {
         auto gpuInfoWmic = load_gpu_info_wmic();
         parse_gpu_info_list_windows(gpuInfoWmic, gpus);
     }
+}
+
+// windows: blacklist depending on amdvlk and certain versions of vulkan-1.dll
+// Based on chromium/src/gpu/config/gpu_info_collector_win.cc
+bool badAmdVulkanDriverVersion() {
+    int major, minor, build_1, build_2;
+
+    crashhandler_append_message_format(
+        "checking for bad AMD Vulkan driver version...\n");
+
+    if (!System::queryFileVersionInfo("amdvlk64.dll", &major, &minor, &build_1, &build_2)) {
+        crashhandler_append_message_format(
+            "amdvlk64.dll not found. Checking for amdvlk32...\n");
+        if (!System::queryFileVersionInfo("amdvlk32.dll", &major, &minor, &build_1, &build_2)) {
+            crashhandler_append_message_format(
+                "amdvlk32.dll not found. No bad AMD Vulkan driver versions found.\n");
+            // Information about amdvlk64 not availble; not blacklisted
+            return false;
+        }
+    }
+
+    crashhandler_append_message_format(
+        "AMD driver info found. Version: %d.%d.%d.%d\n",
+        major, minor, build_1, build_2);
+
+    bool isBad = (major == 1 && minor == 0 && build_1 <= 54);
+
+    if (isBad) {
+        crashhandler_append_message_format(
+            "Is bad AMD driver version; blacklisting.\n");
+    } else {
+        crashhandler_append_message_format(
+            "Not known bad AMD driver version; passing.\n");
+    }
+
+    return isBad;
+}
+
+using WindowsDllVersion = std::tuple<int, int, int, int>;
+
+static WindowsDllVersion sBadVulkanDllVersions[] = {
+    std::make_tuple(0, 0, 0, 0),
+    std::make_tuple(1, 0, 26, 0),
+    std::make_tuple(1, 0, 33, 0),
+    std::make_tuple(1, 0, 42, 0),
+    std::make_tuple(1, 0, 42, 1),
+    std::make_tuple(1, 0, 51, 0),
+};
+
+bool badVulkanDllVersion() {
+    int major, minor, build_1, build_2;
+
+    crashhandler_append_message_format(
+        "checking for bad vulkan-1.dll version...\n");
+
+    if (!System::queryFileVersionInfo("vulkan-1.dll", &major, &minor, &build_1, &build_2)) {
+        crashhandler_append_message_format(
+            "info on vulkan-1.dll cannot be found, continue.\n");
+        // Information about vulkan-1.dll not available; not blacklisted
+        return false;
+    }
+
+    crashhandler_append_message_format(
+        "vulkan-1.dll version: %d.%d.%d.%d\n",
+        major, minor, build_1, build_2);
+
+    bool isBad = false;
+    WindowsDllVersion currentVersion =
+        std::make_tuple(major, minor, build_1, build_2);
+
+    for (auto badDllVersion : sBadVulkanDllVersions) {
+        isBad |= (currentVersion == badDllVersion);
+    }
+
+    if (isBad) {
+        crashhandler_append_message_format(
+            "Is bad vulkan-1.dll version; blacklisting.\n");
+    } else {
+        crashhandler_append_message_format(
+            "Not known bad vulkan-1.dll version; continue.\n");
+    }
+
+    return isBad;
+}
+
+bool isVulkanSafeToUseNative() {
+    return !badAmdVulkanDriverVersion() && !badVulkanDllVersion();
 }
