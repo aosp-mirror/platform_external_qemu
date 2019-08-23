@@ -22,6 +22,23 @@
       "revId": "93439b58ddc3f0c278e6481a0e5f665a2613625f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8cd7091_1179091a",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-08-23T16:54:41Z",
+      "side": 1,
+      "message": "Actually, the id should be 3 instead of 2.",
+      "revId": "93439b58ddc3f0c278e6481a0e5f665a2613625f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
