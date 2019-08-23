@@ -486,6 +486,9 @@ public:
     static std::string getProgramDirectoryFromPlatform();
     static WallDuration getSystemTimeUs();
 
+    // Windows driver file querying functions
+    static bool queryFileVersionInfo(StringView path, int* major, int* minor, int* build_1, int* build_2);
+
 protected:
     size_t mMemorySize = 0;
 
