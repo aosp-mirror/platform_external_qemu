@@ -335,7 +335,7 @@ void RendererImpl::setMultiDisplay(uint32_t id,
 void RendererImpl::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
     auto fb = FrameBuffer::getFB();
     if (fb) {
-        fb->setDisplayColorBuffer(id, cb);
+        fb->setDisplayColorBufferLocked(id, cb);
     }
 }
 

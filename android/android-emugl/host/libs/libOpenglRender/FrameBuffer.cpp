@@ -2217,18 +2217,36 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     ComposeDevice* p = (ComposeDevice*)buffer;
     AutoLock mutex(m_lock);
 
-    Post composeCmd;
-    composeCmd.cmd = PostCmd::Compose;
-    composeCmd.d = p;
-    sendPostWorkerCmd(composeCmd);
-
-    if (p->version <= 1) {
+    switch (p->version) {
+    case 1: {
+        Post composeCmd;
+        composeCmd.cmd = PostCmd::Compose;
+        composeCmd.d = p;
+        sendPostWorkerCmd(composeCmd);
         post(p->targetHandle, false);
-    } else {
-       ComposeDevice_v2* p2 = (ComposeDevice_v2*)buffer;
-       post(p2->targetHandle, false);
+        return true;
     }
-    return true;
+
+    case 2: {
+       // support for multi-display
+       ComposeDevice_v2* p2 = (ComposeDevice_v2*)buffer;
+       if (p2->displayId != 0) {
+            setDisplayColorBuffer(p2->displayId, p2->targetHandle);
+       }
+       Post composeCmd;
+       composeCmd.cmd = PostCmd::Compose;
+       composeCmd.d = p;
+       sendPostWorkerCmd(composeCmd);
+       if (p2->displayId == 0) {
+           post(p2->targetHandle, false);
+       }
+       return true;
+    }
+
+    default:
+       fprintf(stderr, "yet to handle composition device version: %d\n", p->version);
+       return false;
+    }
 }
 
 void FrameBuffer::onSave(Stream* stream,
@@ -2598,8 +2616,8 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
         return 0;
     }
     if (*displayId == s_invalidIdMultiDisplay) {
-        while (m_displays.find(++s_nextDisplayId) != m_displays.end()) { }
-        *displayId = s_nextDisplayId;
+        while (m_displays.find(s_nextDisplayId++) != m_displays.end()) { }
+        *displayId = s_nextDisplayId - 1;
     }
     if (m_displays.size() == 1) {
         emugl::get_emugl_window_operations().setNoSkin();
@@ -2633,8 +2651,6 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
 }
 
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
-    DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
-    AutoLock mutex(m_lock);
     if (m_displays.find(displayId) == m_displays.end()) {
         ERR("cannot find display %d\n", displayId);
         return -1;
@@ -2646,6 +2662,12 @@ int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer)
     m_displays[displayId].cb = colorBuffer;
     c->second.cb->setDisplay(displayId);
     return 0;
+}
+
+int FrameBuffer::setDisplayColorBufferLocked(uint32_t displayId, uint32_t colorBuffer) {
+    DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
+    AutoLock mutex(m_lock);
+    return setDisplayColorBuffer(displayId, colorBuffer);
 }
 
 int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
