@@ -16,6 +16,7 @@
 
 #include "android/base/StringView.h"
 #include "android/base/files/ScopedFd.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/CommonReportedInfo.h"
 #include "android/crashreport/common.h"
 #include "android/crashreport/CrashSystem.h"
@@ -158,6 +159,7 @@ private:
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
 
+    android::base::Lock mLock;
     std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;

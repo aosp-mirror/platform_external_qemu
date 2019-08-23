@@ -42,6 +42,7 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
+using android::base::AutoLock;
 using android::base::c_str;
 using android::base::PathUtils;
 using android::base::ScopedFd;
@@ -178,12 +179,14 @@ static void formatDataFileName(char (&buffer)[N], StringView baseName) {
 }
 
 void CrashReporter::attachData(StringView name, StringView data, bool replace) {
+    AutoLock lock(mLock);
     auto fd = openDataAttachFile(name, replace);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
     HANDLE_EINTR(write(fd.get(), "\n", 1));
 }
 
 void CrashReporter::attachBinaryData(StringView name, StringView data, bool replace) {
+    AutoLock lock(mLock);
     auto fd = openDataAttachFile(name, replace, true);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
 }
