@@ -16,6 +16,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Route.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/extended-pages/location-route-playback-item.h"
 #include "android/utils/path.h"
 
 #include <QCheckBox>
@@ -143,6 +144,7 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, previous);
         if (item != nullptr) {
             item->setSelected(false);
+            item->refresh();
         }
     }
     if (!current) {
@@ -151,6 +153,7 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, current);
         if (item != nullptr) {
             item->setSelected(true);
+            item->refresh();
             auto& routeElement = item->routeElement();
 
             mRouteJson = ""; // Forget any unsaved route we may have received
@@ -498,4 +501,18 @@ void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile) {
         free(jsonFileName);
         free(protoDirName);
     }
+}
+
+void LocationPage::routes_updateTheme() {
+#ifdef USE_WEBENGINE
+    for (int i = 0; i < mUi->loc_routeList->count(); ++i) {
+        RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, mUi->loc_routeList->item(i));
+        item->refresh();
+    }
+    for (int i = 0; i < mUi->loc_routePlayingList->count(); ++i) {
+        RoutePlaybackWaypointItem* item = qobject_cast<RoutePlaybackWaypointItem*>(
+                mUi->loc_routePlayingList->itemWidget(mUi->loc_routePlayingList->item(i)));
+        item->refresh();
+    }
+#endif
 }

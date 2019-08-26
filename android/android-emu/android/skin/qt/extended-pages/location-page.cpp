@@ -261,6 +261,8 @@ void LocationPage::updateTheme() {
     //  to include QComboBox items that have icons. I could find all
     //  QComboBox items that have icons, but I could not read their
     //  properties to get 'iconThemeName'.)
+    points_updateTheme();
+    routes_updateTheme();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()

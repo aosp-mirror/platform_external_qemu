@@ -21,6 +21,7 @@ public:
         CCListItem(parent)
     {
         setEditButtonEnabled(false);
+        setSelected(true);
     }
 
     void setTransportMode(int mode) {
@@ -39,10 +40,11 @@ public:
                 modeIconName = "transit";
                 break;
         }
-        QIcon modeIcon = getIconForCurrentTheme(modeIconName);
+        QIcon modeIcon = getIconForTheme(modeIconName, SettingsTheme::SETTINGS_THEME_DARK);
         QPixmap modeIconPix = modeIcon.pixmap(kIconSize, kIconSize);
         setLabelPixmap(modeIconPix);
     }
+
 
 private:
     static constexpr int kIconSize = 20;
@@ -76,8 +78,9 @@ public:
     }
 
     void setWaypointType(WaypointType type) {
-        QString modeIconName;
         int scaledSize;
+        QString modeIconName;
+        mWaypointType = type;
 
         switch (type) {
             case WaypointType::Start:
@@ -99,11 +102,16 @@ public:
         setLabelSize(kIconSize, kIconSize, CCLayoutDirection::Left);
     }
 
+    void refresh() {
+        setWaypointType(mWaypointType);
+    }
+
 private:
     static constexpr int kIconSize = 20;
     static constexpr int kStartScaledSize = 12;
     static constexpr int kIntermediateScaledSize = 10;
     static constexpr int kEndScaledSize = 16;
+    WaypointType mWaypointType;
     QListWidgetItem* mListItem;
     QListWidget* const mListWidget;
 };

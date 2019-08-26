@@ -98,6 +98,8 @@ public:
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
 
     void updateTheme();
+    void points_updateTheme();
+    void routes_updateTheme();
 
     static void writeDeviceLocationToSettings(double lat,
                                               double lon,
@@ -275,6 +277,7 @@ public:
 
     // Call if the |pointElement|'s data changes to refresh the list item.
     void refresh() {
+        updateTheme();
         setTitle(mPointElement.logicalName);
         QString subtitle;
         subtitle.sprintf("%.4f, %.4f",
@@ -373,6 +376,7 @@ public:
     }
     // Call if the |routeElement|'s data changes to refresh the list item.
     void refresh() {
+        updateTheme();
         setTitle(mRouteElement.logicalName);
         setSubtitle(mRouteElement.description);
         QString modeIconName;
@@ -390,7 +394,13 @@ public:
                 modeIconName = "transit";
                 break;
         }
-        QIcon modeIcon = getIconForCurrentTheme(modeIconName);
+
+        QIcon modeIcon;
+        if (isSelected()) {
+            modeIcon = getIconForTheme(modeIconName, SettingsTheme::SETTINGS_THEME_DARK);
+        } else {
+            modeIcon = getIconForCurrentTheme(modeIconName);
+        }
         QPixmap modeIconPix = modeIcon.pixmap(kIconSize, kIconSize);
         setLabelPixmap(modeIconPix);
     }
