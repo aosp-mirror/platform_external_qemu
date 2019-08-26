@@ -22,6 +22,30 @@
       "revId": "d20f5528a57cbd70d48c5de0ee98cf14d08fb64e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf9e73ef_1fe86390",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2870,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-26T17:16:21Z",
+      "side": 1,
+      "message": "In the particular case of GetModuleHandle, it looks like GetModuleHandle keeps reference count constant and doesn\u0027t need a cleanup func:\n\nhttps://stackoverflow.com/questions/2148935/does-getmodulehandle-function-cause-any-leaks-stack-overflow-and-memory-leaks",
+      "parentUuid": "9fc19c6d_191828cb",
+      "range": {
+        "startLine": 2870,
+        "startChar": 12,
+        "endLine": 2870,
+        "endChar": 21
+      },
+      "revId": "d20f5528a57cbd70d48c5de0ee98cf14d08fb64e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
