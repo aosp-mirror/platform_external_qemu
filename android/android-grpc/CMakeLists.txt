@@ -25,7 +25,7 @@ set(android-grpc_src
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE grpc++ png PUBLIC libprotobuf android-emu)
+target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu grpc++)
 target_include_directories(android-grpc
                            PRIVATE # For Renderer.h ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
