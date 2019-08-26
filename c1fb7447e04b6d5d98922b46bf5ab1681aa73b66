@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "feadde01_8fa6d9e8",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_darwin.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-26T17:39:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "968eb1ae_d9d0a7e7",
+      "range": {
+        "startLine": 114,
+        "startChar": 14,
+        "endLine": 114,
+        "endChar": 23
+      },
+      "revId": "c1fb7447e04b6d5d98922b46bf5ab1681aa73b66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d5415a95_07d1c869",
         "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
         "patchSetId": 8
@@ -45,6 +69,30 @@
       "revId": "c1fb7447e04b6d5d98922b46bf5ab1681aa73b66",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9a48932_b9787328",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-08-26T17:39:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d5415a95_07d1c869",
+      "range": {
+        "startLine": 401,
+        "startChar": 8,
+        "endLine": 401,
+        "endChar": 69
+      },
+      "revId": "c1fb7447e04b6d5d98922b46bf5ab1681aa73b66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
