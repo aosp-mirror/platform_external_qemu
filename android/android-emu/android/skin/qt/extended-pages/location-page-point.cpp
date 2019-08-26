@@ -542,6 +542,12 @@ void LocationPage::setUpWebEngine() {
     }
 }
 
+void LocationPage::points_updateTheme() {
+    for (int i = 0; i < mUi->loc_pointList->count(); ++i) {
+        PointWidgetItem* item = getItemWidget(mUi->loc_pointList, mUi->loc_pointList->item(i));
+        item->refresh();
+    }
+}
 
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
 void MapBridge::map_savePoint() { }
@@ -562,4 +568,5 @@ void LocationPage::writePointProtobufFullPath(
         const emulator_location::PointMetadata& protobuf) { }
 void LocationPage::setUpWebEngine() { }
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) { }
+void LocationPage::points_updateTheme() { }
 #endif // !USE_WEBENGINE

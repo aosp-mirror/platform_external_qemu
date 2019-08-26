@@ -22,13 +22,13 @@ void LocationPage::on_loc_playRouteButton_clicked() {
     if (mNowPlaying) {
         // STOP
         mUi->loc_routePlayingList->hide();
+        mUi->loc_routePlayingList->clear();
         mUi->loc_routePlayingTitleItem->hide();
         mUi->loc_routeList->show();
         locationPlaybackStop_v2();
         emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
         // START
-        mUi->loc_routePlayingList->clear();
         mUi->loc_routeList->hide();
         mUi->loc_routePlayingList->show();
         mUi->loc_routePlayingTitleItem->show();

@@ -42,5 +42,8 @@ QIcon getIconForCurrentTheme(const QString& icon_name);
 // Obtains the named color for the current theme
 QColor getColorForCurrentTheme(const QString& colorName);
 
+// Obtains the given icon for |theme|.
+QIcon getIconForTheme(const QString& icon_name, SettingsTheme theme);
+
 // Set a frame's window flags to be always on top
 void setFrameOnTop(QFrame* frame, bool onTop);

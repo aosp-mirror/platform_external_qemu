@@ -37,6 +37,8 @@ public:
     void setLabelSize(int width, int height, CCLayoutDirection direction = CCLayoutDirection::Right);
     void setEditButtonEnabled(bool enabled);
     void setSelected(bool selected);
+    bool isSelected() const;
+    void updateTheme();
 
 private:
     void setSubtitleOpacity(double opacity);
@@ -49,4 +51,5 @@ signals:
 
 private:
     std::unique_ptr<Ui::CCListItem> mUi;
+    bool mSelected = false;
 };
