@@ -17,3 +17,5 @@
 #include "android/opengl/gpuinfo.h"
 
 void getGpuInfoListNative(GpuInfoList*);
+
+bool isVulkanSafeToUseNative();

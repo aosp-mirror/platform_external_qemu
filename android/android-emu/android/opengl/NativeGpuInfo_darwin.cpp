@@ -109,3 +109,8 @@ void getGpuInfoListNative(GpuInfoList* out) {
                 );
     }
 }
+
+// macOS: blacklist
+bool isVulkanSafeToUseNative() {
+    return false;
+}
