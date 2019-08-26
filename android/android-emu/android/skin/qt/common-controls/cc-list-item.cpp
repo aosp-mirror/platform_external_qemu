@@ -16,7 +16,7 @@
 #include <QGraphicsOpacityEffect>
 
 const double kDisplayInfoOpacity = 0.66f;
-const int kNameLabelWidth = 200;
+const int kNameLabelWidth = 170;
 
 CCListItem::CCListItem(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CCListItem()) {
@@ -93,6 +93,7 @@ void CCListItem::setEditButtonEnabled(bool enable) {
 }
 
 void CCListItem::setSelected(bool selected) {
+    mSelected = selected;
     if (selected) {
         mUi->title->setStyleSheet("color: white");
         mUi->subtitle->setStyleSheet("color: white");
@@ -104,4 +105,17 @@ void CCListItem::setSelected(bool selected) {
         mUi->leftLabel->setStyleSheet("");
         mUi->rightLabel->setStyleSheet("");
     }
+    updateTheme();
+}
+
+void CCListItem::updateTheme() {
+    if (mSelected) {
+        mUi->editButton->setIcon(getIconForTheme("more_vert", SettingsTheme::SETTINGS_THEME_DARK));
+    } else {
+        mUi->editButton->setIcon(getIconForCurrentTheme("more_vert"));
+    }
+}
+
+bool CCListItem::isSelected() const {
+    return mSelected;
 }
