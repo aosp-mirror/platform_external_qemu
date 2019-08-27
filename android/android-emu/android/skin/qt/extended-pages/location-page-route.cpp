@@ -16,6 +16,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Route.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/extended-pages/location-route-playback-item.h"
 #include "android/utils/path.h"
 
 #include <QCheckBox>
@@ -127,8 +128,6 @@ void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
         // We don't need to send any updates to the map since we aren't editing any
         // of the routing points.
         routeWidgetItem->refresh();
-        // Redraw the table to show the new selection
-        showRouteDetails(routeWidgetItem->routeElement());
     } else if (theAction == deleteAction && deleteRoute(routeWidgetItem->routeElement())) {
         mUi->loc_routeList->setCurrentItem(nullptr);
         routeWidgetItem->removeFromListWidget();
@@ -143,20 +142,18 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, previous);
         if (item != nullptr) {
             item->setSelected(false);
+            item->refresh();
         }
     }
     if (!current) {
-        mUi->loc_routeInfo->clear();
     } else {
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, current);
         if (item != nullptr) {
             item->setSelected(true);
+            item->refresh();
             auto& routeElement = item->routeElement();
 
             mRouteJson = ""; // Forget any unsaved route we may have received
-
-            // Redraw the table to show the new selection
-            showRouteDetails(routeElement);
 
             // Read the JSON route file and pass it to the javascript to display it
             const QString& routeJson = readRouteJsonFile(routeElement.protoFilePath);
@@ -272,71 +269,9 @@ bool LocationPage::deleteRoute(const RouteListElement& routeElement) {
     return ret;
 }
 
-// Display the details of the selected route
-void LocationPage::showRouteDetails(const RouteListElement& theElement) {
-    // Show the route info in the details window.
-    QString modeString;
-    switch (theElement.modeIndex) {
-        default:
-        case 0:  modeString = tr("Driving");    break;
-        case 1:  modeString = tr("Walking");    break;
-        case 2:  modeString = tr("Bicycling");  break;
-        case 3:  modeString = tr("Transit");    break;
-    }
-    std::string protobufName = theElement.protoFilePath.toStdString();
-    android::base::StringView dirPath;
-    android::base::StringView dirTail;
-    bool splitSucceeded = android::base::PathUtils::split(protobufName,
-                                                          &dirPath,
-                                                          nullptr /* base name */);
-    if (!splitSucceeded) {
-        dirTail = "";
-    } else {
-        // Remove the trailing path separator
-        dirPath = dirPath.substrAbs(0, dirPath.size() - 1);
-
-        splitSucceeded = android::base::PathUtils::split(dirPath.str(),
-                                                         nullptr, /* start of path */
-                                                         &dirTail);
-        if (!splitSucceeded) {
-            dirTail = "";
-        }
-    }
-    int durationSeconds = theElement.duration;
-    int durationHours = durationSeconds / (60 * 60);
-    durationSeconds -= durationHours * (60 * 60);
-    int durationMinutes = durationSeconds / 60;
-    durationSeconds -= durationMinutes * 60;
-    QString durationString = (durationHours > 0)   ? tr("%1h %2m %3s")
-                                                     .arg(durationHours)
-                                                     .arg(durationMinutes)
-                                                     .arg(durationSeconds)
-                                                   :
-                             (durationMinutes > 0) ? tr("%1m %2s")
-                                                     .arg(durationMinutes)
-                                                     .arg(durationSeconds)
-                                                   :
-                                                     tr("%1s")
-                                                     .arg(durationSeconds);
-    QString infoString = tr("<b>%1</b><br>"
-                            "&nbsp;&nbsp;Duration: <b>%2</b><br>"
-                            "&nbsp;&nbsp;Mode: <b>%3</b><br>"
-                            "&nbsp;&nbsp;Number of points: <b>%4</b><br>"
-                            "&nbsp;&nbsp;Directory: <b>%5</b><br>"
-                            "<b>%6</b>")
-                          .arg(theElement.logicalName)
-                          .arg(durationString)
-                          .arg(modeString)
-                          .arg(theElement.numPoints)
-                          .arg(dirTail.str().c_str())
-                          .arg(theElement.description);
-    mUi->loc_routeInfo->setHtml(infoString);
-}
-
 // Display the details of the not-yet-saved route
 void LocationPage::showPendingRouteDetails() {
     if (mRouteNumPoints <= 0) {
-        mUi->loc_routeInfo->setHtml("");
         return;
     }
 
@@ -371,7 +306,6 @@ void LocationPage::showPendingRouteDetails() {
                           .arg(durationString)
                           .arg(modeString)
                           .arg(mRouteNumPoints);
-    mUi->loc_routeInfo->setHtml(infoString);
 }
 
 void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
@@ -498,4 +432,18 @@ void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile) {
         free(jsonFileName);
         free(protoDirName);
     }
+}
+
+void LocationPage::routes_updateTheme() {
+#ifdef USE_WEBENGINE
+    for (int i = 0; i < mUi->loc_routeList->count(); ++i) {
+        RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, mUi->loc_routeList->item(i));
+        item->refresh();
+    }
+    for (int i = 0; i < mUi->loc_routePlayingList->count(); ++i) {
+        RoutePlaybackWaypointItem* item = qobject_cast<RoutePlaybackWaypointItem*>(
+                mUi->loc_routePlayingList->itemWidget(mUi->loc_routePlayingList->item(i)));
+        item->refresh();
+    }
+#endif
 }

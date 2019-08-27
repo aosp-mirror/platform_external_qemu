@@ -64,36 +64,6 @@
       </rect>
      </property>
     </widget>
-    <widget class="RaisedMaterialButton" name="loc_savePoint">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>520</y>
-       <width>132</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>SAVE POINT</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Button</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="RaisedMaterialButton" name="loc_singlePoint_setLocationButton">
      <property name="geometry">
       <rect>
@@ -282,7 +252,7 @@
        <x>332</x>
        <y>38</y>
        <width>272</width>
-       <height>372</height>
+       <height>472</height>
       </rect>
      </property>
      <property name="horizontalScrollBarPolicy">
@@ -330,7 +300,7 @@
        <x>332</x>
        <y>118</y>
        <width>272</width>
-       <height>372</height>
+       <height>392</height>
       </rect>
      </property>
      <property name="horizontalScrollBarPolicy">
@@ -356,13 +326,13 @@
       </rect>
      </property>
     </widget>
-    <widget class="QTextBrowser" name="loc_routeInfo">
+    <widget class="QGroupBox">
      <property name="geometry">
       <rect>
-       <x>332</x>
-       <y>414</y>
-       <width>272</width>
-       <height>96</height>
+       <x>20</x>
+       <y>515</y>
+       <width>121</width>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -370,18 +340,30 @@
        <family>Roboto</family>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Playback speed</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
     </widget>
     <widget class="QComboBox" name="loc_routeSpeed">
      <property name="geometry">
       <rect>
-       <x>172</x>
-       <y>520</y>
+       <x>20</x>
+       <y>530</y>
        <width>111</width>
-       <height>27</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
      </property>
      <item>
       <property name="text">
@@ -412,10 +394,10 @@
     <widget class="QGroupBox" name="loc_repeatLabel">
      <property name="geometry">
       <rect>
-       <x>304</x>
-       <y>520</y>
+       <x>155</x>
+       <y>515</y>
        <width>121</width>
-       <height>21</height>
+       <height>24</height>
       </rect>
      </property>
      <property name="font">
@@ -436,8 +418,8 @@
     <widget class="QCheckBox" name="loc_repeatRoute">
      <property name="geometry">
       <rect>
-       <x>304</x>
-       <y>540</y>
+       <x>155</x>
+       <y>534</y>
        <width>120</width>
        <height>24</height>
       </rect>
@@ -465,7 +447,6 @@
     <zorder>loc_playRouteButton</zorder>
     <zorder>loc_savedRoutesLabel_2</zorder>
     <zorder>loc_routeWebEngineView</zorder>
-    <zorder>loc_routeInfo</zorder>
     <zorder>loc_noSavedRoutes_mask</zorder>
     <zorder>loc_routeSpeed</zorder>
     <zorder>loc_repeatLabel</zorder>
