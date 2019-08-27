@@ -26,6 +26,7 @@
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
@@ -71,7 +72,6 @@ public:
                    ::grpc::ServerReaderWriter<::waterfall::ForwardMessage,
                                               ::waterfall::ForwardMessage>*
                            stream) override {
-        LOG(INFO) << "Forwarding forward to waterfall";
         return StreamingToStreaming<::waterfall::ForwardMessage>(
                 mWaterfall.get(), stream,
                 [](auto stub, auto ctx) { return stub->Forward(ctx); });
@@ -81,7 +81,6 @@ public:
             ServerContext* context,
             ::grpc::ServerReaderWriter<::waterfall::Message,
                                        ::waterfall::Message>* stream) override {
-        LOG(INFO) << "Forwarding Exec to waterfall";
         return StreamingToStreaming<::waterfall::Message>(
                 mWaterfall.get(), stream,
                 [](auto stub, auto ctx) { return stub->Echo(ctx); });
@@ -91,7 +90,6 @@ public:
                 ::grpc::ServerReaderWriter<::waterfall::CmdProgress,
                                            ::waterfall::CmdProgress>* stream)
             override {
-        LOG(INFO) << "Forwarding Exec to waterfall";
         return StreamingToStreaming<::waterfall::CmdProgress>(
                 mWaterfall.get(), stream,
                 [](auto stub, auto ctx) { return stub->Exec(ctx); });
@@ -100,7 +98,6 @@ public:
     Status Pull(ServerContext* context,
                 const ::waterfall::Transfer* request,
                 ServerWriter<::waterfall::Transfer>* writer) override {
-        LOG(INFO) << "Forwarding Pull to waterfall";
         return UnaryToStreaming<::waterfall::Transfer>(
                 mWaterfall.get(), writer, [&request](auto stub, auto ctx) {
                     return stub->Pull(ctx, *request);
@@ -110,7 +107,6 @@ public:
     Status Push(ServerContext* context,
                 grpc::ServerReader<::waterfall::Transfer>* reader,
                 ::waterfall::Transfer* reply) override {
-        LOG(INFO) << "Forwarding Pull to waterfall";
         return StreamingToUnary<::waterfall::Transfer>(
                 mWaterfall.get(), reader, [&reply](auto stub, auto ctx) {
                     return stub->Push(ctx, reply);
@@ -151,7 +147,6 @@ public:
     Status getLogcat(ServerContext* context,
                      const LogMessage* request,
                      LogMessage* reply) override {
-        LOG(VERBOSE) << "getLogcat: offset: " << request->start();
         auto message = mLogcatBuffer.bufferAtOffset(request->start(), kNoWait);
         reply->set_start(message.first);
         reply->set_contents(message.second);
@@ -168,7 +163,6 @@ public:
             // When streaming, block at most 5 seconds before sending any status
             // This also makes sure we check that the clients is still around at
             // least once every 5 seconds.
-            LOG(VERBOSE) << log.DebugString();
             auto message =
                     mLogcatBuffer.bufferAtOffset(log.next(), k5SecondsWait);
             log.set_start(message.first);
@@ -181,7 +175,6 @@ public:
     Status setRotation(ServerContext* context,
                        const Rotation* request,
                        Rotation* reply) override {
-        LOG(VERBOSE) << request->DebugString();
         mAgents->emu->rotate((SkinRotation)request->rotation());
         return getRotation(context, nullptr, reply);
         return Status::OK;
@@ -191,14 +184,12 @@ public:
                        const ::google::protobuf::Empty* request,
                        Rotation* reply) override {
         reply->set_rotation((Rotation_SkinRotation)mAgents->emu->getRotation());
-        LOG(VERBOSE) << reply->DebugString();
         return Status::OK;
     }
 
     Status setBattery(ServerContext* context,
                       const BatteryState* request,
                       BatteryState* reply) override {
-        LOG(VERBOSE) << reply->DebugString();
         auto battery = mAgents->battery;
         battery->setHasBattery(request->hasbattery());
         battery->setIsBatteryPresent(request->ispresent());
@@ -222,7 +213,6 @@ public:
         reply->set_chargelevel(battery->chargeLevel());
         reply->set_health((BatteryState_BatteryHealth)battery->health());
         reply->set_status((BatteryState_BatteryStatus)battery->status());
-        LOG(VERBOSE) << reply->DebugString();
         return Status::OK;
     }
 
@@ -238,8 +228,6 @@ public:
         location->gpsSendLoc(request->latitude(), request->longitude(),
                              request->elevation(), request->speed(),
                              request->heading(), request->satellites(), &tVal);
-
-        LOG(VERBOSE) << request->DebugString();
         return getGps(context, nullptr, reply);
     }
 
@@ -260,16 +248,12 @@ public:
         reply->set_heading(heading);
         reply->set_elevation(elevation);
         reply->set_satellites(count);
-
-        LOG(VERBOSE) << reply->DebugString();
         return Status::OK;
     }
 
     Status sendFingerprint(ServerContext* context,
                            const FingerprintEvent* request,
                            ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << "sendFingerprint: touching: " << request->istouching()
-                     << ", id: " << request->touchid();
         mAgents->finger->setTouch(request->istouching(), request->touchid());
         return Status::OK;
     }
@@ -284,10 +268,6 @@ public:
     Status sendMouse(ServerContext* context,
                      const MouseEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << "sendMouse: x:" << request->x()
-                     << ", y:" << request->y()
-                     << ", buttons: " << request->buttons();
-
         mAgents->user_event->sendMouseEvent(request->x(), request->y(), 0,
                                             request->buttons(), 0);
         return Status::OK;
@@ -296,7 +276,6 @@ public:
     Status sendTouch(ServerContext* context,
                      const TouchEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        LOG(VERBOSE) << request->DebugString();
         mTouchEventSender.send(request);
         return Status::OK;
     }
@@ -305,7 +284,6 @@ public:
                       const RotaryEvent* request,
                       ::google::protobuf::Empty* reply) override {
         mAgents->user_event->sendRotaryEvent(request->delta());
-        LOG(VERBOSE) << request->DebugString();
         return Status::OK;
     }
 
@@ -318,14 +296,12 @@ public:
                 (VmConfiguration_VmHypervisorType)(config.hypervisorType));
         reply->set_numberofcpucores(config.numberOfCpuCores);
         reply->set_ramsizebytes(config.ramSizeBytes);
-        LOG(VERBOSE) << reply->DebugString();
         return Status::OK;
     }
 
     Status getScreenshot(ServerContext* context,
                          const ImageFormat* request,
                          Image* reply) override {
-        LOG(VERBOSE) << "Taking screenshot";
         auto start = System::get()->getUnixTimeUs();
         auto desiredFormat = android::emulation::ImageFormat::PNG;
         if (request->format() == ImageFormat_ImgFormat_RAW) {
@@ -359,11 +335,6 @@ public:
             default:
                 LOG(ERROR) << "Unknown format retrieved during snapshot";
         }
-        LOG(VERBOSE) << "Screenshot: " << img.getWidth() << "x"
-                     << img.getHeight() << ", fmt: " << reply->format().format()
-                     << " in: "
-                     << ((System::get()->getUnixTimeUs() - start) / 1000)
-                     << " ms";
         return Status::OK;
     }
 
@@ -385,8 +356,6 @@ public:
                             const ::google::protobuf::Empty* request,
                             RtcId* reply) override {
         std::string id = base::Uuid::generate().toString();
-
-        LOG(INFO) << "requestRtcStream id: " << id;
         mRtcBridge->connect(id);
         reply->set_guid(id);
         return Status::OK;
@@ -397,7 +366,6 @@ public:
                            ::google::protobuf::Empty* reply) override {
         std::string id = request->id().guid();
         std::string msg = request->message();
-        LOG(INFO) << "sendJsepMessage from id: " << id << ", msg: " << msg;
         mRtcBridge->acceptJsepMessage(id, msg);
         return Status::OK;
     }
@@ -411,7 +379,6 @@ public:
         mRtcBridge->nextMessage(id, &msg, k5SecondsWait);
         reply->mutable_id()->set_guid(request->guid());
         reply->set_message(msg);
-        LOG(INFO) << "receiveJsepMessage id: " << id << ", msg: " << msg;
         return Status::OK;
     }
 
@@ -470,6 +437,13 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
     builder.RegisterService(wfallforwarder.release());
+
+    std::vector<std::unique_ptr<
+            grpc::experimental::ServerInterceptorFactoryInterface>>
+            creators;
+    creators.push_back(std::unique_ptr<android::control::interceptor::LoggingInterceptorFactory>(
+            new android::control::interceptor::LoggingInterceptorFactory()));
+    builder.experimental().SetInterceptorCreators(std::move(creators));
 
     // TODO(jansene): It seems that we can easily overload the server with
     // touch events. if the gRPC server runs out of threads to serve

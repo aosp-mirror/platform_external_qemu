@@ -15,9 +15,7 @@
 #include <memory>
 #include "android/console.h"
 #include "android/emulation/control/RtcBridge.h"
-namespace grpc {
-class ServerCredentials;
-}
+#include <grpcpp/grpcpp.h>
 
 namespace android {
 namespace emulation {

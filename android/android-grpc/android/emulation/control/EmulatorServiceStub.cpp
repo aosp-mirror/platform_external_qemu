@@ -15,9 +15,6 @@
 
 #include "android/emulation/control/EmulatorService.h"
 
-namespace grpc {
-class ServerCredentials {};
-}
 
 namespace android {
 namespace emulation {
