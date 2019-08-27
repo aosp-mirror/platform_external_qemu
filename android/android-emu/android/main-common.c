@@ -2085,10 +2085,12 @@ bool configAndStartRenderer(
     // Determine whether to enable Vulkan (if in android qemu mode)
 
     if (android_qemu_mode) {
+        // Always enable GLDirectMem for API >= 29
+        bool shouldEnableGLDirectMem = api_level >= 29;
         bool shouldEnableVulkan = true;
 
         crashhandler_append_message_format(
-            "Deciding if Vulkan should be enabled. "
+            "Deciding if GLDirectMem/Vulkan should be enabled. "
             "Selected renderer: %d "
             "API level: %d host GPU blacklisted? %d\n",
             config_out->selectedRenderer,
@@ -2124,6 +2126,12 @@ bool configAndStartRenderer(
                 shouldEnableVulkan = false;
                 crashhandler_append_message_format(
                     "Some other renderer selected, not enabling Vulkan.\n");
+        }
+
+        if (shouldEnableGLDirectMem) {
+            crashhandler_append_message_format("Enabling GLDirectMem");
+            // Do not enable if we did not enable it on the API 29 image itself.
+            feature_set_if_not_overridden_or_guest_disabled(kFeature_GLDirectMem, true);
         }
 
         if (shouldEnableVulkan) {

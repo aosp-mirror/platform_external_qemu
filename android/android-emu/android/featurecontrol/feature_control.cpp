@@ -31,6 +31,11 @@ void feature_set_if_not_overridden(Feature feature, bool enable) {
     android::featurecontrol::setIfNotOverriden(value, enable);
 }
 
+void feature_set_if_not_overridden_or_guest_disabled(Feature feature, bool enable) {
+    auto value = static_cast<android::featurecontrol::Feature>(feature);
+    android::featurecontrol::setIfNotOverridenOrGuestDisabled(value, enable);
+}
+
 void feature_reset_enabled_to_default(Feature feature) {
     auto value = static_cast<android::featurecontrol::Feature>(feature);
     return android::featurecontrol::resetEnabledToDefault(value);
