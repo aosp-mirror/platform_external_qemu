@@ -196,6 +196,8 @@ if(NOT CROSSCOMPILE)
 else()
   android_compile_for_host(protoc ${CMAKE_CURRENT_LIST_DIR} PROTOBUF_EXE)
   set(PROTOBUF_PROTOC_EXECUTABLE ${PROTOBUF_EXE} CACHE PATH "Protocol buffer executable" FORCE)
+  add_executable(protobuf::protoc IMPORTED GLOBAL)
+  set_target_properties(protobuf::protoc PROPERTIES IMPORTED_LOCATION "${PROTOBUF_PROTOC_EXECUTABLE}")
 endif()
 
 set(PROTOBUF_LIBRARY "${PROTO_DESC}")
