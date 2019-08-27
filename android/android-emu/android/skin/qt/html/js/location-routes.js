@@ -60,6 +60,27 @@ class WaypointInfo {
     }
 }
 
+function startRouteCreatorFromPoint(lat, lng, address) {
+    resetRouteCreatorOverlay();
+    hideAllOverlays();
+
+    var latLng = new google.maps.LatLng(lat, lng);
+    gEndWaypoint.setLatLng(latLng);
+    gEndWaypoint.setMarker(new google.maps.Marker({
+        map: gMap,
+        position: latLng
+    }));
+    // Ensure that the starting point is visible
+    if (!gMap.getBounds().contains(latLng)) {
+        gMap.setCenter(latLng);
+    }
+    gEndWaypoint.setAddress(address);
+    document.getElementById('endAddress').value = gEndWaypoint.address;
+
+    document.getElementById('startAddress').value = "";
+    showRouteCreatorOverlay(false);
+}
+
 function hideAllOverlays() {
     document.getElementById("startInfoOverlay").className = "pointOverlaySlideOut";
     document.getElementById("routeCreatorOverlay").className = "routeCreatorOverlayHidden";
