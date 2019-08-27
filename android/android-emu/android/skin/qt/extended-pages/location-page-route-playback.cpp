@@ -21,22 +21,29 @@
 void LocationPage::on_loc_playRouteButton_clicked() {
     if (mNowPlaying) {
         // STOP
-        mUi->loc_routePlayingList->hide();
-        mUi->loc_routePlayingList->clear();
-        mUi->loc_routePlayingTitleItem->hide();
-        mUi->loc_routeList->show();
         locationPlaybackStop_v2();
-        emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
         // START
-        mUi->loc_routeList->hide();
-        mUi->loc_routePlayingList->show();
-        mUi->loc_routePlayingTitleItem->show();
+        playRouteStateChanged(false);
         emit mMapBridge->showRoutePlaybackOverlay(true);
         mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
         if (parsePointsFromJson()) {
             locationPlaybackStart_v2();
         }
+    }
+}
+
+void LocationPage::playRouteStateChanged(bool stopped) {
+    if (stopped) {
+        mUi->loc_routePlayingList->hide();
+        mUi->loc_routePlayingList->clear();
+        mUi->loc_routePlayingTitleItem->hide();
+        mUi->loc_routeList->show();
+        emit mMapBridge->showRoutePlaybackOverlay(false);
+    } else {
+        mUi->loc_routeList->hide();
+        mUi->loc_routePlayingList->show();
+        mUi->loc_routePlayingTitleItem->show();
     }
 }
 
@@ -229,4 +236,5 @@ bool LocationPage::parsePointsFromJson() { return true; }
 void LocationPage::locationPlaybackStart_v2() { }
 double LocationPage::getDistanceNm(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
 double LocationPage::getDistanceMeters(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
+void LocationPage::playRouteStateChanged(bool stopped) { }
 #endif

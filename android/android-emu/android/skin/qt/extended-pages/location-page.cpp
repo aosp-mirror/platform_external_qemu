@@ -530,6 +530,7 @@ void LocationPage::locationPlaybackStop_v2()
     mTimer.stop();
     mNextRoutePointIdx = -1;
     mUi->loc_playRouteButton->setText(tr("PLAY ROUTE"));
+    playRouteStateChanged(true);
 
     mNowPlaying = false;
 }

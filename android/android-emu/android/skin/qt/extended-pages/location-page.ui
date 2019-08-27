@@ -155,10 +155,10 @@
       <bool>false</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+      <string notr="true">background-color: transparent;</string>
      </property>
      <property name="text">
-      <string>No points have been saved</string>
+      <string>Points that you save shall appear here</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -211,17 +211,17 @@
        <x>342</x>
        <y>48</y>
        <width>252</width>
-       <height>352</height>
+       <height>452</height>
       </rect>
      </property>
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+      <string notr="true">background-color: transparent;</string>
      </property>
      <property name="text">
-      <string>No routes have been saved</string>
+      <string>Routes that you save shall appear here</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

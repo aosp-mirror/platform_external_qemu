@@ -160,7 +160,6 @@ private slots:
     void locationPlaybackStop_v2();
     void timeout_v2();
 
-    void on_loc_savePoint_clicked();
     void on_loc_singlePoint_setLocationButton_clicked();
     void on_loc_pointList_currentItemChanged(QListWidgetItem* current,
                                          QListWidgetItem* previous);
@@ -180,6 +179,8 @@ private:
 
     void sendMostRecentUiLocation();
     void updateControlsAfterLoading();
+
+    void playRouteStateChanged(bool stopped);
 
     void writeLocationPlaybackFilePathToSettings(const QString& file);
     QString getLocationPlaybackFilePathFromSettings();

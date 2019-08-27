@@ -132,34 +132,6 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
     mUi->loc_pointList->setCurrentItem(nullptr);
 }
 
-void LocationPage::on_loc_savePoint_clicked() {
-    QDateTime now = QDateTime::currentDateTime();
-    QString pointName("point_" + now.toString("yyyy-MM-dd_HH-mm-ss"));
-
-    emulator_location::PointMetadata ptMetadata;
-    QString logicalName = pointName;
-    ptMetadata.set_logical_name(logicalName.toStdString());
-    ptMetadata.set_creation_time(now.toMSecsSinceEpoch() / 1000LL);
-    ptMetadata.set_latitude(mLastLat.toDouble());
-    ptMetadata.set_longitude(mLastLng.toDouble());
-    ptMetadata.set_altitude(0.0);
-    ptMetadata.set_address(mLastAddr.toStdString());
-
-    std::string fullPath = writePointProtobufByName(pointName, ptMetadata);
-
-    // Add the new point to the list
-    PointListElement listElement;
-    listElement.protoFilePath = QString::fromStdString(fullPath);
-    listElement.logicalName = QString::fromStdString(ptMetadata.logical_name());
-    listElement.description = QString::fromStdString(ptMetadata.description());
-    listElement.latitude = ptMetadata.latitude();
-    listElement.longitude = ptMetadata.longitude();
-    listElement.address = QString::fromStdString(ptMetadata.address());
-
-    PointItemBuilder builder(mUi->loc_pointList);
-    builder.addPoint(std::move(listElement), this);
-}
-
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
     sendMostRecentUiLocation();
 }
@@ -554,7 +526,6 @@ void MapBridge::map_savePoint() { }
 void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
 void LocationPage::map_savePoint() { }
 void LocationPage::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
-void LocationPage::on_loc_savePoint_clicked() { }
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
 void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous) { }
