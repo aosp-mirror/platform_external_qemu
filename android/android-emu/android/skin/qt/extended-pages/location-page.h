@@ -188,7 +188,6 @@ private:
     int getLocationPlaybackSpeedFromSettings();
 
     void showPendingRouteDetails();
-    void showRouteDetails(const RouteListElement& theElement);
     std::string writePointProtobufByName(const QString& pointFormalName,
                                          const emulator_location::PointMetadata& protobuf);
     void writePointProtobufFullPath(const QString& protoFullPath,
