@@ -162,10 +162,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    uint32_t w,
                    uint32_t h,
                    uint32_t dpi,
-                   uint32_t flag) {
+                   uint32_t flag)->bool {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        win->switchMultiDisplay(add, id, x, y, w, h, dpi, flag);
+                        return win->switchMultiDisplay(add, id, x, y, w, h, dpi, flag);
                     }
+                    return false;
                 }};
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

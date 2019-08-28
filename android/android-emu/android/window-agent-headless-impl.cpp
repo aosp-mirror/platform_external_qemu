@@ -101,7 +101,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                  uint32_t w,
                                  uint32_t h,
                                  uint32_t dpi,
-                                 uint32_t flag) {},
+                                 uint32_t flag)->bool {},
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
