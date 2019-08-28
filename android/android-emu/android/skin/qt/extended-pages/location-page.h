@@ -336,6 +336,7 @@ signals:
     void showRouteOnMap(const QString& routeJson);
     void resetPointsMap();
     void showRoutePlaybackOverlay(bool visible);
+    void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
 
 private:
     LocationPage* const mLocationPage;

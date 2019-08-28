@@ -215,12 +215,20 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     auto* pointWidgetItem = reinterpret_cast<PointWidgetItem*>(listItem);
     QMenu* popMenu = new QMenu(this);
+    QAction* startRouteAction = popMenu->addAction(tr("Start a route"));
     QAction* editAction   = popMenu->addAction(tr("Edit"));
     QAction* deleteAction = popMenu->addAction(tr("Delete"));
 
     mUi->loc_pointList->setCurrentItem(pointWidgetItem->listWidgetItem());
     QAction* theAction = popMenu->exec(QCursor::pos());
-    if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
+    if (theAction == startRouteAction) {
+        // Switch to routes tab with the saved point
+        auto& pointElement = pointWidgetItem->pointElement();
+        emit mMapBridge->startRouteCreatorFromPoint(QString::number(pointElement.latitude, 'g', 12),
+                                                    QString::number(pointElement.longitude, 'g', 12),
+                                                    pointElement.address);
+        mUi->locationTabs->setCurrentIndex(1);
+    } else if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
         pointWidgetItem->refresh();
         auto& pointElement = pointWidgetItem->pointElement();
         // show the location on the map, but do not send it to the device
@@ -481,6 +489,10 @@ void LocationPage::setUpWebEngine() {
             appendString.append(
                         "channel.objects.emulocationserver.showRoutePlaybackOverlay.connect(function(visible) {"
                             "if (showRoutePlaybackOverlay) showRoutePlaybackOverlay(visible);"
+                        "});");
+            appendString.append(
+                        "channel.objects.emulocationserver.startRouteCreatorFromPoint.connect(function(lat, lng, addr) {"
+                            "if (startRouteCreatorFromPoint) startRouteCreatorFromPoint(lat, lng, addr);"
                         "});");
         }
         appendString.append(
