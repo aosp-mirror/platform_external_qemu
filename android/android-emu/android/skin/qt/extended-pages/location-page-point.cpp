@@ -17,6 +17,7 @@
 #include "android/base/StringView.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Point.h"
+#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/utils/path.h"
 
@@ -24,6 +25,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -494,6 +496,10 @@ void LocationPage::setUpWebEngine() {
                         "channel.objects.emulocationserver.startRouteCreatorFromPoint.connect(function(lat, lng, addr) {"
                             "if (startRouteCreatorFromPoint) startRouteCreatorFromPoint(lat, lng, addr);"
                         "});");
+            appendString.append(
+                        "channel.objects.emulocationserver.showGpxKmlRouteOnMap.connect(function(routeJson) {"
+                            "if (showGpxKmlRouteOnMap) showGpxKmlRouteOnMap(routeJson);"
+                        "});");
         }
         appendString.append(
                     "});"
@@ -533,6 +539,62 @@ void LocationPage::points_updateTheme() {
     }
 }
 
+void LocationPage::handle_importGpxKmlButton_clicked() {
+    // Use dialog to get file name
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX or KML File"), ".",
+                                                    tr("GPX and KML files (*.gpx *.kml)"));
+
+    if (fileName.isNull()) return;
+
+    // Asynchronously parse the file with geo data.
+    // If the file is big enough, parsing it synchronously will cause a noticeable
+    // hiccup in the UI.
+    mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
+                                                      SLOT(geoDataThreadStarted_v2()),
+                                                      SLOT(geoDataThreadFinished_v2(QString, bool, QString))));
+    mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
+}
+
+void LocationPage::geoDataThreadStarted_v2() {
+    {
+        QSignalBlocker blocker(mUi->loc_routeList);
+        // TODO: add signal to also block the routes webengine
+    }
+
+    SettingsTheme theme = getSelectedTheme();
+
+    // Prevent the user from initiating a load gpx/kml while another load is already
+    // in progress
+    setButtonEnabled(mUi->loc_importGpxKmlButton, theme, false);
+    setButtonEnabled(mUi->loc_playRouteButton, theme, false);
+    mNowLoadingGeoData = true;
+}
+
+void LocationPage::geoDataThreadFinished_v2(QString file_name, bool ok, QString error_message) {
+    finishGeoDataLoading_v2(file_name, ok, error_message, false);
+}
+
+void LocationPage::finishGeoDataLoading_v2(
+        const QString& file_name,
+        bool ok,
+        const QString& error_message,
+        bool ignore_error) {
+    mGeoDataLoader.reset();
+    if (!ok) {
+        if (!ignore_error) {
+            showErrorDialog(error_message, tr("Geo Data Parser"));
+        }
+        SettingsTheme theme = getSelectedTheme();
+        setButtonEnabled(mUi->loc_importGpxKmlButton, theme, true);
+        setButtonEnabled(mUi->loc_playRouteButton, theme, true);
+        mNowLoadingGeoData = false;
+        return;
+    }
+    // TODO: send data to the route webengine to render the route
+    QString jsonString = toJsonString(&mGpsFixesArray);
+    emit mMapBridge->showGpxKmlRouteOnMap(jsonString);
+}
+
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
 void MapBridge::map_savePoint() { }
 void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
@@ -552,4 +614,5 @@ void LocationPage::writePointProtobufFullPath(
 void LocationPage::setUpWebEngine() { }
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) { }
 void LocationPage::points_updateTheme() { }
+void LocationPage::handle_importGpxKmlButton_clicked() { }
 #endif // !USE_WEBENGINE

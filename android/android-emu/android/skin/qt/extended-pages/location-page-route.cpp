@@ -66,6 +66,28 @@ RouteWidgetItem* getItemWidget(QListWidget* list,
 }
 }  // namespace
 
+// static
+QString LocationPage::toJsonString(const GpsFixArray* arr) {
+    QString ret;
+
+    if (arr == nullptr || arr->size() == 0) {
+        return ret;
+    }
+
+    ret.append("{\"path\":[");
+    for (int i = 0; i < arr->size(); ++i) {
+        const GpsFix& fix = (*arr)[i];
+        ret.append(QString("{\"lat\":%1,\"lng\":%2},")
+                .arg(QString::number(fix.latitude))
+                .arg(QString::number(fix.longitude)));
+    }
+    // Remove the last comma
+    ret.chop(1);
+    ret.append("]}");
+
+    return ret;
+}
+
 // Populate the saved routes list with the routes that are found on disk
 void LocationPage::scanForRoutes() {
     // Get the directory

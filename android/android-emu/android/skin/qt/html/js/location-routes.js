@@ -22,6 +22,7 @@ var gLastFocusedAddrBox;
 var gMapClickedListener;
 var gSearchContainer;
 var kMaxSearchResults = 5;
+var gGpxKmlPath;
 
 class WaypointInfo {
     constructor() {
@@ -277,6 +278,10 @@ function clearDirections() {
         gDirectionsDisplay.setMap(null);
         gDirectionsDisplay = null;
     }
+    if (gGpxKmlPath != null) {
+        gGpxKmlPath.setMap(null);
+        gGpxKmlPath = null;
+    }
     document.getElementById('saveRouteButton').style.display = "none";
 }
 
@@ -371,6 +376,35 @@ function showDestinationPoint(latLng) {
         showStartInfoOverlay(address, latLng, elevation);
         gSearchBox.update(address);
     });
+}
+
+function zoomToGpxKmlRoute(map, path) {
+    var bounds = new google.maps.LatLngBounds();
+    for (var i = 0; i < path.length; ++i) {
+        bounds.extend(path[i]);
+    }
+    map.fitBounds(bounds);
+}
+function showGpxKmlRouteOnMap(routeJson) {
+    if (routeJson.length < 2) {
+        return;
+    }
+
+    hideAllOverlays();
+    clearDirections();
+
+    var theRoute = JSON.parse(routeJson);
+    var path = theRoute.path;
+
+    gGpxKmlPath = new google.maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: "#709ddf",
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+    gGpxKmlPath.setMap(gMap);
+    zoomToGpxKmlRoute(gMap, path);
 }
 
 // Callback function for Maps API

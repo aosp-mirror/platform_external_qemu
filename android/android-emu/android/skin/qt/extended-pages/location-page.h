@@ -125,6 +125,9 @@ signals:
 private slots:
     void map_saveRoute();
 
+    void on_loc_importGpxKmlButton_clicked() { handle_importGpxKmlButton_clicked(); }
+    void on_loc_importGpxKmlButton_route_clicked() { handle_importGpxKmlButton_clicked(); }
+
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
@@ -141,6 +144,17 @@ private slots:
     // Do not change QString to QString& - these arguments are passed
     // between threads.
     void geoDataThreadFinished(QString file_name, bool ok, QString error);
+
+    // LocationUiV2 variant
+    // Called when the thread that loads and parses
+    // geo data from file is initiated.
+    void geoDataThreadStarted_v2();
+
+    // Called when the geo data loding thread is finished.
+    // Calls finishGeoDataLoading.
+    // Do not change QString to QString& - these arguments are passed
+    // between threads.
+    void geoDataThreadFinished_v2(QString file_name, bool ok, QString error);
 
     // Takes the loaded geodata and populates UI table chunk-by-chunk, allowing
     // UI to process other events while loading.
@@ -171,7 +185,15 @@ private slots:
     void routeWidget_editButtonClicked(CCListItem* listItem);
 
 private:
+    void handle_importGpxKmlButton_clicked();
+
     void finishGeoDataLoading(
+        const QString& file_name,
+        bool ok,
+        const QString& error_message,
+        bool ignore_error);
+
+    void finishGeoDataLoading_v2(
         const QString& file_name,
         bool ok,
         const QString& error_message,
@@ -207,6 +229,8 @@ private:
                              int row,
                              int col,
                              QString* outErrorMessage);
+    // Helper to generate json string for use in the javascript for google maps to display the route
+    static QString toJsonString(const GpsFixArray* arr);
 
     std::unique_ptr<Ui::LocationPage> mUi;
     static double getDistanceMeters(double startLat, double startLng, double endLat, double endLng);
@@ -337,6 +361,7 @@ signals:
     void resetPointsMap();
     void showRoutePlaybackOverlay(bool visible);
     void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
+    void showGpxKmlRouteOnMap(const QString& routeJson);
 
 private:
     LocationPage* const mLocationPage;
