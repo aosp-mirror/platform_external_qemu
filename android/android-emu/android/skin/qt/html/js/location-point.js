@@ -67,9 +67,25 @@ function showPendingLocation(lat, lng, addr) {
     var latLng = new google.maps.LatLng(lat, lng);
     showPin(latLng);
     // TODO: no support for elevation yet.
-    gPointOverlay.show(addr, latLng, null, true);
-    gSearchBox.update(addr);
-    gMap.panTo(latLng);
+    if (addr === "") {
+        gSearchBox.showSpinner();
+        // Try to fetch the address for this location.
+        gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+            var address = "";
+            var elevation = 0.0;
+            if (status === 'OK' && results[0]) {
+                address = results[0].formatted_address;
+                elevation = results[0].elevation;
+            }
+            gPointOverlay.show(address, latLng, elevation, true);
+            gSearchBox.update(address)
+            gMap.panTo(latLng);
+        });
+    } else {
+        gPointOverlay.show(addr, latLng, null, true);
+        gSearchBox.update(addr);
+        gMap.panTo(latLng);
+    }
 }
 
 function setDeviceLocation(lat, lng) {

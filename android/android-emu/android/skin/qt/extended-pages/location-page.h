@@ -72,6 +72,7 @@ public:
         int     modeIndex;
         int     numPoints;
         int     duration; // Route duration at 1x (seconds)
+        int     jsonFormat; // Format of the json data
 
         RouteListElement() = default;
         bool operator ==(const RouteListElement& other) const {
@@ -109,6 +110,8 @@ public:
     static void getDeviceLocation(double* pLatitude, double* pLongitude,
                                   double* pAltitude, double* pVelocity, double* pHeading);
 
+    void savePoint(double lat, double lng, double elevation, const QString& addr);
+
     // Handlers for point/route map callbacks
     void map_savePoint();
     void sendLocation(const QString& lat, const QString& lng, const QString& address);
@@ -124,6 +127,9 @@ signals:
 
 private slots:
     void map_saveRoute();
+
+    void on_loc_importGpxKmlButton_clicked() { handle_importGpxKmlButton_clicked(); }
+    void on_loc_importGpxKmlButton_route_clicked() { handle_importGpxKmlButton_clicked(); }
 
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
@@ -141,6 +147,17 @@ private slots:
     // Do not change QString to QString& - these arguments are passed
     // between threads.
     void geoDataThreadFinished(QString file_name, bool ok, QString error);
+
+    // LocationUiV2 variant
+    // Called when the thread that loads and parses
+    // geo data from file is initiated.
+    void geoDataThreadStarted_v2();
+
+    // Called when the geo data loding thread is finished.
+    // Calls finishGeoDataLoading.
+    // Do not change QString to QString& - these arguments are passed
+    // between threads.
+    void geoDataThreadFinished_v2(QString file_name, bool ok, QString error);
 
     // Takes the loaded geodata and populates UI table chunk-by-chunk, allowing
     // UI to process other events while loading.
@@ -171,7 +188,17 @@ private slots:
     void routeWidget_editButtonClicked(CCListItem* listItem);
 
 private:
+    void handle_importGpxKmlButton_clicked();
+    void saveGpxKmlPoint(double lat, double lng, double elevation);
+    void saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString);
+
     void finishGeoDataLoading(
+        const QString& file_name,
+        bool ok,
+        const QString& error_message,
+        bool ignore_error);
+
+    void finishGeoDataLoading_v2(
         const QString& file_name,
         bool ok,
         const QString& error_message,
@@ -200,13 +227,19 @@ private:
                                     const emulator_location::RouteMetadata& protobuf);
     QString readRouteJsonFile(const QString& pathOfProtoFile);
     bool parsePointsFromJson();
-    void writeRouteJsonFile(const std::string& pathOfProtoFile);
+
+    bool parseGoogleMapsJson(const QJsonDocument& jsonDoc);
+    bool parseGpxKmlJson(const QJsonDocument& jsonDoc, const QString& description);
+
+    void writeRouteJsonFile(const std::string& pathOfProtoFile, const std::string& jsonString);
     void setUpWebEngine();
 
     static bool validateCell(QTableWidget* table,
                              int row,
                              int col,
                              QString* outErrorMessage);
+    // Helper to generate json string for use in the javascript for google maps to display the route
+    static QString toJsonString(const GpsFixArray* arr);
 
     std::unique_ptr<Ui::LocationPage> mUi;
     static double getDistanceMeters(double startLat, double startLng, double endLat, double endLng);
@@ -337,6 +370,7 @@ signals:
     void resetPointsMap();
     void showRoutePlaybackOverlay(bool visible);
     void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
+    void showGpxKmlRouteOnMap(const QString& routeJson, const QString& title, const QString& subtitle);
 
 private:
     LocationPage* const mLocationPage;
@@ -378,22 +412,28 @@ public:
     // Call if the |routeElement|'s data changes to refresh the list item.
     void refresh() {
         updateTheme();
+
+        QString modeIconName;
         setTitle(mRouteElement.logicalName);
         setSubtitle(mRouteElement.description);
-        QString modeIconName;
-        switch (mRouteElement.modeIndex) {
-            case 0:
-                modeIconName = "car";
-                break;
-            case 1:
-                modeIconName = "walk";
-                break;
-            case 2:
-                modeIconName = "bike";
-                break;
-            case 3:
-                modeIconName = "transit";
-                break;
+
+        if (mRouteElement.jsonFormat == 1) { // emulator_location::RouteMetadata_JsonFormat_GPXKML
+            modeIconName = "file";
+        } else {
+            switch (mRouteElement.modeIndex) {
+                case 0:
+                    modeIconName = "car";
+                    break;
+                case 1:
+                    modeIconName = "walk";
+                    break;
+                case 2:
+                    modeIconName = "bike";
+                    break;
+                case 3:
+                    modeIconName = "transit";
+                    break;
+            }
         }
 
         QIcon modeIcon;
@@ -429,6 +469,8 @@ public:
     }
 private:
     static constexpr int kIconSize = 20;
+    QString mGpxKmlFilename;
+    bool mIsGpxKml = false;
     LocationPage::RouteListElement mRouteElement;
     QListWidgetItem* mListItem;
     QListWidget* const mListWidget;
