@@ -45,7 +45,14 @@ setuptools.setup(
         "console_scripts": ["aemu-build=aemu.cmake:launch"],
     },
     install_requires=[
-        "absl-py", "requests", "enum34", "pip"
+        "pip==19.0.3",
+        "enum34==1.1.6",
+        "requests==2.21.0",
+        "absl-py==0.6.1",
+        "certifi==2019.3.9",
+        "urllib3==1.24.1",
+        "idna==2.8",
+        "chardet==3.0.4",
     ],
     license="Apache License, Version 2.0",
     classifiers=[
