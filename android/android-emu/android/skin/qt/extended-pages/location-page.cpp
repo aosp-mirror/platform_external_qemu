@@ -138,6 +138,7 @@ LocationPage::LocationPage(QWidget *parent) :
         // Hide the V2 widgets that are not functional yet
         mUi->locationTabs->removeTab(2); // "Settings"
         mUi->loc_pointSortBox->hide();   // "Sort by ..."
+        mUi->locationTabs->setCurrentIndex(0);
     } else {
         mUi->locationTabs->setTabText(3, ""); // "V1"
         // Hide the new tabs on the Location page
