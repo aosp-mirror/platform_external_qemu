@@ -111,6 +111,7 @@ TEST(Route, WriteReadExplicitFile) {
     rtMetadata.set_description("Over the river and through the wood");
     rtMetadata.set_mode_of_travel(emulator_location::RouteMetadata_Mode_WALKING);
     rtMetadata.set_duration(13579LL);
+    rtMetadata.set_json_format(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS);
 
     // Write to protobuf to disk
     TestTempDir myDir("location_route_tests");
@@ -140,5 +141,7 @@ TEST(Route, WriteReadExplicitFile) {
     EXPECT_EQ(emulator_location::RouteMetadata_Mode_WALKING,
                        inputMetadata->mode_of_travel());
     EXPECT_EQ(13579LL, inputMetadata->duration());
+    EXPECT_EQ(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS,
+              inputMetadata->json_format());
 }
 }

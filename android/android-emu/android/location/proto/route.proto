@@ -47,4 +47,11 @@ message RouteMetadata {
 
   // Number of lat/lng pairs in the route
   optional int64 number_of_points = 6;
+
+  // The format of the route json.
+  enum JsonFormat {
+      GOOGLEMAPS = 0;
+      GPXKML = 1;
+  }
+  required bool json_format = 7;
 }

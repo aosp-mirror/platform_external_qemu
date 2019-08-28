@@ -24,6 +24,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -494,6 +495,10 @@ void LocationPage::setUpWebEngine() {
                         "channel.objects.emulocationserver.startRouteCreatorFromPoint.connect(function(lat, lng, addr) {"
                             "if (startRouteCreatorFromPoint) startRouteCreatorFromPoint(lat, lng, addr);"
                         "});");
+            appendString.append(
+                        "channel.objects.emulocationserver.showGpxKmlRouteOnMap.connect(function(routeJson, title, subtitle) {"
+                            "if (showGpxKmlRouteOnMap) showGpxKmlRouteOnMap(routeJson, title, subtitle);"
+                        "});");
         }
         appendString.append(
                     "});"
@@ -533,6 +538,22 @@ void LocationPage::points_updateTheme() {
     }
 }
 
+void LocationPage::handle_importGpxKmlButton_clicked() {
+    // Use dialog to get file name
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX or KML File"), ".",
+                                                    tr("GPX and KML files (*.gpx *.kml)"));
+
+    if (fileName.isNull()) return;
+
+    // Asynchronously parse the file with geo data.
+    // If the file is big enough, parsing it synchronously will cause a noticeable
+    // hiccup in the UI.
+    mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
+                                                      SLOT(geoDataThreadStarted_v2()),
+                                                      SLOT(geoDataThreadFinished_v2(QString, bool, QString))));
+    mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
+}
+
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
 void MapBridge::map_savePoint() { }
 void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
@@ -552,4 +573,6 @@ void LocationPage::writePointProtobufFullPath(
 void LocationPage::setUpWebEngine() { }
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) { }
 void LocationPage::points_updateTheme() { }
+void LocationPage::handle_importGpxKmlButton_clicked() { }
+void LocationPage::routes_updateTheme() { }
 #endif // !USE_WEBENGINE
