@@ -24,6 +24,13 @@ public:
         setSelected(true);
     }
 
+    // Icon for GPX/KML playback
+    void showFileIcon() {
+        QIcon modeIcon = getIconForTheme("file", SettingsTheme::SETTINGS_THEME_DARK);
+        QPixmap modeIconPix = modeIcon.pixmap(kIconSize, kIconSize);
+        setLabelPixmap(modeIconPix);
+    }
+
     void setTransportMode(int mode) {
         QString modeIconName;
         switch (mode) {

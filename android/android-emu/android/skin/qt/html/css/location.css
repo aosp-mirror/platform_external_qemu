@@ -246,6 +246,16 @@ html, body {
   margin-right: 24px;
 }
 
+#closeGpxKmlInfoButton {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-right: 12px;
+  margin-top: 12px;
+}
+
 /* Transport modes */
 
 .transport-mode-container {
