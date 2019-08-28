@@ -24,6 +24,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -94,6 +95,10 @@ void MapBridge::sendLocation(const QString& lat, const QString& lng, const QStri
 
 // Invoked when the user saves a point on the map
 void LocationPage::map_savePoint() {
+    savePoint(mLastLat.toDouble(), mLastLng.toDouble(), 0.0, mLastAddr);
+}
+
+void LocationPage::savePoint(double lat, double lng, double elevation, const QString& addr) {
     QDateTime now = QDateTime::currentDateTime();
     QString pointName("point_" + now.toString("yyyy-MM-dd_HH-mm-ss"));
 
@@ -101,10 +106,10 @@ void LocationPage::map_savePoint() {
     QString logicalName = pointName;
     ptMetadata.set_logical_name(logicalName.toStdString());
     ptMetadata.set_creation_time(now.toMSecsSinceEpoch() / 1000LL);
-    ptMetadata.set_latitude(mLastLat.toDouble());
-    ptMetadata.set_longitude(mLastLng.toDouble());
-    ptMetadata.set_altitude(0.0);
-    ptMetadata.set_address(mLastAddr.toStdString());
+    ptMetadata.set_latitude(lat);
+    ptMetadata.set_longitude(lng);
+    ptMetadata.set_altitude(elevation);
+    ptMetadata.set_address(addr.toStdString());
 
     std::string fullPath = writePointProtobufByName(pointName, ptMetadata);
 
@@ -208,6 +213,9 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
             emit mMapBridge->showLocation(QString::number(pointElement.latitude, 'g', 12),
                                           QString::number(pointElement.longitude, 'g', 12),
                                           pointElement.address);
+            mLastLat = QString::number(pointElement.latitude, 'g', 12);
+            mLastLng = QString::number(pointElement.longitude, 'g', 12);
+            mLastAddr = pointElement.address;
         }
     }
 }
@@ -494,6 +502,10 @@ void LocationPage::setUpWebEngine() {
                         "channel.objects.emulocationserver.startRouteCreatorFromPoint.connect(function(lat, lng, addr) {"
                             "if (startRouteCreatorFromPoint) startRouteCreatorFromPoint(lat, lng, addr);"
                         "});");
+            appendString.append(
+                        "channel.objects.emulocationserver.showGpxKmlRouteOnMap.connect(function(routeJson, title, subtitle) {"
+                            "if (showGpxKmlRouteOnMap) showGpxKmlRouteOnMap(routeJson, title, subtitle);"
+                        "});");
         }
         appendString.append(
                     "});"
@@ -533,6 +545,22 @@ void LocationPage::points_updateTheme() {
     }
 }
 
+void LocationPage::handle_importGpxKmlButton_clicked() {
+    // Use dialog to get file name
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX or KML File"), ".",
+                                                    tr("GPX and KML files (*.gpx *.kml)"));
+
+    if (fileName.isNull()) return;
+
+    // Asynchronously parse the file with geo data.
+    // If the file is big enough, parsing it synchronously will cause a noticeable
+    // hiccup in the UI.
+    mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
+                                                      SLOT(geoDataThreadStarted_v2()),
+                                                      SLOT(geoDataThreadFinished_v2(QString, bool, QString))));
+    mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
+}
+
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
 void MapBridge::map_savePoint() { }
 void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
@@ -552,4 +580,13 @@ void LocationPage::writePointProtobufFullPath(
 void LocationPage::setUpWebEngine() { }
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) { }
 void LocationPage::points_updateTheme() { }
+void LocationPage::handle_importGpxKmlButton_clicked() { }
+void LocationPage::routes_updateTheme() { }
+void LocationPage::geoDataThreadStarted_v2() { }
+void LocationPage::geoDataThreadFinished_v2(QString file_name, bool ok, QString error_message) { }
+void LocationPage::finishGeoDataLoading_v2(
+        const QString& file_name,
+        bool ok,
+        const QString& error_message,
+        bool ignore_error) { }
 #endif // !USE_WEBENGINE
