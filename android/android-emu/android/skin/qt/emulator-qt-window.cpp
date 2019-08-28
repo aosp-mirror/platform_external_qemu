@@ -2892,7 +2892,7 @@ int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
             });
 }
 
-void EmulatorQtWindow::switchMultiDisplay(bool enabled,
+bool EmulatorQtWindow::switchMultiDisplay(bool enabled,
                                           uint32_t id,
                                           int32_t x,
                                           int32_t y,
@@ -2904,11 +2904,12 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled,
                  << x << " " << y << " " << width << " " << height << " "
                 << dpi << " " << flag << " " << (enabled? "add":"del");
     if (!android::featurecontrol::isEnabled(
-                android::featurecontrol::MultiDisplay)) {
-        return;
+                android::featurecontrol::MultiDisplay) ||
+        ToolWindow::isFoldableConfigured()) {
+        return false;
     }
     if (enabled && !multiDisplayParamValidate(width, height, dpi, flag)) {
-        return;
+        return false;
     }
 
     {
@@ -2933,6 +2934,8 @@ void EmulatorQtWindow::switchMultiDisplay(bool enabled,
          ".MultiDisplayServiceReceiver"});
     const auto uiAgent = mToolWindow->getUiEmuAgent();
     uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
+
+    return true;
 }
 
 bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {

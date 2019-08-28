@@ -129,7 +129,8 @@ ExtendedWindow::ExtendedWindow(
                    + ":" + QString::number(android_serial_number_port));
 
     mSidebarButtons.addButton(mExtendedUi->locationButton);
-    if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
+        !ToolWindow::isFoldableConfigured()) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
