@@ -26,7 +26,6 @@
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/clipboard_agent.h"
-#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
