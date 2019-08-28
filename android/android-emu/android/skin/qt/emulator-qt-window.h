@@ -302,7 +302,7 @@ public:
 
 public slots:
     void rotateSkin(SkinRotation rot);
-    void switchMultiDisplay(bool enabled,
+    bool switchMultiDisplay(bool enabled,
                             uint32_t id,
                             int32_t x,
                             int32_t y,
