@@ -33,7 +33,6 @@ public:
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
     static void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
-    void hideEvent(QHideEvent* event) override;
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
@@ -45,14 +44,6 @@ signals:
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
-    void enableMultiDisplayChanged(bool enabled,
-                                   uint32_t id,
-                                   int32_t x,
-                                   int32_t y,
-                                   uint32_t width,
-                                   uint32_t height,
-                                   uint32_t dpi,
-                                   uint32_t flag);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -90,8 +81,6 @@ private slots:
 
     void on_set_clipboardSharing_toggled(bool checked);
     void on_set_disableMouseWheel_toggled(bool checked);
-    void on_set_multiDisplay_clicked();
-    void onMultiDisplayIdChanged(int id);
 
 private:
     bool eventFilter(QObject* object, QEvent* event) override;
@@ -105,10 +94,5 @@ private:
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
     std::unique_ptr<PerfStatsPage> mPerfStatsPage;
-    bool    mDisableANGLE = false;
-    int mCurrentDisplay = -1;
-    uint64_t mReportWindowStartUs = 0;
-    uint32_t mReportWindowCount = 0;
-    uint32_t mApplyCnt = 0;
-    uint32_t mMaxDisplayCnt = 0;
+    bool mDisableANGLE = false;
 };

@@ -91,14 +91,6 @@ ExtendedWindow::ExtendedWindow(
             SIGNAL(ensureVirtualSceneWindowCreated()), mToolWindow,
             SLOT(ensureVirtualSceneWindowCreated()));
 
-    connect(mExtendedUi->settingsPage,
-            SIGNAL(enableMultiDisplayChanged(bool, uint32_t, int32_t, int32_t,
-                                             uint32_t, uint32_t, uint32_t,
-                                             uint32_t)),
-            mEmulatorWindow,
-            SLOT(switchMultiDisplay(bool, uint32_t, int32_t, int32_t, uint32_t,
-                                    uint32_t, uint32_t, uint32_t)));
-
     connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()), this,
             SLOT(hideRotationButtons()));
     // clang-format off
