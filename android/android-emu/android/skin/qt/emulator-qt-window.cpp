@@ -2885,7 +2885,11 @@ bool EmulatorQtWindow::switchMultiDisplay(bool enabled,
     if (enabled && !multiDisplayParamValidate(width, height, dpi, flag)) {
         return false;
     }
-
+    if (mOrientation != SKIN_ROTATION_0) {
+        showMessage("Please apply multiple displays without rotation",
+                    Ui::OverlayMessageType::Error, 1000);
+         return false;
+    }
     {
       AutoLock lock(mMultiDisplayLock);
       mMultiDisplay[id].pos_x = x;
