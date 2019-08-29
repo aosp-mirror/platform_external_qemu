@@ -1133,7 +1133,7 @@ static int rcSetDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
         return -1;
     }
 
-    return fb->setDisplayColorBufferLocked(displayId, colorBuffer);
+    return fb->setDisplayColorBuffer(displayId, colorBuffer);
 }
 
 static int rcGetDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
