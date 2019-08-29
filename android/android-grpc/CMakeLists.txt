@@ -21,6 +21,7 @@ set(android-grpc_src
     android/emulation/control/keyboard/TouchEventSender.cpp
     android/emulation/control/GrpcServices.cpp
     android/emulation/control/interceptor/LoggingInterceptor.cpp
+    android/emulation/control/interceptor/MetricsInterceptor.cpp
     android/emulation/control/logcat/RingStreambuf.cpp
     android/emulation/control/waterfall/SocketController.cpp)
 

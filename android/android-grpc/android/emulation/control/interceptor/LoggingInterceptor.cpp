@@ -1,3 +1,16 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 
 #include <android/base/Log.h>
@@ -6,13 +19,14 @@
 #include <algorithm>
 
 #include "android/base/system/System.h"
+
 namespace android {
 namespace control {
 namespace interceptor {
 
 using namespace grpc::experimental;
 
-std::array<std::string, 4> LoggingInterceptor::kTypes{
+const std::array<std::string, 4> InvocationRecord::kTypes{
         "UNARY", "CLIENT_STREAMING", "SERVER_STREAMING", "BIDI_STREAMING"};
 
 std::array<std::string, 17> kStatus{"OK",
@@ -41,27 +55,40 @@ static std::string statusToString(grpc::Status status) {
             .append(status.error_message());
 }
 
-uint64_t LoggingInterceptor::getTimeDiffUs(InterceptionHookPoints from,
-                                           InterceptionHookPoints to) {
-    assert(mTimestamps[static_cast<int>(to)] >
-           mTimestamps[static_cast<int>(from)]);
+static uint64_t getTimeDiffUs(InvocationRecord loginfo,
+                              InterceptionHookPoints from,
+                              InterceptionHookPoints to) {
+    assert(loginfo.mTimestamps[static_cast<int>(to)] >
+           loginfo.mTimestamps[static_cast<int>(from)]);
 
-    return mTimestamps[static_cast<int>(to)] -
-           mTimestamps[static_cast<int>(from)];
+    return loginfo.mTimestamps[static_cast<int>(to)] -
+           loginfo.mTimestamps[static_cast<int>(from)];
 }
 
-LoggingInterceptor::LoggingInterceptor(ServerRpcInfo* info) {
-    mMethod = std::string(info->method()).substr(0, kMaxStringLen);
-    mTimestamps[kStartTimeIdx] = base::System::get()->getUnixTimeUs();
-    mType = info->type();
+static void printLog(const InvocationRecord& loginfo) {
+    LOG(INFO) << loginfo.mTimestamps[InvocationRecord::kStartTimeIdx]
+              << ", rcvTime: " << loginfo.rcvTime
+              << ", sndTime: " << loginfo.sndTime << ", "
+              << InvocationRecord::kTypes[static_cast<int>(loginfo.type)]
+              << ", rcv: " << loginfo.rcvBytes << ", snd: " << loginfo.sndBytes
+              << ", " << loginfo.method << "(" << loginfo.incoming << ") -> ["
+              << loginfo.response << "], " << statusToString(loginfo.status);
+};
+
+LoggingInterceptor::LoggingInterceptor(ServerRpcInfo* info,
+                                       ReportingFunction reporter)
+    : mReporter(reporter) {
+    mLoginfo.method = std::string(info->method()).substr(0, kMaxStringLen);
+    mLoginfo.mTimestamps[InvocationRecord::kStartTimeIdx] =
+            base::System::get()->getUnixTimeUs();
+    mLoginfo.type = info->type();
 }
 
 LoggingInterceptor::~LoggingInterceptor() {
-    LOG(INFO) << mTimestamps[kStartTimeIdx] << ", rcvTime: " << mRcvTime
-              << ", sndTime: " << mSndTime << ", "
-              << kTypes[static_cast<int>(mType)] << ", rcv: " << mRcvBytes
-              << ", snd: " << mSndBytes << ", " << mMethod << "(" << mIncoming
-              << ") -> [" << mResponse << "], " << statusToString(mStatus);
+    auto ts = base::System::get()->getUnixTimeUs();
+    mLoginfo.duration =
+            ts - mLoginfo.mTimestamps[InvocationRecord::kStartTimeIdx];
+    mReporter(mLoginfo);
 }
 
 std::string LoggingInterceptor::chopStr(std::string str) {
@@ -86,15 +113,15 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         // Special case for streaming.. This is really just an approximation
         // of what is happening.. Increment the time spend on receiving
         // bytes..
-        int selector = kStartTimeIdx;
-        if (mType == ServerRpcInfo::Type::CLIENT_STREAMING ||
-            mType == ServerRpcInfo::Type::BIDI_STREAMING)
+        int selector = InvocationRecord::kStartTimeIdx;
+        if (mLoginfo.type == ServerRpcInfo::Type::CLIENT_STREAMING ||
+            mLoginfo.type == ServerRpcInfo::Type::BIDI_STREAMING)
             selector = static_cast<int>(
-                    mRcvTime == 0
+                    mLoginfo.rcvTime == 0
                             ? InterceptionHookPoints::POST_RECV_INITIAL_METADATA
                             : InterceptionHookPoints::POST_RECV_MESSAGE);
 
-        mRcvTime += (ts - mTimestamps[selector]);
+        mLoginfo.rcvTime += (ts - mLoginfo.mTimestamps[selector]);
     }
 
     // Note you can get many pre/post send in case of server streaming/bidi
@@ -104,7 +131,7 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
          i++) {
         if (methods->QueryInterceptionHookPoint(
                     static_cast<InterceptionHookPoints>(i))) {
-            mTimestamps[i] = ts;
+            mLoginfo.mTimestamps[i] = ts;
         }
     }
 
@@ -114,8 +141,8 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         auto msg = reinterpret_cast<::google::protobuf::Message*>(
                 methods->GetRecvMessage());
         if (msg) {
-            mIncoming = chopStr(msg->ShortDebugString());
-            mRcvBytes += msg->SpaceUsed();
+            mLoginfo.incoming = chopStr(msg->ShortDebugString());
+            mLoginfo.rcvBytes += msg->SpaceUsed();
         }
     }
 
@@ -125,29 +152,36 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         auto msg = reinterpret_cast<const ::google::protobuf::Message*>(
                 methods->GetSendMessage());
         if (msg) {
-            mResponse = chopStr(msg->ShortDebugString());
-            mSndBytes += msg->SpaceUsed();
+            mLoginfo.response = chopStr(msg->ShortDebugString());
+            mLoginfo.sndBytes += msg->SpaceUsed();
         }
     }
     if (methods->QueryInterceptionHookPoint(
                 InterceptionHookPoints::PRE_SEND_STATUS)) {
-        mStatus = methods->GetSendStatus();
+        mLoginfo.status = methods->GetSendStatus();
     }
 
     if (methods->QueryInterceptionHookPoint(
                 InterceptionHookPoints::POST_SEND_MESSAGE)) {
         // Increment the time spend on sending bytes..
-        mSndTime += getTimeDiffUs(InterceptionHookPoints::PRE_SEND_MESSAGE,
-                                  InterceptionHookPoints::POST_SEND_MESSAGE);
+        mLoginfo.sndTime += getTimeDiffUs(
+                mLoginfo, InterceptionHookPoints::PRE_SEND_MESSAGE,
+                InterceptionHookPoints::POST_SEND_MESSAGE);
     }
 
     methods->Proceed();
-}  // namespace interceptor
+}
+
+LoggingInterceptorFactory::LoggingInterceptorFactory(ReportingFunction reporter)
+    : mReporter(std::move(reporter)) {}
 
 Interceptor* LoggingInterceptorFactory::CreateServerInterceptor(
         ServerRpcInfo* info) {
-    return new LoggingInterceptor(info);
-}
+    return new LoggingInterceptor(info, mReporter);
+};
+
+StdOutLoggingInterceptorFactory::StdOutLoggingInterceptorFactory()
+    : LoggingInterceptorFactory(printLog){};
 }  // namespace interceptor
 }  // namespace control
 }  // namespace android

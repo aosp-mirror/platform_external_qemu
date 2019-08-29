@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-
-#include <cstdint>
 #include <algorithm>
+#include <cstdint>
 #include <initializer_list>
 #include <vector>
+
+#include "android/base/Optional.h"
 
 namespace android_studio {
 class PercentileEstimator;
@@ -26,12 +26,13 @@ namespace android {
 namespace metrics {
 
 //
-// This class is a C++ implementation of a corresponding Android Studio code from
+// This class is a C++ implementation of a corresponding Android Studio code
+// from
 //    https://android.googlesource.com/platform/tools/analytics-library/+/studio-master-dev/tracker/src/main/java/com/android/tools/analytics
 //
 // Percentiles class creates an estimation of the value at target percentiles
 // from a data stream. It is based on the P-square algorithm found at:
-//    http://pierrechainais.ec-lille.fr/Centrale/Option_DAD/IMPACT_files/Dynamic%20quantiles%20calcultation%20-%20P2%20Algorythm.pdf
+//    https://www.cse.wustl.edu/~jain/papers/ftp/psqr.pdf
 // with extensions to allow monitoring multiple percentiles.
 //
 
@@ -40,6 +41,9 @@ public:
     // Constructor.
     // |rawDataSize| - number of samples before interpolating.
     // |targets| - percentiles to monitor.
+    // Be aware that up to rawDataSize elements will not be bucketized
+    // which can significantly increase the size of
+    // filled out protobuf messages.
     explicit Percentiles(int rawDataSize,
                          std::initializer_list<double> targets);
 
@@ -71,7 +75,7 @@ public:
     base::Optional<double> calcValueForTargetNo(int targetNo);
 
     // Fills in a metrics event with the current state.
-    void fillMetricsEvent(android_studio::PercentileEstimator* event);
+    void fillMetricsEvent(android_studio::PercentileEstimator* event) const;
 
 private:
     // A single tracked bucket.

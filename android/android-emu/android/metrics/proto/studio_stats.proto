@@ -1848,6 +1848,22 @@ message EmulatorMultiDisplay {
   optional uint32 max_displays = 2;
 }
 
+// Metrics for grpc invocations.
+message EmulatorGrpc {
+  // CRC32 digest of the fully-specified method name.
+  optional uint32 call_id = 1;
+  // Number of requests
+  optional uint32 requests = 2;
+  // Number of requests for which the response was not Status::OK
+  optional uint32 failures = 3;
+  // Sum of received message size, if streaming
+  optional PercentileEstimator rcv_bytes_estimate = 4;
+  // Sum of sent message size, if streaming
+  optional PercentileEstimator snd_bytes_estimate = 5;
+  // Duration of the total request time in milliseconds.
+  optional PercentileEstimator duration = 6;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1908,7 +1924,9 @@ message EmulatorDetails {
   optional EmulatorAutomation automation = 30;
   // Metrics for multi-display
   optional EmulatorMultiDisplay multi_display = 31;
-  // Next tag: 32
+  // Metrics for gRPC invocation
+  optional EmulatorGrpc grpc = 32;
+  // Next tag: 33
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
