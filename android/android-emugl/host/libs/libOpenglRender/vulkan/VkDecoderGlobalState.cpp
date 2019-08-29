@@ -79,6 +79,9 @@ kEmulatedExtensions[] = {
     "VK_KHR_external_semaphore",
     "VK_KHR_external_semaphore_capabilities",
     "VK_KHR_external_semaphore_fd",
+    "VK_KHR_external_fence_capabilities",
+    "VK_KHR_external_fence",
+    "VK_KHR_external_fence_fd",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
@@ -2932,6 +2935,17 @@ public:
         return vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
     }
 
+    VkResult on_vkQueueWaitIdle(
+            android::base::Pool* pool,
+            VkQueue boxed_queue) {
+
+        auto queue = unbox_VkQueue(boxed_queue);
+        auto vk = dispatch_VkQueue(boxed_queue);
+        if (!queue) return VK_SUCCESS;
+
+        return vk->vkQueueWaitIdle(queue);
+    }
+
     VkResult on_vkResetCommandBuffer(
             android::base::Pool* pool,
             VkCommandBuffer boxed_commandBuffer,
@@ -5483,6 +5497,12 @@ VkResult VkDecoderGlobalState::on_vkQueueSubmit(
     const VkSubmitInfo* pSubmits,
     VkFence fence) {
     return mImpl->on_vkQueueSubmit(pool, queue, submitCount, pSubmits, fence);
+}
+
+VkResult VkDecoderGlobalState::on_vkQueueWaitIdle(
+        android::base::Pool* pool,
+        VkQueue queue) {
+    return mImpl->on_vkQueueWaitIdle(pool, queue);
 }
 
 VkResult VkDecoderGlobalState::on_vkResetCommandBuffer(
