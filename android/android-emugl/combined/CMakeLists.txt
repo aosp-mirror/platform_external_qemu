@@ -76,3 +76,9 @@ android_target_dependency(aemugraphics_toplevel_unittests all  SWIFTSHADER_DEPEN
 android_target_dependency(aemugraphics_toplevel_unittests all  EMULATOR_FEATURE_DEPENDENCIES)
 android_target_properties(aemugraphics_toplevel_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 android_target_properties(aemugraphics_toplevel_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
+
+# Vulkan encoder unit tests
+set(vulkan_enc_unittests_src ${GOLDFISH_EMUGL_DIR}/system/vulkan_enc/vulkan_enc_unittests.cpp)
+android_add_test(vulkan_enc_unittests)
+target_include_directories(vulkan_enc_unittests PRIVATE ${GOLDFISH_EMUGL_DIR}/android-emu)
+target_link_libraries(vulkan_enc_unittests PUBLIC vulkan_enc androidemu gtest gtest_main)
