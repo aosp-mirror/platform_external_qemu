@@ -28,6 +28,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkCreateSemaphore",
     "vkDestroySemaphore",
     "vkQueueSubmit",
+    "vkQueueWaitIdle",
     "vkImportSemaphoreFdKHR",
     "vkGetSemaphoreFdKHR",
     # Warning: These need to be defined in vk.xml (currently no-op) {
