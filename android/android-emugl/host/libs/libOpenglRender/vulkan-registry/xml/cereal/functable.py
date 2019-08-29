@@ -28,6 +28,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkCreateSemaphore",
     "vkDestroySemaphore",
     "vkQueueSubmit",
+    "vkQueueWaitIdle",
     "vkImportSemaphoreFdKHR",
     "vkGetSemaphoreFdKHR",
     # Warning: These need to be defined in vk.xml (currently no-op) {
@@ -50,6 +51,13 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkResetCommandBuffer",
     "vkCreateImageView",
     "vkCreateSampler",
+    "vkGetPhysicalDeviceExternalFenceProperties",
+    "vkGetPhysicalDeviceExternalFencePropertiesKHR",
+    "vkCreateFence",
+    "vkResetFences",
+    "vkImportFenceFdKHR",
+    "vkGetFenceFdKHR",
+    "vkWaitForFences",
 ]
 
 SUCCESS_VAL = {
