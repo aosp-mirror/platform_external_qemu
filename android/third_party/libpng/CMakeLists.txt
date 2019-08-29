@@ -26,6 +26,7 @@ set(png_src
 android_add_library(png)
 target_compile_options(png
                        PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
+                               -Wno-extra-semi-stmt
                                -Wno-tautological-constant-out-of-range-compare)
 target_compile_definitions(png PRIVATE -DPNG_INTEL_SSE_OPT=1)
 target_include_directories(png PUBLIC ${PNG_SRC_DIR})
@@ -78,13 +79,14 @@ file(GLOB TEST_PNGS "${PNG_SRC_DIR}/contrib/testpngs/*.png")
 list(SORT TEST_PNGS)
 
 set(PNGTEST_PNG "${PNG_SRC_DIR}/pngtest.png")
-
 add_executable(pngtest ${pngtest_src})
+target_compile_options(pngtest PRIVATE "-Wno-incompatible-pointer-types-discards-qualifiers")
 target_link_libraries(pngtest PRIVATE png)
 
 png_add_test(NAME pngtest COMMAND pngtest FILES "${PNGTEST_PNG}")
 
 android_add_executable(pngvalid)
+target_compile_options(pngvalid PRIVATE "-Wno-incompatible-pointer-types-discards-qualifiers")
 target_link_libraries(pngvalid PRIVATE  png)
 
 png_add_test(NAME pngvalid-gamma-16-to-8 COMMAND pngvalid OPTIONS --gamma-16-to-8)
@@ -111,6 +113,7 @@ png_add_test(NAME pngvalid-transform COMMAND pngvalid OPTIONS --transform)
 
 android_add_executable(pngstest)
 target_link_libraries(pngstest PRIVATE  png)
+target_compile_options(pngstest PRIVATE "-Wno-tautological-constant-out-of-range-compare")
 
 foreach(gamma_type 1.8 linear none sRGB)
   foreach(alpha_type none alpha)

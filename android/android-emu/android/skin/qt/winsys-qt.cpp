@@ -862,12 +862,13 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                 int i = 0;
                 for (int cnt = 0; cnt < multidisplay_cnt; cnt++) {
                     window->switchMultiDisplay(true,
-                                               multidisplay_args[i++],
+                                               multidisplay_args[i],
                                                -1, -1,
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++],
-                                               multidisplay_args[i++]);
+                                               multidisplay_args[i+1],
+                                               multidisplay_args[i+2],
+                                               multidisplay_args[i+3],
+                                               multidisplay_args[i+4]);
+                    i += 5;
                 }
             }
             else {
