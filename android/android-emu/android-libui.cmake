@@ -336,9 +336,9 @@ endif()
 
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 
-# Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
+# Target specific compiler flags for windows (mingw), since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
-android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+android_target_compile_options(emulator-libui windows-x86_64 PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
 # Linux compiler settings
 android_target_compile_options(emulator-libui
@@ -405,7 +405,7 @@ android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}" tes
 target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
 
 # Target specific compiler flags for windows
-android_target_compile_options(emulator-libui_unittests windows PRIVATE
+android_target_compile_options(emulator-libui_unittests windows-x86_64 PRIVATE
                                "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
 # Linux compiler settings
@@ -439,7 +439,7 @@ target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
 # Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
 if(NOT MSVC)
-  android_target_compile_options(emulator-libui-headless windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+  android_target_compile_options(emulator-libui-headless windows-x86_64 PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 endif()
 
 # Linux compiler settings

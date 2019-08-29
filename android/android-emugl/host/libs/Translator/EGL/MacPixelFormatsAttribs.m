@@ -87,15 +87,15 @@ static NSOpenGLPixelFormatAttribute attrs16_2[] =
     0
 };
 
-NSOpenGLPixelFormatAttribute** getPixelFormatsAttributes(int* size){
-    static NSOpenGLPixelFormatAttribute* arr[] = {
-        attrs32_1,
-        attrs32_2,
-        attrs32_3,
-        attrs32_4,
-        attrs32_5,
-        attrs32_6,
-        attrs32_7,
+const NSOpenGLPixelFormatAttribute** getPixelFormatsAttributes(int* size){
+    static const NSOpenGLPixelFormatAttribute* arr[] = {
+         attrs32_1,
+         attrs32_2,
+         attrs32_3,
+         attrs32_4,
+         attrs32_5,
+         attrs32_6,
+         attrs32_7,
     };
     *size = sizeof(arr)/sizeof(arr[0]);
     return arr;
@@ -131,11 +131,11 @@ void setCoreProfileLevel(NSOpenGLPixelFormatAttribute level) {
     sWantedCoreProfileLevel = level;
 }
 
-NSOpenGLPixelFormatAttribute* getLegacyProfileAttributes() {
-    return Legacy;
+const NSOpenGLPixelFormatAttribute* getLegacyProfileAttributes() {
+    return  Legacy;
 }
 
-NSOpenGLPixelFormatAttribute* getCoreProfileAttributes() {
+const NSOpenGLPixelFormatAttribute* getCoreProfileAttributes() {
     if (sWantedCoreProfileLevel == NSOpenGLProfileVersion4_1Core) {
         return Core4_1;
     } else if (sWantedCoreProfileLevel == NSOpenGLProfileVersion3_2Core) {
