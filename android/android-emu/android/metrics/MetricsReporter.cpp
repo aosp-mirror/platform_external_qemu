@@ -11,10 +11,14 @@
 
 #include "android/metrics/MetricsReporter.h"
 
-#include "android/base/threads/Async.h"
+#include <stdio.h>
+
+#include <type_traits>
+
+#include "android/base/Uuid.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/Uuid.h"
+#include "android/base/threads/Async.h"
 #include "android/cmdline-option.h"
 #include "android/metrics/AsyncMetricsReporter.h"
 #include "android/metrics/CrashMetricsReporting.h"
@@ -23,17 +27,11 @@
 #include "android/metrics/NullMetricsReporter.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/metrics/TextMetricsWriter.h"
-#include "android/utils/debug.h"
-#include "android/utils/file_io.h"
-
 #include "android/metrics/proto/clientanalytics.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
-
-
+#include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 #include "picosha2.h"
-
-#include <stdio.h>
-#include <type_traits>
 
 using android::base::System;
 
@@ -85,7 +83,8 @@ void MetricsReporter::start(const std::string& sessionId,
     if (android_cmdLineOptions->metrics_to_console) {
         writer = TextMetricsWriter::create(base::StdioStream(stdout));
     } else if (android_cmdLineOptions->metrics_to_file != nullptr) {
-        if (FILE* out = ::android_fopen(android_cmdLineOptions->metrics_to_file, "w")) {
+        if (FILE* out = ::android_fopen(android_cmdLineOptions->metrics_to_file,
+                                        "w")) {
             writer = TextMetricsWriter::create(
                     base::StdioStream(out, base::StdioStream::kOwner));
         } else {
@@ -117,14 +116,22 @@ void MetricsReporter::start(const std::string& sessionId,
 }
 
 void MetricsReporter::stop(MetricsStopReason reason) {
+    for (const auto& callback : sInstance->reporter().mOnExit) {
+        sInstance->reporter().report(callback);
+    }
     sInstance->reporter().report(
-                [reason](android_studio::AndroidStudioEvent* event) {
-                    int crashCount = reason != METRICS_STOP_GRACEFUL ? 1 : 0;
-                    event->mutable_emulator_details()->set_crashes(crashCount);
-                });
+            [reason](android_studio::AndroidStudioEvent* event) {
+                int crashCount = reason != METRICS_STOP_GRACEFUL ? 1 : 0;
+                event->mutable_emulator_details()->set_crashes(crashCount);
+            });
     sInstance->reset({});
 }
 
+void MetricsReporter::reportOnExit(Callback callback) {
+    if (callback) {
+        mOnExit.push_back(callback);
+    }
+}
 MetricsReporter& MetricsReporter::get() {
     return sInstance->reporter();
 }
@@ -139,7 +146,8 @@ void MetricsReporter::report(Callback callback) {
     });
 }
 
-MetricsReporter::MetricsReporter(bool enabled, MetricsWriter::Ptr writer,
+MetricsReporter::MetricsReporter(bool enabled,
+                                 MetricsWriter::Ptr writer,
                                  base::StringView emulatorVersion,
                                  base::StringView emulatorFullVersion,
                                  base::StringView qemuVersion)
@@ -175,11 +183,10 @@ std::string MetricsReporter::anonymize(base::StringView s) {
 }
 
 const base::System::Duration MetricsReporter::getStartTimeMs() {
-  return mStartTimeMs;
+    return mStartTimeMs;
 }
 
-void MetricsReporter::sendToWriter(
-        android_studio::AndroidStudioEvent* event) {
+void MetricsReporter::sendToWriter(android_studio::AndroidStudioEvent* event) {
     wireless_android_play_playlog::LogEvent logEvent;
 
     const auto timeMs = System::get()->getUnixTimeUs() / 1000;

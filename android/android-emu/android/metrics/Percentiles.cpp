@@ -11,9 +11,9 @@
 
 #include "android/metrics/Percentiles.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
-
 #include <cassert>
+
+#include "android/metrics/proto/studio_stats.pb.h"
 
 namespace android {
 namespace metrics {
@@ -103,7 +103,8 @@ base::Optional<double> Percentiles::calcValueForTargetNo(int targetNo) {
     return {};
 }
 
-void Percentiles::fillMetricsEvent(android_studio::PercentileEstimator* event) {
+void Percentiles::fillMetricsEvent(
+        android_studio::PercentileEstimator* event) const {
     assert(event);
 
     if (mCount <= mRawDataSize) {

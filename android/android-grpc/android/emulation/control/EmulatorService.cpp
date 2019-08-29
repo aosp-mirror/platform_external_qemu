@@ -27,6 +27,7 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
+#include "android/emulation/control/interceptor/MetricsInterceptor.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
@@ -43,6 +44,7 @@ using grpc::ServerContext;
 using grpc::ServerWriter;
 using grpc::Status;
 using namespace android::base;
+using namespace android::control::interceptor;
 
 namespace android {
 namespace emulation {
@@ -438,11 +440,12 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     builder.RegisterService(controller.release());
     builder.RegisterService(wfallforwarder.release());
 
+    // Register logging & metrics interceptor.
     std::vector<std::unique_ptr<
             grpc::experimental::ServerInterceptorFactoryInterface>>
             creators;
-    creators.push_back(std::unique_ptr<android::control::interceptor::LoggingInterceptorFactory>(
-            new android::control::interceptor::LoggingInterceptorFactory()));
+    creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
+    creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
     builder.experimental().SetInterceptorCreators(std::move(creators));
 
     // TODO(jansene): It seems that we can easily overload the server with
