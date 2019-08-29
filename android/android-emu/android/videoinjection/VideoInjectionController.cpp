@@ -113,6 +113,11 @@ public:
         ::offworld::VideoInjectionRequest event,
         uint32_t asyncId) override;
 
+    VideoInjectionResult handleSensorMockRequest(
+        android::AsyncMessagePipeHandle pipe,
+        ::offworld::SensorMockRequest event,
+        uint32_t asyncId) override;
+
     void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
 
     void sendFollowUpAsyncResponse(uint32_t async_id,
@@ -211,12 +216,38 @@ VideoInjectionResult VideoInjectionControllerImpl::handleRequest(
     }
 
     RequestContext requestContext;
+    requestContext.type = RequestType::VideoInjection;
     requestContext.request = request;
     requestContext.pipe = pipe;
     requestContext.asyncId = asyncId;
     mRequestContexts.push_back(requestContext);
 
     mAsyncRequestContextMap.insert(std::make_pair(asyncId, requestContext));
+
+    return Ok();
+}
+
+
+VideoInjectionResult VideoInjectionControllerImpl::handleSensorMockRequest(
+    android::AsyncMessagePipeHandle pipe,
+    ::offworld::SensorMockRequest request,
+    uint32_t asyncId) {
+AutoLock lock(mLock);
+    if (mShutdown) {
+        return Err(VideoInjectionError::InternalError);
+    }
+
+    if (!request.function_case()) {
+        VLOG(videoinjection) << "Empty Request";
+        return Err(VideoInjectionError::InvalidRequest);
+    }
+
+    RequestContext requestContext;
+    requestContext.type = RequestType::SensorMock;
+    requestContext.mock_request = request;
+    requestContext.pipe = pipe;
+    requestContext.asyncId = asyncId;
+    mRequestContexts.push_back(requestContext);
 
     return Ok();
 }

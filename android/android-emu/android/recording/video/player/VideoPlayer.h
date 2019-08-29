@@ -34,6 +34,7 @@
 #include <atomic>
 #include <memory>
 
+#include "android/automation/proto/automation.pb.h"
 #include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
@@ -90,6 +91,8 @@ public:
 
     virtual void loadVideoFileWithData(
             const ::offworld::DatasetInfo& datasetInfo) = 0;
+    virtual bool setAutomationEvent(
+            const ::emulator_automation::RecordedEvent& recordedEvent) = 0;
 
     virtual void setErrorStatusAndRecordErrorMessage(std::string errorDetails) = 0;
     virtual bool getErrorStatus() = 0;

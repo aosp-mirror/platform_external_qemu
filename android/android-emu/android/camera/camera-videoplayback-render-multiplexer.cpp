@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "android/automation/proto/automation.pb.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/async/Looper.h"
@@ -28,12 +29,50 @@
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/utils/tempfile.h"
 
+namespace {
+
+::emulator_automation::RecordedEvent toRecordedEvent(
+    const ::offworld::SensorMockRequest& request) {
+  ::emulator_automation::RecordedEvent event;
+  event.set_delay(request.timestamp_us());
+  switch (request.function_case()) {
+    case ::offworld::SensorMockRequest::kMockLocation:
+      event.mutable_location_override()->set_latitude(
+          request.mock_location().location_data().latitude());
+
+      event.mutable_location_override()->set_longitude(
+          request.mock_location().location_data().longitude());
+
+      event.mutable_location_override()->set_meters_elevation(
+          request.mock_location().location_data().meters_elevation());
+
+      event.mutable_location_override()->set_speed_knots(
+          request.mock_location().location_data().knots_speed());
+
+      event.mutable_location_override()->set_heading_degrees(
+          request.mock_location().location_data().degrees_heading());
+
+      event.mutable_location_override()->set_num_satellites(
+          request.mock_location().location_data().num_satellites());
+
+      event.mutable_location_override()->set_timestamp_in_us(
+          request.timestamp_us());
+      break;
+    default:
+      break;
+  }
+  return event;
+}
+
+}  // namespace
+
 namespace android {
 namespace videoplayback {
 
 using ::android::base::Looper;
 using ::android::base::ThreadLooper;
 using videoinjection::VideoInjectionController;
+using videoinjection::RequestType;
 
 class VideoplaybackNotifier : public android::videoplayer::VideoPlayerNotifier {
 public:
@@ -146,6 +185,11 @@ int64_t RenderMultiplexer::render() {
 
     // If there is pending RequestContext, invoke execution accordingly.
     if (maybe_next_request_context) {
+        if (maybe_next_request_context->type == RequestType::SensorMock) {
+          mPlayer->setAutomationEvent(
+              toRecordedEvent(maybe_next_request_context->mock_request));
+          return 0;
+        }
         base::Optional<::offworld::VideoInjectionRequest> maybe_next_request =
                 maybe_next_request_context->request;
         uint32_t async_id = maybe_next_request_context->asyncId;

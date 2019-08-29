@@ -194,6 +194,8 @@ public:
     virtual void videoRefresh();
     virtual void loadVideoFileWithData(
             const ::offworld::DatasetInfo& datasetInfo);
+    virtual bool setAutomationEvent(
+            const ::emulator_automation::RecordedEvent& recordedEvent);
 
     AvSyncMaster getMasterSyncType();
     double getMasterClock();
@@ -1046,6 +1048,12 @@ void VideoPlayerImpl::loadVideoFileWithData(
         LOG(INFO) << "Dataset info not empty! Creating event provider!";
         mEventProvider = SensorLocationEventProvider::create(datasetInfo);
     }
+}
+
+bool VideoPlayerImpl::setAutomationEvent(
+    const ::emulator_automation::RecordedEvent& recordedEvent) {
+    mEventProvider->pushEvent(recordedEvent);
+    return true;
 }
 
 // schedule a timer to start in the specified milliseconds

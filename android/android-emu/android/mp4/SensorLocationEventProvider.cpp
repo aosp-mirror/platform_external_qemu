@@ -68,6 +68,7 @@ public:
     virtual ~SensorLocationEventProviderImpl(){};
     int init(const DatasetInfo& datasetInfo);
     int createEvent(const AVPacket* packet) override;
+    int pushEvent(const ::emulator_automation::RecordedEvent& event) override;
     RecordedEvent consumeNextCommand() override;
     bool getNextCommandDelay(automation::DurationNs* outDelay) override;
 
@@ -274,6 +275,12 @@ int SensorLocationEventProviderImpl::createSensorEvent(AndroidSensor sensor,
     mEventQueue->push(recordedEvent);
 
     return 0;
+}
+
+int SensorLocationEventProviderImpl::pushEvent(
+    const ::emulator_automation::RecordedEvent& event) {
+  mEventQueue->push(event);
+  return 0;
 }
 
 RecordedEvent SensorLocationEventProviderImpl::consumeNextCommand() {

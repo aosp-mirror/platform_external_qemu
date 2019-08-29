@@ -39,6 +39,8 @@ public:
             const DatasetInfo& datasetInfo);
     // Create a RecordedEvent from the packet
     virtual int createEvent(const AVPacket* packet) = 0;
+    virtual int pushEvent(
+        const emulator_automation::RecordedEvent& event) = 0;
     virtual emulator_automation::RecordedEvent consumeNextCommand() = 0;
     virtual bool getNextCommandDelay(automation::DurationNs* outDelay) = 0;
 
