@@ -1248,7 +1248,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkQueueWaitIdle 0x%llx \n", ioStream, (unsigned long long)queue);
                 }
                 VkResult vkQueueWaitIdle_VkResult_return = (VkResult)0;
-                vkQueueWaitIdle_VkResult_return = vk->vkQueueWaitIdle(unboxed_queue);
+                vkQueueWaitIdle_VkResult_return = m_state->on_vkQueueWaitIdle(&m_pool, queue);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkQueueWaitIdle_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();

@@ -497,6 +497,10 @@ public:
         const VkSubmitInfo* pSubmits,
         VkFence fence);
 
+    VkResult on_vkQueueWaitIdle(
+        android::base::Pool* pool,
+        VkQueue queue);
+
     VkResult on_vkResetCommandBuffer(
         android::base::Pool* pool,
         VkCommandBuffer commandBuffer,
