@@ -45,6 +45,16 @@ namespace metrics {
 // It might even be never called at all - if metrics reporting is disabled -
 // so make sure your code doesn't rely on that in any way.
 //
+// If you are aggregating metrics that you wish to report you can register a
+// callback that will be invoked upon closing the emulator.
+//
+//  int counter = ....
+//  MetricsReporter::get().reportOnExit(
+//            [&counter](android_studio::AndroidStudioEvent* event) {
+//                event->mutable_emulator_details()->...
+//  }
+//  counter++;
+//
 // There is one advanced method, reportConditional(): it expects a different
 // type of callback, one that returns |true| if it logged anything or |false| if
 // it didn't and the metric message should be discarded. This is useful when
@@ -78,6 +88,8 @@ public:
     virtual void finishPendingReports() = 0;
 
     void report(Callback callback);
+    // Report the metric before exiting
+    void reportOnExit(Callback callback);
     // Checks if the metrics reporting is enabled for the current reporter
     // instance.
     bool isReportingEnabled() const;
@@ -110,6 +122,7 @@ private:
     base::Lock mSaltLock;
     base::System::Duration mSaltFileTime = 0;
     std::string mSalt;
+    std::vector<Callback> mOnExit;
 };
 
 }  // namespace metrics

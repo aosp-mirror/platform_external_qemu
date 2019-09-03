@@ -1,7 +1,20 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#pragma once
 #include <grpcpp/support/server_interceptor.h>
 
 #include <array>
-
 namespace android {
 namespace control {
 namespace interceptor {
@@ -9,49 +22,80 @@ namespace interceptor {
 using namespace grpc::experimental;
 class LoggingInterceptorFactory;
 
-// A simple logging interceptor that logs completed requests.
-// Note that this does not provide accurate statistical insights
-// for streaming endpoints.
-class LoggingInterceptor : public grpc::experimental::Interceptor {
-public:
-    ~LoggingInterceptor();
+typedef struct InvocationRecord {
+    std::string method;                      // Invoked method.
+    std::string incoming;                    // Shortened receive parameters.
+    std::string response;                    // Shortened response string.
+    grpc::Status status = grpc::Status::OK;  // Status
+    uint64_t rcvBytes = 0;  // Size of all received protobuf messages.
+    uint64_t rcvTime = 0;   // Time spend receiving bytes out over the wire.
+    uint64_t sndBytes = 0;  // Size of all send protobuf messages.
+    uint64_t sndTime = 0;   // Time spend sending bytes out over the wire.
 
-    virtual void Intercept(InterceptorBatchMethods* methods) override;
-
-private:
-    LoggingInterceptor(ServerRpcInfo* info);
-    uint64_t getTimeDiffUs(InterceptionHookPoints from,
-                           InterceptionHookPoints to);
-    std::string chopStr(std::string);
-
-    // We will cut of all repsone/incoming strings at this length.
-    const unsigned int kMaxStringLen = 80;
-    const int kStartTimeIdx =
-            static_cast<int>(InterceptionHookPoints::NUM_INTERCEPTION_HOOKS);
-    static std::array<std::string, 4> kTypes;
-
-    std::string mMethod;     // Invoked method.
-    std::string mIncoming;   // Shortened receive parameters.
-    std::string mResponse;   // Shortened response string.
-    grpc::Status mStatus;          // Status
-    uint64_t mRcvBytes = 0;  // Size of all received protobuf messages.
-    uint64_t mRcvTime = 0;   // Time spend receiving bytes out over the wire.
-    uint64_t mSndBytes = 0;  // Size of all send protobuf messages.
-    uint64_t mSndTime = 0;   // Time spend sending bytes out over the wire.
-    ServerRpcInfo::Type mType;
+    uint64_t duration = 0;  // Total lifetime of the request.
+    ServerRpcInfo::Type type = ServerRpcInfo::Type::UNARY;
 
     // Timestamps of the various stages. We will use NUM_INTERCEPTION_HOOKS to
     // store the creation time
     uint64_t mTimestamps
             [static_cast<int>(InterceptionHookPoints::NUM_INTERCEPTION_HOOKS) +
-             1];
+             1] = {};
 
-    friend LoggingInterceptorFactory;
+    static const std::array<std::string, 4> kTypes;
+    static const int kStartTimeIdx =
+            static_cast<int>(InterceptionHookPoints::NUM_INTERCEPTION_HOOKS);
+
+} InvocationRecord;
+
+using ReportingFunction = std::function<void(const InvocationRecord&)>;
+
+// A simple logging interceptor that collects InvocationRecords.
+// The reporting function will be invoked when the gRPC method is completed
+// and the interceptor object is deleted.
+//
+// You can use it as follows:
+// - Create a ReportingFunction
+// - Register the reporting function with gRPC
+//
+//    ServerBuilder builder;
+//    std::vector<std::unique_ptr<ServerInterceptorFactoryInterface>> creators;
+//    creators.emplace_back(std::make_unique<LoggingInterceptorFactory>([](auto
+//    log}{ .... }));
+//    builder.experimental().SetInterceptorCreators(std::move(creators));
+//
+class LoggingInterceptor : public grpc::experimental::Interceptor {
+public:
+    LoggingInterceptor(ServerRpcInfo* info, ReportingFunction reporter);
+    ~LoggingInterceptor();
+
+    virtual void Intercept(InterceptorBatchMethods* methods) override;
+
+private:
+    std::string chopStr(std::string);
+
+    // We will cut of all repsone/incoming strings at this length.
+    const unsigned int kMaxStringLen = 80;
+
+    InvocationRecord mLoginfo;
+    ReportingFunction mReporter;
 };
 
+// The factory class that needs to be registered with the gRPC server/client.
 class LoggingInterceptorFactory
     : public grpc::experimental::ServerInterceptorFactoryInterface {
-    virtual Interceptor* CreateServerInterceptor(ServerRpcInfo* info);
+public:
+    LoggingInterceptorFactory(ReportingFunction reporter);
+    virtual ~LoggingInterceptorFactory() = default;
+    virtual Interceptor* CreateServerInterceptor(ServerRpcInfo* info) override;
+
+private:
+    ReportingFunction mReporter;
+};
+
+// A logging interceptor that logs all the requests to stdout using LOG(INFO)
+class StdOutLoggingInterceptorFactory : public LoggingInterceptorFactory {
+public:
+    StdOutLoggingInterceptorFactory();
 };
 
 }  // namespace interceptor
