@@ -41,6 +41,7 @@
 
 struct QAndroidLocationAgent;
 class GeoDataLoaderThread;
+class RouteSenderThread;
 class MapBridge;
 
 class LocationPage : public QWidget
@@ -116,6 +117,7 @@ public:
     void map_savePoint();
     void sendLocation(const QString& lat, const QString& lng, const QString& address);
     void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
+    void onSavedRouteDrawn();
 
 signals:
     void signal_saveRoute();
@@ -159,6 +161,9 @@ private slots:
     // between threads.
     void geoDataThreadFinished_v2(QString file_name, bool ok, QString error);
 
+    // Called when the json route is finished being sent to the map.
+    void routeSendingFinished(bool ok);
+
     // Takes the loaded geodata and populates UI table chunk-by-chunk, allowing
     // UI to process other events while loading.
     void populateTableByChunks();
@@ -191,6 +196,7 @@ private:
     void handle_importGpxKmlButton_clicked();
     void saveGpxKmlPoint(double lat, double lng, double elevation);
     void saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString);
+    void setLoadingOverlayVisible(bool visible, QString text = QString(""));
 
     void finishGeoDataLoading(
         const QString& file_name,
@@ -225,7 +231,7 @@ private:
                                          const emulator_location::RouteMetadata& protobuf);
     void writeRouteProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::RouteMetadata& protobuf);
-    QString readRouteJsonFile(const QString& pathOfProtoFile);
+    static QString readRouteJsonFile(const QString& pathOfProtoFile);
     bool parsePointsFromJson();
 
     bool parseGoogleMapsJson(const QJsonDocument& jsonDoc);
@@ -249,6 +255,7 @@ private:
     int                  mGpsNextPopulateIndex = 0;
 
     std::unique_ptr<GeoDataLoaderThread> mGeoDataLoader;
+    std::unique_ptr<RouteSenderThread> mRouteSender;
     QTimer mTimer;
     bool mNowPlaying = false;
     bool mNowLoadingGeoData = false;
@@ -290,6 +297,8 @@ private:
     std::unique_ptr<QWebChannel> mWebChannel;
 
     std::unique_ptr<MapBridge> mMapBridge;
+
+    friend class RouteSenderThread;
 };
 
 class PointWidgetItem : public CCListItem {
@@ -361,6 +370,7 @@ public:
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
     Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
     Q_INVOKABLE void saveRoute();
+    Q_INVOKABLE void onSavedRouteDrawn();
 
 signals:
     // Qt C++ code ==> Javascript
@@ -500,4 +510,28 @@ private:
     GeoDataLoaderThread() = default;
     QString mFileName;
     GpsFixArray* mFixes = nullptr;
+};
+
+class RouteSenderThread : public QThread {
+Q_OBJECT
+public:
+    // Sends the json route data to the map. This can become a heavy task
+    // when the json data becomes very large, hence the need for this thread.
+    void sendRouteToMap(const LocationPage::RouteListElement* const routeElement,
+                        MapBridge* mapBridge);
+
+    static RouteSenderThread* newInstance(
+            const QObject* handler,
+            const char* finished_slot);
+
+signals:
+    void sendFinished(bool ok);
+
+protected:
+    void run() override;
+
+private:
+    RouteSenderThread() = default;
+    const LocationPage::RouteListElement* mRouteElement;
+    MapBridge* mMapBridge;
 };
