@@ -27,6 +27,7 @@
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMovie>
 #include <QPainter>
 #include <QPlainTextEdit>
 #include <QWebEngineScriptCollection>
@@ -146,6 +147,8 @@ void LocationPage::scanForPoints() {
     mUi->loc_pointList->clear();
     // Disable sorting while we're updating the table
     mUi->loc_pointList->setSortingEnabled(false);
+    // Block currentItemChange signals until items are added
+    mUi->loc_pointList->blockSignals(true);
 
     // Get the directory
     std::string pointDirectoryName = android::base::PathUtils::
@@ -191,6 +194,7 @@ void LocationPage::scanForPoints() {
     // All done updating. Enable sorting now.
     mUi->loc_pointList->setSortingEnabled(true);
     mUi->loc_pointList->setCurrentItem(nullptr);
+    mUi->loc_pointList->blockSignals(false);
     // If the list is empty, show an overlay saying that.
     mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
 }
@@ -221,6 +225,7 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
 }
 
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
+    mUi->loc_pointList->blockSignals(true);
     auto* pointWidgetItem = reinterpret_cast<PointWidgetItem*>(listItem);
     QMenu* popMenu = new QMenu(this);
     QAction* startRouteAction = popMenu->addAction(tr("Start a route"));
@@ -250,6 +255,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
         mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
         emit mMapBridge->resetPointsMap();
     }
+    mUi->loc_pointList->blockSignals(false);
 }
 
 bool LocationPage::editPoint(PointListElement& pointElement) {
@@ -543,6 +549,19 @@ void LocationPage::points_updateTheme() {
         PointWidgetItem* item = getItemWidget(mUi->loc_pointList, mUi->loc_pointList->item(i));
         item->refresh();
     }
+    SettingsTheme theme = getSelectedTheme();
+    QMovie* movie = new QMovie(this);
+    movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                       "/circular_spinner_transparent");
+    if (movie->isValid()) {
+        movie->start();
+        mUi->loc_overlaySpinner->setMovie(movie);
+    }
+}
+
+void LocationPage::setLoadingOverlayVisible(bool visible, QString text) {
+    mUi->loc_loadingOverlay->setVisible(visible);
+    mUi->loc_loadingOverlayLabel->setText(text);
 }
 
 void LocationPage::handle_importGpxKmlButton_clicked() {
@@ -555,10 +574,55 @@ void LocationPage::handle_importGpxKmlButton_clicked() {
     // Asynchronously parse the file with geo data.
     // If the file is big enough, parsing it synchronously will cause a noticeable
     // hiccup in the UI.
+    setLoadingOverlayVisible(true, tr("Importing GPX/KML file..."));
     mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
                                                       SLOT(geoDataThreadStarted_v2()),
                                                       SLOT(geoDataThreadFinished_v2(QString, bool, QString))));
     mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
+}
+
+void RouteSenderThread::sendRouteToMap(const LocationPage::RouteListElement* const routeElement,
+                                       MapBridge* mapBridge) {
+    mRouteElement = routeElement;
+    mMapBridge = mapBridge;
+    start();
+}
+
+void RouteSenderThread::run() {
+    bool ok = true;
+
+    const QString& routeJson = LocationPage::readRouteJsonFile(mRouteElement->protoFilePath);
+    if (routeJson.length() <= 0) {
+        ok = false;
+    } else {
+        switch (mRouteElement->jsonFormat) {
+        case emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS:
+            emit mMapBridge->showRouteOnMap(routeJson.toStdString().c_str());
+            break;
+        case emulator_location::RouteMetadata_JsonFormat_GPXKML:
+            emit mMapBridge->showGpxKmlRouteOnMap(routeJson.toStdString().c_str(),
+                                                  mRouteElement->logicalName,
+                                                  "Route from GPX/KML file");
+            break;
+        default:
+            LOG(WARNING) << "Route JsonFormat(" << mRouteElement->jsonFormat << ") is unknown. Can't display on map.";
+            ok = false;
+            break;
+        }
+    }
+
+    emit(sendFinished(ok));
+}
+
+RouteSenderThread* RouteSenderThread::newInstance(const QObject* handler,
+                                                  const char* finished_slot) {
+    RouteSenderThread* new_instance = new RouteSenderThread();
+    connect(new_instance, SIGNAL(sendFinished(bool)), handler, finished_slot);
+
+    // Make sure new_instance gets cleaned up after the thread exits.
+    connect(new_instance, &QThread::finished, new_instance, &QObject::deleteLater);
+
+    return new_instance;
 }
 
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
@@ -589,4 +653,11 @@ void LocationPage::finishGeoDataLoading_v2(
         bool ok,
         const QString& error_message,
         bool ignore_error) { }
+void LocationPage::setLoadingOverlayVisible(bool visible, QString text) { }
+void RouteSenderThread::sendRouteToMap(const LocationPage::RouteListElement* const routeElement,
+                                       MapBridge* mapBridge) { }
+void RouteSenderThread::run() { }
+RouteSenderThread* RouteSenderThread::newInstance(const QObject* handler,
+                                                  const char* finished_slot) { return nullptr; }
+void LocationPage::routeSendingFinished(bool ok) { }
 #endif // !USE_WEBENGINE

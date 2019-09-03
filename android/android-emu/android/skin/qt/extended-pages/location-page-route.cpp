@@ -34,6 +34,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPlainTextEdit>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include <fstream>
 
@@ -118,6 +119,7 @@ void LocationPage::scanForRoutes() {
     QStringList routeList(locationsDir.entryList());
 
     mUi->loc_routeList->setSortingEnabled(false);
+    mUi->loc_routeList->blockSignals(true);
     RouteItemBuilder builder(mUi->loc_routeList);
     // Look at all the directories and create an entry for each valid route
     for (const QString& routeName : routeList) {
@@ -146,6 +148,7 @@ void LocationPage::scanForRoutes() {
     }
     // All done updating. Enable sorting now.
     mUi->loc_routeList->setSortingEnabled(true);
+    mUi->loc_routeList->blockSignals(false);
     mUi->loc_routeList->setCurrentItem(nullptr);
 
     // If the list is empty, show an overlay saying that.
@@ -153,6 +156,7 @@ void LocationPage::scanForRoutes() {
 }
 
 void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
+    mUi->loc_routeList->blockSignals(true);
     auto* routeWidgetItem = reinterpret_cast<RouteWidgetItem*>(listItem);
     QMenu* popMenu = new QMenu(this);
     QAction* editAction   = popMenu->addAction(tr("Edit"));
@@ -169,6 +173,7 @@ void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
         // If the list is empty, show an overlay saying that.
         mUi->loc_noSavedRoutes_mask->setVisible(mUi->loc_routeList->count() == 0);
     }
+    mUi->loc_routeList->blockSignals(false);
 }
 
 void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
@@ -190,29 +195,14 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
 
             mRouteJson = ""; // Forget any unsaved route we may have received
 
-            // Read the JSON route file and pass it to the javascript to display it
-            const QString& routeJson = readRouteJsonFile(routeElement.protoFilePath);
-            if (routeJson.length() <= 0) {
-                mUi->loc_playRouteButton->setEnabled(false);
-            } else {
-                switch (routeElement.jsonFormat) {
-                case emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS:
-                    emit mMapBridge->showRouteOnMap(routeJson.toStdString().c_str());
-                    break;
-                case emulator_location::RouteMetadata_JsonFormat_GPXKML:
-                    emit mMapBridge->showGpxKmlRouteOnMap(routeJson.toStdString().c_str(),
-                                                          routeElement.logicalName,
-                                                          "Route from GPX/KML file");
-                    break;
-                default:
-                    LOG(WARNING) << "Route JsonFormat(" << routeElement.jsonFormat << ") is unknown. Can't display on map.";
-                    break;
-                }
-
-                mRouteTravelMode = routeElement.modeIndex;
-                mRouteNumPoints = routeElement.numPoints;
-                mUi->loc_playRouteButton->setEnabled(true);
-            }
+            setLoadingOverlayVisible(true, tr("Loading Saved Route..."));
+            mRouteTravelMode = routeElement.modeIndex;
+            mRouteNumPoints = routeElement.numPoints;
+            mUi->loc_playRouteButton->setEnabled(false);
+            mRouteSender.reset(RouteSenderThread::newInstance(
+                    this,
+                    SLOT(routeSendingFinished(bool))));
+            mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
         }
     }
 }
@@ -360,6 +350,10 @@ void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const 
     mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson, mode);
 }
 
+void MapBridge::onSavedRouteDrawn() {
+    mLocationPage->onSavedRouteDrawn();
+}
+
 // Invoked by the Maps javascript when a route has been created
 void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
     mRouteNumPoints = numPoints;
@@ -373,6 +367,10 @@ void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, con
     mUi->loc_routeList->setCurrentItem(nullptr);
     showPendingRouteDetails();
     mUi->loc_playRouteButton->setEnabled(mRouteNumPoints > 0);
+}
+
+void LocationPage::onSavedRouteDrawn() {
+    setLoadingOverlayVisible(false);
 }
 
 void MapBridge::saveRoute() {
@@ -520,6 +518,13 @@ void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile,
 }
 
 #ifdef USE_WEBENGINE
+void LocationPage::routeSendingFinished(bool ok) {
+    mRouteSender.reset();
+    mUi->loc_playRouteButton->setEnabled(ok);
+    // Wait until the route has drawn on the map before hiding the overlay.
+    // When onSavedRouteDrawn() gets called.
+}
+
 void LocationPage::routes_updateTheme() {
     for (int i = 0; i < mUi->loc_routeList->count(); ++i) {
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, mUi->loc_routeList->item(i));
@@ -535,7 +540,6 @@ void LocationPage::routes_updateTheme() {
 void LocationPage::geoDataThreadStarted_v2() {
     {
         QSignalBlocker blocker(mUi->loc_routeList);
-        // TODO: add signal to also block the routes webengine
     }
 
     SettingsTheme theme = getSelectedTheme();
@@ -558,6 +562,7 @@ void LocationPage::finishGeoDataLoading_v2(
         const QString& error_message,
         bool ignore_error) {
     mGeoDataLoader.reset();
+    setLoadingOverlayVisible(false);
     if (!ok) {
         if (!ignore_error) {
             showErrorDialog(error_message, tr("Geo Data Parser"));
