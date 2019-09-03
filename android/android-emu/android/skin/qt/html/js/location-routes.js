@@ -480,6 +480,7 @@ function showGpxKmlRouteOnMap(routeJson, title, subtitle) {
     });
     gGpxKmlPath.setMap(gMap);
     zoomToGpxKmlRoute(gMap, path);
+    channel.objects.emulocationserver.onSavedRouteDrawn();
 }
 
 // Callback function for Maps API
@@ -559,6 +560,7 @@ function initMap() {
             showRouteCreatorOverlay(true);
         }
         gSearchBox.update('');
+        channel.objects.emulocationserver.onSavedRouteDrawn();
     }
 
     // Add Google search box
