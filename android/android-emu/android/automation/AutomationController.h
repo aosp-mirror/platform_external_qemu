@@ -163,6 +163,8 @@ public:
                                      android::base::StringView event,
                                      uint32_t asyncId) = 0;
 
+    virtual void sendEvent(const emulator_automation::RecordedEvent& event) = 0;
+
     // Listen to the stream of automation events, returns an error if there is
     // already a pending listen operations.
     //
