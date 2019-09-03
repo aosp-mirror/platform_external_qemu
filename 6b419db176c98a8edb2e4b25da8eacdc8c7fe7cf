@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "836c3c55_c90f026a",
+        "filename": "android/android-emu/android/skin/qt/html/location-route.html",
+        "patchSetId": 6
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-09-03T19:22:07Z",
+      "side": 1,
+      "message": "oops. API KEY here",
+      "range": {
+        "startLine": 101,
+        "startChar": 82,
+        "endLine": 101,
+        "endChar": 117
+      },
+      "revId": "6b419db176c98a8edb2e4b25da8eacdc8c7fe7cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
