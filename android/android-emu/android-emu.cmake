@@ -182,6 +182,7 @@ set(android-emu-common
     android/qt/qt_setup.cpp
     android/resource.c
     android/sdk-controller-socket.c
+    android/sensor_mock/SensorMockUtils.cpp
     android/session_phase_reporter.cpp
     android/shaper.c
     android/snaphost-android.c

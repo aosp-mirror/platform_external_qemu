@@ -396,6 +396,8 @@ public:
                              StringView event,
                              uint32_t asyncId) override;
 
+    void sendEvent(const pb::RecordedEvent& event) override;
+
     ListenResult listen(android::AsyncMessagePipeHandle pipe,
                         uint32_t asyncId) override;
 
@@ -861,6 +863,8 @@ ReplayResult AutomationControllerImpl::replayEvent(
     return Ok();
 }
 
+
+
 ListenResult AutomationControllerImpl::listen(
         android::AsyncMessagePipeHandle pipe,
         uint32_t asyncId) {
@@ -907,8 +911,7 @@ void AutomationControllerImpl::pipeClosed(android::AsyncMessagePipeHandle pipe) 
     }
 }
 
-void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
-    pb::RecordedEvent event = mPlaybackEventSource->consumeNextCommand();
+void AutomationControllerImpl::sendEvent(const pb::RecordedEvent& event) {
     switch (event.stream_case()) {
         case pb::RecordedEvent::StreamCase::kPhysicalModel:
             physicalModel_replayEvent(mPhysicalModel, event.physical_model());
@@ -929,6 +932,11 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
                              << static_cast<uint32_t>(event.stream_case());
             break;
     }
+}
+
+void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
+    pb::RecordedEvent event = mPlaybackEventSource->consumeNextCommand();
+    sendEvent(event);
 
     DurationNs nextCommandDelay;
     if (mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay)) {

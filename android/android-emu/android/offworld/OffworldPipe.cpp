@@ -22,6 +22,7 @@
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsLogging.h"
+#include "android/sensor_mock/SensorMockUtils.h"
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
@@ -195,6 +196,9 @@ private:
                     case offworld::Request::ModuleCase::kVideoInjection:
                         handleVideoInjectionRequest(request.video_injection());
                         break;
+                    case offworld::Request::ModuleCase::kSensorMock:
+                        handleSensorMockRequest(request.sensor_mock());
+                        break;
                     default:
                         LOG(ERROR) << "Offworld lib received unrecognized "
                                       "message!";
@@ -354,6 +358,14 @@ private:
                 request.sequence_id());
             sendResponse(response);
         }
+    }
+
+    void handleSensorMockRequest(
+        const offworld::SensorMockRequest& request) {
+      LOG(ERROR) << "Received Sensor Mock Event";
+      getAutomationController().sendEvent(
+          android::sensor_mock::toEvent(request));
+      sendResponse(createOkResponse());
     }
 
     void sendResponse(const offworld::Response& response) {
