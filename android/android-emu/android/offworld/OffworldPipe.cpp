@@ -22,6 +22,7 @@
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsLogging.h"
+#include "android/sensor_mock/SensorMockUtils.h"
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
@@ -354,6 +355,17 @@ private:
                 request.sequence_id());
             sendResponse(response);
         }
+    }
+
+    void handleSensorMockRequest(
+        const offworld::SensorMockRequest& request) {
+      using sm = offworld::SensorMockRequest;
+      getAutomationController().sendEvent(
+          android::sensor_mock::toEvent(request));
+      const uint32_t asyncId = mNextAsyncId++;
+      offworld::Response response = createOkResponse();
+      response.set_pending_async_id(asyncId);
+      sendResponse(response);
     }
 
     void sendResponse(const offworld::Response& response) {
