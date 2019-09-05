@@ -1873,7 +1873,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                    opts->screen);
             return false;
         }
-        str_reset(&hw->hw_screen, opts->screen);
+        // BUG(140563470) Explicitly set screen to multi-touch when VirtioInput
+        // feature is enabled because virtio input device is configured to be multi-touch.
+        if (strcmp(opts->screen, "touch") == 0 && feature_is_enabled(kFeature_VirtioInput)) {
+            str_reset(&hw->hw_screen, "multi-touch");
+        } else {
+            str_reset(&hw->hw_screen, opts->screen);
+        }
     }
 
     // DNS server support. Validate the option if any, find the DNS
