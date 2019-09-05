@@ -25,6 +25,10 @@ class MockEmuLocationServer {
     saveRoute() {
         console.log("saveRoute() called");
     }
+
+    onSavedRouteDrawn() {
+        console.log("onSavedRouteDrawn() called");
+    }
 }
 class MockObjects {
     constructor() {

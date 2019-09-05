@@ -48,15 +48,16 @@ void LocationPage::playRouteStateChanged(bool stopped) {
 }
 
 bool LocationPage::parsePointsFromJson() {
-    mPlaybackElements.clear();
-    mPlaybackElements.reserve(mRouteNumPoints);
     QString jsonString;
     QString titleString;
+    QString description;
+    int jsonFormat;
 
     if (!mRouteJson.isEmpty()) {
         // Use the unsaved route we recently received
         jsonString = mRouteJson;
         titleString = "Route not saved..";
+        jsonFormat = emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS;
     } else {
         // Read a saved route JSON file
         auto* currentItem = mUi->loc_routeList->currentItem();
@@ -67,7 +68,13 @@ bool LocationPage::parsePointsFromJson() {
         RouteWidgetItem* item = qobject_cast<RouteWidgetItem*>(mUi->loc_routeList->itemWidget(currentItem));
         jsonString = readRouteJsonFile(item->routeElement().protoFilePath);
         titleString = item->routeElement().logicalName;
+        jsonFormat = item->routeElement().jsonFormat;
+        description = item->routeElement().description;
     }
+
+    mPlaybackElements.clear();
+    mPlaybackElements.reserve(mRouteNumPoints);
+
     QJsonDocument routeDoc = QJsonDocument::fromJson(jsonString.toUtf8());
 
     // The top level should be an object
@@ -76,10 +83,25 @@ bool LocationPage::parsePointsFromJson() {
         mRouteNumPoints = 0;
         return false;
     }
+
+    mUi->loc_routePlayingTitleItem->setTitle(titleString);
+
+    switch (jsonFormat) {
+    case emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS:
+        return parseGoogleMapsJson(routeDoc);
+    case emulator_location::RouteMetadata_JsonFormat_GPXKML:
+        return parseGpxKmlJson(routeDoc, description);
+    default:
+        LOG(ERROR) << "The Json for the route is in an unknown format (" << jsonFormat << ")";
+        return false;
+    }
+}
+
+bool LocationPage::parseGoogleMapsJson(const QJsonDocument& jsonDoc) {
     // Treat the very first point specially. After this, we can skip the
     // first point of each step because it is a repeat of the last point
     // of the previous step.
-    QJsonObject firstLocationObject = routeDoc.object().value("routes").toArray().at(0)
+    QJsonObject firstLocationObject = jsonDoc.object().value("routes").toArray().at(0)
                                               .toObject().value("legs").toArray().at(0)
                                               .toObject().value("steps").toArray().at(0)
                                               .toObject().value("path").toArray().at(0).toObject();
@@ -95,13 +117,12 @@ bool LocationPage::parsePointsFromJson() {
     mPlaybackElements.push_back({previousLat, previousLng, 0.0}); // Zero delay for the first point
 
     // We only care about legs[] within routes[0]
-    QJsonArray legsArray = routeDoc.object().value("routes").toArray().at(0)
+    QJsonArray legsArray = jsonDoc.object().value("routes").toArray().at(0)
                                    .toObject().value("legs").toArray();
     int nLegs = legsArray.size();
 
     QString endAddr = legsArray.at(nLegs - 1).toObject().value("end_address").toString();
     QString startAddr = legsArray.at(0).toObject().value("start_address").toString();
-    mUi->loc_routePlayingTitleItem->setTitle(titleString);
     // Build a string for the titleitem. The format is <start_addr> - <end_addr>
     mUi->loc_routePlayingTitleItem->setSubtitle(QString("%1 - %2").arg(startAddr).arg(endAddr));
     mUi->loc_routePlayingTitleItem->setTransportMode(mRouteTravelMode);
@@ -173,6 +194,50 @@ bool LocationPage::parsePointsFromJson() {
     return true;
 }
 
+bool LocationPage::parseGpxKmlJson(const QJsonDocument& jsonDoc,
+                                   const QString& description) {
+    // Treat the very first point specially. After this, we can skip the
+    // first point of each step because it is a repeat of the last point
+    // of the previous step.
+    QJsonArray pathArray = jsonDoc.object().value("path").toArray();
+    if (pathArray.size() == 0) {
+        // No points
+        mRouteNumPoints = 0;
+        return false;
+    }
+
+    mUi->loc_routePlayingTitleItem->setSubtitle(description);
+    mUi->loc_routePlayingTitleItem->showFileIcon();
+
+    for (int i = 0; i < pathArray.size(); ++i) {
+        QJsonObject thisPoint = pathArray.at(i).toObject();
+        double lat = thisPoint.value("lat").toDouble();
+        double lng = thisPoint.value("lng").toDouble();
+        double delay_sec = thisPoint.value("delay_sec").toDouble();
+        mPlaybackElements.push_back({lat, lng, delay_sec}); // Zero delay for the first point
+
+        if (i == 0) {
+            auto* startWaypointItem = new RoutePlaybackWaypointItem(
+                    tr("Origin"),
+                    QString("%1, %2").arg(lat).arg(lng),
+                    RoutePlaybackWaypointItem::WaypointType::Start,
+                    mUi->loc_routePlayingList);
+        } else if (i == pathArray.size() - 1) {
+            auto* endWaypointItem = new RoutePlaybackWaypointItem(
+                    tr("Destination"),
+                    QString("%1, %2").arg(lat).arg(lng),
+                    RoutePlaybackWaypointItem::WaypointType::End,
+                    mUi->loc_routePlayingList);
+        }
+    }
+
+    if (mPlaybackElements.size() != mRouteNumPoints) {
+        LOG(WARNING) << "Expected " << mRouteNumPoints
+                     << " points in route, but got " << mPlaybackElements.size();
+        mRouteNumPoints = mPlaybackElements.size();
+    }
+    return true;
+}
 
 void LocationPage::locationPlaybackStart_v2()
 {

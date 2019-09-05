@@ -12,9 +12,11 @@
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/StringView.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Route.h"
+#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/extended-pages/location-route-playback-item.h"
 #include "android/utils/path.h"
@@ -32,6 +34,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPlainTextEdit>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include <fstream>
 
@@ -66,6 +69,38 @@ RouteWidgetItem* getItemWidget(QListWidget* list,
 }
 }  // namespace
 
+// static
+QString LocationPage::toJsonString(const GpsFixArray* arr) {
+    QString ret;
+
+    if (arr == nullptr || arr->size() == 0) {
+        return ret;
+    }
+    // The first point will always have 0 sec delay.
+    time_t prevTime = (*arr)[0].time;
+
+    ret.append("{\"path\":[");
+    for (int i = 0; i < arr->size(); ++i) {
+        const GpsFix& fix = (*arr)[i];
+        time_t delay = fix.time - prevTime;
+        // Ensure all other delays are > 0, even if multiple points have
+        // the same timestamp.
+        if (delay == 0 && i != 0) {
+            delay = 2;
+        }
+        ret.append(QString("{\"lat\":%1,\"lng\":%2,\"elevation\":%3,\"delay_sec\":%4},")
+                .arg(QString::number(fix.latitude))
+                .arg(QString::number(fix.longitude))
+                .arg(QString::number(fix.elevation))
+                .arg(QString::number(delay)));
+    }
+    // Remove the last comma
+    ret.chop(1);
+    ret.append("]}");
+
+    return ret;
+}
+
 // Populate the saved routes list with the routes that are found on disk
 void LocationPage::scanForRoutes() {
     // Get the directory
@@ -84,6 +119,7 @@ void LocationPage::scanForRoutes() {
     QStringList routeList(locationsDir.entryList());
 
     mUi->loc_routeList->setSortingEnabled(false);
+    mUi->loc_routeList->blockSignals(true);
     RouteItemBuilder builder(mUi->loc_routeList);
     // Look at all the directories and create an entry for each valid route
     for (const QString& routeName : routeList) {
@@ -106,11 +142,13 @@ void LocationPage::scanForRoutes() {
         listElement.modeIndex     = routeMetadata->mode_of_travel();
         listElement.numPoints     = routeMetadata->number_of_points();
         listElement.duration      = routeMetadata->duration();
+        listElement.jsonFormat    = routeMetadata->json_format();
 
         builder.addRoute(std::move(listElement), this);
     }
     // All done updating. Enable sorting now.
     mUi->loc_routeList->setSortingEnabled(true);
+    mUi->loc_routeList->blockSignals(false);
     mUi->loc_routeList->setCurrentItem(nullptr);
 
     // If the list is empty, show an overlay saying that.
@@ -118,6 +156,7 @@ void LocationPage::scanForRoutes() {
 }
 
 void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
+    mUi->loc_routeList->blockSignals(true);
     auto* routeWidgetItem = reinterpret_cast<RouteWidgetItem*>(listItem);
     QMenu* popMenu = new QMenu(this);
     QAction* editAction   = popMenu->addAction(tr("Edit"));
@@ -134,6 +173,7 @@ void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
         // If the list is empty, show an overlay saying that.
         mUi->loc_noSavedRoutes_mask->setVisible(mUi->loc_routeList->count() == 0);
     }
+    mUi->loc_routeList->blockSignals(false);
 }
 
 void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
@@ -155,16 +195,14 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
 
             mRouteJson = ""; // Forget any unsaved route we may have received
 
-            // Read the JSON route file and pass it to the javascript to display it
-            const QString& routeJson = readRouteJsonFile(routeElement.protoFilePath);
-            if (routeJson.length() <= 0) {
-                mUi->loc_playRouteButton->setEnabled(false);
-            } else {
-                emit mMapBridge->showRouteOnMap(routeJson.toStdString().c_str());
-
-                mRouteTravelMode = routeElement.modeIndex;
-                mUi->loc_playRouteButton->setEnabled(true);
-            }
+            setLoadingOverlayVisible(true, tr("Loading Saved Route..."));
+            mRouteTravelMode = routeElement.modeIndex;
+            mRouteNumPoints = routeElement.numPoints;
+            mUi->loc_playRouteButton->setEnabled(false);
+            mRouteSender.reset(RouteSenderThread::newInstance(
+                    this,
+                    SLOT(routeSendingFinished(bool))));
+            mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
         }
     }
 }
@@ -312,6 +350,10 @@ void MapBridge::sendFullRouteToEmu(int numPoints, double durationSeconds, const 
     mLocationPage->sendFullRouteToEmu(numPoints, durationSeconds, routeJson, mode);
 }
 
+void MapBridge::onSavedRouteDrawn() {
+    mLocationPage->onSavedRouteDrawn();
+}
+
 // Invoked by the Maps javascript when a route has been created
 void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson, const QString& mode) {
     mRouteNumPoints = numPoints;
@@ -325,6 +367,10 @@ void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, con
     mUi->loc_routeList->setCurrentItem(nullptr);
     showPendingRouteDetails();
     mUi->loc_playRouteButton->setEnabled(mRouteNumPoints > 0);
+}
+
+void LocationPage::onSavedRouteDrawn() {
+    setLoadingOverlayVisible(false);
 }
 
 void MapBridge::saveRoute() {
@@ -342,10 +388,13 @@ void LocationPage::map_saveRoute() {
     routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
     routeMetadata.set_number_of_points(mRouteNumPoints);
     routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
+    // TODO: move all of this stuff outside of the Qt code. We are susceptible to getting broken
+    // if Google maps decides to change the format of the Json data.
+    routeMetadata.set_json_format(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS);
     std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
 
     // Write the JSON to a file
-    writeRouteJsonFile(protoPath);
+    writeRouteJsonFile(protoPath, mRouteJson.toStdString());
 
     // Add the new route to the list
     RouteListElement listElement;
@@ -355,6 +404,7 @@ void LocationPage::map_saveRoute() {
     listElement.modeIndex     = routeMetadata.mode_of_travel();
     listElement.numPoints     = routeMetadata.number_of_points();
     listElement.duration      = routeMetadata.duration();
+    listElement.jsonFormat    = routeMetadata.json_format();
 
     RouteItemBuilder builder(mUi->loc_routeList);
     builder.addRoute(std::move(listElement), this);
@@ -362,6 +412,38 @@ void LocationPage::map_saveRoute() {
 
     QApplication::restoreOverrideCursor();
 }
+
+void LocationPage::saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString) {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QDateTime creationTime = QDateTime::currentDateTime();
+    // Create the protobuf describing this route
+    QString routeName("route_" + creationTime.toString("yyyy-MM-dd_HH-mm-ss"));
+
+    emulator_location::RouteMetadata routeMetadata;
+    routeMetadata.set_logical_name(routeName.toStdString().c_str());
+    routeMetadata.set_description(gpxKmlFilename.toStdString().c_str());
+    routeMetadata.set_creation_time(creationTime.toMSecsSinceEpoch() / 1000LL);
+    // TODO: move all of this stuff outside of the Qt code. We are susceptible to getting broken
+    // if Google maps decides to change the format of the Json data.
+    routeMetadata.set_json_format(emulator_location::RouteMetadata_JsonFormat_GPXKML);
+    std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
+
+    // Write the JSON to a file
+    writeRouteJsonFile(protoPath, jsonString.toStdString());
+
+    // Add the new route to the list
+    RouteListElement listElement;
+    listElement.protoFilePath = QString::fromStdString(protoPath);
+    listElement.logicalName   = QString::fromStdString(routeMetadata.logical_name());
+    listElement.description   = QString::fromStdString(routeMetadata.description());
+    listElement.jsonFormat    = routeMetadata.json_format();
+
+    RouteItemBuilder builder(mUi->loc_routeList);
+    builder.addRoute(std::move(listElement), this);
+    mUi->loc_noSavedRoutes_mask->setVisible(false);
+    QApplication::restoreOverrideCursor();
+}
+
 // Write a protobuf into the specified directory.
 // This code determines the parent directory. The
 // full path of output file is returned.
@@ -417,7 +499,8 @@ QString LocationPage::readRouteJsonFile(const QString& pathOfProtoFile) {
     return fullContents;
 }
 
-void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile) {
+void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile,
+                                      const std::string& jsonString) {
     // Write a text file with the JSON that we received
     // from Google Maps
     char* protoDirName = path_dirname(pathOfProtoFile.c_str());
@@ -425,7 +508,7 @@ void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile) {
         char* jsonFileName = path_join(protoDirName, JSON_FILE_NAME);
         QFile jsonFile(jsonFileName);
         if (jsonFile.open(QFile::WriteOnly | QFile::Text)) {
-            jsonFile.write(mRouteJson.toStdString().c_str());
+            jsonFile.write(jsonString.c_str());
             jsonFile.write("\n");
             jsonFile.close();
         }
@@ -434,8 +517,15 @@ void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile) {
     }
 }
 
-void LocationPage::routes_updateTheme() {
 #ifdef USE_WEBENGINE
+void LocationPage::routeSendingFinished(bool ok) {
+    mRouteSender.reset();
+    mUi->loc_playRouteButton->setEnabled(ok);
+    // Wait until the route has drawn on the map before hiding the overlay.
+    // When onSavedRouteDrawn() gets called.
+}
+
+void LocationPage::routes_updateTheme() {
     for (int i = 0; i < mUi->loc_routeList->count(); ++i) {
         RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, mUi->loc_routeList->item(i));
         item->refresh();
@@ -445,5 +535,62 @@ void LocationPage::routes_updateTheme() {
                 mUi->loc_routePlayingList->itemWidget(mUi->loc_routePlayingList->item(i)));
         item->refresh();
     }
-#endif
 }
+
+void LocationPage::geoDataThreadStarted_v2() {
+    {
+        QSignalBlocker blocker(mUi->loc_routeList);
+    }
+
+    SettingsTheme theme = getSelectedTheme();
+
+    // Prevent the user from initiating a load gpx/kml while another load is already
+    // in progress
+    setButtonEnabled(mUi->loc_importGpxKmlButton, theme, false);
+    setButtonEnabled(mUi->loc_importGpxKmlButton_route, theme, false);
+    setButtonEnabled(mUi->loc_playRouteButton, theme, false);
+    mNowLoadingGeoData = true;
+}
+
+void LocationPage::geoDataThreadFinished_v2(QString file_name, bool ok, QString error_message) {
+    finishGeoDataLoading_v2(file_name, ok, error_message, false);
+}
+
+void LocationPage::finishGeoDataLoading_v2(
+        const QString& file_name,
+        bool ok,
+        const QString& error_message,
+        bool ignore_error) {
+    mGeoDataLoader.reset();
+    setLoadingOverlayVisible(false);
+    if (!ok) {
+        if (!ignore_error) {
+            showErrorDialog(error_message, tr("Geo Data Parser"));
+        }
+        SettingsTheme theme = getSelectedTheme();
+        setButtonEnabled(mUi->loc_importGpxKmlButton, theme, true);
+        setButtonEnabled(mUi->loc_importGpxKmlButton_route, theme, true);
+        setButtonEnabled(mUi->loc_playRouteButton, theme, true);
+        mNowLoadingGeoData = false;
+        return;
+    }
+    const GpsFixArray& fixes = mGpsFixesArray;
+    if (fixes.size() == 1) {
+        mUi->locationTabs->setCurrentIndex(0);
+        savePoint(fixes[0].latitude,
+                  fixes[0].longitude,
+                  fixes[0].elevation,
+                  "");
+    } else {
+        // TODO: toJsonString may take a long time. Make it async.
+        QString gpxKmlRouteJson = toJsonString(&fixes);
+        mUi->locationTabs->setCurrentIndex(1);
+        saveGpxKmlRoute(file_name, gpxKmlRouteJson);
+    }
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mUi->loc_importGpxKmlButton, theme, true);
+    setButtonEnabled(mUi->loc_importGpxKmlButton_route, theme, true);
+    setButtonEnabled(mUi->loc_playRouteButton, theme, true);
+}
+
+#endif

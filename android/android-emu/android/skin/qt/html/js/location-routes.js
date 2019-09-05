@@ -22,6 +22,10 @@ var gLastFocusedAddrBox;
 var gMapClickedListener;
 var gSearchContainer;
 var kMaxSearchResults = 5;
+var gGpxKmlPath;
+var gGpxKmlStartMarker;
+var gGpxKmlEndMarker;
+var gIsGpxKmlPlaying;
 
 class WaypointInfo {
     constructor() {
@@ -74,8 +78,24 @@ function startRouteCreatorFromPoint(lat, lng, address) {
     if (!gMap.getBounds().contains(latLng)) {
         gMap.setCenter(latLng);
     }
-    gEndWaypoint.setAddress(address);
-    document.getElementById('endAddress').value = gEndWaypoint.address;
+
+    if (address === "") {
+        gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+            var address = "";
+            var elevation = 0.0;
+            if (status === 'OK' && results[0]) {
+                address = results[0].formatted_address;
+                elevation = results[0].elevation;
+            } else {
+                address = lat + ", " + lng;
+            }
+            gEndWaypoint.setAddress(address);
+            document.getElementById('endAddress').value = gEndWaypoint.address;
+        });
+    } else {
+        gEndWaypoint.setAddress(address);
+        document.getElementById('endAddress').value = gEndWaypoint.address;
+    }
 
     document.getElementById('startAddress').value = "";
     showRouteCreatorOverlay(false);
@@ -83,11 +103,13 @@ function startRouteCreatorFromPoint(lat, lng, address) {
 
 function hideAllOverlays() {
     document.getElementById("startInfoOverlay").className = "pointOverlaySlideOut";
+    document.getElementById("gpxKmlInfoOverlay").className = "pointOverlaySlideOut";
     document.getElementById("routeCreatorOverlay").className = "routeCreatorOverlayHidden";
 }
 
 function showStartInfoOverlay(address, latLng, elevation) {
     hideAllOverlays();
+    setSearchBoxVisible(true);
 
     document.getElementById("startInfoTitle").innerHTML = address;
     var lat = latLng.lat().toFixed(4);
@@ -97,7 +119,28 @@ function showStartInfoOverlay(address, latLng, elevation) {
     document.getElementById("startInfoOverlay").className = "pointOverlayNoBottomPanel"
 }
 
+function showGpxKmlOverlay(title, subtitle) {
+    gIsGpxKmlPlaying = true;
+    hideAllOverlays();
+    setSearchBoxVisible(false);
+
+    if (title != null) {
+        document.getElementById("gpxKmlInfoTitle").innerHTML = title;
+    }
+    if (subtitle != null) {
+        document.getElementById("gpxKmlInfoSubtitle").innerHTML = subtitle;
+    }
+    document.getElementById("gpxKmlInfoOverlay").className = "pointOverlayNoBottomPanel"
+}
+
+function hideGpxKmlOverlay() {
+    hideAllOverlays();
+    clearDirections();
+    setSearchBoxVisible(true);
+}
+
 function showRouteCreatorOverlay(isSavedRoute) {
+    gIsGpxKmlPlaying = false;
     document.getElementById("routeCreatorOverlay").className = "routeCreatorOverlay";
     if (isSavedRoute) {
         setTransportMode(gTravelModeString);
@@ -277,6 +320,18 @@ function clearDirections() {
         gDirectionsDisplay.setMap(null);
         gDirectionsDisplay = null;
     }
+    if (gGpxKmlPath != null) {
+        gGpxKmlPath.setMap(null);
+        gGpxKmlPath = null;
+    }
+    if (gGpxKmlStartMarker != null) {
+        gGpxKmlStartMarker.setMap(null);
+        gGpxKmlStartMarker = null;
+    }
+    if (gGpxKmlEndMarker != null) {
+        gGpxKmlEndMarker.setMap(null);
+        gGpxKmlEndMarker = null;
+    }
     document.getElementById('saveRouteButton').style.display = "none";
 }
 
@@ -309,21 +364,35 @@ function onReverseButtonClicked() {
     calcRoute();
 }
 
+function setSearchBoxVisible(visible) {
+    if (visible && gSearchContainer != null) {
+        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(gSearchContainer);
+        gSearchContainer = null;
+        gMapClickedListener = google.maps.event.addListener(gMap, 'click', mapClickedEvent);
+    } else if (!visible && gSearchContainer == null) {
+        gSearchContainer = gMap.controls[google.maps.ControlPosition.TOP_CENTER].pop();
+        google.maps.event.removeListener(gMapClickedListener);
+        gMapClickedListener = null;
+    }
+}
+
 function showRoutePlaybackOverlay(visible) {
     if (visible) {
         // in route playback mode
         hideAllOverlays();
-        google.maps.event.removeListener(gMapClickedListener);
-        gMapClickedListener = null;
         gMap.setOptions({ zoomControl: false });
         document.getElementById('locationInfoOverlay').style.display = 'flex';
-        gSearchContainer = gMap.controls[google.maps.ControlPosition.TOP_CENTER].pop();
+        setSearchBoxVisible(false);
     } else {
-        showRouteCreatorOverlay(true);
-        gMap.setOptions({ zoomControl: true });
-        document.getElementById('locationInfoOverlay').style.display = 'none';
-        gMapClickedListener = google.maps.event.addListener(gMap, 'click', mapClickedEvent);
-        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(gSearchContainer);
+        if (gIsGpxKmlPlaying) {
+            document.getElementById('locationInfoOverlay').style.display = 'none';
+            showGpxKmlOverlay();
+        } else {
+            showRouteCreatorOverlay(true);
+            gMap.setOptions({ zoomControl: true });
+            document.getElementById('locationInfoOverlay').style.display = 'none';
+            setSearchBoxVisible(true);
+        }
     }
 }
 
@@ -371,6 +440,47 @@ function showDestinationPoint(latLng) {
         showStartInfoOverlay(address, latLng, elevation);
         gSearchBox.update(address);
     });
+}
+
+function zoomToGpxKmlRoute(map, path) {
+    var bounds = new google.maps.LatLngBounds();
+    for (var i = 0; i < path.length; ++i) {
+        bounds.extend(path[i]);
+    }
+    map.fitBounds(bounds);
+}
+
+function showGpxKmlRouteOnMap(routeJson, title, subtitle) {
+    if (routeJson.length < 2) {
+        return;
+    }
+
+    clearDirections();
+    showGpxKmlOverlay(title, subtitle);
+
+    var theRoute = JSON.parse(routeJson);
+    var path = theRoute.path;
+
+    gGpxKmlStartMarker = new google.maps.Marker({
+        position: path[0],
+        map: gMap,
+        label: {text: "A", color: "white"}
+    });
+    gGpxKmlEndMarker = new google.maps.Marker({
+        position: path[path.length - 1],
+        map: gMap,
+        label: {text: "B", color: "white"}
+    });
+    gGpxKmlPath = new google.maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: "#709ddf",
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+    gGpxKmlPath.setMap(gMap);
+    zoomToGpxKmlRoute(gMap, path);
+    channel.objects.emulocationserver.onSavedRouteDrawn();
 }
 
 // Callback function for Maps API
@@ -450,6 +560,7 @@ function initMap() {
             showRouteCreatorOverlay(true);
         }
         gSearchBox.update('');
+        channel.objects.emulocationserver.onSavedRouteDrawn();
     }
 
     // Add Google search box
@@ -472,6 +583,7 @@ function initMap() {
         document.getElementById("routeCreatorOverlay").className = "routeCreatorOverlayHidden";
         document.getElementById("startInfoOverlay").className = "pointOverlayNoBottomPanel";
         resetRouteCreatorOverlay();
+        setSearchBoxVisible(true);
     });
 
     document.getElementById('startNavButton').style.position = 'absolute';

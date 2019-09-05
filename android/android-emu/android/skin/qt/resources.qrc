@@ -76,6 +76,7 @@
         <file alias="check_no">images/light/ic_check_box_outline_blank_777_24dp.svg</file>
         <file alias="check_no_disabled">images/light/ic_check_box_outline_blank_BBB_24dp.svg</file>
         <file alias="circular_spinner">images/light/spinner.gif</file>
+        <file alias="circular_spinner_transparent">images/light/spinner_transparent.gif</file>
         <file alias="current_snapshot">images/light/circle_0EC_48dp.svg</file>
         <file alias="current_snapshot_selected">images/light/circle_0EC_48dp.svg</file>
         <file alias="delete">images/light/ic_delete_forever_777_48dp.svg</file>
@@ -99,6 +100,7 @@
         <file alias="drop_down">images/light/ic_arrow_drop_down_ccc_48dp.svg</file>
         <file alias="edit">images/light/ic_mode_edit_777_48dp.svg</file>
         <file alias="edit_disabled">images/light/ic_mode_edit_BBB_48dp.svg</file>
+        <file alias="file">images/light/ic_file_24dp.svg</file>
         <file alias="file_download">images/light/ic_file_download_678_48dp.svg</file>
         <file alias="file_upload">images/light/ic_file_upload_678_48dp.svg</file>
         <file alias="fingerprint">images/light/ic_fingerprint_678_48dp.svg</file>
@@ -205,6 +207,7 @@
         <file alias="check_no">images/dark/ic_check_box_outline_blank_BCC_24dp.svg</file>
         <file alias="check_no_disabled">images/dark/ic_check_box_outline_blank_566_24dp.svg</file>
         <file alias="circular_spinner">images/dark/spinner.gif</file>
+        <file alias="circular_spinner_transparent">images/dark/spinner_transparent.gif</file>
         <file alias="current_snapshot">images/dark/circle_0EC_48dp.svg</file>
         <file alias="current_snapshot_selected">images/dark/circle_0EC_48dp.svg</file>
         <file alias="delete">images/dark/ic_delete_forever_BCC_48dp.svg</file>
@@ -228,6 +231,7 @@
         <file alias="drop_down">images/dark/ic_arrow_drop_down_667_48dp.svg</file>
         <file alias="edit">images/dark/ic_mode_edit_BCC_48dp.svg</file>
         <file alias="edit_disabled">images/dark/ic_mode_edit_566_48dp.svg</file>
+        <file alias="file">images/dark/ic_file_white_24dp.svg</file>
         <file alias="file_download">images/dark/ic_file_download_677_48dp.svg</file>
         <file alias="file_upload">images/dark/ic_file_upload_677_48dp.svg</file>
         <file alias="fingerprint">images/dark/ic_fingerprint_677_48dp.svg</file>

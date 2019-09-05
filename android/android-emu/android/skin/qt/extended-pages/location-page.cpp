@@ -32,6 +32,7 @@
 
 #include <QFileDialog>
 #include <QItemDelegate>
+#include <QMovie>
 #include <QSettings>
 #ifdef USE_WEBENGINE
 #include <QWebEngineProfile>
@@ -138,6 +139,7 @@ LocationPage::LocationPage(QWidget *parent) :
         // Hide the V2 widgets that are not functional yet
         mUi->locationTabs->removeTab(2); // "Settings"
         mUi->loc_pointSortBox->hide();   // "Sort by ..."
+        mUi->locationTabs->setCurrentIndex(0);
     } else {
         mUi->locationTabs->setTabText(3, ""); // "V1"
         // Hide the new tabs on the Location page
@@ -157,6 +159,16 @@ LocationPage::LocationPage(QWidget *parent) :
         scanForRoutes();
 
         mUi->loc_playRouteButton->setEnabled(false);
+
+        SettingsTheme theme = getSelectedTheme();
+        QMovie* movie = new QMovie(this);
+        movie->setFileName(":/" +
+                           Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                           "/circular_spinner_transparent");
+        if (movie->isValid()) {
+            movie->start();
+            mUi->loc_overlaySpinner->setMovie(movie);
+        }
 #endif
     } else { // !useLocationV2
         mUi->loc_latitudeInput->setMinValue(-90.0);
@@ -218,6 +230,10 @@ LocationPage::~LocationPage() {
         // ignore all signals from it and wait for it to finish.
         mGeoDataLoader->blockSignals(true);
         mGeoDataLoader->wait();
+    }
+    if (mRouteSender != nullptr) {
+        mRouteSender->blockSignals(true);
+        mRouteSender->wait();
     }
     mUi->loc_pathTable->blockSignals(true);
     mUi->loc_pathTable->clear();
