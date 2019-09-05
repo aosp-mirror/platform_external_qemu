@@ -82,6 +82,7 @@ private slots:
     void on_bugreportButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
+    void on_displaysButton_clicked();
     void on_fingerButton_clicked();
     void on_googlePlayButton_clicked();
     void on_helpButton_clicked();

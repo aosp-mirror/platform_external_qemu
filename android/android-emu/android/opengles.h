@@ -89,6 +89,10 @@ void android_setMultiDisplay(uint32_t id,
 
 void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb);
 
+bool android_tryLockMultiDisplayOnLoad(void);
+
+void android_unlockMultiDisplayOnLoad(void);
+
 void android_redrawOpenglesWindow(void);
 
 bool android_hasGuestPostedAFrame(void);

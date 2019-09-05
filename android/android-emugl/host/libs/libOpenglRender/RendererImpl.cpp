@@ -325,7 +325,7 @@ void RendererImpl::setMultiDisplay(uint32_t id,
     if (fb) {
         if (add) {
             fb->createDisplay(&id);
-            fb->setDisplayPose(id, x, y, w, h);
+            fb->setDisplayPose(id, x, y, w, h, dpi);
         } else {
             fb->destroyDisplay(id);
         }
@@ -336,6 +336,21 @@ void RendererImpl::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
     auto fb = FrameBuffer::getFB();
     if (fb) {
         fb->setDisplayColorBuffer(id, cb);
+    }
+}
+
+bool RendererImpl::tryLockMultiDisplayOnLoad(void) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        return fb->tryLockMultiDisplayOnLoad();
+    }
+    return false;
+}
+
+void RendererImpl::unlockMultiDisplayOnLoad(void) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->unlockMultiDisplayOnLoad();
     }
 }
 

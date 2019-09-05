@@ -10,6 +10,8 @@
 
 #include "android/skin/qt/angle-input-widget.h"
 #include <QtMath>
+#include <QKeyEvent>
+#include "android/base/Log.h"
 
 // Helper function for AngleInputWidget ctor
 static void setUpLineEdit(QLineEdit* editor, const QValidator* validator) {
@@ -238,5 +240,12 @@ void AngleInputWidget::validateAndUpdateValue(double new_value) {
     } else {
         // Force display the old value if the provided value was out of range.
         updateView();
+    }
+}
+
+void AngleInputWidget::keyPressEvent(QKeyEvent *event) {
+    QWidget::keyPressEvent(event);
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        emit(enterPressed());
     }
 }

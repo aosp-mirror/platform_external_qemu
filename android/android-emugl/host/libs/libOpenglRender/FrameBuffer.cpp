@@ -670,12 +670,12 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_postThread([this](FrameBuffer::Post&& post) {
           return postWorkerFunc(post);
       }) {
-    m_displays.emplace(0, DisplayInfo(0, 0, 0, m_framebufferWidth, m_framebufferHeight));
+    m_displays.emplace(0, DisplayInfo(0, 0, 0, m_framebufferWidth, m_framebufferHeight, 0));
     uint32_t w, h;
     if (emugl::get_emugl_window_operations().getMonitorRect(&w, &h) && w != 0 && h != 0) {
         m_monitorAspectRatio = (double) h / (double) w;
     }
-    emugl::get_emugl_window_operations().setMultiDisplay(0, 0, 0, getWidth(), getHeight(), true);
+    emugl::get_emugl_window_operations().setUIMultiDisplay(0, 0, 0, getWidth(), getHeight(), true, 0);
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -2330,6 +2330,7 @@ void FrameBuffer::onSave(Stream* stream,
         s->putBe32(pair.second.pos_y);
         s->putBe32(pair.second.width);
         s->putBe32(pair.second.height);
+        s->putBe32(pair.second.dpi);
     });
 
     // Save Vulkan state
@@ -2495,8 +2496,8 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedColorBuffers);
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
-    m_displays.clear();
-    loadCollection(stream, &m_displays,
+    std::unordered_map<uint32_t, DisplayInfo> displays_onLoad;
+    loadCollection(stream, &displays_onLoad,
                    [this](Stream* stream) -> std::unordered_map<uint32_t, DisplayInfo>::value_type {
         const uint32_t idx = stream->getBe32();
         const uint32_t cb = stream->getBe32();
@@ -2504,7 +2505,8 @@ bool FrameBuffer::onLoad(Stream* stream,
         const int32_t pos_y = stream->getBe32();
         const uint32_t width = stream->getBe32();
         const uint32_t height = stream->getBe32();
-        return {idx, {cb, pos_x, pos_y, width, height}};
+        const uint32_t dpi = stream->getBe32();
+        return {idx, {cb, pos_x, pos_y, width, height, dpi}};
     });
 
     if (s_egl.eglPostLoadAllImages) {
@@ -2532,27 +2534,35 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     }
 
-    if (m_displays.size() != 1 || m_displays.find(0) == m_displays.end()) {
+    // destroy the multidisplays not in snapshot states, then restore the
+    // multidisplays of the snapshot.
+    lock.unlock();
+    m_multiDisplayOnLoadLock.lock();
+    bool hasDeletedMultiDisplay = false;
+    for (const auto& iter : m_displays) {
+        if (displays_onLoad.find(iter.first) == displays_onLoad.end()) {
+            emugl::get_emugl_window_operations().setUIMultiDisplay(iter.first,
+                                                                 0, 0, 0,
+                                                                 0, false,
+                                                                 iter.second.dpi);
+            hasDeletedMultiDisplay = true;
+        }
+    }
+    m_displays.clear();
+    m_displays = displays_onLoad;
+    if (m_displays.size() > 1 || hasDeletedMultiDisplay) {
         emugl::get_emugl_window_operations().setNoSkin();
         // Restore multi display state
         int combinedDisplayWidth = 0;
         int combinedDisplayHeight = 0;
         getCombinedDisplaySize(&combinedDisplayWidth, &combinedDisplayHeight);
-        for (const auto& iter : m_displays) {
-            emugl::get_emugl_window_operations().setMultiDisplay(
-                iter.first,
-                iter.second.pos_x,
-                combinedDisplayHeight - iter.second.pos_y - iter.second.height,
-                iter.second.width,
-                iter.second.height, true);
-        }
-
-        // unlock before calling setUIDisplayRegion
-        lock.unlock();
+        setDisplayPoseInSkinUI(combinedDisplayHeight);
         emugl::get_emugl_window_operations()
             .setUIDisplayRegion(
                 0, 0, combinedDisplayWidth, combinedDisplayHeight);
     }
+    m_multiDisplayOnLoadDone = true;
+    m_multiDisplayOnLoadLock.unlock();
 
     return true;
     // TODO: restore memory management
@@ -2635,8 +2645,8 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
             return 0;
         }
         m_displays.erase(displayId);
-        emugl::get_emugl_window_operations().setMultiDisplay(displayId, 0, 0, 0,
-                                                             0, false);
+        emugl::get_emugl_window_operations().setUIMultiDisplay(displayId, 0, 0, 0,
+                                                             0, false, 0);
         recomputeLayout();
         getCombinedDisplaySize(&width, &height);
         setDisplayPoseInSkinUI(height);
@@ -2710,7 +2720,8 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
                                 int32_t x,
                                 int32_t y,
                                 uint32_t w,
-                                uint32_t h) {
+                                uint32_t h,
+                                uint32_t dpi) {
     int width, height;
 
     {
@@ -2720,6 +2731,7 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
         }
         m_displays[displayId].width = w;
         m_displays[displayId].height = h;
+        m_displays[displayId].dpi = dpi;
         if (x == -1 && y == -1) {
             recomputeLayout();
         } else {
@@ -2747,7 +2759,7 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
  * Important detail of implementations: the x and y offsets saved in
  * m_displays use the bottom-left corner as origin. This coordinates will
  * be used by glviewport() in Postworker.cpp. However, the x and y offsets saved
- * by invoking setMultiDisplay() will be using top-left corner as origin. Thus,
+ * by invoking setUIMultiDisplay() will be using top-left corner as origin. Thus,
  * input coordinates willl be calculated correctly when mouse events are
  * captured by QT window.
  */
@@ -2771,12 +2783,12 @@ void FrameBuffer::setDisplayPoseInSkinUI(int totalHeight) {
 
     for (const auto& iter : m_displays) {
         uint32_t displayId = iter.first;
-        emugl::get_emugl_window_operations().setMultiDisplay(
+        emugl::get_emugl_window_operations().setUIMultiDisplay(
                 displayId, m_displays[displayId].pos_x,
                 totalHeight - m_displays[displayId].height -
                         m_displays[displayId].pos_y,
                 m_displays[displayId].width, m_displays[displayId].height,
-                true);
+                true, m_displays[displayId].dpi);
     }
 }
 void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
@@ -2790,4 +2802,17 @@ void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
         *h = (int)total_h;
     if (w)
         *w = (int)total_w;
+}
+
+bool FrameBuffer::tryLockMultiDisplayOnLoad(void) {
+    m_multiDisplayOnLoadLock.lock();
+    if (m_multiDisplayOnLoadDone) {
+        m_multiDisplayOnLoadLock.unlock();
+        return false;
+    }
+    return true;
+}
+
+void FrameBuffer::unlockMultiDisplayOnLoad(void) {
+    m_multiDisplayOnLoadLock.unlock();
 }
