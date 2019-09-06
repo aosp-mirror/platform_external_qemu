@@ -4,7 +4,7 @@ Coding Style Guide for the Android emulator:
 Introduction:
 -------------
 
-IMPORTANT:
+**IMPORTANT:**
     This guide only applies to the Android-specific code that is currently
     found under $AOSP/external/qemu/android/ only. Other parts of
     external/qemu/ should adhere to the QEMU coding style, whenever possible.
@@ -16,8 +16,8 @@ portions of the Android emulator source code. Don't forget that consistency
 for the sake of consistency is a waste of time. Use this information as a way
 to speed up your coding and code reviews, first and foremost.
 
-A .clang_format file is provided to automatically reformat your modified code
-through 'git clang-format'. Use it, this will save you a lot of time.
+A `.clang_format` file is provided to automatically reformat your modified code
+through `git clang-format`. Use it, this will save you a lot of time.
 
 Also, there is no real need to reformat existing code to adhere to the guide.
 Would you feel the need to do so, do it in independent patches that batch all
@@ -26,7 +26,7 @@ reformatting without any bugfix / changes at all.
 Each rule below comes with a rationale. Again, strict adherence is not
 necessary.
 
-IMPORTANT: You need to use 'git-config' to ensure 'git clang-format' works
+**IMPORTANT:** You need to use `git-config` to ensure `git clang-format` works
            correctly, see dedicated section below.
 
 
@@ -50,17 +50,17 @@ with most of the Android-specific code under $AOSP/external/qemu/android/.
 The 'qemu2' Android emulator code base lives under $AOSP/external/qemu/
 and is *NOT* affected by this coding style guide.
 
-  external/qemu/android/base/
+  - `external/qemu/android/base/`
+
       Set of low-level C++ interfaces to system facilities.
       These should be completely self-contained (i.e. not depend on other
       parts of the code base), and form the 'base platform' to rely on.
 
       This is very similar (but simpler) than the Chromium base/ component.
 
-      *IMPORTANT*: Any new addition here should come with unit-tests that
+      **IMPORTANT:* Any new addition here should come with unit-tests that
                    will be run each time android/rebuild.sh runs.
-
-                   Also see android/base/testing/ for helper classes to use
+                   Also see `android/base/testing/` for helper classes to use
                    inside your unit tests.
 
       Generally speaking, the use of C++ makes it easier to provide abstract
@@ -74,61 +74,64 @@ and is *NOT* affected by this coding style guide.
       an instance of base/testing/TestSystem.h, allowing your tests to not
       depend on the state of the development machine whenever possible.
 
-      NOTE: Do not put high-level features here. Imagine you would reuse the
+      *NOTE:* Do not put high-level features here. Imagine you would reuse the
             classes in this directory in a completely different program.
 
-  external/qemu/android/utils/
+  - `external/qemu/android/utils/`:
+
       Similar low-level C-based interfaces, some of them are actual wrappers
       for android/base/ features. Should not depend on anything else besides
       system interfaces.
 
-      NOTE: Do not put high-level features here.
+      *NOTE:* Do not put high-level features here.
 
-  external/qemu/android-qemu1-glue/base/
+  - `external/qemu/android-qemu1-glue/base/`:
+
       Currently contains QEMU-specific implementations of android/base/
-      interfaces. E.g. android-qemu1-glue/base/async/Looper.h provides
-      android::qemu::createLooper(), which returns a Looper instance
+      interfaces. E.g. `android-qemu1-glue/base/async/Looper.h` provides
+      `android::qemu::createLooper()`, which returns a Looper instance
       based on the QEMU main event loop.
 
-      In this specific example, the idea is to use ThreadLooper::set() with
+      In this specific example, the idea is to use `ThreadLooper::set()` with
       its result to inject it into the main thread. Any code that uses
-      ThreadLooper::get() to retrieve the current thread's Looper will use the
+      `ThreadLooper::get()` to retrieve the current thread's Looper will use the
       QEMU-based main loop when it runs within the emulator's main thread,
       even if it doesn't know anything about QEMU.
 
       This kind of decoupling is very useful and should be encouraged in
       general.
 
-  external/qemu/android/<feature>/
+  - `external/qemu/android/<feature>/`:
+
       Should contain code related to a specific feature used during emulation.
       Ideally, the code should only depend on android/base/ and android/utils/,
       stuff as much as possible. Anything that is QEMU-specific should be moved
       somewhere else.
 
       A good example is the GSM/SMS emulation code. Generic code is provided
-      under external/qemu/android/telephony/ (with unit-tests), while
-      QEMU-specific bindings are implemented under external/qemu/telephony/
+      under `external/qemu/android/telephony/` (with unit-tests), while
+      QEMU-specific bindings are implemented under `external/qemu/telephony/`
       which depend on it, and other QEMU headers / functions.
 
-      NOTE: It's essentially impossible to properly unit-test code that depends
+      *NOTE:* It's essentially impossible to properly unit-test code that depends
             on any QEMU-specific function, so move as much of your code as
             possible out of it.
 
-  external/qemu/android/
+  - external/qemu/android/
+
       The rest of the sources under this sub-directory are Android-specific
       and is probably still a little bit messy. We plan to sort this out by
       moving, over time, anything specific to QEMU outside of this directory.
 
-  *IMPORTANT*: The end goal is to ensure that the sources under
-               external/qemu/android/ will constitute a standalone component
+  **IMPORTANT:** The end goal is to ensure that the sources under
+               `external/qemu/android/` will constitute a standalone component
                that can be compiled as a standalone library, that doesn't
                depend on the QEMU code, or its dependencies (e.g. GLib).
-
                Ultimately, we plan to link the QEMU2 code base to the same
                library, in order to ensure the same feature set for both the
                classic and new emulator engines.
 
-  When adding new code, try hard to:
+  - When adding new code, try hard to:
 
     - Avoid using QEMU-specific functions directly. It's better to decouple
       a 'clean' feature implementation, which can be unit-tested independently,
@@ -141,7 +144,7 @@ and is *NOT* affected by this coding style guide.
       robust / less dependent on host/development system specifics.
 
   The style guide applies to any new code you want to add under
-  external/qemu/android/ that should not depend on QEMU-specific headers and
+  `external/qemu/android/` that should not depend on QEMU-specific headers and
   declarations.
 
 
@@ -159,11 +162,12 @@ ask on the public mailing list for information.
 
 1. Basic Code Formatting:
 
-  NOTE: Most of these should be handled automatically by 'git clang-format' !!
-        (See dedicated section below).
+  *NOTE: Most of these should be handled automatically by 'git clang-format' !!
+        (See dedicated section below).*
 
   - No TABs in source code allowed (except for Makefiles).
     Rationale: Life is too short to play with editor settings all the time.
+    See also [tabs vs spaces](https://www.youtube.com/watch?v=SsoOG6ZeyUI).
 
   - Indent width is 4 characters.
     Rationale: Let's choose one reasonable default and stick with it.
@@ -174,13 +178,17 @@ ask on the public mailing list for information.
 
     E.g.:
 
-    [YES]
-         SomeSuperLongTypeName someSuperLongVariableName =
-                 CreateAnInstanceOfSomeSuperLongTypeName(withParameter);
+      **YES**:
+      ```
+      SomeSuperLongTypeName someSuperLongVariableName =
+              CreateAnInstanceOfSomeSuperLongTypeName(withParameter);
+      ```
 
-    [NO]
-         SomeSuperLongTypeName someSuperLongVariableName =
-             CreateAnInstanceOfSomeSuperLongTypeName(withParameter);
+      **NO**:
+      ```
+      SomeSuperLongTypeName someSuperLongVariableName =
+          CreateAnInstanceOfSomeSuperLongTypeName(withParameter);
+      ```
 
   - Static word wrap at 80 characters.
     Rationale: That's good enough, let's not fight about it.
@@ -190,10 +198,11 @@ ask on the public mailing list for information.
        x = y + z - 4;
 
   - The opening curly brace is at the end of the line, e.g.:
-
-       void foo(int x) {
-          return x + 42;
-       }
+    ```
+    void foo(int x) {
+      return x + 42;
+    }
+    ```
 
     Rationale: Let's just choose one convention, this one saves a little
                vertical space.
@@ -201,26 +210,26 @@ ask on the public mailing list for information.
   - Single-statements conditionals can go into a single line, and always use
     accolades:
 
-        if (error) {               [YES]
+        if (error) {                   [YES]
             return ENOPE;
         }
 
         if (error) { return ENOPE; }   [YES]
 
         if (error)
-            return ENOPE;         [NO]
+            return ENOPE;              [NO]
 
-        if (error) return ENOPE;  [NO]
+        if (error) return ENOPE;       [NO]
 
         if (error) { return ENOPE; } else { return 0; }  [NO]  // not single-statement
 
-        if (error) {            [YES]
+        if (error) {                    [YES]
             return ENOPE;
         } else {
             return 0;
         }
 
-        return error ? ENOPE : 0;   [YES]
+        return error ? ENOPE : 0;       [YES]
 
     Rationale: Reduces the chance of introducing subtle bug later when
                adding more statements. Sadly this still happens occasionally
@@ -241,11 +250,11 @@ ask on the public mailing list for information.
         if (cond) { return error; }  [YES]
 
   - The * and & go by the type rather than the variable name, e.g.:
-
+     ```
        void foo(const char* str);       [YES]
        void foo(const char * str);      [NO]
        void foo(const char *str);       [NO]
-
+     ```
     Rationale: it's more logical since they're really part of the type.
 
     Special exception: a space is allowed for casts, as in:
@@ -377,7 +386,7 @@ ask on the public mailing list for information.
 
   - C++ constants like unscoped enum values and static character arrays
     should be named using a 'k' prefix followed by CamelCase, as in:
-
+    ```
        enum Mode {
           kRead = 1 << 0,
           kWrite = 1 << 1,
@@ -385,15 +394,16 @@ ask on the public mailing list for information.
        };
 
        static char kString[] = "Hello World";
-
+    ```
     Note that scoped enums (a.k.a. 'enum classes') don't need the k Prefix
     but should still use CamelCasing as in:
-
+    ```
        enum class Mode {
            Read = 1 << 0,                    // Mode::Read
            Write = 1 << 1,                   // Mode::Write
            ReadWrite = Read | Write          // Mode::ReadWrite
        };
+    ```
 
 3. Comments:
 
@@ -416,7 +426,7 @@ ask on the public mailing list for information.
 
   - Try to add comments after #else and #endif directives to indicate what
     they relate to, as in:
-
+    ```
        #ifdef _WIN32
        ...
        #endif  // !_WIN32
@@ -426,7 +436,7 @@ ask on the public mailing list for information.
        #else  // !__linux__ && !_WIN32    <-- NOTE: condition inverted on #else
        ...
        #endif  // !__linux__ && !_WIN32
-
+    ```
 
 4. Header and ordering:
 
@@ -528,8 +538,8 @@ A file is provided at external/qemu/android/.clang-format that contains rules
 to apply with the 'clang-format' tool. More specifically, one should do the
 following to manually reformat entire sources:
 
-  cd external/qemu/android/
-  clang-format -style=file -i <list-of-files>
+    cd external/qemu/android/
+    clang-format -style=file -i <list-of-files>
 
 The '-style=file' option is required to tell clang-format to use our
 .clang-format file, otherwise, it will default to the Google style which
@@ -540,7 +550,7 @@ the lines that you have currently modified and added to your index, however
 you need to configure your git project once to ensure it uses the .clang-format
 file properly, with:
 
-  git config clangformat.style file
+    git config clangformat.style file
 
 This ensures that git will pass '-style=file' to clang-format each time you
 call 'git clang-format' (which itself calls git-clang-format).
@@ -564,14 +574,16 @@ V. C++11 and beyond
   Use auto when type is obvious, not important or hard to spell:
 
   good:
+  ```
      auto i = 0;
      auto foo = new Foo();
      auto it = map.begin();
-
+  ```
   bad:
+  ```
      auto f = doSomeStuff();
      otherStuff(f->bar());
-
+  ```
   Don't forget about "auto&" and "const auto&" to make sure the value is not
   copied or accidentally modified.
 
@@ -579,10 +591,10 @@ V. C++11 and beyond
 
   Use the foreach loop for iteration over everything you can
 
-   int values[] = {1,2,3};
-   for (int i : values) {
-       ...
-   }
+     int values[] = {1,2,3};
+     for (int i : values) {
+         ...
+     }
 
   Use the correct reference form for the variable (& or const &); don't
   just throw &&
@@ -602,16 +614,16 @@ V. C++11 and beyond
 
   Prefer "using" over "typedef"
 
-   // easier to understand - "=" splits alias and the actual type
-   using f = foo::bar::baz;
+    // easier to understand - "=" splits alias and the actual type
+    using f = foo::bar::baz;
 
-   // much simpler for functions than typedefed version -
-   // typedef char (*func)(blah)[10];
-   using func = char (*)(blah)[10];
+    // much simpler for functions than typedefed version -
+    // typedef char (*func)(blah)[10];
+    using func = char (*)(blah)[10];
 
-   // typedef cannot into templates :)
-   template <class T>
-   using vec<T> = std::vector<T, our_super_duper_allocator<T>>;
+    // typedef cannot into templates :)
+    template <class T>
+    using vec<T> = std::vector<T, our_super_duper_allocator<T>>;
 
 5. override and final
 
@@ -625,13 +637,13 @@ V. C++11 and beyond
   code.
   Note: you can use this syntax in the implementation file:
 
-  foo.h:
-    struct Foo {
-        Foo();
-    };
+    foo.h:
+      struct Foo {
+          Foo();
+      };
 
-  foo.cpp:
-    Foo::Foo() = default;
+    foo.cpp:
+      Foo::Foo() = default;
 
 7. Class member initializers
 
@@ -639,18 +651,18 @@ V. C++11 and beyond
   only thing it is needed for, or if there are many constructors all requiring
   the same member values
 
-   class Meow {
-   public:
-       Meow() = default;
+    class Meow {
+    public:
+        Meow() = default;
 
-       Meow(int i) : i(i) {
-       }
+        Meow(int i) : i(i) {
+        }
 
-   private:
-       int i = 0;
-       int j = 2;
-       std::string meow = "meow";
-   };
+    private:
+        int i = 0;
+        int j = 2;
+        std::string meow = "meow";
+    };
 
 8. Strongly-typed enums
 
@@ -697,22 +709,7 @@ even
  many
   newlines)";
 
-11. STL updates
-
-  TEMPORARY: no C++11 STL features work on Mac with its default library
-  until we switch to libc++, STL is limited to C++03
-
-  DISABLED: Feel free to use all new features from the STL, but make sure they
-  DISABLED: actually compile and work on all platforms: Linux, Mac and Windows.
-  DISABLED: Take extra care with the Windows MinGW - it tends to lag for quite a lot
-  DISABLED: compare to others, e.g. std::thread is still unavaliable out of the box
-  DISABLED: Something may not compile, others could be implemented a little differently.
-  DISABLED: Do your due diligence before actually submitting the change.
-
-  DISABLED: Prefer STL implementations over a handwritten code, e.g. std::atomic,
-  DISABLED: std smart pointers, regexes, etc
-
-99. lambdas, noexcept, rvalue references, move semantics, perfect forwarding,
+11.  lambdas, noexcept, rvalue references, move semantics, perfect forwarding,
     constexpr
 
   Do not use the features listed here.
@@ -741,15 +738,15 @@ newly introduced differences, etc.
 Long lines should be wrapped to 80 columns for easier log message viewing in
 terminals.
 
-BUG=b.android.com/123456
-TEST=Optional description of test steps to be performed by a human to verify
-     this patch. This helps cherry-pick changes later.
-     For bug fixes, it's a manual regression test (or preferably, just "Run
-     (new) unittests" :) ). For new features, some sanity checks.
+    BUG=b.android.com/123456
+    TEST=Optional description of test steps to be performed by a human to verify
+        this patch. This helps cherry-pick changes later.
+        For bug fixes, it's a manual regression test (or preferably, just "Run
+        (new) unittests" :) ). For new features, some sanity checks.
 
 
 M. Appendix
 -----------------------------
 
-[1] https://www.chromium.org/developers/coding-style
-[2] https://www.chromium.org/developers/contributing-code
+1. https://www.chromium.org/developers/coding-style
+2. https://www.chromium.org/developers/contributing-code
