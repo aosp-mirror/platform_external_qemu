@@ -46,4 +46,5 @@ private:
     uint64_t mReportWindowStartUs = 0;
     uint32_t mReportWindowCount = 0;
     uint32_t mApplyCnt = 0;
+    std::vector<bool> mPendingDelete;
 };

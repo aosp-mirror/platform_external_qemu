@@ -74,6 +74,8 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     }
     recomputeLayout();
 
+    mPendingDelete.resize(sMaxItem + 1, false);
+
     connect(EmulatorQtWindow::getInstance(), SIGNAL(updateMultiDisplayPage(int)),
             this, SLOT(updateSecondaryDisplay(int)));
 }
@@ -107,6 +109,7 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
     mItem[i] = item;
     setSecondaryDisplaysTitle(++mSecondaryItemCount);
     recomputeLayout();
+    mPendingDelete[i] = false;
 }
 
 void MultiDisplayPage::deleteSecondaryDisplay(int id) {
@@ -115,6 +118,7 @@ void MultiDisplayPage::deleteSecondaryDisplay(int id) {
     mItem[id] = nullptr;
     setSecondaryDisplaysTitle(--mSecondaryItemCount);
     recomputeLayout();
+    mPendingDelete[id] =true;
 }
 
 // Called when UI change the display type, or customize display
@@ -137,16 +141,19 @@ void MultiDisplayPage::updateSecondaryDisplay(int i) {
             return;
         } else {
             deleteSecondaryDisplay(i);
+            mPendingDelete[i] = false;
         }
     } else {
         if (mItem[i] == nullptr) {
-            LOG(VERBOSE) << "create MultiDisplayItem " << i << " and insert widget";
-            MultiDisplayItem *item = new MultiDisplayItem(i, width, height, dpi, this);
-            mUi->verticalLayout_5->insertWidget(i - 1, item);
-            mItem[i] = item;
-            ++mSecondaryItemCount;
-            setSecondaryDisplaysTitle(mSecondaryItemCount);
-            recomputeLayout();
+            if (!mPendingDelete[i]) {
+                LOG(VERBOSE) << "create MultiDisplayItem " << i << " and insert widget";
+                MultiDisplayItem *item = new MultiDisplayItem(i, width, height, dpi, this);
+                mUi->verticalLayout_5->insertWidget(i - 1, item);
+                mItem[i] = item;
+                ++mSecondaryItemCount;
+                setSecondaryDisplaysTitle(mSecondaryItemCount);
+                recomputeLayout();
+            }
         } else {
             uint32_t w, h, d;
             mItem[i]->getValues(&w, &h, &d);
@@ -220,6 +227,7 @@ void MultiDisplayPage::on_applyChanges_clicked() {
                                                                     0,
                                                                     0);
             }
+            mPendingDelete[i] = false;
         }
 
     }
