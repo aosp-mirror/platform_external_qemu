@@ -51,7 +51,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .showMessageWithDismissCallback = nullptr,
         .fold = nullptr,
         .isFolded = nullptr,
-        .setUIDisplayRegion = nullptr,
+        .setUIDisplayRegion = [](int x,
+                                 int y,
+                                 int width,
+                                 int height) {},
         .setUIMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,
@@ -68,8 +71,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         *h = 1600;
                     return true;
                 },
-        .setNoSkin = nullptr,
-        .switchMultiDisplay = nullptr,
+        .setNoSkin = []() {},
+        .switchMultiDisplay = [](bool add,
+                               uint32_t id,
+                               int32_t x,
+                               int32_t y,
+                               uint32_t w,
+                               uint32_t h,
+                               uint32_t dpi,
+                               uint32_t flag) { return true;}
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const
@@ -678,4 +688,102 @@ TEST_F(FrameBufferTest, ReadColorBufferSwitchRedBlue) {
     mFb->closeColorBuffer(handle);
 }
 
+TEST_F(FrameBufferTest, CreateMultiDisplay) {
+    uint32_t id = FrameBuffer::s_invalidIdMultiDisplay;
+    mFb->createDisplay(&id);
+    EXPECT_EQ(1, id);
+    EXPECT_EQ(0, mFb->createDisplay(&id));
+    EXPECT_EQ(0, mFb->destroyDisplay(id));
+}
+
+TEST_F(FrameBufferTest, BindMultiDisplayColorBuffer) {
+    uint32_t id = 2;
+    EXPECT_EQ(0, mFb->createDisplay(&id));
+    uint32_t handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->setDisplayColorBuffer(id, handle));
+    uint32_t getHandle = 0;
+    mFb->getDisplayColorBuffer(id, &getHandle);
+    EXPECT_EQ(handle, getHandle);
+    uint32_t getId = 0;
+    mFb->getColorBufferDisplay(handle, &getId);
+    EXPECT_EQ(id, getId);
+    mFb->closeColorBuffer(handle);
+    EXPECT_EQ(0, mFb->destroyDisplay(id));
+}
+
+TEST_F(FrameBufferTest, SetMultiDisplayPosition) {
+    uint32_t id = FrameBuffer::s_invalidIdMultiDisplay;
+    mFb->createDisplay(&id);
+    EXPECT_NE(0, id);
+    uint32_t w = mWidth / 2, h = mHeight / 2;
+    EXPECT_EQ(0, mFb->setDisplayPose(id, -1, -1, w, h));
+    int32_t x, y;
+    uint32_t width, height;
+    EXPECT_EQ(0, mFb->getDisplayPose(id, &x, &y, &width, &height));
+    EXPECT_EQ(w, width);
+    EXPECT_EQ(h, height);
+    EXPECT_EQ(0, mFb->destroyDisplay(id));
+}
+
+TEST_F(FrameBufferTest, ComposeMultiDisplay) {
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+
+    HandleType cb0 =
+        mFb->createColorBuffer(mWidth/2, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    TestTexture forUpdate0 = createTestTextureRGBA8888SingleColor(mWidth/2, mHeight, 1.0f, 1.0f, 1.0f, 1.0f);
+    EXPECT_EQ(0, mFb->openColorBuffer(cb0));
+    mFb->updateColorBuffer(cb0, 0, 0, mWidth/2, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate0.data());
+
+    uint32_t cb1 =
+        mFb->createColorBuffer(mWidth/2, mHeight/2, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_EQ(0, mFb->openColorBuffer(cb1));
+    TestTexture forUpdate1 = createTestTextureRGBA8888SingleColor(mWidth/2, mHeight/2, 1.0f, 0.0f, 0.0f, 1.0f);
+    mFb->updateColorBuffer(cb1, 0, 0, mWidth/2, mHeight/2, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate1.data());
+
+    uint32_t cb2 =
+        mFb->createColorBuffer(mWidth/4, mHeight/2, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_EQ(0, mFb->openColorBuffer(cb2));
+    TestTexture forUpdate2 = createTestTextureRGBA8888SingleColor(mWidth/4, mHeight/2, 0.0f, 1.0f, 0.0f, 1.0f);
+    mFb->updateColorBuffer(cb2, 0, 0, mWidth/4, mHeight/2, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate2.data());
+
+    uint32_t cb3 =
+        mFb->createColorBuffer(mWidth/4, mHeight/4, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_EQ(0, mFb->openColorBuffer(cb3));
+    TestTexture forUpdate3 = createTestTextureRGBA8888SingleColor(mWidth/4, mHeight/4, 0.0f, 0.0f, 1.0f, 1.0f);
+    mFb->updateColorBuffer(cb3, 0, 0, mWidth/4, mHeight/4, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate3.data());
+
+    FrameBuffer::DisplayInfo info[] =
+    {{cb1, -1, -1, (uint32_t)mWidth/2, (uint32_t)mHeight/2, 240},
+     {cb2, -1, -1, (uint32_t)mWidth/4, (uint32_t)mHeight/2, 240},
+     {cb3, -1, -1, (uint32_t)mWidth/4, (uint32_t)mHeight/4, 240}};
+
+    uint32_t ids[] = {1, 2, 3};
+    for (uint32_t i = 0; i < 3 ; i++) {
+        EXPECT_EQ(0, mFb->createDisplay(&ids[i]));
+        EXPECT_EQ(0, mFb->setDisplayPose(ids[i], info[i].pos_x, info[i].pos_y,
+                                         info[i].width, info[i].height));
+        EXPECT_EQ(0, mFb->setDisplayColorBuffer(ids[i], info[i].cb));
+    }
+
+    if (mUseSubWindow) {
+        mFb->post(cb0);
+        mWindow->messageLoop();
+    }
+
+    EXPECT_TRUE(mFb->bindContext(0, 0, 0));
+    mFb->closeColorBuffer(cb0);
+    mFb->closeColorBuffer(cb1);
+    mFb->closeColorBuffer(cb2);
+    mFb->closeColorBuffer(cb3);
+    mFb->destroyDisplay(ids[0]);
+    mFb->destroyDisplay(ids[1]);
+    mFb->destroyDisplay(ids[2]);
+    mFb->DestroyWindowSurface(surface);
+}
 }  // namespace emugl
