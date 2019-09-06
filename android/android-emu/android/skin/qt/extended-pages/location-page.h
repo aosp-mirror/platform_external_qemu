@@ -130,8 +130,10 @@ signals:
 private slots:
     void map_saveRoute();
 
+#ifdef USE_WEBENGINE
     void on_loc_importGpxKmlButton_clicked() { handle_importGpxKmlButton_clicked(); }
     void on_loc_importGpxKmlButton_route_clicked() { handle_importGpxKmlButton_clicked(); }
+#endif
 
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
@@ -416,7 +418,6 @@ public:
         if (mode == "TRANSIT") {
             return 3;
         }
-       
         return -1;
     }
     // Call if the |routeElement|'s data changes to refresh the list item.
