@@ -15,6 +15,7 @@
 
 #include <android/base/Log.h>
 #include <google/protobuf/message.h>
+#include <google/protobuf/text_format.h>
 
 #include <algorithm>
 
@@ -58,7 +59,7 @@ static std::string statusToString(grpc::Status status) {
 static uint64_t getTimeDiffUs(InvocationRecord loginfo,
                               InterceptionHookPoints from,
                               InterceptionHookPoints to) {
-    assert(loginfo.mTimestamps[static_cast<int>(to)] >
+    assert(loginfo.mTimestamps[static_cast<int>(to)] >=
            loginfo.mTimestamps[static_cast<int>(from)]);
 
     return loginfo.mTimestamps[static_cast<int>(to)] -
@@ -78,10 +79,12 @@ static void printLog(const InvocationRecord& loginfo) {
 LoggingInterceptor::LoggingInterceptor(ServerRpcInfo* info,
                                        ReportingFunction reporter)
     : mReporter(reporter) {
-    mLoginfo.method = std::string(info->method()).substr(0, kMaxStringLen);
+    if (info) {
+        mLoginfo.method = std::string(info->method()).substr(0, kMaxStringLen);
+        mLoginfo.type = info->type();
+    }
     mLoginfo.mTimestamps[InvocationRecord::kStartTimeIdx] =
             base::System::get()->getUnixTimeUs();
-    mLoginfo.type = info->type();
 }
 
 LoggingInterceptor::~LoggingInterceptor() {
@@ -89,6 +92,25 @@ LoggingInterceptor::~LoggingInterceptor() {
     mLoginfo.duration =
             ts - mLoginfo.mTimestamps[InvocationRecord::kStartTimeIdx];
     mReporter(mLoginfo);
+}
+
+std::string LoggingInterceptor::formatProtobufMessage(
+        const ::google::protobuf::Message* msg) {
+    std::string debug_string;
+
+    ::google::protobuf::TextFormat::Printer printer;
+    printer.SetSingleLineMode(true);
+    printer.SetExpandAny(true);
+    printer.SetTruncateStringFieldLongerThan(kMaxProtbufStrlen);
+    printer.PrintToString(*msg, &debug_string);
+
+    // Single line mode currently might have an extra space at the end.
+    if (debug_string.size() > 0 &&
+        debug_string[debug_string.size() - 1] == ' ') {
+        debug_string.resize(debug_string.size() - 1);
+    }
+
+    return debug_string;
 }
 
 std::string LoggingInterceptor::chopStr(std::string str) {
@@ -141,8 +163,11 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         auto msg = reinterpret_cast<::google::protobuf::Message*>(
                 methods->GetRecvMessage());
         if (msg) {
-            mLoginfo.incoming = chopStr(msg->ShortDebugString());
-            mLoginfo.rcvBytes += msg->SpaceUsed();
+            auto size = msg->SpaceUsed();
+            if (size < kMaxProtobufMsgLogSize && mLoginfo.rcvBytes == 0) {
+                mLoginfo.incoming = formatProtobufMessage(msg);
+            }
+            mLoginfo.rcvBytes += size;
         }
     }
 
@@ -152,8 +177,11 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         auto msg = reinterpret_cast<const ::google::protobuf::Message*>(
                 methods->GetSendMessage());
         if (msg) {
-            mLoginfo.response = chopStr(msg->ShortDebugString());
-            mLoginfo.sndBytes += msg->SpaceUsed();
+            auto size = msg->SpaceUsed();
+            if (size < kMaxProtobufMsgLogSize && mLoginfo.sndBytes == 0) {
+                mLoginfo.response = formatProtobufMessage(msg);
+            }
+            mLoginfo.sndBytes += size;
         }
     }
     if (methods->QueryInterceptionHookPoint(

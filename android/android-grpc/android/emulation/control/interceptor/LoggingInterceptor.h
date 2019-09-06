@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <google/protobuf/text_format.h>
 #include <grpcpp/support/server_interceptor.h>
 
 #include <array>
@@ -23,9 +24,9 @@ using namespace grpc::experimental;
 class LoggingInterceptorFactory;
 
 typedef struct InvocationRecord {
-    std::string method;                      // Invoked method.
-    std::string incoming;                    // Shortened receive parameters.
-    std::string response;                    // Shortened response string.
+    std::string method = "unknown";          // Invoked method.
+    std::string incoming = "...";            // Shortened receive parameters.
+    std::string response = "...";            // Shortened response string.
     grpc::Status status = grpc::Status::OK;  // Status
     uint64_t rcvBytes = 0;  // Size of all received protobuf messages.
     uint64_t rcvTime = 0;   // Time spend receiving bytes out over the wire.
@@ -72,9 +73,16 @@ public:
 
 private:
     std::string chopStr(std::string);
+    std::string formatProtobufMessage(const ::google::protobuf::Message* msg);
 
     // We will cut of all repsone/incoming strings at this length.
     const unsigned int kMaxStringLen = 80;
+
+    // Max field length of protobuf message we are willing to log.
+    const unsigned int kMaxProtbufStrlen = 20;
+
+    // Maximum size of a protobuf message we are willing to log.
+    const unsigned int kMaxProtobufMsgLogSize = 1024;
 
     InvocationRecord mLoginfo;
     ReportingFunction mReporter;
