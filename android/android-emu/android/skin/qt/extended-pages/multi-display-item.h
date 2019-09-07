@@ -22,9 +22,9 @@ class MultiDisplayItem : public QWidget {
     Q_OBJECT
 
 public:
-    MultiDisplayItem(int id, MultiDisplayPage* page, QWidget* parent = 0);
+    MultiDisplayItem(int id, QWidget* parent = 0);
     MultiDisplayItem(int id, uint32_t width, uint32_t height, uint32_t dpi,
-                     MultiDisplayPage* page, QWidget* parent = 0);
+                     QWidget* parent = 0);
     void getValues(uint32_t* width, uint32_t* height, uint32_t* dpi);
     std::string& getName();
     void focusInEvent(QFocusEvent* event) override;

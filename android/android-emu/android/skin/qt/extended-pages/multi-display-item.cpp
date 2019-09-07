@@ -23,11 +23,12 @@ std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes =
      {"custom", "custom", 720, 480, 142},
     };
 
-MultiDisplayItem::MultiDisplayItem(int id, MultiDisplayPage* page, QWidget* parent)
-    : QWidget(parent), mMultiDisplayPage(page),
+MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
+    : QWidget(parent), mMultiDisplayPage(reinterpret_cast<MultiDisplayPage*>(parent)),
       mUi(new Ui::MultiDisplayItem()), mId(id) {
 
     mUi->setupUi(this);
+    this->setStyleSheet(parent->styleSheet());
 
     // Initialize the drop-down menu
     for (auto const& type : sDisplayTypes) {
@@ -61,9 +62,8 @@ MultiDisplayItem::MultiDisplayItem(int id, MultiDisplayPage* page, QWidget* pare
 }
 
 MultiDisplayItem::MultiDisplayItem(int id, uint32_t width, uint32_t height,
-                                   uint32_t dpi, MultiDisplayPage* page,
-                                   QWidget* parent)
-    : MultiDisplayItem(id, page, parent) {
+                                   uint32_t dpi, QWidget* parent)
+    : MultiDisplayItem(id, parent) {
     // check with displayType fits the width, height and dpi, then set to it.
     // If not found, set to "custom" type.
     int i = 0;
