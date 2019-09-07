@@ -22,7 +22,7 @@ public:
     explicit MultiDisplayPage(QWidget *parent = 0);
 
     void setArrangementHighLightDisplay(int id);
-    void updateTheme();
+    void updateTheme(const QString& styleString);
     static int sMaxItem;
 
 private slots:
