@@ -90,6 +90,7 @@ typedef struct QAndroidEmulatorWindowAgent {
                                uint32_t,
                                uint32_t,
                                uint32_t);
+    void (*updateUIMultiDisplayPage)(uint32_t);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp
