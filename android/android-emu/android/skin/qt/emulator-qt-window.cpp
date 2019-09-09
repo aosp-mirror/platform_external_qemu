@@ -2836,10 +2836,12 @@ void EmulatorQtWindow::setUIMultiDisplay(uint32_t id,
     event->u.multi_display.height = h;
     event->u.multi_display.add = add;
     skin_event_add(event);
+}
 
+void EmulatorQtWindow::updateUIMultiDisplayPage(uint32_t id) {
     // update the MutiDisplay UI page, e.g., config through console,
     // loaded from snapshot
-    if (dpi != 0 && id > 0 && id <= MultiDisplayPage::sMaxItem) {
+    if (id > 0 && id <= MultiDisplayPage::sMaxItem) {
         emit(updateMultiDisplayPage(id));
     }
 }

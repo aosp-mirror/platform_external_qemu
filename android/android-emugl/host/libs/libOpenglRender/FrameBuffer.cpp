@@ -2545,6 +2545,7 @@ bool FrameBuffer::onLoad(Stream* stream,
                                                                  0, 0, 0,
                                                                  0, false,
                                                                  iter.second.dpi);
+            emugl::get_emugl_window_operations().updateUIMultiDisplayPage(iter.first);
             hasDeletedMultiDisplay = true;
         }
     }
@@ -2557,6 +2558,9 @@ bool FrameBuffer::onLoad(Stream* stream,
         int combinedDisplayHeight = 0;
         getCombinedDisplaySize(&combinedDisplayWidth, &combinedDisplayHeight);
         setDisplayPoseInSkinUI(combinedDisplayHeight);
+        for (const auto&  iter : m_displays) {
+            emugl::get_emugl_window_operations().updateUIMultiDisplayPage(iter.first);
+        }
         emugl::get_emugl_window_operations()
             .setUIDisplayRegion(
                 0, 0, combinedDisplayWidth, combinedDisplayHeight);
