@@ -373,7 +373,8 @@ struct goldfish_address_space_ping {
 	uint64_t offset;
 	uint64_t size;
 	uint64_t metadata;
-	uint64_t wait_offset;
+	uint32_t version;
+	uint32_t wait_fd;
     uint32_t wait_flags;
     uint32_t direction;
 };
