@@ -88,6 +88,10 @@ public:
 
     int* getSerialPtr() { return &mSerial; }
 
+    // retrieve the timespan covered by the enqueued packets, in
+    // AVStream->time_base unit
+    int64_t getEnqueuedPktDuration();
+
 private:
     int internalPut(AVPacket* pkt);
 

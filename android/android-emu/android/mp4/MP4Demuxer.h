@@ -17,6 +17,7 @@
 #include "android/hw-sensors.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/SensorLocationEventProvider.h"
+#include "android/mp4/VideoMetadataProvider.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
@@ -26,6 +27,12 @@ using android::videoplayer::VideoPlayerWaitInfo;
 
 namespace android {
 namespace mp4 {
+
+enum class DemuxResult {
+    UNKNOWN,
+    OK,
+    AV_EOF,
+};
 
 // The MP4 demultiplexer (a.k.a. demuxer) extract packets from an MP4
 // input file and dispatch these packets to output corresponding to
@@ -50,7 +57,7 @@ public:
     // the video player is in looping mode.
     //
     // Returns 0 on success, -1 on error.
-    virtual int demuxNextPacket() = 0;
+    virtual DemuxResult demuxNextPacket() = 0;
 
     // Seeks the MP4 file to timestamp and flushes packet queues.
     //
@@ -62,6 +69,8 @@ public:
     virtual void setVideoPacketQueue(PacketQueue* videoPacketQueue) = 0;
     virtual void setSensorLocationEventProvider(
             std::shared_ptr<SensorLocationEventProvider> eventProvider) = 0;
+    virtual void setVideoMetadataProvider(
+            std::shared_ptr<VideoMetadataProvider> metadataProvider) = 0;
 
 protected:
     Mp4Demuxer() = default;

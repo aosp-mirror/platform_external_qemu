@@ -15,14 +15,11 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
-#include "android/hw-sensors.h"
 #include "android/offworld/proto/offworld.pb.h"
-#include "android/utils/compiler.h"
 
 extern "C" {
-#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
 }
 
 namespace android {
@@ -30,23 +27,22 @@ namespace mp4 {
 
 typedef ::offworld::DatasetInfo DatasetInfo;
 
-// A wrapper around an MP4 dataset file that provides access to
-// information about this dataset.
-class Mp4Dataset {
+struct VideoMetadata {
+    int32_t frameNumber;
+    uint64_t timestamp;
+};
+
+class VideoMetadataProvider {
 public:
-    virtual ~Mp4Dataset() {};
-    static std::unique_ptr<Mp4Dataset> create(const std::string filepath,
-                                              const DatasetInfo& datasetInfo);
-    virtual int getAudioStreamIndex() = 0;
-    virtual int getVideoStreamIndex() = 0;
-    virtual int getSensorDataStreamIndex(AndroidSensor sensor) = 0;
-    virtual int getLocationDataStreamIndex() = 0;
-    virtual int getVideoMetadataStreamIndex() = 0;
-    virtual AVFormatContext* getFormatContext() = 0;
-    virtual void clearFormatContext() = 0;
+    virtual ~VideoMetadataProvider(){};
+    static std::unique_ptr<VideoMetadataProvider> create(
+            const DatasetInfo& datasetInfo);
+    virtual int createVideoMetadata(const AVPacket* packet) = 0;
+    virtual bool hasNextFrameMetadata() = 0;
+    virtual VideoMetadata getNextFrameMetadata() = 0;
 
 protected:
-    Mp4Dataset() = default;
+    VideoMetadataProvider() = default;
 };
 
 }  // namespace mp4
