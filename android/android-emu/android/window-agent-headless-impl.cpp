@@ -103,6 +103,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                  uint32_t h,
                                  uint32_t dpi,
                                  uint32_t flag)->bool {},
+        .updateUIMultiDisplayPage = [](uint32_t id) { },
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

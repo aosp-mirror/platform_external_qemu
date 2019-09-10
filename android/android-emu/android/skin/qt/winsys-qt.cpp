@@ -874,6 +874,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                                                    i.height,
                                                    i.dpi,
                                                    i.flag);
+                        window->updateUIMultiDisplayPage(i.id);
                     }
                 }
                 else {
@@ -893,6 +894,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                                                    android_hw->hw_display1_height,
                                                    android_hw->hw_display1_density,
                                                    android_hw->hw_display1_flag);
+                        window->updateUIMultiDisplayPage(1);
                     }
                     if (android_hw->hw_display2_width != 0 &&
                         android_hw->hw_display2_height != 0) {
@@ -904,6 +906,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                                                    android_hw->hw_display2_height,
                                                    android_hw->hw_display2_density,
                                                    android_hw->hw_display2_flag);
+                        window->updateUIMultiDisplayPage(2);
                     }
                     if (android_hw->hw_display3_width != 0 &&
                         android_hw->hw_display3_height != 0) {
@@ -915,6 +918,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
                                                    android_hw->hw_display3_height,
                                                    android_hw->hw_display3_density,
                                                    android_hw->hw_display3_flag);
+                        window->updateUIMultiDisplayPage(3);
                     }
                 }
                 agent->multiDisplay->unlockMultiDisplayOnLoad();

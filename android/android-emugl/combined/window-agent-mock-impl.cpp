@@ -83,6 +83,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     printf("window-agent-mock-impl: .switchMultiDisplay id %d %d %d %dx%d "
                            "dpi %d flag %d %s\n",
                            id, x, y, w, h, dpi, flag, add ? "add" : "del");
+                },
+        .updateUIMultiDisplayPage =
+                [](uint32_t id) {
+                    printf("updateMultiDisplayPage\n");
                 }
 };
 
