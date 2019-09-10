@@ -130,6 +130,13 @@ public:
     }
 
     bool load(Stream* stream) {
+        {
+            // First destroy all contexts, because
+            // this can be done while an emulator is running
+            AutoLock lock(mContextsLock);
+            mContexts.clear();
+        }
+
         const uint32_t handleIndex = stream->getBe32();
         const size_t size = stream->getBe32();
 
