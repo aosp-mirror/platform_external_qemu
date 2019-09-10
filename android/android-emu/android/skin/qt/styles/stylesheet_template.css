@@ -344,3 +344,6 @@ QToolTip {
     border-width: 2px;
     border-color: %%TOOL_COLOR%%;
 }
+QComboBox[ColorGroup="focused"] {
+  border-bottom: 2px solid %%TOOL_COLOR%%;
+}

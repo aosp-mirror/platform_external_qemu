@@ -84,8 +84,15 @@ void MultiDisplayPage::setSecondaryDisplaysTitle(int count) {
 }
 
 void MultiDisplayPage::updateTheme(const QString& styleString) {
-    mUi->addSecondaryDisplay->setIcon(getIconForCurrentTheme("add_display"));
+    auto icon = getIconForCurrentTheme("add_display");
+    mUi->addSecondaryDisplay->setIcon(icon);
+    mUi->addSecondaryDisplay->setIconSize(QSize(24, 24));
     mUi->scrollAreaWidgetContents->setStyleSheet(styleString);
+    for (int i = 1; i <= sMaxItem; i++) {
+        if (mItem[i] != nullptr) {
+            mItem[i]->updateTheme();
+        }
+    }
 }
 
 int MultiDisplayPage::findNextItemIndex() {
