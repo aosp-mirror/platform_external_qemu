@@ -28,6 +28,7 @@ namespace android {
 namespace mp4 {
 
 typedef ::offworld::DatasetInfo DatasetInfo;
+typedef automation::DurationNs DurationNs;
 
 // SensorLocationEventProvider turns AVPackets containing sensor/location event
 // information into actual event objects that could be consumed by
@@ -39,8 +40,11 @@ public:
             const DatasetInfo& datasetInfo);
     // Create a RecordedEvent from the packet
     virtual int createEvent(const AVPacket* packet) = 0;
+    virtual void start() = 0;
+    virtual void stop() = 0;
+    virtual void startFromTimestamp(uint64_t startingTimestamp) = 0;
     virtual emulator_automation::RecordedEvent consumeNextCommand() = 0;
-    virtual bool getNextCommandDelay(automation::DurationNs* outDelay) = 0;
+    virtual bool getNextCommandDelay(DurationNs* outDelay) = 0;
 
 protected:
     SensorLocationEventProvider() = default;
