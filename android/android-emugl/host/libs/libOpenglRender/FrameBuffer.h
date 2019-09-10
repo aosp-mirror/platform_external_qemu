@@ -511,6 +511,7 @@ public:
                        uint32_t h,
                        uint32_t dpi = 0);
     void getCombinedDisplaySize(int* w, int* h);
+    void adjustHostWindowSize();
     struct DisplayInfo {
         uint32_t cb;
         int32_t pos_x;

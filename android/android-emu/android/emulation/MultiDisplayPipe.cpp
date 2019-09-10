@@ -67,6 +67,7 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
             uint32_t id = *(uint32_t*)&(data[1]);
             uint32_t cb = *(uint32_t*)&(data[5]);
             android_setMultiDisplayColorBuffer(id, cb);
+            android_adjustHostWindowSize();
             break;
         }
         default:
@@ -92,7 +93,7 @@ void MultiDisplayPipe::setMultiDisplay(uint32_t id,
                      << " flag " << flag;
         sMultiDisplayPipeInstance->send(std::move(data));
     }
-    // adjust the host window
+
     android_setMultiDisplay(id, x, y, w, h, dpi, add);
 }
 

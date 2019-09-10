@@ -174,6 +174,8 @@ public:
     //    bind ColorBuffer to the display
     virtual void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) = 0;
 
+    virtual void adjustHostWindowSize() = 0;
+
     virtual bool tryLockMultiDisplayOnLoad(void) = 0;
     virtual void unlockMultiDisplayOnLoad(void) = 0;
 

@@ -339,6 +339,13 @@ void RendererImpl::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
     }
 }
 
+void RendererImpl::adjustHostWindowSize() {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->adjustHostWindowSize();
+    }
+}
+
 bool RendererImpl::tryLockMultiDisplayOnLoad(void) {
     auto fb = FrameBuffer::getFB();
     if (fb) {

@@ -2742,13 +2742,17 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
             m_displays[displayId].pos_x = x;
             m_displays[displayId].pos_y = y;
         }
-        getCombinedDisplaySize(&width, &height);
+        int height;
+        getCombinedDisplaySize(nullptr, &height);
         setDisplayPoseInSkinUI(height);
     }
-
-    // unlock before calling setUIDisplayRegion
-    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
+}
+
+void FrameBuffer::adjustHostWindowSize() {
+    int width, height;
+    getCombinedDisplaySize(&width, &height);
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
 }
 
 /*
@@ -2799,8 +2803,10 @@ void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
     for (const auto& iter : m_displays) {
-        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
-        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+        if (iter.first == 0 || iter.second.cb != 0) {
+            total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+            total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+        }
     }
     if (h)
         *h = (int)total_h;

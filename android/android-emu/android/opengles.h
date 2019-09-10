@@ -89,6 +89,8 @@ void android_setMultiDisplay(uint32_t id,
 
 void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb);
 
+void android_adjustHostWindowSize(void);
+
 bool android_tryLockMultiDisplayOnLoad(void);
 
 void android_unlockMultiDisplayOnLoad(void);

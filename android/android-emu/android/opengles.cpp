@@ -487,6 +487,12 @@ void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
     }
 }
 
+void android_adjustHostWindowSize(void) {
+    if (sRenderer) {
+        sRenderer->adjustHostWindowSize();
+    }
+}
+
 bool android_tryLockMultiDisplayOnLoad(void) {
     if (sRenderer) {
         return sRenderer->tryLockMultiDisplayOnLoad();

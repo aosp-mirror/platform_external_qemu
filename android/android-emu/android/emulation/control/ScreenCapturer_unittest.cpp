@@ -174,6 +174,7 @@ public:
                          uint32_t dpi,
                          bool add) { }
     void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) { }
+    void adjustHostWindowSize() {}
     bool tryLockMultiDisplayOnLoad(void) {
         return true;
     }
