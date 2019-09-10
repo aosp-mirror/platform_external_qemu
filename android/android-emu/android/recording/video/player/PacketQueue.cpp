@@ -204,5 +204,17 @@ void PacketQueue::signalWait() {
     pwi->cvDone.signalAndUnlock(&pwi->lock);
 }
 
+int64_t PacketQueue::getEnqueuedPktDuration() {
+    if (mFirstPkt == nullptr || mLastPkt == nullptr) {
+        return 0L;
+    } else if (mFirstPkt->pkt.pts == AV_NOPTS_VALUE ||
+               mLastPkt->pkt.pts == AV_NOPTS_VALUE) {
+        LOG(WARNING) << "Packet has no valid PTS value!";
+        return -1;
+    } else {
+        return mLastPkt->pkt.pts - mFirstPkt->pkt.pts;
+    }
+}
+
 }  // namespace videoplayer
 }  // namespace android
