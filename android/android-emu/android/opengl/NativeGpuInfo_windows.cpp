@@ -409,13 +409,14 @@ bool badVulkanDllVersion() {
         "vulkan-1.dll version: %d.%d.%d.%d\n",
         major, minor, build_1, build_2);
 
-    bool isBad = false;
-    WindowsDllVersion currentVersion =
-        std::make_tuple(major, minor, build_1, build_2);
-
-    for (auto badDllVersion : sBadVulkanDllVersions) {
-        isBad |= (currentVersion == badDllVersion);
-    }
+    // Ban all Windows Vulkan drivers < 1.1;
+    // they sometimes advertise vkEnumerateInstanceVersion
+    // and then running that function pointer causes a segfault.
+    // In any case, properly updated GPU drivers for Windows
+    // should all be 1.1 now for the major manufacturers
+    // (even Intel; see https://www.intel.com/content/www/us/en/support/articles/000005524/graphics-drivers.html)
+    bool isBad =
+        major == 1 && minor == 0;
 
     if (isBad) {
         crashhandler_append_message_format(
