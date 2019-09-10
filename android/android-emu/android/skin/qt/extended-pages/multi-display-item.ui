@@ -22,6 +22,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="margin">
     <number>0</number>
@@ -48,6 +51,12 @@
        </property>
        <item>
         <widget class="QComboBox" name="selectDisplayType">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -58,22 +67,9 @@
           <enum>Qt::NoFocus</enum>
          </property>
          <property name="styleSheet">
-          <string notr="true">padding-left: 0px;</string>
+          <string notr="true">padding-left: 0px; padding-top: 6px; padding-bottom: 6px;</string>
          </property>
         </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QPushButton" name="deleteDisplay">
@@ -138,8 +134,8 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="AngleInputWidget" name="dpi" native="true">
+       <item row="2" column="1">
+        <widget class="AngleInputWidget" name="width" native="true">
          <property name="maximumSize">
           <size>
            <width>60</width>
@@ -151,8 +147,8 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="AngleInputWidget" name="width" native="true">
+       <item row="2" column="2">
+        <widget class="AngleInputWidget" name="dpi" native="true">
          <property name="maximumSize">
           <size>
            <width>60</width>

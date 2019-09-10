@@ -17,46 +17,24 @@
 #include <QGraphicsOpacityEffect>
 #include <QPainter>
 
-static const QColor kBackGroundColorDark = QColor(32, 39, 43);
-static const QColor kBackGroundColorLight = QColor(255, 255, 255);
-static const QColor kMultiDisplayColorDark = QColor(41, 50, 55);
-static const QColor kMultiDisplayColorLight= QColor(240, 240, 240);
-static const QColor kMultiDisplayBorderColorDark = QColor(123, 126, 131);
-static const QColor kMultiDisplayBorderColorLight = QColor(193, 193, 193);
-static const QColor kHighlightMultiDisplayBorderColor= QColor(80, 135, 236);
-static const QColor kTextColorDark = QColor(168, 172, 174);
-static const QColor kTextColorLight = QColor(83, 83, 86);
-static const QColor kMultiDisplayNameTextColorDark = QColor(245, 245, 245);
-static const QColor kMultiDisplayNameTextColorLight = QColor(32, 33, 36);
-static const QColor kMultiDisplayTitleTextColorDark = QColor(182, 185, 187);
-static const QColor kMultiDisplayTitleTextColorLight = QColor(107, 108, 110);
 static const int kBorderX = 10;
 static const int kBorderY = 50;
 static const int kTextHeight = 80;
 
-struct ThemeColor {
-    QColor backGround;
-    QColor MD;
-    QColor MDBorder;
-    QColor MDBorderHighLight;
-    QColor MDTitle;
-    QColor MDName;
-    QColor text;
-};
-static const ThemeColor kLightThemeColor = {
+const MultiDisplayArrangement::ThemeColor MultiDisplayArrangement::kLightThemeColor = {
     QColor(255, 255, 255),
     QColor(240, 240, 240),
     QColor(193, 193, 193),
-    QColor(80, 135, 236),
+    QColor(0, 190, 164),
     QColor(107, 108, 110),
     QColor(32, 33, 36),
     QColor(83, 83, 86),
 };
-static const ThemeColor kDarkThemeColor = {
+const MultiDisplayArrangement::ThemeColor MultiDisplayArrangement::kDarkThemeColor = {
     QColor(32, 39, 43),
     QColor(41, 50, 55),
     QColor(123, 126, 131),
-    QColor(80, 135, 236),
+    QColor(0, 190, 164),
     QColor(182, 185, 187),
     QColor(245, 245, 245),
     QColor(168, 172, 174),
@@ -64,6 +42,67 @@ static const ThemeColor kDarkThemeColor = {
 
 MultiDisplayArrangement::MultiDisplayArrangement(QWidget* parent)
     : QWidget(parent) {
+}
+
+void MultiDisplayArrangement::paintDisplayBorder(QPainter& p,
+                                                 bool highLight){
+    int w, h;
+    const ThemeColor* t;
+    if (getSelectedTheme() == SETTINGS_THEME_LIGHT) {
+        t = &kLightThemeColor;
+    } else {
+        t = &kDarkThemeColor;
+    }
+    getCombinedDisplaySize(&w, &h);
+    float wRatio = ((float) width() - 2 * kBorderX) / (float) w;
+    float hRatio = ((float) height() - 2 * kBorderY - kTextHeight) / (float) h;
+    float ratio = (wRatio < hRatio) ? wRatio : hRatio;
+
+    for (const auto& iter : mLayout) {
+        if (highLight) {
+            if (iter.first != mHighLightDisplayId) {
+                continue;
+            }
+        } else {
+            if (iter.first == mHighLightDisplayId) {
+                continue;
+            }
+        }
+
+        p.setRenderHint(QPainter::Antialiasing);
+        QPainterPath path;
+        QRectF rect = QRectF((float)iter.second.x * ratio + kBorderX,
+                             (float)(h - iter.second.y - iter.second.h) * ratio + kBorderY,
+                             (float)iter.second.w * ratio,
+                             (float)iter.second.h * ratio);
+        path.addRoundedRect(rect, 5, 5);
+        QPen pen(t->MDBorder, 1);
+        if (highLight) {
+            pen.setColor(t->MDBorderHighLight);
+        }
+        p.setPen(pen);
+        p.fillPath(path, t->MD);
+        p.drawPath(path);
+        pen.setColor(t->MDName);
+        QFont font = p.font();
+        int fontSize = font.pointSize();
+        font.setPointSize(fontSize* 1.5);
+        p.setFont(font);
+        p.setPen(pen);
+        p.drawText(rect, Qt::AlignCenter, tr(iter.second.name.c_str()));
+        pen.setColor(t->MDTitle);
+        p.setPen(pen);
+        font.setPointSize(fontSize);
+        p.setFont(font);
+        rect.setX(rect.x() + 5);
+        rect.setY(rect.y() + 5);
+        if (iter.first == 0) {
+            p.drawText(rect, Qt::AlignTop, tr("Default"));
+        } else {
+            std::string title = "Display " + std::to_string(iter.first);
+            p.drawText(rect, Qt::AlignTop, tr(title.c_str()));
+        }
+    }
 }
 
 void MultiDisplayArrangement::paintEvent(QPaintEvent* e) {
@@ -76,46 +115,9 @@ void MultiDisplayArrangement::paintEvent(QPaintEvent* e) {
 
     QPainter p(this);
     p.fillRect(this->rect(), t->backGround);
-    int w, h;
-    getCombinedDisplaySize(&w, &h);
-    float wRatio = ((float) width() - 2 * kBorderX) / (float) w;
-    float hRatio = ((float) height() - 2 * kBorderY - kTextHeight) / (float) h;
-    float ratio = (wRatio < hRatio) ? wRatio : hRatio;
-    for (const auto& iter : mLayout) {
-        p.setRenderHint(QPainter::Antialiasing);
-        QPainterPath path;
-        QRectF rect = QRectF((float)iter.second.x * ratio + kBorderX,
-                             (float)(h - iter.second.y - iter.second.h) * ratio + kBorderY,
-                             (float)iter.second.w * ratio,
-                             (float)iter.second.h * ratio);
-        path.addRoundedRect(rect, 5, 5);
-        QPen pen(t->MDBorder, 1);
-        if (iter.first == mHighLightDisplayId) {
-            pen.setColor(t->MDBorderHighLight);
-        }
-        p.setPen(pen);
-        p.fillPath(path, t->MD);
-        p.drawPath(path);
 
-        pen.setColor(t->MDName);
-        QFont font = p.font();
-        int fontSize = font.pointSize();
-        font.setPointSize(fontSize* 1.5);
-        p.setFont(font);
-        p.setPen(pen);
-        p.drawText(rect, Qt::AlignCenter, tr(iter.second.name.c_str()));
-
-        pen.setColor(t->MDTitle);
-        p.setPen(pen);
-        font.setPointSize(fontSize);
-        p.setFont(font);
-        if (iter.first == 0) {
-            p.drawText(rect, Qt::AlignTop, tr("Default"));
-        } else {
-            std::string title = "Display " + std::to_string(iter.first);
-            p.drawText(rect, Qt::AlignTop, tr(title.c_str()));
-        }
-    }
+    paintDisplayBorder(p, false);
+    paintDisplayBorder(p, true);
 
     QPen penText(t->text, 1);
     p.setPen(penText);

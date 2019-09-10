@@ -28,14 +28,26 @@ public:
                    std::unordered_map<uint32_t, std::string>& name);
     void setHighLightDisplay(int id);
 private:
-    struct rectangle {
+    struct Rectangle {
         uint32_t x;
         uint32_t y;
         uint32_t w;
         uint32_t h;
         std::string name;
     };
-    std::unordered_map<uint32_t, struct rectangle> mLayout;
+    struct ThemeColor {
+        QColor backGround;
+        QColor MD;
+        QColor MDBorder;
+        QColor MDBorderHighLight;
+        QColor MDTitle;
+        QColor MDName;
+        QColor text;
+    };
+    static const ThemeColor kLightThemeColor;
+    static const ThemeColor kDarkThemeColor;
+    std::unordered_map<uint32_t, struct Rectangle> mLayout;
     void getCombinedDisplaySize(int* w, int* h);
+    void paintDisplayBorder(QPainter& p, bool highLight);
     int mHighLightDisplayId = -1;
 };
