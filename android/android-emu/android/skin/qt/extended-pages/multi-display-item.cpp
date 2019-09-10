@@ -20,7 +20,7 @@ std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes =
      {"1080p(1920x1080)", "1080p", 1920, 1080, 320},
      {"4K(3840x2160)", "4K", 3840, 2160, 320},
      {"4K upscaled(3840x2160)", "4K upscaled", 3840, 2160, 640},
-     {"custom", "custom", 720, 480, 142},
+     {"custom", "custom", 1080, 720, 213},
     };
 
 MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
@@ -50,12 +50,12 @@ MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
             SLOT(changeSecondaryDisplay(int)));
     connect(this, SIGNAL(deleteDisplay(int)), mMultiDisplayPage,
             SLOT(deleteSecondaryDisplay(int)));
-    connect(mUi->height, SIGNAL(enterPressed()), this, SLOT(onCustomParaChanged()));
-    connect(mUi->width, SIGNAL(enterPressed()), this, SLOT(onCustomParaChanged()));
-    connect(mUi->dpi, SIGNAL(enterPressed()), this, SLOT(onCustomParaChanged()));
-    mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
+    connect(mUi->height, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
+    connect(mUi->width, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
+    connect(mUi->dpi, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
     std::string s = "Display " + std::to_string(mId);
     mUi->display_title->setText(s.c_str());
+    mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
 
     // hide the configuration box for resolution and dpi
     hideWidthHeightDpiBox(true);
@@ -83,13 +83,18 @@ MultiDisplayItem::MultiDisplayItem(int id, uint32_t width, uint32_t height,
 void MultiDisplayItem::onDisplayTypeChanged(int index) {
     if (index == sDisplayTypes.size() - 1) {
         uint32_t w, h, dpi;
+        bool enabled;
         EmulatorQtWindow::getInstance()->getMultiDisplay(mId,
                                                          NULL, NULL,
                                                          &w, &h, &dpi,
-                                                         NULL, NULL);
-        mUi->height->setValue(h);
-        mUi->width->setValue(w);
-        mUi->dpi->setValue(dpi);
+                                                         NULL, &enabled);
+        if (enabled) {
+            mUi->height->setValue(h);
+            mUi->width->setValue(w);
+            mUi->dpi->setValue(dpi);
+        } else {
+            setValues(index);
+        }
         hideWidthHeightDpiBox(false);
     } else {
         hideWidthHeightDpiBox(true);
@@ -99,7 +104,7 @@ void MultiDisplayItem::onDisplayTypeChanged(int index) {
     emit changeDisplay(mId);
 }
 
-void MultiDisplayItem::onCustomParaChanged() {
+void MultiDisplayItem::onCustomParaChanged(double /*value*/) {
     uint32_t w, h, d;
     getValues(&w, &h, &d);
     if (EmulatorQtWindow::getInstance()->multiDisplayParamValidate(mId, w, h, d, 0)) {
@@ -146,11 +151,19 @@ void MultiDisplayItem::hideWidthHeightDpiBox(bool hide) {
 }
 
 void MultiDisplayItem::focusInEvent(QFocusEvent* event) {
-    mUi->selectDisplayType->setStyleSheet("border: 1px solid blue;");
+    QWidget::focusInEvent(event);
     mMultiDisplayPage->setArrangementHighLightDisplay(mId);
+    mUi->selectDisplayType->setProperty("ColorGroup", "focused");
+    style()->polish(mUi->selectDisplayType);
 }
 
 void MultiDisplayItem::focusOutEvent(QFocusEvent* event) {
-    mUi->selectDisplayType->setStyleSheet("border: none;");
+    QWidget::focusOutEvent(event);
     mMultiDisplayPage->setArrangementHighLightDisplay(-1);
+    mUi->selectDisplayType->setProperty("ColorGroup", "");
+    style()->polish(mUi->selectDisplayType);
+}
+
+void MultiDisplayItem::updateTheme() {
+    mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
 }

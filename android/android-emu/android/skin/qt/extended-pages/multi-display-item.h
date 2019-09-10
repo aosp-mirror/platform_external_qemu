@@ -29,6 +29,7 @@ public:
     std::string& getName();
     void focusInEvent(QFocusEvent* event) override;
     void focusOutEvent(QFocusEvent* event) override;
+    void updateTheme(void);
 
 private:
     std::unique_ptr<Ui::MultiDisplayItem> mUi;
@@ -49,7 +50,7 @@ private:
 
 private slots:
     void onDisplayTypeChanged(int index);
-    void onCustomParaChanged();
+    void onCustomParaChanged(double value);
     void on_deleteDisplay_clicked();
 
 signals:
