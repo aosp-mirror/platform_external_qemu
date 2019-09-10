@@ -50,10 +50,9 @@ MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
             SLOT(changeSecondaryDisplay(int)));
     connect(this, SIGNAL(deleteDisplay(int)), mMultiDisplayPage,
             SLOT(deleteSecondaryDisplay(int)));
-    connect(mUi->height, SIGNAL(enterPressed()), this, SLOT(onCustomParaChanged()));
-    connect(mUi->width, SIGNAL(enterPressed()), this, SLOT(onCustomParaChanged()));
-    connect(mUi->dpi, SIGNAL(enterPressed()), this, SLOT(onCustomParaChanged()));
-    mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
+    connect(mUi->height, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
+    connect(mUi->width, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
+    connect(mUi->dpi, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
     std::string s = "Display " + std::to_string(mId);
     mUi->display_title->setText(s.c_str());
 
@@ -99,7 +98,7 @@ void MultiDisplayItem::onDisplayTypeChanged(int index) {
     emit changeDisplay(mId);
 }
 
-void MultiDisplayItem::onCustomParaChanged() {
+void MultiDisplayItem::onCustomParaChanged(double /*value*/) {
     uint32_t w, h, d;
     getValues(&w, &h, &d);
     if (EmulatorQtWindow::getInstance()->multiDisplayParamValidate(mId, w, h, d, 0)) {
@@ -146,11 +145,19 @@ void MultiDisplayItem::hideWidthHeightDpiBox(bool hide) {
 }
 
 void MultiDisplayItem::focusInEvent(QFocusEvent* event) {
-    mUi->selectDisplayType->setStyleSheet("border: 1px solid blue;");
+    QWidget::focusInEvent(event);
     mMultiDisplayPage->setArrangementHighLightDisplay(mId);
+    mUi->selectDisplayType->setProperty("ColorGroup", "focused");
+    style()->polish(mUi->selectDisplayType);
 }
 
 void MultiDisplayItem::focusOutEvent(QFocusEvent* event) {
-    mUi->selectDisplayType->setStyleSheet("border: none;");
+    QWidget::focusOutEvent(event);
     mMultiDisplayPage->setArrangementHighLightDisplay(-1);
+    mUi->selectDisplayType->setProperty("ColorGroup", "");
+    style()->polish(mUi->selectDisplayType);
+}
+
+void MultiDisplayItem::updateTheme() {
+    mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
 }
