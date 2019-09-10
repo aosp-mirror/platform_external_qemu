@@ -163,6 +163,7 @@ message DatasetInfo {
   optional DataStreamInfo accelerometer = 2;
   optional DataStreamInfo gyroscope = 3;
   optional DataStreamInfo magnetic_field = 4;
+  optional DataStreamInfo video_metadata = 5;
 }
 
 message DataStreamInfo {
@@ -170,6 +171,7 @@ message DataStreamInfo {
   oneof packet_info {
     SensorDataPacketInfo sensor_packet = 2;
     LocationDataPacketInfo location_packet = 3;
+    VideoMetadataPacketInfo video_metadata_packet = 4;
   }
 
 }
@@ -188,6 +190,11 @@ message LocationDataPacketInfo {
   optional FieldInfo knots_speed = 5;
   optional FieldInfo degrees_heading = 6;
   optional FieldInfo num_satellites = 7;
+}
+
+message VideoMetadataPacketInfo {
+    optional FieldInfo timestamp = 1;
+    optional FieldInfo frame_number = 2;
 }
 
 message FieldInfo {

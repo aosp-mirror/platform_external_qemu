@@ -20,6 +20,7 @@
 #include "android/automation/AutomationController.h"
 #include "android/automation/EventSource.h"
 #include "android/hw-sensors.h"
+#include "android/mp4/FieldDecodeInfo.h"
 #include "android/offworld/proto/offworld.pb.h"
 
 extern "C" {
@@ -33,11 +34,7 @@ typedef emulator_automation::RecordedEvent RecordedEvent;
 typedef emulator_automation::SensorOverrideEvent SensorOverrideEvent;
 typedef ::offworld::DatasetInfo DatasetInfo;
 typedef ::offworld::FieldInfo::Type Type;
-
-struct FieldDecodeInfo {
-    int offset = -1;
-    Type type = Type::FieldInfo_Type_UNDEF;
-};
+typedef automation::DurationNs DurationNs;
 
 struct SensorDecodeInfo {
     int streamIndex = -1;
@@ -67,9 +64,12 @@ public:
     };
     virtual ~SensorLocationEventProviderImpl(){};
     int init(const DatasetInfo& datasetInfo);
+    void start() override { mStarted = true; }
+    void stop() override { mStarted = false; }
+    void startFromTimestamp(uint64_t startTimestamp) override;
     int createEvent(const AVPacket* packet) override;
     RecordedEvent consumeNextCommand() override;
-    bool getNextCommandDelay(automation::DurationNs* outDelay) override;
+    bool getNextCommandDelay(DurationNs* outDelay) override;
 
 private:
     int createSensorEvent(AndroidSensor sensor, uint8_t* data);
@@ -81,6 +81,7 @@ private:
     std::unique_ptr<RecordedEventQueue> mEventQueue;
     uint64_t mPreviousTimestamp = 0;
     SensorDecodeInfo mSensorDecodeInfo[MAX_SENSORS];
+    bool mStarted = false;
 };
 
 std::shared_ptr<SensorLocationEventProvider>
@@ -157,6 +158,12 @@ int SensorLocationEventProviderImpl::init(const DatasetInfo& datasetInfo) {
     }
 
     return 0;
+}
+
+void SensorLocationEventProviderImpl::startFromTimestamp(
+        uint64_t startTimestamp) {
+    mPreviousTimestamp = startTimestamp;
+    mStarted = true;
 }
 
 int SensorLocationEventProviderImpl::createEvent(const AVPacket* packet) {
@@ -284,20 +291,24 @@ RecordedEvent SensorLocationEventProviderImpl::consumeNextCommand() {
 }
 
 bool SensorLocationEventProviderImpl::getNextCommandDelay(
-        automation::DurationNs* outDelay) {
-    if (mEventQueue->size() == 0) {
+        DurationNs* outDelay) {
+    if (!mStarted || mEventQueue->size() == 0) {
         return false;
     }
 
-    automation::DurationNs delay = 0;
-    if (mPreviousTimestamp == 0) {
-        mPreviousTimestamp = mEventQueue->top().delay();
-    } else {
-        auto currentTimeStamp = mEventQueue->top().delay();
-        delay = currentTimeStamp - mPreviousTimestamp;
-        mPreviousTimestamp = currentTimeStamp;
+    // In the case where a starting timestamp is set to later than
+    // mPreviousTimestamp, drop all events that are supposed to happen prior to
+    // that
+    while (mEventQueue->top().delay() < mPreviousTimestamp) {
+        mEventQueue->pop();
+        if (mEventQueue->size() == 0) {
+            return false;
+        }
     }
-    *outDelay = delay;
+
+    auto currentTimestamp = mEventQueue->top().delay();
+    *outDelay = currentTimestamp - mPreviousTimestamp;
+    mPreviousTimestamp = currentTimestamp;
     return true;
 }
 
