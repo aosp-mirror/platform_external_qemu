@@ -2680,8 +2680,17 @@ int FrameBuffer::setDisplayColorBufferLocked(uint32_t displayId, uint32_t colorB
 
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
     DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
-    AutoLock mutex(m_lock);
-    return setDisplayColorBufferLocked(displayId, colorBuffer);
+    int ret, width, height;
+    {
+        AutoLock mutex(m_lock);
+        ret = setDisplayColorBufferLocked(displayId, colorBuffer);
+        getCombinedDisplaySize(&width, &height);
+    }
+    // Explicitly adjust host window size when color buffer is binded to
+    // display.
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width,
+                                                            height);
+    return ret;
 }
 
 int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
@@ -2726,8 +2735,6 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
                                 uint32_t w,
                                 uint32_t h,
                                 uint32_t dpi) {
-    int width, height;
-
     {
         AutoLock mutex(m_lock);
         if (m_displays.find(displayId) == m_displays.end()) {
@@ -2742,12 +2749,10 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
             m_displays[displayId].pos_x = x;
             m_displays[displayId].pos_y = y;
         }
-        getCombinedDisplaySize(&width, &height);
+        int height;
+        getCombinedDisplaySize(nullptr, &height);
         setDisplayPoseInSkinUI(height);
     }
-
-    // unlock before calling setUIDisplayRegion
-    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
 }
 
@@ -2799,8 +2804,10 @@ void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
     for (const auto& iter : m_displays) {
-        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
-        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+        if (iter.first == 0 || iter.second.cb != 0) {
+            total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+            total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+        }
     }
     if (h)
         *h = (int)total_h;
