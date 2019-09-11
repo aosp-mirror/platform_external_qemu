@@ -48,7 +48,6 @@ static void handleNativeKeyEvent(int keycode,
     if (modifiers & NSEventModifierFlagOption) {
         textInputData.mod |= kKeyModRAlt;
     }
-
     if (modifiers & NSEventModifierFlagCapsLock) {
         textInputData.mod |= kKeyModCapsLock;
     }
