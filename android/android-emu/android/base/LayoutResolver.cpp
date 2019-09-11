@@ -108,7 +108,7 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
 
     std::stable_sort(
             rectangles.begin(), rectangles.end(),
-            [](const Rect& a, const Rect& b) { return a.width < b.width; });
+            [](const Rect& a, const Rect& b) { return a.width < b.width || (a.width == b.width && a.id > b.id); });
 
     for (int i = 0; i < rectangles.size(); i++) {
         for (int j = i + 1; j < rectangles.size(); j++) {

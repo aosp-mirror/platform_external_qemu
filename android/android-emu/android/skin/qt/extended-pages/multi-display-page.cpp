@@ -190,7 +190,7 @@ void MultiDisplayPage::recomputeLayout() {
         }
     }
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> offsets =
-        std::move(android::base::resolveLayout(rectangles, m_monitorAspectRatio));
+        android::base::resolveLayout(rectangles, m_monitorAspectRatio);
     mUi->multiDisplayArrangement->setLayout(rectangles, offsets, names);
 }
 
