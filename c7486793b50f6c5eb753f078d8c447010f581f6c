@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c590aae8_184dd7fc",
+        "filename": "android/android-emu/android/emulation/MultiDisplayPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-09-11T05:42:49Z",
+      "side": 1,
+      "message": "I will move this code to FrameBuffer.cpp",
+      "parentUuid": "6988e059_ff2f87d0",
+      "revId": "c7486793b50f6c5eb753f078d8c447010f581f6c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ef65313d_0f0234b9",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2019-09-10T23:49:50Z",
       "side": 1,
       "message": "Remove?",
+      "revId": "c7486793b50f6c5eb753f078d8c447010f581f6c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c2e632d_88ab0267",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2729,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-09-11T05:42:49Z",
+      "side": 1,
+      "message": "good call.",
+      "parentUuid": "ef65313d_0f0234b9",
       "revId": "c7486793b50f6c5eb753f078d8c447010f581f6c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
