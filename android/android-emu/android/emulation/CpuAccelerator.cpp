@@ -137,28 +137,6 @@ GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
                         {}};
 
 
-// Windows GVM hypervisor support
-
-#ifdef HAVE_GVM
-
-#include "android/base/system/System.h"
-
-using ::android::base::System;
-
-AndroidCpuAcceleration ProbeGVM(std::string* status) {
-    std::string IfGvm = System::get()->envGet("GVM_ENABLE");
-    if (IfGvm.compare("1"))
-        return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
-    StringAppendFormat(
-            status, "GVM is installed and usable.");
-    GlobalState* g = &gGlobals;
-    ::snprintf(g->version, sizeof(g->version), "1.0");
-    return ANDROID_CPU_ACCELERATION_READY;
-}
-
-#endif // HAVE_GVM
-
-
 // Windows Hypervisor Platform (WHPX) support
 
 #if HAVE_WHPX
@@ -926,6 +904,147 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
 
 #endif  // HAVE_HAX
 
+// Windows GVM hypervisor support
+
+#ifdef HAVE_GVM
+
+#include "android/base/system/System.h"
+
+using ::android::base::System;
+
+// Windows IOCTL code to extract GVM version.
+#define FILE_DEVICE_GVM 0xE3E3
+#define GVM_GET_API_VERSION       \
+    CTL_CODE(FILE_DEVICE_GVM, 0x00, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+/*
+ * ProbeGVMCpu: returns ANDROID_CPU_ACCELERATION_READY if the CPU supports
+ * GVM requirements.
+ *
+ * Otherwise returns some other AndroidCpuAcceleration status and sets
+ * |status| to a user-understandable error string
+ */
+AndroidCpuAcceleration ProbeGVMCpu(std::string* status) {
+    char vendor_id[16];
+    android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+
+    // By default, GVM is only enabled for AMD platform, however, a switch
+    // is provided for testing purpose.
+    std::string IfGvmIntel = System::get()->envGet("GVM_ENABLE_INTEL");
+    int gvm_intel = !IfGvmIntel.compare("1");
+
+    if (android_get_x86_cpuid_vendor_id_type(vendor_id) != VENDOR_ID_AMD &&
+        (!gvm_intel || android_get_x86_cpuid_vendor_id_type(vendor_id) != VENDOR_ID_INTEL)) {
+        StringAppendFormat(status,
+                           "Android Emulator requires an %s processor with "
+                           "virtualization extension support.  Your CPU: '%s'",
+                           gvm_intel ? "Intel/AMD": "AMD",
+                           vendor_id);
+        return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+    }
+
+    if (android_get_x86_cpuid_is_vcpu()) {
+        // Try asking the hypervisor directly.
+        char hv_vendor_id[16] = {};
+        android_get_x86_cpuid_vmhost_vendor_id(hv_vendor_id,
+                                               sizeof(hv_vendor_id));
+        auto vmhost = android_get_x86_cpuid_vendor_vmhost_type(hv_vendor_id);
+        if (vmhost == VENDOR_VM_HYPERV) {
+            // Last part: check if this is the host or guest Hyper-V system.
+            auto hvStatus = GetHyperVStatus();
+            if (hvStatus.first == ANDROID_HYPERV_RUNNING) {
+                // Host
+                status->assign("Please disable Hyper-V before using the Android Emulator.  "
+                               "Start a command prompt as Administrator, run 'bcdedit /set "
+                               "hypervisorlaunchtype off', reboot.");
+#if HAVE_WHPX
+                if (isOkToTryWHPX()) {
+                    status->assign("Hyper-V detected and Windows Hypervisor Platform is available. "
+                                   "Please ensure that you are running Windows 10 April 2018 release or later "
+                                   "with both the \"Hyper-V\" and \"Windows Hypervisor Platform\" "
+                                   "features enabled in \"Turn Windows features on or off\".");
+                    return ANDROID_CPU_ACCELERATION_READY;
+                } else {
+                    return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
+                }
+#else
+                return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
+#endif
+            }
+        }
+    }
+
+    if (!android_get_x86_cpuid_svm_support() &&
+        (!gvm_intel || !android_get_x86_cpuid_vmx_support())) {
+        status->assign(
+            "Android Emulator requires an %s processor with virtualization extension support.  "
+            "(Virtualization extension is not supported)", gvm_intel ? "Intel/AMD" : "AMD");
+        return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+    }
+
+    return ANDROID_CPU_ACCELERATION_READY;
+}
+
+AndroidCpuAcceleration ProbeGVM(std::string* status) {
+    status->clear();
+
+    AndroidCpuAcceleration cpu = ProbeGVMCpu(status);
+    if (cpu != ANDROID_CPU_ACCELERATION_READY)
+        return cpu;
+
+    ScopedFileHandle gvm(CreateFile("\\\\.\\gvm",
+                                    GENERIC_READ | GENERIC_WRITE,
+                                    0,
+                                    NULL,
+                                    CREATE_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL,
+                                    NULL));
+    if (!gvm.valid()) {
+        DWORD err = GetLastError();
+        if (err == ERROR_FILE_NOT_FOUND) {
+            status->assign(
+                "GVM is not installed on this machine");
+            return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
+        } else if (err == ERROR_ACCESS_DENIED) {
+            status->assign(
+                "Unable to open GVM device: ERROR_ACCESS_DENIED");
+            return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
+        }
+        StringAppendFormat(status,
+                           "Opening GVM kernel module failed: %u",
+                           err);
+        return ANDROID_CPU_ACCELERATION_DEV_OPEN_FAILED;
+    }
+
+    int version;
+
+    DWORD dSize = 0;
+    BOOL ret = DeviceIoControl(gvm.get(),
+                               GVM_GET_API_VERSION,
+                               NULL, 0,
+                               &version, sizeof(version),
+                               &dSize,
+                               (LPOVERLAPPED) NULL);
+    if (!ret) {
+        DWORD err = GetLastError();
+        StringAppendFormat(status,
+                            "Could not extract GVM version: %u",
+                            err);
+        return ANDROID_CPU_ACCELERATION_DEV_IOCTL_FAILED;
+    }
+
+    // Profit!
+    StringAppendFormat(status,
+                       "GVM (version %d) is installed and usable.",
+                       version);
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "%d", version);
+    return ANDROID_CPU_ACCELERATION_READY;
+}
+
+#endif // HAVE_GVM
+
+
 }  // namespace
 
 CpuAccelerator GetCurrentCpuAccelerator() {
@@ -962,12 +1081,25 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->accel = CPU_ACCELERATOR_HAX;
         g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
+#if HAVE_GVM
+    char cpu_vendor[16];
+    android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
+    std::string statusGvm;
+    AndroidCpuAcceleration status_code_gvm = ProbeGVM(&statusGvm);
+    if (status_code_gvm == ANDROID_CPU_ACCELERATION_READY) {
+        g->accel = CPU_ACCELERATOR_GVM;
+        g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
+        status_code = status_code_gvm;
+        status = std::move(statusGvm);
+    } else if (android_get_x86_cpuid_vendor_id_type(cpu_vendor) == VENDOR_ID_AMD) {
+        // For AMD, let us return error message from GVM
+        status_code = status_code_gvm;
+        status = std::move(statusGvm);
+    }
+#endif
 #if HAVE_WHPX
     // WHPX feature enablement:
     // - Flag needs to be on
-    // - CPU vendor must be Intel
-    char cpu_vendor[16];
-    android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
     if (isOkToTryWHPX()) {
         // WHPX will supersede HAX, if available.
         std::string statusWHPX;
@@ -998,16 +1130,6 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 
     }
 #endif // HAVE_WHPX
-#if HAVE_GVM
-    std::string statusGvm;
-    AndroidCpuAcceleration status_code_gvm = ProbeGVM(&statusGvm);
-    if (status_code_gvm == ANDROID_CPU_ACCELERATION_READY) {
-        g->accel = CPU_ACCELERATOR_GVM;
-        g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
-        status_code = status_code_gvm;
-        status = std::move(statusGvm);
-    }
-#endif
 #if HAVE_HVF
     if (featurecontrol::isEnabled(featurecontrol::HVF)) {
         std::string statusHvf;
