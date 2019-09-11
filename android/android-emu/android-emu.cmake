@@ -124,6 +124,8 @@ set(android-emu-common
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
+    android/location/MapsKey.cpp
+    android/location/MapsKeyFileParser.cpp
     android/location/Point.cpp
     android/location/Route.cpp
     android/main-help.cpp
@@ -699,6 +701,8 @@ set(android-emu_unittests_src
     android/gps/KmlParser_unittest.cpp
     android/hw-lcd_unittest.cpp
     android/kernel/kernel_utils_unittest.cpp
+    android/location/MapsKey_unittest.cpp
+    android/location/MapsKeyFileParser_unittest.cpp
     android/location/Point_unittest.cpp
     android/location/Route_unittest.cpp
     android/network/control_unittest.cpp

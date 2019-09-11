@@ -1758,6 +1758,16 @@ help_multidisplay(stralloc_t* out)
     );
 }
 
+static void
+help_google_maps_key(stralloc_t* out)
+{
+    PRINTF(
+    "  User-provided API key to use with the Google maps GUI."
+    "  -multidisplay <your_key>\n"
+    "  Note that providing this key will override the one provided by Android Studio.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
