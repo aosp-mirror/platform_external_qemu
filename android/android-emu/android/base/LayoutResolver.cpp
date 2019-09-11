@@ -181,12 +181,12 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
 
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
     uint32_t yOffset = 0;
-    auto&& resFirstRow = computeCoordinatesPerRow(firstRow, yOffset, rect);
+    auto resFirstRow = computeCoordinatesPerRow(firstRow, yOffset, rect);
     retVal.insert(resFirstRow.begin(), resFirstRow.end());
     uint32_t firstRowHeight = (firstRow.empty() ? 0 : firstRow[0].height);
 
     yOffset = firstRowHeight;
-    auto&& resSecRow = computeCoordinatesPerRow(secondRow, yOffset, rect);
+    auto resSecRow = computeCoordinatesPerRow(secondRow, yOffset, rect);
     retVal.insert(resSecRow.begin(), resSecRow.end());
 
     return retVal;
