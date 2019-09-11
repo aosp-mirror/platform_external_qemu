@@ -1215,6 +1215,7 @@ static int gvm_init(MachineState *ms)
         gvm_user_backed_ram_map,
         gvm_user_backed_ram_unmap);
 
+    printf("GVM is operational\n");
 
     return 0;
 
