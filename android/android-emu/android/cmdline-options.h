@@ -240,6 +240,9 @@ OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrt
 
 OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")
 
+OPT_PARAM(google_maps_key, "<API key>", "API key to use with the Google Maps GUI.")
+
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

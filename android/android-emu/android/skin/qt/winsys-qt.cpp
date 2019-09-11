@@ -32,7 +32,10 @@
 #include "android/skin/resource.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/multi_display_agent.h"
+#include "android/location/MapsKey.h"
+#include "android/location/MapsKeyFileParser.h"
 #include "android/utils/setenv.h"
 
 #include <QtCore>
@@ -734,6 +737,24 @@ extern int skin_winsys_snapshot_control_start() {
     return g->app->exec();
 }
 
+static void initGoogleMapKeys(bool no_window) {
+    auto mapsKeyHolder = android::location::MapsKey::get();
+
+    if (!no_window) {
+        std::string mapsKeyFile = android::ConfigDirs::getSdkRootDirectory();
+        mapsKeyFile += PATH_SEP "extras"
+                       PATH_SEP "google"
+                       PATH_SEP "Emulator_Extras"
+                       PATH_SEP "maps.key";
+        auto mapsKey = android::location::parseMapsKeyFromFile(mapsKeyFile);
+        mapsKeyHolder->setAndroidStudioMapsKey(mapsKey);
+    }
+
+    if (android_cmdLineOptions && android_cmdLineOptions->google_maps_key) {
+        mapsKeyHolder->setUserMapsKey(android_cmdLineOptions->google_maps_key);
+    }
+}
+
 extern void skin_winsys_start(bool no_window) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
@@ -745,6 +766,7 @@ extern void skin_winsys_start(bool no_window) {
     skin_winsys_setup_library_paths();
 
     qInstallMessageHandler(myMessageOutput);
+    initGoogleMapKeys(no_window);
     if (no_window) {
         g->app = nullptr;
         EmulatorNoQtNoWindow::create();
