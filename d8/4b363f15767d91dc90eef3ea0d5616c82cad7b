@@ -1,0 +1,9 @@
+Code-Review+2: Huan Song <huans@google.com>
+Verified+1: Huan Song <huans@google.com>
+Autosubmit+1: Huan Song <huans@google.com>
+Presubmit-Ready+1: Huan Song <huans@google.com>
+Submitted-by: Huan Song <huans@google.com>
+Submitted-at: Wed, 11 Sep 2019 18:14:33 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1118672
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
