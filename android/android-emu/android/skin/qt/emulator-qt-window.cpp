@@ -1397,13 +1397,6 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
         CrashReporter::get()->attachData(
                 "qemu-main-loop-args.txt", arguments);
 
-        if (arguments.find("-loadvm") != std::string::npos) {
-            printf("found -loadvm\n");
-        }
-        if (arguments.find("-mem-path") != std::string::npos) {
-            printf("found -mem-path\n");
-        }
-
         mMainLoopThread = new MainLoopThread(f, argc, argv);
         QObject::connect(mMainLoopThread, &QThread::finished, &mContainer,
                          &EmulatorContainer::close);
@@ -2791,8 +2784,6 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
     }
 }
 
-bool EmulatorQtWindow::sMultiDisplaySet = false;
-
 void EmulatorQtWindow::setUIMultiDisplay(uint32_t id,
                                        int32_t x,
                                        int32_t y,
@@ -2812,18 +2803,15 @@ void EmulatorQtWindow::setUIMultiDisplay(uint32_t id,
             mMultiDisplay[id].width = w;
             mMultiDisplay[id].height = h;
             mMultiDisplay[id].dpi = dpi;
-            if (!sMultiDisplaySet && countEnabledMultiDisplayLocked() == 1) {
-                sMultiDisplaySet = true;
+            if (countEnabledMultiDisplayLocked() > 0) {
                 runOnUiThread([this] {
                     mToolWindow->hideRotationButton(true);
                     setFrameAlways(true);
                 });
             }
-        } else if (sMultiDisplaySet && countEnabledMultiDisplayLocked() == 0) {
-            sMultiDisplaySet = false;
+        } else if (countEnabledMultiDisplayLocked() == 0) {
             runOnUiThread([this] {
                 mToolWindow->hideRotationButton(false);
-                setFrameAlways(true);
             });
         }
     }

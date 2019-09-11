@@ -2633,9 +2633,6 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
         while (m_displays.find(s_nextDisplayId++) != m_displays.end()) { }
         *displayId = s_nextDisplayId - 1;
     }
-    if (m_displays.size() == 1) {
-        emugl::get_emugl_window_operations().setNoSkin();
-    }
     m_displays.emplace(*displayId, DisplayInfo());
     DBG("create display %d\n", *displayId);
     return 0;
@@ -2643,6 +2640,7 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
 
 int FrameBuffer::destroyDisplay(uint32_t displayId) {
     int width, height;
+    bool needUIUpdate = ((m_displays[displayId].cb != 0) ? true : false);
     {
         AutoLock mutex(m_lock);
         if (m_displays.find(displayId) == m_displays.end()) {
@@ -2651,14 +2649,14 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
         m_displays.erase(displayId);
         emugl::get_emugl_window_operations().setUIMultiDisplay(displayId, 0, 0, 0,
                                                              0, false, 0);
-        if (m_displays[displayId].cb != 0) {
+        if (needUIUpdate) {
             recomputeLayout();
             getCombinedDisplaySize(&width, &height);
             setDisplayPoseInSkinUI(height);
         }
     }
     // unlock before calling setUIDisplayRegion
-    if (m_displays[displayId].cb != 0) {
+    if (needUIUpdate) {
         emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     }
     Post postCmd;
@@ -2685,9 +2683,14 @@ int FrameBuffer::setDisplayColorBufferLocked(uint32_t displayId, uint32_t colorB
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
     DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
     int ret, width, height;
+    static bool noSkinSet = false;
     {
         AutoLock mutex(m_lock);
         ret = setDisplayColorBufferLocked(displayId, colorBuffer);
+        if (!noSkinSet) {
+            emugl::get_emugl_window_operations().setNoSkin();
+            noSkinSet = true;
+        }
         recomputeLayout();
         getCombinedDisplaySize(&width, &height);
         setDisplayPoseInSkinUI(height);
