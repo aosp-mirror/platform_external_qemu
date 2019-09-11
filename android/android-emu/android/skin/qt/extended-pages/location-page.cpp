@@ -29,6 +29,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/utils/path.h"
 
 #include <QFileDialog>
 #include <QItemDelegate>
@@ -39,6 +40,8 @@
 #endif
 
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <utility>
 #ifndef _MSC_VER
@@ -107,6 +110,29 @@ static void updateThreadLoop() {
     }
 }
 
+std::string LocationPage::parseKey(const std::string& keyfile) {
+    std::ifstream fin;
+    std::string apikey;
+
+    fin.open(keyfile, std::ifstream::in);
+    if (!fin.good()) {
+        return std::string();
+    }
+
+    for (;;) {
+        int hexval;
+        std::string str;
+        fin >> str;
+        if (str.empty()) {
+            break;
+        }
+        std::istringstream(str) >> std::hex >> hexval;
+        apikey.push_back((char)hexval);
+    }
+
+    return apikey;
+}
+
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::LocationPage)
@@ -120,15 +146,12 @@ LocationPage::LocationPage(QWidget *parent) :
     if (feature_is_enabled(kFeature_LocationUiV2)) {
         // Get the Maps API key from 'maps.key' (nominally in ~/.android/)
         QString mapsKeyPath = QString::fromStdString(android::ConfigDirs::getUserDirectory());
-        mapsKeyPath += "/maps.key"; // QFile is OK with '/' even on Windows
-        QFile mapsKeyFile(mapsKeyPath);
-        if (mapsKeyFile.open(QFile::ReadOnly | QFile::Text)) {
-            QByteArray theKey = mapsKeyFile.readLine().trimmed();
-            if (!theKey.isEmpty()) {
-                // There is a non-empty key
-                mMapsApiKey = theKey;
-                useLocationV2 = true;
-            }
+        mapsKeyPath += QString(PATH_SEP) + "maps.key";
+        mMapsApiKey = QString(parseKey(mapsKeyPath.toStdString()).c_str());
+        if (!mMapsApiKey.isEmpty()) {
+            // There is a non-empty key
+            qDebug() << "Defaulting to offline Location page";
+            useLocationV2 = true;
         }
     }
 #endif

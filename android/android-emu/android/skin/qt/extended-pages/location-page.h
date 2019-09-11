@@ -95,6 +95,7 @@ public:
 
     static void setLocationAgent(const QAndroidLocationAgent* agent);
     static void shutDown();
+    static std::string parseKey(const std::string& keyfile);
 
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
