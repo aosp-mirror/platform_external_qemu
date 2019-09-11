@@ -35,34 +35,88 @@
 
 #elif defined(__linux__)
 
+#include <X11/XKBlib.h>
 #include <xcb/xcb.h>
 
-static void handleNativeKeyEvent(int keycode,
-                                 int modifiers,
-                                 SkinEventType eventType) {
-    D("Raw keycode %d modifiers 0x%x", keycode, modifiers);
-
-    if (!skin_keycode_native_to_linux(&keycode, &modifiers)) {
-        return;
+class NativeEventFilter : public QAbstractNativeEventFilter {
+public:
+    NativeEventFilter()
+        : mNumLockMask(XCB_MOD_MASK_2), mAltMask(XCB_MOD_MASK_1) {
+        // NumLock and Alt modifier are mapped different MOD_MASK1 - MOD_MASK5
+        // depending on system configurations. We should use virtual modifier to
+        // to find which real modifier it is mapped to.
+        Display* display = XOpenDisplay(NULL);
+        XkbDescPtr xkb =
+                XkbGetKeyboard(display, XkbAllComponentsMask, XkbUseCoreKbd);
+        for (int i = 0; i < XkbNumVirtualMods; i++) {
+            char* name = NULL;
+            unsigned int realMod = 0;
+            if (xkb->names->vmods[i]) {
+                name = XGetAtomName(display, xkb->names->vmods[i]);
+                if (!strcmp(name, "NumLock")) {
+                    XkbVirtualModsToReal(xkb, 1 << i, &realMod);
+                    mNumLockMask = realMod;
+                } else if (!strcmp(name, "Alt")) {
+                    XkbVirtualModsToReal(xkb, 1 << i, &realMod);
+                    mAltMask = realMod;
+                }
+            }
+        }
+        XkbFreeKeyboard(xkb, XkbAllComponentsMask, true);
+        XCloseDisplay(display);
     }
 
-    // X11 modifier state doesn't tell whether left alt or
-    // right alt has been pressed. However, unlike Windows or MacOS,
-    // modifier key press is reported as a separate event.
-    // Thus, we can directly forward the modifier key to Android system.
-    SkinEvent* skin_event = nullptr;
-    if (skin_keycode_is_modifier(keycode)) {
-        skin_event =
-                EmulatorQtWindow::getInstance()->createSkinEvent(eventType);
-        skin_event->u.key.keycode = keycode;
-        skin_event->u.key.mod = 0;
-    } else if (eventType == kEventKeyDown) {
-        skin_event = EmulatorQtWindow::getInstance()->createSkinEvent(
-                kEventTextInput);
+    bool nativeEventFilter(const QByteArray& eventType,
+                           void* message,
+                           long*) override {
+        if (eventType.compare("xcb_generic_event_t") == 0) {
+            xcb_generic_event_t* ev =
+                    static_cast<xcb_generic_event_t*>(message);
+            int evType = (ev->response_type & ~0x80);
+            if (evType == XCB_KEY_PRESS) {
+                xcb_key_press_event_t* keyEv = (xcb_key_press_event_t*)ev;
+                // Bug: 135141621 our own customized QT framework doesn't
+                // handle num lock well. Thus, we translate keypad keycode
+                // when num lock is on.
+                if ((keyEv->state & mNumLockMask) &&
+                    skin_keycode_native_is_keypad(keyEv->detail)) {
+                    keyEv->detail =
+                            skin_keycode_native_map_keypad(keyEv->detail);
+                }
+                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                    handleNativeKeyEvent(keyEv->detail, keyEv->state,
+                                         kEventKeyDown);
+                }
+            }
+        }
+        return false;
+    }
+
+    void handleNativeKeyEvent(int keycode,
+                              int modifiers,
+                              SkinEventType eventType) {
+        D("Raw keycode %d modifiers 0x%x", keycode, modifiers);
+
+        if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
+            skin_keycode_is_modifier(keycode)) {
+            return;
+        }
+
+        SkinEvent* skin_event =
+                EmulatorQtWindow::getInstance()->createSkinEvent(
+                        kEventTextInput);
         SkinEventTextInputData& textInputData = skin_event->u.text;
-        textInputData.down = true;
         textInputData.keycode = keycode;
         textInputData.mod = 0;
+        if (modifiers & XCB_MOD_MASK_CONTROL) {
+            textInputData.mod |= kKeyModLCtrl;
+        }
+        if (modifiers & XCB_MOD_MASK_SHIFT) {
+            textInputData.mod |= kKeyModLShift;
+        }
+        if (modifiers & mAltMask) {
+            textInputData.mod |= kKeyModRAlt;
+        }
         if (modifiers & XCB_MOD_MASK_LOCK) {
             textInputData.mod |= kKeyModCapsLock;
         }
@@ -72,93 +126,23 @@ static void handleNativeKeyEvent(int keycode,
         // case, substitute caps lock with shift. We simulate "Caps Lock" key
         // using "Shift" when "Alt" key is not pressed.
         if ((modifiers & XCB_MOD_MASK_LOCK) && skin_keycode_is_alpha(keycode) &&
-            !(modifiers & XCB_MOD_MASK_1)) {
+            !(modifiers & mAltMask)) {
             textInputData.mod |= kKeyModLShift;
         }
-    }
-    if (skin_event) {
+
         D("Processed keycode %d modifiers 0x%x", keycode,
           skin_event->u.text.mod);
         EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event);
     }
-}
 
-class NativeEventFilter : public QAbstractNativeEventFilter {
-public:
-    bool nativeEventFilter(const QByteArray& eventType,
-                           void* message,
-                           long*) override {
-        if (eventType.compare("xcb_generic_event_t") == 0) {
-            xcb_generic_event_t* ev =
-                    static_cast<xcb_generic_event_t*>(message);
-            int evType = (ev->response_type & ~0x80);
-            if (evType == XCB_KEY_PRESS || evType == XCB_KEY_RELEASE) {
-                xcb_key_press_event_t* keyEv = (xcb_key_press_event_t*)ev;
-                // Bug: 135141621 our own customized QT framework doesn't
-                // handle num lock well. Thus, we translate keypad keycode
-                // when num lock is on.
-                if ((keyEv->state & XCB_MOD_MASK_2) &&
-                    skin_keycode_native_is_keypad(keyEv->detail)) {
-                    keyEv->detail =
-                            skin_keycode_native_map_keypad(keyEv->detail);
-                }
-                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                    handleNativeKeyEvent(keyEv->detail, keyEv->state,
-                                         evType == XCB_KEY_PRESS ? kEventKeyDown
-                                                                 : kEventKeyUp);
-                }
-            }
-        }
-        return false;
-    }
+private:
+    unsigned int mNumLockMask;
+    unsigned int mAltMask;
 };
 
 #else  // windows
 
 #include <windows.h>
-
-static void handleNativeKeyEvent(int keycode,
-                                 int modifiers,
-                                 SkinEventType eventType) {
-    D("Raw keycode %d modifiers 0x%x", keycode, modifiers);
-
-    // Do no send modifier by itself.
-    if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
-        skin_keycode_is_modifier(keycode)) {
-        return;
-    }
-
-    SkinEvent* skin_event =
-            EmulatorQtWindow::getInstance()->createSkinEvent(kEventTextInput);
-    SkinEventTextInputData& textInputData = skin_event->u.text;
-    textInputData.down = true;
-
-    textInputData.keycode = keycode;
-    textInputData.mod = 0;
-    if (HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0) {
-        textInputData.mod |= kKeyModLCtrl;
-    }
-    if (HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0 || (modifiers & MOD_SHIFT)) {
-        textInputData.mod |= kKeyModLShift;
-    }
-    if (HIWORD(GetAsyncKeyState(VK_MENU)) != 0) {
-        textInputData.mod |= kKeyModRAlt;
-    }
-    if (LOWORD(GetKeyState(VK_CAPITAL)) != 0) {
-        textInputData.mod |= kKeyModCapsLock;
-    }
-    // TODO (wdu@) Use a guest feature flag to determine if the workaround
-    // below needs to run.
-    // Applicable to system images where caps locks is not accepted, in whic
-    // case, substitute caps lock with shift. We simulate "Caps Lock" key
-    // using "Shift" when "Alt" key is not pressed.
-    if (LOWORD(GetKeyState(VK_CAPITAL)) != 0 &&
-        skin_keycode_is_alpha(keycode) && !(textInputData.mod & kKeyModRAlt)) {
-        textInputData.mod |= kKeyModLShift;
-    }
-    D("Processed keycode %d modifiers 0x%x", keycode, textInputData.mod);
-    EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event);
-}
 
 class NativeEventFilter : public QAbstractNativeEventFilter {
 public:
@@ -178,6 +162,50 @@ public:
             }
         }
         return false;
+    }
+
+    void handleNativeKeyEvent(int keycode,
+                              int modifiers,
+                              SkinEventType eventType) {
+        D("Raw keycode %d modifiers 0x%x", keycode, modifiers);
+
+        // Do no send modifier by itself.
+        if (!skin_keycode_native_to_linux(&keycode, &modifiers) ||
+            skin_keycode_is_modifier(keycode)) {
+            return;
+        }
+
+        SkinEvent* skin_event =
+                EmulatorQtWindow::getInstance()->createSkinEvent(
+                        kEventTextInput);
+        SkinEventTextInputData& textInputData = skin_event->u.text;
+        textInputData.keycode = keycode;
+        textInputData.mod = 0;
+        if (HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0) {
+            textInputData.mod |= kKeyModLCtrl;
+        }
+        if (HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0 ||
+            (modifiers & MOD_SHIFT)) {
+            textInputData.mod |= kKeyModLShift;
+        }
+        if (HIWORD(GetAsyncKeyState(VK_MENU)) != 0) {
+            textInputData.mod |= kKeyModRAlt;
+        }
+        if (LOWORD(GetKeyState(VK_CAPITAL)) != 0) {
+            textInputData.mod |= kKeyModCapsLock;
+        }
+        // TODO (wdu@) Use a guest feature flag to determine if the workaround
+        // below needs to run.
+        // Applicable to system images where caps locks is not accepted, in whic
+        // case, substitute caps lock with shift. We simulate "Caps Lock" key
+        // using "Shift" when "Alt" key is not pressed.
+        if (LOWORD(GetKeyState(VK_CAPITAL)) != 0 &&
+            skin_keycode_is_alpha(keycode) &&
+            !(textInputData.mod & kKeyModRAlt)) {
+            textInputData.mod |= kKeyModLShift;
+        }
+        D("Processed keycode %d modifiers 0x%x", keycode, textInputData.mod);
+        EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event);
     }
 };
 
