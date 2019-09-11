@@ -51,6 +51,24 @@
       "revId": "e094b49573bac5eb519a3c8e323b76d0ab9187ea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69cfd9f5_b03065d9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2807,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-09-11T14:55:40Z",
+      "side": 1,
+      "message": "We can\u0027t rely on x + width to compute the total width.",
+      "parentUuid": "2e0e4a22_6b170c51",
+      "revId": "e094b49573bac5eb519a3c8e323b76d0ab9187ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
