@@ -2643,6 +2643,7 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
 
 int FrameBuffer::destroyDisplay(uint32_t displayId) {
     int width, height;
+    bool needUIUpdate = ((m_displays[displayId].cb != 0) ? true : false);
     {
         AutoLock mutex(m_lock);
         if (m_displays.find(displayId) == m_displays.end()) {
@@ -2651,14 +2652,14 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
         m_displays.erase(displayId);
         emugl::get_emugl_window_operations().setUIMultiDisplay(displayId, 0, 0, 0,
                                                              0, false, 0);
-        if (m_displays[displayId].cb != 0) {
+        if (needUIUpdate) {
             recomputeLayout();
             getCombinedDisplaySize(&width, &height);
             setDisplayPoseInSkinUI(height);
         }
     }
     // unlock before calling setUIDisplayRegion
-    if (m_displays[displayId].cb != 0) {
+    if (needUIUpdate) {
         emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     }
     Post postCmd;
