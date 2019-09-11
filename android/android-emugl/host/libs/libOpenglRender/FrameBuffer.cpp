@@ -2651,12 +2651,16 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
         m_displays.erase(displayId);
         emugl::get_emugl_window_operations().setUIMultiDisplay(displayId, 0, 0, 0,
                                                              0, false, 0);
-        recomputeLayout();
-        getCombinedDisplaySize(&width, &height);
-        setDisplayPoseInSkinUI(height);
+        if (m_displays[displayId].cb != 0) {
+            recomputeLayout();
+            getCombinedDisplaySize(&width, &height);
+            setDisplayPoseInSkinUI(height);
+        }
     }
     // unlock before calling setUIDisplayRegion
-    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+    if (m_displays[displayId].cb != 0) {
+        emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+    }
     Post postCmd;
     postCmd.cmd = PostCmd::Clear;
     sendPostWorkerCmd(postCmd);
@@ -2680,8 +2684,19 @@ int FrameBuffer::setDisplayColorBufferLocked(uint32_t displayId, uint32_t colorB
 
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
     DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
-    AutoLock mutex(m_lock);
-    return setDisplayColorBufferLocked(displayId, colorBuffer);
+    int ret, width, height;
+    {
+        AutoLock mutex(m_lock);
+        ret = setDisplayColorBufferLocked(displayId, colorBuffer);
+        recomputeLayout();
+        getCombinedDisplaySize(&width, &height);
+        setDisplayPoseInSkinUI(height);
+    }
+    // Explicitly adjust host window size when color buffer is binded to
+    // display.
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width,
+                                                            height);
+    return ret;
 }
 
 int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
@@ -2726,8 +2741,6 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
                                 uint32_t w,
                                 uint32_t h,
                                 uint32_t dpi) {
-    int width, height;
-
     {
         AutoLock mutex(m_lock);
         if (m_displays.find(displayId) == m_displays.end()) {
@@ -2736,18 +2749,17 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
         m_displays[displayId].width = w;
         m_displays[displayId].height = h;
         m_displays[displayId].dpi = dpi;
-        if (x == -1 && y == -1) {
-            recomputeLayout();
-        } else {
-            m_displays[displayId].pos_x = x;
-            m_displays[displayId].pos_y = y;
+        m_displays[displayId].pos_x = x;
+        m_displays[displayId].pos_y = y;
+        if (m_displays[displayId].cb != 0) {
+            if (x == -1 && y == -1) {
+                recomputeLayout();
+            }
+            int height;
+            getCombinedDisplaySize(nullptr, &height);
+            setDisplayPoseInSkinUI(height);
         }
-        getCombinedDisplaySize(&width, &height);
-        setDisplayPoseInSkinUI(height);
     }
-
-    // unlock before calling setUIDisplayRegion
-    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
 }
 
@@ -2766,12 +2778,17 @@ int FrameBuffer::setDisplayPose(uint32_t displayId,
  * by invoking setUIMultiDisplay() will be using top-left corner as origin. Thus,
  * input coordinates willl be calculated correctly when mouse events are
  * captured by QT window.
+ *
+ * TODO: We assume all displays pos_x/pos_y is adjustable here. This may
+ * overwrite the specified pos_x/pos_y in setDisplayPos();
  */
 void FrameBuffer::recomputeLayout() {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     for (const auto& iter : m_displays) {
-        rectangles[iter.first] =
+        if (iter.first == 0 || iter.second.cb != 0) {
+            rectangles[iter.first] =
                 std::make_pair(iter.second.width, iter.second.height);
+        }
     }
     for (const auto& iter :
          android::base::resolveLayout(rectangles, m_monitorAspectRatio)) {
@@ -2786,21 +2803,25 @@ void FrameBuffer::setDisplayPoseInSkinUI(int totalHeight) {
     // bottom left corner to top left corner.
 
     for (const auto& iter : m_displays) {
-        uint32_t displayId = iter.first;
-        emugl::get_emugl_window_operations().setUIMultiDisplay(
-                displayId, m_displays[displayId].pos_x,
-                totalHeight - m_displays[displayId].height -
-                        m_displays[displayId].pos_y,
-                m_displays[displayId].width, m_displays[displayId].height,
-                true, m_displays[displayId].dpi);
+        if (iter.first == 0 || iter.second.cb != 0) {
+            uint32_t displayId = iter.first;
+            emugl::get_emugl_window_operations().setUIMultiDisplay(
+                    displayId, m_displays[displayId].pos_x,
+                    totalHeight - m_displays[displayId].height -
+                            m_displays[displayId].pos_y,
+                    m_displays[displayId].width, m_displays[displayId].height,
+                    true, m_displays[displayId].dpi);
+        }
     }
 }
 void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
     for (const auto& iter : m_displays) {
-        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
-        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+        if (iter.first == 0 || iter.second.cb != 0) {
+            total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+            total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+        }
     }
     if (h)
         *h = (int)total_h;
