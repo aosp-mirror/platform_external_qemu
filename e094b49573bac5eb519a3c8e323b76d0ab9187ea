@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a9e0399_ba646d30",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2753,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-09-11T05:57:01Z",
+      "side": 1,
+      "message": "May be a hidden issue here:\nupdated getCombinedDisplaySize() counts only displays with binded cb. But setDisplayPoseInSkinUI() counts all displays. Assuming we have a 4K display without cb binding, then the position for it will be incorrect.",
+      "revId": "e094b49573bac5eb519a3c8e323b76d0ab9187ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5adfa98d_9dcb31c5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2807,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-09-11T05:57:01Z",
+      "side": 1,
+      "message": "same as above. How about making a dedicated function for counting size for binded displays",
+      "revId": "e094b49573bac5eb519a3c8e323b76d0ab9187ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
