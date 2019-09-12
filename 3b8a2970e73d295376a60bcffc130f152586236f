@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8c9e40a4_aa8fb43b",
+        "filename": "android/android-emu/android/mp4/MP4Demuxer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-12T23:09:15Z",
+      "side": 1,
+      "message": "You can omit the explicit specifiers here unless you are replying on a specific mapping.",
+      "range": {
+        "startLine": 32,
+        "startChar": 11,
+        "endLine": 32,
+        "endChar": 15
+      },
+      "revId": "3b8a2970e73d295376a60bcffc130f152586236f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "581c6398_9fc47173",
+        "filename": "android/android-emu/android/mp4/MP4Demuxer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-12T23:09:15Z",
+      "side": 1,
+      "message": "This puts the symbols \"OK\" and \"UNKNOWN\" into this namespace.  I recommend using \"enum class\" instead.",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 6
+      },
+      "revId": "3b8a2970e73d295376a60bcffc130f152586236f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bfa03b20_4cb5d43d",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-12T23:09:15Z",
+      "side": 1,
+      "message": "Could this be dropping important information, like a command that only occurs once a second?\n\nMaybe it would be better to return delay\u003d0 unless the command is older than a certain threshold.  To handle that case, maybe this should be split into a helper function, like dropStaleCommands().",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 307,
+        "endChar": 5
+      },
+      "revId": "3b8a2970e73d295376a60bcffc130f152586236f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34f0c3ff_551177a3",
+        "filename": "android/android-emu/android/mp4/VideoMetadataProvider.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-12T23:09:15Z",
+      "side": 1,
+      "message": "This would leak the memory for VideoMetadataProviderImpl, since it is actually a pointer (which was hidden by the \"auto\" keyword).  To fix, I recommend making this a unique_ptr immediately:\n\nstd::unique_ptr\u003cVideoMetadataProviderImpl\u003e provider(new VideoMetadataProviderImpl());\nif (provider-\u003einit(datasetInfo) \u003c 0) {\n   // Log error\n   return nullptr;\n}\n\nreturn std::unique_ptr\u003cVideoMetadataProvider\u003e(provider.release());",
+      "range": {
+        "startLine": 60,
+        "startChar": 8,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "3b8a2970e73d295376a60bcffc130f152586236f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f0f27e9_4076baab",
+        "filename": "android/android-emu/android/recording/video/player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1024,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-12T23:09:15Z",
+      "side": 1,
+      "message": "Remove debug logging?",
+      "range": {
+        "startLine": 1024,
+        "startChar": 8,
+        "endLine": 1024,
+        "endChar": 40
+      },
+      "revId": "3b8a2970e73d295376a60bcffc130f152586236f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
