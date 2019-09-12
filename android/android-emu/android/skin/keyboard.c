@@ -214,8 +214,15 @@ static bool has_modifier_key(int keycode, int mod)
     return false;
 }
 
-// left-ctrl and right-ctrl
 static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
+    if (ev->u.text.mod & kKeyModNumLock) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_NUMLOCK, 1);
+        skin_keyboard_add_key_event(kb, LINUX_KEY_NUMLOCK, 0);
+    }
+    if (ev->u.text.mod & kKeyModCapsLock) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_CAPSLOCK, 1);
+        skin_keyboard_add_key_event(kb, LINUX_KEY_CAPSLOCK, 0);
+    }
     if (ev->u.text.mod & kKeyModRShift) {
         skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTSHIFT, down);
     }
@@ -227,12 +234,6 @@ static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
     }
     if (ev->u.text.mod & kKeyModLAlt) {
         skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, down);
-    }
-    if (ev->u.text.mod & kKeyModNumLock) {
-        skin_keyboard_add_key_event(kb, LINUX_KEY_NUMLOCK, down);
-    }
-    if (ev->u.text.mod & kKeyModCapsLock) {
-        skin_keyboard_add_key_event(kb, LINUX_KEY_CAPSLOCK, down);
     }
 }
 
