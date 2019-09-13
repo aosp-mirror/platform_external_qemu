@@ -1,0 +1,7 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Haipeng Wu <haipengwu@google.com>
+Submitted-by: Haipeng Wu <haipengwu@google.com>
+Submitted-at: Fri, 13 Sep 2019 21:06:47 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1118353
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
