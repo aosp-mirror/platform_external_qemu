@@ -1,0 +1,8 @@
+Autosubmit+1: Calvin Huang <calhuang@google.com>
+Code-Review+2: Dean Harding <deanh@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Fri, 13 Sep 2019 21:50:26 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1121242
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
