@@ -196,6 +196,7 @@ void MultiDisplayPage::recomputeLayout() {
 
 void MultiDisplayPage::on_applyChanges_clicked() {
     mApplyCnt++;
+    uint32_t numDisplay = 0;
     for (int i = 1; i <= sMaxItem; i++) {
         uint32_t width, height, dpi;
         bool enabled;
@@ -204,6 +205,7 @@ void MultiDisplayPage::on_applyChanges_clicked() {
                                                          &dpi, nullptr,
                                                          &enabled);
         if (mItem[i] != nullptr) {
+            numDisplay++;
             uint32_t w, h, d;
             mItem[i]->getValues(&w, &h, &d);
             if (w == width && h == height && d == dpi && enabled) {
@@ -229,7 +231,9 @@ void MultiDisplayPage::on_applyChanges_clicked() {
                                                                     0);
             }
         }
-
+    }
+    if (numDisplay > mMaxDisplayCnt) {
+        mMaxDisplayCnt = numDisplay;
     }
 }
 
@@ -237,9 +241,8 @@ void MultiDisplayPage::setArrangementHighLightDisplay(int id) {
     mUi->multiDisplayArrangement->setHighLightDisplay(id);
 }
 
-void MultiDisplayPage::hideEvent(QHideEvent* event) {
-    QWidget::hideEvent(event);
-
+// Called when closing emulator
+void MultiDisplayPage::sendMetrics() {
     const uint64_t now = android::base::System::get()->getHighResTimeUs();
 
     // Reset the metrics reporting limiter if enough time has passed.
@@ -257,17 +260,13 @@ void MultiDisplayPage::hideEvent(QHideEvent* event) {
 
     android_studio::EmulatorMultiDisplay metrics;
     metrics.set_apply_count(mApplyCnt);
-    int maxDisplayCnt = 0;
-    for (int i = 1; i <= sMaxItem; i++) {
-        if (mItem[i] != nullptr) {
-            maxDisplayCnt++;
-        }
-    }
-    metrics.set_max_displays(maxDisplayCnt);
+    metrics.set_max_displays(mMaxDisplayCnt);
     android::metrics::MetricsReporter::get().report(
             [metrics](android_studio::AndroidStudioEvent* event) {
                 event->mutable_emulator_details()
                         ->mutable_multi_display()
                         ->CopyFrom(metrics);
             });
+    mApplyCnt = 0;
+    mMaxDisplayCnt = 0;
 }
