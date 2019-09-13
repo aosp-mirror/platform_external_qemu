@@ -86,7 +86,10 @@ private:
 
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
-uint32_t FrameBuffer::s_nextDisplayId = 1;  /* start from 1, 0 is for default Android display */
+// 0 for default Android display
+// 1-5 for Emulator UI
+// 6-10 for developer from rcControl
+uint32_t FrameBuffer::s_displayIdInternalBegin = 6;
 uint32_t FrameBuffer::s_maxNumMultiDisplay = 11;
 uint32_t FrameBuffer::s_invalidIdMultiDisplay = 0xFFFFFFAB;
 
@@ -2629,10 +2632,22 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
     if (m_displays.find(*displayId) != m_displays.end()) {
         return 0;
     }
+
+    // displays created by internal rcCommands
     if (*displayId == s_invalidIdMultiDisplay) {
-        while (m_displays.find(s_nextDisplayId++) != m_displays.end()) { }
-        *displayId = s_nextDisplayId - 1;
+        for (int i = s_displayIdInternalBegin; i < s_maxNumMultiDisplay; i++) {
+            if (m_displays.find(i) == m_displays.end()) {
+                *displayId = i;
+                break;
+            }
+        }
     }
+    if (*displayId == s_invalidIdMultiDisplay) {
+        ERR("%s: cannot create more internaldisplays, exceeding limits %d",
+            __FUNCTION__, s_maxNumMultiDisplay - s_invalidIdMultiDisplay);
+        return -1;
+    }
+
     m_displays.emplace(*displayId, DisplayInfo());
     DBG("create display %d\n", *displayId);
     return 0;

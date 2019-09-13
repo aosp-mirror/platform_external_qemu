@@ -692,7 +692,7 @@ TEST_F(FrameBufferTest, ReadColorBufferSwitchRedBlue) {
 TEST_F(FrameBufferTest, CreateMultiDisplay) {
     uint32_t id = FrameBuffer::s_invalidIdMultiDisplay;
     mFb->createDisplay(&id);
-    EXPECT_EQ(1, id);
+    EXPECT_EQ(FrameBuffer::s_displayIdInternalBegin, id);
     EXPECT_EQ(0, mFb->createDisplay(&id));
     EXPECT_EQ(0, mFb->destroyDisplay(id));
 }
