@@ -195,6 +195,7 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->fingerButton->setVisible(false);
         mExtendedUi->batteryButton->setVisible(false);
         mExtendedUi->dpadButton->setVisible(false);
+        mExtendedUi->telephoneButton->setVisible(false);
     }
 
 #ifdef __APPLE__
