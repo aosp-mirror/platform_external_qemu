@@ -5,6 +5,7 @@ prebuilt(FFMPEG)
 set(ANDROID_LIBUI_HEADLESS_SRC_FILES
     android/mp4/MP4Dataset.cpp
     android/mp4/MP4Demuxer.cpp
+    android/mp4/VideoMetadataProvider.cpp
     android/mp4/SensorLocationEventProvider.cpp
     android/skin/charmap.c
     android/skin/rect.c
@@ -49,6 +50,7 @@ set(ANDROID_LIBUI_HEADLESS_SRC_FILES
 set(ANDROID_LIBUI_SRC_FILES
     android/mp4/MP4Dataset.cpp
     android/mp4/MP4Demuxer.cpp
+    android/mp4/VideoMetadataProvider.cpp
     android/mp4/SensorLocationEventProvider.cpp
     android/skin/charmap.c
     android/skin/rect.c
@@ -390,6 +392,7 @@ android_target_link_libraries(emulator-libui windows_msvc-x86_64 PUBLIC dirent-w
 set(emulator-libui_unittests_src
     android/mp4/MP4Dataset_test.cpp
     android/mp4/MP4Demuxer_test.cpp
+    android/mp4/VideoMetadataProvider_test.cpp
     android/mp4/SensorLocationEventProvider_test.cpp
     android/skin/keycode_unittest.cpp
     android/skin/keycode-buffer_unittest.cpp

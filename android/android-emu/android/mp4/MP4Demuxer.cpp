@@ -20,6 +20,7 @@
 #include "android/hw-sensors.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/SensorLocationEventProvider.h"
+#include "android/mp4/VideoMetadataProvider.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
@@ -42,11 +43,13 @@ public:
                    VideoPlayerWaitInfo* readingWaitInfo)
         : mPlayer(player),
           mDataset(dataset),
-          mContinueReadWaitInfo(readingWaitInfo) {}
+          mContinueReadWaitInfo(readingWaitInfo) {
+        mDemuxEnded = false;
+    }
 
     virtual ~Mp4DemuxerImpl() { }
 
-    virtual int demuxNextPacket();
+    virtual DemuxResult demuxNextPacket();
     virtual void seek(double timestamp);
 
     virtual void setAudioPacketQueue(PacketQueue* audioPacketQueue) {
@@ -62,6 +65,11 @@ public:
         mEventProvider = eventProvider.get();
     }
 
+    virtual void setVideoMetadataProvider(
+            std::shared_ptr<VideoMetadataProvider> metadataProvider) {
+        mVideoMetadataProvider = metadataProvider.get();
+    }
+
 private:
     bool isDataStreamIndex(int index);
 
@@ -72,6 +80,8 @@ private:
     PacketQueue* mAudioPacketQueue = nullptr;
     PacketQueue* mVideoPacketQueue = nullptr;
     SensorLocationEventProvider* mEventProvider = nullptr;
+    VideoMetadataProvider* mVideoMetadataProvider = nullptr;
+    bool mDemuxEnded = true;
 
     // lock to protect demuxer functions from being called at the same time
     android::base::Lock mLock;
@@ -86,12 +96,13 @@ std::unique_ptr<Mp4Demuxer> Mp4Demuxer::create(
     return std::move(demuxer);
 }
 
-int Mp4DemuxerImpl::demuxNextPacket() {
+DemuxResult Mp4DemuxerImpl::demuxNextPacket() {
     base::AutoLock lock(mLock);
     AVPacket packet;
     AVFormatContext* formatCtx = mDataset->getFormatContext();
     const int audioStreamIndex = mDataset->getAudioStreamIndex();
     const int videoStreamIndex = mDataset->getVideoStreamIndex();
+    const int videoMetadataIndex = mDataset->getVideoMetadataStreamIndex();
 
     int ret = av_read_frame(formatCtx, &packet);
 
@@ -102,6 +113,10 @@ int Mp4DemuxerImpl::demuxNextPacket() {
         } else if (mVideoPacketQueue != nullptr && videoStreamIndex >= 0 &&
                    packet.stream_index == videoStreamIndex) {
             mVideoPacketQueue->put(&packet);
+        } else if (mVideoMetadataProvider != nullptr &&
+                   videoMetadataIndex >= 0 &&
+                   packet.stream_index == videoMetadataIndex) {
+            mVideoMetadataProvider->createVideoMetadata(&packet);
         } else {
             // Create an event from this packet if it's from one of the known
             // data stream that carries event info
@@ -115,7 +130,7 @@ int Mp4DemuxerImpl::demuxNextPacket() {
             // stream we care about. Wipe the packet here.
             av_packet_unref(&packet);
         }
-        return 0;
+        return DemuxResult::OK;
     }
 
     if (ret == AVERROR_EOF || avio_feof(formatCtx->pb)) {
@@ -123,18 +138,22 @@ int Mp4DemuxerImpl::demuxNextPacket() {
         // seek to start of the streams in looping mode
         if (mPlayer->isLooping()) {
             av_seek_frame(formatCtx, -1, 0, 0);
-            return 0;
+            return DemuxResult::OK;
         }
-
-        if (videoStreamIndex >= 0 && mVideoPacketQueue != nullptr) {
-            mVideoPacketQueue->putNullPacket(videoStreamIndex);
+        // If not looping, put a null packet to each acket queue to mark the end
+        // of current video file.
+        if (!mDemuxEnded) {
+            if (videoStreamIndex >= 0 && mVideoPacketQueue != nullptr) {
+                mVideoPacketQueue->putNullPacket(videoStreamIndex);
+            }
+            if (audioStreamIndex >= 0 && mAudioPacketQueue != nullptr) {
+                mAudioPacketQueue->putNullPacket(audioStreamIndex);
+            }
+            mDemuxEnded = true;
         }
-        if (audioStreamIndex >= 0 && mAudioPacketQueue != nullptr) {
-            mAudioPacketQueue->putNullPacket(audioStreamIndex);
-        }
-        return 0;
-    } else { // other errors
-        return -1;
+        return DemuxResult::AV_EOF;
+    } else {  // other errors
+        return DemuxResult::UNKNOWN;
     }
 }
 
