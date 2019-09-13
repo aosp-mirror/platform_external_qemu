@@ -16,9 +16,9 @@
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include "android/base/memory/LazyInstance.h"
-#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/featurecontrol/feature_control.h"
+#include "android/location/MapsKey.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -29,6 +29,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/utils/path.h"
 
 #include <QFileDialog>
 #include <QItemDelegate>
@@ -39,6 +40,8 @@
 #endif
 
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <utility>
 #ifndef _MSC_VER
@@ -118,17 +121,15 @@ LocationPage::LocationPage(QWidget *parent) :
 
 #ifdef USE_WEBENGINE
     if (feature_is_enabled(kFeature_LocationUiV2)) {
-        // Get the Maps API key from 'maps.key' (nominally in ~/.android/)
-        QString mapsKeyPath = QString::fromStdString(android::ConfigDirs::getUserDirectory());
-        mapsKeyPath += "/maps.key"; // QFile is OK with '/' even on Windows
-        QFile mapsKeyFile(mapsKeyPath);
-        if (mapsKeyFile.open(QFile::ReadOnly | QFile::Text)) {
-            QByteArray theKey = mapsKeyFile.readLine().trimmed();
-            if (!theKey.isEmpty()) {
-                // There is a non-empty key
-                mMapsApiKey = theKey;
-                useLocationV2 = true;
-            }
+        auto keyHolder = android::location::MapsKey::get();
+        // Always prefer user-provided maps key
+        mMapsApiKey = strlen(keyHolder->userMapsKey()) > 0 ?
+                      keyHolder->userMapsKey() :
+                      keyHolder->androidStudioMapsKey();
+        qDebug() << "key=" << mMapsApiKey;
+        if (!mMapsApiKey.isEmpty()) {
+            // There is a non-empty key
+            useLocationV2 = true;
         }
     }
 #endif
