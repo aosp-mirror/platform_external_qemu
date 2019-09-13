@@ -72,6 +72,7 @@ message Request {
     SnapshotRequest snapshot = 1;
     AutomationRequest automation = 2;
     VideoInjectionRequest video_injection = 3;
+    SensorMockRequest sensor_mock = 4;
   }
 }
 
@@ -201,6 +202,28 @@ message FieldInfo {
 
   optional uint32 offset = 1;
   optional Type type = 2;
+}
+
+message LocationData {
+  optional double latitude = 1;
+  optional double longitude = 2;
+  optional double meters_elevation = 3;
+  optional double knots_speed = 4;
+  optional double degrees_heading = 5;
+  optional uint32 num_satellites = 6;
+}
+
+message SensorMockRequest {
+  optional uint64 timestamp_us = 1;
+
+
+  message LocationMock {
+    optional LocationData location_data = 1;
+  }
+
+  oneof function {
+    LocationMock mock_location = 50;
+  }
 }
 
 
