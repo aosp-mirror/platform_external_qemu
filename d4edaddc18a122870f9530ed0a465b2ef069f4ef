@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "690a6f54_d4a64a80",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-09-13T18:30:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27de0486_4fcb9f4e",
+      "range": {
+        "startLine": 70,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 29
+      },
+      "revId": "d4edaddc18a122870f9530ed0a465b2ef069f4ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dde1a432_b234c78b",
         "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "d4edaddc18a122870f9530ed0a465b2ef069f4ef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be8f3920_b59c32ac",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1129090
+      },
+      "writtenOn": "2019-09-13T18:30:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dde1a432_b234c78b",
+      "range": {
+        "startLine": 303,
+        "startChar": 21,
+        "endLine": 303,
+        "endChar": 58
+      },
+      "revId": "d4edaddc18a122870f9530ed0a465b2ef069f4ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
