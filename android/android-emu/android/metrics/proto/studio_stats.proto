@@ -1848,6 +1848,14 @@ message EmulatorMultiDisplay {
   optional uint32 max_displays = 2;
 }
 
+// Metrics for LocationV2
+message EmulatorLocationV2 {
+  // Count for "Set Location" button
+  optional uint32 set_loc_count = 1;
+  // Count for "Play route" button
+  optional uint32 play_route_count = 2;
+}
+
 // Metrics for grpc invocations.
 message EmulatorGrpc {
   // CRC32 digest of the fully-specified method name.
@@ -1926,7 +1934,9 @@ message EmulatorDetails {
   optional EmulatorMultiDisplay multi_display = 31;
   // Metrics for gRPC invocation
   optional EmulatorGrpc grpc = 32;
-  // Next tag: 33
+  // Metrics for LocationUiV2
+  optional EmulatorLocationV2 location_v2 = 33;
+  // Next tag: 34
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {

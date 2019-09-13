@@ -17,6 +17,8 @@
 #include "android/base/StringView.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Point.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/utils/path.h"
 
@@ -140,6 +142,7 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
     sendMostRecentUiLocation();
+    ++mSetLocCount;
 }
 
 // Populate the QListWidget with the points that are found on disk
@@ -581,6 +584,19 @@ void LocationPage::handle_importGpxKmlButton_clicked() {
     mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
 }
 
+// Called when closing emulator
+void LocationPage::sendMetrics() {
+    android_studio::EmulatorLocationV2 metrics;
+    metrics.set_set_loc_count(mSetLocCount);
+    metrics.set_play_route_count(mPlayRouteCount);
+    android::metrics::MetricsReporter::get().report(
+            [metrics](android_studio::AndroidStudioEvent* event) {
+                event->mutable_emulator_details()
+                        ->mutable_location_v2()
+                        ->CopyFrom(metrics);
+            });
+}
+
 void RouteSenderThread::sendRouteToMap(const LocationPage::RouteListElement* const routeElement,
                                        MapBridge* mapBridge) {
     mRouteElement = routeElement;
@@ -660,4 +676,5 @@ void RouteSenderThread::run() { }
 RouteSenderThread* RouteSenderThread::newInstance(const QObject* handler,
                                                   const char* finished_slot) { return nullptr; }
 void LocationPage::routeSendingFinished(bool ok) { }
+void LocationPage::sendMetrics() { }
 #endif // !USE_WEBENGINE

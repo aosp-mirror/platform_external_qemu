@@ -31,6 +31,7 @@ void LocationPage::on_loc_playRouteButton_clicked() {
             locationPlaybackStart_v2();
         }
     }
+    ++mPlayRouteCount;
 }
 
 void LocationPage::playRouteStateChanged(bool stopped) {
