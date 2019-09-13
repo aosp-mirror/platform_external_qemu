@@ -1,0 +1,7 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Tiantian Bian <tianbian@google.com>
+Submitted-by: Joseph Lee <josephhlee@google.com>
+Submitted-at: Fri, 13 Sep 2019 16:16:13 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1112185
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
