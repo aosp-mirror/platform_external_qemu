@@ -22,6 +22,7 @@ public:
     explicit MultiDisplayPage(QWidget *parent = 0);
 
     void setArrangementHighLightDisplay(int id);
+    void sendMetrics();
     void updateTheme(const QString& styleString);
     static int sMaxItem;
 
@@ -36,7 +37,6 @@ private:
     int findNextItemIndex();
     void setSecondaryDisplaysTitle(int count);
     void recomputeLayout();
-    void hideEvent(QHideEvent* event) override;
 
     std::unique_ptr<Ui::MultiDisplayPage> mUi;
     std::vector<MultiDisplayItem*> mItem;
@@ -46,4 +46,5 @@ private:
     uint64_t mReportWindowStartUs = 0;
     uint32_t mReportWindowCount = 0;
     uint32_t mApplyCnt = 0;
+    uint32_t mMaxDisplayCnt = 0;
 };
