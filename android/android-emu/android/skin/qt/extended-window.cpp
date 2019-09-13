@@ -418,6 +418,7 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         move(mToolWindow->geometry().right() + 3 + ToolWindow::TOOL_GAP_FRAMELESS,
              mToolWindow->geometry().top());
     }
+    setFrameOnTop(this, true);
     QFrame::showEvent(e);
 }
 
