@@ -307,6 +307,27 @@ message AndroidStudioEvent {
   // Set when kind = WINDOWS_DEFENDER_STATUS
   optional WindowsDefenderStatus windows_defender_status = 84;
 
+  // Set when kind = MEMORY_SETTINGS_EVENT
+  optional MemorySettingsEvent memory_settings_event = 85;
+
+  // Set when kind = STUDIO_UPDATE_FLOW
+  optional StudioUpdateFlowEvent studio_update_flow_event = 86;
+
+  // set when kind = BUILD_OUTPUT_WINDOW_STATS
+  optional BuildOutputWindowStats build_output_window_stats = 87;
+
+  // set when kind = GRADLE_PLUGIN_DSL_USAGE_STATS
+  optional GradlePluginDslUsageStats gradle_plugin_dsl_usage_stats = 88;
+
+  // set when kind = WHATS_NEW_ASSISTANT_UPDATE_EVENT
+  optional WhatsNewAssistantUpdateEvent whats_new_assistant_update_event = 89;
+
+  // set when kind = DEFAULT_ACTIVITY_LOCATOR_STATS
+  optional DefaultActivityLocatorStats default_activity_locator_stats = 90;
+
+  // set when kind = MOTION_LAYOUT_EDITOR_EVENT
+  optional MotionLayoutEditorEvent motion_layout_editor_event = 91;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -768,6 +789,34 @@ message AndroidStudioEvent {
 
     // Status of Windows Defender
     WINDOWS_DEFENDER_STATUS = 182;
+
+    // Memory settings configuration statistics
+    MEMORY_SETTINGS_EVENT = 183;
+
+    // Studio update flow events
+    STUDIO_UPDATE_FLOW = 184;
+
+    // Build output window statistics when build fails.
+    BUILD_OUTPUT_WINDOW_STATS = 185;
+
+    // Stats about the use of the Android Gradle Plugin DSL
+    GRADLE_PLUGIN_DSL_USAGE_STATS = 186;
+
+    // The event is related to What's New Assistant update flow
+    WHATS_NEW_ASSISTANT_UPDATE_EVENT = 188;
+
+    // APK reload operation started
+    APK_DEBUG_RELOAD_START = 189;
+
+    // APK reload finished without errors
+    APK_DEBUG_RELOAD_SUCCESS = 190;
+
+    // Information about how long DefaultActivityLocator blocked on getting
+    // a list of activities from the merged manifest.
+    DEFAULT_ACTIVITY_LOCATOR_STATS = 191;
+
+    // Motion Layout Editor event
+    MOTION_LAYOUT_EDITOR_EVENT = 192;
   }
 
   // Represents different Performance Monitoring types.
@@ -870,6 +919,7 @@ message AndroidStudioEvent {
     ANDROID_INSTANT_APP_MODULE = 37;
     ANDROID_INSTANT_APP_BUNDLE_PROJECT = 38;
     ANDROID_INSTANT_APP_DYNAMIC_MODULE = 39;
+    BENCHMARK_LIBRARY_MODULE = 40;
   }
 
   // Reasons Gradle sync failed.
@@ -907,6 +957,8 @@ message AndroidStudioEvent {
     DAEMON_CONTEXT_MISMATCH = 30;
     JAVA_HEAP_ERROR = 31;
     JDK8_REQUIRED = 32;
+    GRADLE_DISTRIBUTION_INSTALL_ERROR = 33;
+    DISTRIBUTIONSHA256SUM_FOUND_IN_WRAPPER = 34;
   }
 
   // IDE brand containing the android plugin
@@ -915,6 +967,8 @@ message AndroidStudioEvent {
     ANDROID_STUDIO = 1;
     ANDROID_STUDIO_WITH_BLAZE = 2;
     INTELLIJ = 3;
+    // For the Toolkit preview build released at Google IO 2019
+    ANDROID_STUDIO_TOOLKIT_2019_IO_PREVIEW = 4;
   }
 
   // Gradle sync issue type.
@@ -993,10 +1047,17 @@ message AndroidStudioEvent {
     // Indicates that the project uses a deprecated DSL.
     TYPE_DEPRECATED_DSL = 28;
 
-    TYPE_DEPRECATED_CONFIGURATION = 29;
+    // Indicates that the project uses a deprecated configuration.
+    // This type is now replaced with TYPE_USING_DEPRECATED_CONFIGURATION
+    // because of an indexing issue in the past
+    // (see http://issuetracker.google.com/138278313).
+    TYPE_DEPRECATED_CONFIGURATION = 29 [deprecated = true];
 
-    // Indicates that the project uses a deprecated DSL.
-    TYPE_DEPRECATED_DSLVALUE = 30;
+    // Indicates that the project uses a deprecated DSL value.
+    // This type is now replaced with TYPE_USING_DEPRECATED_DSL_VALUE
+    // because of an indexing issue in the past
+    // (see http://issuetracker.google.com/138278313).
+    TYPE_DEPRECATED_DSLVALUE = 30 [deprecated = true];
 
     // Indicates that the project contains the min sdk in the android manifest
     // file.
@@ -1027,6 +1088,50 @@ message AndroidStudioEvent {
     // the ANDROID_SDK_ROOT environment variable or the projects
     // local.properties files.
     TYPE_SDK_NOT_SET = 37;
+
+    // Indicates that the user has specified multiple default build types.
+    TYPE_AMBIGUOUS_BUILD_TYPE_DEFAULT = 38;
+
+    // Indicates that the user has specified multiple default product flavors.
+    TYPE_AMBIGUOUS_PRODUCT_FLAVOR_DEFAULT = 39;
+
+    // Indicates that the compileSdkVersion is missing.
+    TYPE_COMPILE_SDK_VERSION_NOT_SET = 40;
+
+    // Indicates that the `android.useAndroidX` property must be enabled but is
+    // currently disabled.
+    TYPE_ANDROID_X_PROPERTY_NOT_ENABLED = 41;
+
+    // Indicates that the project uses a deprecated configuration.
+    TYPE_USING_DEPRECATED_CONFIGURATION = 42;
+
+    // Indicates that the project uses a deprecated DSL value.
+    TYPE_USING_DEPRECATED_DSL_VALUE = 43;
+
+    // Generic build file issues with file/line number information
+    TYPE_BUILD_FILE_ISSUE = 44;
+
+    // dynamic feature declared in base module does not exist
+    TYPE_UNKNOWN_FEATURE = 45;
+
+    // Declared source sets is not actually used by a variant
+    TYPE_UNKNOWN_SOURCE_SET = 46;
+
+    // Retro lambda plugin is present instead of using D8/R8
+    TYPE_RETRO_LAMBDA_PRESENT = 47;
+
+    TYPE_RES_SHRINKER_WITH_APP_BUNDLE = 48;
+
+    TYPE_RES_SHRINKER_WITH_LIBRARY_MODULE = 49;
+
+    TYPE_INVALID_JAVA8_FLAGS = 50;
+
+    TYPE_MISSING_JAVA8_FLAG = 51;
+
+    // NOTE: When adding a new type here, increment the index by 1. This index
+    // may not be consistent with the corresponding value in the Android Gradle
+    // plugin (e.g., it could be higher by 1), because of an indexing issue in
+    // the past (see http://issuetracker.google.com/138278313).
   }
 
   // Various quick-fixes that are offered to resolve sync issues.
@@ -1076,6 +1181,8 @@ message AndroidStudioEvent {
     USE_EMBEDDED_JDK_HYPERLINK = 42;
     SET_NDK_DIR_HYPERLINK = 43;
     SET_CMAKE_DIR_HYPERLINK = 44;
+    DELETE_FILE_HYPERLINK = 45;
+    REMOVE_DISTRIBUTIONSHA256SUM_FROM_WRAPPER_HYPERLINK = 46;
   }
 }
 
@@ -1131,6 +1238,8 @@ message ProductDetails {
     LIGHT_MAC_NATIVE = 3;
     LIGHT_WIN_NATIVE = 4;
     GTK = 5;
+    HIGH_CONTRAST = 6;
+    CUSTOM = 7;
   }
 }
 
@@ -1410,17 +1519,7 @@ message EmulatorFeatureFlagState {
     VIDEO_PLAYBACK = 40;
     VULKAN = 41;
     MACRO_UI = 42;
-    CAR_VHAL_TABLE = 43;
-    DYNAMIC_PARTITION = 44;
-    IP_DISCONNECT_ON_LOAD = 45;
-    VULKAN_SNAPSHOTS = 46;
-    VIRTIO_INPUT = 47;
-    MULTI_DISPLAY = 48;
-    VULKAN_NULL_OPTIONAL_STRINGS = 49;
-    DYNAMIC_MEDIA_PROFILE = 50;
-    YUV420_888_to_NV21 = 51;
-    YUV_Cache = 52;
-    // Next tag: 53
+    // Next tag: 43
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
@@ -1848,6 +1947,14 @@ message EmulatorMultiDisplay {
   optional uint32 max_displays = 2;
 }
 
+// Metrics for LocationV2
+message EmulatorLocationV2 {
+  // Count for "Set Location" button
+  optional uint32 set_loc_count = 1;
+  // Count for "Play route" button
+  optional uint32 play_route_count = 2;
+}
+
 // Metrics for grpc invocations.
 message EmulatorGrpc {
   // CRC32 digest of the fully-specified method name.
@@ -1926,7 +2033,9 @@ message EmulatorDetails {
   optional EmulatorMultiDisplay multi_display = 31;
   // Metrics for gRPC invocation
   optional EmulatorGrpc grpc = 32;
-  // Next tag: 33
+  // Metrics for LocationUiV2
+  optional EmulatorLocationV2 location_v2 = 33;
+  // Next tag: 34
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -2262,6 +2371,28 @@ message JniInspectionEvent {
     ONLOAD_INSPECTION_EVENT = 4;
     // Set when the FindMethod inspection quickfix is used.
     FIND_METHOD_INSPECTION_EVENT = 5;
+    // Set when the FindField inspection quickfix is used.
+    FIND_FIELD_INSPECTION_EVENT = 6;
+    // Set when the FindClass inspection quickfix is used.
+    FIND_CLASS_INSPECTION_EVENT = 7;
+    // Set when the RegisterNatives inspection quickfix is used.
+    REGISTER_NATIVES_INSPECTION_EVENT = 8;
+    // Set when the CallMethod inspection quickfix is used.
+    CALL_METHOD_INSPECTION_EVENT = 9;
+    // Set when the GetField inspection quickfix is used.
+    GET_FIELD_INSPECTION_EVENT = 10;
+    // Set when the SetField inspection quickfix is used.
+    SET_FIELD_INSPECTION_EVENT = 11;
+    // Set when FindClass completion is accepted.
+    FIND_CLASS_COMPLETION_EVENT = 12;
+    // Set when GetMethodID completion is accepted.
+    GET_METHOD_ID_COMPLETION_EVENT = 13;
+    // Set when GetFieldID completion is accepted.
+    GET_FIELD_ID_COMPLETION_EVENT = 14;
+    // Set when JNI function stub completion is accepted.
+    JNI_FUNCTION_STUB_COMPLETION_EVENT = 15;
+    // Set when RegisterNatives completion is accepted.
+    REGISTER_NATIVES_COMPLETION_EVENT = 16;
   }
 
   optional JniInspectionType type = 1;
@@ -2626,6 +2757,10 @@ message GradleBuildProject {
   // All of the gradle plugins applied to this project
   repeated GradlePlugin plugin = 13;
 
+  // The version of the firebase performance plugin applied to the project
+  // e.g. '1.3.0'
+  optional string firebase_performance_plugin_version = 14;
+
   enum PluginType {
     UNKNOWN_PLUGIN_TYPE = 0;
     // The 'com.android.application' or 'com.android.model.application' plugins.
@@ -2711,6 +2846,12 @@ message GradleBuildProject {
     COM_ANDROID_BUILD_GRADLE_TESTPLUGIN = 54;
     ORG_GRADLE_BUILDINIT_PLUGINS_BUILDINITPLUGIN = 55;
     ORG_GRADLE_BUILDINIT_PLUGINS_WRAPPERPLUGIN = 56;
+    COM_ANDROID_BUILD_GRADLE_INTERNAL_PLUGINS_APPPLUGIN = 57;
+    COM_ANDROID_BUILD_GRADLE_INTERNAL_PLUGINS_LIBRARYPLUGIN = 58;
+    COM_ANDROID_BUILD_GRADLE_INTERNAL_PLUGINS_DYNAMICFEATUREPLUGIN = 59;
+    COM_ANDROID_BUILD_GRADLE_INTERNAL_PLUGINS_REPORTINGPLUGIN = 60;
+    COM_ANDROID_BUILD_GRADLE_INTERNAL_PLUGINS_TESTPLUGIN = 61;
+    COM_ANDROID_BUILD_GRADLE_INTERNAL_PLUGINS_VERSIONCHECKPLUGIN = 62;
   }
 }
 
@@ -2899,6 +3040,13 @@ message GradleBuildVariant {
   // Per-ABI native build info.
   repeated NativeBuildConfigInfo native_build_config = 21;
 
+  // Whether annotation processing could be run incrementally
+  optional bool is_annotation_processing_incremental = 22;
+
+  // Whether this variant (a base module or dynamic feature) is marked as
+  // instant enabled in its manifest (Google Play Instant / Instant Apps)
+  optional bool is_instant_enabled = 23;
+
   // The nature of this variant.
   // The test variants have an associated tested variant.
   // See com.android.builder.core.VariantType
@@ -3002,6 +3150,10 @@ message AnnotationProcessorInfo {
 
   // How the processor was included in the build file.
   optional InclusionType inclusion_type = 2;
+
+  // Whether the annotation processor is
+  // incremental(isolating/aggregating/dynamic)
+  optional bool is_incremental = 3;
 
   enum InclusionType {
     // The old apt way of including them.
@@ -3108,6 +3260,7 @@ message GradleBuildProfileSpan {
     TASK_EXECUTION = 14;
     WORKER_EXECUTION = 15;
     THREAD_EXECUTION = 16;
+    ARTIFACT_TRANSFORM = 17;
     INITIAL_METADATA = 100 [deprecated = true];
     FINAL_METADATA = 101 [deprecated = true];
     GENERAL_CONFIG = 102;
@@ -4102,6 +4255,15 @@ message LayoutEditorEvent {
     DROP_VIEW_FROM_PALETTE = 32;
     ATTRIBUTE_CHANGE = 33;
     FAVORITE_CHANGE = 34;
+
+    SELECT_TEXT_MODE = 35;
+    SELECT_SPLIT_MODE = 36;
+    SELECT_VISUAL_MODE = 37;
+
+    OPEN_MOTION_LAYOUT_EDITOR_MODE = 38;
+
+    SHOW_LAYOUT_VISUALIZATION_TOOL = 39;
+    HIDE_LAYOUT_VISUALIZATION_TOOL = 40;
   }
 
   // Type of event
@@ -4125,8 +4287,10 @@ message NavEditorEvent {
 
     OPEN_FILE = 1;
 
-    SELECT_DESIGN_TAB = 2;
-    SELECT_XML_TAB = 3;
+    // Deprecated by LayoutEditorEventType.SELECT_VISUAL_MODE
+    SELECT_DESIGN_TAB = 2 [deprecated = true];
+    // Deprecated by LayoutEditorEventType.SELECT_TEXT_MODE
+    SELECT_XML_TAB = 3 [deprecated = true];
 
     CREATE_ACTION = 4;
     EDIT_ACTION = 5;
@@ -4168,15 +4332,29 @@ message NavEditorEvent {
 
     SCHEMA_CREATED = 29;
 
-    ZOOM_IN = 30;
-    ZOOM_OUT = 31;
-    ZOOM_FIT = 32;
+    // Deprecated by LayoutEditorEventType.ZOOM_IN
+    ZOOM_IN = 30 [deprecated = true];
+    // Deprecated by LayoutEditorEventType.ZOOM_OUT
+    ZOOM_OUT = 31 [deprecated = true];
+    // Deprecated by LayoutEditorEventType.ZOOM_FIT
+    ZOOM_FIT = 32 [deprecated = true];
 
     CUT = 33;
     COPY = 34;
     PASTE = 35;
 
     // next index: 39
+  }
+
+  // Identifies the mode of the navigation editor
+  enum NavEditorMode {
+    UNKNOWN_MODE = 0;
+    // Single view displaying only the navigation editor itself
+    VISUAL_ONLY_MODE = 1;
+    // Split view with text and design editor side-by-side
+    SPLIT_MODE = 2;
+    // Single view displaying only the text editor
+    TEXT_ONLY_MODE = 3;
   }
 
   enum Source {
@@ -4203,6 +4381,8 @@ message NavEditorEvent {
   optional NavSchemaInfo schema_info = 6;
   // Information on the current contents of the navigation file
   optional NavigationContents contents = 7;
+  // Mode of navigation editor: design-only, text-only, or split view
+  optional NavEditorMode mode = 8;
 }
 
 message NavPropertyInfo {
@@ -4501,13 +4681,40 @@ message CpuCaptureMetadata {
     // The capture was successful
     SUCCESS = 1;
     // The device responded to our request for a capture with an error
-    STOP_CAPTURING_FAILURE = 2;
+    // Deprecated by STOP_FAILED_* enum constants.
+    STOP_CAPTURING_FAILURE = 2 [deprecated = true];
     // The capture data sent back to us could not be parsed successfully
     PARSING_FAILURE = 3;
     // User aborted parsing the trace after being notified it was too large
     USER_ABORTED_PARSING = 4;
     // There was an error while preprocessing the trace file
     PREPROCESS_FAILURE = 5;
+    // There was no ongoing capture to stop.
+    STOP_FAILED_NO_GOING_PROFILING = 6;
+    // The profiled app process died.
+    STOP_FAILED_APP_PROCESS_DIED = 7;
+    // The PID of the profiled app process changed (it's another process).
+    STOP_FAILED_APP_PID_CHANGED = 8;
+    // The profiler process (e.g., simpleperf process) died.
+    STOP_FAILED_PROFILER_PROCESS_DIED = 9;
+    // The shell/DDMS command to stop capture didn't return successfully.
+    STOP_FAILED_STOP_COMMAND_FAILED = 10;
+    // The capture didn't stop after the stop command.
+    STOP_FAILED_STILL_PROFILING_AFTER_STOP = 11;
+    // The wait for the trace file to complete couldn't be initiated.
+    STOP_FAILED_CANNOT_START_WAITING = 12;
+    // The wait for the trace file to complete timed out.
+    STOP_FAILED_WAIT_TIMEOUT = 13;
+    // The wait for the trace file to complete had unspecified failure.
+    STOP_FAILED_WAIT_FAILED = 14;
+    // Couldn't read events while waiting for the trace file to complete.
+    STOP_FAILED_CANNOT_READ_WAIT_EVENT = 15;
+    // Couldn't copy/move the trace file within the device.
+    STOP_FAILED_CANNOT_COPY_FILE = 16;
+    // Couldn't form the trace file into the format expected by Studio.
+    STOP_FAILED_CANNOT_FORM_FILE = 17;
+    // Couldn't read the content of the trace file.
+    STOP_FAILED_CANNOT_READ_FILE = 18;
   }
 
   // The result of a CPU capture
@@ -4535,6 +4742,9 @@ message CpuCaptureMetadata {
   // Timeout set by the user for the system "profiler.cpu.art.stop.timeout.sec"
   // property. Set if |profiling_config.type| is |ART|.
   optional int32 art_stop_timeout_sec = 7;
+
+  // How much time it took to stop CPU recording.
+  optional int32 stopping_time_ms = 8;
 }
 
 // Data associated with importing CPU traces.
@@ -4724,6 +4934,16 @@ message TransportFailureMetadata {
   optional FailureType failure_type = 1;
 }
 
+message MemoryInstanceFilterMetadata {
+  enum FilterType {
+    UNKNOWN_FILTER_TYPE = 0;
+    ACTIVITY_FRAGMENT_LEAKS = 1;
+    PROJECT_CLASSES = 2;
+  }
+
+  optional FilterType filter_type = 1;
+}
+
 // Android Profiler metrics
 message AndroidProfilerEvent {
   // The current stage we're on when this event was generated
@@ -4771,6 +4991,9 @@ message AndroidProfilerEvent {
 
   // Set if |type| is |TRANSPORT_DAEMON_FAILED| OR |TRANSPORT_PROXY_FAILED|
   optional TransportFailureMetadata transport_failure_metadata = 15;
+
+  // Set if |type| is |MEMORY_INSTANCE_FILTER|
+  optional MemoryInstanceFilterMetadata memory_instance_filter_metadata = 16;
 
   enum Stage {
     UNKNOWN_STAGE = 0;
@@ -4872,6 +5095,8 @@ message AndroidProfilerEvent {
     SELECT_MEMORY_STACK = 308;
     SELECT_MEMORY_REFERENCES = 309;
     SELECT_MEMORY_HEAP = 310;  // This event type should have |memory_heap|
+    // This type should have |memory_instance_filter_metadata|
+    MEMORY_INSTANCE_FILTER = 311;
 
     /// Network
 
@@ -5020,6 +5245,9 @@ message GradleSyncStats {
     TRIGGER_USER_REFRESH_LINKED_CPP_PROJECTS = 104;
     // Sync was requested by user while the project was building
     TRIGGER_USER_REQUEST_WHILE_BUILDING = 105;
+    // Re-run was requested by user from command line output console with
+    // additional options
+    TRIGGER_USER_REQUEST_RERUN_WITH_ADDITIONAL_OPTIONS = 106;
     // Last marker for user initiated syncs
     TRIGGER_USER_LAST_MARKER = 199;
 
@@ -5069,6 +5297,10 @@ message GradleSyncStats {
     TRIGGER_QF_WRAPPER_GRADLE_VERSION_FIXED = 421;
     // SDK has been removed from manifest files
     TRIGGER_QF_SDK_REMOVED_FROM_MANIFEST = 422;
+    // Gradle distribution file has been deleted
+    TRIGGER_QF_GRADLE_DISTRIBUTION_DELETED = 423;
+    // Property distributionSha256Sum was removed from Gradle wrapper
+    TRIGGER_QF_DISTRIBUTIONSHA256SUM_REMOVED_FROM_WRAPPER = 424;
     // Last marker for syncs caused by quickfixes
     TRIGGER_QF_LAST_MARKER = 999;
 
@@ -5406,6 +5638,23 @@ message WhatsNewAssistantEvent {
   optional WhatsNewAssistantEventType type = 1;
 }
 
+// Details for What's New Assistant update flow only
+message WhatsNewAssistantUpdateEvent {
+  // Whether this window was auto opened
+  optional bool auto_opened = 1;
+  // Whether this is the update flow or regular WNA
+  optional bool update_flow = 2;
+  // Whether the user scrolled to the bottom of the pane
+  optional bool scrolled_to_bottom = 3;
+  // Whether the window was closed due to clicking "Dismiss"
+  optional bool dismissed = 4;
+
+  // Time between opening window and clicking update button
+  optional int64 time_to_update_ms = 5;
+  // Time between opening window and closing it
+  optional int64 time_to_close_ms = 6;
+}
+
 // Information about a session running lint -- in build, in IDE, etc
 message LintSession {
   // analysis type - build, ide batch, ide incremental
@@ -5631,6 +5880,10 @@ message RunEvent {
 
   // Enum name representing deploy failure reason
   optional string deploy_failure_id = 21;
+  // Whether the user configured AC to fall back to Run
+  optional bool apply_changes_fallback_to_run = 22;
+  // Whether the user configured ACC to fall back to Run
+  optional bool apply_code_changes_fallback_to_run = 23;
 }
 
 message LaunchTaskDetail {
@@ -6130,6 +6383,9 @@ message DataBindingEvent {
   // Set if |type| is |DATA_BINDING_BUILD_EVENT| or |DATA_BINDING_SYNC_EVENT|
   optional DataBindingPollMetadata poll_metadata = 3;
 
+  // Collects view binding layout count when |type| = |DATA_BINDING_BUILD_EVENT|
+  optional ViewBindingPollMetadata view_binding_metadata = 4;
+
   // Type of data binding event
   enum EventType {
     UNKNOWN_TYPE = 0;
@@ -6161,13 +6417,12 @@ message DataBindingEvent {
     DATA_BINDING_CONTEXT_XML_TAG = 3;
   }
 
-  // All of the stats we actively poll for
+  // Data binding stats we actively poll for
   message DataBindingPollMetadata {
     /// These are set when the message is a |DATA_BINDING_SYNC_EVENT|
     // Whether user enabled data binding in gradle file.
     optional bool data_binding_enabled = 1;
 
-    /// These are set when the message is a |DATA_BINDING_BUILD_EVENT|
     // # of data binding layout xmls
     optional uint32 layout_xml_count = 2;
 
@@ -6182,6 +6437,12 @@ message DataBindingEvent {
 
     // # of data binding related errors generated by compiler
     optional uint32 error_count = 6;
+
+    // # of modules in this project
+    optional uint32 module_count = 7;
+
+    // # of modules with data binding enabled
+    optional uint32 data_binding_enabled_module_count = 8;
 
     // Observable type metrics
     optional ObservableMetrics observable_metrics = 101;
@@ -6215,6 +6476,15 @@ message DataBindingEvent {
       // # of live data objects
       optional uint32 live_data_object_count = 1;
     }
+  }
+
+  // View binding stats we poll for
+  message ViewBindingPollMetadata {
+    // Whether user enabled view binding in gradle dsl.
+    optional bool view_binding_enabled = 1;
+
+    // Number of view binding layout xmls.
+    optional uint32 layout_xml_count = 2;
   }
 }
 
@@ -6358,4 +6628,202 @@ message WindowsDefenderStatus {
     SOME_EXCLUDED = 3;
     NONE_EXCLUDED = 4;
   }
+}
+
+// Event for memory settings configuration and recommendation
+message MemorySettingsEvent {
+  // Kind of the event.
+  optional EventKind kind = 1;
+  // Current memory settings.
+  optional MemorySettings current = 2;
+  // Recommended memory settings.
+  optional MemorySettings recommended = 3;
+  // New memory settings changed by users (may or may not be saved yet).
+  optional MemorySettings changed = 4;
+
+  enum EventKind {
+    UNKNOWN = 0;
+    // Configuration dialog shown.
+    SHOW_CONFIG_DIALOG = 1;
+    // Users change the settings and save.
+    SETTINGS_CHANGE_SAVED = 2;
+    // Users change the settings but do not save.
+    SETTINGS_CHANGE_CANCELLED = 3;
+    // Session uses the non-default recommended heap size.
+    NON_DEFAULT_RECOMMENDATION_USED = 4;
+    // Users click the "Apply recommendation" button in the memory panel.
+    APPLY_RECOMMENDATION_BUTTON_CLICKED = 5;
+    // Recommendation notification shown.
+    SHOW_RECOMMENDATION = 6;
+    // Users click "Save and Restart" from recommendation notification.
+    SAVE_AND_RESTART = 7;
+    // Users click "Configure" from recommendation notification.
+    CONFIGURE = 8;
+    // Users click "Remind me later" from recommendation notification.
+    REMIND_ME_LATER = 9;
+    // Users click "Do not ask again" from recommendation notification.
+    DO_NOT_ASK = 10;
+  }
+}
+
+message MemorySettings {
+  optional int32 ide_xmx = 1;
+  optional int32 gradle_daemon_xmx = 2;
+  optional int32 kotlin_daemon_xmx = 3;
+}
+
+// Event related to studion update flow
+message StudioUpdateFlowEvent {
+  optional Kind event_kind = 1;
+
+  // Version we are updating to, e.g. "182.5107.16.33.5314842"
+  optional string studio_new_version = 2;
+
+  // Set when event_kind = DIALOG_OPEN
+  optional DialogTrigger dialog_trigger = 3;
+
+  // Set when event_kind = DIALOG_CLICK_ACTION
+  // Some extra buttons can be added to the update dialog with
+  // the build xml entry. The action is to open provided link in the browser.
+  // Typically it is 'Release notes' button, but since it is not fixed,
+  // seems good to send the name of the action.
+  // This text comes as part of an update information xml from Google
+  // and does not contain any end user information.
+  optional string action_name = 4;
+
+  enum Kind {
+    UNKNOWN_KIND = 0;
+    NOTIFICATION_SHOWN = 1;
+    // User clicked on the notification update action
+    NOTIFICATION_UPDATE_LINK_CLICKED = 2;
+    // Update dialog was opened
+    DIALOG_OPEN = 3;
+
+    // Dialog button clicks
+    DIALOG_CLICK_UPDATE = 4;
+    DIALOG_CLICK_IGNORE = 5;
+    DIALOG_CLICK_LATER = 6;
+    // Other non-fixed actions (typically 'Release notes' link)
+    DIALOG_CLICK_ACTION = 7;
+
+    // Patch download result
+    PATCH_DOWNLOAD_SUCCESS = 8;
+    PATCH_DOWNLOAD_FAILURE = 9;
+  }
+
+  // What triggers update dialog to open
+  enum DialogTrigger {
+    UNKNOWN_DIALOG_TRIGER = 0;
+    // User clicks check for updates action to open dialog
+    MANUAL = 1;
+    // User clicked on the notification update action to open dialog
+    NOTIFICATION = 2;
+  }
+}
+
+// Contains information on what we show on the build output window when the
+// build fails.
+message BuildErrorMessage {
+  enum ErrorType {
+    UNKNOWN_ERROR_TYPE = 0;
+    JAVA_COMPILER = 1;
+    KOTLIN_COMPILER = 2;
+    CLANG = 3;
+    CMAKE = 4;
+    DATA_BINDING = 5;
+    XML_PARSER = 6;
+    AAPT = 7;
+    D8 = 8;
+    R8 = 9;
+    RESOURCE_AND_ASSET_MERGER = 10;
+    GENERAL_ANDROID_GRADLE_PLUGIN = 11;
+  }
+
+  enum FileType {
+    UNKNOWN_FILE_TYPE = 0;
+    // The file location is pointing to a build generated file.
+    BUILD_GENERATED_FILE = 1;
+    // The file location is pointing to a project file.
+    PROJECT_FILE = 2;
+  }
+
+  // The tool produced the error.
+  optional ErrorType error_shown_type = 1;
+  // Whether the file location was parsed and shown successfully.
+  optional bool file_location_included = 2;
+  // The included file type.
+  optional FileType file_included_type = 3;
+  // Whether the line location in file was parsed and shown successfully.
+  optional bool line_location_included = 4;
+}
+
+// Statistics for what we show on the build output window.
+message BuildOutputWindowStats {
+  repeated BuildErrorMessage build_error_messages = 1;
+}
+
+// Statistics for Android Gradle Plugin DSL methods that are invoked in
+// build scripts or by other Gradle plugins.
+message GradlePluginDslUsageStats {
+  // A data point for each DSL method the user invokes.
+  repeated DslElementUse dsl_element_use = 1;
+
+  // Statistics for an individual Android Gradle Plugin DSL method
+  message DslElementUse {
+    // The DSL method called in the build script or by another Gradle Plugin
+    // This is an enum in android git:
+    // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+    // DslElementType
+    optional int32 type = 1;
+    // The number of times this method is called within this multi-project build
+    optional int32 count = 2;
+  }
+}
+
+// Information about how long DefaultActivityLocator blocked on getting
+// a list of activities from the merged manifest.
+message DefaultActivityLocatorStats {
+  // Whether getting information from the merged manifest blocked the UI thread.
+  optional bool blocks_ui_thread = 1;
+  // Whether we're leveraging an index to determine the module's activities.
+  optional bool index_based = 2;
+  // Whether DefaultActivityLocator used a potentially stale manifest (as
+  // opposed to blocking on a fresh view of the merged manifest).
+  optional bool used_potentially_stale_manifest = 3;
+  // How long it took us to obtain the list of activiteis
+  // from the merged manifest.
+  optional uint64 latency_ms = 4;
+}
+
+// Details for motion layout editor events
+message MotionLayoutEditorEvent {
+  // List of event types available in motion layout editor
+  enum MotionLayoutEditorEventType {
+    UNKNOWN_EVENT_TYPE = 0;
+    CREATE_CONSTRAINT = 1;
+    CREATE_TRANSITION = 2;
+    CREATE_ONCLICK = 3;
+    TOGGLE_LAYOUT = 4;
+    CREATE_KEY_POSITION = 5;
+    CREATE_KEY_ATTRIBUTES = 6;
+    CREATE_KEY_CYCLE = 7;
+    CREATE_KEY_TRIGGER = 8;
+    CREATE_KEY_TIME_CYCLE = 9;
+    CONVERT_TO_CONSTRAINT = 10;
+    CONVERT_TO_SECTIONED_CONSTRAINT = 11;
+    CLEAR_CONSTRAINT = 12;
+    SHOW_TIMELINE = 13;
+    SHOW_CONSTRAINTSET = 14;
+    SHOW_LAYOUT = 15;
+    CONSTRAINT_TABLE_SELECT = 16;
+    LAYOUT_TABLE_SELECT = 17;
+    TIMELINE_TABLE_SELECT = 18;
+    MOTION_PLAY = 19;
+    MOTION_SPEED = 20;
+    MOTION_PAUSE = 21;
+    MOTION_DIRETION_TOGGLE = 22;
+  }
+
+  // Type of event
+  optional MotionLayoutEditorEventType type = 1;
 }
