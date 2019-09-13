@@ -140,6 +140,7 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
     sendMostRecentUiLocation();
+    ++mSetLocCount;
 }
 
 // Populate the QListWidget with the points that are found on disk
@@ -581,6 +582,33 @@ void LocationPage::handle_importGpxKmlButton_clicked() {
     mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
 }
 
+void LocationPage::sendMetrics() {
+    const uint64_t now = android::base::System::get()->getHighResTimeUs();
+
+    // Reset the metrics reporting limiter if enough time has passed.
+    if (mReportWindowStartUs + kReportWindowDurationUs < now) {
+        mReportWindowStartUs = now;
+        mReportWindowCount = 0;
+    }
+
+    if (mReportWindowCount > kMaxReportsPerWindow) {
+        LOG(INFO) << "Dropping metrics, too many recent reports.";
+        return;
+    }
+
+    ++mReportWindowCount;
+
+    android_studio::EmulatorLocationV2 metrics;
+    metrics.set_loc_count(mSetLocCount);
+    metrics.play_route_count(mPlayRouteCount);
+    android::metrics::MetricsReporter::get().report(
+            [metrics](android_studio::AndroidStudioEvent* event) {
+                event->mutable_emulator_details()
+                        ->mutable_location_v2()
+                        ->CopyFrom(metrics);
+            });
+}
+
 void RouteSenderThread::sendRouteToMap(const LocationPage::RouteListElement* const routeElement,
                                        MapBridge* mapBridge) {
     mRouteElement = routeElement;
@@ -660,4 +688,5 @@ void RouteSenderThread::run() { }
 RouteSenderThread* RouteSenderThread::newInstance(const QObject* handler,
                                                   const char* finished_slot) { return nullptr; }
 void LocationPage::routeSendingFinished(bool ok) { }
+void LocationPage::sendMetrics() { }
 #endif // !USE_WEBENGINE
