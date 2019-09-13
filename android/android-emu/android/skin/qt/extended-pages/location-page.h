@@ -93,6 +93,8 @@ public:
     explicit LocationPage(QWidget *parent = 0);
     ~LocationPage();
 
+    void sendMetrics();
+
     static void setLocationAgent(const QAndroidLocationAgent* agent);
     static void shutDown();
 
@@ -299,6 +301,9 @@ private:
     std::unique_ptr<QWebChannel> mWebChannel;
 
     std::unique_ptr<MapBridge> mMapBridge;
+
+    uint32_t mSetLocCount = 0;
+    uint32_t mPlayRouteCount = 0;
 
     friend class RouteSenderThread;
 };
