@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27de0486_4fcb9f4e",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-13T18:26:24Z",
+      "side": 1,
+      "message": "Not used?",
+      "range": {
+        "startLine": 70,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 29
+      },
+      "revId": "d4edaddc18a122870f9530ed0a465b2ef069f4ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dde1a432_b234c78b",
+        "filename": "android/android-emu/android/mp4/SensorLocationEventProvider.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-09-13T18:26:24Z",
+      "side": 1,
+      "message": "Both of these are unsigned types (uint64_t), the result of this will never be negative.  This was also hidden by \"auto\" (which is why I\u0027m not a big fan of it).\n\nThe result is that if currentTimestamp \u003c mPreviousTimestamp, this will result in very large positive number, effectively making the std::max a no-op.\n\nTo fix:\n*outDelay \u003d (currentTimestamp \u003c mPreviousTimestamp) ? 0 : currentTimestamp - mPreviousTimestamp;",
+      "range": {
+        "startLine": 303,
+        "startChar": 21,
+        "endLine": 303,
+        "endChar": 58
+      },
+      "revId": "d4edaddc18a122870f9530ed0a465b2ef069f4ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
