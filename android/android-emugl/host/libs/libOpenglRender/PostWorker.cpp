@@ -7,6 +7,15 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#define POST_DEBUG 0
+#if POST_DEBUG >= 1
+#define DD(fmt, ...) \
+    fprintf(stderr, "%s:%d| " fmt, __func__, __LINE__, ##__VA_ARGS__)
+#else
+#define DD(fmt, ...) (void)0
+#endif
+
+
 PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mFb(FrameBuffer::getFB()),
     mBindSubwin(cb) {}
@@ -129,10 +138,10 @@ void PostWorker::compose(ComposeDevice* p) {
                                    mFb->findColorBuffer(p->targetHandle)->getTexture(),
                                    0);
 
-    DBG("worker compose %d layers\n", p->numLayers);
+    DD("worker compose %d layers\n", p->numLayers);
     mFb->getTextureDraw()->prepareForDrawLayer();
     for (int i = 0; i < p->numLayers; i++, l++) {
-        DBG("\tcomposeMode %d color %d %d %d %d blendMode "
+        DD("\tcomposeMode %d color %d %d %d %d blendMode "
                "%d alpha %f transform %d %d %d %d %d "
                "%f %f %f %f\n",
                l->composeMode, l->color.r, l->color.g, l->color.b,
