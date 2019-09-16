@@ -19,6 +19,8 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/location/MapsKey.h"
+#include "android/location/MapsKeyFileParser.h"
+#include "android/location/StudioMapsKey.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -121,21 +123,35 @@ LocationPage::LocationPage(QWidget *parent) :
 
 #ifdef USE_WEBENGINE
     if (feature_is_enabled(kFeature_LocationUiV2)) {
-        auto keyHolder = android::location::MapsKey::get();
+        useLocationV2 = true;
+        auto mapsKeyHolder = android::location::MapsKey::get();
         // Always prefer user-provided maps key
-        mMapsApiKey = strlen(keyHolder->userMapsKey()) > 0 ?
-                      keyHolder->userMapsKey() :
-                      keyHolder->androidStudioMapsKey();
-        qDebug() << "key=" << mMapsApiKey;
-        if (!mMapsApiKey.isEmpty()) {
-            // There is a non-empty key
-            useLocationV2 = true;
+        if (strlen(mapsKeyHolder->userMapsKey()) == 0) {
+            QObject::connect(this,
+                             &LocationPage::onMapsKeyUpdated,
+                             this,
+                             &LocationPage::setUpWebEngine);
+            auto studioMapsKey = android::location::StudioMapsKey::create(
+                [](android::base::StringView mapsFile, void* opaque) {
+                    auto s = reinterpret_cast<LocationPage*>(opaque);
+                    if (!mapsFile.empty()) {
+                        auto mapsKeyHolder = android::location::MapsKey::get();
+                        auto mapsKey = android::location::parseMapsKeyFromFile(
+                                mapsFile);
+                        mapsKeyHolder->setAndroidStudioMapsKey(mapsKey);
+                        s->mMapsApiKey = mapsKeyHolder->androidStudioMapsKey();
+                    }
+                    emit s->onMapsKeyUpdated();
+                }, this);
+        } else {
+            mMapsApiKey = mapsKeyHolder->userMapsKey();
         }
     }
 #endif
 
     if (useLocationV2) {
         // Hide the old tab on the Location page
+        mOfflineTab = mUi->locationTabs->widget(3);
         mUi->locationTabs->removeTab(3);
         // Hide the V2 widgets that are not functional yet
         mUi->locationTabs->removeTab(2); // "Settings"
@@ -153,9 +169,6 @@ LocationPage::LocationPage(QWidget *parent) :
 #ifdef USE_WEBENGINE
         mTimer.setSingleShot(true);
         QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
-
-        setUpWebEngine(); // Set up the Points and Routes web engines
-
         scanForPoints();
         scanForRoutes();
 
@@ -238,6 +251,9 @@ LocationPage::~LocationPage() {
     }
     mUi->loc_pathTable->blockSignals(true);
     mUi->loc_pathTable->clear();
+    if (mOfflineTab != nullptr) {
+        mOfflineTab->deleteLater();
+    }
 }
 
 static void locationAgentQtSettingsWriter(double lat, double lon, double alt,

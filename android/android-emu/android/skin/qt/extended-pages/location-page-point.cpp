@@ -32,6 +32,7 @@
 #include <QMovie>
 #include <QPainter>
 #include <QPlainTextEdit>
+#include <QSettings>
 #include <QWebEngineScriptCollection>
 
 #include <fstream>
@@ -425,6 +426,11 @@ void LocationPage::writePointProtobufFullPath(
 }
 
 void LocationPage::setUpWebEngine() {
+    if (mMapsApiKey.isEmpty()) {
+        fallbackToOfflineUi();
+        return;
+    }
+
     double initialLat, initialLng, unusedAlt, unusedVelocity, unusedHeading;
     mMapBridge.reset(new MapBridge(this));
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
@@ -547,6 +553,59 @@ void LocationPage::setUpWebEngine() {
     }
 }
 
+void LocationPage::fallbackToOfflineUi() {
+    mUi->locationTabs->clear();
+    mUi->locationTabs->addTab(mOfflineTab, "");
+    mUi->loc_latitudeInput->setMinValue(-90.0);
+    mUi->loc_latitudeInput->setMaxValue(90.0);
+    mTimer.setSingleShot(true);
+    QObject::disconnect(&mTimer, &QTimer::timeout, 0, 0);
+    QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
+    QObject::connect(this, &LocationPage::locationUpdateRequired,
+                     this, &LocationPage::updateDisplayedLocation);
+    QObject::connect(this, &LocationPage::populateNextGeoDataChunk,
+                     this, &LocationPage::populateTableByChunks,
+                     Qt::QueuedConnection);
+
+    setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
+
+    // Set the GUI to the current values
+    double curLat, curLon, curAlt, curVelocity, curHeading;
+    getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
+    updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
+
+    mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
+    mUi->loc_speedInput->setText(QString::number(curVelocity, 'f', 1));
+    mUi->loc_latitudeInput->setValue(curLat);
+    mUi->loc_longitudeInput->setValue(curLon);
+
+    QSettings settings;
+    mUi->loc_playbackSpeed->setCurrentIndex(
+            getLocationPlaybackSpeedFromSettings());
+    mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    QString location_data_file =
+        getLocationPlaybackFilePathFromSettings();
+    mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(
+            this,
+            SLOT(geoDataThreadStarted()),
+            SLOT(startupGeoDataThreadFinished(QString, bool, QString))));
+    mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+
+    using android::metrics::PeriodicReporter;
+    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+            60 * 10 * 1000,  // reporting period
+            [this](android_studio::AndroidStudioEvent* event) {
+                if (mLocationUsed) {
+                    event->mutable_emulator_details()
+                            ->mutable_used_features()
+                            ->set_gps(true);
+                    mMetricsReportingToken.reset();  // Report it only once.
+                    return true;
+                }
+                return false;
+    });
+}
+
 void LocationPage::points_updateTheme() {
     for (int i = 0; i < mUi->loc_pointList->count(); ++i) {
         PointWidgetItem* item = getItemWidget(mUi->loc_pointList, mUi->loc_pointList->item(i));
@@ -658,6 +717,7 @@ void LocationPage::writePointProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::PointMetadata& protobuf) { }
 void LocationPage::setUpWebEngine() { }
+void LocationPage::fallbackToOfflineUi() { }
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) { }
 void LocationPage::points_updateTheme() { }
 void LocationPage::handle_importGpxKmlButton_clicked() { }
