@@ -128,8 +128,10 @@ signals:
                                 double velocity, double heading);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
+    void onMapsKeyUpdated();
 
 private slots:
+    void setUpWebEngine();
     void map_saveRoute();
 
 #ifdef USE_WEBENGINE
@@ -197,6 +199,7 @@ private slots:
     void routeWidget_editButtonClicked(CCListItem* listItem);
 
 private:
+    void fallbackToOfflineUi();
     void handle_importGpxKmlButton_clicked();
     void saveGpxKmlPoint(double lat, double lng, double elevation);
     void saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString);
@@ -242,7 +245,6 @@ private:
     bool parseGpxKmlJson(const QJsonDocument& jsonDoc, const QString& description);
 
     void writeRouteJsonFile(const std::string& pathOfProtoFile, const std::string& jsonString);
-    void setUpWebEngine();
 
     static bool validateCell(QTableWidget* table,
                              int row,
@@ -305,6 +307,7 @@ private:
     uint32_t mSetLocCount = 0;
     uint32_t mPlayRouteCount = 0;
 
+    QWidget* mOfflineTab = nullptr;
     friend class RouteSenderThread;
 };
 

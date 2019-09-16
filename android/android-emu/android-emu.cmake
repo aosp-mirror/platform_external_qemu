@@ -128,6 +128,7 @@ set(android-emu-common
     android/location/MapsKeyFileParser.cpp
     android/location/Point.cpp
     android/location/Route.cpp
+    android/location/StudioMapsKey.cpp
     android/main-help.cpp
     android/main-emugl.cpp
     android/main-kernel-parameters.cpp
