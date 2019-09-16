@@ -233,7 +233,7 @@ html, body {
 }
 
 .routeCreatorOverlay {
-  height: 204px;
+  height: auto;
 }
 
 .routeCreatorOverlayAutoCompleteVisible {
@@ -396,8 +396,8 @@ html, body {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  margin-left: 36px;
-  margin-right: 36px;
+  margin-left: 16px;
+  margin-right: 16px;
 }
 
 .reverse-icon {
@@ -406,7 +406,7 @@ html, body {
 
 #routeCreatorOverlay #searchResultsOverlay {
   width: 100%;
-  height: 100%;
+  height: auto;
   background-color: #fff;
   padding-top: 12px;
   display: none;
