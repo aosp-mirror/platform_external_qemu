@@ -86,6 +86,7 @@ png_add_test(NAME pngtest COMMAND pngtest FILES "${PNGTEST_PNG}")
 
 android_add_executable(pngvalid)
 target_link_libraries(pngvalid PRIVATE  png)
+target_compile_options(pngvalid PRIVATE -Wno-incompatible-pointer-types-discards-qualifiers)
 
 png_add_test(NAME pngvalid-gamma-16-to-8 COMMAND pngvalid OPTIONS --gamma-16-to-8)
 png_add_test(NAME pngvalid-gamma-alpha-mode COMMAND pngvalid OPTIONS --gamma-alpha-mode)
