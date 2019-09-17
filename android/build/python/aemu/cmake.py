@@ -90,6 +90,11 @@ def configure():
     cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
+
+    # Make darwin and msvc builds have QtWebEngine support for the default
+    # build.
+    if FLAGS.target == "darwin" or FLAGS.target == "windows":
+        FLAGS.qtwebengine = True
     cmake_cmd += ['-DQTWEBENGINE=%s' % FLAGS.qtwebengine]
 
     if FLAGS.cmake_option:
