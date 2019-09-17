@@ -126,7 +126,9 @@ endif()
 # Note that clang in windows act as a drop in replacement for cl
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
-
+  if (DARWIN_X86_64)
+    add_c_flag("-Werror")
+  endif()
   # If macro expansion goes wrong, we like to see why
   add_c_flag("-fmacro-backtrace-limit=0")
 
@@ -167,6 +169,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wswitch")
   add_c_flag("-Wno-defaulted-function-deleted")
   add_c_flag("-Wno-return-type")
+endif()
+
+if (DARWIN_X86_64)
+  add_c_flag("-Werror")
 endif()
 
 if(WINDOWS_MSVC_X86_64)
