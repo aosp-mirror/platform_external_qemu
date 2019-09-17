@@ -163,12 +163,17 @@ endif()
 # Note that clang in windows act as a drop in replacement for cl
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
+
   # If macro expansion goes wrong, we like to see why
   add_c_flag("-fmacro-backtrace-limit=0")
 
   # Let's not trip over warnings & errors that do not exist on every platform clang-cl != clang-lin != clang-darwin
   add_c_flag("-Wno-unknown-warning-option")
   add_c_flag("-Wno-unknown-argument")
+endif()
+
+if (DARWIN_X86_64)
+  add_c_flag("-Werror")
 endif()
 
 if(WINDOWS_MSVC_X86_64)

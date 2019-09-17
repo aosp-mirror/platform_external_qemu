@@ -18,10 +18,10 @@
 #define MAC_PIXELS_FORMATS_ATTRIBS_H
 
 #include <Cocoa/Cocoa.h>
-NSOpenGLPixelFormatAttribute** getPixelFormatsAttributes(int* size);
+const NSOpenGLPixelFormatAttribute* const* getPixelFormatsAttributes(int* size);
 
 void setCoreProfileLevel(NSOpenGLPixelFormatAttribute level);
 
-NSOpenGLPixelFormatAttribute* getLegacyProfileAttributes();
-NSOpenGLPixelFormatAttribute* getCoreProfileAttributes();
+const NSOpenGLPixelFormatAttribute* const getLegacyProfileAttributes();
+const NSOpenGLPixelFormatAttribute* const  getCoreProfileAttributes();
 #endif
