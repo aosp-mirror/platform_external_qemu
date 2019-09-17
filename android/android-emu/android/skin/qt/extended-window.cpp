@@ -216,6 +216,7 @@ ExtendedWindow::ExtendedWindow(
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
+    mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
 }
 
