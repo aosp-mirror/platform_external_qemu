@@ -100,10 +100,19 @@
      </item>
      <item>
       <layout class="QGridLayout" name="widthHeightDpiBox">
+       <property name="topMargin">
+        <number>8</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>7</number>
+       </property>
        <item row="1" column="2">
         <widget class="QLabel" name="dpiTitle">
          <property name="text">
           <string>Dpi</string>
+         </property>
+         <property name="ColorGroup" stdset="0">
+          <string notr="true">Title</string>
          </property>
         </widget>
        </item>
@@ -112,12 +121,18 @@
          <property name="text">
           <string>Width</string>
          </property>
+         <property name="ColorGroup" stdset="0">
+          <string notr="true">Title</string>
+         </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="heightTitle">
          <property name="text">
           <string>Height</string>
+         </property>
+         <property name="ColorGroup" stdset="0">
+          <string notr="true">Title</string>
          </property>
         </widget>
        </item>
