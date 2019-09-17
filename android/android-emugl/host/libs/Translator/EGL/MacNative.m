@@ -63,7 +63,7 @@
 }
 @end
 
-int getAttrListLength(NSOpenGLPixelFormatAttribute* list) {
+int getAttrListLength(const NSOpenGLPixelFormatAttribute* list) {
     int count = 0;
     while (list[count++] != 0);
     return count ? (count - 1) : 0;
@@ -115,7 +115,7 @@ int setupCoreProfileNativeFormats() {
 
 int getNumPixelFormats(){
     int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists =
+    const NSOpenGLPixelFormatAttribute* const* attrib_lists =
         getPixelFormatsAttributes(&size);
     return size;
 }
@@ -123,15 +123,15 @@ int getNumPixelFormats(){
 void* finalizePixelFormat(bool coreProfile,
                           int attribsId) {
     int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists =
+    const NSOpenGLPixelFormatAttribute* const* attrib_lists =
         getPixelFormatsAttributes(&size);
 
     assert(attribsId < size);
 
-    NSOpenGLPixelFormatAttribute* attrs =
+    const NSOpenGLPixelFormatAttribute*  attrs =
         attrib_lists[attribsId];
 
-    NSOpenGLPixelFormatAttribute* selected_variant =
+    const NSOpenGLPixelFormatAttribute* selected_variant =
         coreProfile ?
         getCoreProfileAttributes() :
         getLegacyProfileAttributes();
@@ -186,9 +186,9 @@ int getPixelFormatAttrib(int i, int _query) {
     NSOpenGLPixelFormatAttribute query =
         (NSOpenGLPixelFormatAttribute)_query;
     int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
+    const NSOpenGLPixelFormatAttribute* const* attrib_lists = getPixelFormatsAttributes(&size);
     int attributes_num = i % size;
-    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[attributes_num];
+    const NSOpenGLPixelFormatAttribute* attribs = attrib_lists[attributes_num];
     int res = 0;
     while (*attribs) {
         if (sIsKeyValueAttrib(*attribs)) {
