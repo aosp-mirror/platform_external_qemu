@@ -24,7 +24,7 @@ using namespace base;
 static uint64_t next_pow2(uint64_t x) {
     return x == 1 ? 1 : 1 << (64 - __builtin_clzl(x - 1));
 }
-RingStreambuf::RingStreambuf(uint16_t capacity) {
+RingStreambuf::RingStreambuf(uint32_t capacity) {
     uint64_t cap = next_pow2(capacity + 1);
     mRingbuffer.resize(cap);
 }

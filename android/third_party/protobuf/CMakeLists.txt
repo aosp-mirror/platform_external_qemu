@@ -5,8 +5,8 @@ include(android)
 include(prebuilts)
 
 if(NOT TARGET zlib)
-   # Cross build needs zlib for protoc.
-   add_subdirectory(../zlib zlib)
+  # Cross build needs zlib for protoc.
+  add_subdirectory(../zlib zlib)
 endif()
 
 set(protobuf_PUBLIC_COMPILE_DEFS -DGOOGLE_PROTOBUF_CMAKE_BUILD -DGOOGLE_PROTOBUF_NO_RTTI)
@@ -18,7 +18,7 @@ if(NOT WINDOWS_MSVC_X86_64)
 endif()
 
 # Disable sanitizers, as we will be running protoc, which has some ODR violations.
-set(protobuf_PRIVATE_COMPILE_OPTS -Wno-enum-compare-switch -DANDROID_EMULATOR=1)
+set(protobuf_PRIVATE_COMPILE_OPTS -Wno-enum-compare-switch -Wno-inconsistent-missing-override -Wno-unused-private-field -DANDROID_EMULATOR=1)
 
 set(protobuf_DEBUG_POSTFIX "d" CACHE STRING "Default debug postfix")
 
@@ -148,7 +148,7 @@ target_compile_definitions(libprotobuf PUBLIC ${protobuf_PUBLIC_COMPILE_DEFS})
 target_compile_definitions(libprotobuf PRIVATE ${protobuf_PRIVATE_COMPILE_DEFS})
 target_compile_options(libprotobuf PRIVATE ${protobuf_PRIVATE_COMPILE_OPTS})
 android_target_compile_options(libprotobuf windows_msvc-x86_64 PUBLIC -Wno-microsoft-unqualified-friend)
-target_link_libraries(libprotobuf PUBLIC zlib  libprotobuf_lite)
+target_link_libraries(libprotobuf PUBLIC zlib libprotobuf_lite)
 # Let's not name things liblibxx etc
 set_target_properties(libprotobuf PROPERTIES PREFIX "")
 
@@ -181,7 +181,8 @@ if(NOT CROSSCOMPILE)
   target_compile_definitions(libprotoc PRIVATE ${protobuf_PRIVATE_COMPILE_DEFS})
   target_compile_options(libprotoc PRIVATE ${protobuf_PRIVATE_COMPILE_OPTS})
   target_include_directories(libprotoc
-                             PUBLIC ${protobuf_source_dir}/src ${protobuf_BINARY_DIR} ${protobuf_source_dir}/config ${protobuf_source_dir})
+                             PUBLIC ${protobuf_source_dir}/src ${protobuf_BINARY_DIR} ${protobuf_source_dir}/config
+                                    ${protobuf_source_dir})
   # Let's not name things liblibxx etc
   set_target_properties(libprotoc PROPERTIES PREFIX "")
 
@@ -216,7 +217,7 @@ endif()
 
 # Unit tests, only active when we are not cross compiling
 if(NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG OR NOT TARGET gmock_main)
-    message(STATUS "Disabling protobuf tests when cross compiling")
+  message(STATUS "Disabling protobuf tests when cross compiling")
 else()
   set(lite_test_protos
       # AUTOGEN(lite_test_protos)
@@ -279,8 +280,7 @@ else()
     add_custom_command(OUTPUT ${protobuf_source_dir}/src/${dirname}/${basename}.pb.cc
                        DEPENDS protoc ${protobuf_source_dir}/src/${dirname}/${basename}.proto
                        COMMAND protoc ${protobuf_source_dir}/src/${dirname}/${basename}.proto
-                               --proto_path=${protobuf_source_dir}/src
-                               --cpp_out=${protobuf_source_dir}/src)
+                               --proto_path=${protobuf_source_dir}/src --cpp_out=${protobuf_source_dir}/src)
   endmacro(compile_proto_file)
 
   set(lite_test_proto_files)
@@ -298,9 +298,9 @@ else()
   endforeach(proto_file)
 
   set(protobuf_test_plugin_src ${protobuf_source_dir}/src/google/protobuf/compiler/mock_code_generator.cc
-      ${protobuf_source_dir}/src/google/protobuf/testing/file.cc
-      ${protobuf_source_dir}/src/google/protobuf/testing/file.h
-      ${protobuf_source_dir}/src/google/protobuf/compiler/test_plugin.cc)
+                               ${protobuf_source_dir}/src/google/protobuf/testing/file.cc
+                               ${protobuf_source_dir}/src/google/protobuf/testing/file.h
+                               ${protobuf_source_dir}/src/google/protobuf/compiler/test_plugin.cc)
 
   android_add_executable(protobuf_test_plugin)
   target_link_libraries(protobuf_test_plugin PRIVATE libprotoc libprotobuf gmock_main gtest)
@@ -388,7 +388,8 @@ else()
   android_add_test(protobuf_tests)
   target_link_libraries(protobuf_tests PRIVATE libprotoc libprotobuf zlib gmock_main)
   target_compile_options(protobuf_tests
-                         PRIVATE -DGOOGLE_PROTOBUF_TEST_PLUGIN_PATH="$<TARGET_FILE:protobuf_test_plugin>")
+                         PRIVATE -DGOOGLE_PROTOBUF_TEST_PLUGIN_PATH="$<TARGET_FILE:protobuf_test_plugin>"
+                                 -Wno-inconsistent-missing-override -Wno-deprecated-declarations)
   set_tests_properties(protobuf_tests PROPERTIES WORKING_DIRECTORY ${protobuf_source_dir})
   add_dependencies(protobuf_tests protobuf_test_plugin)
 endif()

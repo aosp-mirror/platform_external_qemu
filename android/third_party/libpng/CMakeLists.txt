@@ -34,6 +34,7 @@ android_target_link_libraries(png linux-x86_64 PRIVATE m)
 android_target_compile_options(png darwin-x86_64 PRIVATE -Wno-unguarded-availability-new)
 android_target_compile_options(png windows_msvc-x86_64 PRIVATE -Wno-nonportable-system-include-path
                                                                -Wno-unused-macros -Wno-sign-conversion -Wno-float-equal
+                                                               -Wno-extra-semi-stmt
                                                                -Wno-language-extension-token -Wno-reserved-id-macro)
 
 function(png_add_test)
@@ -112,6 +113,7 @@ png_add_test(NAME pngvalid-transform COMMAND pngvalid OPTIONS --transform)
 
 android_add_executable(pngstest)
 target_link_libraries(pngstest PRIVATE  png)
+target_compile_options(pngstest PRIVATE "-Wno-tautological-constant-out-of-range-compare")
 
 foreach(gamma_type 1.8 linear none sRGB)
   foreach(alpha_type none alpha)

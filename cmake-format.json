@@ -6,7 +6,9 @@
     0,
     1,
     2,
-    3
+    3,
+    4,
+    5
   ],
   "command_case": "lower",
   "additional_commands": {
@@ -28,6 +30,7 @@
   "max_subargs_per_line": 5,
   "fence_pattern": "^\\s*([`~]{3}[`~]*)(.*)$",
   "enable_markup": true,
+  "enable_sort": true,
   "ruler_pattern": "^\\s*[^\\w\\s]{3}.*[^\\w\\s]{3}$",
   "tab_size": 2,
   "keyword_case": "unchanged",
