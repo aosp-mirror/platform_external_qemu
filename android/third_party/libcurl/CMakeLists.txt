@@ -141,17 +141,14 @@ set(curl_src
     ${CURL_SRC_DIR}/urlapi.c)
 
 android_add_library(curl)
-target_compile_definitions(curl PRIVATE  -DBUILDING_LIBCURL -DCURL_HIDDEN_SYMBOLS -DOS=\"${ANDROID_TARGET_TAG}\")
+target_compile_definitions(curl PRIVATE -DBUILDING_LIBCURL -DCURL_HIDDEN_SYMBOLS -DOS=\"${ANDROID_TARGET_TAG}\")
 target_compile_definitions(curl PUBLIC -DCURL_STATICLIB)
 android_target_compile_definitions(curl darwin-x86_64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl linux-x86_64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl windows-x86_64 PRIVATE -DWIN32 -DHAVE_CONFIG_H)
-android_target_compile_definitions(curl
-                                   windows_msvc-x86_64
-                                   PRIVATE
-                                   -DWIN32
-                                   -DBUILDING_LIBCURL
-                                   # -DUSE_OPENSSL # We will use native windows SSL for now, as our prebuilt libs are incomplete.
+android_target_compile_definitions(curl windows_msvc-x86_64 PRIVATE -DWIN32 -DBUILDING_LIBCURL
+                                   # -DUSE_OPENSSL # We will use native windows SSL for now, as our prebuilt libs are
+                                   # incomplete.
                                    -DHAVE_ZLIB_H
                                    -DHAVE_ZLIB
                                    -DHAVE_LIBZ
@@ -161,7 +158,7 @@ android_target_compile_definitions(curl
                                    -DUSE_IPV6
                                    -DUSE_WINDOWS_SSPI
                                    -DWIN64)
-target_compile_options(curl PRIVATE -fvisibility=default)
+target_compile_options(curl PRIVATE -fvisibility=default "-Wno-macro-redefined" "-Wno-string-plus-int")
 target_include_directories(curl
                            PRIVATE ${CMAKE_CURRENT_LIST_DIR}/${ANDROID_TARGET_TAG} # Make sure this one is first, so we
                                                                                    # can pick up the right config..

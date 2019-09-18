@@ -117,7 +117,7 @@ public:
 
     void sendFollowUpAsyncResponse(uint32_t async_id,
                                 android::videoinjection::VideoInjectionResult result,
-                                bool isCompleted, const std::string& errorDetails);
+                                bool isCompleted, const std::string& errorDetails) override;
 
 private:
     Lock mLock;

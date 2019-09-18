@@ -19,7 +19,7 @@ set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
 
 # Checks to make sure the TAG is valid.
 function(_check_target_tag TAG)
-  set(VALID_TARGETS windows windows-x86_64 windows_msvc-x86_64 linux-x86_64 darwin-x86_64 all)
+  set(VALID_TARGETS windows windows-x86_64 windows_msvc-x86_64 linux-x86_64 darwin-x86_64 all Clang)
   if(NOT (TAG IN_LIST VALID_TARGETS))
      message(FATAL_ERROR "The target ${TAG} does not exist, has to be one of: ${VALID_TARGETS}")
   endif()
@@ -160,6 +160,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_options.html) The only difference is that the definitions
 # will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
 function(android_target_compile_options TGT OS MODIFIER ITEMS)
+  _check_target_tag(${OS})
   if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_compile_options(${TGT} ${MODIFIER} "${ITEMS};${ARGN}")
   endif()

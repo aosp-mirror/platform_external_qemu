@@ -27,7 +27,7 @@ static const GLfloat kGLES2TestPolygonOffset[] = {0.5f, 0.5f};
 
 class SnapshotGlLineWidthTest : public SnapshotSetValueTest<GLfloat>,
                                 public ::testing::WithParamInterface<GLfloat> {
-    void stateCheck(GLfloat expected) {
+    void stateCheck(GLfloat expected) override {
         GLfloat lineWidthRange[2];
         gl->glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
 
@@ -52,7 +52,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 
 class SnapshotGlCullFaceTest : public SnapshotSetValueTest<GLenum>,
                                public ::testing::WithParamInterface<GLenum> {
-    void stateCheck(GLenum expected) {
+    void stateCheck(GLenum expected) override {
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_CULL_FACE_MODE, expected));
     }
     void stateChange() override { gl->glCullFace(GetParam()); }
@@ -69,7 +69,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 
 class SnapshotGlFrontFaceTest : public SnapshotSetValueTest<GLenum>,
                                 public ::testing::WithParamInterface<GLenum> {
-    void stateCheck(GLenum expected) {
+    void stateCheck(GLenum expected) override {
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_FRONT_FACE, expected));
     }
     void stateChange() override { gl->glFrontFace(GetParam()); }
@@ -87,7 +87,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 class SnapshotGlPolygonOffsetTest
     : public SnapshotSetValueTest<GLfloat*>,
       public ::testing::WithParamInterface<const GLfloat*> {
-    void stateCheck(GLfloat* expected) {
+    void stateCheck(GLfloat* expected) override {
         EXPECT_TRUE(compareGlobalGlFloat(gl, GL_POLYGON_OFFSET_FACTOR,
                                          expected[0]));
         EXPECT_TRUE(

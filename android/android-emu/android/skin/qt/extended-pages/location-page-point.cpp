@@ -720,8 +720,8 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
 void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous) { }
-bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) { }
-bool LocationPage::deletePoint(const PointListElement& pointElement) { }
+bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) { return true; }
+bool LocationPage::deletePoint(const PointListElement& pointElement) { return true; }
 std::string LocationPage::writePointProtobufByName(
         const QString& pointFormalName,
         const emulator_location::PointMetadata& protobuf) { return ""; }

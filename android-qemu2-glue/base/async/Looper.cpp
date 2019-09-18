@@ -177,7 +177,7 @@ public:
 
     virtual BaseFdWatch* createFdWatch(int fd,
                                        BaseFdWatch::Callback callback,
-                                       void* opaque) {
+                                       void* opaque) override {
         ::android::base::socketSetNonBlocking(fd);
         return new FdWatch(this, fd, callback, opaque);
     }
@@ -202,7 +202,7 @@ public:
             ::timer_free(mTimer);
         }
 
-        virtual void startRelative(Duration timeout_ms) {
+        virtual void startRelative(Duration timeout_ms) override {
             if (sSkipTimerOps) {
                 return;
             }
@@ -216,7 +216,7 @@ public:
             }
         }
 
-        virtual void startAbsolute(Duration deadline_ms) {
+        virtual void startAbsolute(Duration deadline_ms) override {
             if (sSkipTimerOps) {
                 return;
             }
@@ -228,21 +228,21 @@ public:
             }
         }
 
-        virtual void stop() {
+        virtual void stop() override {
             if (sSkipTimerOps) return;
             ::timer_del(mTimer);
         }
 
-        virtual bool isActive() const {
+        virtual bool isActive() const override {
             if (sSkipTimerOps) return false;
             return timer_pending(mTimer);
         }
 
-        void save(android::base::Stream* stream) const {
+        void save(android::base::Stream* stream) const override {
             stream->putBe64(timer_expire_time_ns(mTimer));
         }
 
-        void load(android::base::Stream* stream) {
+        void load(android::base::Stream* stream) override {
             uint64_t deadline_ns = stream->getBe64();
             if (deadline_ns != -1) {
                 timer_mod_ns(mTimer, deadline_ns);
@@ -261,7 +261,7 @@ public:
     };
 
     virtual BaseTimer* createTimer(BaseTimer::Callback callback,
-                                   void* opaque, ClockType clock) {
+                                   void* opaque, ClockType clock) override {
         return new QemuLooper::Timer(this, callback, opaque, clock);
     }
 
@@ -324,21 +324,21 @@ public:
     //  L O O P E R
     //
 
-    virtual Duration nowMs(ClockType clockType) {
+    virtual Duration nowMs(ClockType clockType) override {
         return qemu_clock_get_ms(toQemuClockType(clockType));
     }
 
-    virtual DurationNs nowNs(ClockType clockType) {
+    virtual DurationNs nowNs(ClockType clockType) override {
         return qemu_clock_get_ns(toQemuClockType(clockType));
     }
 
-    virtual int runWithDeadlineMs(Duration deadline_ms) {
+    virtual int runWithDeadlineMs(Duration deadline_ms) override {
         CHECK(false) << "User cannot call looper_run on a QEMU event loop";
         errno = ENOSYS;
         return -1;
     }
 
-    virtual void forceQuit() {
+    virtual void forceQuit() override {
         qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_SIGNAL);
     }
 

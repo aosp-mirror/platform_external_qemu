@@ -47,8 +47,8 @@ public:
     void scheduleRefresh(int delayMS) {}
     void loadVideoFileWithData(const ::offworld::DatasetInfo& datasetInfo) {}
     void setErrorStatusAndRecordErrorMessage(std::string errorDetails){};
-    bool getErrorStatus(){};
-    std::string getErrorMessage(){};
+    bool getErrorStatus(){ return true; };
+    std::string getErrorMessage(){ return ""; };
 
 private:
     bool mRunning = false;

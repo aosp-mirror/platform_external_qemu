@@ -42,7 +42,7 @@ public:
 
 protected:
     Producer() = default;
-    Producer(Producer&& p) = default;
+    Producer(Producer&& p) = delete;
 
 protected:
     Callback mCallback;
