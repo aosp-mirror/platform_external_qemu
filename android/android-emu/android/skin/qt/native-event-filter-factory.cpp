@@ -17,6 +17,7 @@
 #include "android/skin/qt/native-event-filter-factory.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
@@ -83,9 +84,12 @@ public:
                     keyEv->detail =
                             skin_keycode_native_map_keypad(keyEv->detail);
                 }
-                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                    handleNativeKeyEvent(keyEv->detail, keyEv->state,
-                                         kEventKeyDown);
+                if (android::featurecontrol::isEnabled(
+                            android::featurecontrol::KeycodeForwarding)) {
+                    if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                        handleNativeKeyEvent(keyEv->detail, keyEv->state,
+                                             kEventKeyDown);
+                    }
                 }
             }
         }
@@ -120,15 +124,6 @@ public:
         if (modifiers & XCB_MOD_MASK_LOCK) {
             textInputData.mod |= kKeyModCapsLock;
         }
-        // TODO (wdu@) Use a guest feature flag to determine if the workaround
-        // below needs to run.
-        // Applicable to system images where caps locks is not accepted, in whic
-        // case, substitute caps lock with shift. We simulate "Caps Lock" key
-        // using "Shift" when "Alt" key is not pressed.
-        if ((modifiers & XCB_MOD_MASK_LOCK) && skin_keycode_is_alpha(keycode) &&
-            !(modifiers & mAltMask)) {
-            textInputData.mod |= kKeyModLShift;
-        }
 
         D("Processed keycode %d modifiers 0x%x", keycode,
           skin_event->u.text.mod);
@@ -156,8 +151,11 @@ public:
                     skin_keycode_native_is_keypad(ev->wParam)) {
                     ev->wParam = skin_keycode_native_map_keypad(ev->wParam);
                 }
-                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                    handleNativeKeyEvent(ev->wParam, 0, kEventKeyDown);
+                if (android::featurecontrol::isEnabled(
+                            android::featurecontrol::KeycodeForwarding)) {
+                    if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                        handleNativeKeyEvent(ev->wParam, 0, kEventKeyDown);
+                    }
                 }
             }
         }
@@ -194,16 +192,7 @@ public:
         if (LOWORD(GetKeyState(VK_CAPITAL)) != 0) {
             textInputData.mod |= kKeyModCapsLock;
         }
-        // TODO (wdu@) Use a guest feature flag to determine if the workaround
-        // below needs to run.
-        // Applicable to system images where caps locks is not accepted, in whic
-        // case, substitute caps lock with shift. We simulate "Caps Lock" key
-        // using "Shift" when "Alt" key is not pressed.
-        if (LOWORD(GetKeyState(VK_CAPITAL)) != 0 &&
-            skin_keycode_is_alpha(keycode) &&
-            !(textInputData.mod & kKeyModRAlt)) {
-            textInputData.mod |= kKeyModLShift;
-        }
+
         D("Processed keycode %d modifiers 0x%x", keycode, textInputData.mod);
         EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event);
     }
