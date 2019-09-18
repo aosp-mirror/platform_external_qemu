@@ -1420,7 +1420,8 @@ message EmulatorFeatureFlagState {
     DYNAMIC_MEDIA_PROFILE = 50;
     YUV420_888_to_NV21 = 51;
     YUV_Cache = 52;
-    // Next tag: 53
+    KEYCODE_FORWARDING = 53;
+    // Next tag: 54
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
