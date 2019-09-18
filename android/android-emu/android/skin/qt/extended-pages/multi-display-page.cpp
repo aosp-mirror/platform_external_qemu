@@ -106,7 +106,7 @@ int MultiDisplayPage::findNextItemIndex() {
 
 void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
     int i = findNextItemIndex();
-    if (i < 1) {
+    if (i < 0) {
         return;
     }
     MultiDisplayItem *item = new MultiDisplayItem(i, this);
@@ -115,6 +115,10 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
     mItem[i] = item;
     setSecondaryDisplaysTitle(++mSecondaryItemCount);
     recomputeLayout();
+
+    if (findNextItemIndex() < 0) {
+        mUi->addSecondaryDisplay->setEnabled(false);
+    }
 }
 
 void MultiDisplayPage::deleteSecondaryDisplay(int id) {
@@ -123,6 +127,9 @@ void MultiDisplayPage::deleteSecondaryDisplay(int id) {
     mItem[id] = nullptr;
     setSecondaryDisplaysTitle(--mSecondaryItemCount);
     recomputeLayout();
+    if (!mUi->addSecondaryDisplay->isEnabled()) {
+        mUi->addSecondaryDisplay->setEnabled(true);
+    }
 }
 
 // Called when UI change the display type, or customize display
