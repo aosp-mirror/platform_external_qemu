@@ -161,7 +161,7 @@ android_target_compile_definitions(curl
                                    -DUSE_IPV6
                                    -DUSE_WINDOWS_SSPI
                                    -DWIN64)
-target_compile_options(curl PRIVATE -fvisibility=default)
+target_compile_options(curl PRIVATE -fvisibility=default "-Wno-macro-redefined" "-Wno-string-plus-int")
 target_include_directories(curl
                            PRIVATE ${CMAKE_CURRENT_LIST_DIR}/${ANDROID_TARGET_TAG} # Make sure this one is first, so we
                                                                                    # can pick up the right config..

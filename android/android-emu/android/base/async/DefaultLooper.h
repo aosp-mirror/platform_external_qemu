@@ -120,9 +120,9 @@ public:
 
         void fire();
 
-        void save(Stream* stream) const;
+        void save(Stream* stream) const override;
 
-        void load(Stream* stream);
+        void load(Stream* stream) override;
 
     private:
         Duration mDeadline;

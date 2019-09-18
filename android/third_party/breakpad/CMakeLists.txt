@@ -98,6 +98,7 @@ set(breakpad_disasm_src
 android_add_library(breakpad_disasm)
 android_target_compile_definitions(breakpad_disasm windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 
+android_target_compile_options(breakpad_disasm windows PRIVATE -Wno-int-to-void-pointer-cast)
 #
 # breakpad_common
 set(breakpad_common_src

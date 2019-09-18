@@ -64,7 +64,7 @@ if (WINDOWS_X86_64)
 endif()
 
 if (WINDOWS_MSVC_X86_64)
-    target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3")
+    target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3" "-Wno-incompatible-pointer-types")
 endif()
 
 

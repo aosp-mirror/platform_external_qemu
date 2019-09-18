@@ -8,13 +8,9 @@ if(CROSSCOMPILE)
 endif()
 # Include astc-codec as a subproject.
 
-if(WINDOWS_MSVC_X86_64)
-  # astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did the same for googletest.
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/base astc-codec-base)
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/decoder astc-codec-decoder)
-else()
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec astc-codec)
-endif()
+# astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did the same for googletest.
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/base astc-codec-base)
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/decoder astc-codec-decoder)
 
 # Our magical toolchain will likely not create runnable executables due to libc++ dependencies.
 # So we must make sure we set the runtime_os_properties.

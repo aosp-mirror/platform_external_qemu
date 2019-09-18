@@ -44,7 +44,7 @@ public:
         delete this;
     }
 
-    virtual unsigned onGuestPoll() const { return getFuncs()->poll(mInstance); }
+    virtual unsigned onGuestPoll() const override { return getFuncs()->poll(mInstance); }
 
     virtual int onGuestRecv(AndroidPipeBuffer* buffers,
                             int numBuffers) override {
@@ -60,7 +60,7 @@ public:
         getFuncs()->wakeOn(mInstance, flags);
     }
 
-    virtual void onSave(BaseStream* stream) {
+    virtual void onSave(BaseStream* stream) override {
         if (getFuncs()->save) {
             getFuncs()->save(mInstance, asCStream(stream));
         }

@@ -403,7 +403,7 @@ public:
     virtual ~SourceReaderCallback() { CloseHandle(mFrameAvailable); }
 
     // IUnknown methods
-    STDMETHODIMP QueryInterface(REFIID iid, void** ppv) {
+    STDMETHODIMP QueryInterface(REFIID iid, void** ppv) override {
         if (!ppv) {
             return E_INVALIDARG;
         }
@@ -422,8 +422,8 @@ public:
         return E_NOINTERFACE;
     }
 
-    STDMETHODIMP_(ULONG) AddRef() { return InterlockedIncrement(&mRefCount); }
-    STDMETHODIMP_(ULONG) Release() {
+    STDMETHODIMP_(ULONG) AddRef() override { return InterlockedIncrement(&mRefCount); }
+    STDMETHODIMP_(ULONG) Release() override {
         const ULONG refs = InterlockedDecrement(&mRefCount);
         if (refs == 0) {
             delete this;
