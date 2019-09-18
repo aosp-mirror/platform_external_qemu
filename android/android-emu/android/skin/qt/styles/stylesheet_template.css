@@ -295,8 +295,12 @@ QTabBar::tab:!selected{
     border-bottom: 2px solid %%BKG_COLOR%%;
 }
 QTabBar::tab:disabled {
-    color: transparent;
-    border-bottom: 2px solid transparent
+    color: %%TITLE_COLOR%%;
+    border-bottom: 2px solid %%BKG_COLOR%%;
+}
+QTabBar[ColorGroup="NoHiddenTabOnDisabled"]::tab:disabled {
+    color: %%DISABLED_TITLE_COLOR%%;
+    border-bottom: 2px solid %%DISABLED_BKG_COLOR%%;
 }
 RaisedMaterialButton {
     border-radius: 2px;
