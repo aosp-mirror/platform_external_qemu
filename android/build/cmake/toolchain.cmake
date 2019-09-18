@@ -128,6 +128,7 @@ function(toolchain_generate TARGET_OS)
     set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}windres CACHE PATH "windres")
     set(CMAKE_C_COMPILER ${COMPILER_PREFIX}gcc CACHE PATH "C compiler")
     set(CMAKE_CXX_COMPILER ${COMPILER_PREFIX}g++ CACHE PATH "C++ compiler")
+    set(CLANG_TIDY_EXE ${COMPILER_PREFIX}clang-tidy CACHE PATH "Clang tidy")
     # We will use system bintools (Note, this might not work with msvc)
     # As setting the AR somehow causes all sorts of strange issues.
     # set(CMAKE_AR ${COMPILER_PREFIX}ar PARENT_SCOPE)
