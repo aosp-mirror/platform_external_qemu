@@ -36,7 +36,7 @@ public:
                                      : Versions{};
     }
 
-    virtual Version getCurrentVersion() const {
+    virtual Version getCurrentVersion() const override {
         ++mGetCurrentVersionCallCount;
         return mGetCurrentVersionResult;
     }

@@ -584,6 +584,11 @@ static uint64_t address_space_control_read_locked(struct address_space_state* st
         AS_DPRINT("read high bits of phys start: 0x%x", state->registers.phys_start_high);
         return state->registers.phys_start_high;
     }
+
+    /* Should not happen */
+    fprintf(stderr, "%s:%d warning: unknown state!\n", __func__, __LINE__);
+    assert(false);
+    return -1;
 }
 
 static void address_space_control_write_locked(void *opaque,

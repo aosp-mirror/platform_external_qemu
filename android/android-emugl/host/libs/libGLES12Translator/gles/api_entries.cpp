@@ -248,6 +248,7 @@ namespace {
             default:
                 LOG_ALWAYS_FATAL("Unknown array %s(0x%x)", GetEnumString(array), array);
         }
+        return GL_FALSE; // Shouldn't happen..
     }
 
 }  // namespace
@@ -580,7 +581,7 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
         const GLuint global_texture_name =
             c->GetShareGroup()->GetTextureGlobalName(texture);
         PASS_THROUGH(c, BindTexture, target, global_texture_name);
-    } 
+    }
     GL_DLOG("exit function");
 }
 

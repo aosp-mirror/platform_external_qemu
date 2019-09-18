@@ -33,32 +33,31 @@ elseif(LINUX_X86_64)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
 elseif(WINDOWS_MSVC_X86_64)
-
+  add_c_flag("-Wno-c++11-narrowing")
 else()
   message(FATAL_ERROR "Only darwin, linux or windows using clang msvc are supported, not ${ANDROID_TARGET_TAG}.")
 endif()
 
-  set(ANDROID_BREAKPAD_WINDOWS_DEFS
-      -D_WIN32_WINNT=0x0600
-      -DWINVER=0x0600
-      -DWIN32
-      -D_WINDOWS
-      -D_HAS_EXCEPTIONS=0
-      -DNOMINMAX
-      -D_CRT_RAND_S
-      -DCERT_CHAIN_PARA_HAS_EXTRA_FIELDS
-      -DWIN32_LEAN_AND_MEAN
-      -D_SECURE_ATL
-      -D_CRT_SECURE_NO_DEPRECATE
-      -D_CRT_NONSTDC_NO_WARNINGS
-      -D_CRT_NONSTDC_NO_DEPRECATE
-      -D_USING_V110_SDK71_
-      -DNDEBUG
-      -DNVALGRIND
-      -DOFFICIAL_BUILD
-      -D_UNICODE
-      -DUNICODE
-     )
+set(ANDROID_BREAKPAD_WINDOWS_DEFS
+    -D_WIN32_WINNT=0x0600
+    -DWINVER=0x0600
+    -DWIN32
+    -D_WINDOWS
+    -D_HAS_EXCEPTIONS=0
+    -DNOMINMAX
+    -D_CRT_RAND_S
+    -DCERT_CHAIN_PARA_HAS_EXTRA_FIELDS
+    -DWIN32_LEAN_AND_MEAN
+    -D_SECURE_ATL
+    -D_CRT_SECURE_NO_DEPRECATE
+    -D_CRT_NONSTDC_NO_WARNINGS
+    -D_CRT_NONSTDC_NO_DEPRECATE
+    -D_USING_V110_SDK71_
+    -DNDEBUG
+    -DNVALGRIND
+    -DOFFICIAL_BUILD
+    -D_UNICODE
+    -DUNICODE)
 # Make sure we do not have definitions that will break us.
 remove_definitions("-DNDEBUG"
                    "-DNDEBUG=1"
@@ -96,8 +95,10 @@ set(breakpad_disasm_src
     ${BREAKPAD_SRC}/third_party/libdisasm/x86_misc.c
     ${BREAKPAD_SRC}/third_party/libdisasm/x86_operand_list.c)
 android_add_library(breakpad_disasm)
+set_property(TARGET breakpad_disasm PROPERTY CXX_STANDARD 11)
 android_target_compile_definitions(breakpad_disasm windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 
+android_target_compile_options(breakpad_disasm windows PRIVATE -Wno-int-to-void-pointer-cast)
 #
 # breakpad_common
 set(breakpad_common_src
@@ -177,6 +178,7 @@ set(breakpad_common_darwin-x86_64_src
     ${BREAKPAD_SRC}/common/mac/string_utilities.cc)
 
 android_add_library(breakpad_common)
+set_property(TARGET breakpad_common PROPERTY CXX_STANDARD 11)
 target_include_directories(breakpad_common PUBLIC ${BREAKPAD_SRC})
 android_target_include_directories(breakpad_common linux-x86_64 PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
 android_target_compile_definitions(breakpad_common linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -290,6 +292,7 @@ set(breakpad_processor_src
 set(breakpad_processor_linux-x86_64_src ${BREAKPAD_SRC}/processor/minidump.cc)
 
 android_add_library(breakpad_processor)
+set_property(TARGET breakpad_processor PROPERTY CXX_STANDARD 11)
 target_include_directories(breakpad_processor PUBLIC ${BREAKPAD_SRC})
 target_link_libraries(breakpad_processor PRIVATE breakpad_disasm breakpad_common)
 android_target_compile_definitions(breakpad_processor linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -320,10 +323,7 @@ set(breakpad_processor_unittests basic_source_line_resolver_unittest cfi_frame_i
     # stackwalker_arm64_unittest
     # stackwalker_arm_unittest
     # stackwalker_x86_unittest
-    static_address_map_unittest
-    static_contained_range_map_unittest
-    static_map_unittest
-    static_range_map_unittest
+    static_address_map_unittest static_contained_range_map_unittest static_map_unittest static_range_map_unittest
     synth_minidump_unittest)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -336,10 +336,12 @@ endforeach()
 
 set(minidump_dump_src ${BREAKPAD_SRC}/processor/minidump_dump.cc)
 android_add_executable(minidump_dump)
+set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 11)
 target_link_libraries(minidump_dump PRIVATE breakpad_processor)
 
-set(minidump_stackwalk_src  ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
+set(minidump_stackwalk_src ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
 android_add_executable(minidump_stackwalk)
+set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 11)
 target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor breakpad_common)
 
 #
@@ -351,6 +353,7 @@ set(breakpad_server_linux-x86_64_src ${BREAKPAD_SRC}/client/linux/crash_generati
 set(breakpad_server_darwin-x86_64_src ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_server.cc)
 
 android_add_library(breakpad_server)
+set_property(TARGET breakpad_server PROPERTY CXX_STANDARD 11)
 android_target_include_directories(breakpad_server linux-x86_64 PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
 android_target_compile_definitions(breakpad_server windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 android_target_compile_definitions(breakpad_server linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -395,6 +398,7 @@ set(breakpad_client_darwin-x86_64_src
     ${BREAKPAD_SRC}/client/mac/handler/protected_memory_allocator.cc)
 
 android_add_library(breakpad_client)
+set_property(TARGET breakpad_client PROPERTY CXX_STANDARD 11)
 target_include_directories(breakpad_client PUBLIC ${BREAKPAD_SRC})
 android_target_include_directories(breakpad_client darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
                                    ${BREAKPAD_SRC}/common/mac)
@@ -413,6 +417,7 @@ set(dump_syms_linux-x86_64_src ${BREAKPAD_SRC}/tools/linux/dump_syms/dump_syms.c
 set(dump_syms_darwin-x86_64_src ${BREAKPAD_SRC}/common/mac/dump_syms.cc
     ${BREAKPAD_SRC}/tools/mac/dump_syms/dump_syms_tool.cc)
 android_add_executable(dump_syms)
+set_property(TARGET dump_syms PROPERTY CXX_STANDARD 11)
 target_link_libraries(dump_syms PRIVATE breakpad_common)
 android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids)
 if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
@@ -420,7 +425,6 @@ if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
 endif()
 android_target_compile_definitions(dump_syms linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
 android_target_compile_definitions(dump_syms darwin-x86_64 PUBLIC -DHAVE_MACH_O_NLIST_H)
-
 #
 # Symupload
 set(sym_upload_linux-x86_64_src ${BREAKPAD_SRC}/common/linux/http_upload.cc
@@ -428,11 +432,12 @@ set(sym_upload_linux-x86_64_src ${BREAKPAD_SRC}/common/linux/http_upload.cc
 set(sym_upload_darwin-x86_64_src ${BREAKPAD_SRC}/tools/mac/symupload/symupload.m)
 set(sym_upload_windows_src ${BREAKPAD_SRC}/tools/windows/symupload/symupload.cc)
 android_add_executable(sym_upload)
+set_property(TARGET sym_upload PROPERTY CXX_STANDARD 20)
 android_target_include_directories(sym_upload darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/common/mac/)
 target_link_libraries(sym_upload PRIVATE breakpad_common)
-# Note, sym_upload.exe will likely only work on the machine you are building it on due to the mincore dependency.
-# the mincore dependency will bring in Api-ms-win-core-version-l1-1-0.dll which may not be available
-# on every windows version.
+# Note, sym_upload.exe will likely only work on the machine you are building it on due to the mincore dependency. the
+# mincore dependency will bring in Api-ms-win-core-version-l1-1-0.dll which may not be available on every windows
+# version.
 android_target_link_libraries(sym_upload windows PRIVATE dbghelp::dbghelp diaguids::diaguids mincore::mincore)
 android_target_link_libraries(sym_upload darwin-x86_64 PRIVATE "-framework Foundation")
 android_target_compile_definitions(sym_upload linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -442,6 +447,7 @@ android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE -D_UNICO
 if(LINUX_X86_64)
   set(linux_dumper_unittest_helper_src ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_dumper_unittest_helper.cc)
   android_add_executable(linux_dumper_unittest_helper)
+  set_property(TARGET linux_dumper_unittest_helper PROPERTY CXX_STANDARD 11)
   target_link_libraries(linux_dumper_unittest_helper
                         PRIVATE breakpad_common Threads::Threads "-Wl,-rpath,'${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'"
                                 "-Wl,--build-id=0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")

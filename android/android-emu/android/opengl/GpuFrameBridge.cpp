@@ -115,7 +115,7 @@ public:
 
     // Implementation of the GpuFrameBridge::postFrame() method, must be
     // called from the EmuGL thread.
-    virtual void postFrame(int width, int height, const void* pixels) {
+    virtual void postFrame(int width, int height, const void* pixels) override {
         if (mInSocket < 0) {
             return;
         }
@@ -128,13 +128,13 @@ public:
 
     // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
     // called from the EmuGL thread.
-    virtual void postRecordFrame(int width, int height, const void* pixels) {
+    virtual void postRecordFrame(int width, int height, const void* pixels) override {
         postRecordFrameAsync(width, height, pixels);
         AutoLock lock(mRecLock);
         memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
     }
 
-    virtual void postRecordFrameAsync(int width, int height, const void* pixels) {
+    virtual void postRecordFrameAsync(int width, int height, const void* pixels) override {
         {
             AutoLock lock(mRecLock);
             if (!mRecFrame) {
@@ -151,7 +151,7 @@ public:
         mRecFrameUpdated.store(true, std::memory_order_release);
     }
 
-    virtual void* getRecordFrame() {
+    virtual void* getRecordFrame() override {
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             memcpy(mRecFrame->pixels, mRecTmpFrame->pixels,
@@ -161,7 +161,7 @@ public:
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
-    virtual void* getRecordFrameAsync() {
+    virtual void* getRecordFrameAsync() override {
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             mReadPixelsFunc(mRecFrame->pixels,
@@ -171,7 +171,7 @@ public:
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
-    virtual void invalidateRecordingBuffers() {
+    virtual void invalidateRecordingBuffers() override {
         {
             AutoLock lock(mRecLock);
             if (mRecFrame) {

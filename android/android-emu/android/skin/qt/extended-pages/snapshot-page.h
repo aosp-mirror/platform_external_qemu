@@ -90,7 +90,7 @@ private:
     QString getDescription(const QString& fileName);
 
     void    adjustIcons(QTreeWidget* theDisplayList);
-    void    closeEvent(QCloseEvent* closeEvent);
+    void    closeEvent(QCloseEvent* closeEvent) override;
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
     void    disableActions();
     void    editSnapshot(const WidgetSnapshotItem* theItem);

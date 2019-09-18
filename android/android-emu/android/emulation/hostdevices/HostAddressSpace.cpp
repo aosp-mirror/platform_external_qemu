@@ -336,9 +336,9 @@ private:
         const BlockMemory& block,
         uint64_t physAddr) const {
         if (!blockContainsOffset(offset, block, physAddr)) {
-            fprintf(stderr, "%s: block at [0x%llx 0x%llx] does not contain 0x%llx!\n", __func__,
-                    (unsigned long long)offset,
-                    (unsigned long long)offset + block.size,
+            fprintf(stderr, "%s: block at [0x%" PRIx64 " 0x%" PRIx64"] does not contain 0x%" PRIx64 "!\n", __func__,
+                    offset,
+                    offset + block.size,
                     physAddr);
             abort();
         }

@@ -55,12 +55,18 @@ private:
     std::string mKeyText;
     void* mOpaque;
     UpdateCallback mCallback;
-    static constexpr char* kMapsFileName = "maps.key";
-    static constexpr char* kMapsFileUrl =
+    static constexpr char kMapsFileName[] = "maps.key";
+    static constexpr char kMapsFileUrl[] =
         "https://dl.google.com/dl/android/studio/metadata/maps.key";
     static const uint64_t kMapsDownloadIntervalSec = 24 * 60 * 60;
     DISALLOW_COPY_AND_ASSIGN(StudioMapsKeyImpl);
 };
+
+
+// We can remove this once we upgrade to C++17.
+// (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0386r2.pdf)
+constexpr char StudioMapsKeyImpl::kMapsFileName[];
+constexpr char StudioMapsKeyImpl::kMapsFileUrl[];
 
 StudioMapsKeyImpl::StudioMapsKeyImpl(UpdateCallback cb, void* opaque) :
         mCallback(cb),
@@ -68,7 +74,7 @@ StudioMapsKeyImpl::StudioMapsKeyImpl(UpdateCallback cb, void* opaque) :
         mThread([this](){ updateWorkerFn(); }) {
     mMapsFile = android::base::PathUtils::join(
             android::ConfigDirs::getUserDirectory(),
-            kMapsFileName);
+            StudioMapsKeyImpl::kMapsFileName);
     mThread.start();
 }
 

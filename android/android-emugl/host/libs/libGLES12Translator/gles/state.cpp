@@ -1111,6 +1111,7 @@ TextureContext::Target TextureContext::MapTarget(GLenum target) const {
       return kTextureExternal;
     default:
       LOG_ALWAYS_FATAL("Unsupported.");
+      return kNumTargets;
   }
 }
 

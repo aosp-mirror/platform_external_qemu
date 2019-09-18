@@ -405,7 +405,7 @@ android_add_test(emulator-libui_unittests)
 
 android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}" testdata)
 
-target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
+target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG -Wno-deprecated-declarations)
 
 # Target specific compiler flags for windows
 android_target_compile_options(emulator-libui_unittests windows PRIVATE

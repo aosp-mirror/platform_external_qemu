@@ -32,6 +32,8 @@ target_include_directories(android-grpc
                            PRIVATE # For Renderer.h ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
+target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
+
 
 set(android-grpc_unittest_src
     android/emulation/control/logcat/RingStreambuf_unittest.cpp
