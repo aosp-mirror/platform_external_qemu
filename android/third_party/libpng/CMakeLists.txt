@@ -112,6 +112,7 @@ png_add_test(NAME pngvalid-transform COMMAND pngvalid OPTIONS --transform)
 
 android_add_executable(pngstest)
 target_link_libraries(pngstest PRIVATE  png)
+target_compile_options(pngstest PRIVATE "-Wno-tautological-constant-out-of-range-compare")
 
 foreach(gamma_type 1.8 linear none sRGB)
   foreach(alpha_type none alpha)

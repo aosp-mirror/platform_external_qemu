@@ -169,7 +169,7 @@ public:
         return mFileLock != nullptr;
     }
 
-    time_t getTime(const std::string& key) {
+    time_t getTime(const std::string& key) override {
         IniFile file(mDataFileName);
         if (!file.read()) {
             // no file at all, return the lowest possible timestamp
@@ -179,7 +179,7 @@ public:
         return file.getInt64(IniFile::makeValidKey(key), 0);
     }
 
-    void setTime(const std::string& key, time_t time) {
+    void setTime(const std::string& key, time_t time) override {
         IniFile file(mDataFileName);
         file.read();  // who cares if it didn't exist - we'll create it anyway
         file.setInt64(IniFile::makeValidKey(key), time);

@@ -55,8 +55,8 @@ private:
     std::string mKeyText;
     void* mOpaque;
     UpdateCallback mCallback;
-    static constexpr char* kMapsFileName = "maps.key";
-    static constexpr char* kMapsFileUrl =
+    static constexpr char const* kMapsFileName = "maps.key";
+    static constexpr char const* kMapsFileUrl =
         "https://dl.google.com/dl/android/studio/metadata/maps.key";
     static const uint64_t kMapsDownloadIntervalSec = 24 * 60 * 60;
     DISALLOW_COPY_AND_ASSIGN(StudioMapsKeyImpl);

@@ -124,68 +124,17 @@ endif()
 # Note that clang in windows act as a drop in replacement for cl
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
-  if (DARWIN_X86_64)
-    add_c_flag("-Werror")
-  endif()
+  add_c_flag("-Werror")
   # If macro expansion goes wrong, we like to see why
   add_c_flag("-fmacro-backtrace-limit=0")
 
-  # Clang goes balistic on our codebase, so let's just suppress all the things.
-  add_c_flag("-Wno-mismatched-tags")
-  add_c_flag("-Wno-\#warnings")
-  add_c_flag("-Wno-nonportable-include-path") # Let's not break cross compilers.
-  add_c_flag("-Wno-unused-variable")
-  add_c_flag("-Wno-deprecated-declarations")
-  add_c_flag("-Wno-c++14-extensions")
-  add_c_flag("-Wno-array-bounds")
-  add_c_flag("-Wno-builtin-requires-header")
-  add_c_flag("-Wno-constant-conversion")
-  add_c_flag("-Wno-deprecated-register")
-  add_c_flag("-Wno-extern-c-compat")
-  add_c_flag("-Wno-gnu-designator")
-  add_c_flag("-Wno-inconsistent-missing-override")
-  add_c_flag("-Wno-initializer-overrides")
-  add_c_flag("-Wno-invalid-constexpr")
-  add_c_flag("-Wno-macro-redefined")
-  add_c_flag("-Wno-missing-braces")
-  add_c_flag("-Wno-missing-field-initializers")
-  add_c_flag("-Wno-parentheses-equality")
-  add_c_flag("-Wno-pessimizing-move")
-  add_c_flag("-Wno-pointer-bool-conversion")
-  add_c_flag("-Wno-return-type-c-linkage")
-  add_c_flag("-Wno-self-assign")
-  add_c_flag("-Wno-shift-negative-value")
-  add_c_flag("-Wno-string-plus-int")
-  add_c_flag("-Wno-uninitialized")
-  add_c_flag("-Wno-unknown-pragmas")
-  add_c_flag("-Wno-unused-command-line-argument")
-  add_c_flag("-Wno-unused-const-variable")
-  add_c_flag("-Wno-unused-function")
-  add_c_flag("-Wno-unused-lambda-capture")
-  add_c_flag("-Wno-unused-private-field")
-  add_c_flag("-Wno-unused-value")
-  add_c_flag("-Wswitch")
-  add_c_flag("-Wno-defaulted-function-deleted")
-  add_c_flag("-Wno-return-type")
-endif()
-
-if (DARWIN_X86_64)
-  add_c_flag("-Werror")
+  # Let's not trip over warnings that do not exist on every platform
+  add_c_flag("-Wno-unknown-warning-option")
 endif()
 
 if(WINDOWS_MSVC_X86_64)
   add_c_flag("-Wno-microsoft-enum-forward-reference")
-  add_c_flag("-Wno-address-of-packed-member")
-  add_c_flag("-Wno-incompatible-ms-struct")
-  add_c_flag("-Wno-c++11-narrowing")
-  add_c_flag("-Wno-unknown-argument")
-  add_c_flag("-Wno-return-type")
-  add_c_flag("-Wno-microsoft-include")
-  add_c_flag("-Wno-incompatible-pointer-types")
-  add_c_flag("-Wno-incompatible-pointer-types-discards-qualifiers")
-  add_c_flag("-Wno-int-to-void-pointer-cast")
-  add_c_flag("-Wno-inconsistent-dllimport")
-  add_c_flag("-Wno-int-conversion") # Needed for setjmp hack.
+  add_c_flag("-Wno-deprecated-register")
   add_c_flag("-MD")
 endif()
 
@@ -323,7 +272,8 @@ if(NOT WINDOWS_MSVC_X86_64)
 endif()
 
 target_compile_options(android-qemu-deps
-                       INTERFACE "-Werror=implicit-function-declaration" "-Wno-unused-function"
+                       INTERFACE "-Werror=implicit-function-declaration"
+                                 "-Wno-unused-function"
                                  # Do not allow the compiler to assume the strictest aliasing rules
                                  # applicable to the language being compiled. For C (and C++), this activates
                                  # optimizations based on the type of expressions. In particular, an object
@@ -403,16 +353,19 @@ set(ANDROID_QEMU_i386_DEVICES_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${
 set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 android_target_compile_options(android-qemu-deps
-                               windows_msvc
+                               windows_msvc-x86_64
                                INTERFACE
+                               "-Wno-return-type"
+                               "-Wno-initializer-overrides"
                                "-Wno-int-to-void-pointer-cast"
-                               "-Werror=implicit-function-declaration"
+                               "-Wno-incompatible-pointer-types"
                                "-Wno-unused-variable"
+                               "-Wno-microsoft-include"
                                "-mms-bitfields"
                                "-mcx16")
 
 android_target_compile_options(android-qemu-deps
-                               windows-x86
+                               windows-x86_64
                                INTERFACE
                                "-Werror=implicit-function-declaration"
                                "-mms-bitfields"
@@ -463,6 +416,7 @@ include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 android_add_library(qemu2-common)
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
+target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int" "-Wno-return-type")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 # Not allowed to have libraries without source files.

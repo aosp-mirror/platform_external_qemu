@@ -26,7 +26,7 @@ target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
 target_include_directories(cutils PUBLIC .)
 target_link_libraries(cutils PUBLIC android-emu-base)
 target_link_libraries(cutils PRIVATE log emugl_base)
-android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr)
+android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr -Wno-macro-redefined)
 target_compile_definitions(cutils PRIVATE -D__ANDROID_API__=28)
 
 set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)

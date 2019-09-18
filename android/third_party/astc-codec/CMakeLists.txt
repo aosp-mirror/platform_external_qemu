@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.5)
-
 set(src "../../../../astc-codec/src")
 
 add_library(emulator-astc-codec
@@ -15,6 +13,7 @@ add_library(emulator-astc-codec
             ${src}/decoder/quantization.cc
             ${src}/decoder/weight_infill.cc)
 
+target_compile_features(emulator-astc-codec PRIVATE cxx_std_14)
 target_include_directories(emulator-astc-codec PUBLIC ${src}/../include)
 target_include_directories(emulator-astc-codec PRIVATE ${src}/..)
 
@@ -48,6 +47,7 @@ add_executable(emulator_astc_unittests
                ${src}/decoder/test/footprint_test.cc)
 target_include_directories(emulator_astc_unittests PRIVATE ${src}/..)
 target_compile_definitions(emulator_astc_unittests PRIVATE -DGTEST_HAS_RTTI=0)
+target_compile_features(emulator_astc_unittests PRIVATE cxx_std_14)
 target_link_libraries(emulator_astc_unittests emulator-astc-codec gmock_main)
 
 if(LINUX_X86_64)
