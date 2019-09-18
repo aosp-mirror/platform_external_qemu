@@ -17,6 +17,7 @@
 #include "android/skin/qt/native-event-filter-factory.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
@@ -83,9 +84,12 @@ public:
                     keyEv->detail =
                             skin_keycode_native_map_keypad(keyEv->detail);
                 }
-                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                    handleNativeKeyEvent(keyEv->detail, keyEv->state,
-                                         kEventKeyDown);
+                if (android::featurecontrol::isEnabled(
+                            android::featurecontrol::KeycodeForwarding)) {
+                    if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                        handleNativeKeyEvent(keyEv->detail, keyEv->state,
+                                             kEventKeyDown);
+                    }
                 }
             }
         }
@@ -156,8 +160,11 @@ public:
                     skin_keycode_native_is_keypad(ev->wParam)) {
                     ev->wParam = skin_keycode_native_map_keypad(ev->wParam);
                 }
-                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                    handleNativeKeyEvent(ev->wParam, 0, kEventKeyDown);
+                if (android::featurecontrol::isEnabled(
+                            android::featurecontrol::KeycodeForwarding)) {
+                    if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                        handleNativeKeyEvent(ev->wParam, 0, kEventKeyDown);
+                    }
                 }
             }
         }

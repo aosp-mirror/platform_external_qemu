@@ -81,4 +81,6 @@ enum Feature {
     YUV420888toNV21 = 46;
 
     YUVCache = 47;
+
+    KeycodeForwarding = 48;
 }
