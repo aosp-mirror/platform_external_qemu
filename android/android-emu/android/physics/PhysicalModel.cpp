@@ -364,6 +364,7 @@ PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
 
 pb::SensorOverrideEvent_Sensor toProto(AndroidSensor param) {
     switch (param) {
+#undef PROTO_ENUM
 #define SENSOR_ENUM(x) ANDROID_SENSOR_##x
 #define PROTO_ENUM(x) pb::SensorOverrideEvent_Sensor_##x
 

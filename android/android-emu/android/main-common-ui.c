@@ -390,6 +390,7 @@ bool emulator_initMinimalSkinConfig(
         auserConfig_new_custom(
             android_avdInfo, rect,
             s_deviceLcdWidth, s_deviceLcdHeight);
+    return true;
 }
 
 bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,

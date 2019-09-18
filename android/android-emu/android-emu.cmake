@@ -402,7 +402,10 @@ target_include_directories(android-emu PUBLIC
                                    ${CMAKE_CURRENT_BINARY_DIR}
                                    ${DARWINN_INCLUDE_DIRS})
 
-android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+android_target_compile_options(android-emu Clang PRIVATE -Wno-invalid-constexpr -Wno-return-type-c-linkage -fvisibility=default)
+android_target_compile_options(android-emu Clang PUBLIC  -Wno-extern-c-compat # Needed for serial_line.h
+                                                         -Wno-return-type-c-linkage # android_getOpenglesRenderer
+                              )
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
 android_target_compile_options(android-emu darwin-x86_64 PRIVATE -Wno-error -Wno-objc-method-access -Wno-missing-selector-name -Wno-receiver-expr -Wno-incomplete-implementation -Wno-incompatible-pointer-types)
 
@@ -537,6 +540,8 @@ target_include_directories(android-emu-shared PUBLIC
                                    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 android_target_compile_options(android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+
+android_target_compile_options(android-emu-shared Clang PUBLIC -Wno-return-type-c-linkage) #android_getOpenGlesRenderer
 android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
 android_target_compile_options(android-emu-shared darwin-x86_64 PRIVATE -Wno-error -Wno-objc-method-access -Wno-receiver-expr -Wno-incomplete-implementation -Wno-missing-selector-name -Wno-incompatible-pointer-types)
 
@@ -777,7 +782,7 @@ set(android-emu_unittests_linux-x86_64_src
 android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
-android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr -Wno-string-plus-int)
 target_include_directories(android-emu_unittests PRIVATE ../android-emugl/host/include/)
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)

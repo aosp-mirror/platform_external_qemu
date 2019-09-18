@@ -159,6 +159,8 @@ android_target_compile_options(android-emu-base Clang
                                "-Wno-parentheses"
                                "-Wno-invalid-constexpr")
 
+android_target_compile_options(android-emu-base windows_msvc-x86_64 PRIVATE "-Wno-inconsistent-dllimport")
+
 # Add the benchmark
 set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)
 android_add_executable(android-emu_benchmark)

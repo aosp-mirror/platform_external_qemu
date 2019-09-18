@@ -41,6 +41,7 @@ EXPORT int __android_log_error_write(
     printf("android_log_error_write: "
            "tag: %d subtag: [%s] uid: %d datalen: %u data: [%s]\n",
            tag, subTag, uid, dataLen, data);
+    return 0;
 }
 
 } // extern "C"

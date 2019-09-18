@@ -6,6 +6,8 @@ if(LINUX_X86_64)
 
   android_add_library(darwinn)
   target_compile_options(darwinn PUBLIC ${DARWINN_COMPILE_DEFINITIONS})
+
+  target_compile_options(darwinn PRIVATE -Wno-macro-redefined)
   target_link_libraries(darwinn PUBLIC darwinnmodelconfig darwinnpipe libprotobuf)
   target_include_directories(darwinn
                              PUBLIC ${DARWINN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -26,7 +28,7 @@ if(LINUX_X86_64)
 
   android_add_test(darwinn_unittests)
   target_compile_options(darwinn_unittests PRIVATE -O0)
-  android_target_compile_options(darwinn_unittests Clang PRIVATE -Wno-invalid-constexpr)
+  android_target_compile_options(darwinn_unittests Clang PRIVATE -Wno-invalid-constexpr -Wno-macro-redefined)
   target_compile_definitions(darwinn_unittests PRIVATE -DGTEST_HAS_RTTI=0)
   target_link_libraries(darwinn_unittests PRIVATE android-emu libqemu2-glue gmock_main)
 

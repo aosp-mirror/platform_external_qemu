@@ -18,7 +18,9 @@ if(NOT WINDOWS_MSVC_X86_64)
 endif()
 
 # Disable sanitizers, as we will be running protoc, which has some ODR violations.
-set(protobuf_PRIVATE_COMPILE_OPTS -Wno-enum-compare-switch -DANDROID_EMULATOR=1)
+set(protobuf_PRIVATE_COMPILE_OPTS -Wno-enum-compare-switch
+                                  -Wno-inconsistent-missing-override
+                                  -DANDROID_EMULATOR=1)
 
 set(protobuf_DEBUG_POSTFIX "d" CACHE STRING "Default debug postfix")
 
@@ -388,7 +390,8 @@ else()
   android_add_test(protobuf_tests)
   target_link_libraries(protobuf_tests PRIVATE libprotoc libprotobuf zlib gmock_main)
   target_compile_options(protobuf_tests
-                         PRIVATE -DGOOGLE_PROTOBUF_TEST_PLUGIN_PATH="$<TARGET_FILE:protobuf_test_plugin>")
+                         PRIVATE -DGOOGLE_PROTOBUF_TEST_PLUGIN_PATH="$<TARGET_FILE:protobuf_test_plugin>"
+                         -Wno-inconsistent-missing-override)
   set_tests_properties(protobuf_tests PROPERTIES WORKING_DIRECTORY ${protobuf_source_dir})
   add_dependencies(protobuf_tests protobuf_test_plugin)
 endif()
