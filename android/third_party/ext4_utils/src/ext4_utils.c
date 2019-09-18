@@ -422,7 +422,7 @@ u64 get_file_size(int fd)
 	u64 reserve_len = 0;
 	s64 computed_size;
 
-	ret = fstat(fd, &buf);
+	ret = fstat64(fd, &buf);
 	if (ret)
 		return 0;
 

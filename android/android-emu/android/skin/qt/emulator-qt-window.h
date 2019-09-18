@@ -396,7 +396,7 @@ public slots:
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
 
-    bool event(QEvent* ev);  // Used to resume the MV on un-minimize
+    bool event(QEvent* ev) override;  // Used to resume the MV on un-minimize
 
 private:
     static const android::base::StringView kRemoteDownloadsDir;
