@@ -143,6 +143,7 @@ set(curl_src
 android_add_library(curl)
 target_compile_definitions(curl PRIVATE  -DBUILDING_LIBCURL -DCURL_HIDDEN_SYMBOLS -DOS=\"${ANDROID_TARGET_TAG}\")
 target_compile_definitions(curl PUBLIC -DCURL_STATICLIB)
+target_compile_options(curl PRIVATE -Wno-macro-redefined)
 android_target_compile_definitions(curl darwin-x86_64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl linux-x86_64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl windows-x86_64 PRIVATE -DWIN32 -DHAVE_CONFIG_H)

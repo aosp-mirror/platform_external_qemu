@@ -215,7 +215,9 @@ TEST(ReadWriteLock, SyncReadWriteRandom) {
             item.second = i < num_writers;
             indices_writers.push_back(item);
         }
-        std::random_shuffle(indices_writers.begin(), indices_writers.end());
+        std::random_device rng;
+        std::mt19937 urng(rng());
+        std::shuffle(indices_writers.begin(), indices_writers.end(), urng);
 
         for (size_t i = 0; i < kNumThreadsPerTrial; i++) {
             if (indices_writers[i].second) {

@@ -34,6 +34,7 @@
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
+#include "android/avd/hw-config.h"
 
 #include <stdio.h>
 

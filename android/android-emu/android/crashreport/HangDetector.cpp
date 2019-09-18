@@ -34,7 +34,6 @@ public:
     ~LooperWatcher();
 
     LooperWatcher(LooperWatcher&&) = default;
-    LooperWatcher& operator=(LooperWatcher&&) = default;
 
     void startHangCheck();
     void cancelHangCheck();

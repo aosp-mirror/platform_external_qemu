@@ -138,15 +138,24 @@ target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
 target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID)
-android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC TCMALLOC::TCMALLOC LIBUNWIND::LIBUNWIND -ldl Threads::Threads -lrt)
+android_target_link_libraries(android-emu-base
+                              linux-x86_64
+                              PUBLIC
+                              TCMALLOC::TCMALLOC
+                              LIBUNWIND::LIBUNWIND
+                              -ldl
+                              Threads::Threads
+                              -lrt)
 
 android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
+
 android_target_link_libraries(android-emu-base
                               darwin-x86_64
                               PUBLIC
                               "-framework Foundation"
                               "-framework ApplicationServices"
                               "-framework IOKit")
+
 android_target_compile_definitions(android-emu-base
                                    darwin-x86_64
                                    PRIVATE
@@ -154,12 +163,12 @@ android_target_compile_definitions(android-emu-base
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
 
+android_target_compile_options(android-emu-base darwin-x86_64 PRIVATE "-Wno-deprecated-declarations")
 # Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
 # these flags.
-android_target_compile_options(android-emu-base Clang
-                               PRIVATE
-                               "-Wno-parentheses"
-                               "-Wno-invalid-constexpr")
+android_target_compile_options(android-emu-base Clang PRIVATE "-Wno-parentheses" "-Wno-invalid-constexpr")
+
+android_target_compile_options(android-emu-base windows_msvc-x86_64 PRIVATE "-Wno-inconsistent-dllimport")
 
 # Add the benchmark
 set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)

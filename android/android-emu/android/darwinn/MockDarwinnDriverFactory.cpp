@@ -44,7 +44,7 @@ public:
     }
 
     util::StatusOr<std::unique_ptr<api::Driver>> CreateDriver(
-            const api::Device& device) {
+            const api::Device& device) override {
         return {std::make_unique<MockDarwinnDriver>()};
     }
 
@@ -60,7 +60,7 @@ private:
 
     MockDarwinnDriver mDriver;
 };
-static android::base::LazyInstance<MockDarwinnDriverFactory> 
+static android::base::LazyInstance<MockDarwinnDriverFactory>
 sDarwinnDriverFactory  = LAZY_INSTANCE_INIT;
 
 MockDarwinnDriverFactory* MockDarwinnDriverFactory::GetOrCreate() {

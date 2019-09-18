@@ -72,7 +72,7 @@ void SettingsPage::proxyDtor() {
     // to read it and we didn't delete it.)
 
     EmulatorWindow* const ew = emulator_window_get();
-    if (ew && ew->opts && ew->opts->studio_params) {
+    if (ew && ew->opts->studio_params) {
         QFile paramFile(ew->opts->studio_params);
         (void)paramFile.remove();
     }
@@ -192,7 +192,7 @@ static void sendProxySettingsToAgent(QString password) {
     }
 
     EmulatorWindow* const ew = emulator_window_get();
-    if (ew && ew->opts && ew->opts->http_proxy) {
+    if (ew && ew->opts->http_proxy) {
         // There is HTTP proxy information on the command line.
         // This takes precendence over the UI, and the back end
         // is already using these settings.
@@ -258,7 +258,7 @@ void SettingsPage::disableProxyApply() {
 
 static void getStudioProxyString() {
     EmulatorWindow* const ew = emulator_window_get();
-    if (!ew || !ew->opts || !ew->opts->studio_params) {
+    if (!ew || !ew->opts->studio_params) {
         // No file to read
         return;
     }

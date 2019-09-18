@@ -815,7 +815,7 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
 void LocationPage::on_loc_pointList_itemSelectionChanged() { }
-bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) { }
+bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) { return true; }
 void LocationPage::deletePoint(PointWidgetItem* item) { }
 std::string LocationPage::writePointProtobufByName(
         const QString& pointFormalName,
