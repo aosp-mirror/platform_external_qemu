@@ -251,9 +251,6 @@ LocationPage::~LocationPage() {
     }
     mUi->loc_pathTable->blockSignals(true);
     mUi->loc_pathTable->clear();
-    if (mOfflineTab != nullptr) {
-        mOfflineTab->deleteLater();
-    }
 }
 
 static void locationAgentQtSettingsWriter(double lat, double lon, double alt,
