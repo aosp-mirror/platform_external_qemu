@@ -32,7 +32,7 @@ TextMetricsWriter::TextMetricsWriter(base::StdioStream&& outStream)
 void TextMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,
         wireless_android_play_playlog::LogEvent* logEvent) {
-    fprintf(mOutStream.get(), "event time %llu ms\n", logEvent->event_time_ms());
+    fprintf(mOutStream.get(), "event time %ld ms\n", logEvent->event_time_ms());
     fprintf(mOutStream.get(), "{ %s }\n", asEvent.ShortDebugString().c_str());
     fflush(mOutStream.get());
 }
