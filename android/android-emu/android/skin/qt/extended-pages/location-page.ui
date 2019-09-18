@@ -22,6 +22,9 @@
      <height>588</height>
     </rect>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">NoHiddenTabOnDisabled</string>
+   </property>
    <property name="cursor">
     <cursorShape>ArrowCursor</cursorShape>
    </property>

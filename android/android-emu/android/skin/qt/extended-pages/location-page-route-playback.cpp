@@ -36,12 +36,20 @@ void LocationPage::on_loc_playRouteButton_clicked() {
 
 void LocationPage::playRouteStateChanged(bool stopped) {
     if (stopped) {
+        // Enable the single point tab
+        mUi->locationTabs->setTabEnabled(0, true);
+        mUi->loc_importGpxKmlButton->setEnabled(true);
+        mUi->loc_importGpxKmlButton_route->setEnabled(true);
         mUi->loc_routePlayingList->hide();
         mUi->loc_routePlayingList->clear();
         mUi->loc_routePlayingTitleItem->hide();
         mUi->loc_routeList->show();
         emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
+        // Disable the single point tab
+        mUi->locationTabs->setTabEnabled(0, false);
+        mUi->loc_importGpxKmlButton->setEnabled(false);
+        mUi->loc_importGpxKmlButton_route->setEnabled(false);
         mUi->loc_routeList->hide();
         mUi->loc_routePlayingList->show();
         mUi->loc_routePlayingTitleItem->show();

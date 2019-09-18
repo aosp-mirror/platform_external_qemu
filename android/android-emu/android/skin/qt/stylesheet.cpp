@@ -245,6 +245,7 @@ struct StylesheetValues {
     QHash<QString, QString> lightValues = {
         {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
         {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
+        {"DISABLED_BKG_COLOR","rgba(240,240,240,60%)"},  // Main page background (disabled)
         {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
         {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
@@ -268,6 +269,7 @@ struct StylesheetValues {
         {"TEXT_COLOR",                      "#212121"},  // Main page text
         {"INACTIVE_TEXT_COLOR",  "rgba(33,33,33,50%)"},
         {"TITLE_COLOR",                     "#757575"},  // Main page titles
+        {"DISABLED_TITLE_COLOR", "rgba(117,117,117,60%)"},  // Main page titles (disabled color)
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
         {"TOOL_ON_COLOR",                   "#d6d6d6"},  // Main toolbar button ON
         {"TREE_WIDGET_BKG",                 "#ffffff"},  // List of Snapshots
@@ -287,6 +289,7 @@ struct StylesheetValues {
     QHash<QString, QString> darkValues = {
         {"BOX_COLOR",                    "#414a50"},
         {"BKG_COLOR",                    "#273238"},
+        {"DISABLED_BKG_COLOR","rgba(39,50,56,60%)"},
         {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
         {"BUTTON_BKG_COLOR",             "#37474f"},
         {"BUTTON_COLOR",                 "#bec1c3"},
@@ -310,6 +313,7 @@ struct StylesheetValues {
         {"TEXT_COLOR",                   "#eeeeee"},
         {"INACTIVE_TEXT_COLOR", "rgba(238,238,238,50%)"},
         {"TITLE_COLOR",                  "#bec1c3"},
+        {"DISABLED_TITLE_COLOR", "rgba(206,209,211,60%)"},
         {"TOOL_COLOR",                   "#00bea4"},
         {"TOOL_ON_COLOR",                "#586670"},
         {"TREE_WIDGET_BKG",              "#394249"},
