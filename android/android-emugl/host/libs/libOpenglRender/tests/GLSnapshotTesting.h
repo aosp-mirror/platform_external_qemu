@@ -287,7 +287,7 @@ public:
     }
 
     // Checks part of state against an expected value.
-    virtual void stateCheck(T expected) {
+    virtual void stateCheck(T expected)  {
         ADD_FAILURE() << "Snapshot test needs a state-check function.";
     };
 

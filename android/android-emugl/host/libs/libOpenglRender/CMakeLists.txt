@@ -39,7 +39,7 @@ set(OpenglRender_vulkan_src
 android_add_library(OpenglRender_vulkan)
 target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal PRIVATE emugl_base GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden -Wno-unused-value  -Wno-return-type  -Wno-return-type-c-linkage)
 target_include_directories(
     OpenglRender_vulkan
     PUBLIC
@@ -96,6 +96,7 @@ target_link_libraries(OpenglRender
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
     OpenglRender
