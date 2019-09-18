@@ -155,6 +155,8 @@ Make sure you have configured the proper user name and email address:
     C:\>git config --global user.email wrong-do-it-again@badrobot.com
   ```
 
+Here you can find more details on [submitting patches](
+https://gerrit.googlesource.com/git-repo/+/refs/heads/master/SUBMITTING_PATCHES.md).
 
 # Known Issues
 
