@@ -217,6 +217,26 @@ elseif(WINDOWS_MSVC_X86_64)
   add_qt_shared_lib(WebSockets "${PREBUILT_ROOT}/lib/Qt5WebSocketsAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
   add_qt_shared_lib(WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgetsAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
 
+  list(
+    APPEND
+      QT5_SHARED_DEPENDENCIES
+      ${PREBUILT_ROOT}/bin/QtWebEngineProcess.exe>lib64/qt/bin/QtWebEngineProcess.exe
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/resources/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
+      # TODO: These 6 are copies of the files immediately above. It would be nice to make
+      # these symbolic links rather than copies.
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
+    )
+
 elseif(WINDOWS_X86_64)
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear in emulator-libui_unittests LDFLAGS
