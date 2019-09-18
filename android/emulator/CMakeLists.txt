@@ -74,7 +74,9 @@ android_target_dependency(emulator windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIE
 android_target_dependency(emulator windows_msvc-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 # And install them for a release.
-android_install_dependency(all QT5_SHARED_DEPENDENCIES)
+# TODO(b/141205876): prebuilt executables are losing their execute permission on installation.
+# Once this issue is fixed, remove all of these "android_install_dependency_force_exec()" calls.
+android_install_dependency_force_exec(all QT5_SHARED_DEPENDENCIES)
 android_install_dependency(all MESA_DEPENDENCIES)
 android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
