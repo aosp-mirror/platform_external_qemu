@@ -256,21 +256,12 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              */
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
-
-        if (feature_is_enabled(kFeature_KeycodeForwarding)) {
-            process_modifier_key(kb, ev, 1);
-
-            D("event type: kTextInput key code=%d mod=0x%x str=%s",
-              ev->u.text.keycode, ev->u.text.mod,
-              skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
-
-            if (android_hw->hw_arc) {
-                map_cros_key(&ev->u.text.keycode);
-            }
-            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
-            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 0);
-            process_modifier_key(kb, ev, 0);
-        } else {
+// TODO (wdu) Fix the QT libxcb, then remove the ifdef.
+// After QT upgrades to 5.12.1, X11 doesn't produce the correct key symbol when
+// keyboard layout is set to Non-English. The workaround is to always use
+// keycode forwarding on Linux platform. Bug: 141318682
+#if defined(_WIN32) || defined(__APPLE__)
+        if (!feature_is_enabled(kFeature_KeycodeForwarding)) {
             // TODO(digit): For each Unicode value in the input text.
             const uint8_t* text = ev->u.text.text;
             const uint8_t* end = text + sizeof(ev->u.text.text);
@@ -284,6 +275,20 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
                 skin_keyboard_process_unicode_event(kb, codepoint, 0);
                 text += len;
             }
+        } else
+#endif
+        {
+            process_modifier_key(kb, ev, 1);
+            D("event type: kTextInput key code=%d mod=0x%x str=%s",
+              ev->u.text.keycode, ev->u.text.mod,
+              skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
+
+            if (android_hw->hw_arc) {
+                map_cros_key(&ev->u.text.keycode);
+            }
+            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
+            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 0);
+            process_modifier_key(kb, ev, 0);
         }
 
         if (android_hw->hw_arc && mod) {
