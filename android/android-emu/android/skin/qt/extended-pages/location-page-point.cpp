@@ -126,6 +126,9 @@ void LocationPage::savePoint(double lat, double lng, double elevation, const QSt
     listElement.longitude = ptMetadata.longitude();
     listElement.address = QString::fromStdString(ptMetadata.address());
 
+    // Open a dialog to let the user change the name if they want.
+    editPoint(listElement, true);
+
     PointItemBuilder builder(mUi->loc_pointList);
     builder.addPoint(std::move(listElement), this);
 
@@ -262,7 +265,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     mUi->loc_pointList->blockSignals(false);
 }
 
-bool LocationPage::editPoint(PointListElement& pointElement) {
+bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
@@ -303,9 +306,10 @@ bool LocationPage::editPoint(PointListElement& pointElement) {
     dialogLayout->addWidget(longitudeField);
 
     // OK and Cancel buttons
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok |
-                                                       QDialogButtonBox::Cancel,
-                                                       Qt::Horizontal);
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            isNewPoint ? QDialogButtonBox::Ok :
+                         QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                         Qt::Horizontal);
     dialogLayout->addWidget(buttonBox);
 
     QDialog editDialog(this);
@@ -708,7 +712,7 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
 void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous) { }
-bool LocationPage::editPoint(PointListElement& pointElement) { }
+bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) { }
 bool LocationPage::deletePoint(const PointListElement& pointElement) { }
 std::string LocationPage::writePointProtobufByName(
         const QString& pointFormalName,

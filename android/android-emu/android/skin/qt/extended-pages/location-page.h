@@ -290,11 +290,11 @@ private:
     QString mLastAddr = "";
     QString mMapsApiKey = "";
 
-    bool editPoint(PointListElement& pointElement);
+    bool editPoint(PointListElement& pointElement, bool isNewPoint = false);
     bool deletePoint(const PointListElement& pointElement);
     void scanForPoints();
 
-    bool editRoute(RouteListElement& routeElement);
+    bool editRoute(RouteListElement& routeElement, bool isNewRoute = false);
     bool deleteRoute(const RouteListElement& routeElement);
     void scanForRoutes();
 
