@@ -2318,6 +2318,11 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     bool qtEvent = mToolWindow->handleQtKeyEvent(
             event, QtKeyEventSource::EmulatorWindow);
 
+// TODO (wdu) Fix the QT libxcb, then remove the ifdef.
+// After QT upgrades to 5.12.1, X11 doesn't produce the correct key symbol when
+// keyboard layout is set to Non-English. The workaround is to always use
+// keycode forwarding on Linux platform. Bug: 141318682
+#if defined(_WIN32) || defined(__APPLE__)
     if (!android::featurecontrol::isEnabled(
                 android::featurecontrol::KeycodeForwarding)) {
         if (mForwardShortcutsToDevice || !qtEvent) {
@@ -2342,6 +2347,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
             }
         }
     }
+#endif
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers) {
