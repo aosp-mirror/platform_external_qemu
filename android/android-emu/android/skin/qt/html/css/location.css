@@ -86,9 +86,8 @@ html, body {
 .subtitle {
   font-family: Roboto;
   font-size: 12px;
-  font-weight: 200;
+  font-weight: 300;
   color: white;
-  opacity: 0.6;
   margin-left: 24px;
   margin-right: 16px;
 }
