@@ -196,7 +196,7 @@ class RouteViewModel {
     }
 
     shouldShowSwapOriginDestinationButton() {
-        return this.model.waypoints.length === 2 && this.allowEdits;
+        return this.model.waypoints.length === 2;
     }
 
     shouldShowSaveRouteButton() {

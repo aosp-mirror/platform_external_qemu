@@ -53,7 +53,7 @@
     right: 8px;
     width: 24px;
     height: 24px;
-    padding: 8px;
+    padding: 8px 4px 8px 8px;
     text-align: center;
     cursor: pointer;
 }
