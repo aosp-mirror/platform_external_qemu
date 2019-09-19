@@ -22,14 +22,14 @@
      <height>588</height>
     </rect>
    </property>
-   <property name="ColorGroup" stdset="0">
-    <string notr="true">NoHiddenTabOnDisabled</string>
-   </property>
    <property name="cursor">
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
     <number>1</number>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">NoHiddenTabOnDisabled</string>
    </property>
    <widget class="QWidget" name="singlePointsTab">
     <attribute name="title">
@@ -250,7 +250,7 @@
        <x>342</x>
        <y>48</y>
        <width>252</width>
-       <height>452</height>
+       <height>392</height>
       </rect>
      </property>
      <property name="autoFillBackground">
@@ -288,7 +288,7 @@
        <x>332</x>
        <y>38</y>
        <width>272</width>
-       <height>472</height>
+       <height>412</height>
       </rect>
      </property>
      <property name="focusPolicy">
@@ -336,7 +336,7 @@
        <x>332</x>
        <y>118</y>
        <width>272</width>
-       <height>392</height>
+       <height>332</height>
       </rect>
      </property>
      <property name="focusPolicy">
@@ -368,8 +368,8 @@
     <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
       <rect>
-       <x>176</x>
-       <y>515</y>
+       <x>477</x>
+       <y>462</y>
        <width>121</width>
        <height>21</height>
       </rect>
@@ -392,8 +392,8 @@
     <widget class="QComboBox" name="loc_routeSpeed">
      <property name="geometry">
       <rect>
-       <x>176</x>
-       <y>530</y>
+       <x>477</x>
+       <y>477</y>
        <width>111</width>
        <height>31</height>
       </rect>
@@ -433,8 +433,8 @@
     <widget class="QGroupBox" name="loc_repeatLabel">
      <property name="geometry">
       <rect>
-       <x>311</x>
-       <y>515</y>
+       <x>338</x>
+       <y>462</y>
        <width>121</width>
        <height>24</height>
       </rect>
@@ -457,8 +457,8 @@
     <widget class="QCheckBox" name="loc_repeatRoute">
      <property name="geometry">
       <rect>
-       <x>311</x>
-       <y>534</y>
+       <x>338</x>
+       <y>481</y>
        <width>120</width>
        <height>24</height>
       </rect>
@@ -1111,9 +1111,6 @@
    </widget>
   </widget>
   <widget class="QWidget" name="loc_loadingOverlay" native="true">
-   <property name="visible">
-    <bool>false</bool>
-   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -1127,6 +1124,9 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgba(0,0,0,128);</string>
