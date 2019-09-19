@@ -50,6 +50,8 @@ or path, *instead* of creating a toolchain. Valid values for <tool> are:
    ld, ar, as, ... -> Same for other tools.
    sysroot         -> Print the path to directory corresponding to the current
                       toolchain.
+   cflags          -> Print all the flags that are passed on to the c compiler.
+   cxxflags        -> Print all the flags that are passed on to the c++ compiler.
 
 Note: If you wish to cross compile to windows on darwin you will have to have a mingw
 installation (brew install mingw-w64)
@@ -78,6 +80,7 @@ option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccac
 
 OPT_CXX11=
 option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
+
 
 OPT_FORCE_FETCH_WINTOOLCHAIN=
 option_register_var "--force-fetch-wintoolchain" OPT_FORCE_FETCH_WINTOOLCHAIN "Force fetch the Windows toolchain (google internal)"
@@ -463,6 +466,7 @@ prepare_build_for_linux_x86_64() {
     var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/x86_64-linux/lib64/"
     var_append GCC_LINK_FLAGS "-fuse-ld=${PREBUILT_TOOLCHAIN_DIR}/bin/x86_64-linux-ld"
     var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
+    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/include"
     var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/"
     var_append GCC_LINK_FLAGS "--sysroot=${SYSROOT}"
 
@@ -782,6 +786,12 @@ print_info () {
                 printf "${AOSP_DIR}/${SUBDIR}"
             fi
             ;;
+        cflags)
+          echo $EXTRA_CFLAGS
+          ;;
+        cxxflags)
+          echo $EXTRA_CXXFLAGS
+          ;;
         clang-dir)
           printf "%s\n" "${CLANG_DIR}"
             ;;
