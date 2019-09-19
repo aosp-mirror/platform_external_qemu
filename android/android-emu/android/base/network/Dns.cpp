@@ -14,10 +14,7 @@
 
 #include "android/base/network/Dns.h"
 
-#include "android/base/Log.h"
-
-#include <string>
-#include <unordered_set>
+#include "android/base/Log.h"  // for LogStream, DLOG, LogMessage
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
@@ -26,16 +23,19 @@
 #include "android/base/system/Win32Utils.h"
 #include "wincrypt.h"
 #include "iphlpapi.h"
+
+#include <unordered_set>
 #else
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include <arpa/inet.h>        // for in_addr, sockaddr_in, sockaddr_in6
+#include <sys/socket.h>        // for AF_INET, AF_INET6, SOCK_STREAM
+#include <netdb.h>             // for addrinfo, EAI_NODATA, freeaddrinfo
 #endif
 
-#include <fstream>
-
-#include <errno.h>
-#include <string.h>
+#include <string.h>            // for size_t
+#include <stdio.h>             // for sscanf
+#include <errno.h>             // for ENOENT, EHOSTDOWN, EINVAL, ENOMEM
+#include <fstream>             // for ifstream, char_traits, string, basic_i...
+#include <type_traits>         // for move
 
 // Set to 1 to increase verbosity of debug messages.
 #define DEBUG 0

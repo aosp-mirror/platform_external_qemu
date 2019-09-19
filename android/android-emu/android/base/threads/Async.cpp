@@ -14,9 +14,12 @@
 
 #include "android/base/threads/Async.h"
 
-#include "android/base/threads/FunctorThread.h"
+#include <stdio.h>                               // for fprintf, stderr
+#include <stdlib.h>                              // for abort
+#include <memory>                                // for unique_ptr
 
-#include <memory>
+#include "android/base/threads/FunctorThread.h"  // for FunctorThread, Funct...
+#include "android/base/EnumFlags.h"              // for operator|
 
 namespace android {
 namespace base {

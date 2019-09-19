@@ -11,23 +11,20 @@
 
 #include "android/base/StringParse.h"
 
-#include "android/base/StringView.h"
+#include <locale.h>                            // for _xlocale, locale_t
+#include <stdio.h>                             // for vsscanf
 
 #ifdef _WIN32
 #include <algorithm>
 #include <string>
+#include "android/base/StringView.h"           // for StringView
 #else
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "android/base/memory/ScopedPtr.h"     // for makeCustomScopedPtr
 #endif
 
-#include <assert.h>
-#include <locale.h>
-#include <string.h>
-#include <stdlib.h>
-
 #ifdef __APPLE__
-#include <xlocale.h>
+#include <xlocale.h>                           // for uselocale, newlocale
 #endif
 
 namespace android {

@@ -14,9 +14,11 @@
 
 #include "android/base/synchronization/Lock.h"
 
-#include "android/base/testing/TestThread.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
 
-#include <gtest/gtest.h>
+#include "android/base/testing/TestThread.h"  // for TestThread
+#include "gtest/gtest_pred_impl.h"            // for Test, SuiteApiResolver
 
 namespace android {
 namespace base {

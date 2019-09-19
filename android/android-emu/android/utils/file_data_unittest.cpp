@@ -11,7 +11,12 @@
 
 #include "android/utils/file_data.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <string.h>                 // for memset
+#include <ostream>                  // for operator<<
+
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
 
 class ScopedFileData {
 public:

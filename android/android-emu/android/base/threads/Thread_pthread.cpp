@@ -12,16 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/threads/Thread.h"
+#include <assert.h>                             // for assert
+#include <signal.h>                             // for pthread_sigmask, sigf...
+#include <stdio.h>                              // for NULL
+#include <pthread.h>                            // for pthread_join, pthread...
+#include <sched.h>                              // for sched_yield
+#include <errno.h>                              // for errno
+#include <sys/signal.h>                         // for SIG_SETMASK
 
-#include "android/base/Log.h"
-#include "android/base/threads/ThreadStore.h"
-
-#include <assert.h>
-#include <signal.h>
-#include <stdio.h>
+#include "android/base/threads/Thread.h"        // for Thread, getCurrentThr...
+#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
+#include "android/base/threads/ThreadStore.h"   // for ThreadStoreBase
+#include "android/base/EnumFlags.h"             // for operator&
+#include "android/base/synchronization/Lock.h"  // for AutoLock, Lock
+#include "android/base/threads/Types.h"         // for ThreadFlags, ThreadFl...
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                             // for usleep, intptr_t
 #endif
 
 namespace android {

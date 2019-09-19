@@ -13,11 +13,11 @@
 // limitations under the License.
 #include "android/base/Pool.h"
 
-#include "android/base/FunctionView.h"
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <stdint.h>                 // for uint8_t
 
-#include <gtest/gtest.h>
-
-#include <string>
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, SuiteApiResolver
 
 namespace android {
 namespace base {

@@ -11,25 +11,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/base/network/IpAddress.h"
 
-#include "android/base/network/NetworkUtils.h"
-#include "android/base/Log.h"
-
-#include <algorithm>
-#include <string>
+#include <string.h>                             // for memcpy, memcmp, strlen
+#include <string>                               // for basic_string
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "android/base/sockets/Winsock.h"       // IWYU pragma: keep
 #include <wincrypt.h>
 #include <iphlpapi.h>
 #include <ws2tcpip.h>
 #else
-#include <arpa/inet.h>
-#include <net/if.h>
-#include <netinet/in.h>
+#include <arpa/inet.h>                          // for inet_ntop, inet_pton
+#include <netinet/in.h>                         // for in_addr, in6_addr
+#include <sys/socket.h>                         // for AF_INET, AF_INET6
 #endif
+
+#include "android/base/network/NetworkUtils.h"  // for netStringToInterfaceI...
+#include "android/base/Log.h"                   // for DCHECK, LogMessage
+
 
 namespace android {
 namespace base {

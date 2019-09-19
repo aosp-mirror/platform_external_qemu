@@ -11,8 +11,11 @@
 
 #include "android/base/containers/CircularBuffer.h"
 
-#include <memory>
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <memory>                   // for unique_ptr
+
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, EXPECT_EQ
 
 namespace android {
 namespace base {

@@ -11,12 +11,13 @@
 
 #include "android/base/AlignedBuf.h"
 
-#include "android/base/ArraySize.h"
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <array>                     // for array
+#include <cstdint>                   // for uint32_t, uintptr_t
 
-#include <gtest/gtest.h>
-
-#include <vector>
-#include <array>
+#include "android/base/ArraySize.h"  // for arraySize
+#include "gtest/gtest_pred_impl.h"   // for Test, EXPECT_EQ, SuiteApiResolver
 
 using android::AlignedBuf;
 using android::base::arraySize;

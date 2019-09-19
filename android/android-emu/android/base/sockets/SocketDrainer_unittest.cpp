@@ -10,11 +10,20 @@
 // GNU General Public License for more details.
 
 #include "android/base/sockets/SocketDrainer.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/utils/looper.h"
-#include "android/utils/tempfile.h"
-#include "android/utils/socket_drainer.h"
-#include "android/utils/file_io.h"
+
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <errno.h>                             // for errno, EAGAIN, EWOULDB...
+#include <sys/wait.h>                          // for wait
+#include <unistd.h>                            // for _exit, fork, ssize_t
+
+#include "android/base/sockets/SocketUtils.h"  // for socketClose, socketCre...
+#include "android/utils/looper.h"              // for looper_free, looper_ne...
+#include "android/utils/tempfile.h"            // for tempfile_close, tempfi...
+#include "android/utils/socket_drainer.h"      // for socket_drainer_drain_a...
+#include "android/utils/file_io.h"             // for android_fopen
+#include "android/base/async/Looper.h"         // for Looper
+#include "gtest/gtest_pred_impl.h"             // for Test, ASSERT_GE, EXPEC...
 
 
 // The following unit tests only work on Linux and OS X, because they rely on "fork()"
@@ -22,10 +31,7 @@
 
 #ifndef _WIN32
 
-#include <gtest/gtest.h>
-
-#include <errno.h>
-#include <stdio.h>
+#include <stdio.h>                             // for fscanf, FILE, fclose
 
 namespace android {
 namespace base {

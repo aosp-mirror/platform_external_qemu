@@ -10,9 +10,11 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/utils/bufprint.h"
+#include <iosfwd>                        // for string
+#include <string>                        // for basic_string
 
-#include "android/base/system/System.h"
+#include "android/utils/bufprint.h"      // for bufprint, bufprint_temp_dir
+#include "android/base/system/System.h"  // for System, System::kDirSeparator
 
 using android::base::System;
 

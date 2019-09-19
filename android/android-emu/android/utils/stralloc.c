@@ -11,12 +11,15 @@
 */
 
 #include "android/utils/stralloc.h"
-#include "android/utils/debug.h"
-#include "android/utils/misc.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
+
+#include <string.h>               // for strlen, memcpy, memmove, memset
+#include <stdlib.h>               // for exit, free, realloc
+#include <stdio.h>                // for vsnprintf
+#include <limits.h>               // for UINT_MAX
+#include <stdint.h>               // for uint8_t
+
+#include "android/utils/debug.h"  // for derror
+#include "android/utils/misc.h"   // for tempstr_get
 
 extern void
 stralloc_tabular( stralloc_t*  out,

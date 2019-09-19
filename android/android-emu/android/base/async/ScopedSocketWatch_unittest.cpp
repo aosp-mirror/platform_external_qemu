@@ -11,10 +11,12 @@
 
 #include "android/base/async/ScopedSocketWatch.h"
 
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/async/ThreadLooper.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
 
-#include <gtest/gtest.h>
+#include "android/base/sockets/SocketUtils.h"  // for socketClose, socketCre...
+#include "android/base/async/ThreadLooper.h"   // for ThreadLooper
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Test
 
 namespace android {
 namespace base {

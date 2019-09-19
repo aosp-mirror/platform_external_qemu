@@ -14,21 +14,17 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-
-#include <algorithm>
-#include <atomic>
-#include <cinttypes>
-#include <cstdlib>
-#include <cstring>
-#include <type_traits>
-#include <vector>
-
-#include <stdio.h>
-
-#ifdef _WIN32
-#include <malloc.h>
+#include <stdio.h>           // for size_t, fprintf, stderr
+#ifdef __APPLE__
+#include <malloc/_malloc.h>
+#else
+#include <malloc.h>          // for posix_memalign
 #endif
+#include <algorithm>         // for max, min
+#include <cstdlib>           // for abort, free
+#include <cstring>           // for memcmp
+#include <type_traits>       // for is_trivially_copyable
+#include <vector>            // for vector
 
 namespace android {
 

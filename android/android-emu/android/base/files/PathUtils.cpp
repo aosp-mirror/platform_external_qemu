@@ -11,13 +11,11 @@
 
 #include "android/base/files/PathUtils.h"
 
-#include "android/base/system/System.h"
+#include <string.h>                      // for size_t, strncmp
+#include <iterator>                      // for reverse_iterator, operator!=
+#include <numeric>                       // for accumulate
 
-#include <iterator>
-#include <numeric>
-
-#include <assert.h>
-#include <string.h>
+#include "android/base/system/System.h"  // for System
 
 namespace android {
 namespace base {

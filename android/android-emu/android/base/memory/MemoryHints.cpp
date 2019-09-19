@@ -12,16 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/Compiler.h"
-#include "android/base/ContiguousRangeMapper.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/MemoryHints.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
+#include <string.h>                              // for memset, size_t
+#include <algorithm>                             // for min
+#include <cstdint>                               // for uint8_t, uint64_t
+#include <functional>                            // for __base
+#include <vector>                                // for vector
+
+#include "android/base/ContiguousRangeMapper.h"  // for ContiguousRangeMapper
+#include "android/base/memory/LazyInstance.h"    // for LazyInstance, LAZY_I...
+#include "android/base/memory/MemoryHints.h"     // for MemoryHint, MemoryHi...
 
 #ifndef _WIN32
-#include <sys/mman.h>
-#include <sys/types.h>
+#include <sys/mman.h>                            // for mprotect, madvise
+#else
+#include <windows.h>
+#include <memoryapi.h>
 #endif
 
 using android::base::ContiguousRangeMapper;

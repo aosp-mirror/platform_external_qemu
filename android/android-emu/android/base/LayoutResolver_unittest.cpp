@@ -14,9 +14,13 @@
 
 #include "android/base/LayoutResolver.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <stddef.h>                  // for size_t
+#include <cstdint>                   // for uint32_t
 
-#include "android/base/ArraySize.h"
+#include "android/base/ArraySize.h"  // for ARRAY_SIZE
+#include "gtest/gtest_pred_impl.h"   // for Test, EXPECT_EQ, SuiteApiResolver
 
 namespace android {
 namespace base {

@@ -14,11 +14,11 @@
 
 #pragma once
 
-#include "android/base/TypeTraits.h"
-#include "android/base/threads/Thread.h"
-#include "android/base/threads/Types.h"
+#include <stdint.h>                       // for intptr_t
 
-#include <utility>
+#include "android/base/TypeTraits.h"      // for enable_if, is_callable_as
+#include "android/base/threads/Thread.h"  // for Thread
+#include "android/base/threads/Types.h"   // for ThreadFlags, ThreadFlags::M...
 
 // FunctorThread class is an implementation of base Thread interface that
 // allows one to run a function object in separate thread. It's mostly a

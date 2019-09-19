@@ -14,9 +14,11 @@
 
 #include "android/base/LayoutResolver.h"
 
-#include <algorithm>
-#include <cmath>
-#include <vector>
+#include <algorithm>    // for max, stable_sort
+#include <cmath>        // for pow
+#include <vector>       // for vector
+#include <cstdint>      // for uint32_t
+#include <type_traits>  // for move
 
 namespace android {
 namespace base {

@@ -14,10 +14,13 @@
 
 #include "android/base/EintrWrapper.h"
 
-#include <stdarg.h>
-#include <setjmp.h>
+#include <setjmp.h>                 // for longjmp, jmp_buf, setjmp
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <stddef.h>                 // for size_t
+#include <ostream>                  // for operator<<
 
-#include <gtest/gtest.h>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, EXPECT_EQ, Suite...
 
 namespace android {
 namespace base {

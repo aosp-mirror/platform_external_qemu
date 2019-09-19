@@ -14,7 +14,9 @@
 
 #include "android/base/threads/Async.h"
 
-#include <gtest/gtest.h>
+#include <functional>               // for __base
+
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, TEST, Tes...
 
 namespace android {
 namespace base {

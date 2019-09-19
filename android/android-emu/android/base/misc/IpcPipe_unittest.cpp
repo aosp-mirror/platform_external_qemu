@@ -11,7 +11,10 @@
 
 #include "android/base/misc/IpcPipe.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+#include "gtest/gtest_pred_impl.h"  // for Test, ASSERT_EQ, SuiteApiResolver
 
 namespace android {
 namespace base {

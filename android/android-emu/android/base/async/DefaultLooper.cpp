@@ -11,12 +11,17 @@
 
 #include "android/base/async/DefaultLooper.h"
 
-#include "android/base/Log.h"
-#include "android/base/system/System.h"
-#include "android/base/sockets/SocketErrors.h"
+#include <stdint.h>                             // for INT64_MAX, uint64_t
+#include <errno.h>                              // for ETIMEDOUT, EWOULDBLOCK
+#include <algorithm>                            // for find_if
+#include <utility>                              // for pair
+#include <iterator>                             // for prev
+#include <type_traits>                          // for move
 
-#include <algorithm>
-#include <utility>
+#include "android/base/Log.h"                   // for DCHECK, LogMessage
+#include "android/base/system/System.h"         // for System
+#include "android/base/files/Stream.h"          // for Stream
+#include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter
 
 namespace android {
 namespace base {
