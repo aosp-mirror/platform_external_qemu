@@ -1,0 +1,16 @@
+[
+# Mac OS rewrites
+{ include: ['@.*sys/_types/.*', 'private', '<sys/types.h>', 'public'] },
+{ include: ['@.*sys/_pthread/.*', 'private', '<pthread.h>', 'public'] },
+{ include: ['<_ctype.h>', 'private',  '<ctype.h>', 'public'] },
+{ include: ['<_xlocale.h>', 'private',  '<locale.h>', 'public'] },
+{ include: ['<i386/endian.h>', 'private',  '<arpa/inet.h>', 'public'] },
+{ include: ['<malloc/malloc.h>', 'private',  '"android/base/memory/MallocUsableSize.h"', 'public'] },
+{ include: ['<malloc/_malloc.h>', 'private',  '"android/base/memory/MallocUsableSize.h"', 'public'] },
+{ include: ['<sys/syslimits.h>', 'private',  '<limits.h>', 'public'] },
+{ include: ['<sys/proc.h>', 'private',  '<sys/types.h>', 'public'] },
+{ include: ['<sys/unistd.h>', 'private',  '<unistd.h>', 'public'] },
+{ include: ['<sys/fcntl.h>', 'private',  '<fcntl.h>', 'public'] },
+{ include: ['<sys/dirent.h>', 'private',  '<dirent.h>', 'public'] },
+{ include: ['<sys/_select.h>', 'private',  '<sys/select.h>' 'public'] },
+]
