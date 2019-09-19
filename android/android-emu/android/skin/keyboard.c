@@ -11,12 +11,13 @@
 */
 #include "android/skin/keyboard.h"
 
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/skin/charmap.h"
-#include "android/skin/keycode.h"
 #include "android/skin/keycode-buffer.h"
-#include "android/utils/debug.h"
+#include "android/skin/keycode.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/utils/utf8_utils.h"
 
@@ -255,17 +256,35 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              */
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
-        process_modifier_key(kb, ev, 1);
 
-        D("event type: kTextInput key code=%d mod=0x%x str=%s",
-          ev->u.text.keycode, ev->u.text.mod,
-          skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
+        if (feature_is_enabled(kFeature_KeycodeForwarding)) {
+            process_modifier_key(kb, ev, 1);
 
-        if (android_hw->hw_arc) {
-            map_cros_key(&ev->u.text.keycode);
+            D("event type: kTextInput key code=%d mod=0x%x str=%s",
+              ev->u.text.keycode, ev->u.text.mod,
+              skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
+
+            if (android_hw->hw_arc) {
+                map_cros_key(&ev->u.text.keycode);
+            }
+            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
+            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 0);
+            process_modifier_key(kb, ev, 0);
+        } else {
+            // TODO(digit): For each Unicode value in the input text.
+            const uint8_t* text = ev->u.text.text;
+            const uint8_t* end = text + sizeof(ev->u.text.text);
+            while (text < end && *text) {
+                uint32_t codepoint = 0;
+                int len = android_utf8_decode(text, end - text, &codepoint);
+                if (len < 0) {
+                    break;
+                }
+                skin_keyboard_process_unicode_event(kb, codepoint, 1);
+                skin_keyboard_process_unicode_event(kb, codepoint, 0);
+                text += len;
+            }
         }
-        skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
-        skin_keyboard_add_key_event(kb, ev->u.text.keycode, 0);
 
         if (android_hw->hw_arc && mod) {
             /* If the tracked shift status was pressed, restore it by
@@ -276,7 +295,6 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
                               LINUX_KEY_LEFTSHIFT, 0, 1);
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
-        process_modifier_key(kb, ev, 0);
 
         skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {

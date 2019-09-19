@@ -425,6 +425,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::YUV420_888_to_NV21;
         case android::featurecontrol::YUVCache:
             return android_studio::EmulatorFeatureFlagState::YUV_Cache;
+        case android::featurecontrol::KeycodeForwarding:
+            return android_studio::EmulatorFeatureFlagState::KEYCODE_FORWARDING;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
