@@ -18,6 +18,11 @@ function resetPointsMap() {
     gPointOverlay.hide();
 }
 
+function onSearchBarCleared() {
+    // Send an invalid point so the list selection is cleared.
+    channel.objects.emulocationserver.sendLocation(91.0, 181.0, "");
+}
+
 // Callback function for Maps API
 function initMap() {
     // Create a map object and specify the DOM element for display.
@@ -46,6 +51,7 @@ function initMap() {
             if (gPendingMarker != null) {
                 gPendingMarker.setMap(null);
             }
+            onSearchBarCleared();
         });
 
     // Register a listener that sets a new marker wherever the

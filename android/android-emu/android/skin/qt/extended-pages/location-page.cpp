@@ -781,6 +781,19 @@ void LocationPage::updateControlsAfterLoading() {
     mNowLoadingGeoData = false;
 }
 
+void LocationPage::validateCoordinates() {
+    // Latitude range: +/-90 deg
+    // Longitude range: +/-90 deg
+    double lat = mLastLat.toDouble();
+    double lng = mLastLng.toDouble();
+    if (lat >= -90.0 && lat <= 90.0 &&
+        lng >= -180.0 && lng <= 180.0) {
+        mUi->loc_singlePoint_setLocationButton->setEnabled(true);
+    } else {
+        mUi->loc_singlePoint_setLocationButton->setEnabled(false);
+    }
+}
+
 // Give the device the location that is now showing on
 // the map UI
 void LocationPage::sendMostRecentUiLocation() {
