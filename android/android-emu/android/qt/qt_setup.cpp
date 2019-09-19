@@ -46,6 +46,9 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     VERBOSE_PRINT(init,
         "Setting Qt to use software OpenGL: QT_OPENGL=software");
     system->envSet("QT_OPENGL", "software");
+    VERBOSE_PRINT(init,
+        "Setting QML to use software QtQuick2D: QMLSCENE_DEVICE=softwarecontext");
+    system->envSet("QMLSCENE_DEVICE", "softwarecontext");
 
     VERBOSE_PRINT(init,
         "Overriding pre-existing bad Qt high dpi settings...");
