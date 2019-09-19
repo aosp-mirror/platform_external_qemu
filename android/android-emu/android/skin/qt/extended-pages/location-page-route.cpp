@@ -207,7 +207,7 @@ void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
     }
 }
 
-bool LocationPage::editRoute(RouteListElement& routeElement) {
+bool LocationPage::editRoute(RouteListElement& routeElement, bool isNewRoute) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
@@ -226,9 +226,12 @@ bool LocationPage::editRoute(RouteListElement& routeElement) {
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Save |
-                                                       QDialogButtonBox::Cancel,
-                                                       Qt::Horizontal);
+    QApplication::restoreOverrideCursor();
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            isNewRoute ? QDialogButtonBox::Save :
+                         QDialogButtonBox::Save | QDialogButtonBox::Cancel,
+                         Qt::Horizontal);
     dialogLayout->addWidget(buttonBox);
 
     QDialog editDialog(this);
@@ -239,7 +242,6 @@ bool LocationPage::editRoute(RouteListElement& routeElement) {
     editDialog.setWindowTitle(tr("Edit route"));
     editDialog.setLayout(dialogLayout);
 
-    QApplication::restoreOverrideCursor();
 
     int selection = editDialog.exec();
     if (selection == QDialog::Rejected) {
@@ -395,6 +397,7 @@ void LocationPage::map_saveRoute() {
 
     // Write the JSON to a file
     writeRouteJsonFile(protoPath, mRouteJson.toStdString());
+    QApplication::restoreOverrideCursor();
 
     // Add the new route to the list
     RouteListElement listElement;
@@ -406,11 +409,13 @@ void LocationPage::map_saveRoute() {
     listElement.duration      = routeMetadata.duration();
     listElement.jsonFormat    = routeMetadata.json_format();
 
+    // Open a dialog to let the user change the name of the route
+    editRoute(listElement, true);
+
     RouteItemBuilder builder(mUi->loc_routeList);
     builder.addRoute(std::move(listElement), this);
     mUi->loc_noSavedRoutes_mask->setVisible(false);
 
-    QApplication::restoreOverrideCursor();
 }
 
 void LocationPage::saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString) {
