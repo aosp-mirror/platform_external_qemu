@@ -1,10 +1,15 @@
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 
-#include "android/base/ArraySize.h"
-#include "android/console.h"
-#include "emulator_controller.pb.h"
-#include "android/emulation/control/keyboard/dom_key.h"
-#include "android/utils/utf8_utils.h"
+#include <functional>                                    // for __base
+#include <string>                                        // for operator==
+
+#include "android/base/ArraySize.h"                      // for ARRAY_SIZE
+#include "android/console.h"                             // for AndroidConso...
+#include "emulator_controller.pb.h"                      // for KeyboardEvent
+#include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
+#include "android/utils/utf8_utils.h"                    // for android_utf8...
+#include "android/emulation/control/libui_agent.h"       // for LibuiKeyCode...
+#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 
 
 #define KEYEVENT_QUEUE_LENGTH 128

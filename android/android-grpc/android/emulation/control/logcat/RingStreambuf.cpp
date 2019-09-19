@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/emulation/control/logcat/RingStreambuf.h"
-#include <iostream>
+
+#include <string.h>   // for memcpy
+#include <iostream>   // for streamsize
+#include <algorithm>  // for max, min
+#include <string>     // for basic_string
 
 namespace android {
 namespace emulation {

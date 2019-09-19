@@ -13,7 +13,11 @@
 // limitations under the License.
 
 
-#include "android/emulation/control/EmulatorService.h"
+#include <memory>                                       // for unique_ptr
+
+#include "android/emulation/control/EmulatorService.h"  // for EmulatorContr...
+#include "android/console.h"                            // for AndroidConsol...
+#include "grpcpp/security/server_credentials.h"         // for ServerCredent...
 
 
 namespace android {

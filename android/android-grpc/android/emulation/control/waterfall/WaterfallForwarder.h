@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include <grpcpp/grpcpp.h>
+#include <grpcpp/grpcpp.h> // IWYU pragma: keep
 
 #include <thread>
 

@@ -1,12 +1,17 @@
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 
-#include <vector>
+#include <vector>                                        // for vector
+#include <functional>                                    // for __base
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/threads/ParallelTask.h"
-#include "android/hw-events.h"
-#include "android/skin/generic-event-buffer.h"
-#include "android/skin/linux_keycodes.h"
+#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
+#include "android/hw-events.h"                           // for EV_ABS, EV_SYN
+#include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
+#include "android/skin/linux_keycodes.h"                 // for LINUX_ABS_MT...
+#include "android/base/Log.h"                            // for LogStream, LOG
+#include "android/base/async/Looper.h"                   // for Looper
+#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
+#include "emulator_controller.pb.h"                      // for Touch, Touch...
+#include "google/protobuf/repeated_field.h"              // for RepeatedPtrF...
 
 namespace android {
 namespace emulation {
