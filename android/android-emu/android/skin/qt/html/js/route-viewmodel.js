@@ -188,7 +188,8 @@ class RouteViewModel {
     }
 
     shouldShowAddDestinationButton() {
-        return this.model.isValidRoute() && this.totalWaypointsCount() < 4 && this.allowEdits;
+        return false;
+        // return this.model.isValidRoute() && this.totalWaypointsCount() < 4 && this.allowEdits;
     }
 
     shouldShowRemoveWaypointButtons() {

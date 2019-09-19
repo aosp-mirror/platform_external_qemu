@@ -36,7 +36,6 @@ class LocationPanelController extends GoogleMapPageComponent {
     }
 
     showTitleSubtitle(title, subtitle, hideActionButtonPanel) {
-        console.log('LocationPanelController::show called', address, latLng, elevation, hideActionButtonPanel);
         $('#floating-action-button').hide();
         $('#location-panel-close-button').show();
         $('#location-title').html(title);

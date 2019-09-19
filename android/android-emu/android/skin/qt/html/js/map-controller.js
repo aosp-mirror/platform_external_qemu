@@ -75,16 +75,12 @@ class MapController extends GoogleMapPageComponent {
             this.mapManager.map.setOptions({ zoomControl: false });
             $('#locationInfoOverlay').css('display', 'flex');
         } else {
-            if (this.isGpxKmlPlaying) {
-                $('#locationInfoOverlay').css('display', 'none');
-                this.showGpxKmlPanel();
-            } else {
-                this.locationPanel.hide();
-                this.searchBox.show();
-                this.routePanel.open();
-                this.mapManager.map.setOptions({ zoomControl: true });
-                $('#locationInfoOverlay').css('display', 'none');
-            }
+            this.isGpxKmlPlaying = false;
+            this.locationPanel.hide();
+            this.searchBox.show();
+            this.routePanel.open();
+            this.mapManager.map.setOptions({ zoomControl: true });
+            $('#locationInfoOverlay').css('display', 'none');
         }
     }
 
