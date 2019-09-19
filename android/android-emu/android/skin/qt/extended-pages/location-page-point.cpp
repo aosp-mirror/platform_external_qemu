@@ -140,6 +140,7 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
     mLastLat = lat;
     mLastLng = lng;
     mLastAddr = address;
+    validateCoordinates();
     // Make nothing selected now
     mUi->loc_pointList->setCurrentItem(nullptr);
 }
@@ -227,6 +228,7 @@ void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
             mLastLat = QString::number(pointElement.latitude, 'g', 12);
             mLastLng = QString::number(pointElement.longitude, 'g', 12);
             mLastAddr = pointElement.address;
+            validateCoordinates();
         }
     }
 }
@@ -354,6 +356,7 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
 
         mLastLat = QString::number(pointElement.latitude, 'g', 12);
         mLastLng = QString::number(pointElement.longitude, 'g', 12);
+        validateCoordinates();
 
         writePointProtobufFullPath(pointElement.protoFilePath, pointMetadata);
         QApplication::restoreOverrideCursor();
@@ -438,6 +441,7 @@ void LocationPage::setUpWebEngine() {
     double initialLat, initialLng, unusedAlt, unusedVelocity, unusedHeading;
     mMapBridge.reset(new MapBridge(this));
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
+    mUi->loc_singlePoint_setLocationButton->setEnabled(false);
 
     QObject::connect(this, &LocationPage::signal_saveRoute,
                      this, &LocationPage::map_saveRoute,

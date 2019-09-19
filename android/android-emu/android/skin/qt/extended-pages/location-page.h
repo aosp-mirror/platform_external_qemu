@@ -199,6 +199,7 @@ private slots:
     void routeWidget_editButtonClicked(CCListItem* listItem);
 
 private:
+    void validateCoordinates();
     void fallbackToOfflineUi();
     void handle_importGpxKmlButton_clicked();
     void saveGpxKmlPoint(double lat, double lng, double elevation);
