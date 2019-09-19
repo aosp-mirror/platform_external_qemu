@@ -14,11 +14,17 @@
 
 #include "android/emulation/control/EmulatorService.h"
 
-#include <grpcpp/grpcpp.h>
-
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/time.h>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <functional>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
@@ -33,10 +39,45 @@
 #include "android/emulation/control/logcat/RingStreambuf.h"
 #include "android/emulation/control/waterfall/SocketController.h"
 #include "android/emulation/control/waterfall/WaterfallForwarder.h"
-#include "android/loadpng.h"
 #include "android/opengles.h"
 #include "emulator_controller.grpc.pb.h"
 #include "waterfall.grpc.pb.h"
+#include "android/emulation/control/RtcBridge.h"
+#include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/display_agent.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
+#include "android/emulation/control/window_agent.h"
+#include "android/skin/rect.h"
+#include "emulator_controller.pb.h"
+#include "grpcpp/impl/codegen/client_context.h"
+#include "grpcpp/impl/codegen/server_context.h"
+#include "grpcpp/impl/codegen/server_interceptor.h"
+#include "grpcpp/impl/codegen/status.h"
+#include "grpcpp/impl/codegen/status_code_enum.h"
+#include "grpcpp/impl/codegen/sync_stream.h"
+#include "grpcpp/impl/codegen/sync_stream_impl.h"
+#include "grpcpp/server.h"
+#include "grpcpp/server_builder.h"
+#include "grpcpp/server_builder_impl.h"
+#include "grpcpp/server_impl.h"
+
+namespace google {
+namespace protobuf {
+class Empty;
+}  // namespace protobuf
+}  // namespace google
+namespace waterfall {
+class CmdProgress;
+class ForwardMessage;
+class Message;
+class Transfer;
+class VersionMessage;
+}  // namespace waterfall
 
 using grpc::Server;
 using grpc::ServerBuilder;

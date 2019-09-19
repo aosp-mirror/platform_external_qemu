@@ -14,9 +14,15 @@
 
 #include "android/emulation/control/logcat/RingStreambuf.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>                 // for Message
+#include <gtest/gtest-test-part.h>               // for TestPartResult
+#include <functional>                            // for __base
+#include <istream>                               // for operator<<, operator>>
+#include <string>                                // for basic_string, char_t...
 
-#include "android/base/threads/FunctorThread.h"
+#include "android/base/threads/FunctorThread.h"  // for FunctorThread
+#include "android/base/threads/Thread.h"         // for Thread
+#include "gtest/gtest_pred_impl.h"               // for Test, SuiteApiResolver
 
 namespace android {
 namespace emulation {
