@@ -11,17 +11,18 @@
 
 #include "android/base/misc/FileUtils.h"
 
-#include "android/base/files/ScopedFd.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/file_io.h"
-#include "android/utils/tempfile.h"
+#include <gtest/gtest-message.h>          // for Message
+#include <gtest/gtest-test-part.h>        // for TestPartResult
+#include <sys/fcntl.h>                    // for open, O_RDWR
+#include <unistd.h>                       // for write
+#include <string>                         // for basic_string
+#include <cstdint>                        // for uint8_t
+#include <vector>                         // for vector
 
-#include <fcntl.h>
-#include <gtest/gtest.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <limits>
-#include <string>
+#include "android/base/files/ScopedFd.h"  // for ScopedFd
+#include "android/utils/eintr_wrapper.h"  // for HANDLE_EINTR
+#include "android/utils/tempfile.h"       // for tempfile_path, tempfile_create
+#include "gtest/gtest_pred_impl.h"        // for AssertionResult, Test, EXPE...
 
 using android::base::ScopedFd;
 

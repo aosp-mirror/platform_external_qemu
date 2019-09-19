@@ -10,11 +10,12 @@
 // GNU General Public License for more details.
 
 #include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
 
-#include <utility>
+#include "android/base/sockets/SocketUtils.h"  // for socketClose, socketCre...
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Test
 
 namespace android {
 namespace base {

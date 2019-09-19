@@ -13,18 +13,20 @@
 // limitations under the License.
 #include "android/base/CpuUsage.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include <stdio.h>                                           // for fprintf
+#include <array>                                             // for array
+#include <iomanip>                                           // for operator<<
+#include <sstream>                                           // for operator<<
+#include <string>                                            // for char_traits
+#include <vector>                                            // for vector
 
-#include <array>
-#include <iomanip>
-#include <sstream>
-
-#include <stdio.h>
+#include "android/base/async/Looper.h"                       // for Looper::...
+#include "android/base/memory/LazyInstance.h"                // for LazyInst...
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/base/CpuTime.h"                            // for CpuTime
 
 namespace android {
 namespace base {

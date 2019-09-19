@@ -11,8 +11,9 @@
 
 #include "android/base/files/Stream.h"
 
-#include <assert.h>
-#include <string.h>
+#include <assert.h>  // for assert
+#include <string.h>  // for size_t
+#include <string>    // for basic_string
 
 namespace android {
 namespace base {

@@ -11,9 +11,15 @@
 
 #include "android/base/files/MemStream.h"
 
-#include <gtest/gtest.h>
+#include <stdint.h>                   // for int32_t
+#include <gtest/gtest-message.h>      // for Message
+#include <gtest/gtest-test-part.h>    // for TestPartResult
+#include <string.h>                   // for memcpy
+#include <iosfwd>                     // for string
+#include <type_traits>                // for move
 
-#include <stdint.h>
+#include "android/base/StringView.h"  // for c_str, CStrWrapper, StringView
+#include "gtest/gtest_pred_impl.h"    // for Test, EXPECT_EQ, SuiteApiResolver
 
 namespace android {
 namespace base {

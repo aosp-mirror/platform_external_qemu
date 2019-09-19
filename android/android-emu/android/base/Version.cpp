@@ -10,10 +10,12 @@
 // GNU General Public License for more details.
 
 #include "android/base/Version.h"
-#include "android/base/StringFormat.h"
 
-#include <sstream>
-#include <assert.h>
+#include <assert.h>                     // for assert
+#include <sstream>                      // for istringstream, basic_istream
+#include <string>                       // for char_traits
+
+#include "android/base/StringFormat.h"  // for StringAppendFormat, StringFormat
 
 namespace android {
 namespace base {

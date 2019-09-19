@@ -14,10 +14,12 @@
 
 #include "android/base/memory/SharedMemory.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <string.h>                 // for memcpy
+#include <string>                   // for operator==
 
-#include <type_traits>
-#include <utility>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, ASSERT_FALSE
 
 namespace android {
 namespace base {

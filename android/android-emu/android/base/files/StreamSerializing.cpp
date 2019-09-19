@@ -11,6 +11,8 @@
 
 #include "android/base/files/StreamSerializing.h"
 
+#include <string>  // for basic_string
+
 namespace android {
 namespace base {
 

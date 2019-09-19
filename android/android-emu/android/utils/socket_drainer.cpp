@@ -11,11 +11,12 @@
 
 #include "android/utils/socket_drainer.h"
 
-#include "android/base/Log.h"
-#include "android/base/sockets/SocketDrainer.h"
-#include "android/base/sockets/SocketUtils.h"
+#include <stddef.h>                              // for NULL
 
-#include <stddef.h>
+#include "android/base/Log.h"                    // for base
+#include "android/base/sockets/SocketDrainer.h"  // for SocketDrainer
+#include "android/base/sockets/SocketUtils.h"    // for socketSetNonBlocking
+#include "android/base/async/Looper.h"           // for Looper
 
 using namespace android::base;
 

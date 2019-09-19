@@ -14,8 +14,11 @@
 
 #include "android/base/testing/MockUtils.h"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <functional>               // for function, __base
+
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, Assertion...
 
 TEST(ReplaceMock, Simple) {
     std::function<void()> mock;

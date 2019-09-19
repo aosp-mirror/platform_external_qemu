@@ -11,17 +11,20 @@
 
 #include "android/utils/dirscanner.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <sys/fcntl.h>                         // for open, O_CREAT, O_WRONLY
+#include <algorithm>                           // for sort
+#include <ostream>                             // for string, operator<<
+#include <string>                              // for swap, basic_string
+#include <vector>                              // for vector
 
-#include <gtest/gtest.h>
-
-#include <algorithm>
-
-#include <fcntl.h>
+#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/base/StringView.h"           // for StringView
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Test
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                            // for close
 #endif
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))

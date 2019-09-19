@@ -14,9 +14,13 @@
 
 #include "android/base/memory/OnDemand.h"
 
-#include "android/base/threads/ThreadPool.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
+#include <iosfwd>                             // for string
+#include <utility>                            // for pair
 
-#include <gtest/gtest.h>
+#include "android/base/threads/ThreadPool.h"  // for ThreadPool<>::Processor
+#include "gtest/gtest_pred_impl.h"            // for AssertionResult, EXPECT_EQ
 
 using android::base::makeAtomicOnDemand;
 using android::base::makeOnDemand;

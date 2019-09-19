@@ -13,11 +13,14 @@
 // limitations under the License.
 #include "android/base/perflogger/Metric.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/JsonWriter.h"
-#include "android/base/perflogger/Benchmark.h"
-#include "android/base/system/System.h"
-#include "android/utils/path.h"
+#include <stdio.h>                              // for fprintf, stderr
+#include <utility>                              // for pair
+
+#include "android/base/files/PathUtils.h"       // for pj
+#include "android/base/JsonWriter.h"            // for JsonWriter
+#include "android/base/perflogger/Benchmark.h"  // for Benchmark
+#include "android/base/system/System.h"         // for System
+#include "android/utils/path.h"                 // for path_mkdir_if_needed
 
 using namespace android::base;
 using namespace android::perflogger;

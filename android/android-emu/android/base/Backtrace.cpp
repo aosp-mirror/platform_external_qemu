@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "android/base/Backtrace.h"
 
+#include <string>       // for char_traits
+
 #if defined(__WIN32) || defined(_MSC_VER)
 namespace android {
 namespace base {
@@ -26,13 +28,11 @@ std::string bt() {
 
 #else
 
-#include <iomanip>
-#include <sstream>
-#include <stdlib.h>
-#include <cxxabi.h>
-#include <errno.h>
-#include <libunwind.h>
-#include <stdio.h>
+#include <stdlib.h>     // for free
+#include <cxxabi.h>     // for __cxa_demangle
+#include <libunwind.h>  // for unw_get_proc_name, unw_get_reg, unw_getcontext
+#include <stdio.h>      // for printf, stderr
+#include <sstream>      // for operator<<, basic_ostream, hex, stringstream
 
 
 namespace android {

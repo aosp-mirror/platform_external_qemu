@@ -14,11 +14,14 @@
 
 #include "android/base/misc/StringUtils.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <stdlib.h>                 // for free
+#include <list>                     // for list, operator!=
+#include <string>                   // for basic_string
+#include <vector>                   // for vector
 
-#include <list>
-#include <string>
-#include <vector>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, EXPECT_EQ
 
 namespace android {
 namespace base {

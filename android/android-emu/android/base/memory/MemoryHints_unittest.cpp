@@ -14,9 +14,11 @@
 
 #include "android/base/memory/MemoryHints.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <vector>                   // for vector
 
-#include <vector>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, EXPECT_TRUE
 
 namespace android {
 namespace base {

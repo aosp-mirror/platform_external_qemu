@@ -11,12 +11,16 @@
 
 #include "android/base/files/ScopedFd.h"
 
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
-#include <fcntl.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <sys/fcntl.h>              // for open, O_RDONLY
 
-#include <gtest/gtest.h>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
+
+#ifndef _MSC_VER
+#include <unistd.h>                 // for close
+#endif
+
 
 namespace android {
 namespace base {

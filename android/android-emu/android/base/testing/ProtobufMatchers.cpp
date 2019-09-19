@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <regex>
-#include <string>
+#include <google/protobuf/descriptor.h>                // for Descriptor
+#include <google/protobuf/io/tokenizer.h>              // for ErrorCollector
+#include <google/protobuf/message.h>                   // for Message
+#include <google/protobuf/text_format.h>               // for TextFormat::Pa...
+#include <google/protobuf/util/message_differencer.h>  // for MessageDiffere...
+#include <gtest/gtest-printers.h>                      // for PrintToString
+#include <stddef.h>                                    // for NULL
+#include <string>                                      // for operator+, all...
+#include <ostream>                                     // for string, operat...
+#include <vector>                                      // for vector, vector...
 
-#include "android/base/testing/ProtobufMatchers.h"
-
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/io/tokenizer.h>
-#include <google/protobuf/message.h>
-#include <google/protobuf/text_format.h>
-#include <google/protobuf/util/message_differencer.h>
-
-#include <gmock/gmock-generated-matchers.h>
-#include <gmock/gmock-matchers.h>
-#include <gmock/gmock-more-matchers.h>
+#include "android/base/testing/ProtobufMatchers.h"     // for ProtoComparison
+#include "android/base/Log.h"                          // for LogStream, CHECK
+#include "android/base/StringView.h"                   // for StringView
+#include "google/protobuf/util/field_comparator.h"     // for DefaultFieldCo...
 
 namespace android {
 namespace internal {

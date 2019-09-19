@@ -11,9 +11,16 @@
 
 #include "android/base/StringParse.h"
 
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/testing/Utils.h"
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>                 // for Message
+#include <gtest/gtest-test-part.h>               // for TestPartResult
+#include <stdio.h>                               // for sscanf
+#include <functional>                            // for __base
+#include <memory>                                // for unique_ptr
+#include <vector>                                // for vector
+
+#include "android/base/threads/FunctorThread.h"  // for FunctorThread
+#include "android/base/testing/Utils.h"          // for setScopedCommaLocale
+#include "gtest/gtest_pred_impl.h"               // for Test, AssertionResult
 
 namespace android {
 namespace base {

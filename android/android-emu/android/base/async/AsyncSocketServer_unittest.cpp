@@ -11,16 +11,19 @@
 
 #include "android/base/async/AsyncSocketServer.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/Log.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/threads/Async.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <stdint.h>                            // for intptr_t
+#include <errno.h>                             // for ETIMEDOUT
+#include <memory>                              // for unique_ptr
+#include <functional>                          // for __bind, bind, __base, _1
 
-#include <gtest/gtest.h>
-
-#include <memory>
-#include <functional>
+#include "android/base/async/Looper.h"         // for Looper
+#include "android/base/async/ThreadLooper.h"   // for ThreadLooper
+#include "android/base/Log.h"                  // for ErrnoLogMessage, PLOG
+#include "android/base/threads/Async.h"        // for async
+#include "android/base/sockets/SocketUtils.h"  // for socketClose, socketSend
+#include "gtest/gtest_pred_impl.h"             // for EXPECT_EQ, Test, Asser...
 
 #ifdef _MSC_VER
 #ifdef ERROR

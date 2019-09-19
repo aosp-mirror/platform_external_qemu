@@ -13,12 +13,15 @@
 // limitations under the License.
 
 #include "android/base/network/NetworkUtils.h"
+
+#include <gtest/gtest-message.h>
+#include <gtest/gtest-test-part.h>
+#include <cstdint>
+#include <ostream>
+
 #include "android/base/testing/GTestUtils.h"
 #include "android/base/testing/TestNetworkInterfaceNameResolver.h"
-#include <gtest/gtest.h>
-
-#include <string>
-#include <vector>
+#include "gtest/gtest_pred_impl.h"                                  // for Test
 
 namespace android {
 namespace base {

@@ -14,11 +14,16 @@
 
 #include "android/base/threads/ThreadStore.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/testing/TestThread.h"
-#include "android/base/threads/Thread.h"
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <stddef.h>                             // for size_t, NULL
+#include <stdint.h>                             // for intptr_t
+#include <ostream>                              // for operator<<
 
-#include <gtest/gtest.h>
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/base/testing/TestThread.h"    // for TestThread
+#include "android/base/threads/Thread.h"        // for Thread
+#include "gtest/gtest_pred_impl.h"              // for Test, EXPECT_EQ, Suit...
 
 namespace android {
 namespace base {

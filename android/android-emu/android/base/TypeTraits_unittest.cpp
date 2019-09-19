@@ -11,18 +11,19 @@
 
 #include "android/base/TypeTraits.h"
 
-#include <gtest/gtest.h>
+#include <array>                    // for array
+#include <functional>               // for function
+#include <list>                     // for list
+#include <vector>                   // for vector
 
-#include <array>
-#include <functional>
-#include <list>
-#include <vector>
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, TEST, Tes...
 
 namespace android {
 namespace base {
 
 TEST(TypeTraits, IsCallable) {
     class C;
+
     C* c = nullptr;
 
     auto lambda = [c](bool) -> C* { return nullptr; };

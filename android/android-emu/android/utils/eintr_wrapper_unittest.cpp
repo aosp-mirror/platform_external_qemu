@@ -14,12 +14,14 @@
 
 #include "android/utils/eintr_wrapper.h"
 
-#include <stdarg.h>
-#include <setjmp.h>
+#include <stdarg.h>                 // for va_list
+#include <setjmp.h>                 // for longjmp, jmp_buf, setjmp
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <ostream>                  // for operator<<
 
-#include "android/utils/panic.h"
-
-#include <gtest/gtest.h>
+#include "android/utils/panic.h"    // for android_panic_registerHandler
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, SuiteApiResolver
 
 // Loop counter used by several functions below.
 static int loop_count = 0;

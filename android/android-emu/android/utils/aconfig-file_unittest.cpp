@@ -11,9 +11,11 @@
 
 #include "android/utils/aconfig-file.h"
 
-#include <gtest/gtest.h>
+#include <stddef.h>                 // for NULL
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include <stddef.h>
+#include "gtest/gtest_pred_impl.h"  // for Test, AssertionResult, EXPECT_EQ
 
 namespace {
 

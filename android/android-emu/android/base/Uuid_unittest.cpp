@@ -11,7 +11,10 @@
 
 #include "android/base/Uuid.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
 
 namespace android {
 namespace base {
