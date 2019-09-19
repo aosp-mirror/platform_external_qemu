@@ -11,8 +11,10 @@
 
 #include "android/base/async/AsyncReader.h"
 
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
+#include <errno.h>                             // for errno, EAGAIN, ECONNRESET
+#include <sys/types.h>                         // for ssize_t
+
+#include "android/base/sockets/SocketUtils.h"  // for socketRecv
 
 namespace android {
 namespace base {

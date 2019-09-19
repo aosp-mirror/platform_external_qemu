@@ -11,9 +11,11 @@
 
 #include "android/base/misc/HttpUtils.h"
 
-#include <gtest/gtest.h>
+#include <string.h>                 // for strlen
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include <string.h>
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, EXPECT_EQ
 
 namespace android {
 namespace base {

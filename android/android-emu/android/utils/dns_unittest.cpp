@@ -12,10 +12,11 @@
 
 #include "android/utils/dns.h"
 
-#include "android/base/Log.h"
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include <gtest/gtest.h>
-#include <string>
+#include "android/base/Log.h"       // for LOG, LogMessage, LogStream
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, EXPECT_STREQ
 
 TEST(android_dns_parse_servers, IgnoreIpv6) {
     const int kMaxAddresses = 3;

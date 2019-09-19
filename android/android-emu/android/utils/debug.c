@@ -10,15 +10,16 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/debug.h"
-#include "android/utils/system.h"
 
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdio.h>
+#include <stdint.h>                // for uint64_t
+#include <stdio.h>                 // for fileno, printf, stdout, vfprintf
+#include <sys/fcntl.h>             // for open, O_WRONLY
+
+#include "android/utils/system.h"  // for android_get_thread_id, ANDROID_THR...
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <unistd.h>
+#include <unistd.h>                // for dup2, close, dup
 #endif
 
 uint64_t android_verbose = 0;

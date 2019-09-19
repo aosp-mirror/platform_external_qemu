@@ -1,13 +1,12 @@
 #include "android/utils/iolooper.h"
 
-#include "android/base/sockets/SocketWaiter.h"
+#include <stddef.h>                             // for NULL
 
-#include <stddef.h>
-#include <sys/types.h>
+#include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter, SocketW...
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <sys/time.h>
+#include <sys/time.h>                           // for gettimeofday, timeval
 #endif
 
 using namespace android::base;

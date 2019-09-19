@@ -9,10 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/ArraySize.h"
-#include "android/base/StringView.h"
+#include <gtest/gtest-message.h>      // for Message
+#include <gtest/gtest-test-part.h>    // for TestPartResult
+#include <string.h>                   // for strlen, size_t
+#include <iostream>                   // for operator<<, string, basic_ostream
 
-#include <gtest/gtest.h>
+#include "android/base/ArraySize.h"   // for stringLiteralLength
+#include "android/base/StringView.h"  // for StringView, c_str, operator!=
+#include "gtest/gtest_pred_impl.h"    // for AssertionResult, Test, EXPECT_EQ
 
 namespace android {
 namespace base {

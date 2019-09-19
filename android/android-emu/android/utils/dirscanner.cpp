@@ -11,11 +11,12 @@
 */
 #include "android/utils/dirscanner.h"
 
-#include "android/base/system/System.h"
-#include "android/base/files/PathUtils.h"
+#include <string>                          // for basic_string
+#include <vector>                          // for vector
+#include <iosfwd>                          // for string
 
-#include <string>
-#include <vector>
+#include "android/base/system/System.h"    // for System
+#include "android/base/files/PathUtils.h"  // for PathUtils
 
 using android::base::PathUtils;
 

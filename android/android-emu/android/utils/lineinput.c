@@ -9,10 +9,13 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include <errno.h>
-#include "android/utils/system.h"
-#include "android/utils/assert.h"
-#include "android/utils/lineinput.h"
+#include <stdio.h>                    // for NULL, FILE, feof, fgets, size_t
+#include <string.h>                   // for memchr, memcpy
+#include <errno.h>                    // for errno, EINVAL
+
+#include "android/utils/system.h"     // for AFREE, AARRAY_RENEW, ANEW0
+#include "android/utils/assert.h"     // for AASSERT, AASSERT_UNREACHED
+#include "android/utils/lineinput.h"  // for LineInput, lineInput_free, line...
 
 struct LineInput {
     char*   line;

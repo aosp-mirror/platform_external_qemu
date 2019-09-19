@@ -11,7 +11,13 @@
 
 #include "android/base/StringFormat.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <stddef.h>                 // for size_t
+#include <ostream>                  // for string, operator<<
+#include <string>                   // for basic_string<>::value_type
+
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, EXPECT_STREQ
 
 namespace android {
 namespace base {

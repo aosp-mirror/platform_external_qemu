@@ -11,11 +11,15 @@
 
 #include "android/utils/looper.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/Stream.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/threads/Async.h"
+#include "android/base/async/Looper.h"         // for Looper, Looper::FdWatch
+#include "android/base/async/ThreadLooper.h"   // for ThreadLooper
+#include "android/base/sockets/SocketUtils.h"  // for socketSetNonBlocking
+
+namespace android {
+namespace base {
+class Stream;
+}  // namespace base
+}  // namespace android
 
 typedef ::Looper CLooper;
 typedef android::base::Looper BaseLooper;

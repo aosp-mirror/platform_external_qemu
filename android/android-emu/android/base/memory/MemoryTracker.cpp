@@ -11,12 +11,15 @@
 
 #include "android/base/memory/MemoryTracker.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include <stdint.h>                            // for intptr_t
+#include <stdio.h>                             // for fprintf, stderr, size_t
+#include <string>                              // for basic_string
+
+#include "android/base/memory/LazyInstance.h"  // for LAZY_INSTANCE_INIT
 
 #if defined(__linux__)
 #include <malloc_extension_c.h>
 #include <malloc_hook.h>
-
 #include <execinfo.h>
 #include <libunwind.h>
 #include <set>

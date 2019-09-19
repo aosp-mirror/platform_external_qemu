@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/base/JsonWriter.h"
-#include "android/utils/file_io.h"
-#include <sstream>
 
-#include <stdio.h>
+#include <stdio.h>                  // for FILE, fclose, fflush, fwrite, stdout
+#include <sstream>                  // for stringstream, operator<<, basic_o...
+#include <string>                   // for char_traits, basic_string<>::valu...
+
+#include "android/utils/file_io.h"  // for android_fopen
 
 namespace android {
 namespace base {

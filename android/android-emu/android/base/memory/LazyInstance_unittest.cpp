@@ -14,10 +14,14 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/testing/TestThread.h"
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <stddef.h>                             // for size_t, NULL
+#include <ostream>                              // for operator<<
 
-#include <gtest/gtest.h>
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/base/testing/TestThread.h"    // for TestThread
+#include "gtest/gtest_pred_impl.h"              // for Test, AssertionResult
 
 namespace android {
 namespace base {

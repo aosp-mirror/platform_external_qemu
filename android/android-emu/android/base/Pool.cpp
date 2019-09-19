@@ -13,9 +13,13 @@
 // limitations under the License.
 #include "android/base/Pool.h"
 
-#include "android/base/AlignedBuf.h"
+#include <stdio.h>                    // for fprintf, stderr
+#include <stdlib.h>                   // for free, abort, malloc
+#include <vector>                     // for vector
+#include <algorithm>                  // for max
+#include <cstdint>                    // for uint8_t, uintptr_t
 
-#include <vector>
+#include "android/base/AlignedBuf.h"  // for AlignedBuf
 
 #define DEBUG_POOL 0
 

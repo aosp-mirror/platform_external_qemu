@@ -14,13 +14,15 @@
 // limitations under the License.
 #include "android/base/Tracing.h"
 
-#include "android/base/system/System.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/threads/Thread.h"
-#include "android/base/threads/ThreadStore.h"
+#include <stdio.h>                             // for size_t, printf
+#include <string>                              // for basic_string, operator==
+#include <vector>                              // for vector, __vector_base<...
+#include <iosfwd>                              // for string
 
-#include <string>
-#include <vector>
+#include "android/base/system/System.h"        // for System::WallDuration
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "android/base/threads/Thread.h"       // for getCurrentThreadId
+#include "android/base/threads/ThreadStore.h"  // for ThreadStore
 
 namespace android {
 namespace base {

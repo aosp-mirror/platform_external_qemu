@@ -14,12 +14,15 @@
 
 #include "android/base/threads/Thread.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <stddef.h>                             // for size_t, NULL
+#include <memory>                               // for unique_ptr
+#include <ostream>                              // for operator<<
 
-#include <gtest/gtest.h>
-
-#include <memory>
+#include "android/base/synchronization/Lock.h"  // for Lock
+#include "android/base/system/System.h"         // for System
+#include "gtest/gtest_pred_impl.h"              // for AssertionResult, Test
 
 namespace android {
 namespace base {

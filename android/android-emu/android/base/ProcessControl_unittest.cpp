@@ -10,11 +10,14 @@
 // GNU General Public License for more details.
 
 #include "android/base/ProcessControl.h"
-#include "android/base/testing/TestTempDir.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <memory>                              // for unique_ptr
+#include <string>                              // for basic_string
 
-#include <memory>
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "gtest/gtest_pred_impl.h"             // for SuiteApiResolver, EXPE...
 
 namespace android {
 namespace base {

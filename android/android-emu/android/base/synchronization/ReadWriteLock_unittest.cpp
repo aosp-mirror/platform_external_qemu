@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/synchronization/Lock.h"
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <stddef.h>                             // for size_t, NULL
+#include <algorithm>                            // for random_shuffle, unifo...
+#include <random>                               // for default_random_engine
+#include <utility>                              // for pair
+#include <vector>                               // for vector
 
-#include "android/base/testing/TestThread.h"
-#include "android/base/testing/Utils.h"
-
-#include <gtest/gtest.h>
-
-#include <algorithm>
-#include <random>
-#include <utility>
-#include <vector>
+#include "android/base/synchronization/Lock.h"  // for ReadWriteLock
+#include "android/base/testing/TestThread.h"    // for TestThread
+#include "gtest/gtest_pred_impl.h"              // for Test, SuiteApiResolver
 
 namespace android {
 namespace base {

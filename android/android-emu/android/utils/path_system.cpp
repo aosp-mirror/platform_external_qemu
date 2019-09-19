@@ -10,17 +10,20 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/utils/path.h"
+#include <vector>                           // for vector
+#include <iosfwd>                           // for string
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/System.h"
+#include "android/utils/path.h"             // for path_basename, path_can_exec
+#include "android/base/files/PathUtils.h"   // for PathUtils
+#include "android/base/memory/ScopedPtr.h"  // for ScopedCPtr
+#include "android/base/misc/StringUtils.h"  // for strDup
+#include "android/base/system/System.h"     // for System
+#include "android/base/StringView.h"        // for StringView
+#include "android/utils/system.h"           // for ABool, ASTRDUP
+
+#ifdef _WIN32
 #include "android/base/system/Win32UnicodeString.h"
-
-#include <string>
-#include <vector>
-
+#endif
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::strDup;

@@ -11,9 +11,12 @@
 
 #include "android/utils/host_bitness.h"
 
-#include <gtest/gtest.h>
+#include <stdio.h>                  // for printf
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <ostream>                  // for operator<<
 
-#include <stdio.h>
+#include "gtest/gtest_pred_impl.h"  // for Test, AssertionResult, SuiteApiRe...
 
 TEST(HostBitness, android_getHostBitness) {
     int host_bitness = android_getHostBitness();

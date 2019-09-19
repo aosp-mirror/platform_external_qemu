@@ -11,9 +11,12 @@
 
 #include "android/utils/property_file.h"
 
-#include <stdlib.h>
+#include <stdlib.h>                 // for free
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <string.h>                 // for memcpy
 
-#include <gtest/gtest.h>
+#include "gtest/gtest_pred_impl.h"  // for Test, AssertionResult, EXPECT_STREQ
 
 // Unlike std::string, accept NULL as input.
 class String {

@@ -11,9 +11,11 @@
 
 #include "android/utils/Random.h"
 
-#include "android/base/files/ScopedStdioFile.h"
-#include "android/utils/debug.h"
-#include "android/utils/file_io.h"
+#include <stdio.h>                               // for fread, size_t
+
+#include "android/base/files/ScopedStdioFile.h"  // for ScopedStdioFile
+#include "android/utils/debug.h"                 // for derror
+#include "android/utils/file_io.h"               // for android_fopen
 
 #ifdef _WIN32
 #include <windows.h>

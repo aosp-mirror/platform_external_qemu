@@ -9,21 +9,21 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include <string.h>                         // for strdup
+#include <stdint.h>                         // for int64_t
+#include <iosfwd>                           // for string
+
 /* NOTE:
  * This file contains thin wrappers around actual system related library
  * functions from android/base/system/System.h.
  * Keep this lean. DO NOT implement any real functionality here.
  */
-#include "android/base/system/System.h"
-
-#include "android/base/misc/StringUtils.h"
-
+#include "android/base/system/System.h"     // for System, System::Times
+#include "android/base/misc/StringUtils.h"  // for strDup
 // This is a very thin wrapper around C++ implementations of some functions
 // NOTE: cpp headers need to go before this so that inttypes.h doesn't pollute
 // types.
-#include "android/utils/system.h"
-
-#include <string.h>
+#include "android/utils/system.h"           // for add_library_search_dir
 
 using android::base::System;
 

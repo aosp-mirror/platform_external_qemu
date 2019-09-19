@@ -10,7 +10,11 @@
 ** GNU General Public License for more details.
 */
 #include <android/utils/refset.h>
-#include <stddef.h>
+#include <stddef.h>                // for NULL, ptrdiff_t
+#include <stdint.h>                // for uint32_t, uint64_t
+
+#include "android/utils/assert.h"  // for AASSERT
+#include "android/utils/vector.h"  // for AVECTOR_INIT_ALLOC, AVECTOR_DONE
 
 #define  AREFSET_STEP    5
 #define  AREFSET_INIT_SIZE    4

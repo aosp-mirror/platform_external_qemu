@@ -10,12 +10,14 @@
 // GNU General Public License for more details.
 
 #include "android/utils/format.h"
-#include "android/utils/string.h"
-#include "gtest/gtest.h"
 
-#include <algorithm>
-#include <stdint.h>
-#include <string.h>
+#include <stdint.h>                 // for uint8_t
+#include <string.h>                 // for strlcpy
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+#include "gtest/gtest_pred_impl.h"  // for EXPECT_EQ, EXPECT_STREQ, Test
+#include "android/utils/string.h"
 
 namespace android {
 namespace utils {

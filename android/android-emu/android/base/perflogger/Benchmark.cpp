@@ -13,12 +13,12 @@
 // limitations under the License.
 #include "android/base/perflogger/Benchmark.h"
 
-#include "android/base/perflogger/Metric.h"
+#include <memory>                              // for unique_ptr
+#include <vector>                              // for vector
 
-#include "android/base/system/System.h"
-
-#include <memory>
-#include <vector>
+#include "android/base/perflogger/Metric.h"    // for Metric::MetricSample
+#include "android/base/system/System.h"        // for System
+#include "android/base/perflogger/Analyzer.h"  // for Analyzer
 
 using android::base::System;
 

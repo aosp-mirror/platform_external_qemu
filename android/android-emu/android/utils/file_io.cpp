@@ -10,25 +10,25 @@
 // GNU General Public License for more details.
 
 #include "android/utils/file_io.h"
-#include "android/base/files/Fd.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/system/Win32UnicodeString.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdio.h>                  // for fopen, popen, FILE
+#include <sys/types.h>              // for mode_t
+#include <sys/stat.h>               // for chmod, lstat, mkdir, stat
+#include <sys/fcntl.h>              // for open, O_CLOEXEC, O_CREAT, O_TRUNC
+
+#include "android/base/files/Fd.h"  // for fdSetCloexec
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                 // for access, rmdir, unlink
 #endif
 
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
 #include <share.h>
+#include "android/base/system/Win32UnicodeString.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
+
 using android::base::PathUtils;
 using android::base::Win32UnicodeString;
 using android::base::ScopedCPtr;

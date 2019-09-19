@@ -11,11 +11,13 @@
 
 #include "android/utils/bufprint.h"
 
-#include "android/base/system/System.h"
-#include "android/base/testing/TestSystem.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
 
-#include <gtest/gtest.h>
+#include "android/base/testing/TestSystem.h"  // for TestSystem
+#include "android/base/CpuTime.h"             // for base
+#include "android/base/StringView.h"          // for StringView
+#include "gtest/gtest_pred_impl.h"            // for Test, SuiteApiResolver
 
 using namespace android::base;
 

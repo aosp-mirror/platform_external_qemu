@@ -12,11 +12,10 @@
 
 #pragma once
 
-#include "android/utils/compiler.h"
-#include "android/utils/sockets.h"
+#include <stddef.h>                  // for size_t
 
-#include <stddef.h>
-#include <stdint.h>
+#include "android/utils/compiler.h"  // for ANDROID_BEGIN_HEADER, ANDROID_EN...
+#include "android/utils/sockets.h"   // for SockAddress
 
 ANDROID_BEGIN_HEADER
 
