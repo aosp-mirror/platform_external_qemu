@@ -14,30 +14,29 @@
 
 #include "android/base/network/NetworkUtils.h"
 
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
-#include "android/base/system/System.h"
-
-#include <limits.h>
-
-#ifdef __APPLE__
-#include <sys/socket.h>
-#endif
+#include <limits.h>  // for INT_MAX
 
 #ifndef _WIN32
-#include <net/if.h>
+#include <net/if.h>  // for if_nametoindex
 #endif
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>  // for NULL, strtol
+#include <string.h>  // for strchr, memcpy, memset
+
+namespace android {
+namespace base {
+class System;
+}  // namespace base
+}  // namespace android
 
 #ifdef _WIN32
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/sockets/Winsock.h"
-#include "android/base/system/Win32UnicodeString.h"
 #include <wincrypt.h>
 #include <iphlpapi.h>
 #include <unordered_map>
 #include <string>
+
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/sockets/Winsock.h"
+#include "android/base/system/Win32UnicodeString.h"
 #endif
 
 // Set to 1 to display debug messages.

@@ -11,11 +11,17 @@
 
 #include "android/utils/path.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/testing/TestSystem.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <stdlib.h>                            // for free, NULL, size_t
+#include <ostream>                             // for operator<<
+#include <string>                              // for basic_string
 
-#include "gtest/gtest.h"
+#include "android/base/files/PathUtils.h"      // for pj
+#include "android/base/testing/TestSystem.h"   // for TestSystem
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/base/StringView.h"           // for StringView
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Test
 
 using android::base::pj;
 using android::base::TestTempDir;

@@ -10,12 +10,11 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/cbuffer.h"
-#include "android/utils/stralloc.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>                   // for printf
+#include <string.h>                  // for memcpy
+
+#include "android/utils/stralloc.h"  // for stralloc_reset, stralloc_to_tempstr
 
 #define  DEBUG  0
 

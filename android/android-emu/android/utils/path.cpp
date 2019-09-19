@@ -9,26 +9,28 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/system/System.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/dirscanner.h"
-#include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/file_io.h"
-#include "android/utils/path.h"
+#include <stdio.h>                          // for NULL, snprintf, size_t
+#include <string.h>                         // for strdup, strlen, memcpy
+#include <stdlib.h>                         // for malloc, free, getenv
+#include <stdint.h>                         // for uint64_t
+#include <sys/_types/_s_ifmt.h>             // for S_IRUSR, S_IWUSR, S_IREAD
+#include <sys/errno.h>                      // for errno, EINVAL, ENOENT
+#include <sys/fcntl.h>                      // for open, O_RDONLY
+#include <sys/syslimits.h>                  // for PATH_MAX
+#include <sys/unistd.h>                     // for F_OK, R_OK
+#include <memory>                           // for unique_ptr
+#include <iosfwd>                           // for string
+#include <string>                           // for basic_string
 
-#include "android/base/files/ScopedFileHandle.h"
-#include "android/base/system/Win32UnicodeString.h"
-
-#include <memory>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
+#include "android/base/files/PathUtils.h"   // for PathUtils
+#include "android/base/memory/ScopedPtr.h"  // for makeCustomScopedPtr
+#include "android/base/system/System.h"     // for System
+#include "android/utils/dirscanner.h"       // for dirScanner_nextFull, dirS...
+#include "android/utils/debug.h"            // for VERBOSE_PRINT, VERBOSE_init
+#include "android/utils/eintr_wrapper.h"    // for HANDLE_EINTR
+#include "android/utils/file_io.h"          // for android_access, android_c...
+#include "android/utils/path.h"             // for path_exists, path_is_dir
+#include "android/utils/system.h"           // for APosixStatus
 
 #ifdef _WIN32
 #include <process.h>
@@ -36,21 +38,19 @@
 #include <tlhelp32.h>
 #include <io.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <stdint.h>
+#include <sys/stat.h>                       // for stat
+#include <stdint.h>                         // for uint64_t
 #include <limits.h>
 #include <winbase.h>
 #else
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                         // for close, lseek, read, write
 #endif
-#include <sys/stat.h>
-#include <time.h>
-#include <signal.h>
+#include <sys/stat.h>                       // for stat
 #endif
 
 #ifdef __APPLE__
-#include <copyfile.h>
+#include <copyfile.h>                       // for copyfile, COPYFILE_DATA
 #endif
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)

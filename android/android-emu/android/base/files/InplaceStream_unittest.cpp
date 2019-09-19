@@ -11,9 +11,15 @@
 
 #include "android/base/files/InplaceStream.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>      // for Message
+#include <gtest/gtest-test-part.h>    // for TestPartResult
+#include <string.h>                   // for strncmp, strlen
+#include <cstdint>                    // for int32_t, int16_t, int64_t
+#include <iosfwd>                     // for string
+#include <vector>                     // for vector
 
-#include <stdint.h>
+#include "android/base/StringView.h"  // for c_str, CStrWrapper, StringView
+#include "gtest/gtest_pred_impl.h"    // for EXPECT_EQ, Test, SuiteApiResolver
 
 namespace android {
 namespace base {

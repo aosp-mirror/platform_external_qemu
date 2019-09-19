@@ -14,11 +14,14 @@
 
 #include "android/base/network/Dns.h"
 
-#include "android/base/Log.h"
-#include "android/base/testing/GTestUtils.h"
-#include "android/base/testing/TestDnsResolver.h"
+#include <gtest/gtest-message.h>                   // for Message
+#include <gtest/gtest-test-part.h>                 // for TestPartResult
+#include <cstdint>                                 // for uint8_t
 
-#include <gtest/gtest.h>
+#include "android/base/Log.h"                      // for LOG, LogMessage
+#include "android/base/testing/GTestUtils.h"       // for RangesMatch
+#include "android/base/testing/TestDnsResolver.h"  // for TestDnsResolver
+#include "gtest/gtest_pred_impl.h"                 // for AssertionResult, Test
 
 namespace android {
 namespace base {

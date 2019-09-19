@@ -11,10 +11,11 @@
 
 #include "android/base/files/MemStream.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include <string.h>                                // for memcpy, size_t
+#include <algorithm>                               // for min
+#include <type_traits>                             // for move
 
-#include <algorithm>
-#include <utility>
+#include "android/base/files/StreamSerializing.h"  // for loadBuffer, saveBu...
 
 namespace android {
 namespace base {

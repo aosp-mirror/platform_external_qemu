@@ -14,22 +14,26 @@
 
 #include "android/base/system/System.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/testing/TestSystem.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <string.h>                            // for strncmp
+#include <sys/_types/_s_ifmt.h>                // for S_IRUSR, S_IWUSR, S_IXUSR
+#include <sys/fcntl.h>                         // for open, O_CREAT, O_WRONLY
+#include <sys/stat.h>                          // for chmod
+#include <fstream>                             // for string, operator<<
+#include <string>                              // for basic_string, char_traits
+#include <cstdio>                              // for remove
 
-#include <gtest/gtest.h>
-
-#include <fstream>
-#include <iostream>
-#include <string>
-
-#include <fcntl.h>
+#include "android/base/EintrWrapper.h"         // for HANDLE_EINTR
+#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "android/base/Log.h"                  // for LogStream, LOG, LogMes...
+#include "android/base/misc/FileUtils.h"       // for setFileSize
+#include "android/base/testing/TestSystem.h"   // for TestSystem
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/base/EnumFlags.h"            // for operator|
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Test
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                            // for close
 #endif
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))

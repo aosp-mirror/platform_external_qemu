@@ -11,16 +11,13 @@
 */
 #include "android/utils/timezone.h"
 
-#include "android/base/memory/ScopedPtr.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/file_io.h"
-#include "android/utils/eintr_wrapper.h"
+#include <string.h>                  // for strchr, strcpy, strlen, strstr
+#include <stdio.h>                   // for fprintf, snprintf, stderr
+#include <stdlib.h>                  // for getenv
+#include <sys/syslimits.h>           // for PATH_MAX
 
-#include <string.h>
-#include <stdio.h>
-
-#include <string>
+#include "android/utils/bufprint.h"  // for bufprint
+#include "android/utils/debug.h"     // for dprint, VERBOSE_CHECK, VERBOSE_t...
 
 #define  DEBUG  1
 
@@ -84,9 +81,8 @@ bufprint_zoneinfo_timezone( char*  p, char*  end )
 #if defined(__APPLE__)
 
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                  // for readlink
 #endif
-#include <limits.h>
 #define  LOCALTIME_FILE  "/etc/localtime"
 #define  ZONEINFO_DIR    "/zoneinfo/"
 static const char*
@@ -136,14 +132,14 @@ get_zoneinfo_timezone( void )
 #if defined(__linux__) || defined (__FreeBSD__)
 
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                  // for readlink
 #endif
 #include <limits.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <string.h>
+#include <string.h>                  // for strchr, strcpy, strlen, strstr
 
 #define  ZONEINFO_DIR  "/usr/share/zoneinfo/"
 #define  LOCALTIME_FILE1  "/etc/localtime"
@@ -401,6 +397,7 @@ get_zoneinfo_timezone( void )
 #ifdef _WIN32
 
 #include <windows.h>
+
 typedef struct {
     const char*  win_name;
     const char*  zoneinfo_name;
@@ -891,12 +888,6 @@ get_zoneinfo_timezone( void )
                 android_timezone = win32tz->zoneinfo_name;
                 goto Exit;
             }
-
-#if 0  /* TODO */
-    /* we didn't find it, this may come from localized versions of Windows. we're going to explore the registry,
-    * as the code in Postgresql does...
-    */
-#endif
         D( "%s: could not determine current timezone\n", __FUNCTION__ );
         return NULL;
     }

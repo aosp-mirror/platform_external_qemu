@@ -10,12 +10,15 @@
 // GNU General Public License for more details.
 #include "android/base/JsonWriter.h"
 
-#include "android/base/misc/FileUtils.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <memory>                              // for unique_ptr
+#include <string>                              // for basic_string
 
-#include <gtest/gtest.h>
-
-#include <memory>
+#include "android/base/misc/FileUtils.h"       // for readFileIntoString
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/base/Optional.h"             // for Optional
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Suite...
 
 using namespace android::base;
 

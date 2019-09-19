@@ -11,7 +11,11 @@
 
 #include "android/base/files/PathUtils.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <ostream>                  // for operator<<, string
+
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, EXPECT_EQ
 
 #define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
 

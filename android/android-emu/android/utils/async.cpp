@@ -14,7 +14,10 @@
 
 #include "android/utils/async.h"
 
-#include "android/base/threads/Async.h"
+#include <functional>                    // for __base
+
+#include "android/base/threads/Async.h"  // for async
+#include "android/base/threads/Types.h"  // for ThreadFlags, ThreadFlags::Ma...
 
 using android::base::ThreadFlags;
 

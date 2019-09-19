@@ -11,8 +11,10 @@
 
 #include "android/base/Debug.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/StringView.h"
+#include <stddef.h>                  // for size_t
+#include <sys/proc.h>                // for P_TRACED, extern_proc
+
+#include "android/base/ArraySize.h"  // for arraySize
 
 #ifdef _WIN32
 #include <windows.h>
@@ -21,10 +23,9 @@
 #include <sstream>
 #include <string>
 #elif defined(__APPLE__)
-#include <sys/sysctl.h>
-#include <sys/types.h>
+#include <sys/sysctl.h>              // for kinfo_proc, sysctl, CTL_KERN
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                  // for getpid
 #endif
 #endif
 

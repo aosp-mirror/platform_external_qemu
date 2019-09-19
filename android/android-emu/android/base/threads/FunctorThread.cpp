@@ -14,7 +14,9 @@
 
 #include "FunctorThread.h"
 
-#include <assert.h>
+#include <assert.h>     // for assert
+#include <functional>   // for function
+#include <type_traits>  // for move
 
 namespace android {
 namespace base {

@@ -12,13 +12,13 @@
 
 #include "dns.h"
 
-#include "android/base/network/Dns.h"
-#include "android/base/network/IpAddress.h"
+#include <algorithm>                         // for replace
+#include <string>                            // for basic_string
+#include <iosfwd>                            // for string
 
-#include "android/utils/debug.h"
-
-#include <algorithm>
-#include <string>
+#include "android/base/network/Dns.h"        // for Dns::AddressList, Dns
+#include "android/base/network/IpAddress.h"  // for IpAddress
+#include "android/utils/debug.h"             // for derror, dprintn, dwarning
 
 using android::base::Dns;
 using android::base::IpAddress;

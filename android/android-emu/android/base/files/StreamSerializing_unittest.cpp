@@ -11,11 +11,14 @@
 
 #include "android/base/files/StreamSerializing.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/testing/GTestUtils.h"
+#include <gtest/gtest-message.h>                  // for Message
+#include <gtest/gtest-test-part.h>                // for TestPartResult
 
-#include <gtest/gtest.h>
+#include "android/base/ArraySize.h"               // for arraySize
+#include "android/base/files/MemStream.h"         // for MemStream
+#include "android/base/testing/GTestUtils.h"      // for RangesMatch
+#include "android/base/containers/SmallVector.h"  // for SmallFixedVector
+#include "gtest/gtest_pred_impl.h"                // for Test, AssertionResult
 
 using android::base::arraySize;
 

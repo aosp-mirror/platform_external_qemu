@@ -10,13 +10,14 @@
 // GNU General Public License for more details.
 
 #include "android/utils/file_data.h"
-#include "android/utils/file_io.h"
-#include "android/utils/panic.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>                  // for fseek, fclose, feof, ferror, fread
+#include <stdlib.h>                 // for malloc, free
+#include <string.h>                 // for memcpy, memset
+#include <sys/errno.h>              // for errno, EIO
+
+#include "android/utils/file_io.h"  // for android_fopen
+#include "android/utils/panic.h"    // for APANIC
 
 // Use a magic value in the |flags| field to indicate that a FileData
 // value was properly initialized. Helps catch errors at runtime.

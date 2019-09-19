@@ -11,20 +11,26 @@
 
 #include "android/utils/filelock.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/system/System.h"
-#include "android/base/testing/TestTempDir.h"
-#include "android/utils/path.h"
-#include "android/utils/eintr_wrapper.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <signal.h>                            // for kill
+#include <stdint.h>                            // for uint8_t
+#include <stdlib.h>                            // for size_t, exit
+#include <sys/signal.h>                        // for SIGKILL
+#include <sys/wait.h>                          // for waitpid
+#include <memory>                              // for unique_ptr
+#include <iosfwd>                              // for string
 
-#include <gtest/gtest.h>
-#include <memory>
+#include "android/base/system/System.h"        // for System
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/utils/eintr_wrapper.h"       // for HANDLE_EINTR
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, Suite...
 
 #ifdef _WIN32
 #include <windows.h>
 #else
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                            // for close, pipe, fork, read
 #endif
 #endif
 

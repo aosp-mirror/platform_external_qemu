@@ -14,10 +14,10 @@
 
 #include "android/base/misc/StringUtils.h"
 
-#include <algorithm>
-
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>  // for malloc
+#include <string.h>  // for memcmp, memcpy, memmem, strlen
+#include <_ctype.h>  // for isspace
+#include <string>    // for basic_string<>::value_type
 
 #ifdef _WIN32
 const void* memmem(const void* haystack, size_t haystackLen,

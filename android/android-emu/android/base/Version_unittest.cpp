@@ -12,7 +12,10 @@
 
 #include "android/base/Version.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, SuiteApiResolver
 
 namespace android {
 namespace base {

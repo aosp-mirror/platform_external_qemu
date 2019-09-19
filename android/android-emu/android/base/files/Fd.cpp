@@ -11,10 +11,7 @@
 
 #include "android/base/files/Fd.h"
 
-#ifndef _WIN32
-#   include <unistd.h>
-#   include <fcntl.h>
-#endif  // !_WIN32
+#include <sys/fcntl.h>  // for fcntl, FD_CLOEXEC, F_GETFD, F_SETFD
 
 namespace android {
 namespace base {

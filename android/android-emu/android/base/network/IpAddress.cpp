@@ -14,21 +14,23 @@
 
 #include "android/base/network/IpAddress.h"
 
-#include "android/base/network/NetworkUtils.h"
-#include "android/base/Log.h"
+#include <string.h>                             // for memcpy, memcmp, strlen
+#include <sys/socket.h>                         // for AF_INET, AF_INET6
+#include <string>                               // for basic_string
 
-#include <algorithm>
-#include <string>
+#include "android/base/network/NetworkUtils.h"  // for netStringToInterfaceI...
+#include "android/base/Log.h"                   // for DCHECK, LogMessage
+#include "i386/endian.h"                        // for htonl, ntohl
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
 #include <wincrypt.h>
 #include <iphlpapi.h>
 #include <ws2tcpip.h>
+
+#include "android/base/sockets/Winsock.h"
 #else
-#include <arpa/inet.h>
-#include <net/if.h>
-#include <netinet/in.h>
+#include <arpa/inet.h>                          // for inet_ntop, inet_pton
+#include <netinet/in.h>                         // for in_addr, in6_addr
 #endif
 
 namespace android {

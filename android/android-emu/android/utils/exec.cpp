@@ -11,12 +11,10 @@
 
 #include "android/utils/exec.h"
 
-#include "android/base/system/Win32UnicodeString.h"
-
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <unistd.h>
+#include <unistd.h>  // for execv
 #endif
 
 #ifdef _WIN32

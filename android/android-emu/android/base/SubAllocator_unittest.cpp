@@ -13,13 +13,16 @@
 // limitations under the License.
 #include "android/base/SubAllocator.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/FunctionView.h"
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <random>                    // for default_random_engine
+#include <algorithm>                 // for uniform_int_distribution
+#include <cstdint>                   // for uint8_t, uint64_t
+#include <ostream>                   // for operator<<
+#include <vector>                    // for vector
 
-#include <gtest/gtest.h>
-
-#include <random>
-#include <string>
+#include "android/base/ArraySize.h"  // for arraySize
+#include "gtest/gtest_pred_impl.h"   // for Test, SuiteApiResolver, Assertio...
 
 namespace android {
 namespace base {

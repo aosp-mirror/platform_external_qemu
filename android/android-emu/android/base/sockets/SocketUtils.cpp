@@ -11,34 +11,39 @@
 
 #include "android/base/sockets/SocketUtils.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/EnumFlags.h"
-#include "android/base/files/Fd.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/system/System.h"
-#include "android/utils/sockets.h"
-#include "android/utils/system.h"
+#include "android/base/EintrWrapper.h"          // for HANDLE_EINTR, IGNORE_...
+#include "android/base/files/Fd.h"              // for fdSetCloexec
+#include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
+#include "android/utils/sockets.h"              // for socket_connect_posix
+#include "android/base/Log.h"                   // for DPLOG, ErrnoLogMessage
+#include "android/utils/fd.h"                   // for SOCK_CLOEXEC
+#include "i386/endian.h"                        // for htons, ntohs, htonl
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
 #else
-#  include <sys/socket.h>
-#  include <unistd.h>
-#  include <fcntl.h>
-#  include <netdb.h>
-#  include <netinet/in.h>
-#  include <netinet/tcp.h>
+#include <sys/socket.h>                         // for AF_INET6, AF_INET
+#include <unistd.h>                             // for close
+#include <netdb.h>                              // for addrinfo, EAI_NODATA
+#include <netinet/in.h>                         // for sockaddr_in, sockaddr...
+#include <netinet/tcp.h>                        // for TCP_NODELAY
 #endif
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #endif
 
-#include <vector>
-
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>                             // for size_t, NULL
+#include <string.h>                             // for memset
+#include <sys/_select.h>                        // for select
+#include <sys/_types/_fd_def.h>                 // for fd_set
+#include <sys/_types/_fd_set.h>                 // for FD_SET
+#include <sys/_types/_fd_zero.h>                // for FD_ZERO
+#include <sys/errno.h>                          // for errno, EINVAL, EAGAIN
+#include <sys/fcntl.h>                          // for fcntl, F_GETFL, F_SETFL
+#include <sys/time.h>                           // for timeval
+#include <vector>                               // for vector
+#include <type_traits>                          // for move
 
 namespace android {
 namespace base {

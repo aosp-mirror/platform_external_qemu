@@ -12,20 +12,20 @@
 
 #include "android/utils/filelock.h"
 
-#include "android/base/system/System.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/lock.h"
-#include "android/utils/path.h"
-#include "android/utils/file_io.h"
+#include <stdio.h>                        // for snprintf, NULL, fclose, fpr...
+#include <stdlib.h>                       // for free, malloc, atexit, atoi
+#include <sys/stat.h>                     // for lstat, stat, fstat, st_mtime
+#include <time.h>                         // for time
+#include <string.h>                       // for strlen, memcpy, strcat
+#include <sys/errno.h>                    // for errno, EPERM, ESRCH
+#include <sys/fcntl.h>                    // for open, O_RDONLY
+#include <algorithm>                      // for min
 
-#include <assert.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <time.h>
+#include "android/base/system/System.h"   // for System, System::WaitExitResult
+#include "android/utils/eintr_wrapper.h"  // for HANDLE_EINTR, IGNORE_EINTR
+#include "android/utils/lock.h"           // for android_lock_release, andro...
+#include "android/utils/path.h"           // for PATH_SEP
+#include "android/utils/file_io.h"        // for android_rmdir, android_unlink
 #ifdef _WIN32
 #  include "android/base/files/ScopedFileHandle.h"
 #  include "android/base/memory/ScopedPtr.h"
@@ -34,11 +34,12 @@
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
+
 using android::base::ScopedFileHandle;
 #else
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <signal.h>
+#include <sys/types.h>                    // for time_t
+#include <unistd.h>                       // for unlink, close, link, read
+#include <signal.h>                       // for kill
 #endif
 
 using android::base::System;

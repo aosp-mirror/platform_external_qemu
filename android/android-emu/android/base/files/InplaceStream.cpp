@@ -11,15 +11,15 @@
 
 #include "android/base/files/InplaceStream.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include <string.h>                                // for memcpy, size_t
+
+#include "android/base/files/StreamSerializing.h"  // for loadBufferRaw, sav...
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #endif
 
-#include <algorithm>
-#include <utility>
-#include <vector>
+#include <algorithm>                               // for min
 
 namespace android {
 namespace base {

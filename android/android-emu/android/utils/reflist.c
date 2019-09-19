@@ -10,10 +10,11 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/reflist.h"
-#include "android/utils/system.h"
-#include "android/utils/assert.h"
-#include <stdlib.h>
-#include <string.h>
+
+#include <stdlib.h>                // for NULL
+
+#include "android/utils/system.h"  // for ABool, AARRAY_MOVE, AARRAY_NEW
+#include "android/utils/assert.h"  // for AASSERT_TRUE
 
 static void** _areflist_items(const ARefList*  l)
 {

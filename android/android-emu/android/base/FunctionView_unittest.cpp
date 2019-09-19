@@ -11,10 +11,13 @@
 
 #include "android/base/FunctionView.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <functional>               // for function, __base
+#include <string>                   // for operator+, basic_string
+#include <iosfwd>                   // for string
 
-#include <functional>
-#include <string>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
 
 namespace android {
 namespace base {

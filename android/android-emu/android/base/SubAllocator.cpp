@@ -13,12 +13,10 @@
 // limitations under the License.
 #include "android/base/SubAllocator.h"
 
-#include "android/base/address_space.h"
-#include "android/base/Log.h"
+#include <sstream>                       // for operator<<, basic_ostream, hex
 
-#include <iomanip>
-#include <sstream>
-#include <string>
+#include "android/base/address_space.h"  // for address_space_allocator_allo...
+#include "android/base/Log.h"            // for LOG, LogMessage
 
 namespace android {
 namespace base {

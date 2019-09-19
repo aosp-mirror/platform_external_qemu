@@ -11,12 +11,13 @@
 
 #include "android/base/containers/SmallVector.h"
 
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/testing/GTestUtils.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
+#include <iosfwd>                             // for string
 
-#include <gtest/gtest.h>
-
-#include <string>
+#include "android/base/memory/ScopedPtr.h"    // for makeCustomScopedPtr
+#include "android/base/testing/GTestUtils.h"  // for RangesMatch
+#include "gtest/gtest_pred_impl.h"            // for AssertionResult, EXPECT_EQ
 
 namespace android {
 namespace base {

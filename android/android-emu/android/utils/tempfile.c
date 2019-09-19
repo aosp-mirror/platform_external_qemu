@@ -11,14 +11,14 @@
 */
 
 #include "android/utils/tempfile.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/file_io.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
+#include <stdio.h>                   // for NULL
+#include <stdlib.h>                  // for free, atexit, malloc
+#include <string.h>                  // for strcmp, strlen, strcpy
+
+#include "android/utils/bufprint.h"  // for bufprint, bufprint_temp_file
+#include "android/utils/debug.h"     // for dwarning
+#include "android/utils/file_io.h"   // for android_unlink
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -28,7 +28,7 @@
 #  include <windows.h>
 #endif
 #else
-#  include <unistd.h>
+#include <unistd.h>                  // for close, mkstemp, mkstemps
 #endif
 
 #define  D(...)  ((void)0)

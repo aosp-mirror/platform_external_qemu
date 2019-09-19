@@ -11,9 +11,13 @@
 
 #include "android/utils/string.h"
 
-#include <gtest/gtest.h>
+#include <stdlib.h>                 // for free
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <stddef.h>                 // for NULL
+#include <string.h>                 // for strdup
 
-#include <stdlib.h>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
 
 #define TEST_SKIP(string, skipped) \
     EXPECT_EQ(string + skipped, str_skip_white_space_if_any(string))
