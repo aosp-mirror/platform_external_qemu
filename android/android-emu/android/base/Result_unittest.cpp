@@ -13,13 +13,16 @@
 // limitations under the License.
 
 #include "android/base/Result.h"
-#include "android/base/Compiler.h"
-#include "android/base/testing/ResultMatchers.h"
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <gmock/gmock-matchers.h>                 // for Optional, EXPECT_THAT
+#include <gtest/gtest-death-test.h>               // for EXPECT_DEATH
+#include <gtest/gtest-message.h>                  // for Message
+#include <gtest/gtest-test-part.h>                // for TestPartResult
+#include <ostream>                                // for operator<<, ostream
 
-#include <string>
+#include "android/base/Compiler.h"                // for DISALLOW_COPY_AND_A...
+#include "android/base/testing/ResultMatchers.h"  // for IsOk, IsErr, IsErrM...
+#include "gtest/gtest_pred_impl.h"                // for AssertionResult, Test
 
 using android::base::Err;
 using android::base::IsErr;

@@ -11,20 +11,21 @@
 
 #include "android/base/sockets/SocketWaiter.h"
 
-#include "android/base/Log.h"
-#include "android/base/sockets/SocketErrors.h"
+#include "android/base/Log.h"        // for LogStream, LogMessage, DCHECK, LOG
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
 #else
-#  include <sys/types.h>
-#  include <sys/select.h>
 #endif
 
 
-#include <errno.h>
-#include <string.h>
+#include <string.h>                  // for strerror, NULL
+#include <sys/types.h>
+#include <sys/errno.h>               // for errno, EINTR, ETIMEDOUT
+#include <sys/time.h>                // for timeval
 
+
+#include "android/base/memory/ScopedPtr.h"
 namespace android {
 namespace base {
 

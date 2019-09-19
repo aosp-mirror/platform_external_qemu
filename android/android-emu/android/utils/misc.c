@@ -12,14 +12,15 @@
 
 #include "android/utils/misc.h"
 
-#include "android/utils/debug.h"
-#include "android/utils/stralloc.h"
+#include <limits.h>                  // for INT_MAX, INT_MIN, LONG_MAX
+#include <string.h>                  // for strlen, strchr, strstr, memcpy
+#include <stdio.h>                   // for NULL, printf
+#include <stdlib.h>                  // for exit, free, malloc, realloc, strtol
+#include <stdarg.h>                  // for va_end, va_list, va_start
+#include <sys/errno.h>               // for errno, ERANGE
 
-#include <errno.h>
-#include <limits.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "android/utils/debug.h"     // for derror
+#include "android/utils/stralloc.h"  // for stralloc_reset, stralloc_to_tempstr
 
 #define  E(...)    derror(__VA_ARGS__)
 

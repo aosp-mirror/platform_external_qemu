@@ -14,7 +14,12 @@
 
 #include "android/base/threads/FunctorThread.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <cstdint>                  // for intptr_t
+#include <functional>               // for __bind, __base, bind
+
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
 
 using android::base::FunctorThread;
 

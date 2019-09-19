@@ -11,20 +11,19 @@
 */
 
 #include "android/utils/aconfig-file.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/path.h"
-#include "android/utils/file_io.h"
 
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <fcntl.h>
+#include <string.h>                       // for strcmp, strlen, memcpy
+#include <stdlib.h>                       // for NULL, calloc, free, strtol
+#include <_ctype.h>                       // for isspace
+
+#include "android/utils/eintr_wrapper.h"  // for HANDLE_EINTR, IGNORE_EINTR
+#include "android/utils/path.h"           // for path_load_file
+#include "android/utils/file_io.h"        // for android_creat
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <unistd.h>
+#include <unistd.h>                       // for write, close
 #endif
-#include <errno.h>
 
 AConfig*
 aconfig_node(const char *name, const char *value)

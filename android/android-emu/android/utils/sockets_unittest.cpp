@@ -11,7 +11,10 @@
 
 #include "android/utils/sockets.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, EXPECT_STREQ
 
 
 TEST(SockAddress, ResolveAndToString) {

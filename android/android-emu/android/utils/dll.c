@@ -10,10 +10,8 @@
 ** GNU General Public License for more details.
 */
 #include <android/utils/dll.h>
-#include <android/utils/system.h>
-#include <android/utils/path.h>
-
-#include <stdlib.h>
+#include <stdlib.h>  // for NULL, free, malloc
+#include <string.h>  // for strdup, strlen, strchr, memcpy
 
 /* Utility function, append one string to another, caller must free result */
 static char*
@@ -97,8 +95,7 @@ adynamicLibrary_close( ADynamicLibrary*  lib )
 
 #else /* !_WIN32 */
 
-#include <dlfcn.h>
-#include <stdlib.h>
+#include <dlfcn.h>   // for dlerror, dlclose, dlopen, dlsym, RTLD_LAZY
 
 ADynamicLibrary*
 adynamicLibrary_open( const char*  libraryName,

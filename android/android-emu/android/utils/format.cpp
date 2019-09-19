@@ -11,9 +11,9 @@
 
 #include "android/utils/format.h"
 
-#include <algorithm>
-#include <ctype.h>
-#include <stdint.h>
+#include <stdint.h>   // for uint8_t
+#include <_ctype.h>   // for isprint
+#include <algorithm>  // for min
 
 // append a character if there is room for it (and a terminating null)
 // always increment the result

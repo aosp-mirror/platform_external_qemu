@@ -11,14 +11,17 @@
 
 #include "android/base/async/ThreadLooper.h"
 
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/ThreadStore.h"
-#include "android/utils/debug.h"
-#include "android/utils/looper.h"
+#include <stddef.h>                                       // for NULL
+#include <memory>                                         // for unique_ptr
+#include <type_traits>                                    // for move
 
-#include <memory>
+#include "android/base/Log.h"                             // for CHECK, LogM...
+#include "android/base/memory/LazyInstance.h"             // for LazyInstance
+#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "android/base/threads/ThreadStore.h"             // for ThreadStore
+#include "android/utils/debug.h"                          // for derror
+#include "android/utils/looper.h"                         // for android_get...
+#include "android/base/async/Looper.h"                    // for Looper, Loo...
 
 namespace android {
 namespace base {

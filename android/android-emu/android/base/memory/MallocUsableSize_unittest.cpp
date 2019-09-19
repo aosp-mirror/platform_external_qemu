@@ -11,9 +11,13 @@
 
 #include "android/base/memory/MallocUsableSize.h"
 
-#include <stdlib.h>
+#include <stdlib.h>                 // for size_t, free, malloc
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <malloc/malloc.h>          // for malloc_size
+#include <ostream>                  // for operator<<
 
-#include <gtest/gtest.h>
+#include "gtest/gtest_pred_impl.h"  // for Test, AssertionResult, SuiteApiRe...
 
 namespace android {
 namespace base {

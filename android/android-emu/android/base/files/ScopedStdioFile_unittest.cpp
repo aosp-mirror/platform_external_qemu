@@ -10,10 +10,12 @@
 // GNU General Public License for more details.
 
 #include "android/base/files/ScopedStdioFile.h"
-#include "android/utils/file_io.h"
 
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include <gtest/gtest.h>
+#include "android/utils/file_io.h"  // for android_fopen
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, SuiteApiRe...
 
 namespace android {
 namespace base {

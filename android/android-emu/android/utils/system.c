@@ -23,16 +23,16 @@
  */
 
 #include "android/utils/system.h"
-#include "android/utils/assert.h"
-#include <stdlib.h>
-#include <stdio.h>
+
+#include <stdlib.h>      // for exit, free, malloc, calloc, realloc
+#include <stdio.h>       // for fprintf, stderr
+#include <sys/signal.h>  // for SIGALRM, SIG_BLOCK, SIG_SETMASK
+#include <sys/syscall.h> // for SYS_thread_selfid
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>  /* for Sleep */
 #else
-#  include <unistd.h>  /* for usleep */
-#  include <sys/syscall.h> // For getting thread id's
-#  include <sys/types.h>
+#include <unistd.h>      // for syscall, usleep
 #endif
 
 void*

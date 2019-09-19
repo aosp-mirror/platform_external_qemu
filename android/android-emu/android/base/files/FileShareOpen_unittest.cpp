@@ -10,13 +10,16 @@
 // GNU General Public License for more details.
 
 #include "android/base/files/FileShareOpen.h"
-#include "android/base/files/FileShareOpenImpl.h"
 
-#include "android/base/testing/TestSystem.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>                   // for Message
+#include <gtest/gtest-test-part.h>                 // for TestPartResult
+#include <sys/errno.h>                             // for errno
+#include <memory>                                  // for unique_ptr
+#include <ostream>                                 // for string, operator<<
 
-#include <gtest/gtest.h>
-#include <memory>
+#include "android/base/files/FileShareOpenImpl.h"  // for closeFileForShare
+#include "android/base/testing/TestTempDir.h"      // for TestTempDir
+#include "gtest/gtest_pred_impl.h"                 // for AssertionResult
 
 namespace {
 

@@ -14,13 +14,15 @@
 
 #include "android/base/async/RecurrentTask.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/testing/TestLooper.h"
-#include "android/base/testing/TestThread.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
+#include <sys/errno.h>                        // for EWOULDBLOCK
+#include <memory>                             // for unique_ptr
 
-#include <gtest/gtest.h>
-
-#include <memory>
+#include "android/base/async/Looper.h"        // for Looper, Looper::kDurati...
+#include "android/base/testing/TestLooper.h"  // for TestLooper
+#include "android/base/testing/TestThread.h"  // for TestThread
+#include "gtest/gtest_pred_impl.h"            // for AssertionResult, Test
 
 using android::base::Looper;
 using android::base::TestLooper;

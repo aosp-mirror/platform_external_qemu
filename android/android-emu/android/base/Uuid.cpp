@@ -11,10 +11,13 @@
 
 #include "android/base/Uuid.h"
 
+#include <sys/_types/_uuid_t.h>  // for uuid_t
+#include <string>                // for basic_string
+
 #ifdef _WIN32
 #include <rpc.h>
 #else
-#include <uuid/uuid.h>
+#include <uuid/uuid.h>           // for uuid_generate, uuid_parse, uuid_unpa...
 #endif
 
 namespace android {

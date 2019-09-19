@@ -14,12 +14,14 @@
 
 #include "android/base/synchronization/MessageChannel.h"
 
-#include "android/base/testing/TestThread.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
+#include <memory>                             // for unique_ptr
+#include <string>                             // for operator==
+#include <iosfwd>                             // for string
 
-#include <gtest/gtest.h>
-
-#include <memory>
-#include <string>
+#include "android/base/testing/TestThread.h"  // for TestThread
+#include "gtest/gtest_pred_impl.h"            // for AssertionResult, Test
 
 namespace android {
 namespace base {

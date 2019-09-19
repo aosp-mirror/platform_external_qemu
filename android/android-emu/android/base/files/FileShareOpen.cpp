@@ -9,15 +9,18 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include <algorithm>
-#include <errno.h>
-#include <cstdio>
+#include <string.h>                                // for strchr
+#include <sys/fcntl.h>                             // for flock, LOCK_NB
+#include <algorithm>                               // for min
+#include <cstdio>                                  // for FILE, fclose, fileno
+#include <iosfwd>                                  // for string
+#include <string>                                  // for basic_string
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/FileShareOpenImpl.h"
-#include "android/base/StringFormat.h"
-#include "android/base/threads/Thread.h"
-#include "android/utils/file_io.h"
+#include "android/base/files/FileShareOpen.h"      // for FileShare, updateF...
+#include "android/base/files/FileShareOpenImpl.h"  // for closeFileForShare
+#include "android/base/StringFormat.h"             // for StringFormat
+#include "android/base/threads/Thread.h"           // for Thread
+#include "android/utils/file_io.h"                 // for android_fopen
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);
@@ -47,10 +50,10 @@ FILE* android::base::fsopenWithTimeout(const char* filename, const char* mode,
 
 #ifdef _WIN32
 
-#include "android/base/system/Win32UnicodeString.h"
-
 #include <share.h>
 #include <windows.h>
+
+#include "android/base/system/Win32UnicodeString.h"
 
 FILE* android::base::fsopen(const char* filename,
                             const char* mode,
@@ -96,10 +99,6 @@ void android::base::internal::closeFileForShare(void* fileHandle) {
 }
 
 #else
-#include <sys/file.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
 
 static int getFlockOperation(android::base::FileShare fileshare) {
     switch (fileshare) {

@@ -11,11 +11,16 @@
 
 #include "android/base/Optional.h"
 
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <stdint.h>                 // for int64_t, int16_t, int32_t
+#include <memory>                   // for unique_ptr
+#include <vector>                   // for vector
+#include <__functional_base>        // for reference_wrapper
+#include <iosfwd>                   // for string
+#include <string>                   // for basic_string
 
-#include <gtest/gtest.h>
-
-#include <memory>
-#include <vector>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, Test, EXPECT_EQ
 
 namespace android {
 namespace base {

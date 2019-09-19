@@ -11,9 +11,12 @@
 
 #include "android/base/ContiguousRangeMapper.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <vector>                   // for vector
+#include <cstdint>                  // for uintptr_t
 
-#include <vector>
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, SuiteApiResolver
 
 using android::base::ContiguousRangeMapper;
 

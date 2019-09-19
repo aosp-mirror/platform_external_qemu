@@ -14,14 +14,17 @@
 
 #include "android/base/network/IpAddress.h"
 
-#include "android/base/Log.h"
+#include <gtest/gtest-message.h>
+#include <gtest/gtest-test-part.h>
+#include <stddef.h>
+#include <cstdint>
+#include <ostream>
+
 #include "android/base/StringFormat.h"
 #include "android/base/testing/GTestUtils.h"
 #include "android/base/testing/TestNetworkInterfaceNameResolver.h"
-
-#include <gtest/gtest.h>
-
-#include <string>
+#include "android/base/StringView.h"
+#include "gtest/gtest_pred_impl.h"
 
 namespace android {
 namespace base {

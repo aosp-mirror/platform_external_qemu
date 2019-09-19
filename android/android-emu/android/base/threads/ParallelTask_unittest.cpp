@@ -14,14 +14,15 @@
 
 #include "android/base/threads/ParallelTask.h"
 
-#include "android/base/testing/TestLooper.h"
-#include "android/base/system/System.h"
+#include <gtest/gtest-message.h>              // for Message
+#include <gtest/gtest-test-part.h>            // for TestPartResult
+#include <atomic>                             // for atomic_bool
+#include <functional>                         // for __bind, __base, bind, _1
+#include <memory>                             // for unique_ptr
 
-#include <gtest/gtest.h>
-
-#include <atomic>
-#include <functional>
-#include <memory>
+#include "android/base/testing/TestLooper.h"  // for TestLooper
+#include "android/base/system/System.h"       // for System
+#include "gtest/gtest_pred_impl.h"            // for AssertionResult, Test
 
 namespace {
 

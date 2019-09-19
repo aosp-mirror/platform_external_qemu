@@ -11,12 +11,17 @@
 
 #include "android/base/sockets/SocketUtils.h"
 
-#include "android/base/sockets/ScopedSocket.h"
-#include <gtest/gtest.h>
+#include <signal.h>                             // for sigaction
+#include <string.h>                             // for size_t, strerror
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <stdint.h>                             // for uint16_t
+#include <sys/errno.h>                          // for errno, EPIPE, EPROTOTYPE
+#include <sys/signal.h>                         // for sigaction, SIGPIPE
+#include <ostream>                              // for operator<<
 
-#include <errno.h>
-#include <signal.h>
-#include <string.h>
+#include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
+#include "gtest/gtest_pred_impl.h"              // for AssertionResult, Test
 
 namespace android {
 namespace base {

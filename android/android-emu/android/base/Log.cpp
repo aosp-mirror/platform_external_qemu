@@ -11,17 +11,16 @@
 
 #include "android/base/Log.h"
 
-#include "android/base/Debug.h"
-#include "android/base/StringFormat.h"
-#include "android/base/files/PathUtils.h"
+#include <stdint.h>                        // for INT32_MAX
+#include <stdio.h>                         // for snprintf, fprintf, fflush
+#include <stdlib.h>                        // for free, malloc, realloc
+#include <string.h>                        // for memcpy, strerror, strlen
+#include <stdarg.h>                        // for va_end, va_list, va_start
+#include <unistd.h>                        // for _exit
 
-#include <string>
-
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "android/base/Debug.h"            // for DebugBreak, IsDebuggerAtta...
+#include "android/base/files/PathUtils.h"  // for PathUtils
+#include "android/base/StringView.h"       // for StringView, c_str, CStrWra...
 
 #define ENABLE_THREAD_ID 0
 

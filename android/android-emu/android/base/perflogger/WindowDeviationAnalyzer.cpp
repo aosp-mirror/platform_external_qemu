@@ -13,9 +13,7 @@
 // limitations under the License.
 #include "android/base/perflogger/WindowDeviationAnalyzer.h"
 
-#include "android/base/JsonWriter.h"
-
-#include <sstream>
+#include "android/base/JsonWriter.h"  // for JsonWriter
 
 using namespace android::base;
 using namespace android::perflogger;

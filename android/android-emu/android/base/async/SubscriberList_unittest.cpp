@@ -10,9 +10,11 @@
 
 #include "android/base/async/SubscriberList.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <memory>                   // for unique_ptr
 
-#include <memory>
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, SuiteApiResolver
 
 using android::base::SubscriberList;
 using android::base::SubscriptionToken;

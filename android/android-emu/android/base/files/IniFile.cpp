@@ -11,23 +11,24 @@
 
 #include "android/base/files/IniFile.h"
 
-#include "android/base/Log.h"
-#include "android/base/system/System.h"
+#include "android/base/Log.h"            // for LogStream, LogMessage, VLOG
+#include "android/base/system/System.h"  // for System
+#include "android/utils/debug.h"         // for VERBOSE_avd_config
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #endif
 
-#include <iomanip>
-#include <istream>
-#include <fstream>
-#include <sstream>
-#include <streambuf>
-#include <string>
-#include <utility>
-
-#include <assert.h>
-#include <string.h>
+#include <string.h>                      // for size_t
+#include <stdlib.h>                      // for strtoll, strtod, strtol
+#include <strings.h>                     // for strncasecmp
+#include <sys/errno.h>                   // for errno
+#include <iomanip>                       // for operator<<, setfill, setw
+#include <sstream>                       // for operator<<, basic_ostream
+#include <fstream>                       // for operator<<, basic_ostream
+#include <string>                        // for to_string, basic_string, ope...
+#include <utility>                       // for pair
+#include <type_traits>                   // for move
 
 namespace android {
 namespace base {

@@ -11,10 +11,12 @@
 
 #include "android/utils/stream.h"
 
-#include "android/base/files/Stream.h"
+#include <stdlib.h>                     // for malloc, size_t, NULL
+#include <string.h>                     // for memcpy
+#include <iosfwd>                       // for string
+#include <string>                       // for basic_string
 
-#include <stdlib.h>
-#include <string.h>
+#include "android/base/files/Stream.h"  // for Stream
 
 typedef android::base::Stream BaseStream;
 

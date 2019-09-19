@@ -8,15 +8,20 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/EintrWrapper.h"
-#include "android/base/memory/SharedMemory.h"
+#include <sys/mman.h>                          // for mmap, munmap, shm_open
+#include <sys/stat.h>                          // for fstat, mode_t, stat
+#include <assert.h>                            // for assert
+#include <stddef.h>                            // for size_t
+#include <sys/errno.h>                         // for errno, EEXIST
+#include <sys/fcntl.h>                         // for O_CREAT, O_RDWR, O_RDONLY
+#include <iosfwd>                              // for string
+#include <string>                              // for basic_string
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
+#include "android/base/EintrWrapper.h"         // for HANDLE_EINTR
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
+#include "android/base/StringView.h"           // for StringView
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                            // for ftruncate, close
 #endif
 
 namespace android {

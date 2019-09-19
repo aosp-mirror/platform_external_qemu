@@ -11,10 +11,10 @@
 
 #include "android/base/files/CompressingStream.h"
 
-#include "android/base/files/StreamSerializing.h"
-#include "lz4.h"
+#include <sys/errno.h>                             // for EIO, EPERM
 
-#include <errno.h>
+#include "android/base/files/StreamSerializing.h"  // for saveBuffer
+#include "lz4.h"                                   // for LZ4_compressBound
 
 namespace android {
 namespace base {

@@ -11,19 +11,16 @@
 */
 
 #include "android/utils/bufprint.h"
-#include "android/utils/path.h"
-#include "android/utils/debug.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include <stdio.h>                // for vsnprintf
+
+#include "android/utils/debug.h"  // for VERBOSE_PRINT
 
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  include "windows.h"
 #  include "shlobj.h"
 #else
-#  include <unistd.h>
-#  include <sys/stat.h>
 #endif
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
