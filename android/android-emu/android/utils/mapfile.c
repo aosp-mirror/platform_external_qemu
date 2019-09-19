@@ -17,21 +17,22 @@
 
 #include "android/utils/mapfile.h"
 
-#include "stddef.h"
-#include "sys/types.h"
-#include "errno.h"
+#include <stdio.h>                        // for SEEK_SET
+#include <errno.h>                        // for EFBIG, errno
+#include <sys/fcntl.h>                    // for open
+
+#include "stddef.h"                       // for ptrdiff_t
 #ifdef  _WIN32
 #include "windows.h"
+#include <sys/stat.h>                     // for S_IWRITE, ..
 #else   // _WIN32
-#include <sys/mman.h>
+#include <sys/mman.h>                     // for mmap, munmap, MAP_FAILED
 #endif  // _WIN32
-#include <sys/stat.h>
-#include <fcntl.h>
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                       // for read, close, getpagesize
 #endif
 
-#include "android/utils/eintr_wrapper.h"
+#include "android/utils/eintr_wrapper.h"  // for HANDLE_EINTR
 
 MapFile*
 mapfile_open(const char* path, int oflag, int share_mode)

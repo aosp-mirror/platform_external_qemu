@@ -11,18 +11,13 @@
 
 #include "android/utils/ini.h"
 
-#include "android/base/files/IniFile.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/Log.h"
+#include <stdio.h>                          // for NULL
+#include <iterator>                         // for next
 
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <iterator>
-#include <string>
+#include "android/base/files/IniFile.h"     // for IniFile::const_iterator
+#include "android/base/misc/StringUtils.h"  // for strDup
+#include "android/base/Log.h"               // for LogStream, LOG, LogMessage
+#include "android/base/StringView.h"        // for StringView
 
 typedef ::CIniFile CIniFile;
 typedef android::base::IniFile BaseIniFile;

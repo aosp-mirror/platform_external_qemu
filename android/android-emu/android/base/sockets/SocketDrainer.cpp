@@ -11,12 +11,14 @@
 
 #include "android/base/sockets/SocketDrainer.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/async/Looper.h"
+#include <stddef.h>                            // for NULL
+#include <errno.h>                             // for errno, EWOULDBLOCK
+#include <sys/types.h>                         // for ssize_t
+#include <unordered_set>                       // for unordered_set
 
-#include <unordered_set>
+#include "android/base/sockets/SocketUtils.h"  // for socketRecv, socketClose
+#include "android/base/async/Looper.h"         // for Looper::FdWatch, Looper
+#include "android/base/Compiler.h"             // for DISALLOW_COPY_AND_ASSIGN
 
 // Some implementation whys:
 // When the looper is running, the sockets are non-blocking and are only

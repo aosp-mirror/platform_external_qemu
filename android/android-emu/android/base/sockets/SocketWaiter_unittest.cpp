@@ -9,11 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/sockets/SocketWaiter.h"
-#include "android/base/memory/ScopedPtr.h"
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <memory>                               // for unique_ptr
 
-#include <gtest/gtest.h>
+#include "android/base/memory/ScopedPtr.h"      // for ScopedPtr
+#include "android/base/sockets/SocketUtils.h"   // for socketClose, socketCr...
+#include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter, SocketW...
+#include "gtest/gtest_pred_impl.h"              // for AssertionResult, Test
 
 namespace android {
 namespace base {

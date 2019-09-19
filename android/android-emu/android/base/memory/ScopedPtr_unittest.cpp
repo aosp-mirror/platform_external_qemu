@@ -14,10 +14,11 @@
 
 #include "android/base/memory/ScopedPtr.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <type_traits>              // for move, integral_constant<>::value
 
-#include <type_traits>
-#include <utility>
+#include "gtest/gtest_pred_impl.h"  // for Test, SuiteApiResolver, Assertion...
 
 namespace android {
 namespace base {

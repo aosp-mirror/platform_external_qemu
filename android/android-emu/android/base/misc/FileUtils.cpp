@@ -10,26 +10,23 @@
 // GNU General Public License for more details.
 
 #include "android/base/misc/FileUtils.h"
-#include "android/utils/eintr_wrapper.h"
 
-#include <assert.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <stdio.h>                        // for SEEK_END, SEEK_SET, size_t
+
+#include "android/utils/eintr_wrapper.h"  // for HANDLE_EINTR
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <unistd.h>
+#include <unistd.h>                       // for lseek, read, write, off_t
 #endif
 
 #ifdef _WIN32
 #include <io.h>
 #endif
 
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <utility>
+#include <sstream>                        // for ostringstream
+#include <fstream>                        // for string, ifstream, ostringst...
+#include <type_traits>                    // for move
 
 namespace android {
 

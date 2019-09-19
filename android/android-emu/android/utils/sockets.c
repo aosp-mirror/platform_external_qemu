@@ -16,24 +16,19 @@
 
 #include "android/utils/sockets.h"
 
-#include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/fd.h"
-#include "android/utils/misc.h"
-#include "android/utils/path.h"
-#include "android/utils/socket_drainer.h"
-#include "android/utils/system.h"
+#include "android/utils/debug.h"           // for VERBOSE_PRINT, VERBOSE_socket
+#include "android/utils/eintr_wrapper.h"   // for HANDLE_EINTR
+#include "android/utils/fd.h"              // for fd_set_cloexec, SOCK_CLOEXEC
+#include "android/utils/socket_drainer.h"  // for socket_drainer_drain_and_c...
+#include "android/utils/system.h"          // for AARRAY_NEW, AFREE, BEGIN_N...
 
-//#include "sysemu/char.h"
-
-#include <assert.h>
-#include <fcntl.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>                        // for assert
+#include <stddef.h>                        // for NULL, size_t, offsetof
+#include <stdlib.h>                        // for free
+#include <string.h>                        // for memcpy, memchr, memset
+#include <sys/fcntl.h>                     // for fcntl, F_GETFL, F_SETFL
 #ifndef _MSC_VER
-#include <unistd.h>
+#include <unistd.h>                        // for gethostname, unlink
 #endif
 
 #define  D(...) VERBOSE_PRINT(socket,__VA_ARGS__)
@@ -44,13 +39,13 @@
 #  include <windows.h>
 #  include <ws2tcpip.h>
 #else /* !_WIN32 */
-#  include <sys/ioctl.h>
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <netinet/tcp.h>
-#  include <netdb.h>
+#include <sys/ioctl.h>                     // for ioctl
+#include <sys/socket.h>                    // for socklen_t, accept, send
+#include <netinet/in.h>                    // for sockaddr_in, sockaddr_in6
+#include <netinet/tcp.h>                   // for TCP_NODELAY
+#include <netdb.h>                         // for addrinfo, freeaddrinfo
 #  if HAVE_UNIX_SOCKETS
-#    include <sys/un.h>
+#include <sys/un.h>                        // for sockaddr_un
 #    ifndef UNIX_PATH_MAX
 #      define  UNIX_PATH_MAX  (sizeof(((struct sockaddr_un*)0)->sun_path)-1)
 #    endif
@@ -1274,7 +1269,7 @@ int socket_get_error(int fd)
 }
 
 #ifdef _WIN32
-#include <stdlib.h>
+#include <stdlib.h>                        // for free
 
 static void socket_cleanup(void)
 {

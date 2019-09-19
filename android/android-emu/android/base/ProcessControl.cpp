@@ -11,16 +11,17 @@
 
 #include "android/base/ProcessControl.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Optional.h"
-#include "android/base/process-control.h"
-#include "android/base/system/System.h"
-#include "android/utils/path.h"
+#include <functional>                          // for function, __base
+#include <sstream>                             // for stringstream
+#include <fstream>                             // for string, operator<<
+#include <string>                              // for char_traits, operator!=
 
-#include <functional>
-#include <fstream>
-#include <sstream>
+#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "android/base/Optional.h"             // for Optional, kNullopt
+#include "android/base/process-control.h"      // for handle_emulator_restart
+#include "android/base/system/System.h"        // for System
+#include "android/base/FunctionView.h"         // for FunctionView
 
 namespace android {
 namespace base {

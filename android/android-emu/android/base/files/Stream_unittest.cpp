@@ -11,10 +11,13 @@
 
 #include "android/base/files/Stream.h"
 
-#include "android/base/ArraySize.h"
-#include <gtest/gtest.h>
+#include <string.h>                  // for size_t, memcpy, memset
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <ostream>                   // for operator<<, string
 
-#include <string.h>
+#include "android/base/ArraySize.h"  // for ARRAY_SIZE
+#include "gtest/gtest_pred_impl.h"   // for Test, SuiteApiResolver, EXPECT_EQ
 
 namespace android {
 namespace base {

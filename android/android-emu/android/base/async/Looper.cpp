@@ -11,9 +11,9 @@
 
 #include "android/base/async/Looper.h"
 
-#include "android/base/async/DefaultLooper.h"
+#include <type_traits>                         // for move
 
-#include <utility>
+#include "android/base/async/DefaultLooper.h"  // for DefaultLooper
 
 namespace android {
 namespace base {

@@ -11,14 +11,28 @@
 
 #include "android/base/Log.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>                  // for snprintf
+#include <string.h>                 // for memcpy, strerror
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include <gtest/gtest.h>
+#include "gtest/gtest_pred_impl.h"  // for AssertionResult, SuiteApiResolver
 
 namespace android {
 namespace base {
+class CheckTest_CheckFalseEvaluatesArguments_Test;
+class CheckTest_CheckFalse_Test;
+class DCheckEnabledTest_DCheckFalse_Test;
+class LogTest_LogError_Test;
+class LogTest_LogEvaluatesArgumentsIfNeeded_Test;
+class LogTest_LogFatal_Test;
+class LogTest_LogInfoEmpty_Test;
+class LogTest_LogInfoWithLogString_Test;
+class LogTest_LogInfoWithString_Test;
+class LogTest_LogInfoWithTwoStrings_Test;
+class LogTest_LogWarning_Test;
+class PLogTest_PLogInfoEmpty_Test;
+class PLogTest_PLogInfoPreservesErrno_Test;
 
 // Create a severity level which is guaranteed to never generate a log
 // message. See LogOnlyEvaluatesArgumentsIfNeeded for usage.

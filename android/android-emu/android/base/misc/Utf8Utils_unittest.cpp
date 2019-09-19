@@ -11,7 +11,11 @@
 
 #include "android/base/misc/Utf8Utils.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <ostream>                  // for operator<<
+
+#include "gtest/gtest_pred_impl.h"  // for Test, EXPECT_EQ, SuiteApiResolver
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 

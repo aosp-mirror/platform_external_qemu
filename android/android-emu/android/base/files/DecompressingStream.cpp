@@ -11,15 +11,16 @@
 
 #include "android/base/files/DecompressingStream.h"
 
-#include "android/base/files/StreamSerializing.h"
-#include "lz4.h"
+#include <errno.h>                                 // for EIO, EPERM
+
+#include "android/base/files/StreamSerializing.h"  // for loadBuffer
+#include "lz4.h"                                   // for LZ4_createStreamDe...
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #endif
 
-#include <errno.h>
-#include <cassert>
+#include <cassert>                                 // for assert
 
 namespace android {
 namespace base {

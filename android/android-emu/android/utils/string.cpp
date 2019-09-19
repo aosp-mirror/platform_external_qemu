@@ -11,11 +11,10 @@
 
 #include "android/utils/string.h"
 
-#include <algorithm>
-
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>  // for free
+#include <string.h>  // for strlen, strcmp, strdup, strncmp
+#include <ctype.h>   // for isspace
+#include <algorithm> // for min
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 

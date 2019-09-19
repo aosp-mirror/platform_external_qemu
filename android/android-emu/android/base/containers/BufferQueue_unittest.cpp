@@ -14,16 +14,21 @@
 
 #include "android/base/containers/BufferQueue.h"
 
+#include <gtest/gtest-message.h>                          // for Message
+#include <gtest/gtest-test-part.h>                        // for TestPartResult
+#include <stdint.h>                                       // for intptr_t
+#include <ostream>                                        // for operator<<
+#include <string>                                         // for basic_string
+
 #ifdef _WIN32
 #undef ERROR  // Make LOG(ERROR) compile properly.
 #endif
 
-#include "android/base/Log.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/Thread.h"
-
-#include <gtest/gtest.h>
+#include "android/base/Log.h"                             // for LOG, LogMes...
+#include "android/base/synchronization/Lock.h"            // for Lock, AutoLock
+#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "android/base/threads/Thread.h"                  // for Thread
+#include "gtest/gtest_pred_impl.h"                        // for Test, Asser...
 
 namespace android {
 namespace base {

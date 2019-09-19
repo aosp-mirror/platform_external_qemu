@@ -10,11 +10,13 @@
 // GNU General Public License for more details.
 #include "android/base/GLObjectCounter.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include <array>                               // for array, array<>::value_...
+#include <atomic>                              // for atomic, __atomic_base
+#include <sstream>                             // for operator<<, basic_ostream
+#include <cstddef>                             // for size_t
+#include <string>                              // for char_traits
 
-#include <array>
-#include <atomic>
-#include <sstream>
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance
 
 namespace android {
 namespace base {

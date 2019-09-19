@@ -10,14 +10,18 @@
 // GNU General Public License for more details.
 #include "android/base/perflogger/Benchmark.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/perflogger/Metric.h"
-#include "android/base/testing/TestTempDir.h"
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <stdio.h>                             // for printf
+#include <memory>                              // for unique_ptr
+#include <string>                              // for operator+, basic_string
 
-#include <gtest/gtest.h>
-
-#include <memory>
+#include "android/base/files/PathUtils.h"      // for pj
+#include "android/base/misc/FileUtils.h"       // for readFileIntoString
+#include "android/base/perflogger/Metric.h"    // for Metric
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/base/Log.h"                  // for base
+#include "gtest/gtest_pred_impl.h"             // for AssertionResult, EXPEC...
 
 using namespace android::base;
 
