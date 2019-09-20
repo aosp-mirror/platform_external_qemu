@@ -377,21 +377,73 @@ public:
             mLocationPage(locationPage),
             QObject(parent) {}
     // Javascript ==> Qt C++ code
-    Q_INVOKABLE void map_savePoint();
+
+    // Sends the location the user picked on the map to the emulator.
+    // Once called, the Qt code will assume that the user is not using a saved
+    // point, thus unselecting any selected saved point from the list, whether
+    // the location sent is invalid or not.
+    // Valid data is -90.0 <= lat <= 90.0, -180.0 <= lng <= -180.0.
+    // If invalid data is sent, the "Set Location" button in the Qt UI will
+    // be disabled.
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
+
+    // Notifies the Qt code to save the point that was sent by the
+    // |sendLocation| call above. Once called, the saved point will become
+    // available in the saved points list and should be also in a selected
+    // state.
+    Q_INVOKABLE void map_savePoint();
+
+    // Sends the generated JSON route data to the Qt code. This data should not
+    // be data from an already saved route. Once this is called, the Qt code
+    // assumes that the user is no longer using a saved route, thus unselecting
+    // any selected saved route from the list, whether the route is invalid or
+    // not.
+    //
+    // Also, when sending data, if numPoints > 0, the "Play route" button will
+    // be enabled. Otherwise, it will be disabled.
     Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
+
+    // Notifies the Qt code to save the route that was sent by the
+    // |sendFullRouteToEmu| call above. Once called, the saved route will become
+    // available in the saved routes list and should be also in a selected
+    // state.
     Q_INVOKABLE void saveRoute();
+
+    // Notifies the Qt code that the route has been drawn on the map. The Qt
+    // code may will wait for this call to come out from a loading state on
+    // the following scenarios:
+    // - Passing the JSON route data from a saved Google route
+    // - Passing the JSON path data from a saved GPX/KML route
     Q_INVOKABLE void onSavedRouteDrawn();
 
 signals:
     // Qt C++ code ==> Javascript
+
+    // Called when the emulator's location changes. The blue marker on the map
+    // should be updated to this location.
     void locationChanged(QString lat, QString lng);
+
+    // Display a saved point on the map.
     void showLocation(QString lat, QString lng, QString addr);
+
+    // Display a saved Google JSON route.
     void showRouteOnMap(const QString& routeJson);
-    void resetPointsMap();
-    void showRoutePlaybackOverlay(bool visible);
-    void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
+
+    // Display a saved JSON converted GPX/KML file.
     void showGpxKmlRouteOnMap(const QString& routeJson, const QString& title, const QString& subtitle);
+    // Resets the map on the single points page.
+    // TODO: We could instead call |showLocation| with an invalid point to reset
+    // the map. Needs to be implemented on the js side.
+    void resetPointsMap();
+
+    // Shows/hides the route playback state on the map. When |visible| is false,
+    // The map should return to the state it was in right before playing the
+    // route.
+    void showRoutePlaybackOverlay(bool visible);
+
+    // Starts the route creator in the map, with the destination set to the
+    // given point.
+    void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
 
 private:
     LocationPage* const mLocationPage;
