@@ -128,6 +128,16 @@ function setDeviceLocation(lat, lng) {
         gMap.setCenter(latLng);
     }
     gCurrentMarker.setIcon(image);
+    gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+        const latitude = latLng.lat().toFixed(4);
+        const longitude = latLng.lng().toFixed(4);
+        var address = `${latitude}, ${longitude}`;
+        if (status === 'OK' && results[0]) {
+            address = results[0].formatted_address;
+        }
+        gMap.panTo(latLng);
+        gPointOverlay.showMessage(`The location has been set to ${address}`, 2000);
+    });
 }
 
 function markerListener(event) {

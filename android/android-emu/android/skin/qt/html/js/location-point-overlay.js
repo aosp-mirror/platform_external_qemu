@@ -21,6 +21,19 @@ class LocationPointOverlay {
         $("#lowerPanel").css("display", hideSavePoint ? "none" : "flex")
     }
 
+    showMessage(message, timeout) {
+        console.log('showing point overlay', message);
+        $("#pointTitle").html(message);
+        $("#pointSubtitle").html('');
+        $("#pointOverlay").removeClass().addClass(this.hideBottomPanelCssClassName);
+        $("#lowerPanel").css("display", "none");
+        if (timeout > 0) {
+            setTimeout(() => {
+                this.hide();
+            }, timeout);
+        }
+    }
+
     hide() {
         console.log('hiding point overlay')
         $("#pointOverlay").removeClass().addClass(this.slideOutCssClassName);
