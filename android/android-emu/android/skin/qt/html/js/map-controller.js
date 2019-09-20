@@ -7,6 +7,9 @@ class MapController extends GoogleMapPageComponent {
         this.locationPanel = locationPanel;
         this.mapManager = null;
         this.currentLocationMarker = null;
+        this.hideGpxKmlPanel.bind(this);
+        this.onRouteComputed.bind(this);
+
     }
 
     onMapInitialized(mapManager, eventBus) {
@@ -20,7 +23,8 @@ class MapController extends GoogleMapPageComponent {
         eventBus.on('route_panel_closed', () => self.onRoutePanelClosed());
         eventBus.on('transportation_mode_changed', (e) => self.onTransportModeChanged(e.newMode));
         eventBus.on('waypoints_changed', () => self.onWaypointsChanged());
-        eventBus.on('location_panel_closed', this.hideGpxKmlPanel.bind(this));
+        eventBus.on('location_panel_closed', () => this.hideGpxKmlPanel());
+        eventBus.on('route_computed', (route) => this.onRouteComputed(route));
     }
 
     setCurrentLocation(latLng) {
@@ -50,17 +54,19 @@ class MapController extends GoogleMapPageComponent {
 
     setRoute(routeJson) {
         console.log('MapController::setRoute called', routeJson);
+        this.viewModel.setIsLoadingRoute(true);
         this.hideGpxKmlPanel();
         if (routeJson.length > 0) {
             this.routePanel.close();
             this.mapManager.clearDirections();
             this.mapManager.clearMarkers();
             this.viewModel.setRoute(routeJson);
-            this.viewModel.setEditable(false);
+            this.viewModel.setEditable(false);            
             this.showRouteEditor();
         }
         this.searchBox.update('');
         channel.objects.emulocationserver.onSavedRouteDrawn();
+        this.viewModel.setIsLoadingRoute(false);        
     }
 
     showRoutePlaybackPanel(visible) {
@@ -78,6 +84,7 @@ class MapController extends GoogleMapPageComponent {
             this.locationPanel.hide();
             this.searchBox.show();
             this.mapManager.map.setOptions({ zoomControl: true });
+            this.viewModel.sendRouteToEmulator();
             $('#locationInfoOverlay').css('display', 'none');
         }
     }
@@ -140,7 +147,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     async onWaypointSelected(event) {
-        if (this.isGpxKmlPlaying) {
+        if (this.viewModel.getIsPlayingRoute()) {
             return;
         }
         const latLng = event.latLng;
@@ -171,6 +178,10 @@ class MapController extends GoogleMapPageComponent {
         this.viewModel.renderDirections(this.mapManager);
     }
 
+    onRouteComputed(route) {
+        this.viewModel.sendRouteToEmulator(route);
+    }
+
     onBeginBuildingRouteButtonClicked() {
         this.showRouteEditor();
     }
@@ -188,6 +199,7 @@ class MapController extends GoogleMapPageComponent {
         this.mapManager.clearMarkers();
         this.mapManager.clearDirections();
         this.viewModel.clearWaypoints();
+        this.viewModel.sendRouteToEmulator();
     }
 
     onTransportModeChanged() {

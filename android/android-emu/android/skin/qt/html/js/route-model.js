@@ -135,6 +135,24 @@ class RouteModel {
         this.eventBus.dispatch('waypoints_changed', this);
     }
 
+    convertRouteToJson(route) {
+        // Calculate the number of points and the total duration of the route
+        let pointCount = 0;
+        let totalDuration = 0.0;
+        for (let legIdx = 0;
+            legIdx < route.routes[0].legs.length;
+            legIdx++) {
+            totalDuration += route.routes[0].legs[legIdx].duration.value;
+
+            let numSteps = route.routes[0].legs[legIdx].steps.length;
+            for (let stepIdx = 0; stepIdx < numSteps; stepIdx++) {
+                pointCount += route.routes[0].legs[legIdx].steps[stepIdx].path.length;
+            }
+            pointCount -= (numSteps - 1); // Don't count the duplicate first points
+        }
+        return { json: JSON.stringify(route), pointCount, totalDuration };
+    }
+
     isValidRoute() {
         for (let i = 0; i < this.waypoints.length; i++) {
             console.log('isEmpty', this.waypoints[i], this.waypoints[i].isEmpty());
