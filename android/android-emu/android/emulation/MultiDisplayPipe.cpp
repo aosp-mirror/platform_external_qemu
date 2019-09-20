@@ -66,6 +66,7 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
         case BIND: {
             uint32_t id = *(uint32_t*)&(data[1]);
             uint32_t cb = *(uint32_t*)&(data[5]);
+            LOG(VERBOSE) << "MultiDisplayPipe bind display " << id << " cb " << cb;
             android_setMultiDisplayColorBuffer(id, cb);
             break;
         }
