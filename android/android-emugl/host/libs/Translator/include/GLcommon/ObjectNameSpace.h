@@ -23,14 +23,15 @@
 #include "GLcommon/ObjectData.h"
 #include "GLcommon/SaveableTexture.h"
 #include "GLcommon/TranslatorIfaces.h"
+#include "GLcommon/tsl/robin_map.h"
 
 #include <GLES/gl.h>
 #include <unordered_map>
 #include <unordered_set>
 
-typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
-typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
-typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
+typedef tsl::robin_map<ObjectLocalName, NamedObjectPtr> NamesMap;
+typedef tsl::robin_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
+typedef tsl::robin_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
 class GlobalNameSpace;
 
