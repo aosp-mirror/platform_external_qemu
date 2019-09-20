@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34a6ac65_5dea0e8d",
+        "filename": "android/android-emu/android/skin/qt/native-event-filter-factory.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-09-20T18:06:24Z",
+      "side": 1,
+      "message": "According to https://www.x.org/releases/X11R7.5/doc/man/man3/XkbGetNames.3.html,\nIt might need to use XkbVirtualModNamesMask instead of XkbKeycodesNameMask.",
+      "range": {
+        "startLine": 64,
+        "startChar": 33,
+        "endLine": 64,
+        "endChar": 52
+      },
+      "revId": "17e4fc43c901df9f7b7b78ebd12bd96a213e2326",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
