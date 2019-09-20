@@ -783,7 +783,7 @@ void LocationPage::updateControlsAfterLoading() {
 
 void LocationPage::validateCoordinates() {
     // Latitude range: +/-90 deg
-    // Longitude range: +/-90 deg
+    // Longitude range: +/-180 deg
     double lat = mLastLat.toDouble();
     double lng = mLastLng.toDouble();
     if (lat >= -90.0 && lat <= 90.0 &&
