@@ -245,7 +245,7 @@ NameSpace::setGlobalObject(ObjectLocalName p_localName,
     NamesMap::iterator n(m_localToGlobalMap.find(p_localName));
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
-        (*n).second = p_namedObject;
+        n.value() = p_namedObject;
     } else {
         m_localToGlobalMap.emplace(p_localName, p_namedObject);
     }
@@ -259,7 +259,7 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
-        (*n).second = p_namedObject;
+        n.value() = p_namedObject;
         m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
     }
 }
