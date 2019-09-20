@@ -5,6 +5,8 @@ class SearchBoxController extends GoogleMapPageComponent {
 
     onMapInitialized(mapManager, eventBus) {
         this.eventBus = eventBus;
+        this.searchContainer = null;
+        this.mapManager = mapManager;
         const self = this;
         const searchContainer = document.getElementById('search-container');
         const input = /** @type {HTMLInputElement} */ (
@@ -52,11 +54,18 @@ class SearchBoxController extends GoogleMapPageComponent {
     }
 
     show() {
-        $('#search-container').show();
+        if (this.searchContainer != null) {
+            this.mapManager.map.controls[google.maps.ControlPosition.TOP_CENTER]
+                    .push(this.searchContainer);
+            this.searchContainer = null;
+        }
     }
 
     hide() {
-        $('#search-container').hide();
+        if (this.searchContainer == null) {
+            this.searchContainer =
+                    this.mapManager.map.controls[google.maps.ControlPosition.TOP_CENTER].pop();
+        }
     }
 
     onPlaceChanged() {

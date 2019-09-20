@@ -5,6 +5,7 @@ class LocationPanelController extends GoogleMapPageComponent {
         this.panelCollapsedCssClassName = collapsedClassName;
         this.actionButtonPanelHiddenCssClassName = actionButtonPanelHiddenCssClassName;
         this.shouldHideActionButtonPanel = false;
+        this.onCloseCallback = null;
     }
 
     onMapInitialized(mapManager, eventBus) {
@@ -14,6 +15,10 @@ class LocationPanelController extends GoogleMapPageComponent {
         });
         $('#location-panel-close-button').click(() => {
             self.hide();
+            if (this.onCloseCallback) {
+                this.onCloseCallback();
+                this.onCloseCallback = null;
+            }
         });
     }
 
@@ -35,7 +40,8 @@ class LocationPanelController extends GoogleMapPageComponent {
         $('#location-action-button-container').css('display', hideActionButtonPanel ? 'none' : 'flex');
     }
 
-    showTitleSubtitle(title, subtitle, hideActionButtonPanel) {
+    showTitleSubtitle(title, subtitle, hideActionButtonPanel, onCloseCallback) {
+        this.onCloseCallback = onCloseCallback;
         $('#floating-action-button').hide();
         $('#location-panel-close-button').show();
         $('#location-title').html(title);

@@ -51,6 +51,7 @@ class MapController extends GoogleMapPageComponent {
 
     setRoute(routeJson) {
         console.log('MapController::setRoute called', routeJson);
+        this.hideGpxKmlPanel();
         if (routeJson.length > 0) {
             this.routePanel.close();
             this.mapManager.clearDirections();
@@ -88,7 +89,10 @@ class MapController extends GoogleMapPageComponent {
         this.isGpxKmlPlaying = true;
         this.routePanel.close();
         this.searchBox.hide();
-        this.locationPanel.showTitleSubtitle(title || '', subtitle || '');
+        this.locationPanel.showTitleSubtitle(title || '', subtitle || '', null,
+            function() {
+                this.hideGpxKmlPanel();
+            }.bind(this));
     }
 
     hideGpxKmlPanel() {
@@ -105,7 +109,7 @@ class MapController extends GoogleMapPageComponent {
         }
 
         this.mapManager.clearDirections();
-        showGpxKmlOverlay(title, subtitle);
+        this.showGpxKmlPanel(title, subtitle);
 
         const theRoute = JSON.parse(routeJson);
         const path = theRoute.path;
