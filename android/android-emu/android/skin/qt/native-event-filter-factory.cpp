@@ -47,8 +47,25 @@ public:
         // depending on system configurations. We should use virtual modifier to
         // to find which real modifier it is mapped to.
         Display* display = XOpenDisplay(NULL);
+
+        if (!display) {
+            fprintf(stderr, "%s: warning: cannot get x11 display info\n", __func__);
+            return;
+        }
+
         XkbDescPtr xkb =
-                XkbGetKeyboard(display, XkbAllComponentsMask, XkbUseCoreKbd);
+                XkbGetMap(display, XkbAllComponentsMask, XkbUseCoreKbd);
+
+        if (!xkb) {
+            fprintf(stderr, "%s: warning: cannot get mod mask info\n", __func__);
+            return;
+        }
+
+        if (XkbGetNames(display, XkbKeycodesNameMask, xkb) != 0) {
+            fprintf(stderr, "%s: warning: cannot get xkb keycodes names\n", __func__);
+            return;
+        }
+
         for (int i = 0; i < XkbNumVirtualMods; i++) {
             char* name = NULL;
             unsigned int realMod = 0;
