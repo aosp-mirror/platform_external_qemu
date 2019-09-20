@@ -128,7 +128,7 @@ class GoogleMapManager {
         const destination = destinationWaypoint.latLng;
         let waypoints = [];
         if (travelMode !== TransportationMode.Transit) {
-            mapWaypoints.map((value) => { return { location: value.latLng, stopover: false } });
+            waypoints = mapWaypoints.map((value) => { return { location: value.latLng, stopover: false } });
             waypoints.shift();
             waypoints.pop();    
         }
@@ -168,7 +168,6 @@ class GoogleMapManager {
 
             let fullResult = JSON.stringify(result);
             channel.objects.emulocationserver.sendFullRouteToEmu(numPoints, totalDuration, fullResult, travelMode);
-            self.eventBus.dispatch("routeRenderingCompleted", { renderRequest, result });
         });
     }
 
@@ -177,7 +176,6 @@ class GoogleMapManager {
             this.directionsRenderer.setMap(null);
             this.directionsRenderer = null;
         }
-        this.eventBus.dispatch("routeCleared", {});
     }
 
     getBounds() {

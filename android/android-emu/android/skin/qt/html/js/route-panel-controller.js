@@ -33,7 +33,7 @@ class RoutePanelController extends GoogleMapPageComponent {
         $('#save-route-button').click(() => self.onSaveRouteButtonClicked());
         $('#route-panel-close').click(() => this.close());
 
-        eventBus.on('transportationModeChanged', (e) => {
+        eventBus.on('transportation_mode_changed', (e) => {
             self.deselectTransportationMode(e.oldMode);
             self.selectTransportationMode(e.newMode);
         });
@@ -72,7 +72,7 @@ class RoutePanelController extends GoogleMapPageComponent {
         this._element().removeClass().addClass(this.animatePanelCollapseClassName);
         this.showAddDestinationButton(false);
         this.clearWaypointElements();
-        this.eventBus.dispatch('routePanelClosed');
+        this.eventBus.dispatch('route_panel_closed');
     }
 
     showSearchResultsContainer(visible) {
@@ -190,7 +190,6 @@ class RoutePanelController extends GoogleMapPageComponent {
 
     onWaypointAddressInputFocus(addressInputElement) {
         addressInputElement.select();
-        this.eventBus.dispatch('waypointSelected', addressInputElement.attr('id'));
     }
 
     async onAutoCompleteSearchItemClicked(searchTextInputElement, placeModel) {

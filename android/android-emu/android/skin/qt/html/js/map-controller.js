@@ -7,7 +7,6 @@ class MapController extends GoogleMapPageComponent {
         this.locationPanel = locationPanel;
         this.mapManager = null;
         this.currentLocationMarker = null;
-        this.isGpxKmlPlaying = false;
     }
 
     onMapInitialized(mapManager, eventBus) {
@@ -17,11 +16,11 @@ class MapController extends GoogleMapPageComponent {
         eventBus.onMapClicked((event) => self.onWaypointSelected(event));
         eventBus.onSearchBoxPlaceChanged((place) => self.onWaypointSelected({ latLng: place.geometry.location }));
         eventBus.onSearchBoxCleared(() => self.onSearchBoxCleared());
-        eventBus.on('floatingActionButtonClicked', () => self.onBeginBuildingRouteButtonClicked());
-        eventBus.on('routePanelClosed', () => self.onRoutePanelClosed());
-        eventBus.on('transportationModeChanged', (e) => self.onTransportModeChanged(e.newMode));
-        eventBus.on('swapOriginWithDestination', () => self.swapOriginDestination());
+        eventBus.on('floating_action_button_clicked', () => self.onBeginBuildingRouteButtonClicked());
+        eventBus.on('route_panel_closed', () => self.onRoutePanelClosed());
+        eventBus.on('transportation_mode_changed', (e) => self.onTransportModeChanged(e.newMode));
         eventBus.on('waypoints_changed', () => self.onWaypointsChanged());
+        eventBus.on('location_panel_closed', this.hideGpxKmlPanel.bind(this));
     }
 
     setCurrentLocation(latLng) {
@@ -57,7 +56,6 @@ class MapController extends GoogleMapPageComponent {
             this.mapManager.clearDirections();
             this.mapManager.clearMarkers();
             this.viewModel.setRoute(routeJson);
-            // this.viewModel.renderDirections(this.mapManager);
             this.viewModel.setEditable(false);
             this.showRouteEditor();
         }
@@ -69,34 +67,30 @@ class MapController extends GoogleMapPageComponent {
         console.log('MapController::showRoutePlaybackPanel called', visible);
         if (visible) {
             // in route playback mode
-            this.isGpxKmlPlaying = true;
+            this.viewModel.setIsPlayingRoute(true);
             this.locationPanel.hide();
             this.routePanel.close();
             this.searchBox.hide();
             this.mapManager.map.setOptions({ zoomControl: false });
             $('#locationInfoOverlay').css('display', 'flex');
         } else {
-            this.isGpxKmlPlaying = false;
+            this.viewModel.setIsPlayingRoute(false);
             this.locationPanel.hide();
             this.searchBox.show();
-            this.routePanel.open();
             this.mapManager.map.setOptions({ zoomControl: true });
             $('#locationInfoOverlay').css('display', 'none');
         }
     }
 
     showGpxKmlPanel(title, subtitle) {
-        this.isGpxKmlPlaying = true;
+        this.viewModel.setIsPlayingRoute(true);
         this.routePanel.close();
         this.searchBox.hide();
-        this.locationPanel.showTitleSubtitle(title || '', subtitle || '', null,
-            function() {
-                this.hideGpxKmlPanel();
-            }.bind(this));
+        this.locationPanel.showTitleSubtitle(title || '', subtitle || '');
     }
 
     hideGpxKmlPanel() {
-        this.isGpxKmlPlaying = false;
+        this.viewModel.setIsPlayingRoute(false);
         this.routePanel.close();
         this.locationPanel.hide();
         this.searchBox.show();
