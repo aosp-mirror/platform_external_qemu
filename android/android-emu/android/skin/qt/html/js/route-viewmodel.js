@@ -17,6 +17,14 @@ class RouteViewModel {
         }
     }
 
+    setIsPlayingRoute(isPlaying) {
+        this.model.setIsPlayingRoute(isPlaying);
+    }
+
+    getIsPlayingRoute() {
+        return this.model.getIsPlayingRoute();
+    }
+
     setEditable(allowEdits) {
         this.allowEdits = allowEdits;
     }
@@ -188,8 +196,7 @@ class RouteViewModel {
     }
 
     shouldShowAddDestinationButton() {
-        return false;
-        // return this.model.isValidRoute() && this.totalWaypointsCount() < 4 && this.allowEdits;
+        return this.model.isValidRoute() && this.totalWaypointsCount() < 4 && this.allowEdits;
     }
 
     shouldShowRemoveWaypointButtons() {

@@ -5,20 +5,16 @@ class LocationPanelController extends GoogleMapPageComponent {
         this.panelCollapsedCssClassName = collapsedClassName;
         this.actionButtonPanelHiddenCssClassName = actionButtonPanelHiddenCssClassName;
         this.shouldHideActionButtonPanel = false;
-        this.onCloseCallback = null;
     }
 
     onMapInitialized(mapManager, eventBus) {
         const self = this;
         $('#floating-action-button').click(() => {
-            eventBus.dispatch('floatingActionButtonClicked')
+            eventBus.dispatch('floating_action_button_clicked')
         });
         $('#location-panel-close-button').click(() => {
             self.hide();
-            if (this.onCloseCallback) {
-                this.onCloseCallback();
-                this.onCloseCallback = null;
-            }
+            eventBus.dispatch('location_panel_closed');
         });
     }
 
@@ -40,8 +36,7 @@ class LocationPanelController extends GoogleMapPageComponent {
         $('#location-action-button-container').css('display', hideActionButtonPanel ? 'none' : 'flex');
     }
 
-    showTitleSubtitle(title, subtitle, hideActionButtonPanel, onCloseCallback) {
-        this.onCloseCallback = onCloseCallback;
+    showTitleSubtitle(title, subtitle, hideActionButtonPanel) {
         $('#floating-action-button').hide();
         $('#location-panel-close-button').show();
         $('#location-title').html(title);

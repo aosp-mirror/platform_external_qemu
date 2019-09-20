@@ -12,6 +12,15 @@ class RouteModel {
         this.transportationMode = TransportationMode.Driving;
         this.waypoints = [this.origin, this.destination]; // array of WaypointModels
         this.eventBus = eventBus;
+        this.isPlayingRoute = false;
+    }
+
+    getIsPlayingRoute() {
+        return this.isPlayingRoute;
+    }
+
+    setIsPlayingRoute(isPlaying) {
+        this.isPlayingRoute = isPlaying;
     }
 
     getTransportationMode() {
@@ -23,7 +32,7 @@ class RouteModel {
         if (oldMode === newMode) { return; }
 
         this.transportationMode = newMode;
-        this.eventBus.dispatch('transportationModeChanged', { newMode, oldMode });
+        this.eventBus.dispatch('transportation_mode_changed', { newMode, oldMode });
     }
 
     setDestination(waypointModel) {
