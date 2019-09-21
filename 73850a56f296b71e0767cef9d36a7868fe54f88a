@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f6d5747_5a0ea84f",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 7
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-09-21T13:54:53Z",
+      "side": 0,
+      "message": "Not familiar with this code, but it looks important. Do we want to remove this?",
+      "range": {
+        "startLine": 253,
+        "startChar": 8,
+        "endLine": 256,
+        "endChar": 9
+      },
+      "revId": "73850a56f296b71e0767cef9d36a7868fe54f88a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

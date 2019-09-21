@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af499dc6_7a8514d7",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 7
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-09-21T13:54:53Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 424,
+        "startChar": 0,
+        "endLine": 424,
+        "endChar": 20
+      },
+      "revId": "ff2e8ef638ee38987e4fbc9d50a037c1c90587a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fc84b92_461a263f",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 7
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-09-21T13:54:53Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 568,
+        "startChar": 0,
+        "endLine": 568,
+        "endChar": 25
+      },
+      "revId": "ff2e8ef638ee38987e4fbc9d50a037c1c90587a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "545dafe6_eeddd308",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotPixels_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-09-21T13:54:53Z",
+      "side": 1,
+      "message": ";)",
+      "range": {
+        "startLine": 11,
+        "startChar": 36,
+        "endLine": 11,
+        "endChar": 75
+      },
+      "revId": "ff2e8ef638ee38987e4fbc9d50a037c1c90587a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34d7a2a0_f063e4f3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotTesting.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-09-21T13:54:53Z",
+      "side": 1,
+      "message": "extra space",
+      "range": {
+        "startLine": 290,
+        "startChar": 40,
+        "endLine": 290,
+        "endChar": 41
+      },
+      "revId": "ff2e8ef638ee38987e4fbc9d50a037c1c90587a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
