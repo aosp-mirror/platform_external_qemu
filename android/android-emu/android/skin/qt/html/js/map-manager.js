@@ -151,23 +151,7 @@ class GoogleMapManager {
 
             self.directionsRenderer.setDirections(result);
 
-            // Calculate the number of points and the total duration of the route
-            let numPoints = 0;
-            let totalDuration = 0.0;
-            for (let legIdx = 0;
-                legIdx < result.routes[0].legs.length;
-                legIdx++) {
-                totalDuration += result.routes[0].legs[legIdx].duration.value;
-
-                let numSteps = result.routes[0].legs[legIdx].steps.length;
-                for (let stepIdx = 0; stepIdx < numSteps; stepIdx++) {
-                    numPoints += result.routes[0].legs[legIdx].steps[stepIdx].path.length;
-                }
-                numPoints -= (numSteps - 1); // Don't count the duplicate first points
-            }
-
-            let fullResult = JSON.stringify(result);
-            channel.objects.emulocationserver.sendFullRouteToEmu(numPoints, totalDuration, fullResult, travelMode);
+            this.eventBus.dispatch('route_computed', result);
         });
     }
 

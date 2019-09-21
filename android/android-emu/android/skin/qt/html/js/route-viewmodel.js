@@ -4,6 +4,7 @@ class RouteViewModel {
         this.geocoder = geocoder;
         this.autocompleter = autocompleter;
         this.isEditingRoute = false;
+        this.isLoadingRoute = false;
         this.allowEdits = true;
     }
 
@@ -33,6 +34,10 @@ class RouteViewModel {
         this.isEditingRoute = editing;
     }
 
+    setIsLoadingRoute(loading) {
+        this.isLoadingRoute = loading;
+    }
+
     setRoute(routeJson) {
         const route = JSON.parse(routeJson);
         const originLatLng = route['request']['origin']['location'];
@@ -46,7 +51,7 @@ class RouteViewModel {
             destinationAddress,
             travelMode);
         this.model.clear();
-        this.model.setTransportationMode(travelMode);        
+        this.model.setTransportationMode(travelMode);
         this.model.setOrigin({
             latLng: originLatLng,
             address: originAddress
@@ -59,6 +64,20 @@ class RouteViewModel {
 
     saveRoute() {
         channel.objects.emulocationserver.saveRoute();
+    }
+
+    sendRouteToEmulator(route) {
+        if (this.isLoadingRoute || !this.allowEdits || this.getIsPlayingRoute()) {
+            return;
+        }
+        if (!route) {
+            console.log('EMPTY ROUTE - sending route to emulator', this);
+            channel.objects.emulocationserver.sendFullRouteToEmu(0, 0, null, null);
+            return;
+        }
+        const { json, pointCount, totalDuration } = this.model.convertRouteToJson(route);
+        console.log('COMPLETE ROUTE - sending route to emulator', this);
+        channel.objects.emulocationserver.sendFullRouteToEmu(pointCount, totalDuration, json, this.getTransportationMode());
     }
 
     addNewEmptyDestination() {
