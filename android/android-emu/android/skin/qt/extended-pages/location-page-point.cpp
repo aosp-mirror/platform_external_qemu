@@ -270,6 +270,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
 bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    dialogLayout->setAlignment(Qt::AlignTop);
 
     // Name
     dialogLayout->addWidget(new QLabel(tr("Name")));
@@ -281,10 +282,24 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
 
     // Address
     dialogLayout->addWidget(new QLabel(tr("Address")));
-    QLineEdit* addrField = new QLineEdit(this);
+    QLabel* addrField = new QLabel(this);
     addrField->setText(pointElement.address);
-    addrField->setReadOnly(true);
+    addrField->setProperty("ColorGroup", "Property");
     dialogLayout->addWidget(addrField);
+
+    // Latitude
+    dialogLayout->addWidget(new QLabel(tr("Latitude")));
+    QLabel* latitudeField = new QLabel(this);
+    latitudeField->setText(QString::number(pointElement.latitude, 'g', 12));
+    latitudeField->setProperty("ColorGroup", "Property");
+    dialogLayout->addWidget(latitudeField);
+
+    // Longitude
+    dialogLayout->addWidget(new QLabel(tr("Longitude")));
+    QLabel* longitudeField = new QLabel(this);
+    longitudeField->setText(QString::number(pointElement.longitude, 'g', 12));
+    longitudeField->setProperty("ColorGroup", "Property");
+    dialogLayout->addWidget(longitudeField);
 
     // Description
     dialogLayout->addWidget(new QLabel(tr("Description")));
@@ -292,20 +307,6 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
     QString oldDescription = pointElement.description;
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
-
-    // Latitude
-    dialogLayout->addWidget(new QLabel(tr("Latitude")));
-    QLineEdit* latitudeField = new QLineEdit(this);
-    latitudeField->setText(QString::number(pointElement.latitude, 'g', 12));
-    latitudeField->setReadOnly(true);
-    dialogLayout->addWidget(latitudeField);
-
-    // Longitude
-    dialogLayout->addWidget(new QLabel(tr("Longitude")));
-    QLineEdit* longitudeField = new QLineEdit(this);
-    longitudeField->setText(QString::number(pointElement.longitude, 'g', 12));
-    longitudeField->setReadOnly(true);
-    dialogLayout->addWidget(longitudeField);
 
     // OK and Cancel buttons
     QDialogButtonBox* buttonBox = new QDialogButtonBox(
@@ -319,7 +320,8 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
     connect(buttonBox, SIGNAL(rejected()), &editDialog, SLOT(reject()));
     connect(buttonBox, SIGNAL(accepted()), &editDialog, SLOT(accept()));
 
-    editDialog.setWindowTitle(tr("Edit point"));
+    editDialog.setWindowTitle(isNewPoint ?
+            tr("Save route as") : tr("Edit point"));
     editDialog.setLayout(dialogLayout);
 
     QApplication::restoreOverrideCursor();
