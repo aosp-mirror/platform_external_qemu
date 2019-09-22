@@ -19,6 +19,11 @@
 
 #ifdef USE_WEBENGINE
 void LocationPage::on_loc_playRouteButton_clicked() {
+    if (mRouteState == UiState::Deletion) {
+        deleteSelectedRoutes();
+        return;
+    }
+
     if (mNowPlaying) {
         // STOP
         locationPlaybackStop_v2();

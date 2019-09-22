@@ -146,9 +146,44 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 }
 
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
-    sendMostRecentUiLocation();
-    ++mSetLocCount;
-    mUi->loc_pointList->setCurrentItem(nullptr);
+    switch (mPointState) {
+    case UiState::Default:
+        sendMostRecentUiLocation();
+        ++mSetLocCount;
+        mUi->loc_pointList->setCurrentItem(nullptr);
+        mUi->loc_singlePoint_setLocationButton->setEnabled(false);
+        break;
+    case UiState::Deletion:
+        deleteSelectedPoints();
+        break;
+    }
+}
+
+void LocationPage::deleteSelectedPoints() {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QMessageBox msgBox(QMessageBox::Warning,
+                       tr("Delete selected points"),
+                       tr("Do you want to permanently delete the selected points?"),
+                       QMessageBox::Cancel,
+                       this);
+    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
+    deleteButton->setText(tr("Delete"));
+
+    int selection = msgBox.exec();
+
+    if (selection == QMessageBox::Ok) {
+        mPrevSelectedPoints.clear();
+        QList<QListWidgetItem*> selectedItems =
+                mUi->loc_pointList->selectedItems();
+        for (int i = 0; i < selectedItems.size(); ++i) {
+            auto* pointItem = getItemWidget(mUi->loc_pointList,
+                                            selectedItems[i]);
+            deletePoint(pointItem);
+        }
+        emit mMapBridge->resetPointsMap();
+        mUi->loc_singlePoint_setLocationButton->setEnabled(false);
+    }
+    QApplication::restoreOverrideCursor();
 }
 
 // Populate the QListWidget with the points that are found on disk
@@ -208,30 +243,61 @@ void LocationPage::scanForPoints() {
     mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
 }
 
-void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current,
-                                                       QListWidgetItem* previous) {
-    if (previous) {
-        PointWidgetItem* item = getItemWidget(mUi->loc_pointList, previous);
-        if (item != nullptr) {
-            item->setSelected(false);
+void LocationPage::updatePointWidgetItemsColor() {
+    // Deselect everything selected previously
+    for (auto* item : mPrevSelectedPoints) {
+        auto* pointWidgetItem = getItemWidget(mUi->loc_pointList, item);
+        if (pointWidgetItem != nullptr) {
+            pointWidgetItem->setSelected(false);
         }
     }
-    if (current) {
-        PointWidgetItem* item = getItemWidget(mUi->loc_pointList, current);
-        if (item != nullptr) {
-            item->setSelected(true);
-            // update the selected point
-            auto& pointElement = item->pointElement();
-            // show the location on the map, but do not send it to the device
-            emit mMapBridge->showLocation(QString::number(pointElement.latitude, 'g', 12),
-                                          QString::number(pointElement.longitude, 'g', 12),
-                                          pointElement.address);
-            mLastLat = QString::number(pointElement.latitude, 'g', 12);
-            mLastLng = QString::number(pointElement.longitude, 'g', 12);
-            mLastAddr = pointElement.address;
-            validateCoordinates();
+    // Select everything in the selected items list
+    for (auto* item : mUi->loc_pointList->selectedItems()) {
+        auto* pointWidgetItem = getItemWidget(mUi->loc_pointList, item);
+        if (pointWidgetItem != nullptr) {
+            pointWidgetItem->setSelected(true);
         }
     }
+    mPrevSelectedPoints = mUi->loc_pointList->selectedItems();
+}
+
+void LocationPage::on_loc_pointList_itemSelectionChanged() {
+    UiState newState = mUi->loc_pointList->selectedItems().size() > 1 ?
+                       UiState::Deletion :
+                       UiState::Default;
+    updatePointWidgetItemsColor();
+
+    if (mPointState == UiState::Deletion &&
+        mUi->loc_pointList->selectedItems().size() != 1) {
+        // Either no points selected, or in deletion mode, either of which
+        // means the map shouldn't be set to anything.
+        emit mMapBridge->resetPointsMap();
+    }
+    if (mUi->loc_pointList->selectedItems().size() == 1) {
+        // show the location on the map, but do not send it to the device
+        auto* item = getItemWidget(mUi->loc_pointList,
+                                   mUi->loc_pointList->selectedItems()[0]);
+        auto& pointElement = item->pointElement();
+        mLastLat = QString::number(pointElement.latitude, 'g', 12);
+        mLastLng = QString::number(pointElement.longitude, 'g', 12);
+        mLastAddr = pointElement.address;
+        emit mMapBridge->showLocation(mLastLat, mLastLng, mLastAddr);
+        validateCoordinates();
+    }
+
+    // Disable the edit buttons on the saved points if in deletion mode
+    for (int i = 0; i < mUi->loc_pointList->count(); ++i) {
+        auto item = mUi->loc_pointList->item(i);
+        auto* pointWidgetItem = getItemWidget(mUi->loc_pointList, item);
+        if (pointWidgetItem != nullptr) {
+            pointWidgetItem->setEditButtonEnabled(newState == UiState::Default);
+        }
+    }
+    mUi->loc_singlePoint_setLocationButton->setText(
+            newState == UiState::Default ?
+                      tr("SET LOCATION") :
+                      tr("DELETE ITEMS"));
+    mPointState = newState;
 }
 
 void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
@@ -259,12 +325,26 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
         emit mMapBridge->showLocation(QString::number(pointElement.latitude, 'g', 12),
                                       QString::number(pointElement.longitude, 'g', 12),
                                       pointElement.address);
-    } else if (theAction == deleteAction && deletePoint(pointWidgetItem->pointElement())) {
-        mUi->loc_pointList->setCurrentItem(nullptr);
-        pointWidgetItem->removeFromListWidget();
-        // If the list is empty, show an overlay saying that.
-        mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
+    } else if (theAction == deleteAction) {
+        auto& pointElement = pointWidgetItem->pointElement();
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QMessageBox msgBox(QMessageBox::Warning,
+                           tr("Delete point"),
+                           tr("Do you want to permanently delete<br>point \"%1\"?")
+                                   .arg(pointElement.logicalName),
+                           QMessageBox::Cancel,
+                           this);
+        QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
+        deleteButton->setText(tr("Delete"));
+
+        int selection = msgBox.exec();
+
+        if (selection == QMessageBox::Ok) {
+            mPrevSelectedPoints.clear();
+            deletePoint(pointWidgetItem);
+        }
         emit mMapBridge->resetPointsMap();
+        QApplication::restoreOverrideCursor();
     }
     mUi->loc_pointList->blockSignals(false);
 }
@@ -369,35 +449,21 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
     return true;
 }
 
-bool LocationPage::deletePoint(const PointListElement& pointElement) {
-    bool ret = false;
-    QMessageBox msgBox(QMessageBox::Warning,
-                       tr("Delete point"),
-                       tr("Do you want to permanently delete<br>point \"%1\"?")
-                               .arg(pointElement.logicalName),
-                       QMessageBox::Cancel,
-                       this);
-    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
-    deleteButton->setText(tr("Delete"));
-
-    int selection = msgBox.exec();
-
-    if (selection == QMessageBox::Ok) {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        std::string protobufName = pointElement.protoFilePath.toStdString();
-        android::base::StringView dirName;
-        bool haveDirName = android::base::PathUtils::split(protobufName,
-                                                           &dirName,
-                                                           nullptr /* base name */);
-        if (haveDirName) {
-            path_delete_dir(dirName.str().c_str());
-            ret = true;
-        }
-
-        QApplication::restoreOverrideCursor();
+void LocationPage::deletePoint(PointWidgetItem* item) {
+    auto& pointElement = item->pointElement();
+    std::string protobufName = pointElement.protoFilePath.toStdString();
+    android::base::StringView dirName;
+    bool haveDirName = android::base::PathUtils::split(protobufName,
+                                                       &dirName,
+                                                       nullptr /* base name */);
+    if (haveDirName) {
+        path_delete_dir(dirName.str().c_str());
     }
 
-    return ret;
+    mUi->loc_pointList->setCurrentItem(nullptr);
+    item->removeFromListWidget();
+    // If the list is empty, show an overlay saying that.
+    mUi->loc_noSavedPoints_mask->setVisible(mUi->loc_pointList->count() == 0);
 }
 
 // Write a protobuf into the specified directory.
@@ -446,6 +512,8 @@ void LocationPage::setUpWebEngine() {
     mMapBridge.reset(new MapBridge(this));
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
     mUi->loc_singlePoint_setLocationButton->setEnabled(false);
+    mUi->loc_pointList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    mUi->loc_routeList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     QObject::connect(this, &LocationPage::signal_saveRoute,
                      this, &LocationPage::map_saveRoute,
@@ -712,6 +780,32 @@ RouteSenderThread* RouteSenderThread::newInstance(const QObject* handler,
     return new_instance;
 }
 
+void LocationPage::keyPressEvent(QKeyEvent* e) {
+    QWidget::keyPressEvent(e);
+
+    switch (e->key()) {
+    case Qt::Key_Backspace:
+    case Qt::Key_Delete:
+        switch (mUi->locationTabs->currentIndex()) {
+        case 0:  // Single point tab
+            if (mPointState == UiState::Deletion) {
+                on_loc_singlePoint_setLocationButton_clicked();
+            }
+            break;
+        case 1:  // Routes tab
+            if (mRouteState == UiState::Deletion) {
+                on_loc_playRouteButton_clicked();
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 #else // !USE_WEBENGINE  These are the stubs for when we don't have WebEngine
 void MapBridge::map_savePoint() { }
 void MapBridge::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
@@ -719,9 +813,9 @@ void LocationPage::map_savePoint() { }
 void LocationPage::sendLocation(const QString& lat, const QString& lng, const QString& address) { }
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() { }
 void LocationPage::scanForPoints() { }
-void LocationPage::on_loc_pointList_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous) { }
+void LocationPage::on_loc_pointList_itemSelectionChanged() { }
 bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) { }
-bool LocationPage::deletePoint(const PointListElement& pointElement) { }
+void LocationPage::deletePoint(PointWidgetItem* item) { }
 std::string LocationPage::writePointProtobufByName(
         const QString& pointFormalName,
         const emulator_location::PointMetadata& protobuf) { return ""; }
@@ -749,4 +843,6 @@ RouteSenderThread* RouteSenderThread::newInstance(const QObject* handler,
                                                   const char* finished_slot) { return nullptr; }
 void LocationPage::routeSendingFinished(bool ok) { }
 void LocationPage::sendMetrics() { }
+void LocationPage::deleteSelectedPoints() { }
+void LocationPage::updatePointWidgetItemsColor() { }
 #endif // !USE_WEBENGINE
