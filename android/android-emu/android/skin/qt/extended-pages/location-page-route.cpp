@@ -176,44 +176,91 @@ void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
         // We don't need to send any updates to the map since we aren't editing any
         // of the routing points.
         routeWidgetItem->refresh();
-    } else if (theAction == deleteAction && deleteRoute(routeWidgetItem->routeElement())) {
-        mUi->loc_routeList->setCurrentItem(nullptr);
-        routeWidgetItem->removeFromListWidget();
-        // If the list is empty, show an overlay saying that.
-        mUi->loc_noSavedRoutes_mask->setVisible(mUi->loc_routeList->count() == 0);
+    } else if (theAction == deleteAction) {
+        auto& routeElement = routeWidgetItem->routeElement();
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QMessageBox msgBox(QMessageBox::Warning,
+                           tr("Delete route"),
+                           tr("Do you want to permanently delete<br>route \"%1\"?")
+                                   .arg(routeElement.logicalName),
+                           QMessageBox::Cancel,
+                           this);
+        QPushButton *deleteButton = msgBox.addButton(QMessageBox::Apply);
+        deleteButton->setText(tr("Delete"));
+
+        int selection = msgBox.exec();
+
+        if (selection == QMessageBox::Apply) {
+            deleteRoute(routeWidgetItem);
+            mPrevSelectedRoutes.clear();
+        }
+        QApplication::restoreOverrideCursor();
     }
     mUi->loc_routeList->blockSignals(false);
 }
 
-void LocationPage::on_loc_routeList_currentItemChanged(QListWidgetItem* current,
-                                                       QListWidgetItem* previous) {
-    if (previous) {
-        RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, previous);
-        if (item != nullptr) {
-            item->setSelected(false);
-            item->refresh();
+void LocationPage::updateRouteWidgetItemsColor() {
+    // Deselect everything selected previously
+    for (auto* item : mPrevSelectedRoutes) {
+        auto* routeWidgetItem = getItemWidget(mUi->loc_routeList, item);
+        if (routeWidgetItem != nullptr) {
+            routeWidgetItem->setSelected(false);
+            routeWidgetItem->refresh();
         }
     }
-    if (!current) {
-    } else {
-        RouteWidgetItem* item = getItemWidget(mUi->loc_routeList, current);
-        if (item != nullptr) {
-            item->setSelected(true);
-            item->refresh();
-            auto& routeElement = item->routeElement();
-
-            mRouteJson = ""; // Forget any unsaved route we may have received
-
-            setLoadingOverlayVisible(true, tr("Loading Saved Route..."));
-            mRouteTravelMode = routeElement.modeIndex;
-            mRouteNumPoints = routeElement.numPoints;
-            mUi->loc_playRouteButton->setEnabled(false);
-            mRouteSender.reset(RouteSenderThread::newInstance(
-                    this,
-                    SLOT(routeSendingFinished(bool))));
-            mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
+    // Select everything in the selected items list
+    for (auto* item : mUi->loc_routeList->selectedItems()) {
+        auto* routeWidgetItem = getItemWidget(mUi->loc_routeList, item);
+        if (routeWidgetItem != nullptr) {
+            routeWidgetItem->setSelected(true);
+            routeWidgetItem->refresh();
         }
     }
+    mPrevSelectedRoutes = mUi->loc_routeList->selectedItems();
+}
+
+void LocationPage::on_loc_routeList_itemSelectionChanged() {
+    UiState newState = mUi->loc_routeList->selectedItems().size() > 1 ?
+                       UiState::Deletion :
+                       UiState::Default;
+    updateRouteWidgetItemsColor();
+
+    if (mRouteState == UiState::Deletion &&
+        mUi->loc_routeList->selectedItems().size() != 1) {
+        // Either no routes selected, or in deletion mode, either of which
+        // means the map shouldn't be set to anything.
+        emit mMapBridge->showRouteOnMap("");
+    }
+    if (mUi->loc_routeList->selectedItems().size() == 1) {
+        // show the location on the map, but do not send it to the device
+        auto* item = getItemWidget(mUi->loc_routeList,
+                                   mUi->loc_routeList->selectedItems()[0]);
+        auto& routeElement = item->routeElement();
+        mRouteJson = ""; // Forget any unsaved route we may have received
+
+        setLoadingOverlayVisible(true, tr("Loading Saved Route..."));
+        mRouteTravelMode = routeElement.modeIndex;
+        mRouteNumPoints = routeElement.numPoints;
+        mUi->loc_playRouteButton->setEnabled(false);
+        mRouteSender.reset(RouteSenderThread::newInstance(
+                this,
+                SLOT(routeSendingFinished(bool))));
+        mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
+    }
+
+    // Disable the edit buttons on the saved points if in deletion mode
+    for (int i = 0; i < mUi->loc_routeList->count(); ++i) {
+        auto item = mUi->loc_routeList->item(i);
+        auto* routeWidgetItem = getItemWidget(mUi->loc_routeList, item);
+        if (routeWidgetItem != nullptr) {
+            routeWidgetItem->setEditButtonEnabled(newState == UiState::Default);
+        }
+    }
+    mUi->loc_playRouteButton->setText(
+            newState == UiState::Default ?
+                      tr("PLAY ROUTE") :
+                      tr("DELETE ITEMS"));
+    mRouteState = newState;
 }
 
 bool LocationPage::editRoute(RouteListElement& routeElement, bool isNewRoute) {
@@ -288,34 +335,47 @@ bool LocationPage::editRoute(RouteListElement& routeElement, bool isNewRoute) {
     return true;
 }
 
-bool LocationPage::deleteRoute(const RouteListElement& routeElement) {
-    bool ret = false;
+void LocationPage::deleteSelectedRoutes() {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     QMessageBox msgBox(QMessageBox::Warning,
-                       tr("Delete route"),
-                       tr("Do you want to permanently delete<br>route \"%1\"?")
-                               .arg(routeElement.logicalName),
+                       tr("Delete selected routes"),
+                       tr("Do you want to permanently delete the selected routes?"),
                        QMessageBox::Cancel,
                        this);
-    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Apply);
+    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
     deleteButton->setText(tr("Delete"));
 
     int selection = msgBox.exec();
 
-    if (selection == QMessageBox::Apply) {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        std::string protobufName = routeElement.protoFilePath.toStdString();
-        android::base::StringView dirName;
-        bool haveDirName = android::base::PathUtils::split(protobufName,
-                                                           &dirName,
-                                                           nullptr /* base name */);
-        if (haveDirName) {
-            path_delete_dir(dirName.str().c_str());
-            mUi->loc_routeList->setCurrentItem(nullptr);
-            ret = true;
+    if (selection == QMessageBox::Ok) {
+        mPrevSelectedRoutes.clear();
+        QList<QListWidgetItem*> selectedItems =
+                mUi->loc_routeList->selectedItems();
+        for (int i = 0; i < selectedItems.size(); ++i) {
+            auto* routeItem = getItemWidget(mUi->loc_routeList,
+                                            selectedItems[i]);
+            deleteRoute(routeItem);
         }
-        QApplication::restoreOverrideCursor();
+        emit mMapBridge->showRouteOnMap("");
+        mUi->loc_playRouteButton->setEnabled(false);
     }
-    return ret;
+    QApplication::restoreOverrideCursor();
+}
+
+void LocationPage::deleteRoute(RouteWidgetItem* item) {
+    auto& routeElement = item->routeElement();
+    std::string protobufName = routeElement.protoFilePath.toStdString();
+    android::base::StringView dirName;
+    bool haveDirName = android::base::PathUtils::split(protobufName,
+                                                       &dirName,
+                                                       nullptr /* base name */);
+    if (haveDirName) {
+        path_delete_dir(dirName.str().c_str());
+    }
+    mUi->loc_routeList->setCurrentItem(nullptr);
+    item->removeFromListWidget();
+    // If the list is empty, show an overlay saying that.
+    mUi->loc_noSavedRoutes_mask->setVisible(mUi->loc_routeList->count() == 0);
 }
 
 // Display the details of the not-yet-saved route
