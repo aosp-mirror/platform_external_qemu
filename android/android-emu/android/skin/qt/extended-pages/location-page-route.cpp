@@ -101,6 +101,14 @@ QString LocationPage::toJsonString(const GpsFixArray* arr) {
     return ret;
 }
 
+void LocationPage::stylePopupMenu(QMenu* popMenu) {
+    popMenu->setMinimumWidth(100);
+    popMenu->setStyleSheet("QMenu::item {padding: 4px; font-size: 14pt;}"
+        "QMenu::item:selected {background-color: #4285f4;}"
+        "QLabel {font-size: 14pt;}"
+        "QLabel:hover {background-color: #4285f4;}");
+}
+
 // Populate the saved routes list with the routes that are found on disk
 void LocationPage::scanForRoutes() {
     // Get the directory
@@ -159,6 +167,7 @@ void LocationPage::routeWidget_editButtonClicked(CCListItem* listItem) {
     mUi->loc_routeList->blockSignals(true);
     auto* routeWidgetItem = reinterpret_cast<RouteWidgetItem*>(listItem);
     QMenu* popMenu = new QMenu(this);
+    stylePopupMenu(popMenu);
     QAction* editAction   = popMenu->addAction(tr("Edit"));
     QAction* deleteAction = popMenu->addAction(tr("Delete"));
 

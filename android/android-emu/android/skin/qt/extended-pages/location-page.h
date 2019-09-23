@@ -205,6 +205,7 @@ private:
     void saveGpxKmlPoint(double lat, double lng, double elevation);
     void saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString);
     void setLoadingOverlayVisible(bool visible, QString text = QString(""));
+    void stylePopupMenu(QMenu* popupMenu);
 
     void finishGeoDataLoading(
         const QString& file_name,

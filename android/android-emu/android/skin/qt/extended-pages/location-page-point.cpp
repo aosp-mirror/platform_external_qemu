@@ -237,6 +237,7 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     mUi->loc_pointList->blockSignals(true);
     auto* pointWidgetItem = reinterpret_cast<PointWidgetItem*>(listItem);
     QMenu* popMenu = new QMenu(this);
+    stylePopupMenu(popMenu);
     QAction* startRouteAction = popMenu->addAction(tr("Start a route"));
     QAction* editAction   = popMenu->addAction(tr("Edit"));
     QAction* deleteAction = popMenu->addAction(tr("Delete"));
