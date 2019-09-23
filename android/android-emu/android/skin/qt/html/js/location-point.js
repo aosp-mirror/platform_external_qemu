@@ -110,6 +110,7 @@ function setDeviceLocation(lat, lng) {
     if (gPendingMarker != null) {
         gPendingMarker.setMap(null);
     }
+    gSearchBox.update('');
 
     var latLng = new google.maps.LatLng(lat, lng);
     gCurrentMarker = new google.maps.Marker({ map: gMap, position: latLng });
