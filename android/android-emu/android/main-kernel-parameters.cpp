@@ -189,8 +189,14 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             android::featurecontrol::isEnabled(android::featurecontrol::Wifi)) {
         params.add("qemu.wifi=1");
         // Enable multiple channels so the kernel can scan on one channel while
-        // communicating the other. This speeds up scanning significantly.
-        params.add("mac80211_hwsim.channels=2");
+        // communicating the other. This speeds up scanning significantly. This
+        // does not work if WiFi Direct is enabled starting with Q images so
+        // only set this option if WiFi Direct support is not enabled.
+        if (apiLevel < 29) {
+            params.add("mac80211_hwsim.channels=2");
+        } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
+            params.add("mac80211_hwsim.channels=2");
+        }
     }
 
     const bool isDynamicPartition = android::featurecontrol::isEnabled(android::featurecontrol::DynamicPartition);
