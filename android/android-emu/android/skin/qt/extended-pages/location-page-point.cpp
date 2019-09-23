@@ -148,6 +148,7 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng, const QS
 void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
     sendMostRecentUiLocation();
     ++mSetLocCount;
+    mUi->loc_pointList->setCurrentItem(nullptr);
 }
 
 // Populate the QListWidget with the points that are found on disk
