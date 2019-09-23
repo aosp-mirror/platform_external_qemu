@@ -242,6 +242,7 @@ OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays
 
 OPT_PARAM(google_maps_key, "<API key>", "API key to use with the Google Maps GUI.")
 
+OPT_FLAG(no_location_ui, "Disable the location UI in the extended window.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM
