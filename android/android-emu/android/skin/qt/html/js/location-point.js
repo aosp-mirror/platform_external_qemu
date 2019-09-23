@@ -15,10 +15,6 @@ function savePoint() {
 }
 
 function resetPointsMap() {
-    if (gCurrentMarker) {
-        gCurrentMarker.setMap(null);
-        gCurrentMarker = null;    
-    }
     if (gPendingMarker) {
         gPendingMarker.setMap(null);
         gPendingMarker = null;    
