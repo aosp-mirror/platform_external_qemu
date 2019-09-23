@@ -22,6 +22,30 @@
       "revId": "73850a56f296b71e0767cef9d36a7868fe54f88a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae347074_5a9800b7",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 7
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-09-23T21:01:25Z",
+      "side": 0,
+      "message": "This API has been removed for several years now.  In objective C you can send non existent messages to object, which get ignored.  See https://developer.apple.com/documentation/avfoundation/avcapturedevice for API details.",
+      "parentUuid": "6f6d5747_5a0ea84f",
+      "range": {
+        "startLine": 253,
+        "startChar": 8,
+        "endLine": 256,
+        "endChar": 9
+      },
+      "revId": "73850a56f296b71e0767cef9d36a7868fe54f88a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
