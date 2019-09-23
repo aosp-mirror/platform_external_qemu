@@ -16,7 +16,7 @@ class GoogleMapManager {
             center: self._initialLocation,
             zoom: 10,
             zoomControl: true,
-            controlSize: 18,
+            controlSize: 20,
             disableDefaultUI: true
         });
         this.geocoder = new google.maps.Geocoder();

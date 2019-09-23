@@ -18,7 +18,12 @@ class LocationPointOverlay {
         else {
             $("#pointOverlay").removeClass().addClass(this.slideInCssClassName);
         }
-        $("#lowerPanel").css("display", hideSavePoint ? "none" : "flex")
+        $("#lowerPanel").css("display", hideSavePoint ? "none" : "flex");
+        gMap.setOptions({
+            zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_CENTER
+            }
+        });
     }
 
     showMessage(message, timeout) {
@@ -32,10 +37,20 @@ class LocationPointOverlay {
                 this.hide();
             }, timeout);
         }
+        gMap.setOptions({
+            zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_CENTER
+            }
+        });
     }
 
     hide() {
         console.log('hiding point overlay')
         $("#pointOverlay").removeClass().addClass(this.slideOutCssClassName);
+        gMap.setOptions({
+            zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_BOTTOM
+            }
+        });
     }
 }

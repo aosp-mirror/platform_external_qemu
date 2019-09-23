@@ -14,8 +14,8 @@ class LocationPanelController extends GoogleMapPageComponent {
         });
         $('#location-panel-close-button').click(() => {
             self.hide();
-            eventBus.dispatch('location_panel_closed');
         });
+        this.eventBus = eventBus;
     }
 
     show(address, latLng, elevation, hideActionButtonPanel) {
@@ -34,6 +34,7 @@ class LocationPanelController extends GoogleMapPageComponent {
             $('#location-panel').removeClass().addClass(this.panelExpandedCssClassName);
         }
         $('#location-action-button-container').css('display', hideActionButtonPanel ? 'none' : 'flex');
+        this.eventBus.dispatch('location_panel_opened', this);
     }
 
     showTitleSubtitle(title, subtitle, hideActionButtonPanel) {
@@ -48,9 +49,11 @@ class LocationPanelController extends GoogleMapPageComponent {
             $('#location-panel').removeClass().addClass(this.panelExpandedCssClassName);
         }
         $('#location-action-button-container').css('display', hideActionButtonPanel ? 'none' : 'flex');
+        this.eventBus.dispatch('location_panel_opened', this);
     }
 
     hide() {
         $('#location-panel').removeClass().addClass(this.panelCollapsedCssClassName);
+        this.eventBus.dispatch('location_panel_closed');
     }
 }
