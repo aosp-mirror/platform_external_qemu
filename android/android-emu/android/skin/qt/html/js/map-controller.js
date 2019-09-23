@@ -7,23 +7,29 @@ class MapController extends GoogleMapPageComponent {
         this.locationPanel = locationPanel;
         this.mapManager = null;
         this.currentLocationMarker = null;
-        this.hideGpxKmlPanel.bind(this);
         this.onRouteComputed.bind(this);
-
+        this.onWaypointSelected.bind(this);
+        this.onSearchBoxCleared.bind(this);
+        this.onBeginBuildingRouteButtonClicked.bind(this);
+        this.onRoutePanelClosed.bind(this);
+        this.onTransportModeChanged.bind(this);
+        this.onWaypointsChanged.bind(this);
+        this.onLocationPanelOpened.bind(this);
+        this.onLocationPanelClosed.bind(this);
     }
 
     onMapInitialized(mapManager, eventBus) {
         this.mapManager = mapManager;
         this.eventBus = eventBus;
-        const self = this;
-        eventBus.onMapClicked((event) => self.onWaypointSelected(event));
-        eventBus.onSearchBoxPlaceChanged((place) => self.onWaypointSelected({ latLng: place.geometry.location }));
-        eventBus.onSearchBoxCleared(() => self.onSearchBoxCleared());
-        eventBus.on('floating_action_button_clicked', () => self.onBeginBuildingRouteButtonClicked());
-        eventBus.on('route_panel_closed', () => self.onRoutePanelClosed());
-        eventBus.on('transportation_mode_changed', (e) => self.onTransportModeChanged(e.newMode));
-        eventBus.on('waypoints_changed', () => self.onWaypointsChanged());
-        eventBus.on('location_panel_closed', () => this.hideGpxKmlPanel());
+        eventBus.onMapClicked((event) => this.onWaypointSelected(event));
+        eventBus.onSearchBoxPlaceChanged((place) => this.onWaypointSelected({ latLng: place.geometry.location }));
+        eventBus.onSearchBoxCleared(() => this.onSearchBoxCleared());
+        eventBus.on('floating_action_button_clicked', () => this.onBeginBuildingRouteButtonClicked());
+        eventBus.on('route_panel_closed', () => this.onRoutePanelClosed());
+        eventBus.on('transportation_mode_changed', (e) => this.onTransportModeChanged(e.newMode));
+        eventBus.on('waypoints_changed', () => this.onWaypointsChanged());
+        eventBus.on('location_panel_opened', () => this.onLocationPanelOpened());
+        eventBus.on('location_panel_closed', () => this.onLocationPanelClosed());
         eventBus.on('route_computed', (route) => this.onRouteComputed(route));
     }
 
@@ -61,27 +67,27 @@ class MapController extends GoogleMapPageComponent {
             this.mapManager.clearDirections();
             this.mapManager.clearMarkers();
             this.viewModel.setRoute(routeJson);
-            this.viewModel.setEditable(false);            
+            this.viewModel.setEditable(false);
             this.showRouteEditor();
         }
         this.searchBox.update('');
         channel.objects.emulocationserver.onSavedRouteDrawn();
-        this.viewModel.setIsLoadingRoute(false);        
+        this.viewModel.setIsLoadingRoute(false);
     }
 
     showRoutePlaybackPanel(visible) {
         console.log('MapController::showRoutePlaybackPanel called', visible);
         if (visible) {
             // in route playback mode
-            this.viewModel.setIsPlayingRoute(true);
             this.locationPanel.hide();
+            this.viewModel.setIsPlayingRoute(true);
             this.routePanel.close();
             this.searchBox.hide();
             this.mapManager.map.setOptions({ zoomControl: false });
             $('#locationInfoOverlay').css('display', 'flex');
         } else {
-            this.viewModel.setIsPlayingRoute(false);
             this.locationPanel.hide();
+            this.viewModel.setIsPlayingRoute(false);
             this.searchBox.show();
             this.mapManager.map.setOptions({ zoomControl: true });
             this.viewModel.sendRouteToEmulator();
@@ -146,6 +152,14 @@ class MapController extends GoogleMapPageComponent {
         this.routePanel.open();
     }
 
+    moveZoomControls(position) {
+        this.mapManager.map.setOptions({
+            zoomControlOptions: {
+                position
+            }
+        });
+    }
+
     async onWaypointSelected(event) {
         if (this.viewModel.getIsPlayingRoute()) {
             return;
@@ -154,7 +168,7 @@ class MapController extends GoogleMapPageComponent {
         const self = this;
         if (this.viewModel.isEditingRoute) {
             if (!this.viewModel.isValidRoute()) {
-                const waypoint = await self.viewModel.geocodeLocation(latLng, self.mapManager.getBounds());
+                const waypoint = await this.viewModel.geocodeLocation(latLng, this.mapManager.getBounds());
                 this.viewModel.addNewWaypoint(waypoint);
             }
         }
@@ -204,5 +218,16 @@ class MapController extends GoogleMapPageComponent {
 
     onTransportModeChanged() {
         this.viewModel.renderDirections(this.mapManager);
+    }
+
+    onLocationPanelOpened() {
+        this.moveZoomControls(google.maps.ControlPosition.RIGHT_CENTER);
+    }
+
+    onLocationPanelClosed() {
+        this.moveZoomControls(google.maps.ControlPosition.RIGHT_BOTTOM);
+        if (this.viewModel.getIsPlayingRoute()) {
+            this.hideGpxKmlPanel();
+        }
     }
 }
