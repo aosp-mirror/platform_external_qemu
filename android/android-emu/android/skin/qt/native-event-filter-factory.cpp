@@ -163,6 +163,17 @@ private:
 
 class NativeEventFilter : public QAbstractNativeEventFilter {
 public:
+    NativeEventFilter() {
+        mEnglishKeyboardLayout =
+                LoadKeyboardLayoutA(kEnglishLanguageId, KLF_NOTELLSHELL);
+        if (LOWORD(mEnglishKeyboardLayout) !=
+            std::stoi(kEnglishLanguageId, nullptr, 16)) {
+            fprintf(stderr, "Cannot load English keyboard layout on Windows\n");
+        }
+    }
+
+    ~NativeEventFilter() { UnloadKeyboardLayout(mEnglishKeyboardLayout); }
+
     bool nativeEventFilter(const QByteArray& eventType,
                            void* message,
                            long*) override {
@@ -176,7 +187,25 @@ public:
                 if (android::featurecontrol::isEnabled(
                             android::featurecontrol::KeycodeForwarding)) {
                     if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                        handleNativeKeyEvent(ev->wParam, 0, kEventKeyDown);
+                        // On Windows, when keyboard layout is different, the
+                        // virtual keycode provided by the event will also
+                        // change. To obtain the keycode being used, we should
+                        // use the scan code provided by the event. Then,
+                        // translate to virtual keycode by assuming the keyboard
+                        // layout is English-US. Therefore, emulated qwerty2
+                        // keyboard in Android system will receive
+                        // consistent Linux keycode no matter what keyboard
+                        // layout is used on host OS. Bug: 140523177
+                        UINT scancode = (ev->lParam & 0x00FF0000) >> 16;
+                        UINT virtualKey =
+                                MapVirtualKeyExA(scancode, MAPVK_VSC_TO_VK,
+                                                 mEnglishKeyboardLayout);
+                        if (virtualKey == 0) {
+                            D("Cannot translate scan code %u to virtualKey",
+                              scancode);
+                            virtualKey = ev->wParam;
+                        }
+                        handleNativeKeyEvent(virtualKey, 0, kEventKeyDown);
                     }
                 }
             }
@@ -218,6 +247,10 @@ public:
         D("Processed keycode %d modifiers 0x%x", keycode, textInputData.mod);
         EmulatorQtWindow::getInstance()->queueSkinEvent(skin_event);
     }
+
+private:
+    HKL mEnglishKeyboardLayout;
+    static constexpr const char* kEnglishLanguageId = "00000409";
 };
 
 #endif
