@@ -16,6 +16,7 @@
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/cmdline-option.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/location/MapsKey.h"
@@ -119,6 +120,10 @@ LocationPage::LocationPage(QWidget *parent) :
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
 
+    if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
+        qDebug() << "Location UI disabled by command-line option.";
+        return;
+    }
     bool useLocationV2 = false;
 
 #ifdef USE_WEBENGINE

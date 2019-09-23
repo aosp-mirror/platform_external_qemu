@@ -1762,9 +1762,19 @@ static void
 help_google_maps_key(stralloc_t* out)
 {
     PRINTF(
-    "  User-provided API key to use with the Google maps GUI."
-    "  -multidisplay <your_key>\n"
+    "  User-provided API key to use with the Google maps GUI.\n"
+    "  -google_maps_key <your_key>\n"
     "  Note that providing this key will override the one provided by Android Studio.\n\n"
+    );
+}
+
+static void
+help_no_location_ui(stralloc_t* out)
+{
+    PRINTF(
+    "  Disables the location UI in the extended window.\n"
+    "  -no-location-ui\n"
+    "  This is useful if the location UI is interfering with your own location mocking.\n\n"
     );
 }
 

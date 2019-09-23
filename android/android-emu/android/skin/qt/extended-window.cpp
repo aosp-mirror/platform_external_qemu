@@ -120,7 +120,12 @@ ExtendedWindow::ExtendedWindow(
     setWindowTitle(QString("Extended controls - ") + android_hw->avd_name
                    + ":" + QString::number(android_serial_number_port));
 
-    mSidebarButtons.addButton(mExtendedUi->locationButton);
+    if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
+        mExtendedUi->locationButton->setVisible(false);
+    } else {
+        mSidebarButtons.addButton(mExtendedUi->locationButton);
+    }
+
     if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
         !ToolWindow::isFoldableConfigured()) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
@@ -412,7 +417,15 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         switchToTheme(getSelectedTheme());
 
         // Set the first tab active
-        on_locationButton_clicked();
+
+        // Programatically click the top sidebar button to get the correct page to show.
+        for (int i = 0; i < mExtendedUi->verticalLayout->count(); ++i) {
+            auto* pushBtn = reinterpret_cast<QPushButton*>(mExtendedUi->verticalLayout->itemAt(i)->widget());
+            if (pushBtn->isVisible()) {
+                pushBtn->click();
+                break;
+            }
+        }
 
         mFirstShowEvent = false;
 
