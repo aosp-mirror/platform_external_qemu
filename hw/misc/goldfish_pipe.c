@@ -361,9 +361,12 @@ struct PipeDevice {
     bool measure_latency;
     uint64_t write_start_us;
     uint64_t write_end_us;
-    uint64_t wake_us;
+    uint64_t wake_start_us;
+    uint64_t wake_end_us;
     uint64_t read_start_us;
     uint64_t read_end_us;
+    uint32_t wake_start_to_read_start_counter;
+    uint32_t wake_end_to_read_start_counter;
 };
 
 
@@ -1198,6 +1201,7 @@ static uint64_t pipe_dev_curr_time_us() {
 }
 
 #define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
+#define PIPE_DEV_PRINT_INTERVAL 100
 
 static void pipe_dev_warn_long_duration(
     const char* tag, uint64_t start_us, uint64_t end_us) {
@@ -1205,6 +1209,21 @@ static void pipe_dev_warn_long_duration(
     if (ms > LONG_PIPE_TRANSACTION_THRESHOLD_MS) {
         fprintf(stderr, "%s: high latency for [%s]: %f ms\n",
                 __func__, tag, ms);
+    }
+}
+
+static void pipe_dev_interval_print(
+    const char* tag, uint64_t start_us, uint64_t end_us,
+    uint32_t* counter, uint32_t interval) {
+    float ms = (end_us - start_us) / 1000.0f;
+    uint32_t next_counter = (*counter) + 1;
+
+    if (next_counter == interval) {
+        fprintf(stderr, "%s: latency for [%s]: %f ms\n",
+                __func__, tag, ms);
+        *counter = 0;
+    } else {
+        *counter = next_counter;
     }
 }
 
@@ -1366,9 +1385,21 @@ static uint64_t pipe_dev_read_v2(PipeDevice* dev, hwaddr offset) {
             dev->read_start_us,
             dev->read_end_us);
         pipe_dev_warn_long_duration(
-            "pipe_wake",
-            dev->wake_us,
+            "pipe_wake_to_read_start",
+            dev->wake_end_us,
             dev->read_start_us);
+        pipe_dev_interval_print(
+            "pipe_wake_start_to_read_start",
+            dev->wake_start_us,
+            dev->read_start_us,
+            &dev->wake_start_to_read_start_counter,
+            PIPE_DEV_PRINT_INTERVAL);
+        pipe_dev_interval_print(
+            "pipe_wake_end_to_read_start",
+            dev->wake_end_us,
+            dev->read_start_us,
+            &dev->wake_end_to_read_start_counter,
+            PIPE_DEV_PRINT_INTERVAL);
     }
 
     return res;
@@ -1835,6 +1866,10 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
        pipe->channel, flags);
 
+    if (dev->measure_latency) {
+        dev->wake_start_us = pipe_dev_curr_time_us();
+    }
+
     hwpipe_set_wanted(pipe, (unsigned char)flags);
     dev->ops->wanted_list_add(dev, pipe);
 
@@ -1843,7 +1878,7 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     DD("%s: raising IRQ", __func__);
 
     if (dev->measure_latency) {
-        dev->wake_us = pipe_dev_curr_time_us();
+        dev->wake_end_us = pipe_dev_curr_time_us();
     }
 }
 
