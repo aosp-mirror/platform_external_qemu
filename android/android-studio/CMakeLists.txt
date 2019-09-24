@@ -29,7 +29,7 @@ create_javah(TARGET
 
 set(android-studio_src android/emulation/studio/SharedMemory.cpp ${CMAKE_CURRENT_BINARY_DIR}/studio-view-headers.h)
 android_add_shared_library(android-studio)
-target_link_libraries(android-studio PRIVATE android-emu)
+target_link_libraries(android-studio PRIVATE android-emu-shared)
 
 target_include_directories(android-studio PRIVATE . ${CMAKE_CURRENT_BINARY_DIR})
 android_install_shared(android-studio)

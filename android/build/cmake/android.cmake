@@ -250,6 +250,7 @@ function(android_clang_tidy name)
     set_target_properties(${name} PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
   endif()
 endfunction()
+
 # Adds a shared library with the given name. The source files for this target will be resolved as follows: The variable
 # ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the sources only
 # specific for the given target.
@@ -456,6 +457,24 @@ function(android_generate_hw_config)
   set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES SKIP_AUTOGEN ON)
   set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES HEADER_FILE_ONLY TRUE)
   target_include_directories(android-hw-config PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/avd_config)
+endfunction()
+
+
+# This function generates a def file from a static library
+# This def file can be used to construct a .dll on windows.
+function(android_generate_def_file tgt var)
+  set(DEF ${CMAKE_CURRENT_BINARY_DIR}/${tgt}.def)
+  add_custom_command(OUTPUT ${tgt}.def
+                     COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/gen_def.py
+                             --objdump ${CMAKE_OBJDUMP}
+                             --lib ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_STATIC_LIBRARY_PREFIX}${tgt}${CMAKE_STATIC_LIBRARY_SUFFIX}
+                             --defs ${DEF}
+                     DEPENDS ${tgt}
+                     VERBATIM)
+  set_source_files_properties(${DEF} PROPERTIES GENERATED TRUE)
+  set_source_files_properties(${DEF} PROPERTIES SKIP_AUTOGEN ON)
+  set_source_files_properties(${DEF} PROPERTIES HEADER_FILE_ONLY TRUE)
+  set(${var} ${DEF} PARENT_SCOPE)
 endfunction()
 
 # Copies the list of test data files to the given destination The test data resides in the prebuilts/android-emulator-

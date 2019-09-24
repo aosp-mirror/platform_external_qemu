@@ -1,5 +1,6 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
+project(Android-Emulator)
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(WARNING "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, "
                   "It is best to invoke: android/scripts/rebuild. "
