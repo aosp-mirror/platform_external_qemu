@@ -270,6 +270,7 @@ intptr_t RenderThread::main() {
     }
 
     while (1) {
+            android::base::ScopedIntervalTrace scopedTrace("RenderThread process outer", 1000);
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
         if (readBuf.validData() >= 8) {
@@ -333,6 +334,7 @@ intptr_t RenderThread::main() {
 
         bool progress;
         do {
+            android::base::ScopedIntervalTrace scopedTrace("RenderThread process inner", 1000);
             progress = false;
 
             // try to process some of the command buffer using the GLESv1

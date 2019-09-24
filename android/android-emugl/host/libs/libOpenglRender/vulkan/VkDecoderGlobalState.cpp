@@ -35,6 +35,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/Tracing.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
 #include "emugl/common/crash_reporter.h"
@@ -413,9 +414,12 @@ public:
             VkImageCreateFlags flags,
             VkImageFormatProperties* pImageFormatProperties) {
 
+        android::base::ScopedIntervalTrace scopedTr("on_vkGetPhysicalDeviceImageFormatProperties_total", 1000);
+
         auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
         if (needEmulatedEtc2(physicalDevice, vk)) {
+            android::base::ScopedIntervalTrace scopedTr("on_vkGetPhysicalDeviceImageFormatProperties_compressInfo", 1000);
             CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
             if (cmpInfo.isCompressed) {
                 if (!supportEmulatedCompressedImageFormatProperty(
