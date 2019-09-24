@@ -43,6 +43,8 @@ struct QAndroidLocationAgent;
 class GeoDataLoaderThread;
 class RouteSenderThread;
 class MapBridge;
+class PointWidgetItem;
+class RouteWidgetItem;
 
 class LocationPage : public QWidget
 {
@@ -137,6 +139,7 @@ private slots:
 #ifdef USE_WEBENGINE
     void on_loc_importGpxKmlButton_clicked() { handle_importGpxKmlButton_clicked(); }
     void on_loc_importGpxKmlButton_route_clicked() { handle_importGpxKmlButton_clicked(); }
+    void keyPressEvent(QKeyEvent* e) override;
 #endif
 
     void on_loc_GpxKmlButton_clicked();
@@ -189,16 +192,21 @@ private slots:
     void timeout_v2();
 
     void on_loc_singlePoint_setLocationButton_clicked();
-    void on_loc_pointList_currentItemChanged(QListWidgetItem* current,
-                                         QListWidgetItem* previous);
+    void on_loc_pointList_itemSelectionChanged();
     void pointWidget_editButtonClicked(CCListItem* listItem);
 
     void on_loc_playRouteButton_clicked();
-    void on_loc_routeList_currentItemChanged(QListWidgetItem* current,
-                                         QListWidgetItem* previous);
+    void on_loc_routeList_itemSelectionChanged();
     void routeWidget_editButtonClicked(CCListItem* listItem);
 
 private:
+    enum class UiState {
+        Default,
+        Deletion,
+    };
+
+    void updatePointWidgetItemsColor();
+    void updateRouteWidgetItemsColor();
     void validateCoordinates();
     void fallbackToOfflineUi();
     void handle_importGpxKmlButton_clicked();
@@ -293,11 +301,13 @@ private:
     QString mMapsApiKey = "";
 
     bool editPoint(PointListElement& pointElement, bool isNewPoint = false);
-    bool deletePoint(const PointListElement& pointElement);
+    void deletePoint(PointWidgetItem* item);
+    void deleteSelectedPoints();
     void scanForPoints();
 
     bool editRoute(RouteListElement& routeElement, bool isNewRoute = false);
-    bool deleteRoute(const RouteListElement& routeElement);
+    void deleteRoute(RouteWidgetItem* item);
+    void deleteSelectedRoutes();
     void scanForRoutes();
 
     std::unique_ptr<QWebSocketServer> mServer;
@@ -310,6 +320,10 @@ private:
     uint32_t mPlayRouteCount = 0;
 
     QWidget* mOfflineTab = nullptr;
+    QList<QListWidgetItem*> mPrevSelectedPoints;
+    QList<QListWidgetItem*> mPrevSelectedRoutes;
+    UiState mPointState = UiState::Default;
+    UiState mRouteState = UiState::Default;
     friend class RouteSenderThread;
 };
 
