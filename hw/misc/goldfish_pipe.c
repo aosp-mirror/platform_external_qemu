@@ -361,9 +361,16 @@ struct PipeDevice {
     bool measure_latency;
     uint64_t write_start_us;
     uint64_t write_end_us;
-    uint64_t wake_us;
+    uint64_t wake_start_us;
+    uint64_t wake_end_us;
     uint64_t read_start_us;
     uint64_t read_end_us;
+    uint32_t wake_start_to_read_start_counter;
+    uint32_t wake_end_to_read_start_counter;
+    uint64_t call_start_us;
+    uint64_t call_end_us;
+    uint64_t call_us_total;
+    uint32_t call_count;
 };
 
 
@@ -828,6 +835,12 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
     commandBuffer->status = 0;
 }
 
+static uint64_t pipe_dev_curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_usec + tv.tv_sec * 1000000ULL;
+}
+
 static void pipeDevice_doCommand_v2(HwPipe* pipe) {
     assert(pipe);
     assert(pipe->command_buffer->cmd != PIPE_CMD_OPEN);
@@ -863,6 +876,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
         case PIPE_CMD_READ:
         case PIPE_CMD_WRITE:
         case PIPE_CMD_CALL: {
+                dev->call_start_us = pipe_dev_curr_time_us();
             const bool willModifyData = command != PIPE_CMD_WRITE;
             const bool isCall = command == PIPE_CMD_CALL;
             pipe->command_buffer->rw_params.consumed_size = 0;
@@ -988,6 +1002,9 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
 
             int32_t status = 0;
             int32_t consumed_size = 0;
+            // if (dev->measure_latency) {
+            // }
+
             if (send_buffers_count) {
                 status = service_ops->guest_send(pipe->host_pipe,
                                                  send_buffers,
@@ -1004,6 +1021,8 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                     consumed_size += status;
                 }
             }
+            // if (dev->measure_latency) {
+            // }
             // TODO(zyy): create an extended version of send()/recv() functions
             // to return both transferred size and resulting status in single
             // call.
@@ -1025,6 +1044,16 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 cpu_physical_memory_unmap(buffers[j].data, buffers[j].size,
                                           willModifyData, buffers[j].size);
             }
+                dev->call_end_us = pipe_dev_curr_time_us();
+                dev->call_us_total += (dev->call_end_us - dev->call_start_us);
+                ++dev->call_count;
+                if (dev->call_count == 1000) {
+                    fprintf(stderr, "%s: avg us for call: %f us\n", __func__,
+                            (float)dev->call_us_total / 1000.0f);
+                    dev->call_us_total = 0;
+                    dev->call_count = 0;
+
+                }
             break;
         }
 
@@ -1191,13 +1220,8 @@ static void pipe_dev_write_v1(PipeDevice* dev,
     }
 }
 
-static uint64_t pipe_dev_curr_time_us() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return tv.tv_usec + tv.tv_sec * 1000000ULL;
-}
-
 #define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
+#define PIPE_DEV_PRINT_INTERVAL 100
 
 static void pipe_dev_warn_long_duration(
     const char* tag, uint64_t start_us, uint64_t end_us) {
@@ -1205,6 +1229,21 @@ static void pipe_dev_warn_long_duration(
     if (ms > LONG_PIPE_TRANSACTION_THRESHOLD_MS) {
         fprintf(stderr, "%s: high latency for [%s]: %f ms\n",
                 __func__, tag, ms);
+    }
+}
+
+static void pipe_dev_interval_print(
+    const char* tag, uint64_t start_us, uint64_t end_us,
+    uint32_t* counter, uint32_t interval) {
+    float ms = (end_us - start_us) / 1000.0f;
+    uint32_t next_counter = (*counter) + 1;
+
+    if (next_counter == interval) {
+        fprintf(stderr, "%s: latency for [%s]: %f ms\n",
+                __func__, tag, ms);
+        *counter = 0;
+    } else {
+        *counter = next_counter;
     }
 }
 
@@ -1366,9 +1405,21 @@ static uint64_t pipe_dev_read_v2(PipeDevice* dev, hwaddr offset) {
             dev->read_start_us,
             dev->read_end_us);
         pipe_dev_warn_long_duration(
-            "pipe_wake",
-            dev->wake_us,
+            "pipe_wake_to_read_start",
+            dev->wake_end_us,
             dev->read_start_us);
+        pipe_dev_interval_print(
+            "pipe_wake_start_to_read_start",
+            dev->wake_start_us,
+            dev->read_start_us,
+            &dev->wake_start_to_read_start_counter,
+            PIPE_DEV_PRINT_INTERVAL);
+        pipe_dev_interval_print(
+            "pipe_wake_end_to_read_start",
+            dev->wake_end_us,
+            dev->read_start_us,
+            &dev->wake_end_to_read_start_counter,
+            PIPE_DEV_PRINT_INTERVAL);
     }
 
     return res;
@@ -1835,6 +1886,10 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
        pipe->channel, flags);
 
+    if (dev->measure_latency) {
+        dev->wake_start_us = pipe_dev_curr_time_us();
+    }
+
     hwpipe_set_wanted(pipe, (unsigned char)flags);
     dev->ops->wanted_list_add(dev, pipe);
 
@@ -1843,7 +1898,7 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     DD("%s: raising IRQ", __func__);
 
     if (dev->measure_latency) {
-        dev->wake_us = pipe_dev_curr_time_us();
+        dev->wake_end_us = pipe_dev_curr_time_us();
     }
 }
 

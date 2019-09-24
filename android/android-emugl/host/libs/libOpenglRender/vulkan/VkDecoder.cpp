@@ -31,6 +31,7 @@
 
 #include "android/base/Pool.h"
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #include "IOStream.h"
 #include "emugl/common/logging.h"
@@ -383,6 +384,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties:
             {
+                android::base::ScopedIntervalTrace scopedTr("OP_vkGetPhysicalDeviceImageFormatProperties", 1000);
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -390,44 +392,59 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageUsageFlags usage;
                 VkImageCreateFlags flags;
                 VkImageFormatProperties* pImageFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
                 uint64_t cgen_var_14;
-                vkReadStream->read((uint64_t*)&cgen_var_14, 1 * 8);
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_14, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
-                vkReadStream->read((VkImageType*)&type, sizeof(VkImageType));
-                vkReadStream->read((VkImageTiling*)&tiling, sizeof(VkImageTiling));
-                vkReadStream->read((VkImageUsageFlags*)&usage, sizeof(VkImageUsageFlags));
-                vkReadStream->read((VkImageCreateFlags*)&flags, sizeof(VkImageCreateFlags));
-                // Begin manual dispatchable handle unboxing for pImageFormatProperties;
-                vkReadStream->unsetHandleMapping();
-                vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties));
-                unmarshal_VkImageFormatProperties(vkReadStream, (VkImageFormatProperties*)(pImageFormatProperties));
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImageFormatProperties;
-                if (pImageFormatProperties)
+                VkPhysicalDevice unboxed_physicalDevice;
+                VulkanDispatch* vk;
+                // Begin manual dispatchable handle unboxing for physicalDevice;
                 {
-                    transform_tohost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
-                }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "stream %p: call vkGetPhysicalDeviceImageFormatProperties 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)type, (unsigned long long)tiling, (unsigned long long)usage, (unsigned long long)flags, (unsigned long long)pImageFormatProperties);
+                android::base::ScopedIntervalTrace scopedTr("OP_vkGetPhysicalDeviceImageFormatProperties_unmarshal", 1000);
+
+                    vkReadStream->unsetHandleMapping();
+                    vkReadStream->read((uint64_t*)&cgen_var_14, 1 * 8);
+                    {
+                android::base::ScopedIntervalTrace scopedTr("OP_vkGetPhysicalDeviceImageFormatProperties_handlemap", 1000);
+                    vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_14, (VkPhysicalDevice*)&physicalDevice, 1);
+                    }
+                    unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
+                    vk = dispatch_VkPhysicalDevice(physicalDevice);
+                    vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                    // End manual dispatchable handle unboxing for physicalDevice;
+                    vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
+                    vkReadStream->read((VkImageType*)&type, sizeof(VkImageType));
+                    vkReadStream->read((VkImageTiling*)&tiling, sizeof(VkImageTiling));
+                    vkReadStream->read((VkImageUsageFlags*)&usage, sizeof(VkImageUsageFlags));
+                    vkReadStream->read((VkImageCreateFlags*)&flags, sizeof(VkImageCreateFlags));
+                    // Begin manual dispatchable handle unboxing for pImageFormatProperties;
+                    vkReadStream->unsetHandleMapping();
+                    vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties));
+                    unmarshal_VkImageFormatProperties(vkReadStream, (VkImageFormatProperties*)(pImageFormatProperties));
+                    vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                    // End manual dispatchable handle unboxing for pImageFormatProperties;
+                    if (pImageFormatProperties)
+                    {
+                        transform_tohost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
+                    }
+                    if (m_logCalls)
+                    {
+                        fprintf(stderr, "stream %p: call vkGetPhysicalDeviceImageFormatProperties 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)format, (unsigned long long)type, (unsigned long long)tiling, (unsigned long long)usage, (unsigned long long)flags, (unsigned long long)pImageFormatProperties);
+                    }
                 }
                 VkResult vkGetPhysicalDeviceImageFormatProperties_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties(&m_pool, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
-                vkStream->unsetHandleMapping();
-                if (pImageFormatProperties)
                 {
-                    transform_fromhost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
+                android::base::ScopedIntervalTrace scopedTr("OP_vkGetPhysicalDeviceImageFormatProperties_exec", 1000);
+                vkGetPhysicalDeviceImageFormatProperties_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties(&m_pool, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 }
-                marshal_VkImageFormatProperties(vkStream, (VkImageFormatProperties*)(pImageFormatProperties));
-                vkStream->write(&vkGetPhysicalDeviceImageFormatProperties_VkResult_return, sizeof(VkResult));
-                vkStream->commitWrite();
+                vkStream->unsetHandleMapping();
+                {
+                    android::base::ScopedIntervalTrace scopedTr("OP_vkGetPhysicalDeviceImageFormatProperties_marshal", 1000);
+                    if (pImageFormatProperties)
+                    {
+                        transform_fromhost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
+                    }
+                    marshal_VkImageFormatProperties(vkStream, (VkImageFormatProperties*)(pImageFormatProperties));
+                    vkStream->write(&vkGetPhysicalDeviceImageFormatProperties_VkResult_return, sizeof(VkResult));
+                    vkStream->commitWrite();
+                }
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
                 if (m_state->snapshotsEnabled())
                 {
