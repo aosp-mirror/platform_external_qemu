@@ -151,7 +151,7 @@ android_target_compile_definitions(curl
                                    PRIVATE
                                    -DWIN32
                                    -DBUILDING_LIBCURL
-                                   # -DUSE_OPENSSL # We will use native windows SSL for now, as our prebuilt libs are incomplete.
+				   -DUSE_SCHANNEL  # For WINSSL support
                                    -DHAVE_ZLIB_H
                                    -DHAVE_ZLIB
                                    -DHAVE_LIBZ
@@ -169,4 +169,4 @@ target_include_directories(curl
                                    ${CURL_SRC_DIR})
 target_include_directories(curl PUBLIC ${CURL_SRC_DIR}/../include)
 target_link_libraries(curl PRIVATE ssl crypto zlib)
-android_target_link_libraries(curl windows_msvc-x86_64 PRIVATE wldap32::wldap32 gdi32::gdi32 normaliz::normaliz)
+android_target_link_libraries(curl windows_msvc-x86_64 PRIVATE wldap32::wldap32 gdi32::gdi32 normaliz::normaliz crypt32::crypt32)
