@@ -34,18 +34,23 @@ public:
         ensureIndentLevel(kDefaultIndentLevels);
     }
 
-    void begin(const char* name) {
+    void begin(const char* name, uint32_t printInterval = 0) {
         auto us = System::getSystemTimeUs();
 
         mTimes[mIndentLevel] = us;
         float ms = ((float)us) / 1000.0f;
         mNames[mIndentLevel] = name;
+        mPrintIntervals[mIndentLevel] = printInterval;
 
-        printf("tid:0x%016llx:%s%s @ %f ms {\n",
-               (unsigned long long)getCurrentThreadId(),
-               mIndents[mIndentLevel].c_str(),
-               name,
-               ms);
+        if (counterShouldPrint(
+                mPrintIntervals[mIndentLevel],
+                mPrintIntervalCounters[mIndentLevel])) {
+            printf("tid:0x%016llx:%s%s @ %f ms {\n",
+                   (unsigned long long)getCurrentThreadId(),
+                   mIndents[mIndentLevel].c_str(),
+                   name,
+                   ms);
+        }
 
         ++mIndentLevel;
 
@@ -59,16 +64,47 @@ public:
         auto us = System::getSystemTimeUs();
 
         mTimes[mIndentLevel] = us - mTimes[mIndentLevel];
-        float ms = (float)mTimes[mIndentLevel] / 1000.0f;
+        mIntervalDurations[mIndentLevel] += mTimes[mIndentLevel];
 
-        printf("tid:0x%016llx:%s} %s for %f ms\n",
-               (unsigned long long)getCurrentThreadId(),
-               mIndents[mIndentLevel].c_str(),
-               mNames[mIndentLevel].c_str(),
-               ms);
+        if (counterShouldPrint(
+                mPrintIntervals[mIndentLevel],
+                mPrintIntervalCounters[mIndentLevel])) {
+            float avgUs = (float)mIntervalDurations[mIndentLevel] / (float)mPrintIntervals[mIndentLevel];
+            printf("tid:0x%016llx:%s} %s for %f avg us\n",
+                   (unsigned long long)getCurrentThreadId(),
+                   mIndents[mIndentLevel].c_str(),
+                   mNames[mIndentLevel].c_str(),
+                   avgUs);
+        }
+
+        updateCounters(mPrintIntervals[mIndentLevel],
+                       &mPrintIntervalCounters[mIndentLevel],
+                       &mIntervalDurations[mIndentLevel]);
     }
 
 private:
+    bool intervalAlwaysPrints(uint32_t interval) const {
+        return !interval || (interval == 1);
+    }
+
+    // Returns: true if we should print, false otherwise.
+    bool counterShouldPrint(uint32_t interval, uint32_t currentCounter) const {
+        if (intervalAlwaysPrints(interval)) return true;
+        uint32_t nextCounter = currentCounter + 1;
+        return (nextCounter == interval);
+    }
+
+    void updateCounters(
+        uint32_t interval, uint32_t* currentCounter,
+        System::WallDuration* currentDuration) {
+        if (counterShouldPrint(interval, *currentCounter)) {
+            *currentCounter = 0;
+            *currentDuration = 0;
+        } else {
+            ++(*currentCounter);
+        }
+    }
+
     void ensureIndentLevel(size_t level) {
         if (mIndents.size() < level) {
             size_t prev_size = mIndents.size();
@@ -90,13 +126,34 @@ private:
         if (mNames.size() < level) {
             mNames.resize(level * 2);
         }
+
+        if (mPrintIntervals.size() < level) {
+            mPrintIntervals.resize(level * 2, 0);
+        }
+
+        if (mPrintIntervalCounters.size() < level) {
+            mPrintIntervalCounters.resize(level * 2, 0);
+        }
+
+        if (mIntervalDurations.size() < level) {
+            mIntervalDurations.resize(level * 2, 0);
+        }
     }
 
     size_t mIndentLevel = 0;
     std::vector<std::string> mIndents;
     std::vector<System::WallDuration> mTimes;
     std::vector<std::string> mNames;
+    // How many times to trace through the same thing before printing,
+    // in order to get a quick look at performance without spamming
+    // 0 or 1 means print every time
+    // Keep a counter per indent level along with its interval
+    std::vector<uint32_t> mPrintIntervals;
+    std::vector<uint32_t> mPrintIntervalCounters;
+    std::vector<System::WallDuration> mIntervalDurations;
 };
+
+using IntervalPrinter = IndentPrinter;
 
 class ThresholdPrinter {
 public:
@@ -172,10 +229,13 @@ private:
 
 typedef ThreadStore<IndentPrinter> IndentPrinterStore;
 typedef ThreadStore<ThresholdPrinter> ThresholdPrinterStore;
+typedef ThreadStore<IntervalPrinter> IntervalPrinterStore;
 
 static LazyInstance<IndentPrinterStore> sIndentPrinterStore =
     LAZY_INSTANCE_INIT;
 static LazyInstance<ThresholdPrinterStore> sThresholdPrinterStore =
+    LAZY_INSTANCE_INIT;
+static LazyInstance<IntervalPrinterStore> sIntervalPrinterStore =
     LAZY_INSTANCE_INIT;
 
 static IndentPrinter* indentPrinter_getForThread() {
@@ -216,6 +276,26 @@ static void thresholdTrace_begin(const char* name, uint64_t thresholdUs) {
 
 static void thresholdTrace_end() {
     thresholdPrinter_getForThread()->end();
+}
+
+static IntervalPrinter* intervalPrinter_getForThread() {
+    auto state = sIntervalPrinterStore.ptr();
+
+    auto printer = state->get();
+    if (!printer) {
+        printer = new IntervalPrinter;
+        state->set(printer);
+    }
+
+    return state->get();
+}
+
+static void intervalTrace_begin(const char* name, size_t printInterval) {
+    intervalPrinter_getForThread()->begin(name, printInterval);
+}
+
+static void intervalTrace_end() {
+    intervalPrinter_getForThread()->end();
 }
 
 class TraceConfig {
@@ -292,6 +372,30 @@ void beginThresholdTrace(const char* name, uint64_t thresholdUs) {
 void endThresholdTrace() {
     if (CC_UNLIKELY(shouldEnableTracing())) {
         thresholdTrace_end();
+    }
+}
+
+void ScopedIntervalTrace::beginTraceImpl(const char* name, uint32_t printInterval) {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        intervalTrace_begin(name, printInterval);
+    }
+}
+
+void ScopedIntervalTrace::endTraceImpl(const char*) {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        intervalTrace_end();
+    }
+}
+
+void beginIntervalTrace(const char* name, uint32_t printInterval) {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        intervalTrace_begin(name, printInterval);
+    }
+}
+
+void endIntervalTrace() {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        intervalTrace_end();
     }
 }
 

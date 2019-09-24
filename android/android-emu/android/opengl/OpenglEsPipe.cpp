@@ -16,6 +16,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Tracing.h"
 #include "android/globals.h"
 #include "android/loadpng.h"
 #include "android/opengl/GLProcessPipe.h"
@@ -309,8 +310,10 @@ public:
         return ret;
     }
 
+        base::IntervalTrace mTracer;
     virtual int onGuestRecv(AndroidPipeBuffer* buffers,
                             int numBuffers) override {
+        mTracer.begin("onGuestRecv");
         DD("%s", __func__);
 
         // Consume the pipe's dataForReading, then put the next received data
@@ -324,24 +327,27 @@ public:
         const auto buffEnd = buff + numBuffers;
         while (buff != buffEnd) {
             if (mDataForReadingLeft == 0) {
-                if (android::opengl::recvMode == android::opengl::RecvMode::Android) {
+                // if (android::opengl::recvMode == android::opengl::RecvMode::Android) {
+                if (false) {
                     // No data left, read a new chunk from the channel.
                     int spinCount = 20;
                     for (;;) {
 
+                        if (len > 0) {
+                            DD("%s: returning %d bytes", __func__, (int)len);
+                            mTracer.end();
+                            return len;
+                        }
                         auto result = mChannel->tryRead(&mDataForReading);
                         if (result == IoResult::Ok) {
                             mDataForReadingLeft = mDataForReading.size();
                             break;
                         }
                         DD("%s: tryRead() failed with %d", __func__, (int)result);
-                        if (len > 0) {
-                            DD("%s: returning %d bytes", __func__, (int)len);
-                            return len;
-                        }
                         // This failed either because the channel was stopped
                         // from the host, or if there was no data yet in the
                         if (result == IoResult::Error) {
+                            mTracer.end();
                             return PIPE_ERROR_IO;
                         }
                         // Spin a little before declaring there is nothing
@@ -351,6 +357,7 @@ public:
                             continue;
                         }
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                            mTracer.end();
                         return PIPE_ERROR_AGAIN;
                     }
                 } else { // Fuchsia, default (Not using switch because of break; overload)
@@ -358,6 +365,7 @@ public:
                     // otherwise read a new chunk from the channel.
                     if (len > 0) {
                         DD("%s: returning %d bytes", __func__, (int)len);
+                            mTracer.end();
                         return len;
                     }
                     // Block a little before declaring there is nothing
@@ -381,13 +389,16 @@ public:
                         // channel.
                         if (len > 0) {
                             DD("%s: returning %d bytes", __func__, (int)len);
+                            mTracer.end();
                             return len;
                         }
                         if (result == IoResult::Error) {
+                            mTracer.end();
                             return PIPE_ERROR_IO;
                         }
 
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                            mTracer.end();
                         return PIPE_ERROR_AGAIN;
                     }
                     mDataForReadingLeft = mDataForReading.size();
@@ -411,15 +422,18 @@ public:
         }
 
         DD("%s: received %d bytes", __func__, (int)len);
+                            mTracer.end();
         return len;
     }
 
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
                             int numBuffers) override {
+        mTracer.begin("onGuestSend");
         DD("%s", __func__);
 
         if (!mIsWorking) {
             DD("%s: pipe already closed!", __func__);
+            mTracer.end();
             return PIPE_ERROR_IO;
         }
 
@@ -443,9 +457,11 @@ public:
         auto result = mChannel->tryWrite(std::move(outBuffer));
         if (result != IoResult::Ok) {
             D("%s: tryWrite() failed with %d", __func__, (int)result);
+            mTracer.end();
             return result == IoResult::Error ? PIPE_ERROR_IO : PIPE_ERROR_AGAIN;
         }
 
+        mTracer.end();
         return count;
     }
 
