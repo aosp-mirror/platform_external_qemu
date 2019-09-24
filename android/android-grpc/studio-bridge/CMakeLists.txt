@@ -13,7 +13,7 @@ set(studio-bridge_src
 
 # Let's add in the library
 android_add_shared_library(studio-bridge)
-target_link_libraries(studio-bridge PRIVATE android-emu)
+target_link_libraries(studio-bridge PRIVATE android-emu-shared)
 target_compile_definitions(studio-bridge PUBLIC -DANDROID_GRPC)
 
 # Lets distribute the proto file

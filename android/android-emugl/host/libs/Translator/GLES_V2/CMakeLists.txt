@@ -16,7 +16,7 @@ target_link_libraries(GLES_V2_translator
                               GLcommon
                               OpenglCodecCommon
                               emugl_common
-                              android-emu
+                              android-emu-shared
                               ANGLE::ANGLE)
 target_link_libraries(GLES_V2_translator PRIVATE emugl_base)
 android_install_shared(GLES_V2_translator)

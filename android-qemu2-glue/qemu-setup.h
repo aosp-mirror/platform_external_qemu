@@ -58,4 +58,5 @@ extern bool qemu_android_emulation_setup(void);
  * after the main loop has returned due to a machine exit. */
 extern void qemu_android_emulation_teardown(void);
 
+
 ANDROID_END_HEADER

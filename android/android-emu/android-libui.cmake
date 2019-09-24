@@ -365,7 +365,7 @@ android_target_compile_options(emulator-libui
 # dependencies will remain internal, we should not be leaking out internal headers and defines.
 target_link_libraries(emulator-libui
                               PRIVATE
-                              android-emu
+                              android-emu-shared
                               emulator-libyuv
                               FFMPEG::FFMPEG
                               Qt5::Core
@@ -425,7 +425,7 @@ android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}
 # Make sure we disable rtti in gtest
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG)
+target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-agents OpenGLESDispatch FFMPEG::FFMPEG)
 
 android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64 PUBLIC dirent-win32)
 
@@ -471,7 +471,7 @@ android_target_compile_options(emulator-libui-headless
 # dependencies will remain internal, we should not be leaking out internal headers and defines.
 target_link_libraries(emulator-libui-headless
                               PRIVATE
-                              android-emu
+                              android-emu-shared
                               emulator-libyuv
                               FFMPEG::FFMPEG
                               zlib

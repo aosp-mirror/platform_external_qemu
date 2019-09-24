@@ -22,6 +22,7 @@
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/emulation/testing/MockAndroidVmOperations.h"
+#include "android/emulation/testing/MockAndroidConsoleAgent.h"
 #include "android/emulation/testing/TestVmLock.h"
 #include "android/utils/looper.h"
 
@@ -48,6 +49,7 @@ static constexpr base::Looper::Duration kTimeoutMs = 15000;  // 15 seconds.
 class HostMemoryServiceTest : public ::testing::Test {
 protected:
     void SetUp() override {
+        register_mock_agents();
         AndroidPipe::Service::resetAll();
         mDevice = HostGoldfishPipeDevice::get();
         mLooper = std::unique_ptr<base::TestLooper>(new base::TestLooper());

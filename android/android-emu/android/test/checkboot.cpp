@@ -15,6 +15,7 @@
 #include "android/base/threads/ParallelTask.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/console.h"
 
 static int s_SleepTime = 0;
 
@@ -27,7 +28,7 @@ static void myTask(int * outResult) {
 static void myTaskDone(const int& outResult) {
     // quit emulator if it is not dead yet
     printf("emulator: ERROR: fail to boot after %d seconds, quit\n", s_SleepTime);
-    gQAndroidVmOperations->vmShutdown();
+    get_console_agents()->vm->vmShutdown();
 }
 
 bool android_test_start_boot_complete_timer(int time_out_seconds) {

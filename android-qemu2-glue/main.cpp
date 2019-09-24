@@ -112,7 +112,7 @@ extern "C" {
 
 extern "C" bool android_op_wipe_data;
 extern "C" bool android_op_writable_system;
-
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 // Check if we are running multiple emulators on the same AVD
 static bool is_multi_instance = false;
 
@@ -134,7 +134,6 @@ enum ImageType {
 
 const int kMaxPartitions = IMAGE_TYPE_MAX;
 const int kMaxTargetQemuParams = 16;
-
 /*
  * A structure used to model information about a given target CPU architecture.
  * |androidArch| is the architecture name, following Android conventions.
