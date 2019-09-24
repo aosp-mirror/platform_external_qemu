@@ -231,7 +231,9 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         BatteryPage::setBatteryAgent(agentPtr->battery);
         CellularPage::setCellularAgent(agentPtr->cellular);
         FingerPage::setFingerAgent(agentPtr->finger);
-        LocationPage::setLocationAgent(agentPtr->location);
+        if (!android_cmdLineOptions || !android_cmdLineOptions->no_location_ui) {
+          LocationPage::setLocationAgent(agentPtr->location);
+        }
         SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
         CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
@@ -246,7 +248,9 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
 
 // static
 void ExtendedWindow::shutDown() {
-    LocationPage::shutDown();
+    if (!android_cmdLineOptions || !android_cmdLineOptions->no_location_ui) {
+      LocationPage::shutDown();
+    }
 }
 
 void ExtendedWindow::show() {
