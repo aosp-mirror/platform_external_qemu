@@ -37,6 +37,7 @@ set(WINDOWS_LIBS
     diaguids
     dbghelp
     normaliz
+    crypt32
     mincore
     imagehlp)
 foreach(LIB ${WINDOWS_LIBS})
