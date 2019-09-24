@@ -1,0 +1,196 @@
+/* Copyright (C) 2019 The Android Open Source Project
+**
+** This software is licensed under the terms of the GNU General Public
+** License version 2, as published by the Free Software Foundation, and
+** may be copied, distributed, and modified under those terms.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+*/
+
+#include "android/skin/qt/native-keyboard-event-handler.h"
+
+#include "android/base/ArraySize.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/skin/event.h"
+#include "android/skin/keycode.h"
+#include "android/skin/linux_keycodes.h"
+
+#include <gtest/gtest.h>
+
+extern "C" void qemu_system_shutdown_request(QemuShutdownCause reason) {}
+
+#define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
+
+namespace {
+
+// Run keycode translation tests on Linux and MacOS only because windows
+// requires win API call to getAsyncKeyState which is non-deterministic.
+
+#if defined(__linux__)
+#include <X11/XKBlib.h>
+#include <xcb/xcb.h>
+const struct {
+    int scancode;
+    int linuxKeyCode;
+} kHandleKeyEventTestData[] = {
+        {10, LINUX_KEY_1},          {11, LINUX_KEY_2},
+        {12, LINUX_KEY_3},          {13, LINUX_KEY_4},
+        {14, LINUX_KEY_5},          {15, LINUX_KEY_6},
+        {16, LINUX_KEY_7},          {17, LINUX_KEY_8},
+        {18, LINUX_KEY_9},          {19, LINUX_KEY_0},
+        {20, LINUX_KEY_MINUS},      {21, LINUX_KEY_EQUAL},
+        {22, LINUX_KEY_BACKSPACE},  {23, LINUX_KEY_TAB},
+        {24, LINUX_KEY_Q},          {25, LINUX_KEY_W},
+        {26, LINUX_KEY_E},          {27, LINUX_KEY_R},
+        {28, LINUX_KEY_T},          {29, LINUX_KEY_Y},
+        {30, LINUX_KEY_U},          {31, LINUX_KEY_I},
+        {32, LINUX_KEY_O},          {33, LINUX_KEY_P},
+        {34, LINUX_KEY_LEFTBRACE},
+
+        {35, LINUX_KEY_RIGHTBRACE}, {36, LINUX_KEY_ENTER},
+        {38, LINUX_KEY_A},          {39, LINUX_KEY_S},
+        {40, LINUX_KEY_D},          {41, LINUX_KEY_F},
+        {42, LINUX_KEY_G},          {43, LINUX_KEY_H},
+        {44, LINUX_KEY_J},          {45, LINUX_KEY_K},
+        {46, LINUX_KEY_L},          {47, LINUX_KEY_SEMICOLON},
+
+        {48, LINUX_KEY_APOSTROPHE}, {49, LINUX_KEY_GREEN},
+        {51, LINUX_KEY_BACKSLASH},  {52, LINUX_KEY_Z},
+        {53, LINUX_KEY_X},          {54, LINUX_KEY_C},
+        {55, LINUX_KEY_V},          {56, LINUX_KEY_B},
+        {57, LINUX_KEY_N},          {58, LINUX_KEY_M},
+        {59, LINUX_KEY_COMMA},      {60, LINUX_KEY_DOT},
+        {61, LINUX_KEY_SLASH},
+};
+
+const struct {
+    int inputModifier;
+    int outputModifer;
+} kModifierTestData[] = {{XCB_MOD_MASK_SHIFT, kKeyModLShift},
+                         {XCB_MOD_MASK_LOCK, kKeyModCapsLock},
+                         {XCB_MOD_MASK_CONTROL, kKeyModLCtrl},
+                         {XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_LOCK,
+                          kKeyModLShift | kKeyModCapsLock}};
+
+#elif defined(__APPLE__)
+#include "android/skin/macos_keycodes.h"
+const struct {
+    int scancode;
+    int linuxKeyCode;
+} kKeycodeTestData[] = {
+        {kVK_ANSI_A, LINUX_KEY_A},
+        {kVK_ANSI_S, LINUX_KEY_S},
+        {kVK_ANSI_D, LINUX_KEY_D},
+        {kVK_ANSI_F, LINUX_KEY_F},
+        {kVK_ANSI_H, LINUX_KEY_H},
+        {kVK_ANSI_G, LINUX_KEY_G},
+        {kVK_ANSI_Z, LINUX_KEY_Z},
+        {kVK_ANSI_X, LINUX_KEY_X},
+        {kVK_ANSI_C, LINUX_KEY_C},
+        {kVK_ANSI_V, LINUX_KEY_V},
+        {kVK_ANSI_B, LINUX_KEY_B},
+        {kVK_ANSI_Q, LINUX_KEY_Q},
+        {kVK_ANSI_W, LINUX_KEY_W},
+        {kVK_ANSI_E, LINUX_KEY_E},
+        {kVK_ANSI_R, LINUX_KEY_R},
+        {kVK_ANSI_Y, LINUX_KEY_Y},
+        {kVK_ANSI_T, LINUX_KEY_T},
+        {kVK_ANSI_1, LINUX_KEY_1},
+        {kVK_ANSI_2, LINUX_KEY_2},
+        {kVK_ANSI_3, LINUX_KEY_3},
+        {kVK_ANSI_4, LINUX_KEY_4},
+        {kVK_ANSI_6, LINUX_KEY_6},
+        {kVK_ANSI_5, LINUX_KEY_5},
+        {kVK_ANSI_Equal, LINUX_KEY_EQUAL},
+        {kVK_ANSI_9, LINUX_KEY_9},
+        {kVK_ANSI_7, LINUX_KEY_7},
+        {kVK_ANSI_Minus, LINUX_KEY_MINUS},
+        {kVK_ANSI_8, LINUX_KEY_8},
+        {kVK_ANSI_0, LINUX_KEY_0},
+        {kVK_ANSI_RightBracket, LINUX_KEY_RIGHTBRACE},
+        {kVK_ANSI_O, LINUX_KEY_O},
+        {kVK_ANSI_U, LINUX_KEY_U},
+        {kVK_ANSI_LeftBracket, LINUX_KEY_LEFTBRACE},
+        {kVK_ANSI_I, LINUX_KEY_I},
+        {kVK_ANSI_P, LINUX_KEY_P},
+        {kVK_ANSI_L, LINUX_KEY_L},
+        {kVK_ANSI_J, LINUX_KEY_J},
+        {kVK_ANSI_Quote, LINUX_KEY_APOSTROPHE},
+        {kVK_ANSI_K, LINUX_KEY_K},
+        {kVK_ANSI_Semicolon, LINUX_KEY_SEMICOLON},
+        {kVK_ANSI_Backslash, LINUX_KEY_BACKSLASH},
+        {kVK_ANSI_Comma, LINUX_KEY_COMMA},
+        {kVK_ANSI_Slash, LINUX_KEY_SLASH},
+        {kVK_ANSI_N, LINUX_KEY_N},
+        {kVK_ANSI_M, LINUX_KEY_M},
+        {kVK_ANSI_Period, LINUX_KEY_DOT},
+        {kVK_ANSI_Grave, LINUX_KEY_GREEN},
+};
+
+const struct {
+    int inputModifier;
+    int outputModifer;
+} kModifierTestData[] = {
+        {NSEventModifierFlagShift, kKeyModLShift},
+        {NSEventModifierFlagCapsLock, kKeyModCapsLock},
+        {NSEventModifierFlagControl, kKeyModLCtrl},
+        {NSEventModifierFlagShift | NSEventModifierFlagCapsLock,
+         kKeyModLShift | kKeyModCapsLock}};
+
+#else  // Windows
+
+const struct {
+    int scancode;
+    int linuxKeyCode;
+} kKeycodeTestData[] = {
+        {'A', LINUX_KEY_A}, {'Z', LINUX_KEY_Z}, {'E', LINUX_KEY_E},
+        {'R', LINUX_KEY_R}, {'T', LINUX_KEY_T}, {'Y', LINUX_KEY_Y},
+        {'U', LINUX_KEY_U}, {'I', LINUX_KEY_I}, {'O', LINUX_KEY_O},
+        {'P', LINUX_KEY_P}, {'Q', LINUX_KEY_Q}, {'S', LINUX_KEY_S},
+        {'D', LINUX_KEY_D}, {'F', LINUX_KEY_F}, {'G', LINUX_KEY_G},
+        {'H', LINUX_KEY_H}, {'J', LINUX_KEY_J}, {'K', LINUX_KEY_K},
+        {'L', LINUX_KEY_L}, {'M', LINUX_KEY_M}, {'W', LINUX_KEY_W},
+        {'X', LINUX_KEY_X}, {'C', LINUX_KEY_C}, {'V', LINUX_KEY_V},
+        {'B', LINUX_KEY_B}, {'N', LINUX_KEY_N}, {'0', LINUX_KEY_0},
+        {'1', LINUX_KEY_1}, {'2', LINUX_KEY_2}, {'3', LINUX_KEY_3},
+        {'4', LINUX_KEY_4}, {'5', LINUX_KEY_5}, {'6', LINUX_KEY_6},
+        {'7', LINUX_KEY_7}, {'8', LINUX_KEY_8}, {'9', LINUX_KEY_9}};
+
+const struct {
+    int inputModifier;
+    int outputModifer;
+} kModifierTestData[] = {};
+
+#endif
+
+TEST(native_keyboard_event_handler, handleKeyEvent) {
+    for (size_t i = 0; i < ARRAYLEN(kHandleKeyEventTestData); i++) {
+        NativeKeyboardEventHandler::KeyEvent keyEv;
+        keyEv.scancode = kHandleKeyEventTestData[i].scancode;
+        keyEv.modifiers = 0;
+        SkinEvent* output =
+                NativeKeyboardEventHandler::getInstance()->handleKeyEvent(
+                        keyEv);
+        EXPECT_NE(nullptr, output);
+        EXPECT_EQ(kEventTextInput, output->type);
+        EXPECT_EQ(kHandleKeyEventTestData[i].linuxKeyCode,
+                  output->u.text.keycode);
+    }
+}
+
+// On Windows, translateModifierState() function invokes winAPI getAsyncState()
+// and is not reliable for testing.
+#if defined(__linux__) || defined(__APPLE__)
+TEST(native_keyboard_event_handler, translateModifierState) {
+    for (size_t i = 0; i < ARRAYLEN(kModifierTestData); i++) {
+        int modifer = NativeKeyboardEventHandler::getInstance()
+                              ->translateModifierState(
+                                      0, kModifierTestData[i].inputModifier);
+        EXPECT_EQ(kModifierTestData[i].outputModifer, modifer);
+    }
+}
+#endif
+}  // namespace
