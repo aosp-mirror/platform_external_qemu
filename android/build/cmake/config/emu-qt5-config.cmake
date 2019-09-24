@@ -229,12 +229,12 @@ elseif(WINDOWS_MSVC_X86_64)
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
       # TODO: These 6 are copies of the files immediately above. It would be nice to make
       # these symbolic links rather than copies.
-      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
-      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
-      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/bin/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/bin/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/bin/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/bin/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/bin/qtwebengine_resources_200p.pak
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/translations/qtwebengine_locales
     )
 
 elseif(WINDOWS_X86_64)
