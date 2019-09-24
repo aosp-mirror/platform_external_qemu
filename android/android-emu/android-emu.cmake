@@ -3,21 +3,68 @@
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 
-# This is the set of sources that are common in both the shared libary and the archive. We currently have to split them
-# up due to dependencies on external variables/functions that are implemented in other libraries.
-set(android-emu-common
+set(camera_src
+    android/videoplayback/VideoplaybackRenderTarget.cpp
+    android/camera/camera-common.cpp
+    android/camera/camera-format-converters.c
+    android/camera/camera-list.cpp
+    android/camera/camera-metrics.cpp
+    android/camera/camera-service.c
+    android/camera/camera-videoplayback.cpp
+    android/camera/camera-videoplayback-default-renderer.cpp
+    android/camera/camera-videoplayback-render-multiplexer.cpp
+    android/camera/camera-videoplayback-video-renderer.cpp
+    android/camera/camera-virtualscene.cpp
+    android/camera/camera-virtualscene-utils.cpp)
+# Windows specific sources
+set(camera_windows_src android/camera/camera-capture-windows.cpp)
+
+# Mac specific sources, these will only be included when building for darwin
+set(camera_darwin-x86_64_src android/camera/camera-capture-mac.m)
+
+# Linux specific sources.
+set(camera_linux-x86_64_src android/camera/camera-capture-linux.c)
+
+android_add_library(camera)
+target_include_directories(camera
+                           PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have
+                                  # not yet made explicit
+                                  ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
+                                  ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
+                                  # If you use our library, you get access to our headers.
+                                  ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(camera PRIVATE emulator-libyuv offworld metrics android-hw-config)
+android_target_link_libraries(camera windows PRIVATE ole32::ole32)
+
+android_target_link_libraries(camera
+                              darwin-x86_64
+                              PUBLIC
+                              "-framework AVFoundation" # For camera-capture-mac.m
+                              "-framework Accelerate" # Of course, our camera needs it!
+                              "-framework CoreMedia" # Also for the camera.
+                              "-framework CoreVideo" # Also for the camera.
+                              )
+
+# These are the set of sources for which we know we have dependencies. You can use this as a starting point to figure
+# out what can move to a separate library This is the set of sources that are common in both the shared library and the
+# archive. We currently have to split them up due to dependencies on external variables/functions that are implemented
+# in other libraries.
+set(android-emu_src
+    android/CommonReportedInfo.cpp
+    android/HostHwInfo.cpp
     android/adb-server.cpp
+    android/async-console.c
+    android/async-socket-connector.c
+    android/async-socket.c
+    android/async-utils.c
+    android/automation/AutomationController.cpp
+    android/automation/AutomationEventSink.cpp
+    android/avd/BugreportInfo.cpp
     android/avd/generate.cpp
     android/avd/hw-config.c
     android/avd/info.c
-    android/avd/scanner.c
-    android/avd/util.c
     android/avd/util_wrapper.cpp
-    android/avd/BugreportInfo.cpp
-    android/async-console.c
-    android/async-socket.c
-    android/async-socket-connector.c
-    android/async-utils.c
     android/base/async/AsyncReader.cpp
     android/base/async/AsyncSocketServer.cpp
     android/base/async/AsyncWriter.cpp
@@ -31,14 +78,14 @@ set(android-emu-common
     android/base/sockets/SocketWaiter.cpp
     android/base/threads/internal/ParallelTaskBase.cpp
     android/boot-properties.c
-    android/car.cpp
     android/car-cluster.cpp
+    android/car.cpp
     android/cmdline-option.cpp
-    android/CommonReportedInfo.cpp
+    android/console.cpp
     android/console_auth.cpp
     android/cpu_accelerator.cpp
-    android/crashreport/CrashSystem.cpp
     android/crashreport/CrashReporter_common.cpp
+    android/crashreport/CrashSystem.cpp
     android/crashreport/HangDetector.cpp
     android/crashreport/detectors/CrashDetectors.cpp
     android/cros.c
@@ -46,60 +93,63 @@ set(android-emu-common
     android/emuctl-client.cpp
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
-    android/emulation/AdbMessageSniffer.cpp
     android/emulation/AdbHostListener.cpp
     android/emulation/AdbHostServer.cpp
+    android/emulation/AdbMessageSniffer.cpp
     android/emulation/AndroidAsyncMessagePipe.cpp
     android/emulation/AndroidMessagePipe.cpp
     android/emulation/AndroidPipe.cpp
-    android/emulation/android_pipe_host.cpp
     android/emulation/AudioCaptureEngine.cpp
     android/emulation/AudioOutputEngine.cpp
+    android/emulation/ClipboardPipe.cpp
+    android/emulation/ComponentVersion.cpp
+    android/emulation/CpuAccelerator.cpp
+    android/emulation/CrossSessionSocket.cpp
+    android/emulation/DmaMap.cpp
+    android/emulation/FakeRotatingCameraSensor.cpp
+    android/emulation/GoldfishDma.cpp
+    android/emulation/GoldfishSyncCommandQueue.cpp
+    android/emulation/HostMemoryService.cpp
+    android/emulation/Keymaster3.cpp
+    android/emulation/LogcatPipe.cpp
+    android/emulation/MultiDisplayPipe.cpp
+    android/emulation/ParameterList.cpp
+    android/emulation/QemuMiscPipe.cpp
+    android/emulation/RefcountPipe.cpp
+    android/emulation/SerialLine.cpp
+    android/emulation/SetupParameters.cpp
+    android/emulation/VmLock.cpp
+    android/emulation/address_space_device.cpp
+    android/emulation/address_space_host_memory_allocator.cpp
+    android/emulation/android_pipe_host.cpp
     android/emulation/android_pipe_pingpong.c
     android/emulation/android_pipe_throttle.c
     android/emulation/android_pipe_unix.cpp
     android/emulation/android_pipe_zero.c
     android/emulation/android_qemud.cpp
-    android/emulation/bufprint_config_dirs.cpp
-    android/emulation/ClipboardPipe.cpp
-    android/emulation/ComponentVersion.cpp
-    android/emulation/ConfigDirs.cpp
     android/emulation/control/AdbInterface.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/LineConsumer.cpp
     android/emulation/control/NopRtcBridge.cpp
-    android/emulation/CpuAccelerator.cpp
-    android/emulation/CrossSessionSocket.cpp
-    android/emulation/DmaMap.cpp
-    android/emulation/GoldfishDma.cpp
-    android/emulation/GoldfishSyncCommandQueue.cpp
+    android/emulation/control/ScreenCapturer.cpp
     android/emulation/goldfish_sync.cpp
-    android/emulation/hostdevices/HostGoldfishPipe.cpp
-    android/emulation/address_space_device.cpp
-    android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
-    android/emulation/LogcatPipe.cpp
-    android/emulation/MultiDisplayPipe.cpp
+    android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/nand_limits.c
-    android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
     android/emulation/qemud/android_qemud_multiplexer.cpp
     android/emulation/qemud/android_qemud_serial.cpp
     android/emulation/qemud/android_qemud_service.cpp
     android/emulation/qemud/android_qemud_sink.cpp
-    android/emulation/RefcountPipe.cpp
     android/emulation/serial_line.cpp
-    android/emulation/SerialLine.cpp
-    android/emulation/SetupParameters.cpp
     android/emulation/testing/TestVmLock.cpp
-    android/emulation/VmLock.cpp
     android/error-messages.cpp
     android/featurecontrol/FeatureControl.cpp
     android/featurecontrol/FeatureControlImpl.cpp
-    android/featurecontrol/feature_control.cpp
     android/featurecontrol/HWMatching.cpp
+    android/featurecontrol/feature_control.cpp
     android/filesystems/ext4_resize.cpp
     android/filesystems/ext4_utils.cpp
     android/filesystems/fstab_parser.cpp
@@ -108,18 +158,18 @@ set(android-emu-common
     android/filesystems/partition_types.cpp
     android/filesystems/ramdisk_extractor.cpp
     android/framebuffer.c
+    android/gps.c
     android/gps/GpxParser.cpp
     android/gps/KmlParser.cpp
-    android/gps.c
     android/gpu_frame.cpp
-    android/help.c
-    android/HostHwInfo.cpp
+    android/http_proxy.c
     android/hw-control.c
     android/hw-events.c
     android/hw-fingerprint.c
     android/hw-kmsg.c
     android/hw-lcd.c
     android/hw-qemud.cpp
+    android/hw-sensors.cpp
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
@@ -128,14 +178,14 @@ set(android-emu-common
     android/location/Point.cpp
     android/location/Route.cpp
     android/location/StudioMapsKey.cpp
-    android/main-help.cpp
+    android/main-common.c
     android/main-emugl.cpp
     android/main-kernel-parameters.cpp
+    android/main-qemu-parameters.cpp
     android/metrics/AdbLivenessChecker.cpp
     android/metrics/AsyncMetricsReporter.cpp
     android/metrics/CrashMetricsReporting.cpp
     android/metrics/FileMetricsWriter.cpp
-    android/metrics/metrics.cpp
     android/metrics/MetricsPaths.cpp
     android/metrics/MetricsReporter.cpp
     android/metrics/MetricsWriter.cpp
@@ -144,155 +194,117 @@ set(android-emu-common
     android/metrics/Percentiles.cpp
     android/metrics/PerfStatReporter.cpp
     android/metrics/PeriodicReporter.cpp
-    android/metrics/SyncMetricsReporter.cpp
     android/metrics/StudioConfig.cpp
+    android/metrics/SyncMetricsReporter.cpp
     android/metrics/TextMetricsWriter.cpp
+    android/metrics/metrics.cpp
     android/multi-instance.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
-    android/network/control.cpp
-    android/network/constants.c
-    android/network/globals.c
     android/network/NetworkPipe.cpp
-    android/network/wifi.cpp
     android/network/WifiForwardClient.cpp
     android/network/WifiForwardPeer.cpp
     android/network/WifiForwardPipe.cpp
     android/network/WifiForwardServer.cpp
+    android/network/control.cpp
+    android/network/globals.c
+    android/network/wifi.cpp
+    android/offworld/OffworldPipe.cpp
     android/opengl/EmuglBackendList.cpp
     android/opengl/EmuglBackendScanner.cpp
-    android/opengl/emugl_config.cpp
-    android/opengl/GpuFrameBridge.cpp
     android/opengl/GLProcessPipe.cpp
+    android/opengl/GpuFrameBridge.cpp
+    android/opengl/OpenglEsPipe.cpp
+    android/opengl/emugl_config.cpp
     android/opengl/gpuinfo.cpp
     android/opengl/logger.cpp
-    android/opengl/OpenglEsPipe.cpp
     android/opengles.cpp
     android/openssl-support.cpp
+    android/physics/AmbientEnvironment.cpp
+    android/physics/InertialModel.cpp
+    android/physics/PhysicalModel.cpp
     android/process_setup.cpp
     android/protobuf/DelimitedSerialization.cpp
     android/protobuf/LoadSave.cpp
     android/protobuf/ProtobufLogging.cpp
+    android/proxy/ProxyUtils.cpp
     android/proxy/proxy_common.c
     android/proxy/proxy_http.c
     android/proxy/proxy_http_connector.c
     android/proxy/proxy_http_rewriter.c
     android/proxy/proxy_setup.cpp
-    android/proxy/ProxyUtils.cpp
+    android/qemu-setup.cpp
     android/qemu-tcpdump.c
-    android/qt/qt_path.cpp
-    android/qt/qt_setup.cpp
     android/resource.c
     android/sdk-controller-socket.c
     android/sensor_mock/SensorMockUtils.cpp
+    android/sensors-port.c
     android/session_phase_reporter.cpp
     android/shaper.c
     android/snaphost-android.c
     android/snapshot.c
-    android/snapshot/common.cpp
     android/snapshot/Compressor.cpp
     android/snapshot/Decompressor.cpp
     android/snapshot/GapTracker.cpp
+    android/snapshot/Hierarchy.cpp
     android/snapshot/IncrementalStats.cpp
-    android/snapshot/interface.cpp
     android/snapshot/Loader.cpp
     android/snapshot/MemoryWatch_common.cpp
     android/snapshot/PathUtils.cpp
-    android/snapshot/Hierarchy.cpp
     android/snapshot/Quickboot.cpp
     android/snapshot/RamLoader.cpp
     android/snapshot/RamSaver.cpp
     android/snapshot/RamSnapshotTesting.cpp
     android/snapshot/Saver.cpp
     android/snapshot/Snapshot.cpp
+    android/snapshot/SnapshotAPI.cpp
     android/snapshot/Snapshotter.cpp
     android/snapshot/TextureLoader.cpp
     android/snapshot/TextureSaver.cpp
+    android/snapshot/common.cpp
+    android/snapshot/interface.cpp
+    android/telephony/SimAccessRules.cpp
+    android/telephony/TagLengthValue.cpp
     android/telephony/debug.c
     android/telephony/gsm.c
     android/telephony/modem.c
     android/telephony/modem_driver.c
-    android/telephony/remote_call.c
     android/telephony/phone_number.cpp
-    android/telephony/SimAccessRules.cpp
+    android/telephony/remote_call.c
     android/telephony/sim_card.c
     android/telephony/sms.c
     android/telephony/sysdeps.c
-    android/telephony/TagLengthValue.cpp
+    android/test/checkboot.cpp
     android/uncompress.cpp
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
-    android/utils/dns.cpp
     android/utils/Random.cpp
-    android/utils/sockets.c
-    android/utils/socket_drainer.cpp
+    android/utils/dns.cpp
     android/utils/looper.cpp
+    android/utils/socket_drainer.cpp
+    android/utils/sockets.c
     android/verified-boot/load_config.cpp
-    android/wear-agent/android_wear_agent.cpp
-    android/wear-agent/WearAgent.cpp
-    android/wear-agent/PairUpWearPhone.cpp)
-
-# These are the set of sources for which we know we have dependencies. You can use this as a starting point to figure
-# out what can move to a seperate library
-set(android_emu_dependent_src
-    android/automation/AutomationController.cpp
-    android/automation/AutomationEventSink.cpp
-    android/camera/camera-common.cpp
-    android/camera/camera-format-converters.c
-    android/camera/camera-list.cpp
-    android/camera/camera-metrics.cpp
-    android/camera/camera-service.c
-    android/camera/camera-videoplayback.cpp
-    android/camera/camera-videoplayback-default-renderer.cpp
-    android/camera/camera-videoplayback-render-multiplexer.cpp
-    android/camera/camera-videoplayback-video-renderer.cpp
-    android/camera/camera-virtualscene.cpp
-    android/camera/camera-virtualscene-utils.cpp
-    android/emulation/control/ScreenCapturer.cpp
-    android/emulation/FakeRotatingCameraSensor.cpp
-    android/emulation/HostMemoryService.cpp
-    android/emulation/Keymaster3.cpp
-    android/emulation/QemuMiscPipe.cpp
-    android/console.cpp
-    android/http_proxy.c
-    android/hw-sensors.cpp
-    android/main-common.c
-    android/main-qemu-parameters.cpp
-    android/offworld/OffworldPipe.cpp
-    android/physics/AmbientEnvironment.cpp
-    android/physics/InertialModel.cpp
-    android/physics/PhysicalModel.cpp
-    android/qemu-setup.cpp
-    android/sensors-port.c
-    android/snapshot/SnapshotAPI.cpp
-    android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
-    android/videoplayback/VideoplaybackRenderTarget.cpp
     android/virtualscene/MeshSceneObject.cpp
     android/virtualscene/PosterInfo.cpp
     android/virtualscene/PosterSceneObject.cpp
-    android/virtualscene/Renderer.cpp
     android/virtualscene/RenderTarget.cpp
+    android/virtualscene/Renderer.cpp
     android/virtualscene/Scene.cpp
     android/virtualscene/SceneCamera.cpp
     android/virtualscene/SceneObject.cpp
     android/virtualscene/TextureUtils.cpp
     android/virtualscene/VirtualSceneManager.cpp
-    android/virtualscene/WASDInputHandler.cpp)
-
-# The standard archive has all the sources, including those that have external dependencies that we have not properly
-# declared yet.
-# TODO(jansene): Properly clean up the mutual dependencies and make sure they are not circular
-list(APPEND android-emu_src ${android-emu-common} ${android_emu_dependent_src})
+    android/virtualscene/WASDInputHandler.cpp
+    android/wear-agent/PairUpWearPhone.cpp
+    android/wear-agent/WearAgent.cpp
+    android/wear-agent/android_wear_agent.cpp)
 
 # Windows specific sources
-set(android-emu_windows_src
-    android/opengl/NativeGpuInfo_windows.cpp
-    android/snapshot/MemoryWatch_windows.cpp
-    android/windows_installer.cpp
-    android/camera/camera-capture-windows.cpp
-    android/crashreport/CrashReporter_windows.cpp)
+set(android-emu_windows_src android/camera/camera-capture-windows.cpp android/crashreport/CrashReporter_windows.cpp
+                            android/opengl/NativeGpuInfo_windows.cpp android/snapshot/MemoryWatch_windows.cpp
+                            android/windows_installer.cpp)
 
 # Mac specific sources, these will only be included when building for darwin
 set(android-emu_darwin-x86_64_src
@@ -304,51 +316,59 @@ set(android-emu_darwin-x86_64_src
     android/crashreport/CrashReporter_darwin.cpp)
 
 # Linux specific sources.
-set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
-    android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
+set(android-emu_linux-x86_64_src android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp
+                                 android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp)
 
-android_add_library(android-emu)
+if(WINDOWS_MSVC_X86_64 OR WINDOWS_X86_64)
+  # Create an archive, which we will upgrade to a shared lib for MSVC once we have it all configured. (Note we keep it
+  # static for mingw)
+  android_add_library(android-emu)
+else()
+  android_add_shared_library(android-emu)
+  android_install_shared(android-emu)
+endif()
 
 # Note that all these dependencies will propagate to whoever relies on android- emu It will also setup the proper
 # include directories, so that android-emu can find all the headers needed for using the library defined below. We
 # ideally would like to keep this list small.
 target_link_libraries(android-emu
-                              PUBLIC
-                              emulator-libext4_utils
-                              android-emu-base
-                              emulator-libsparse
-                              emulator-libselinux
-                              emulator-libjpeg
-                              emulator-libyuv
-                              emulator-libwebp
-                              emulator-tinyobjloader
-                              emulator-libkeymaster3
-                              emulator-murmurhash
-                              emulator-tinyepoxy
-                              emulator-libyuv
-                              picosha2
-                              # Protobuf dependencies
-                              metrics
-                              featurecontrol
-                              crashreport
-                              location
-                              emulation
-                              snapshot
-                              telephony
-                              verified-boot
-                              automation
-                              offworld
-                              # Prebuilt libraries
-                              breakpad_client
-                              curl
-                              ssl
-                              crypto
-                              LibXml2::LibXml2
-                              png
-                              lz4
-                              zlib
-                              android-hw-config
-)
+                      PUBLIC emulator-libext4_utils
+                             android-emu-base
+                             emulator-libsparse
+                             emulator-libselinux
+                             emulator-libjpeg
+                             emulator-libyuv
+                             emulator-libwebp
+                             emulator-tinyobjloader
+                             emulator-libkeymaster3
+                             emulator-murmurhash
+                             emulator-tinyepoxy
+                             emulator-libyuv
+                             picosha2
+                             # Protobuf dependencies
+                             metrics
+                             featurecontrol
+                             crashreport
+                             location
+                             emulation
+                             snapshot
+                             telephony
+                             verified-boot
+                             automation
+                             offworld
+                             libprotobuf
+                             libprotobuf_lite
+                             # Prebuilt libraries
+                             breakpad_client
+                             curl
+                             ssl
+                             crypto
+                             LibXml2::LibXml2
+                             png
+                             lz4
+                             zlib
+                             android-hw-config
+                             camera)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu
@@ -358,8 +378,6 @@ android_target_link_libraries(android-emu
                               emulator-libmman-win32
                               d3d9::d3d9
                               mfuuid::mfuuid
-                              # For CoTaskMemFree used in camera-capture-windows.cpp
-                              ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp
                               psapi::psapi
                               # Winsock functions
@@ -368,7 +386,12 @@ android_target_link_libraries(android-emu
                               iphlpapi::iphlpapi)
 
 # These are the libs needed for android-emu on linux.
-android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lc++)
+android_target_link_libraries(android-emu
+                              linux-x86_64
+                              PUBLIC
+                              darwinn
+                              -lrt
+                              -lc++)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu. You should really only add things that are crucial for this library to link
@@ -376,24 +399,21 @@ android_target_link_libraries(android-emu
                               darwin-x86_64
                               PUBLIC
                               "-framework AppKit"
-                              "-framework AVFoundation" # For camera-capture-mac.m
-                              "-framework Accelerate" # Of course, our camera needs it!
-                              "-framework CoreMedia" # Also for the camera.
-                              "-framework CoreVideo" # Also for the camera.
                               "-framework IOKit"
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
 
-target_include_directories(
-  android-emu
-  PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have not yet made explicit
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
-    # TODO(jansene): We actually have a hard dependency on qemu-glue
-    # as there are a lot of externs that are actually defined in qemu2-glue.
-    # this has to be sorted out,
-    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-    # If you use our library, you get access to our headers.
-    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${DARWINN_INCLUDE_DIRS})
+target_include_directories(android-emu
+                           PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have
+                                  # not yet made explicit
+                                  ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
+                                  ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
+                                  # TODO(jansene): We actually have a hard dependency on qemu-glue
+                                  # as there are a lot of externs that are actually defined in qemu2-glue.
+                                  # this has to be sorted out,
+                                  ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
+                                  # If you use our library, you get access to our headers.
+                                  ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${DARWINN_INCLUDE_DIRS})
 
 android_target_compile_options(android-emu
                                Clang
@@ -427,7 +447,8 @@ android_target_compile_options(android-emu
                                -Wno-reorder
                                -Wno-missing-braces
                                -Wno-pessimizing-move
-                               -Wno-unused-lambda-capture)
+                               -Wno-unused-lambda-capture
+                               -Wno-incompatible-pointer-types)
 
 android_target_compile_definitions(android-emu
                                    darwin-x86_64
@@ -436,9 +457,12 @@ android_target_compile_definitions(android-emu
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
 
-target_compile_definitions(android-emu PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
+target_compile_definitions(android-emu
+                           PRIVATE
+                           "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
                            "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}"
+                           "-DPROJECT_EXPORTS=1")
 
 if(WEBRTC)
   target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
@@ -451,157 +475,24 @@ endif()
 # Boo, we need the make_ext4fs executable
 add_dependencies(android-emu emulator_make_ext4fs)
 
-# Shared version of the library. Note that this only has the set of common sources, otherwise you will get a lot of
-# linker errors.
-set(android-emu-shared_src ${android-emu-common} stubs/stubs.cpp)
-
-# The dependent target os specific sources, they are pretty much the same as above, excluding camera support, because
-# that brings in a whole slew of dependencies.
-
-# Windows specific sources
-set(android-emu-shared_windows_src android/opengl/NativeGpuInfo_windows.cpp android/snapshot/MemoryWatch_windows.cpp
-    android/windows_installer.cpp android/crashreport/CrashReporter_windows.cpp)
-
-# Mac specific sources, these will only be included when building for darwin
-set(android-emu-shared_darwin-x86_64_src
-    android/opengl/NativeGpuInfo_darwin.cpp
-    android/snapshot/MemoryWatch_darwin.cpp
-    android/opengl/macTouchOpenGL.m
-    android/snapshot/MacSegvHandler.cpp
-    android/crashreport/CrashReporter_darwin.cpp)
-
-# Linux specific sources.
-set(android-emu-shared_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
-    android/crashreport/CrashReporter_linux.cpp)
-
-android_add_shared_library(android-emu-shared)
-
-# Note that these are basically the same as android-emu-shared. We should clean this up
-target_link_libraries(android-emu-shared
-                      PRIVATE emulator-libext4_utils
-                              android-emu-base
-                              emulator-libsparse
-                              emulator-libselinux
-                              emulator-libjpeg
-                              emulator-libyuv
-                              emulator-libwebp
-                              emulator-tinyobjloader
-                              emulator-libkeymaster3
-                              emulator-murmurhash
-                              emulator-tinyepoxy
-                              emulator-libyuv
-                              picosha2
-                              # Protobuf dependencies
-                              metrics
-                              featurecontrol
-                              crashreport
-                              location
-                              emulation
-                              snapshot
-                              telephony
-                              verified-boot
-                              automation
-                              offworld
-                              # Prebuilt libraries
-                              breakpad_client
-                              curl
-                              crypto
-                              crypto
-                              LibXml2::LibXml2
-                              png
-                              lz4
-                              zlib
-                              android-hw-config
-                              )
-
-# Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
-# on android-emu-shared
-android_target_link_libraries(android-emu-shared windows PRIVATE emulator-libmman-win32 d3d9::d3d9
-                              # IID_IMFSourceReaderCallback
-                              mfuuid::mfuuid
-                              # For CoTaskMemFree used in camera-capture-windows.cpp
-                              ole32::ole32
-                              # For GetPerformanceInfo in CrashService_windows.cpp
-                              psapi::psapi
-                              # Winsock functions
-                              ws2_32::ws2_32
-                              # GetNetworkParams() for android/utils/dns.c
-                              iphlpapi::iphlpapi)
-
-# These are the libs needed for android-emu-shared on linux.
-android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
-
-# Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
-# android-emu-shared. You should really only add things that are crucial for this library to link If you don't you might
-# see bizarre errors. (Add opengl as a link dependency, you will have fun)
-android_target_link_libraries(android-emu-shared darwin-x86_64 PRIVATE "-framework AppKit")
-
-target_include_directories(
-  android-emu-shared
-  PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have not yet made explicit
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
-    # TODO(jansene): We actually have a hard dependency on qemu-glue
-    # as there are a lot of externs that are actually defined in qemu2-glue.
-    # this has to be sorted out,
-    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-    # If you use our library, you get access to our headers.
-    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
-android_target_compile_options(android-emu-shared
-                               Clang
-                               PRIVATE
-                               -Wno-extern-c-compat
-                               -Wno-invalid-constexpr
-                               -fvisibility=default)
-
-android_target_compile_options(android-emu-shared Clang PUBLIC -Wno-return-type-c-linkage) # android_getOpenGlesRenderer
-android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter
-                               ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
-android_target_compile_options(android-emu-shared
-                               darwin-x86_64
-                               PRIVATE
-                               -Wno-error
-                               -Wno-objc-method-access
-                               -Wno-receiver-expr
-                               -Wno-incomplete-implementation
-                               -Wno-missing-selector-name
-                               -Wno-incompatible-pointer-types)
-
-android_target_compile_options(android-emu-shared
-                               windows_msvc-x86_64
-                               PRIVATE
-                               -Wno-unused-private-field
-                               -Wno-reorder
-                               -Wno-unused-lambda-capture)
-
-# Definitions needed to compile our deps as static
-target_compile_definitions(android-emu-shared PUBLIC ${CURL_DEFINITIONS} ${LIBXML2_DEFINITIONS})
-android_target_compile_definitions(android-emu-shared
-                                   darwin-x86_64
-                                   PRIVATE
-                                   "-D_DARWIN_C_SOURCE=1"
-                                   "-Dftello64=ftell"
-                                   "-Dfseeko64=fseek")
-
-target_compile_definitions(android-emu-shared PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
-
-if(WEBRTC)
-  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
+# Note we do not create a shared library for mingw, as the toolset behaves differently under cmake.
+if(WINDOWS_MSVC_X86_64)
+  android_create_windows_shared_lib(android-emu android-emu-shared)
+  android_install_shared(android-emu-shared)
+else()
+  add_library(android-emu-shared ALIAS android-emu)
 endif()
 
-if(GRPC)
-  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_GRPC)
-endif()
+set(android-mock-agents_src android/emulation/testing/MockAndroidConsoleAgent.cpp
+                            android/emulation/testing/MockAndroidSensorsAgent.cpp
+                            android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
+                            android/emulation/testing/MockAndroidVmOperations.cpp)
 
-set(android-mock-vm-operations_src android/emulation/testing/MockAndroidVmOperations.cpp)
+android_add_library(android-mock-agents)
 
-android_add_library(android-mock-vm-operations)
-
-android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-mock-vm-operations PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-mock-vm-operations PRIVATE gmock)
+android_target_compile_options(android-mock-agents Clang PRIVATE -O0 -Wno-invalid-constexpr)
+target_include_directories(android-mock-agents PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(android-mock-agents PRIVATE gmock)
 
 # The unit tests
 set(android-emu_unittests_src
@@ -717,7 +608,6 @@ set(android-emu_unittests_src
     android/emulation/serial_line_unittest.cpp
     android/emulation/SetupParameters_unittest.cpp
     android/emulation/testing/TestAndroidPipeDevice.cpp
-    android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
     android/emulation/VmLock_unittest.cpp
     android/error-messages_unittest.cpp
     android/featurecontrol/FeatureControl_unittest.cpp
@@ -807,7 +697,12 @@ set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittes
 android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
-android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr -Wno-string-plus-int)
+android_target_compile_options(android-emu_unittests
+                               Clang
+                               PRIVATE
+                               -O0
+                               -Wno-invalid-constexpr
+                               -Wno-string-plus-int)
 target_include_directories(android-emu_unittests PRIVATE ../android-emugl/host/include/)
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
@@ -822,7 +717,7 @@ android_target_compile_definitions(android-emu_unittests
 android_target_compile_options(android-emu_unittests darwin-x86_64 PRIVATE "-Wno-deprecated-declarations")
 
 # Dependecies are exported from android-emu.
-target_link_libraries(android-emu_unittests PRIVATE android-emu android-mock-vm-operations gtest gmock gtest_main)
+target_link_libraries(android-emu_unittests PRIVATE android-emu-shared android-mock-agents gtest gmock gtest_main)
 
 list(APPEND android-emu-testdata
             testdata/snapshots/random-ram-100.bin
@@ -881,4 +776,4 @@ set(android-emu-metrics_unittests_src
 android_add_test(android-emu-metrics_unittests)
 
 target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
-target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main android-emu)
+target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main android-emu-shared)
