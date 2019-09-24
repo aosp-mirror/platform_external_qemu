@@ -96,7 +96,6 @@ add_library(emulator-libwebp
         third_party/chromium_headless/libwebp/utils/utils.c
         )
 
-target_include_directories(emulator-libwebp PUBLIC include)
 target_include_directories(emulator-libwebp PRIVATE src)
 target_include_directories(emulator-libwebp PRIVATE .)
 # Forget about warnings for this code.

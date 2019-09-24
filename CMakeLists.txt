@@ -1,5 +1,6 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
+project(Android-Emulator)
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(WARNING "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, "
                   "It is best to invoke: android/scripts/rebuild. "
@@ -165,7 +166,7 @@ if(WINDOWS_MSVC_X86_64)
     # Link time optization tragically fails when cross compiling.
     if (NOT CROSSCOMPILE)
       # Do a global optimization pass (note, link times --> infinity)
-      add_c_flag("-flto=thin")
+      add_c_flag("-flto=full")
       # Optimize a bit more on the vtables in use, note this requires -flto
       add_c_flag("-fwhole-program-vtables")
     endif()

@@ -250,6 +250,7 @@ function(android_clang_tidy name)
     set_target_properties(${name} PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
   endif()
 endfunction()
+
 # Adds a shared library with the given name. The source files for this target will be resolved as follows: The variable
 # ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the sources only
 # specific for the given target.
@@ -458,6 +459,162 @@ function(android_generate_hw_config)
   target_include_directories(android-hw-config PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/avd_config)
 endfunction()
 
+# ----- EXTRA ----
+
+# Get all propreties that cmake supports
+execute_process(COMMAND cmake --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
+
+# Convert command output into a CMake list
+STRING(REGEX REPLACE ";" "\\\\;" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
+STRING(REGEX REPLACE "\n" ";" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
+
+function(print_properties)
+    message ("CMAKE_PROPERTY_LIST = ${CMAKE_PROPERTY_LIST}")
+endfunction(print_properties)
+
+function(print_target_properties tgt)
+    if(NOT TARGET ${tgt})
+      message("There is no target named '${tgt}'")
+      return()
+    endif()
+
+    foreach (prop ${CMAKE_PROPERTY_LIST})
+        string(REPLACE "<CONFIG>" "${CMAKE_BUILD_TYPE}" prop ${prop})
+    # Fix https://stackoverflow.com/questions/32197663/how-can-i-remove-the-the-location-property-may-not-be-read-from-target-error-i
+    if(prop STREQUAL "LOCATION" OR prop MATCHES "^LOCATION_" OR prop MATCHES "_LOCATION$")
+        continue()
+    endif()
+        # message ("Checking ${prop}")
+        get_property(propval TARGET ${tgt} PROPERTY ${prop} SET)
+        if (propval)
+            get_target_property(propval ${tgt} ${prop})
+            message ("${tgt} ${prop} = ${propval}")
+        endif()
+    endforeach(prop)
+endfunction(print_target_properties)
+
+# ----- EXTRA ----
+
+# Given a target calculate the link closure of targets build by this project.
+# These are basically all the targets that have been declared by add_library(xxx)
+# that are not marked as imported. This implies that if for this archive a
+# series of .a/.lib files will be constructed.
+#
+# 2nd variable will contain all the other references to which you likely want to
+# link directly.
+function(_get_lib_dependency_list tgt lib_var lib_var_imp)
+  set(DEP_LIST "")
+  set(DEP_IMP_LIST "")
+  get_property(has_link TARGET ${tgt} PROPERTY LINK_LIBRARIES SET)
+  if (has_link)
+    get_target_property(LIBS ${tgt} LINK_LIBRARIES)
+    foreach(LIB ${LIBS})
+      if (TARGET ${LIB})
+        get_target_property(TYP ${LIB} TYPE)
+        get_target_property(IMPORT ${LIB} IMPORTED)
+        if (NOT IMPORT AND "${TYP}" STREQUAL "STATIC_LIBRARY")
+          list(APPEND DEP_LIST ${LIB})
+        else()
+          list(APPEND DEP_IMP_LIST ${LIB})
+        endif()
+      endif()
+    endforeach()
+  endif()
+  set(${lib_var} ${DEP_LIST} PARENT_SCOPE)
+  set(${lib_var_imp} ${DEP_IMP_LIST} PARENT_SCOPE)
+endfunction()
+
+
+# Given a target calculate the public include closure.
+function(_get_include_dependecy_list tgt inc_var)
+  _get_include_dependecy_list_helper(${tgt} INC_LIST)
+  list(REMOVE_DUPLICATES INC_LIST)
+  set(${inc_var} ${INC_LIST} PARENT_SCOPE)
+endfunction()
+
+# Helper to calculate the closure, this closure can contain duplicates.
+function(_get_include_dependecy_list_helper tgt inc_var)
+  get_target_property(INC_LIST ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
+
+  # Handle the case where we do not export includes, or when the
+  # property does not exist.
+  if ("${INC_LIST}" STREQUAL "INC_LIST-NOTFOUND")
+    set(INC_LIST "")
+  endif()
+
+  # Recurse down into the children that are not imported,
+  # as an imported target will be a leaf node.
+  get_target_property(IMPORTED ${tgt} IMPORTED)
+  get_target_property(TYP ${tgt} TYPE)
+  if (NOT IMPORTED AND NOT TYP STREQUAL "INTERFACE_LIBRARY")
+    get_target_property(LIBS ${tgt} LINK_LIBRARIES)
+    foreach(LIB ${LIBS})
+      if (TARGET ${LIB})
+        _get_include_dependecy_list_helper(${LIB} INC_CHILD)
+        list(APPEND INC_LIST ${INC_CHILD})
+      endif()
+    endforeach()
+  endif()
+  set(${inc_var} ${INC_LIST} PARENT_SCOPE)
+endfunction()
+
+
+# This functions turns a windows archive into a shared library by
+# exporting all symbols. This sort of mimics what happens on llvm's side of things.
+# It works like this:
+# 1. Figure out the public includes of "src", we need to forward those.
+# 2. Figure out all the dependencies that are not imported or shared
+# 3. Construct a .DEF file by marking all functions/variables as exported
+#    in the dependency list.
+# 4. Create a shared target which will consume the .DEF in the link phase.
+#
+# Note that shared libary will not export any of the dependent libs.
+# be aware of how DLL resolution works on windows:
+# https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order
+function(android_create_windows_shared_lib src tgt)
+  set(INTERIM_TGT "${tgt}")
+  set(DEF ${CMAKE_CURRENT_BINARY_DIR}/${tgt}.def)
+  _get_include_dependecy_list(${src} PUBLIC_INCLUDES)
+  _get_lib_dependency_list(${src} DEPENDENCIES PRIVATE_LINK_LIBS)
+  list(INSERT DEPENDENCIES 0 ${src})
+
+  foreach(DEP ${DEPENDENCIES})
+    set(LIBS "${LIBS},${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_STATIC_LIBRARY_PREFIX}${DEP}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  endforeach()
+  # Chop of the first ,
+  string(SUBSTRING "${LIBS}" 1 -1 LIBS)
+
+  add_custom_command(OUTPUT ${DEF}
+                     COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/gen_def.py
+                             --objdump ${CMAKE_OBJDUMP}
+                             --nm ${CMAKE_NM}
+                             --libs ${LIBS}
+                             --name ${tgt}
+                             --defs ${DEF}
+                     DEPENDS ${src}
+                     VERBATIM)
+  set_source_files_properties(${DEF} PROPERTIES GENERATED TRUE)
+  set_source_files_properties(${DEF} PROPERTIES SKIP_AUTOGEN ON)
+  set_source_files_properties(${DEF} PROPERTIES HEADER_FILE_ONLY TRUE)
+
+
+  set(DUMMY_FILE "${CMAKE_CURRENT_BINARY_DIR}/dummy-${tgt}.c")
+  file(WRITE ${DUMMY_FILE} "/* dummy file for shared library creation */")
+  set(${INTERIM_TGT}_src ${DUMMY_FILE})
+
+  android_add_shared_library(${INTERIM_TGT})
+  set_source_files_properties(${DUMMY_FILE} PROPERTIES OBJECT_DEPENDS ${DEF})
+
+  # We have slightly differrent linker invocation on native v.s. crosscompile
+  if (CROSSCOMPILE)
+    set_target_properties(${INTERIM_TGT} PROPERTIES LINK_FLAGS "-Wl,-def:${DEF}")
+  else()
+    set_target_properties(${INTERIM_TGT} PROPERTIES LINK_FLAGS "/def:${DEF}")
+  endif()
+  target_link_libraries(${INTERIM_TGT} PRIVATE ${src})
+  target_include_directories(${INTERIM_TGT} PUBLIC ${PUBLIC_INCLUDES})
+endfunction()
+
 # Copies the list of test data files to the given destination The test data resides in the prebuilts/android-emulator-
 # build/common/testdata folder.
 #
@@ -660,7 +817,7 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
                              LIBRARIES   libqemu2-glue libqemu2-glue-vm-operations
                                          libqemu2-util
                                          emulator-libui
-                                         android-emu
+                                         android-emu-shared
                                          OpenGLESDispatch
                                          android-qemu-deps
                                          android-qemu-deps-headful)
@@ -683,7 +840,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
                                          -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}
                              LIBRARIES  libqemu2-glue libqemu2-glue-vm-operations
                                         libqemu2-util
-                                        android-emu
+                                        android-emu-shared
                                         emulator-libui-headless
                                         OpenGLESDispatch
                                         android-qemu-deps
@@ -701,7 +858,7 @@ function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
                              CPU ${ANDROID_AARCH}
                              SOURCES vl.c ${STUBS}
                              DEFINITIONS -DNEED_CPU_H
-                             LIBRARIES   android-emu
+                             LIBRARIES   android-emu-shared
                                          libqemu2-glue libqemu2-glue-vm-operations
                                          libqemu2-util
                                          SDL2::SDL2
@@ -782,7 +939,7 @@ endfunction()
 
 # Strips the given prebuilt executable during install..
 function(android_strip_prebuilt FNAME)
-  # MSVC stores debug info in seperate file, so no need to strip
+  # MSVC stores debug info in separate file, so no need to strip
   if(NOT WINDOWS_MSVC_X86_64)
     install(CODE "if(CMAKE_INSTALL_DO_STRIP) \n
                         execute_process(COMMAND ${CMAKE_STRIP} \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${FNAME}\")\n

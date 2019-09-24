@@ -23,7 +23,7 @@
 
 /* this is the internal character driver used to communicate with the
  * emulated GPS unit. see qemu_chr_open() in vl.c */
-extern CSerialLine* android_gps_serial_line;
+API extern CSerialLine* android_gps_serial_line;
 
 extern void  android_gps_send_nmea( const char*  sentence );
 
