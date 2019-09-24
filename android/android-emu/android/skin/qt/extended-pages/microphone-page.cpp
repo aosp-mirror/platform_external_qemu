@@ -19,6 +19,7 @@
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+#include "android/console.h"
 
 class QWidget;
 
@@ -77,7 +78,7 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
-    gQAndroidVmOperations->allowRealAudio(checked);
+    get_console_agents()->vm->allowRealAudio(checked);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {
