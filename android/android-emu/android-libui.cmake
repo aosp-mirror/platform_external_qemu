@@ -130,6 +130,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/FramelessDetector.cpp
     android/skin/qt/ModalOverlay.cpp
     android/skin/qt/native-event-filter-factory.cpp
+    android/skin/qt/native-keyboard-event-handler.cpp
     android/skin/qt/OverlayMessageCenter.cpp
     android/skin/qt/perf-stats-3d-widget.cpp
     android/skin/qt/poster-image-well.cpp
@@ -396,6 +397,7 @@ set(emulator-libui_unittests_src
     android/mp4/SensorLocationEventProvider_test.cpp
     android/skin/keycode_unittest.cpp
     android/skin/keycode-buffer_unittest.cpp
+    android/skin/qt/native-keyboard-event-handler_unittest.cpp
     android/skin/rect_unittest.cpp
     android/recording/test/DummyAudioProducer.cpp
     android/recording/test/DummyVideoProducer.cpp
