@@ -737,6 +737,8 @@ static void gvm_user_backed_ram_unmap(hwaddr gpa, hwaddr size)
         qemu_abort("%s: attempted to map RAM before GVM initialized\n", __func__);
     }
 
+    kml = &gvm_state->memory_listener;
+
     slot = gvm_lookup_matching_slot(kml, gpa, size);
     if (!slot) {
         return;
