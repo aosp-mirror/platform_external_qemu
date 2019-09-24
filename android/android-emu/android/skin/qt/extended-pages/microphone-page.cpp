@@ -18,6 +18,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QSettings>
+#include "android/console.h"
 
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),
@@ -74,7 +75,7 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
-    gQAndroidVmOperations->allowRealAudio(checked);
+    get_console_agents()->vm->allowRealAudio(checked);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {

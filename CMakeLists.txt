@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
+project(Android-Emulator)
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
     WARNING

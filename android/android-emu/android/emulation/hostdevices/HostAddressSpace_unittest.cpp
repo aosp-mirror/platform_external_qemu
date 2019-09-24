@@ -20,6 +20,9 @@
 
 namespace android {
 
+// These come in from a satic lib we link against.
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
+
 class HostAddressSpaceTest : public ::testing::Test {
 protected:
     static void SetUpTestCase() {

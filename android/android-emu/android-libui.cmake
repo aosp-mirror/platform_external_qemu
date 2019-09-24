@@ -430,7 +430,7 @@ android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}
 # Make sure we disable rtti in gtest
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG)
+target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-agents OpenGLESDispatch FFMPEG::FFMPEG)
 
 # Version of libui without Qt
 
