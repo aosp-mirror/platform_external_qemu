@@ -16,13 +16,21 @@
 
 #pragma once
 
-#include <QAbstractNativeEventFilter>
+#include "android/skin/event.h"
+#include "android/utils/compiler.h"
 
-#include "android/skin/qt/native-keyboard-event-handler.h"
+ANDROID_BEGIN_HEADER
 
-class NativeEventFilter : public QAbstractNativeEventFilter {
+class NativeKeyboardEventHandler {
 public:
-    bool nativeEventFilter(const QByteArray& eventType,
-                           void* message,
-                           long*) override;
+    struct KeyEvent {
+        int scancode;
+        int modifiers;
+        int eventType;
+    };
+    static NativeKeyboardEventHandler* getInstance();
+    SkinEvent* handleKeyEvent(NativeKeyboardEventHandler::KeyEvent event);
+    virtual int translateModifierState(int keycode, int modifiers);
 };
+
+ANDROID_END_HEADER
