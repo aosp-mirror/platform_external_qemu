@@ -62,7 +62,7 @@ if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 target_link_libraries(libqemu2-glue
-                      PRIVATE android-emu
+                      PRIVATE android-emu-shared
                               GLIB2::GLIB2
                               PIXMAN::PIXMAN
                               emulator-libdtb
@@ -80,4 +80,4 @@ android_target_include_directories(libqemu2-glue-vm-operations
                                    ..
                                    ../include
                                    ../qemu2-auto-generated)
-target_link_libraries(libqemu2-glue-vm-operations PRIVATE android-emu GLIB2::GLIB2 android-hw-config)
+target_link_libraries(libqemu2-glue-vm-operations PRIVATE android-emu-shared GLIB2::GLIB2 android-hw-config)

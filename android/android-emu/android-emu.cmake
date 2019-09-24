@@ -307,7 +307,22 @@ set(android-emu_darwin-x86_64_src
 set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
     android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
 
-android_add_library(android-emu)
+
+
+if (WINDOWS_MSVC_X86_64 OR WINDOWS_X86_64)
+  android_add_library(android-emu)
+  android_generate_def_file(android-emu android_emu_def)
+  set(android-emu-shared_src dummy.c)
+
+  android_add_shared_library(android-emu-shared)
+  set_source_files_properties(dummy.c PROPERTIES OBJECT_DEPENDS ${android_emu_def})
+  set_target_properties(android-emu-shared PROPERTIES LINK_FLAGS "-def:${android_emu_def}")
+  target_link_libraries(android-emu-shared PUBLIC android-emu)
+else()
+  android_add_shared_library(android-emu)
+  add_library(android-emu-shared ALIAS android-emu)
+endif()
+
 
 # Note that all these dependencies will propagate to whoever relies on android- emu It will also setup the proper
 # include directories, so that android-emu can find all the headers needed for using the library defined below. We
@@ -451,157 +466,19 @@ endif()
 # Boo, we need the make_ext4fs executable
 add_dependencies(android-emu emulator_make_ext4fs)
 
-# Shared version of the library. Note that this only has the set of common sources, otherwise you will get a lot of
-# linker errors.
-set(android-emu-shared_src ${android-emu-common} stubs/stubs.cpp)
 
-# The dependent target os specific sources, they are pretty much the same as above, excluding camera support, because
-# that brings in a whole slew of dependencies.
 
-# Windows specific sources
-set(android-emu-shared_windows_src android/opengl/NativeGpuInfo_windows.cpp android/snapshot/MemoryWatch_windows.cpp
-    android/windows_installer.cpp android/crashreport/CrashReporter_windows.cpp)
+set(android-mock-agents_src
+    android/emulation/testing/MockAndroidConsoleAgent.cpp
+    android/emulation/testing/MockAndroidSensorsAgent.cpp
+    android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
+    android/emulation/testing/MockAndroidVmOperations.cpp)
 
-# Mac specific sources, these will only be included when building for darwin
-set(android-emu-shared_darwin-x86_64_src
-    android/opengl/NativeGpuInfo_darwin.cpp
-    android/snapshot/MemoryWatch_darwin.cpp
-    android/opengl/macTouchOpenGL.m
-    android/snapshot/MacSegvHandler.cpp
-    android/crashreport/CrashReporter_darwin.cpp)
+android_add_library(android-mock-agents)
 
-# Linux specific sources.
-set(android-emu-shared_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
-    android/crashreport/CrashReporter_linux.cpp)
-
-android_add_shared_library(android-emu-shared)
-
-# Note that these are basically the same as android-emu-shared. We should clean this up
-target_link_libraries(android-emu-shared
-                      PRIVATE emulator-libext4_utils
-                              android-emu-base
-                              emulator-libsparse
-                              emulator-libselinux
-                              emulator-libjpeg
-                              emulator-libyuv
-                              emulator-libwebp
-                              emulator-tinyobjloader
-                              emulator-libkeymaster3
-                              emulator-murmurhash
-                              emulator-tinyepoxy
-                              emulator-libyuv
-                              picosha2
-                              # Protobuf dependencies
-                              metrics
-                              featurecontrol
-                              crashreport
-                              location
-                              emulation
-                              snapshot
-                              telephony
-                              verified-boot
-                              automation
-                              offworld
-                              # Prebuilt libraries
-                              breakpad_client
-                              curl
-                              crypto
-                              crypto
-                              LibXml2::LibXml2
-                              png
-                              lz4
-                              zlib
-                              android-hw-config
-                              )
-
-# Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
-# on android-emu-shared
-android_target_link_libraries(android-emu-shared windows PRIVATE emulator-libmman-win32 d3d9::d3d9
-                              # IID_IMFSourceReaderCallback
-                              mfuuid::mfuuid
-                              # For CoTaskMemFree used in camera-capture-windows.cpp
-                              ole32::ole32
-                              # For GetPerformanceInfo in CrashService_windows.cpp
-                              psapi::psapi
-                              # Winsock functions
-                              ws2_32::ws2_32
-                              # GetNetworkParams() for android/utils/dns.c
-                              iphlpapi::iphlpapi)
-
-# These are the libs needed for android-emu-shared on linux.
-android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
-
-# Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
-# android-emu-shared. You should really only add things that are crucial for this library to link If you don't you might
-# see bizarre errors. (Add opengl as a link dependency, you will have fun)
-android_target_link_libraries(android-emu-shared darwin-x86_64 PRIVATE "-framework AppKit")
-
-target_include_directories(
-  android-emu-shared
-  PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have not yet made explicit
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
-    # TODO(jansene): We actually have a hard dependency on qemu-glue
-    # as there are a lot of externs that are actually defined in qemu2-glue.
-    # this has to be sorted out,
-    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-    # If you use our library, you get access to our headers.
-    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
-android_target_compile_options(android-emu-shared
-                               Clang
-                               PRIVATE
-                               -Wno-extern-c-compat
-                               -Wno-invalid-constexpr
-                               -fvisibility=default)
-
-android_target_compile_options(android-emu-shared Clang PUBLIC -Wno-return-type-c-linkage) # android_getOpenGlesRenderer
-android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter
-                               ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
-android_target_compile_options(android-emu-shared
-                               darwin-x86_64
-                               PRIVATE
-                               -Wno-error
-                               -Wno-objc-method-access
-                               -Wno-receiver-expr
-                               -Wno-incomplete-implementation
-                               -Wno-missing-selector-name
-                               -Wno-incompatible-pointer-types)
-
-android_target_compile_options(android-emu-shared
-                               windows_msvc-x86_64
-                               PRIVATE
-                               -Wno-unused-private-field
-                               -Wno-reorder
-                               -Wno-unused-lambda-capture)
-
-# Definitions needed to compile our deps as static
-target_compile_definitions(android-emu-shared PUBLIC ${CURL_DEFINITIONS} ${LIBXML2_DEFINITIONS})
-android_target_compile_definitions(android-emu-shared
-                                   darwin-x86_64
-                                   PRIVATE
-                                   "-D_DARWIN_C_SOURCE=1"
-                                   "-Dftello64=ftell"
-                                   "-Dfseeko64=fseek")
-
-target_compile_definitions(android-emu-shared PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
-
-if(WEBRTC)
-  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
-endif()
-
-if(GRPC)
-  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_GRPC)
-endif()
-
-set(android-mock-vm-operations_src android/emulation/testing/MockAndroidVmOperations.cpp)
-
-android_add_library(android-mock-vm-operations)
-
-android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-mock-vm-operations PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-mock-vm-operations PRIVATE gmock)
+android_target_compile_options(android-mock-agents Clang PRIVATE -O0 -Wno-invalid-constexpr)
+target_include_directories(android-mock-agents PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(android-mock-agents PRIVATE gmock)
 
 # The unit tests
 set(android-emu_unittests_src
@@ -717,7 +594,6 @@ set(android-emu_unittests_src
     android/emulation/serial_line_unittest.cpp
     android/emulation/SetupParameters_unittest.cpp
     android/emulation/testing/TestAndroidPipeDevice.cpp
-    android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
     android/emulation/VmLock_unittest.cpp
     android/error-messages_unittest.cpp
     android/featurecontrol/FeatureControl_unittest.cpp
@@ -822,7 +698,7 @@ android_target_compile_definitions(android-emu_unittests
 android_target_compile_options(android-emu_unittests darwin-x86_64 PRIVATE "-Wno-deprecated-declarations")
 
 # Dependecies are exported from android-emu.
-target_link_libraries(android-emu_unittests PRIVATE android-emu android-mock-vm-operations gtest gmock gtest_main)
+target_link_libraries(android-emu_unittests PRIVATE android-emu android-mock-agents gtest gmock gtest_main)
 
 list(APPEND android-emu-testdata
             testdata/snapshots/random-ram-100.bin
@@ -882,3 +758,4 @@ android_add_test(android-emu-metrics_unittests)
 
 target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
 target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main android-emu)
+
