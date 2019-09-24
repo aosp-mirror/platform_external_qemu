@@ -187,6 +187,7 @@ function(android_add_library name)
   if (WINDOWS_MSVC_X86_64)
     target_link_libraries(${name} PRIVATE msvc-posix-compat)
   endif()
+  android_clang_tidy(${name})
 endfunction()
 
 # Adds an object library with the given name. The source files for this target will be resolved as follows: The variable
@@ -239,6 +240,15 @@ function(android_add_subdirectory external_directory name)
   endforeach()
 endfunction()
 
+function(android_clang_tidy name)
+  if (${name} IN_LIST OPTION_CLANG_TIDY)
+    message(STATUS "Tidying ${name}")
+    if(OPTION_CLANG_TIDY_FIX)
+      message(STATUS " ===> Applying fixes to ${name}")
+    endif()
+    set_target_properties(${name} PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+  endif()
+endfunction()
 # Adds a shared library with the given name. The source files for this target will be resolved as follows: The variable
 # ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the sources only
 # specific for the given target.
@@ -258,6 +268,7 @@ function(android_add_shared_library name)
   if (WINDOWS_MSVC_X86_64)
     target_link_libraries(${name} PRIVATE msvc-posix-compat)
   endif()
+  android_clang_tidy(${name})
   # We don't want cmake to binplace the shared libraries into the bin directory As this can make them show up in
   # unexpected places!
   if(ANDROID_TARGET_TAG MATCHES "windows.*")
@@ -371,6 +382,7 @@ function(android_add_executable name)
   if (WINDOWS_MSVC_X86_64)
     target_link_libraries(${name} PRIVATE msvc-posix-compat)
   endif()
+  android_clang_tidy(${name})
   android_target_dependency(${name} all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(${name} all "${RUNTIME_OS_PROPERTIES}")
 
@@ -402,6 +414,7 @@ function(android_add_protobuf name protofiles)
   target_compile_options(${name} PRIVATE -fno-rtti)
   # This needs to be public, as we don't want the headers to start exposing exceptions.
   target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
+  android_clang_tidy(${name})
 endfunction()
 
 # For adding big proto files that mingw can't handle.
