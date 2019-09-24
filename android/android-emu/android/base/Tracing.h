@@ -58,6 +58,24 @@ private:
 void beginThresholdTrace(const char* name, uint64_t thresholdUs = 1000);
 void endThresholdTrace();
 
+class ScopedIntervalTrace {
+public:
+    ScopedIntervalTrace(const char* name, uint32_t printInterval = 1000) {
+        beginTraceImpl(name, printInterval);
+    }
+
+    ~ScopedIntervalTrace() {
+        endTraceImpl(name_);
+    }
+private:
+    void beginTraceImpl(const char* name, uint32_t printInterval);
+    void endTraceImpl(const char* name);
+    const char* const name_ = nullptr;
+};
+
+void beginIntervalTrace(const char* name, uint32_t printInterval = 1000);
+void endIntervalTrace();
+
 } // namespace base
 } // namespace android
 
@@ -68,6 +86,8 @@ void endThresholdTrace();
 #define AEMU_SCOPED_TRACE(tag) __attribute__ ((unused)) android::base::ScopedTrace AEMU_GENSYM(aemuScopedTrace_)(tag)
 #define AEMU_SCOPED_THRESHOLD_TRACE(tag) __attribute__ ((unused)) android::base::ScopedThresholdTrace AEMU_GENSYM(aemuScopedTrace_)(tag)
 #define AEMU_SCOPED_THRESHOLD_TRACE_TIMED(tag, thresholdUs) __attribute__ ((unused)) android::base::ScopedThresholdTrace AEMU_GENSYM(aemuScopedTrace_)(tag, thresholdUs)
+#define AEMU_SCOPED_INTERVAL_TRACE(tag, printInterval) __attribute__ ((unused)) android::base::ScopedIntervalTrace AEMU_GENSYM(aemuScopedTrace_)(tag, printInterval)
 
 #define AEMU_SCOPED_TRACE_CALL() AEMU_SCOPED_TRACE(__func__)
 #define AEMU_SCOPED_THRESHOLD_TRACE_CALL() AEMU_SCOPED_THRESHOLD_TRACE(__func__)
+#define AEMU_SCOPED_INTERVAL_TRACE_CALL(interval) AEMU_SCOPED_INTERVAL_TRACE(__func__, interval)
