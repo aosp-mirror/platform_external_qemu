@@ -62,13 +62,17 @@ class MapController extends GoogleMapPageComponent {
         console.log('MapController::setRoute called', routeJson);
         this.viewModel.setIsLoadingRoute(true);
         this.hideGpxKmlPanel();
+        this.routePanel.close();
+        this.mapManager.clearDirections();
+        this.mapManager.clearMarkers();
         if (routeJson.length > 0) {
-            this.routePanel.close();
-            this.mapManager.clearDirections();
-            this.mapManager.clearMarkers();
             this.viewModel.setRoute(routeJson);
             this.viewModel.setEditable(false);
             this.showRouteEditor();
+        }
+        else {
+            this.viewModel.clearWaypoints();
+            this.viewModel.setEditable(true);
         }
         this.searchBox.update('');
         channel.objects.emulocationserver.onSavedRouteDrawn();
@@ -210,9 +214,11 @@ class MapController extends GoogleMapPageComponent {
     onRoutePanelClosed() {
         this.viewModel.setEditable(true);
         this.searchBox.clear();
-        this.mapManager.clearMarkers();
-        this.mapManager.clearDirections();
-        this.viewModel.clearWaypoints();
+        if (!this.viewModel.getIsPlayingRoute()) {
+            this.mapManager.clearMarkers();
+            this.mapManager.clearDirections();
+            this.viewModel.clearWaypoints();    
+        }
         this.viewModel.sendRouteToEmulator();
     }
 

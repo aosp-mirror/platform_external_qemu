@@ -72,10 +72,26 @@ function initMap() {
     });
 }
 
+function createLatLng(lat, lng) {
+    if (lat > 90 || lat < -90 || lng > 180 || lng < -180) {
+        return null;
+    }
+    return new google.maps.LatLng(lat,lng);
+}
+
 function showPendingLocation(lat, lng, addr) {
     // Called from Qt code to show a pending location on the UI map.
     // This point has NOT been sent to the AVD.
-    var latLng = new google.maps.LatLng(lat, lng);
+    var latLng = createLatLng(lat, lng);
+    if (!latLng) {
+        gSearchBox.update('');
+        if (gPendingMarker != null) {
+            gPendingMarker.setMap(null);
+            gPendingMarker = null;
+        }
+        pPointOverlay.hide();    
+        return;
+    }
     showPin(latLng);
     // TODO: no support for elevation yet.
     if (addr === "") {
@@ -110,9 +126,15 @@ function setDeviceLocation(lat, lng) {
     if (gPendingMarker != null) {
         gPendingMarker.setMap(null);
     }
+    // clear searchbox
     gSearchBox.update('');
 
-    var latLng = new google.maps.LatLng(lat, lng);
+    let latLng = createLatLng(lat, lng);
+    if (!latLng) {
+        pPointOverlay.hide();    
+        return;
+    }
+    
     gCurrentMarker = new google.maps.Marker({ map: gMap, position: latLng });
 
     var blueDot = 'data:image/svg+xml, \
