@@ -37,7 +37,6 @@ void LocationPage::on_loc_playRouteButton_clicked() {
         } else {
             mSavedRoutePlayingItem = nullptr;
         }
-        mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
         if (parsePointsFromJson()) {
             locationPlaybackStart_v2();
         }
@@ -55,6 +54,9 @@ void LocationPage::playRouteStateChanged(bool stopped) {
         mUi->loc_routePlayingList->clear();
         mUi->loc_routePlayingTitleItem->hide();
         mUi->loc_routeList->show();
+        mUi->loc_playRouteButton->setIcon(getIconForCurrentTheme("play_arrow"));
+        mUi->loc_playRouteButton->setProperty("themeIconName", "play_arrow");
+        mUi->loc_playRouteButton->setText(tr("PLAY ROUTE"));
         emit mMapBridge->showRoutePlaybackOverlay(false);
     } else {
         // Disable the single point tab
@@ -64,6 +66,9 @@ void LocationPage::playRouteStateChanged(bool stopped) {
         mUi->loc_routeList->hide();
         mUi->loc_routePlayingList->show();
         mUi->loc_routePlayingTitleItem->show();
+        mUi->loc_playRouteButton->setIcon(getIconForCurrentTheme("stop_red"));
+        mUi->loc_playRouteButton->setProperty("themeIconName", "stop_red");
+        mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
     }
 }
 
