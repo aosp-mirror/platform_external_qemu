@@ -119,6 +119,10 @@ void ring_buffer_read_fully(
     void* data,
     uint32_t bytes);
 
+uint32_t ring_buffer_view_get_ring_pos(
+    const struct ring_buffer_view* v,
+    uint32_t index);
+
 bool ring_buffer_can_write(
     const struct ring_buffer* r, uint32_t bytes);
 bool ring_buffer_can_read(
