@@ -2672,7 +2672,6 @@ int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer)
     DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
     int width, height;
     static bool noSkinSet = false;
-    bool needUIUpdate = false;
     {
         AutoLock mutex(m_lock);
         if (m_displays.find(displayId) == m_displays.end()) {
@@ -2683,25 +2682,23 @@ int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer)
         if (c == m_colorbuffers.end()) {
             return -1;
         }
-        needUIUpdate = ((m_displays[displayId].cb == 0) ? true : false);
+        if (m_displays[displayId].cb == colorBuffer) {
+            return 0;
+        }
         m_displays[displayId].cb = colorBuffer;
         c->second.cb->setDisplay(displayId);
         if (!noSkinSet) {
             emugl::get_emugl_window_operations().setNoSkin();
             noSkinSet = true;
         }
-        if (needUIUpdate) {
-            recomputeLayout();
-            getCombinedDisplaySize(&width, &height);
-            setDisplayPoseInSkinUI(height);
-        }
+        recomputeLayout();
+        getCombinedDisplaySize(&width, &height);
+        setDisplayPoseInSkinUI(height);
     }
     // Explicitly adjust host window size when color buffer is binded to
     // display.
-    if (needUIUpdate) {
-        emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width,
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width,
                                                             height);
-    }
     return 0;
 }
 
