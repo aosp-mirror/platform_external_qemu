@@ -17,6 +17,7 @@
 
 #include "android/base/files/MemStream.h"
 #include "android/base/Optional.h"
+#include "android/emulation/address_space_graphics_types.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
@@ -30,6 +31,7 @@ namespace emugl {
 class RenderChannelImpl;
 class RendererImpl;
 class ReadBuffer;
+class RingStream;
 
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
@@ -41,6 +43,11 @@ public:
     RenderThread(RenderChannelImpl* channel,
                  android::base::Stream* loadStream = nullptr);
 
+    // Create a new RenderThread instance tied to the address space device.
+    RenderThread(
+        struct asg_context context,
+        android::emulation::asg::ConsumerCallbacks callbacks,
+        android::base::Stream* loadStream = nullptr);
     virtual ~RenderThread();
 
     // Returns true iff the thread has finished.
@@ -49,6 +56,8 @@ public:
     void pausePreSnapshot();
     void resume();
     void save(android::base::Stream* stream);
+
+    void waitFinished();
 
 private:
     virtual intptr_t main();
@@ -61,6 +70,12 @@ private:
         StartLoading,
         InProgress,
         Finished,
+    };
+
+    // Whether using RenderChannel or a ring buffer.
+    enum TransportMode {
+        Channel,
+        Ring,
     };
 
     template <class OpImpl>
@@ -77,6 +92,9 @@ private:
     bool isPausedForSnapshotLocked() const;
 
     RenderChannelImpl* mChannel = nullptr;
+    std::unique_ptr<RingStream> mRingStream;
+    TransportMode mTransportMode = TransportMode::Channel;
+
     SnapshotState mState = SnapshotState::Empty;
     std::atomic<bool> mFinished { false };
     android::base::Lock mLock;

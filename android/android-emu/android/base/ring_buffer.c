@@ -140,6 +140,40 @@ long ring_buffer_read(
     return (long)steps;
 }
 
+long ring_buffer_advance_write(
+    struct ring_buffer* r, uint32_t step_size, uint32_t steps) {
+    uint32_t i;
+
+    for (i = 0; i < steps; ++i) {
+        if (!ring_buffer_can_write(r, step_size)) {
+            errno = -EAGAIN;
+            return (long)i;
+        }
+
+        __atomic_add_fetch(&r->write_pos, step_size, __ATOMIC_SEQ_CST);
+    }
+
+    errno = 0;
+    return (long)steps;
+}
+
+long ring_buffer_advance_read(
+    struct ring_buffer* r, uint32_t step_size, uint32_t steps) {
+    uint32_t i;
+
+    for (i = 0; i < steps; ++i) {
+        if (!ring_buffer_can_read(r, step_size)) {
+            errno = -EAGAIN;
+            return (long)i;
+        }
+
+        __atomic_add_fetch(&r->read_pos, step_size, __ATOMIC_SEQ_CST);
+    }
+
+    errno = 0;
+    return (long)steps;
+}
+
 uint32_t ring_buffer_calc_shift(uint32_t size) {
     uint32_t shift = 0;
     while ((1 << shift) < size) {
