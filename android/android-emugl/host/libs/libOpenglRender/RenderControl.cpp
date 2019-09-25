@@ -253,9 +253,10 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 static bool shouldEnableAsyncSwap() {
     bool isPhone;
     emugl::getAvdInfo(&isPhone, NULL);
+    bool playStoreImage = emugl::emugl_feature_is_enabled(
+            android::featurecontrol::PlayStoreImage);
     return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
-           emugl_sync_device_exists() &&
-           isPhone &&
+           emugl_sync_device_exists() && (isPhone || playStoreImage) &&
            sizeof(void*) == 8;
 }
 
