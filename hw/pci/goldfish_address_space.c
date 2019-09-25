@@ -1,3 +1,4 @@
+#include "qemu/abort.h"
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/acpi/goldfish_defs.h"
@@ -431,10 +432,13 @@ struct address_space_state {
     MemoryRegion control_io;
     MemoryRegion area_mem;
     qemu_irq irq;
+    QemuMutex mutex;
 
     struct address_space_registers registers;
     struct address_space_allocator allocator;
 };
+
+static struct address_space_state* s_current_state = 0;
 
 #define GOLDFISH_ADDRESS_SPACE(obj) \
     OBJECT_CHECK(struct address_space_state, (obj), \
@@ -528,14 +532,9 @@ static uint32_t address_space_run_command(struct address_space_state *state,
     return ENOSYS;
 }
 
-static uint64_t address_space_control_read(void *opaque,
-                                           hwaddr offset,
-                                           unsigned size) {
-    struct address_space_state *state = opaque;
-
-    if (size != 4)
-        goto bad_access;
-
+static uint64_t address_space_control_read_locked(struct address_space_state* state,
+                                                  hwaddr offset,
+                                                  unsigned size) {
     switch ((enum address_space_register_id)offset) {
     case ADDRESS_SPACE_REGISTER_COMMAND: /* write only */
         break;
@@ -572,19 +571,17 @@ static uint64_t address_space_control_read(void *opaque,
         AS_DPRINT("read handle 0x%x", state->registers.handle);
         return state->registers.handle;
     }
-
-bad_access:
-    return 0;
 }
 
-static void address_space_control_write(void *opaque,
-                                        hwaddr offset,
-                                        uint64_t val,
-                                        unsigned size) {
+static void address_space_control_write_locked(void *opaque,
+                                               hwaddr offset,
+                                               uint64_t val,
+                                               unsigned size) {
     struct address_space_state *state = opaque;
 
-    if (size != 4)
+    if (size != 4) {
         return;
+    }
 
     switch ((enum address_space_register_id)offset) {
     case ADDRESS_SPACE_REGISTER_COMMAND:
@@ -635,6 +632,41 @@ static void address_space_control_write(void *opaque,
         break;
 
     }
+}
+
+static uint64_t address_space_control_read(void *opaque,
+                                           hwaddr offset,
+                                           unsigned size) {
+    struct address_space_state *state = opaque;
+    uint64_t res;
+
+    if (size != 4) {
+        goto bad_access;
+    }
+
+    qemu_mutex_lock(&state->mutex);
+    res = address_space_control_read_locked(state, offset, size);
+    qemu_mutex_unlock(&state->mutex);
+
+    return res;
+
+bad_access:
+    return 0;
+}
+
+static void address_space_control_write(void *opaque,
+                                        hwaddr offset,
+                                        uint64_t val,
+                                        unsigned size) {
+    struct address_space_state *state = opaque;
+
+    if (size != 4) {
+        return;
+    }
+
+    qemu_mutex_lock(&state->mutex);
+    address_space_control_write_locked(state, offset, val, size);
+    qemu_mutex_unlock(&state->mutex);
 }
 
 static const MemoryRegionOps address_space_control_ops = {
@@ -703,11 +735,19 @@ static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
 
     state->irq = pci_allocate_irq(dev);
 
+    qemu_mutex_init(&state->mutex);
+
     state->registers.guest_page_size = DEFAULT_GUEST_PAGE_SIZE;
 
     address_space_allocator_init(&state->allocator,
                                  GOLDFISH_ADDRESS_SPACE_AREA_SIZE,
                                  32);
+
+    if (s_current_state) {
+        qemu_abort("FATAL: Two address space devices created\n");
+    }
+
+    s_current_state = state;
 }
 
 static void address_space_pci_unrealize(PCIDevice* dev) {
@@ -715,7 +755,9 @@ static void address_space_pci_unrealize(PCIDevice* dev) {
     uint64_t available;
     uint64_t allocated;
 
+    s_current_state = 0;
     address_space_allocator_destroy(&address_space->allocator);
+    qemu_mutex_destroy(&address_space->mutex);
 }
 
 static Property address_space_pci_properties[] = {
@@ -864,3 +906,85 @@ static void address_space_register(void) {
 }
 
 type_init(address_space_register);
+
+/* Host interface */
+int goldfish_address_space_alloc_shared_host_region(
+    uint64_t page_aligned_size, uint64_t* offset)
+{
+    uint64_t offset_out = ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET;
+    int res;
+
+    if (!s_current_state)
+    {
+        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
+        return -EINVAL;
+    }
+
+    qemu_mutex_lock(&s_current_state->mutex);
+
+    res = goldfish_address_space_alloc_shared_host_region_locked(
+        page_aligned_size, offset);
+
+    qemu_mutex_unlock(&s_current_state->mutex);
+
+    return res;
+}
+
+int goldfish_address_space_free_shared_host_region(uint64_t offset)
+{
+    int res;
+
+    if (!s_current_state)
+    {
+        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
+        return -EINVAL;
+    }
+
+    qemu_mutex_lock(&s_current_state->mutex);
+
+    res = goldfish_address_space_free_shared_host_region_locked(offset);
+
+    qemu_mutex_unlock(&s_current_state->mutex);
+
+    return res;
+}
+
+int goldfish_address_space_alloc_shared_host_region_locked(
+    uint64_t page_aligned_size, uint64_t* offset)
+{
+    uint64_t offset_out = ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET;
+
+    if (!offset)
+    {
+        fprintf(stderr, "%s: ERROR: |offset| output is null!\n", __func__);
+        return -EINVAL;
+    }
+
+    offset_out = address_space_allocator_allocate(
+        &s_current_state->allocator, page_aligned_size);
+
+    if (offset_out == ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET)
+    {
+        return -ENOMEM;
+    }
+    else
+    {
+        *offset = offset_out;
+        return 0;
+    }
+}
+
+int goldfish_address_space_free_shared_host_region_locked(uint64_t offset)
+{
+    uint32_t res = address_space_allocator_deallocate(
+        &s_current_state->allocator, offset);
+
+    if (!res)
+    {
+        return 0;
+    }
+    else
+    {
+        return -EINVAL;
+    }
+}
