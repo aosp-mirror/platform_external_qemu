@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b90f868_cfca5d1e",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T17:06:37Z",
+      "side": 1,
+      "message": "I believe there are too many unlocks here (could you please add address_space_control_read_locked instead?) and qemu_mutex_unlock should come after accessing state-\u003eregisters.",
+      "range": {
+        "startLine": 552,
+        "startChar": 8,
+        "endLine": 552,
+        "endChar": 25
+      },
+      "revId": "b5d00ed86e2092456d04f795c93f125456fe40c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
