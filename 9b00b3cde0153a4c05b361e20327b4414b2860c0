@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "2279c17e_dc1fea4e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T17:27:50Z",
+      "side": 1,
+      "message": "There is no table in C.2.12. Do we need it because division is slower?",
+      "parentUuid": "14267fbc_f5428caa",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 25
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "08986259_901f28fb",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
         "patchSetId": 36
