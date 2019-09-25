@@ -44,8 +44,8 @@ MultiDisplayArrangement::MultiDisplayArrangement(QWidget* parent)
     : QWidget(parent) {
 }
 
-void MultiDisplayArrangement::paintDisplayBorder(QPainter& p,
-                                                 bool highLight){
+void MultiDisplayArrangement::paintDisplays(QPainter& p,
+                                            bool highLightBorder){
     int w, h;
     const ThemeColor* t;
     if (getSelectedTheme() == SETTINGS_THEME_LIGHT) {
@@ -59,7 +59,7 @@ void MultiDisplayArrangement::paintDisplayBorder(QPainter& p,
     float ratio = (wRatio < hRatio) ? wRatio : hRatio;
 
     for (const auto& iter : mLayout) {
-        if (highLight) {
+        if (highLightBorder) {
             if (iter.first != mHighLightDisplayId) {
                 continue;
             }
@@ -77,7 +77,7 @@ void MultiDisplayArrangement::paintDisplayBorder(QPainter& p,
                              (float)iter.second.h * ratio);
         path.addRoundedRect(rect, 5, 5);
         QPen pen(t->MDBorder, 1);
-        if (highLight) {
+        if (highLightBorder) {
             pen.setColor(t->MDBorderHighLight);
         }
         p.setPen(pen);
@@ -89,7 +89,10 @@ void MultiDisplayArrangement::paintDisplayBorder(QPainter& p,
         font.setPointSize(fontSize* 1.5);
         p.setFont(font);
         p.setPen(pen);
-        p.drawText(rect, Qt::AlignCenter, tr(iter.second.name.c_str()));
+        QFontMetrics metrix(font);
+        QString clippedTitle =
+                metrix.elidedText(tr(iter.second.name.c_str()), Qt::ElideRight, rect.width());
+        p.drawText(rect, Qt::AlignCenter|Qt::TextWordWrap, clippedTitle);
         pen.setColor(t->MDTitle);
         p.setPen(pen);
         font.setPointSize(fontSize);
@@ -116,8 +119,8 @@ void MultiDisplayArrangement::paintEvent(QPaintEvent* e) {
     QPainter p(this);
     p.fillRect(this->rect(), t->backGround);
 
-    paintDisplayBorder(p, false);
-    paintDisplayBorder(p, true);
+    paintDisplays(p, false);
+    paintDisplays(p, true);
 
     QPen penText(t->text, 1);
     p.setPen(penText);

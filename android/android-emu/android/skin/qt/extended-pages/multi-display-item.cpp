@@ -19,7 +19,7 @@ std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes =
      {"720p(1280x720)", "720p", 1280, 720, 213},
      {"1080p(1920x1080)", "1080p", 1920, 1080, 320},
      {"4K(3840x2160)", "4K", 3840, 2160, 320},
-     {"4K upscaled(3840x2160)", "4K upscaled", 3840, 2160, 640},
+     {"4K upscaled(3840x2160)", "4K\nupscaled", 3840, 2160, 640},
      {"custom", "custom", 1080, 720, 213},
     };
 

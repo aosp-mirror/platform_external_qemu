@@ -48,6 +48,6 @@ private:
     static const ThemeColor kDarkThemeColor;
     std::unordered_map<uint32_t, struct Rectangle> mLayout;
     void getCombinedDisplaySize(int* w, int* h);
-    void paintDisplayBorder(QPainter& p, bool highLight);
+    void paintDisplays(QPainter& p, bool highLightBorder);
     int mHighLightDisplayId = -1;
 };
