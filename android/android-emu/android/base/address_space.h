@@ -22,6 +22,10 @@
 
 ANDROID_BEGIN_HEADER
 
+#ifdef ADDRESS_SPACE_NAMESPACE
+namespace ADDRESS_SPACE_NAMESPACE {
+#endif
+
 // This is ported from goldfish_address_space, allowing it to be used for
 // general sub-allocations of any buffer range.
 // It is also a pure header library, so there are no compiler tricks needed
@@ -65,7 +69,7 @@ static void address_space_assert(bool condition) {
 #endif
 }
 
-void* address_space_malloc0(size_t size) {
+static void* address_space_malloc0(size_t size) {
 #ifdef ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC
     return ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC(size);
 #else
@@ -75,7 +79,7 @@ void* address_space_malloc0(size_t size) {
 #endif
 }
 
-void* address_space_realloc(void* ptr, size_t size) {
+static void* address_space_realloc(void* ptr, size_t size) {
 #ifdef ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC
     return ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC(ptr, size);
 #else
@@ -84,7 +88,7 @@ void* address_space_realloc(void* ptr, size_t size) {
 #endif
 }
 
-void address_space_free(void* ptr) {
+static void address_space_free(void* ptr) {
 #ifdef ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC
     return ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC(ptr);
 #else
@@ -346,5 +350,9 @@ static void address_space_allocator_reset(
     block->size = allocator->total_bytes;
     block->available = 1;
 }
+
+#ifdef ADDRESS_SPACE_NAMESPACE
+}
+#endif
 
 ANDROID_END_HEADER
