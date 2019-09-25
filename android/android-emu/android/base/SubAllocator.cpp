@@ -14,6 +14,7 @@
 #include "android/base/SubAllocator.h"
 
 #include "android/base/address_space.h"
+#include "android/base/files/Stream.h"
 #include "android/base/Log.h"
 
 #include <iomanip>
@@ -42,7 +43,76 @@ public:
     }
 
     ~Impl() {
+        clear();
+    }
+
+    void clear() {
         address_space_allocator_destroy(&addr_alloc);
+        address_space_allocator_init(
+            &addr_alloc,
+            totalSize,
+            32);
+    }
+
+    bool save(Stream* stream) {
+        address_space_allocator_iter_func_t allocatorSaver =
+            [](void* context, struct address_space_allocator* allocator) {
+                Stream* stream = reinterpret_cast<Stream*>(context);
+                stream->putBe32(allocator->size);
+                stream->putBe32(allocator->capacity);
+                stream->putBe64(allocator->total_bytes);
+                address_space_realloc(allocator->blocks, 
+                    sizeof(struct address_block) * allocator->capacity);
+            };
+        address_block_iter_func_t allocatorBlockSaver =
+            [](void* context, struct address_block* block) {
+                Stream* stream = reinterpret_cast<Stream*>(context);
+                stream->putBe64(block->offset);
+                stream->putBe64(block->size_available);
+            };
+        address_space_allocator_run(
+            &addr_alloc,
+            (void*)stream,
+            allocatorSaver,
+            allocatorBlockSaver);
+
+        stream->putBe64(pageSize);
+        stream->putBe64(totalSize);
+
+        return true;
+    }
+
+    bool load(Stream* stream) {
+        clear();
+        address_space_allocator_iter_func_t allocatorLoader =
+            [](void* context, struct address_space_allocator* allocator) {
+                Stream* stream = reinterpret_cast<Stream*>(context);
+                allocator->size = stream->getBe32();
+                allocator->capacity = stream->getBe32();
+                allocator->total_bytes = stream->getBe64();
+            };
+        address_block_iter_func_t allocatorBlockLoader =
+            [](void* context, struct address_block* block) {
+                Stream* stream = reinterpret_cast<Stream*>(context);
+                block->offset = stream->getBe64();
+                block->size_available = stream->getBe64();
+            };
+        address_space_allocator_run(
+            &addr_alloc,
+            (void*)stream,
+            allocatorLoader,
+            allocatorBlockLoader);
+
+        pageSize = stream->getBe64();
+        totalSize = stream->getBe64();
+
+        return true;
+    }
+
+    bool postLoad(void* postLoadBuffer) {
+        buffer = postLoadBuffer;
+        startAddr =
+            (uint64_t)(uintptr_t)postLoadBuffer;
     }
 
     void rangeCheck(const char* task, void* ptr) {
