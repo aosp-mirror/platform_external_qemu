@@ -182,8 +182,7 @@ extern bool skin_key_pair_from_string(const char* str,
                                       uint32_t* keycode,
                                       uint32_t* mod);
 
-extern bool skin_keycode_native_to_linux(int32_t* pVirtualKey,
-                                         int32_t* pModifier);
+extern int skin_native_scancode_to_linux(int32_t scancode);
 
 extern bool skin_keycode_native_is_keypad(int32_t virtualKey);
 
