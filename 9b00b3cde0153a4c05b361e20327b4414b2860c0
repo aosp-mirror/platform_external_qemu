@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "14267fbc_f5428caa",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:19:19Z",
+      "side": 1,
+      "message": "They are the encoding table in C.2.12 in https://www.khronos.org/registry/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt\n\nI leave it in the comment",
+      "parentUuid": "702fb427_ba9e6c42",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 25
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "08986259_901f28fb",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
         "patchSetId": 36
@@ -36,6 +60,30 @@
       "writtenOn": "2019-09-25T00:04:49Z",
       "side": 1,
       "message": "Could you please add parentheses here?",
+      "range": {
+        "startLine": 168,
+        "startChar": 30,
+        "endLine": 168,
+        "endChar": 56
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e65697f0_36a3e054",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:19:19Z",
+      "side": 1,
+      "message": "Done. Do you want me to add it in every place? There are a lot of them...",
+      "parentUuid": "08986259_901f28fb",
       "range": {
         "startLine": 168,
         "startChar": 30,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "24b48352_30e33da1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:19:19Z",
+      "side": 1,
+      "message": "Let\u0027s not. There is no pointer support here.",
+      "parentUuid": "dcea19f3_682cb1c6",
+      "range": {
+        "startLine": 231,
+        "startChar": 20,
+        "endLine": 231,
+        "endChar": 43
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aff23da0_6fa86f50",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 36
@@ -82,6 +154,30 @@
       "writtenOn": "2019-09-25T00:04:49Z",
       "side": 1,
       "message": "Should this be removed? It looks exactly as one below.",
+      "range": {
+        "startLine": 3896,
+        "startChar": 0,
+        "endLine": 3897,
+        "endChar": 26
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3f903fc_fc2de24b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 3897,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:19:19Z",
+      "side": 1,
+      "message": "Good catch. I once thought they would be different when I started the implementation lol",
+      "parentUuid": "aff23da0_6fa86f50",
       "range": {
         "startLine": 3896,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "84f23660_7412f502",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 4319,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:19:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "337f3616_0eb83bb1",
+      "range": {
+        "startLine": 4317,
+        "startChar": 0,
+        "endLine": 4319,
+        "endChar": 51
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "01323a6f_20298dcb",
         "filename": "android/scripts/unix/build-deqp.sh",
         "patchSetId": 36
@@ -137,6 +257,30 @@
       "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09c59292_c1efe8e6",
+        "filename": "android/scripts/unix/build-deqp.sh",
+        "patchSetId": 36
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:19:19Z",
+      "side": 1,
+      "message": "Done. Thanks.",
+      "parentUuid": "01323a6f_20298dcb",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 25
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
