@@ -9,6 +9,7 @@ prebuilt(TCMALLOC)
 
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src
+    android/avd/util_wrapper.cpp
     android/base/AlignedBuf.cpp
     android/base/Backtrace.cpp
     android/base/ContiguousRangeMapper.cpp
