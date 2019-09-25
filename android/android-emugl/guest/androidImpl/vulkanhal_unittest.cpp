@@ -35,6 +35,7 @@
 #include "android/snapshot/interface.h"
 
 #include <android/hardware_buffer.h>
+#include <cutils/properties.h>
 
 #include <atomic>
 #include <random>
@@ -82,6 +83,15 @@ protected:
         testEnv = nullptr;
 
         delete vk;
+    }
+
+    bool usingAddressSpaceGraphics() {
+        char value[PROPERTY_VALUE_MAX];
+        if (property_get(
+            "ro.kernel.qemu.gltransport", value, "pipe") > 0) {
+            return !strcmp("asg", value);
+        }
+        return false;
     }
 
     void SetUp() override {
@@ -994,11 +1004,21 @@ TEST_F(VulkanHalTest, BufferCreate) {
 }
 
 TEST_F(VulkanHalTest, SnapshotSaveLoad) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     androidSnapshot_save("test_snapshot");
     androidSnapshot_load("test_snapshot");
 }
 
 TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     VkBufferCreateInfo bufCi = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
         4096,
@@ -1037,6 +1057,12 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
 // supports freer ways of mapping memory) in order to test properly.
 // Disabled for now: currently goes down invalid paths in the GL side
 TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
+
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
@@ -1069,6 +1095,11 @@ TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
 // Tests save/load of a dispatchable handle, such as VkCommandBuffer.
 // Note that the internal state of the command buffer is not snapshotted yet.
 TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleDispatchable) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     VkCommandPoolCreateInfo poolCi = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
     };
@@ -1094,6 +1125,11 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleDispatchable) {
 // Tests that dependencies are respected between different handle types,
 // such as VkImage and VkImageView.
 TEST_F(VulkanHalTest, SnapshotSaveLoadDependentHandlesImageView) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     VkImage image;
     VkImageCreateInfo imageCi = {
         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, 0, 0,
