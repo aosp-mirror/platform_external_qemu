@@ -33,6 +33,10 @@ public:
     HostAddressSpaceDevice();
     static HostAddressSpaceDevice* get();
 
+    void initialize();
+
+    void clear();
+
     uint32_t open();
     void close(uint32_t handle);
 
@@ -46,11 +50,25 @@ public:
 
     void ping(uint32_t handle, emulation::AddressSpaceDevicePingInfo* pingInfo);
 
+    int claimShared(uint32_t handle, uint64_t off);
+    int unclaimShared(uint32_t handle, uint64_t off);
+
     void saveSnapshot(base::Stream* stream);
     void loadSnapshot(base::Stream* stream);
 
+    // Callbacks for AddressSpaceHwFuncs.
+    static int allocSharedHostRegion(uint64_t page_aligned_size, uint64_t* offset);
+    static int freeSharedHostRegion(uint64_t offset);
+    static int allocSharedHostRegionLocked(uint64_t page_aligned_size, uint64_t* offset);
+    static int freeSharedHostRegionLocked(uint64_t offset);
+    static uint64_t getPhysAddrStart();
+    static uint64_t getPhysAddrStartLocked();
+
 private:
     class Impl;
+    static Impl* getImpl();
+
+    bool mInitialized = false;
     std::unique_ptr<Impl> mImpl;
 };
 

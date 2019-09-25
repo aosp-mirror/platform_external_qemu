@@ -13,6 +13,7 @@
 #include "android-qemu2-glue/emulation/android_address_space_device.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 #include "android/emulation/address_space_device.hpp"
+#include "android/emulation/address_space_device.h"
 #include "android/utils/stream.h"
 
 extern "C" {
@@ -24,6 +25,7 @@ using android::emulation::goldfish_address_space_memory_state_load;
 using android::emulation::goldfish_address_space_memory_state_save;
 
 namespace {
+
 const GoldfishAddressSpaceOps ops = {
     // .load
     [](QEMUFile* file) -> int {
@@ -36,9 +38,30 @@ const GoldfishAddressSpaceOps ops = {
         return goldfish_address_space_memory_state_save(&stream);
     }
 };
-}
+
+} // namespace
+
+extern "C" {
+
+static const struct AddressSpaceHwFuncs address_space_hw_funcs = {
+    // allocSharedHostRegion()
+    goldfish_address_space_alloc_shared_host_region,
+    // freeSharedHostRegion()
+    goldfish_address_space_free_shared_host_region,
+    // allocSharedHostRegionLocked()
+    goldfish_address_space_alloc_shared_host_region_locked,
+    // freeSharedHostRegionLocked()
+    goldfish_address_space_free_shared_host_region_locked,
+    // getPhysAddrStart()
+    goldfish_address_space_get_phys_addr_start,
+    // getPhysAddrStartLocked()
+    goldfish_address_space_get_phys_addr_start_locked,
+};
+
+} // extern "C"
 
 bool qemu_android_address_space_device_init() {
     goldfish_address_space_set_service_ops(&ops);
+    address_space_set_hw_funcs(&address_space_hw_funcs);
     return true;
 }
