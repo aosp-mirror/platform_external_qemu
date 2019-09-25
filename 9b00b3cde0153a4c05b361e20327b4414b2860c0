@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "702fb427_ba9e6c42",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T00:04:49Z",
+      "side": 1,
+      "message": "Could please elaborate what this table does?",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 25
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08986259_901f28fb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T00:04:49Z",
+      "side": 1,
+      "message": "Could you please add parentheses here?",
+      "range": {
+        "startLine": 168,
+        "startChar": 30,
+        "endLine": 168,
+        "endChar": 56
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dcea19f3_682cb1c6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T00:04:49Z",
+      "side": 1,
+      "message": "Should this be moved out from the cycle?",
+      "range": {
+        "startLine": 231,
+        "startChar": 20,
+        "endLine": 231,
+        "endChar": 43
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aff23da0_6fa86f50",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 3897,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T00:04:49Z",
+      "side": 1,
+      "message": "Should this be removed? It looks exactly as one below.",
+      "range": {
+        "startLine": 3896,
+        "startChar": 0,
+        "endLine": 3897,
+        "endChar": 26
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "337f3616_0eb83bb1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 4319,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T00:04:49Z",
+      "side": 1,
+      "message": "Will this generate a warning because unreachable?",
+      "range": {
+        "startLine": 4317,
+        "startChar": 0,
+        "endLine": 4319,
+        "endChar": 51
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "01323a6f_20298dcb",
+        "filename": "android/scripts/unix/build-deqp.sh",
+        "patchSetId": 36
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T00:04:49Z",
+      "side": 1,
+      "message": "Is this intentional?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 25
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
