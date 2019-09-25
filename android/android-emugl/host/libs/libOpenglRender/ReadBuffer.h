@@ -31,11 +31,14 @@ public:
     void onLoad(android::base::Stream* stream);
     void onSave(android::base::Stream* stream);
 
+    void printStats();
 private:
     unsigned char *m_buf;
     unsigned char *m_readPtr;
     size_t m_size;
     size_t m_validData;
+
+    uint64_t m_tailMoveTimeUs = 0;
 };
 
 }  // namespace emugl
