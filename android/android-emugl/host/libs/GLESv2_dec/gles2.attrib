@@ -676,8 +676,8 @@ glMapBufferRangeAEMU
 glUnmapBufferAEMU
     dir guest_buffer in
     len guest_buffer length
-    var_flag guest_buffer nullAllowed
-    dir out_res out
+    var_flag guest_buffer nullAllowed isLarge
+    dir out_res in
     len out_res (sizeof(GLboolean))
     flag custom_decoder
     flag not_api
@@ -685,7 +685,7 @@ glUnmapBufferAEMU
 glFlushMappedBufferRangeAEMU
     dir guest_buffer in
     len guest_buffer length
-    var_flag guest_buffer nullAllowed
+    var_flag guest_buffer nullAllowed isLarge
     flag custom_decoder
     flag not_api
 
