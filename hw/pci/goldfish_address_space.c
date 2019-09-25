@@ -436,6 +436,8 @@ struct address_space_state {
     struct address_space_allocator allocator;
 };
 
+static struct address_space_allocator* s_current_allocator = 0;
+
 #define GOLDFISH_ADDRESS_SPACE(obj) \
     OBJECT_CHECK(struct address_space_state, (obj), \
                  GOLDFISH_ADDRESS_SPACE_NAME)
@@ -708,6 +710,7 @@ static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
     address_space_allocator_init(&state->allocator,
                                  GOLDFISH_ADDRESS_SPACE_AREA_SIZE,
                                  32);
+    s_current_allocator = &state->allocator;
 }
 
 static void address_space_pci_unrealize(PCIDevice* dev) {
@@ -715,6 +718,7 @@ static void address_space_pci_unrealize(PCIDevice* dev) {
     uint64_t available;
     uint64_t allocated;
 
+    s_current_allocator = 0;
     address_space_allocator_destroy(&address_space->allocator);
 }
 
@@ -864,3 +868,56 @@ static void address_space_register(void) {
 }
 
 type_init(address_space_register);
+
+/* Host interface */
+int goldfish_address_space_alloc_shared_host_region(
+    uint64_t page_aligned_size, uint64_t* offset)
+{
+    uint64_t offset_out = ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET;
+
+    if (!s_current_allocator)
+    {
+        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
+        return -EINVAL;
+    }
+
+    if (!offset)
+    {
+        fprintf(stderr, "%s: ERROR: |offset| output is null!\n", __func__);
+        return -EINVAL;
+    }
+
+    offset_out = address_space_allocator_allocate(
+        s_current_allocator, page_aligned_size);
+
+    if (offset_out == ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET)
+    {
+        return -ENOMEM;
+    }
+    else
+    {
+        *offset = offset_out;
+        return 0;
+    }
+}
+
+int goldfish_address_space_free_shared_host_region(uint64_t offset)
+{
+    if (!s_current_allocator)
+    {
+        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
+        return -EINVAL;
+    }
+
+    uint32_t res = address_space_allocator_deallocate(
+        s_current_allocator, offset);
+
+    if (!res)
+    {
+        return 0;
+    }
+    else
+    {
+        return -EINVAL;
+    }
+}
