@@ -444,15 +444,17 @@ endfunction()
 #
 # This file will be placed on the current binary dir, so it can be included if this directory is on the include path.
 function(android_generate_hw_config)
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+  set(ANDROID_HW_CONFIG_H ${CMAKE_CURRENT_BINARY_DIR}/avd_config/android/avd/hw-config-defs.h)
+  add_custom_command(OUTPUT ${ANDROID_HW_CONFIG_H}
                      COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
                              ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
-                             ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+                             ${ANDROID_HW_CONFIG_H}
                      VERBATIM)
-  set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PROPERTIES GENERATED TRUE)
-  set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PROPERTIES SKIP_AUTOGEN ON)
-  set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PROPERTIES HEADER_FILE_ONLY TRUE)
-  set(ANDROID_HW_CONFIG_H ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PARENT_SCOPE)
+  add_library(android-hw-config ${ANDROID_HW_CONFIG_H} dummy.c)
+  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES GENERATED TRUE)
+  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES SKIP_AUTOGEN ON)
+  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES HEADER_FILE_ONLY TRUE)
+  target_include_directories(android-hw-config PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/avd_config)
 endfunction()
 
 # Copies the list of test data files to the given destination The test data resides in the prebuilts/android-emulator-
