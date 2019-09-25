@@ -56,6 +56,7 @@ TEST(SubAllocator, Basic) {
             buffer.data(),
             (uint64_t)bufferSize,
             pageSize);
+        EXPECT_TRUE(subAlloc.empty());
 
         for (size_t allocCount : allocCounts) {
             std::vector<void*> ptrs;
@@ -93,6 +94,7 @@ TEST(SubAllocator, Basic) {
                 for (auto ptr : ptrs) {
                     subAlloc.free(ptr);
                 }
+                EXPECT_TRUE(subAlloc.empty());
             }
         }
     }
@@ -120,6 +122,7 @@ TEST(SubAllocator, FreeAll) {
             EXPECT_NE(nullptr, ptr);
         }
         subAlloc.freeAll();
+        EXPECT_TRUE(subAlloc.empty());
     }
 }
 
@@ -195,6 +198,7 @@ TEST(SubAllocator, Random) {
             for (auto ptr : ptrs) {
                 subAlloc.free(ptr);
             }
+            EXPECT_TRUE(subAlloc.empty());
         }
     }
 }
@@ -247,6 +251,7 @@ TEST(SubAllocator, Snapshot) {
     // Save/load the snapshot
     subAlloc.save(&snapshotStream);
     subAlloc.load(&snapshotStream);
+    EXPECT_FALSE(subAlloc.empty());
 
     // Set the post load buffer to our original one
     EXPECT_TRUE(subAlloc.postLoad(storage.data()));
