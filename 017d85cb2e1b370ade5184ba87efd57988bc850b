@@ -70,6 +70,30 @@
       "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48c809fd_355bf39f",
+        "filename": "android/android-emu/android/base/ring_buffer.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T17:44:20Z",
+      "side": 1,
+      "message": "Yeah, I should have spent more time googling for the cache line size. In our case likely to be 64 bytes.",
+      "parentUuid": "fc076634_98842458",
+      "range": {
+        "startLine": 30,
+        "startChar": 29,
+        "endLine": 30,
+        "endChar": 48
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
