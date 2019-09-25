@@ -166,7 +166,7 @@ if(WINDOWS_MSVC_X86_64)
     # Link time optization tragically fails when cross compiling.
     if (NOT CROSSCOMPILE)
       # Do a global optimization pass (note, link times --> infinity)
-      add_c_flag("-flto=thin")
+      add_c_flag("-flto=full")
       # Optimize a bit more on the vtables in use, note this requires -flto
       add_c_flag("-fwhole-program-vtables")
     endif()
