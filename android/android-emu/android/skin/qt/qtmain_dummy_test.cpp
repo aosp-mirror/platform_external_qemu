@@ -9,15 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#pragma once
 
 #include "android/emulation/control/vm_operations.h"
 #include <gtest/gtest.h>
 
-#ifdef _WIN32
 extern "C" int qt_main(int, char**) { return 0; }
 extern "C" void qemu_system_shutdown_request(QemuShutdownCause reason) {}
-#endif  // _WIN32
 
 // For the msvc build we set the entry point in winsys_qt, resulting in NOPS for our
 // unit test. we will use the linker to provide is with a different entry point.
