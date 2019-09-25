@@ -69,6 +69,7 @@ set(OpenglRender_src
     RenderThreadInfo.cpp
     render_api.cpp
     RenderWindow.cpp
+    RingStream.cpp
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp
@@ -120,6 +121,7 @@ set(OpenglRender_standalone_common_src
     RenderThreadInfo.cpp
     render_api.cpp
     RenderWindow.cpp
+    RingStream.cpp
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp
@@ -196,6 +198,14 @@ target_include_directories(OpenglRender_vulkan_unittests
                            PRIVATE . cereal ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
                                    ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
                                    ${ANDROID_EMUGL_DIR}/host/include/vulkan)
+
+# Address space ring unittest
+set(OpenglRender_address_space_ring_unittests_src
+    tests/AddressSpaceGraphicsRingStream_unittest.cpp)
+android_add_test(OpenglRender_address_space_ring_unittests)
+target_link_libraries(
+    OpenglRender_address_space_ring_unittests PRIVATE
+    android-emu-base gmock_main OpenglRender_standalone_common)
 
 set(HelloTriangle_src samples/HelloTriangle.cpp samples/HelloTriangleImp.cpp)
 android_add_executable(HelloTriangle)
