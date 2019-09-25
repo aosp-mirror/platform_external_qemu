@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
+#include "android/emulation/address_space_graphics.h"
 #include "android/emulation/address_space_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
@@ -207,7 +208,8 @@ private:
 
         switch (device_type) {
         case AddressSpaceDeviceType::Graphics:
-            return nullptr;
+            AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
+            return DeviceContextPtr(new AddressSpaceGraphicsContext());
         case AddressSpaceDeviceType::Media:
             return nullptr;
         case AddressSpaceDeviceType::Sensors:
