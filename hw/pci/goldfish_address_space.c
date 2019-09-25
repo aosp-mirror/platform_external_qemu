@@ -1,3 +1,4 @@
+#include "qemu/abort.h"
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/acpi/goldfish_defs.h"
@@ -431,10 +432,13 @@ struct address_space_state {
     MemoryRegion control_io;
     MemoryRegion area_mem;
     qemu_irq irq;
+    QemuMutex mutex;
 
     struct address_space_registers registers;
     struct address_space_allocator allocator;
 };
+
+static struct address_space_state* s_current_state = 0;
 
 #define GOLDFISH_ADDRESS_SPACE(obj) \
     OBJECT_CHECK(struct address_space_state, (obj), \
@@ -532,44 +536,58 @@ static uint64_t address_space_control_read(void *opaque,
                                            hwaddr offset,
                                            unsigned size) {
     struct address_space_state *state = opaque;
+    qemu_mutex_lock(&state->mutex);
 
-    if (size != 4)
+    if (size != 4) {
+        qemu_mutex_unlock(&state->mutex);
         goto bad_access;
+    }
 
     switch ((enum address_space_register_id)offset) {
     case ADDRESS_SPACE_REGISTER_COMMAND: /* write only */
+        qemu_mutex_unlock(&state->mutex);
         break;
 
     case ADDRESS_SPACE_REGISTER_STATUS:
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.status;
 
     case ADDRESS_SPACE_REGISTER_GUEST_PAGE_SIZE:
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.guest_page_size;
 
     case ADDRESS_SPACE_REGISTER_BLOCK_SIZE_LOW:
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.size_low;
 
     case ADDRESS_SPACE_REGISTER_BLOCK_SIZE_HIGH:
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.size_high;
 
     case ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_LOW:
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.offset_low;
 
     case ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH:
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.offset_high;
 
     case ADDRESS_SPACE_REGISTER_PING:
         fprintf(stderr, "%s: warning: kernel tried to read PING register!\n", __func__);
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.ping;
 
     case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW:
         AS_DPRINT("read ping info addr low 0x%x", state->registers.ping_info_addr_low);
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.ping_info_addr_low;
     case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH:
         AS_DPRINT("read ping info addr high 0x%x", state->registers.ping_info_addr_high);
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.ping_info_addr_high;
     case ADDRESS_SPACE_REGISTER_HANDLE:
         AS_DPRINT("read handle 0x%x", state->registers.handle);
+        qemu_mutex_unlock(&state->mutex);
         return state->registers.handle;
     }
 
@@ -582,9 +600,12 @@ static void address_space_control_write(void *opaque,
                                         uint64_t val,
                                         unsigned size) {
     struct address_space_state *state = opaque;
+    qemu_mutex_lock(&state->mutex);
 
-    if (size != 4)
+    if (size != 4) {
+        qemu_mutex_unlock(&state->mutex);
         return;
+    }
 
     switch ((enum address_space_register_id)offset) {
     case ADDRESS_SPACE_REGISTER_COMMAND:
@@ -635,6 +656,8 @@ static void address_space_control_write(void *opaque,
         break;
 
     }
+
+    qemu_mutex_unlock(&state->mutex);
 }
 
 static const MemoryRegionOps address_space_control_ops = {
@@ -703,11 +726,19 @@ static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
 
     state->irq = pci_allocate_irq(dev);
 
+    qemu_mutex_init(&state->mutex);
+
     state->registers.guest_page_size = DEFAULT_GUEST_PAGE_SIZE;
 
     address_space_allocator_init(&state->allocator,
                                  GOLDFISH_ADDRESS_SPACE_AREA_SIZE,
                                  32);
+
+    if (s_current_state) {
+        qemu_abort("FATAL: Two address space devices created\n");
+    }
+
+    s_current_state = state;
 }
 
 static void address_space_pci_unrealize(PCIDevice* dev) {
@@ -715,7 +746,9 @@ static void address_space_pci_unrealize(PCIDevice* dev) {
     uint64_t available;
     uint64_t allocated;
 
+    s_current_state = 0;
     address_space_allocator_destroy(&address_space->allocator);
+    qemu_mutex_destroy(&address_space->mutex);
 }
 
 static Property address_space_pci_properties[] = {
@@ -864,3 +897,65 @@ static void address_space_register(void) {
 }
 
 type_init(address_space_register);
+
+/* Host interface */
+int goldfish_address_space_alloc_shared_host_region(
+    uint64_t page_aligned_size, uint64_t* offset)
+{
+    uint64_t offset_out = ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET;
+
+    if (!s_current_state)
+    {
+        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
+        return -EINVAL;
+    }
+
+    qemu_mutex_lock(&s_current_state->mutex);
+
+    if (!offset)
+    {
+        fprintf(stderr, "%s: ERROR: |offset| output is null!\n", __func__);
+        qemu_mutex_unlock(&s_current_state->mutex);
+        return -EINVAL;
+    }
+
+    offset_out = address_space_allocator_allocate(
+        &s_current_state->allocator, page_aligned_size);
+
+    if (offset_out == ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET)
+    {
+        qemu_mutex_unlock(&s_current_state->mutex);
+        return -ENOMEM;
+    }
+    else
+    {
+        *offset = offset_out;
+        qemu_mutex_unlock(&s_current_state->mutex);
+        return 0;
+    }
+}
+
+int goldfish_address_space_free_shared_host_region(uint64_t offset)
+{
+    if (!s_current_state)
+    {
+        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
+        return -EINVAL;
+    }
+
+    qemu_mutex_lock(&s_current_state->mutex);
+
+    uint32_t res = address_space_allocator_deallocate(
+        &s_current_state->allocator, offset);
+
+    if (!res)
+    {
+        qemu_mutex_unlock(&s_current_state->mutex);
+        return 0;
+    }
+    else
+    {
+        qemu_mutex_unlock(&s_current_state->mutex);
+        return -EINVAL;
+    }
+}
