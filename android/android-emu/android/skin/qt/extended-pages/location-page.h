@@ -324,6 +324,7 @@ private:
     QList<QListWidgetItem*> mPrevSelectedRoutes;
     UiState mPointState = UiState::Default;
     UiState mRouteState = UiState::Default;
+    QListWidgetItem* mSavedRoutePlayingItem = nullptr;
     friend class RouteSenderThread;
 };
 
@@ -441,8 +442,9 @@ signals:
     // Display a saved point on the map.
     void showLocation(QString lat, QString lng, QString addr);
 
-    // Display a saved Google JSON route.
-    void showRouteOnMap(const QString& routeJson);
+    // Display a saved Google JSON route. If |isSavedRoute| is true, user should not have the option to
+    // save the route on the map.
+    void showRouteOnMap(const QString& routeJson, bool isSavedRoute = true);
 
     // Display a saved JSON converted GPX/KML file.
     void showGpxKmlRouteOnMap(const QString& routeJson, const QString& title, const QString& subtitle);

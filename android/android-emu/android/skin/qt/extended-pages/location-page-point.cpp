@@ -586,8 +586,8 @@ void LocationPage::setUpWebEngine() {
         } else {
             // Define Routes-specific interfaces
             appendString.append(
-                        "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson) {"
-                            "if (setRouteOnMap) setRouteOnMap(routeJson);"
+                        "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson, isSavedRoute) {"
+                            "if (setRouteOnMap) setRouteOnMap(routeJson, isSavedRoute);"
                         "});");
             appendString.append(
                         "channel.objects.emulocationserver.showRoutePlaybackOverlay.connect(function(visible) {"

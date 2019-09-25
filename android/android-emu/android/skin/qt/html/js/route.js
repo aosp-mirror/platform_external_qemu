@@ -26,8 +26,8 @@ function buildMapPageComponents(eventBus) {
         mapController.setCurrentLocation(new google.maps.LatLng(lat, lng));
     }
     // Receive the selected route from the host
-    setRouteOnMap = (routeJson) => {
-        mapController.setRoute(routeJson);
+    setRouteOnMap = (routeJson, isSavedRoute) => {
+        mapController.setRoute(routeJson, isSavedRoute);
     }
 
     showRoutePlaybackOverlay = (visible) => {
