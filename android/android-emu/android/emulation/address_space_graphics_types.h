@@ -204,8 +204,16 @@ static struct asg_context asg_context_create(
 //
 // Each of |to_host| and |from_host| can contain elements of type 1, 2, or 3:
 // Type 1: 8 bytes: 4 bytes offset, 4 bytes size. Relative to write buffer.
+struct __attribute__((__packed__)) asg_type1_xfer {
+    uint32_t offset;
+    uint32_t size;
+};
 // Type 2: 16 bytes: 16 bytes offset into address space PCI space, 8 bytes
 // size.
+struct __attribute__((__packed__)) asg_type2_xfer {
+    uint64_t physAddr;
+    uint64_t size;
+};
 // Type 3: There is a large transfer of known size and the entire write buffer
 // will be used to send it over.
 //

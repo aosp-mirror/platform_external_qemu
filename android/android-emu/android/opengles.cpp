@@ -15,9 +15,12 @@
 #include "android/base/CpuUsage.h"
 #include "android/base/GLObjectCounter.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/files/Stream.h"
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/address_space_graphics.h"
+#include "android/emulation/address_space_graphics_types.h"
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/RefcountPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -57,6 +60,9 @@
 
 using android::base::pj;
 using android::base::System;
+using android::emulation::asg::AddressSpaceGraphicsContext;
+using android::emulation::asg::ConsumerInterface;
+using android::emulation::asg::ConsumerCallbacks;
 
 /* Name of the GLES rendering library we're going to use */
 #define RENDERER_LIB_NAME "libOpenglRender"
@@ -251,6 +257,26 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 
     android::emulation::registerOnLastRefCallback(
             sRenderLib->getOnLastColorBufferRef());
+
+    ConsumerInterface interface = {
+        // create
+        [](struct asg_context context,
+           ConsumerCallbacks callbacks) {
+           return sRenderer->addressSpaceGraphicsConsumerCreate(
+               context, callbacks);
+        },
+        // destroy
+        [](void* consumer) {
+           return sRenderer->addressSpaceGraphicsConsumerDestroy(
+               consumer);
+        },
+        // TODO
+        // save
+        [](void* consumer, android::base::Stream* stream) { },
+        // load
+        [](void* consumer, android::base::Stream* stream) { },
+    };
+    AddressSpaceGraphicsContext::setConsumer(interface);
 
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");

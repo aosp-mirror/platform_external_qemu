@@ -122,6 +122,15 @@ public:
             android::base::Stream* loadStream = nullptr) {
         return nullptr;
     }
+
+    void* addressSpaceGraphicsConsumerCreate(
+        struct asg_context,
+        android::emulation::asg::ConsumerCallbacks) {
+        return nullptr;
+    }
+
+    void addressSpaceGraphicsConsumerDestroy(void*) { }
+
     HardwareStrings getHardwareStrings() {
         return {};
     }
