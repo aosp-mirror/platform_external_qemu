@@ -115,6 +115,7 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
     mItem[i] = item;
     setSecondaryDisplaysTitle(++mSecondaryItemCount);
     recomputeLayout();
+    item->setFocus();
 
     if (findNextItemIndex() < 0) {
         mUi->addSecondaryDisplay->setEnabled(false);

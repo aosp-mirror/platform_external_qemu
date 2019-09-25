@@ -555,7 +555,6 @@ private:
                                        GLenum p_internalFormat,
                                        FrameworkFormat p_frameworkFormat);
     void recomputeLayout();
-    int setDisplayColorBufferLocked(uint32_t displayId, uint32_t colorBuffer);
     void setDisplayPoseInSkinUI(int totalHeight);
 
 private:

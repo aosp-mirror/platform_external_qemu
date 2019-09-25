@@ -139,9 +139,7 @@
             </font>
            </property>
            <property name="styleSheet">
-            <string>
-             text-align: left;
-            </string>
+            <string notr="true">padding-left: 2px; text-align: left;</string>
            </property>
            <property name="text">
             <string>        Add secondary display (Max 3)</string>

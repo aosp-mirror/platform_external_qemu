@@ -2231,7 +2231,9 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
        // support for multi-display
        ComposeDevice_v2* p2 = (ComposeDevice_v2*)buffer;
        if (p2->displayId != 0) {
-            setDisplayColorBufferLocked(p2->displayId, p2->targetHandle);
+            mutex.unlock();
+            setDisplayColorBuffer(p2->displayId, p2->targetHandle);
+            mutex.lock();
        }
        Post composeCmd;
        composeCmd.cmd = PostCmd::Compose;
@@ -2666,40 +2668,41 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
     return 0;
 }
 
-int FrameBuffer::setDisplayColorBufferLocked(uint32_t displayId, uint32_t colorBuffer) {
-    if (m_displays.find(displayId) == m_displays.end()) {
-        ERR("cannot find display %d\n", displayId);
-        return -1;
-    }
-    ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
-    if (c == m_colorbuffers.end()) {
-        return -1;
-    }
-    m_displays[displayId].cb = colorBuffer;
-    c->second.cb->setDisplay(displayId);
-    return 0;
-}
-
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
     DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
-    int ret, width, height;
+    int width, height;
     static bool noSkinSet = false;
+    bool needUIUpdate = false;
     {
         AutoLock mutex(m_lock);
-        ret = setDisplayColorBufferLocked(displayId, colorBuffer);
+        if (m_displays.find(displayId) == m_displays.end()) {
+            ERR("cannot find display %d\n", displayId);
+            return -1;
+        }
+        ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
+        if (c == m_colorbuffers.end()) {
+            return -1;
+        }
+        needUIUpdate = ((m_displays[displayId].cb == 0) ? true : false);
+        m_displays[displayId].cb = colorBuffer;
+        c->second.cb->setDisplay(displayId);
         if (!noSkinSet) {
             emugl::get_emugl_window_operations().setNoSkin();
             noSkinSet = true;
         }
-        recomputeLayout();
-        getCombinedDisplaySize(&width, &height);
-        setDisplayPoseInSkinUI(height);
+        if (needUIUpdate) {
+            recomputeLayout();
+            getCombinedDisplaySize(&width, &height);
+            setDisplayPoseInSkinUI(height);
+        }
     }
     // Explicitly adjust host window size when color buffer is binded to
     // display.
-    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width,
+    if (needUIUpdate) {
+        emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width,
                                                             height);
-    return ret;
+    }
+    return 0;
 }
 
 int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {

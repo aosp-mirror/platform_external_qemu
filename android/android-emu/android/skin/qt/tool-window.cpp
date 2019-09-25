@@ -142,6 +142,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Shift+F SHOW_PANE_FINGER\n"
             "Ctrl+Shift+D SHOW_PANE_DPAD\n"
             "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
+            "Ctrl+Shift+M SHOW_PANE_MULTIDISPLAY\n"
 #ifdef __APPLE__
             "Ctrl+/     SHOW_PANE_HELP\n"
 #else
@@ -467,6 +468,14 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_CAR:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_CAR);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_MULTIDISPLAY:
+            if (down) {
+                if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
+                    && !isFoldableConfigured()) {
+                    showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
+                }
             }
             break;
         case QtUICommand::SHOW_PANE_SETTINGS:
