@@ -211,9 +211,9 @@
     <widget class="RaisedMaterialButton" name="loc_playRouteButton">
      <property name="geometry">
       <rect>
-       <x>472</x>
+       <x>492</x>
        <y>520</y>
-       <width>132</width>
+       <width>112</width>
        <height>36</height>
       </rect>
      </property>
@@ -236,6 +236,25 @@
      </property>
      <property name="flat">
       <bool>true</bool>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>play_arrow</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>play_arrow_disabled</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Button</string>
