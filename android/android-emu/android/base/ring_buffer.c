@@ -227,30 +227,51 @@ int ring_buffer_copy_contents(
 
     uint32_t total_available =
         ring_buffer_available_read(r, v);
-    uint32_t available_at_end =
-        v->size - ring_buffer_view_get_ring_pos(v, r->read_pos);
+    uint32_t available_at_end = 0;
+
+    if (v) {
+        available_at_end =
+            v->size - ring_buffer_view_get_ring_pos(v, r->read_pos);
+    } else {
+        available_at_end =
+            RING_BUFFER_SIZE - get_ring_pos(r->write_pos);
+    }
 
     if (total_available < wanted_bytes) {
         return -1;
     }
 
-    if (wanted_bytes > available_at_end) {
-        uint32_t remaining = wanted_bytes - available_at_end;
-        memcpy(res,
-               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
-               available_at_end);
-        memcpy(res + available_at_end,
-               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos + available_at_end)],
-               remaining);
+    if (v) {
+        if (wanted_bytes > available_at_end) {
+            uint32_t remaining = wanted_bytes - available_at_end;
+            memcpy(res,
+                   &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+                   available_at_end);
+            memcpy(res + available_at_end,
+                   &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos + available_at_end)],
+                   remaining);
+        } else {
+            memcpy(res,
+                   &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+                   wanted_bytes);
+        }
     } else {
-        memcpy(res,
-               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
-               wanted_bytes);
+        if (wanted_bytes > available_at_end) {
+            uint32_t remaining = wanted_bytes - available_at_end;
+            memcpy(res,
+                   &r->buf[get_ring_pos(r->read_pos)],
+                   available_at_end);
+            memcpy(res + available_at_end,
+                   &r->buf[get_ring_pos(r->read_pos + available_at_end)],
+                   remaining);
+        } else {
+            memcpy(res,
+                   &r->buf[get_ring_pos(r->read_pos)],
+                   wanted_bytes);
+        }
     }
-
     return 0;
 }
-
 
 long ring_buffer_view_write(
     struct ring_buffer* r,
