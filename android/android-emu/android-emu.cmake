@@ -79,6 +79,7 @@ set(android-emu-common
     android/emulation/goldfish_sync.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/address_space_device.cpp
+    android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
