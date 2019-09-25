@@ -35,6 +35,7 @@
 #include "android/snapshot/interface.h"
 
 #include <android/hardware_buffer.h>
+#include <cutils/properties.h>
 
 #include <atomic>
 #include <random>
@@ -54,7 +55,9 @@ static constexpr int kWindowSize = 256;
 
 static android_vulkan_dispatch* vk = nullptr;
 
-class VulkanHalTest : public ::testing::Test {
+class VulkanHalTest :
+    public ::testing::Test,
+    public ::testing::WithParamInterface<const char*> {
 protected:
 
     static GoldfishOpenglTestEnv* testEnv;
@@ -84,7 +87,19 @@ protected:
         delete vk;
     }
 
+    bool usingAddressSpaceGraphics() {
+        char value[PROPERTY_VALUE_MAX];
+        if (property_get(
+            "ro.kernel.qemu.gltransport", value, "pipe") > 0) {
+            return !strcmp("asg", value);
+        }
+        return false;
+    }
+
     void SetUp() override {
+        property_set("ro.kernel.qemu.gltransport", GetParam());
+        printf("%s: using transport: %s\n", __func__, GetParam());
+
         setupGralloc();
         setupVulkan();
     }
@@ -581,10 +596,10 @@ GoldfishOpenglTestEnv* VulkanHalTest::testEnv = nullptr;
 
 // A basic test of Vulkan HAL:
 // - Touch the Android loader at global, instance, and device level.
-TEST_F(VulkanHalTest, Basic) { }
+TEST_P(VulkanHalTest, Basic) { }
 
 // Test: Allocate, map, flush, invalidate some host visible memory.
-TEST_F(VulkanHalTest, MemoryMapping) {
+TEST_P(VulkanHalTest, MemoryMapping) {
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
@@ -658,7 +673,7 @@ TEST_F(VulkanHalTest, MemoryMapping) {
 }
 
 // Tests creation of VkImages backed by gralloc buffers.
-TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
+TEST_P(VulkanHalTest, AndroidNativeImageCreation) {
     VkImage image;
     buffer_handle_t buffer;
     createAndroidNativeImage(&buffer, &image);
@@ -666,7 +681,7 @@ TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
 }
 
 // Tests the path to sync Android native buffers with Gralloc buffers.
-TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
+TEST_P(VulkanHalTest, AndroidNativeImageQueueSignal) {
     VkImage image;
     buffer_handle_t buffer;
     int fenceFd;
@@ -687,7 +702,7 @@ TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
 
 // Tests VK_KHR_get_physical_device_properties2:
 // new API: vkGetPhysicalDeviceProperties2KHR
-TEST_F(VulkanHalTest, GetPhysicalDeviceProperties2) {
+TEST_P(VulkanHalTest, GetPhysicalDeviceProperties2) {
     if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
         printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
                "supported\n");
@@ -715,7 +730,7 @@ TEST_F(VulkanHalTest, GetPhysicalDeviceProperties2) {
 
 // Tests VK_KHR_get_physical_device_properties2:
 // new API: vkGetPhysicalDeviceFeatures2KHR
-TEST_F(VulkanHalTest, GetPhysicalDeviceFeatures2KHR) {
+TEST_P(VulkanHalTest, GetPhysicalDeviceFeatures2KHR) {
     if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
         printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
                "supported\n");
@@ -737,7 +752,7 @@ TEST_F(VulkanHalTest, GetPhysicalDeviceFeatures2KHR) {
 
 // Tests VK_KHR_get_physical_device_properties2:
 // new API: vkGetPhysicalDeviceImageFormatProperties2KHR
-TEST_F(VulkanHalTest, GetPhysicalDeviceImageFormatProperties2KHR) {
+TEST_P(VulkanHalTest, GetPhysicalDeviceImageFormatProperties2KHR) {
     if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
         printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
                "supported\n");
@@ -772,7 +787,7 @@ TEST_F(VulkanHalTest, GetPhysicalDeviceImageFormatProperties2KHR) {
 
 // Tests that if we create an instance and the API version is less than 1.1,
 // we return null for 1.1 core API calls.
-TEST_F(VulkanHalTest, Hide1_1FunctionPointers) {
+TEST_P(VulkanHalTest, Hide1_1FunctionPointers) {
     VkPhysicalDeviceProperties props;
 
     vk->vkGetPhysicalDeviceProperties(mPhysicalDevice, &props);
@@ -789,7 +804,7 @@ TEST_F(VulkanHalTest, Hide1_1FunctionPointers) {
 // Tests VK_ANDROID_external_memory_android_hardware_buffer's allocation API.
 // The simplest: export allocate device local memory.
 // Disabled for now: currently goes down invalid paths in the GL side
-TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ExportDeviceLocal) {
+TEST_P(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ExportDeviceLocal) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     VkDeviceMemory memory;
@@ -803,7 +818,7 @@ TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ExportDeviceLocal) 
 
 // Test AHB allocation via import.
 // Disabled for now: currently goes down invalid paths in the GL side
-TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ImportDeviceLocal) {
+TEST_P(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ImportDeviceLocal) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     AHardwareBuffer* testBuf = allocateAndroidHardwareBuffer();
@@ -824,7 +839,7 @@ TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_ImportDeviceLocal) 
 
 // Test AHB allocation via export, but with a dedicated allocation (image).
 // Disabled for now: currently goes down invalid paths in the GL side
-TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Export) {
+TEST_P(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Export) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     VkImage testAhbImage;
@@ -851,7 +866,7 @@ TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Export) {
 
 // Test AHB allocation via import, but with a dedicated allocation (image).
 // Disabled for now: currently goes down invalid paths in the GL side
-TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Import) {
+TEST_P(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Import) {
     if (!mDeviceHasExternalMemorySupport) return;
 
     AHardwareBuffer* testBuf =
@@ -883,7 +898,7 @@ TEST_F(VulkanHalTest, DISABLED_AndroidHardwareBufferAllocate_Dedicated_Import) {
 }
 
 // Test many host visible allocations.
-TEST_F(VulkanHalTest, HostVisibleAllocations) {
+TEST_P(VulkanHalTest, HostVisibleAllocations) {
     static constexpr VkDeviceSize kTestAllocSizesSmall[] =
         { 4, 5, 6, 16, 32, 37, 64, 255, 256, 267,
           1024, 1023, 1025, 4095, 4096,
@@ -975,7 +990,7 @@ TEST_F(VulkanHalTest, HostVisibleAllocations) {
     }
 }
 
-TEST_F(VulkanHalTest, BufferCreate) {
+TEST_P(VulkanHalTest, BufferCreate) {
     VkBufferCreateInfo bufCi = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
         4096,
@@ -993,12 +1008,22 @@ TEST_F(VulkanHalTest, BufferCreate) {
     vk->vkDestroyBuffer(mDevice, buffer, nullptr);
 }
 
-TEST_F(VulkanHalTest, SnapshotSaveLoad) {
+TEST_P(VulkanHalTest, SnapshotSaveLoad) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     androidSnapshot_save("test_snapshot");
     androidSnapshot_load("test_snapshot");
 }
 
-TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
+TEST_P(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     VkBufferCreateInfo bufCi = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
         4096,
@@ -1036,7 +1061,13 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleNonDispatchable) {
 // Linux/macOS. It would ironically require a hypervisor (or an OS that
 // supports freer ways of mapping memory) in order to test properly.
 // Disabled for now: currently goes down invalid paths in the GL side
-TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
+TEST_P(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
+
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
@@ -1068,7 +1099,12 @@ TEST_F(VulkanHalTest, DISABLED_SnapshotSaveLoadHostVisibleMemory) {
 
 // Tests save/load of a dispatchable handle, such as VkCommandBuffer.
 // Note that the internal state of the command buffer is not snapshotted yet.
-TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleDispatchable) {
+TEST_P(VulkanHalTest, SnapshotSaveLoadSimpleDispatchable) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     VkCommandPoolCreateInfo poolCi = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
     };
@@ -1093,7 +1129,12 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadSimpleDispatchable) {
 
 // Tests that dependencies are respected between different handle types,
 // such as VkImage and VkImageView.
-TEST_F(VulkanHalTest, SnapshotSaveLoadDependentHandlesImageView) {
+TEST_P(VulkanHalTest, SnapshotSaveLoadDependentHandlesImageView) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     VkImage image;
     VkImageCreateInfo imageCi = {
         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, 0, 0,
@@ -1139,7 +1180,7 @@ TEST_F(VulkanHalTest, SnapshotSaveLoadDependentHandlesImageView) {
 }
 
 // Tests beginning and ending command buffers from separate threads.
-TEST_F(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
+TEST_P(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
     Lock lock;
     ConditionVariable cvSequence;
     uint32_t begins = 0;
@@ -1222,5 +1263,10 @@ TEST_F(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
     vk->vkFreeCommandBuffers(mDevice, pool, 1, &cb);
     vk->vkDestroyCommandPool(mDevice, pool, nullptr);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    MultipleTransports,
+    VulkanHalTest,
+    testing::ValuesIn(GoldfishOpenglTestEnv::getTransportsToTest()));
 
 }  // namespace aemu

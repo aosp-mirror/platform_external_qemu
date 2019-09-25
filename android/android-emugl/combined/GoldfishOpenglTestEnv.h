@@ -13,6 +13,8 @@
 // limitations under the License.
 #pragma once
 
+#include <vector>
+
 namespace android {
 namespace base {
 
@@ -32,6 +34,8 @@ class TextureLoader;
 
 class GoldfishOpenglTestEnv {
 public:
+    static std::vector<const char*> getTransportsToTest();
+
     GoldfishOpenglTestEnv();
     ~GoldfishOpenglTestEnv();
 

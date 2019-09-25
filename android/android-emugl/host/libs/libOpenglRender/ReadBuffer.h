@@ -23,6 +23,8 @@ class ReadBuffer {
 public:
     explicit ReadBuffer(size_t bufSize);
     ~ReadBuffer();
+
+    void setNeededFreeTailSize(int size);
     int getData(IOStream *stream, int minSize); // get fresh data from the stream
     unsigned char *buf() { return m_readPtr; } // return the next read location
     size_t validData() { return m_validData; } // return the amount of valid data in readptr
@@ -31,11 +33,15 @@ public:
     void onLoad(android::base::Stream* stream);
     void onSave(android::base::Stream* stream);
 
+    void printStats();
 private:
     unsigned char *m_buf;
     unsigned char *m_readPtr;
     size_t m_size;
     size_t m_validData;
+
+    uint64_t m_tailMoveTimeUs = 0;
+    int m_neededFreeTailSize = 0;
 };
 
 }  // namespace emugl

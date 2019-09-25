@@ -41,11 +41,17 @@ public:
     ~RendererImpl();
 
     bool initialize(int width, int height, bool useSubWindow, bool egl2egl);
-    void stop(bool wait);
-    void finish();
+    void stop(bool wait) override;
+    void finish() override;
 
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
+
+    void* addressSpaceGraphicsConsumerCreate(
+        struct asg_context,
+        android::emulation::asg::ConsumerCallbacks) override final;
+    void addressSpaceGraphicsConsumerDestroy(void*) override final;
+
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
                          void* context, bool useBgraReadback) final;
@@ -77,9 +83,9 @@ public:
                          uint32_t h,
                          uint32_t dpi,
                          bool add) final;
-    void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb);
-    bool tryLockMultiDisplayOnLoad(void);
-    void unlockMultiDisplayOnLoad(void);
+    void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) override;
+    bool tryLockMultiDisplayOnLoad(void) override;
+    void unlockMultiDisplayOnLoad(void) override;
     void cleanupProcGLObjects(uint64_t puid) final;
 
     void pauseAllPreSave() final;
