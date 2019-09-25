@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "071284b2_ebcba650",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
+        "patchSetId": 36
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-09-25T17:38:13Z",
+      "side": 1,
+      "message": "Pretty much yes. The last sentence of the chapter says:\n\n\"Encoding methods are not specified here, although table-based mechanisms work well.\"\n\nSo I assume this is the right approach (actually the whole table is copy-pasted from a c++ implementation)",
+      "parentUuid": "2279c17e_dc1fea4e",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 25
+      },
+      "revId": "9b00b3cde0153a4c05b361e20327b4414b2860c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "08986259_901f28fb",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Astc.comp",
         "patchSetId": 36
