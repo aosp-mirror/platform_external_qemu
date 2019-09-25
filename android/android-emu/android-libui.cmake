@@ -130,6 +130,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/FramelessDetector.cpp
     android/skin/qt/ModalOverlay.cpp
     android/skin/qt/native-event-filter-factory.cpp
+    android/skin/qt/native-keyboard-event-handler.cpp
     android/skin/qt/OverlayMessageCenter.cpp
     android/skin/qt/perf-stats-3d-widget.cpp
     android/skin/qt/poster-image-well.cpp
@@ -279,42 +280,34 @@ set(ANDROID_SKIN_SOURCES
 if (NOT QTWEBENGINE)
   message(STATUS "Webengine disabled." )
   set(emulator-libui_darwin-x86_64_src
-      android/skin/keycode_macos.cpp
       android/skin/qt/mac-native-window.mm
       android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows-x86_64_src
-      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
-      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_linux-x86_64_src
-      android/skin/keycode_x11.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
 else ()
   message(STATUS "Webengine enabled")
   set(emulator-libui_darwin-x86_64_src
-      android/skin/keycode_macos.cpp
       android/skin/qt/mac-native-window.mm
       android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_windows-x86_64_src
-      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
-      android/skin/keycode_windows.cpp
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_linux-x86_64_src
-      android/skin/keycode_x11.cpp
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
@@ -396,6 +389,8 @@ set(emulator-libui_unittests_src
     android/mp4/SensorLocationEventProvider_test.cpp
     android/skin/keycode_unittest.cpp
     android/skin/keycode-buffer_unittest.cpp
+    android/skin/qt/native-keyboard-event-handler_unittest.cpp
+    android/skin/qt/qtmain_dummy_test.cpp
     android/skin/rect_unittest.cpp
     android/recording/test/DummyAudioProducer.cpp
     android/recording/test/DummyVideoProducer.cpp
@@ -406,7 +401,6 @@ set(emulator-libui_unittests_src
 list(APPEND android-libui-testdata
             testdata/mp4/video.mp4)
 
-set(emulator-libui_unittests_windows_src android/skin/qt/qtmain_dummy_test.cpp)
 android_add_test(emulator-libui_unittests)
 
 android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}" testdata)
@@ -432,6 +426,8 @@ target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
 target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG)
 
+android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64 PUBLIC dirent-win32)
+
 # Version of libui without Qt
 
 set(emulator-libui-headless_src
@@ -439,7 +435,6 @@ set(emulator-libui-headless_src
     ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
 
 android_add_library(emulator-libui-headless)
-android_target_link_libraries(emulator-libui-headless windows_msvc-x86_64 PUBLIC dirent-win32)
 
 target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
 
