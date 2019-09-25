@@ -180,7 +180,7 @@ void ring_buffer_init_view_only(
     v->mask = (1 << shift) - 1;
 }
 
-static uint32_t ring_buffer_view_get_ring_pos(
+uint32_t ring_buffer_view_get_ring_pos(
     const struct ring_buffer_view* v,
     uint32_t index) {
     return index & v->mask;
