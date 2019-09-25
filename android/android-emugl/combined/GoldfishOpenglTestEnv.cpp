@@ -21,6 +21,8 @@
 #include "android/cmdline-option.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
+#include "android/emulation/address_space_graphics.h"
+#include "android/emulation/address_space_graphics_types.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
@@ -64,6 +66,10 @@ using android::base::pj;
 using android::base::System;
 using android::HostAddressSpaceDevice;
 using android::HostGoldfishPipeDevice;
+
+using android::emulation::asg::AddressSpaceGraphicsContext;
+using android::emulation::asg::ConsumerInterface;
+using android::emulation::asg::ConsumerCallbacks;
 
 static constexpr int kWindowSize = 256;
 
@@ -144,7 +150,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     // Set fake guest properties
     property_set("ro.kernel.qemu.gles", "1");
     property_set("qemu.sf.lcd_density", "420");
-    property_set("ro.kernel.qemu.gltransport", "pipe");
+    property_set("ro.kernel.qemu.gltransport", "asg");
     property_set("ro.kernel.qemu.gltransport.drawFlushInterval", "800");
 
     android_initOpenglesEmulation();
@@ -188,6 +194,28 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     sTestEnvCmdLineOptions.no_snapshot_load = 0;
 
     android_cmdLineOptions = &sTestEnvCmdLineOptions;
+
+    auto openglesRenderer = android_getOpenglesRenderer().get();
+
+    ConsumerInterface interface = {
+        // create
+        [openglesRenderer](struct asg_context context,
+           ConsumerCallbacks callbacks) {
+           return openglesRenderer->addressSpaceGraphicsConsumerCreate(
+               context, callbacks);
+        },
+        // destroy
+        [openglesRenderer](void* consumer) {
+           return openglesRenderer->addressSpaceGraphicsConsumerDestroy(
+               consumer);
+        },
+        // TODO
+        // save
+        [](void* consumer, android::base::Stream* stream) { },
+        // load
+        [](void* consumer, android::base::Stream* stream) { },
+    };
+    AddressSpaceGraphicsContext::setConsumer(interface);
 }
 
 GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {

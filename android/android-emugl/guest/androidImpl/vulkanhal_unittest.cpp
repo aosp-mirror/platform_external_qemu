@@ -1223,4 +1223,36 @@ TEST_F(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
     vk->vkDestroyCommandPool(mDevice, pool, nullptr);
 }
 
+// Tests many vkGetPhysicalDeviceProperties in a row.
+TEST_F(VulkanHalTest, RoundTrips) {
+    for (uint32_t i = 0; i < 120000; ++i) {
+        VkPhysicalDeviceProperties props;
+        vk->vkGetPhysicalDeviceProperties(mPhysicalDevice, &props);
+        PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
+                physDeviceImageFormatPropertiesFunc =
+                        (PFN_vkGetPhysicalDeviceImageFormatProperties2KHR)
+                                vk->vkGetInstanceProcAddr(mInstance,
+                                                      "vkGetPhysicalDeviceImageForm"
+                                                      "atProperties2KHR");
+
+        EXPECT_NE(nullptr, physDeviceImageFormatPropertiesFunc);
+
+        VkPhysicalDeviceImageFormatInfo2 imageFormatInfo = {
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2, 0,
+            VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_TYPE_2D,
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_SAMPLED_BIT,
+            0,
+        };
+
+        VkImageFormatProperties2 res = {
+            VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2, 0,
+        };
+
+        EXPECT_EQ(VK_SUCCESS, physDeviceImageFormatPropertiesFunc(
+                                      mPhysicalDevice, &imageFormatInfo, &res));
+    }
+}
+
 }  // namespace aemu
