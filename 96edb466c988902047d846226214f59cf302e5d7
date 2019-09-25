@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2fd26936_317cea1a",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 713,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T05:48:15Z",
+      "side": 1,
+      "message": "Should we crash here if s_current_allocator is not null (e.g. we have two devices)?",
+      "range": {
+        "startLine": 713,
+        "startChar": 4,
+        "endLine": 713,
+        "endChar": 23
+      },
+      "revId": "96edb466c988902047d846226214f59cf302e5d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fdc57509_f83b6278",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-25T05:48:15Z",
+      "side": 1,
+      "message": "Do we need to say something about accessing the allocator from different threads?",
+      "range": {
+        "startLine": 873,
+        "startChar": 4,
+        "endLine": 873,
+        "endChar": 51
+      },
+      "revId": "96edb466c988902047d846226214f59cf302e5d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
