@@ -61,6 +61,7 @@ public:
     // someone needs to call 'shutdown' to let us know we should stop
     // those actions.
     static void shutDown();
+    void sendMetricsOnShutDown();
 
     void show();
     void showPane(ExtendedWindowPane pane);

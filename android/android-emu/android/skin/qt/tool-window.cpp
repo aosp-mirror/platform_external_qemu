@@ -913,6 +913,7 @@ bool ToolWindow::shouldClose() {
 
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
+        mExtendedWindow.get()->sendMetricsOnShutDown();
         parentWidget()->close();
         return true;
     }
@@ -927,6 +928,7 @@ void ToolWindow::on_close_button_clicked() {
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier)) {
         // The user shift-clicked on the X
         // This counts as us asking and having the user say "don't save"
+        mExtendedWindow.get()->sendMetricsOnShutDown();
         mAskedWhetherToSaveSnapshot = true;
         android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
         parentWidget()->close();
