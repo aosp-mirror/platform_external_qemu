@@ -494,9 +494,13 @@ static void writeVarLargeEncodingExpression(Var& var, FILE* fp)
     if (var.nullAllowed()) {
         fprintf(fp, "\tif (%s != NULL) {\n", varname);
     }
+
     if (var.writeExpression() != "") {
         fprintf(fp, "%s", var.writeExpression().c_str());
     } else {
+        if (var.packExpression().size() != 0) {
+        fprintf(fp, "%s;", var.packExpression().c_str());
+        }
         fprintf(fp, "\t\tstream->writeFully(%s, __size_%s);\n", varname, varname);
         fprintf(fp, "\t\tif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n", varname, varname);
     }
