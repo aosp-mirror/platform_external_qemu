@@ -462,19 +462,22 @@ endfunction()
 
 # This function generates a def file from a static library
 # This def file can be used to construct a .dll on windows.
-function(android_generate_def_file tgt var)
+function(android_generate_def_file src tgt def_var)
   set(DEF ${CMAKE_CURRENT_BINARY_DIR}/${tgt}.def)
+  set(LIB ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_STATIC_LIBRARY_PREFIX}${src}${CMAKE_STATIC_LIBRARY_SUFFIX})
   add_custom_command(OUTPUT ${tgt}.def
                      COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/gen_def.py
                              --objdump ${CMAKE_OBJDUMP}
-                             --lib ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_STATIC_LIBRARY_PREFIX}${tgt}${CMAKE_STATIC_LIBRARY_SUFFIX}
+                             --nm ${CMAKE_NM}
+                             --lib ${LIB}
+                             --name ${tgt}
                              --defs ${DEF}
-                     DEPENDS ${tgt}
+                     DEPENDS ${src}
                      VERBATIM)
   set_source_files_properties(${DEF} PROPERTIES GENERATED TRUE)
   set_source_files_properties(${DEF} PROPERTIES SKIP_AUTOGEN ON)
   set_source_files_properties(${DEF} PROPERTIES HEADER_FILE_ONLY TRUE)
-  set(${var} ${DEF} PARENT_SCOPE)
+  set(${def_var} ${DEF} PARENT_SCOPE)
 endfunction()
 
 # Copies the list of test data files to the given destination The test data resides in the prebuilts/android-emulator-
@@ -801,7 +804,7 @@ endfunction()
 
 # Strips the given prebuilt executable during install..
 function(android_strip_prebuilt FNAME)
-  # MSVC stores debug info in seperate file, so no need to strip
+  # MSVC stores debug info in separate file, so no need to strip
   if(NOT WINDOWS_MSVC_X86_64)
     install(CODE "if(CMAKE_INSTALL_DO_STRIP) \n
                         execute_process(COMMAND ${CMAKE_STRIP} \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${FNAME}\")\n
