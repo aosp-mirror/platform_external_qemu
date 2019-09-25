@@ -38,4 +38,29 @@ struct address_space_device_control_ops {
 struct address_space_device_control_ops*
 get_address_space_device_control_ops(void);
 
+struct AddressSpaceHwFuncs {
+    /* Called by the host to reserve a shared region. Guest users can then
+     * suballocate into this region. This saves us a lot of KVM slots.
+     * Returns the relative offset to the starting phys addr in |offset|
+     * and returns 0 if successful, -errno otherwise. */
+    int (*allocSharedHostRegion)(uint64_t page_aligned_size, uint64_t* offset);
+    /* Called by the host to free a shared region. Only useful on teardown
+     * or when loading a snapshot while the emulator is running.
+     * Returns 0 if successful, -errno otherwise. */
+    int (*freeSharedHostRegion)(uint64_t offset);
+    
+    /* Versions of the above but when the state is already locked. */
+    int (*allocSharedHostRegionLocked)(uint64_t page_aligned_size, uint64_t* offset);
+    int (*freeSharedHostRegionLocked)(uint64_t offset);
+
+    /* Obtains the starting physical address for which the resulting offsets
+     * are relative to. */
+    uint64_t (*getPhysAddrStart)(void);
+    uint64_t (*getPhysAddrStartLocked)(void);
+};
+
+extern const struct AddressSpaceHwFuncs* address_space_set_hw_funcs(
+    const struct AddressSpaceHwFuncs* hwFuncs);
+const struct AddressSpaceHwFuncs* get_address_space_device_hw_funcs(void);
+
 } // extern "C"
