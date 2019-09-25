@@ -26,4 +26,32 @@ typedef struct GoldfishAddressSpaceOpsTag {
 extern void
 goldfish_address_space_set_service_ops(const GoldfishAddressSpaceOps* ops);
 
+/* Called by the host to reserve a shared region. Guest users can then
+ * suballocate into this region. This saves us a lot of KVM slots.
+ * Returns the relative offset to the starting phys addr in |offset|
+ * and returns 0 if successful, -errno otherwise. */
+extern int
+goldfish_address_space_alloc_shared_host_region(
+    uint64_t page_aligned_size, uint64_t* offset);
+
+/* Called by the host to free a shared region. Only useful on teardown
+ * or when loading a snapshot while the emulator is running.
+ * Returns 0 if successful, -errno otherwise. */
+extern int
+goldfish_address_space_free_shared_host_region(uint64_t offset);
+
+/* Versions of the above but when the state is already locked. */
+extern int
+goldfish_address_space_alloc_shared_host_region_locked(
+    uint64_t page_aligned_size, uint64_t* offset);
+extern int
+goldfish_address_space_free_shared_host_region_locked(uint64_t offset);
+
+/* Called by the host to get the starting physical address,
+ * which is determined by the kernel. */
+extern uint64_t
+goldfish_address_space_get_phys_addr_start(void);
+extern uint64_t
+goldfish_address_space_get_phys_addr_start_locked(void);
+
 #endif /* _HW_GOLDFISH_ADDRESS_SPACE_H */
