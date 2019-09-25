@@ -50,6 +50,8 @@ public:
     void freeAll();
     uint64_t getOffset(void* ptr);
 
+    bool empty() const;
+
     // Convenience function to allocate an array
     // of objects of type T.
     template <class T>
