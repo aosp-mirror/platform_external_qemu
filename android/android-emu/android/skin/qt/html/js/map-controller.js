@@ -58,7 +58,7 @@ class MapController extends GoogleMapPageComponent {
         $('#locationInfoOverlay').html(this.viewModel.formatLatLngString(latLng));
     }
 
-    setRoute(routeJson) {
+    setRoute(routeJson, isSavedRoute) {
         console.log('MapController::setRoute called', routeJson);
         this.viewModel.setIsLoadingRoute(true);
         this.hideGpxKmlPanel();
@@ -67,7 +67,7 @@ class MapController extends GoogleMapPageComponent {
         this.mapManager.clearMarkers();
         if (routeJson.length > 0) {
             this.viewModel.setRoute(routeJson);
-            this.viewModel.setEditable(false);
+            this.viewModel.setEditable(!isSavedRoute);
             this.showRouteEditor();
         }
         else {
@@ -90,11 +90,9 @@ class MapController extends GoogleMapPageComponent {
             this.mapManager.map.setOptions({ zoomControl: false });
             $('#locationInfoOverlay').css('display', 'flex');
         } else {
-            this.locationPanel.hide();
             this.viewModel.setIsPlayingRoute(false);
             this.searchBox.show();
             this.mapManager.map.setOptions({ zoomControl: true });
-            this.viewModel.sendRouteToEmulator();
             $('#locationInfoOverlay').css('display', 'none');
         }
     }

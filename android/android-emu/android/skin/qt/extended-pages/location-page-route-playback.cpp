@@ -31,6 +31,12 @@ void LocationPage::on_loc_playRouteButton_clicked() {
         // START
         playRouteStateChanged(false);
         emit mMapBridge->showRoutePlaybackOverlay(true);
+        // Save the index of the saved route playing to set it back when stopping the playback
+        if (mUi->loc_routeList->selectedItems().size() == 1) {
+            mSavedRoutePlayingItem = mUi->loc_routeList->selectedItems()[0];
+        } else {
+            mSavedRoutePlayingItem = nullptr;
+        }
         mUi->loc_playRouteButton->setText(tr("STOP ROUTE"));
         if (parsePointsFromJson()) {
             locationPlaybackStart_v2();
