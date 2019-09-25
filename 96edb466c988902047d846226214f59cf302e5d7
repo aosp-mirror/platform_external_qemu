@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f7126306_ab600e04",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 713,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-25T15:36:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fd26936_317cea1a",
+      "range": {
+        "startLine": 713,
+        "startChar": 4,
+        "endLine": 713,
+        "endChar": 23
+      },
+      "revId": "96edb466c988902047d846226214f59cf302e5d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdc57509_f83b6278",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "96edb466c988902047d846226214f59cf302e5d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a18a387_1089d090",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-25T15:36:46Z",
+      "side": 1,
+      "message": "Put it under a lock",
+      "parentUuid": "fdc57509_f83b6278",
+      "range": {
+        "startLine": 873,
+        "startChar": 4,
+        "endLine": 873,
+        "endChar": 51
+      },
+      "revId": "96edb466c988902047d846226214f59cf302e5d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
