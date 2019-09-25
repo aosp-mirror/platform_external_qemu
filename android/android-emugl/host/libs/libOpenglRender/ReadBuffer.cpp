@@ -36,17 +36,25 @@ ReadBuffer::~ReadBuffer() {
     free(m_buf);
 }
 
+void ReadBuffer::setNeededFreeTailSize(int size) {
+    m_neededFreeTailSize = size;
+}
+
 int ReadBuffer::getData(IOStream* stream, int minSize) {
     assert(stream);
     assert(minSize > (int)m_validData);
 
     const int minSizeToRead = minSize - m_validData;
+    const int neededFreeTailThisTime =
+        std::max(minSizeToRead,
+                 m_neededFreeTailSize);
+
     int maxSizeToRead;
     const int freeTailSize = m_buf + m_size - (m_readPtr + m_validData);
-    if (freeTailSize >= minSizeToRead) {
+    if (freeTailSize >= neededFreeTailThisTime) {
         maxSizeToRead = freeTailSize;
     } else {
-        if (freeTailSize + (m_readPtr - m_buf) >= minSizeToRead) {
+        if (freeTailSize + (m_readPtr - m_buf) >= neededFreeTailThisTime) {
             // There's some gap in the beginning, if we move the data over it
             // that's going to be enough.
             memmove(m_buf, m_readPtr, m_validData);
@@ -84,6 +92,7 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
     do {
         const size_t readNow = stream->read(m_readPtr + m_validData,
                                             maxSizeToRead - readTotal);
+
         if (!readNow) {
             if (readTotal > 0) {
                 return readTotal;
@@ -123,4 +132,9 @@ void ReadBuffer::onLoad(android::base::Stream* stream) {
     stream->read(m_readPtr, m_validData);
 }
 
+void ReadBuffer::printStats() {
+    printf("ReadBuffer::%s: tail move time %f ms\n", __func__,
+            (float)m_tailMoveTimeUs / 1000.0f);
+    m_tailMoveTimeUs = 0;
+}
 }  // namespace emugl
