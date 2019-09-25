@@ -16,6 +16,8 @@
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
 #include "android/base/files/Stream.h"
+#include "android/base/ring_buffer.h"
+#include "android/emulation/address_space_graphics_types.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
 
@@ -43,6 +45,12 @@ public:
     //   the call as all the required data is copied here synchronously.
     virtual RenderChannelPtr createRenderChannel(
             android::base::Stream* loadStream = nullptr) = 0;
+
+    // analog of createRenderChannel, but for the address space graphics device
+    virtual void* addressSpaceGraphicsConsumerCreate(
+        struct asg_context,
+        android::emulation::asg::ConsumerCallbacks) = 0;
+    virtual void addressSpaceGraphicsConsumerDestroy(void*) = 0;
 
     // getHardwareStrings - describe the GPU hardware and driver.
     // The underlying GL's vendor/renderer/version strings are returned to the
