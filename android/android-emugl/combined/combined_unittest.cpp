@@ -30,6 +30,7 @@
 #include "GrallocDispatch.h"
 
 #include <android/hardware_buffer.h>
+#include <cutils/properties.h>
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -66,6 +67,15 @@ protected:
     static void TearDownTestCase() {
         delete testEnv;
         testEnv = nullptr;
+    }
+
+    bool usingAddressSpaceGraphics() {
+        char value[PROPERTY_VALUE_MAX];
+        if (property_get(
+            "ro.kernel.qemu.gltransport", value, "pipe") > 0) {
+            return !strcmp("asg", value);
+        }
+        return false;
     }
 
     struct EGLState {
@@ -925,6 +935,11 @@ TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
 }
 
 TEST_F(CombinedGoldfishOpenglTest, GenericSnapshot) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
     androidSnapshot_save("test_snapshot");
@@ -932,6 +947,11 @@ TEST_F(CombinedGoldfishOpenglTest, GenericSnapshot) {
 }
 
 TEST_F(CombinedGoldfishOpenglTest, QuickbootSnapshot) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
     androidSnapshot_quickbootSave("test_snapshot");
@@ -939,6 +959,11 @@ TEST_F(CombinedGoldfishOpenglTest, QuickbootSnapshot) {
 }
 
 TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotLoadMulti) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
     androidSnapshot_save("test_snapshot");
@@ -949,6 +974,11 @@ TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotLoadMulti) {
 
 // TODO: Test wtih hostmem device and goldfish address space device snapshot.
 TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotGralloc) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
 
