@@ -22,6 +22,30 @@
       "revId": "60a086be5d52ca045098e6059183b3a3fdd5ac8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "343a6d71_338df94e",
+        "filename": "android/android-emu/android/base/ring_buffer.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-26T03:50:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46bb0072_1cf2d1f2",
+      "range": {
+        "startLine": 40,
+        "startChar": 13,
+        "endLine": 40,
+        "endChar": 20
+      },
+      "revId": "60a086be5d52ca045098e6059183b3a3fdd5ac8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
