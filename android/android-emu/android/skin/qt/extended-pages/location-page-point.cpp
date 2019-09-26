@@ -20,6 +20,7 @@
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/logging-category.h"
 #include "android/utils/path.h"
 
 #include <QDateTime>
@@ -73,7 +74,7 @@ bool addJavascriptFromResource(QWebEnginePage* const webEnginePage,
     QFile jsFile(qrcFile);
     QWebEngineScript script;
     if(!jsFile.open(QIODevice::ReadOnly)) {
-        qDebug() << QString("Couldn't open %1: %2").arg(qrcFile).arg(jsFile.errorString());
+        qCDebug(emu) << QString("Couldn't open %1: %2").arg(qrcFile).arg(jsFile.errorString());
         return false;
     }
 

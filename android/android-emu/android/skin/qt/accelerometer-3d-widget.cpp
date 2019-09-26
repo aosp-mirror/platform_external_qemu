@@ -9,12 +9,14 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/accelerometer-3d-widget.h"
+
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/skin/qt/gl-common.h"
+#include "android/skin/qt/logging-category.h"
 #include "android/skin/qt/wavefront-obj-parser.h"
 
 #include <glm/gtc/epsilon.hpp>
@@ -85,7 +87,7 @@ static bool loadTexture(const GLESv2Dispatch* gles2,
                                                     QImage::Format_RGBA8888 :
                                                     QImage::Format_Grayscale8);
     if (image.isNull()) {
-        qWarning("Failed to load image \"%s\"", source_filename);
+        qCWarning(emu, "Failed to load image \"%s\"", source_filename);
         return false;
     }
     gles2->glTexImage2D(target,
@@ -191,7 +193,7 @@ bool Accelerometer3DWidget::initProgram() {
     GLint compile_status = 0;
     mGLES2->glGetProgramiv(mProgram, GL_LINK_STATUS, &compile_status);
     if (compile_status == GL_FALSE) {
-        qWarning("Failed to link program");
+        qCWarning(emu, "Failed to link program");
         return false;
     }
     CHECK_GL_ERROR_RETURN("Failed to initialize shaders", false);
@@ -212,11 +214,11 @@ bool Accelerometer3DWidget::initModel() {
     if (model_file.open(QFile::ReadOnly)) {
         QTextStream file_stream(&model_file);
         if(!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
-            qWarning("Failed to load model");
+            qCWarning(emu, "Failed to load model");
             return false;
         }
     } else {
-        qWarning("Failed to open model file for reading");
+        qCWarning(emu, "Failed to open model file for reading");
         return false;
     }
     mElementsCount = indices.size();

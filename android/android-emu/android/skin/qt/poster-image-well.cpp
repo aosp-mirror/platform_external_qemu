@@ -12,6 +12,7 @@
 #include "android/skin/qt/poster-image-well.h"
 
 #include "android/metrics/proto/studio_stats.pb.h"
+#include "android/skin/qt/logging-category.h"
 
 #include <QDebug>
 #include <QDragEnterEvent>
@@ -158,7 +159,7 @@ bool PosterImageWell::setPathInternal(const QString& path) {
     QPixmap image(path);
     if (image.isNull()) {
         // Failed to load, reset back to an empty path.
-        qWarning() << tr("Can't load image: ") << path;
+        qCWarning(emu) << tr("Can't load image: ") << path;
 
         const bool pathChanged = !mPath.isNull();
         removeImage();

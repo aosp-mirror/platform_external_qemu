@@ -50,6 +50,8 @@
 
 #include "android/skin/qt/websockets/websockettransport.h"
 
+#include "android/skin/qt/logging-category.h"
+
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -103,11 +105,11 @@ void WebSocketTransport::textMessageReceived(const QString &messageData)
     QJsonParseError error;
     QJsonDocument message = QJsonDocument::fromJson(messageData.toUtf8(), &error);
     if (error.error) {
-        qWarning() << "Failed to parse text message as JSON object:" << messageData
+        qCWarning(emu) << "Failed to parse text message as JSON object:" << messageData
                    << "Error is:" << error.errorString();
         return;
     } else if (!message.isObject()) {
-        qWarning() << "Received JSON message that is not an object: " << messageData;
+        qCWarning(emu) << "Received JSON message that is not an object: " << messageData;
         return;
     }
     emit messageReceived(message.object(), this);
