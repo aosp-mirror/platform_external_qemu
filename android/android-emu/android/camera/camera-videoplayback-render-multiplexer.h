@@ -20,6 +20,7 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/Optional.h"
 #include "android/utils/compiler.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/videoinjection/VideoInjectionController.h"
@@ -28,6 +29,7 @@
 #include "android/camera/camera-videoplayback-video-renderer.h"
 #include "android/camera/camera-virtualscene-utils.h"
 
+using namespace android::base;
 typedef ::offworld::DatasetInfo DatasetInfo;
 
 namespace android {
@@ -63,7 +65,7 @@ private:
      bool mInitialized = false;
      size_t mCounter = 0;
      // async_id for ongoing non-sequential execution, including but not limited to play, pause.
-     uint32_t mOngoingAsyncId = std::numeric_limits<uint32_t>::max();
+     Optional<uint32_t> mOngoingAsyncId;
      bool mPlaysData = false;
 };
 

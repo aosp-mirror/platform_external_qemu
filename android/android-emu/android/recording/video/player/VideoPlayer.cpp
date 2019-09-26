@@ -1049,7 +1049,7 @@ void VideoPlayerImpl::videoRefresh() {
         return;
     }
 
-    if (mVideoFrameQueue.get() == nullptr) {
+    if (mVideoFrameQueue.get() == nullptr || mVideoFrameQueue->size() == 0) {
         scheduleRefresh(20);
         return;
     }
