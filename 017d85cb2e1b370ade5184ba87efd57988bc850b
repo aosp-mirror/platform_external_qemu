@@ -237,6 +237,29 @@
     },
     {
       "key": {
+        "uuid": "6c7d2410_68dbe6e7",
+        "filename": "android/android-emu/android/base/ring_buffer.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-09-26T03:05:47Z",
+      "side": 1,
+      "message": "Should we include version fields here so consumers and producers could agree on layout?",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 12
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8c9a4b4e_7eb649d2",
         "filename": "android/android-emu/android/base/ring_buffer.h",
         "patchSetId": 21
