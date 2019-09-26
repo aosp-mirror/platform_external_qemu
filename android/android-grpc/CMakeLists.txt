@@ -34,7 +34,9 @@ target_include_directories(android-grpc
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
 
 set(android-grpc_unittest_src
-    android/emulation/control/logcat/RingStreambuf_unittest.cpp)
+    android/emulation/control/logcat/RingStreambuf_unittest.cpp
+    android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
+)
 
 android_add_test(android-grpc_unittest)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++ gmock_main)
