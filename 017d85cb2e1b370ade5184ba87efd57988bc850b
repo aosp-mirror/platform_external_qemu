@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2441231b_664328dc",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-26T01:50:10Z",
+      "side": 1,
+      "message": "memset buf might take too long for stuff we\u0027ll overwrite anyway, but did initialize state.",
+      "parentUuid": "52e36440_64bde309",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 1
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5eb5fb32_bc83b491",
         "filename": "android/android-emu/android/base/ring_buffer.c",
         "patchSetId": 21
@@ -45,6 +69,30 @@
       "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "81bdb614_fc92b52e",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-26T01:50:10Z",
+      "side": 1,
+      "message": "No, but it is easier to use atomic ops when wanting to sync a buffer that is visible to both guest and host, which is what this will be used for.",
+      "parentUuid": "5eb5fb32_bc83b491",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 17
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2636bb82_2bd70289",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-26T01:50:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d8cbe104_45c0560f",
+      "range": {
+        "startLine": 58,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 11
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7260f0c_2e4307cc",
         "filename": "android/android-emu/android/base/ring_buffer.c",
         "patchSetId": 21
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "d74ca17c_34dd5fd2",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-26T01:50:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a7260f0c_2e4307cc",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 5
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ee33e01_b84d9119",
         "filename": "android/android-emu/android/base/ring_buffer.c",
         "patchSetId": 21
@@ -114,6 +210,30 @@
       "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e74050ed_52d890d1",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-09-26T01:50:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5ee33e01_b84d9119",
+      "range": {
+        "startLine": 160,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 5
+      },
+      "revId": "017d85cb2e1b370ade5184ba87efd57988bc850b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
