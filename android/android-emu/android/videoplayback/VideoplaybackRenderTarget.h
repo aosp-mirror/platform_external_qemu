@@ -47,7 +47,7 @@ private:
     void renderVideoFrame();
     void renderEmptyFrame();
     const unsigned char* mBuffer = nullptr;
-    size_t mBufferLen;
+    size_t mBufferLen = 0;
     FrameInfo mFrameInfo;
     const GLESv2Dispatch* const mGles2;
     size_t mRenderWidth;

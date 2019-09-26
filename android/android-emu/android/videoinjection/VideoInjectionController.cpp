@@ -273,7 +273,7 @@ void VideoInjectionControllerImpl::sendFollowUpAsyncResponse(
 
     // Creates the async reponse and propagates it.
     if (itr == mAsyncRequestContextMap.end()) {
-        LOG(ERROR) << "Unrecognizable async id.";
+        LOG(ERROR) << "Unrecognizable async id: " << async_id;
     } else {
         //Remove all elements, so following request won't be executed.
         if(result.err()){
@@ -285,7 +285,9 @@ void VideoInjectionControllerImpl::sendFollowUpAsyncResponse(
                 std::move(result), isCompleted, errorDetails);
 
         mSendMessageCallback(*(itr->second.pipe), asyncResponse);
-        mAsyncRequestContextMap.erase(itr);
+        if (isCompleted) {
+            mAsyncRequestContextMap.erase(itr);
+        }
     }
 }
 
