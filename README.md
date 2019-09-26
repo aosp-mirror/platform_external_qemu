@@ -7,9 +7,9 @@ This document gives you some background on the emulator and outlines how you can
 
 Make sure to install [Android Studio](https://developer.android.com/studio) and the associated SDKs. Do not forget to install the official emulator and create a few [android virtual devices](http://www.androiddocs.com/tools/devices/index.html). Next follow the instructions for the platform you would like to work on:
 
-  - [On Linux](android/docs/LINUX-DEV.MD)
-  - [On Mac](android/docs/get_started/macos/README.MD)
-  - [On Windows](android/docs/WINDOWS-DEV.MD)
+  - [On Linux](android/docs/LINUX-DEV.md)
+  - [On Mac](android/docs/get_started/macos/README.md)
+  - [On Windows](android/docs/WINDOWS-DEV.md)
 
 We use the [Repo](https://source.android.com/setup/develop/repo) tool to manage working accross multiple branches.
 
@@ -63,7 +63,7 @@ For incremental builds you can use `ninja`. For example
 
 ## Contributing code
 
-The emulator uses a [coding style](android/docs/ANDROID-CODING-STYLE.MD) derived from the [Chromium style](https://chromium.googlesource.com/chromium/src/+/master/styleguide/c++/c++.md). We use the repo tool to [submit pathces](https://gerrit.googlesource.com/git-repo/+/refs/heads/master/SUBMITTING_PATCHES.md). The usual workflow is roughly as follows:
+The emulator uses a [coding style](android/docs/ANDROID-CODING-STYLE.md) derived from the [Chromium style](https://chromium.googlesource.com/chromium/src/+/master/styleguide/c++/c++.md). We use the repo tool to [submit pathces](https://gerrit.googlesource.com/git-repo/+/refs/heads/master/SUBMITTING_PATCHES.md). The usual workflow is roughly as follows:
 
 ```sh
     repy sync # Pulls in all the changes accross all branches.
@@ -90,7 +90,7 @@ The repo tool will provide you with a url where you can find your change.
 
 ### Code Reviews
 
-Make sure to check the CL against our coding style: [coding style](android/docs/ANDROID-CODING-STYLE.MD). Coding style isn’t frozen: just edit it in our repository and create a code review to propose a change.
+Make sure to check the CL against our coding style: [coding style](android/docs/ANDROID-CODING-STYLE.md). Coding style isn’t frozen: just edit it in our repository and create a code review to propose a change.
 
 Some good articles on code reviewing, especially when it comes to google:
 

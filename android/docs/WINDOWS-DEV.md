@@ -24,13 +24,16 @@ some performance penalties due to this. You are highly encouraged to develop in 
 
 Install the following:
 
-- [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/). We will
+- [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/). We will
   need the compiler toolchain with the latest windows sdk, as we need the WHPX
   headers. Make sure to install the following set of tools:
     - Visual C++ build tools
     - Visual C++ ATL for x86 & x64
     - Visual C++ MFC for x86 & x64
     - Windows 10 SDK (10.0.177763.0)
+    - Make sure you have at least 16.3.1 or later installed! Older versions
+      have some STL issues that break the build.  See
+      [b/141381410](http://b/141381410) for details.
     - [Python](https://www.python.org/downloads/windows/). You only need this
       if your version of visual studio does not come with python.
     - [Cmake](https://cmake.org/download/). You only need this if your version
