@@ -13,6 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 
+#include <QApplication>
 #include <QFile>
 #include <QFont>
 #include <QHash>
@@ -75,16 +76,19 @@ struct FontSizeMapLoader {
 // system here the result is actually worse compared to hardcoded 8/10pt.
 #ifndef _WIN32
         QFont font; // Default ctor populates all values from the system.
+        // Set letter spacing
+        font.setLetterSpacing(QFont::PercentageSpacing, 105);
+        QApplication::setFont(font);
         if (font.pointSizeF() > 0) {
             const auto largeSize = font.pointSizeF();
-            const auto medSize = largeSize * 8 / 10;
+            const auto medSize = largeSize * 85.0 / 100;
             fontMap = {
                 {kFontMediumName, QString("%1pt").arg(medSize) },
                 {kFontLargeName, QString("%1pt").arg(largeSize) }
             };
         } else if (font.pixelSize() > 0) {
             const auto largeSize = font.pixelSize();
-            const auto medSize = largeSize * 8 / 10;
+            const auto medSize = largeSize * 85.0 / 100;
             fontMap = {
                 {kFontMediumName, QString("%1px").arg(medSize) },
                 {kFontLargeName, QString("%1px").arg(largeSize) }

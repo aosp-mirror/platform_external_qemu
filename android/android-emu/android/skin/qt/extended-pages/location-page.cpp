@@ -564,10 +564,8 @@ void LocationPage::locationPlaybackStop_v2()
 {
     mTimer.stop();
     mNextRoutePointIdx = -1;
-    mUi->loc_playRouteButton->setText(tr("PLAY ROUTE"));
     playRouteStateChanged(true);
     if (mSavedRoutePlayingItem != nullptr) {
-        qDebug() << "setting item";
         mUi->loc_routeList->setCurrentItem(nullptr);
         mUi->loc_routeList->setCurrentItem(mSavedRoutePlayingItem);
     } else {

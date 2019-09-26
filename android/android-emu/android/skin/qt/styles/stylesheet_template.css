@@ -68,7 +68,7 @@
     color: #CA4644;
 }
 *[ColorGroup="RoutePlaybackTitleItem"] {
-    background-color: #4285F4;
+    background-color: %%MACRO_BKG_COLOR%%;
     border: 1px solid %%LIST_WIDGET_BORDER%%;
 }
 *{
@@ -84,6 +84,7 @@ QListWidget::item {
 QListWidget::item:focus, QListWidget::item:selected {
     background-color: #4285F4;
 }
+
 QListWidget QLabel, QWidget QLabel {
     background-color: transparent;
 }
