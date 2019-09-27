@@ -308,7 +308,7 @@ endfunction()
 
 set(breakpad_processor_unittests basic_source_line_resolver_unittest cfi_frame_info_unittest
     # disassembler_x86_unittest
-    fast_source_line_resolver_unittest
+    # fast_source_line_resolver_unittest # We explicitly disable rtti in release builds, so we cannot run this one.
     map_serializers_unittest
     microdump_processor_unittest
     minidump_processor_unittest
@@ -325,6 +325,10 @@ set(breakpad_processor_unittests basic_source_line_resolver_unittest cfi_frame_i
     static_map_unittest
     static_range_map_unittest
     synth_minidump_unittest)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  list(APPEND breakpad_processor_unittests fast_source_line_resolver_unittest)
+endif()
 
 foreach(tst ${breakpad_processor_unittests})
   add_proc_test(${tst})
