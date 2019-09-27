@@ -1252,6 +1252,28 @@
    <header>qwebengineview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>locationTabs</tabstop>
+  <tabstop>loc_pointWebEngineView</tabstop>
+  <tabstop>loc_pointList</tabstop>
+  <tabstop>loc_singlePoint_setLocationButton</tabstop>
+  <tabstop>loc_importGpxKmlButton</tabstop>
+  <tabstop>loc_routeWebEngineView</tabstop>
+  <tabstop>loc_routeList</tabstop>
+  <tabstop>loc_repeatRoute</tabstop>
+  <tabstop>loc_routeSpeed</tabstop>
+  <tabstop>loc_playRouteButton</tabstop>
+  <tabstop>loc_importGpxKmlButton_route</tabstop>
+  <tabstop>loc_sendPointButton</tabstop>
+  <tabstop>loc_modeSwitch</tabstop>
+  <tabstop>loc_altitudeInput</tabstop>
+  <tabstop>loc_pathTable</tabstop>
+  <tabstop>loc_playbackSpeed</tabstop>
+  <tabstop>loc_GpxKmlButton</tabstop>
+  <tabstop>loc_playStopButton</tabstop>
+  <tabstop>loc_currentLoc</tabstop>
+  <tabstop>loc_speedInput</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
