@@ -4,8 +4,6 @@ prebuilt(QT5)
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 set(android-emu-crash-service_src
     android/crashreport/CrashService_common.cpp
-    # Make sure we are depending on HW_CONFIG
-    ${ANDROID_HW_CONFIG_H}
     )
 
 set(android-emu-crash-service_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
@@ -15,7 +13,7 @@ set(android-emu-crash-service_windows_msvc-x86_64_src android/crashreport/CrashS
 
 android_add_library(android-emu-crash-service)
 target_include_directories(android-emu-crash-service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-emu-crash-service PRIVATE breakpad_server curl android-emu)
+target_link_libraries(android-emu-crash-service PRIVATE breakpad_server curl android-emu android-hw-config)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(android-emu-crash-service windows_msvc-x86_64 PUBLIC dirent-win32)
 

@@ -315,7 +315,6 @@ endif()
 
 # Set the sources
 set(emulator-libui_src
-    ${ANDROID_HW_CONFIG_H}
     ${ANDROID_LIBUI_SRC_FILES}
     ${ANDROID_SKIN_QT_DYNAMIC_RESOURCES}
     ${ANDROID_SKIN_QT_MOC_SRC_FILES}
@@ -373,7 +372,8 @@ target_link_libraries(emulator-libui
                               Qt5::Widgets
                               Qt5::Gui
                               Qt5::Svg
-                              zlib)
+                              zlib
+                              android-hw-config)
 
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
@@ -431,7 +431,6 @@ android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64 PUBLI
 # Version of libui without Qt
 
 set(emulator-libui-headless_src
-    ${ANDROID_HW_CONFIG_H}
     ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
 
 android_add_library(emulator-libui-headless)
@@ -474,5 +473,6 @@ target_link_libraries(emulator-libui-headless
                               android-emu
                               emulator-libyuv
                               FFMPEG::FFMPEG
-                              zlib)
+                              zlib
+                              android-hw-config)
 

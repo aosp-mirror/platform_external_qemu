@@ -2,11 +2,10 @@
 
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
-android_generate_hw_config()
+
 # This is the set of sources that are common in both the shared libary and the archive. We currently have to split them
 # up due to dependencies on external variables/functions that are implemented in other libraries.
 set(android-emu-common
-    ${ANDROID_HW_CONFIG_H}
     android/adb-server.cpp
     android/avd/generate.cpp
     android/avd/hw-config.c
@@ -352,6 +351,7 @@ target_link_libraries(android-emu
                               png
                               lz4
                               zlib
+                              android-hw-config
 )
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
@@ -490,7 +490,9 @@ target_link_libraries(android-emu-shared
                               LibXml2::LibXml2
                               png
                               lz4
-                              zlib)
+                              zlib
+                              android-hw-config
+                              )
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu-shared
