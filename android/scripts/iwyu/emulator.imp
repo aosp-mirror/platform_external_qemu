@@ -1,0 +1,15 @@
+[
+#  Let's not expose the internals of grpc
+{ include: ["@.*grpcpp/impl/.*", private, "<grpcpp/grpcpp.h>", public] },
+
+# Or gtest.
+{ include: ["@.*gtest/gtest-.+", private, "<gtest/gtest.h>", public] },
+
+
+{ ref: clang-6.intrinsics.imp },
+{ ref: gcc.libc.imp },
+{ ref: gcc.symbols.imp },
+{ ref: libcxx.imp },
+{ ref: qt5_4.imp },
+{ ref: stl.c.headers.imp },
+]
