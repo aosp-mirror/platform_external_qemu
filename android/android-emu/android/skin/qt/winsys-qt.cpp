@@ -83,6 +83,8 @@ using android::base::Win32UnicodeString;
 #define  D(...)   ((void)0)
 #endif
 
+Q_LOGGING_CATEGORY(emu, "android.emu")
+
 struct GlobalState {
     int argc;
     char** argv;

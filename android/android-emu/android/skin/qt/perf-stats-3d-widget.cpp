@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "android/skin/qt/perf-stats-3d-widget.h"
+
+#include "android/skin/qt/logging-category.h"
 #include "android/skin/qt/vector-text-font.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
@@ -350,7 +352,7 @@ void main() {
     gl->glGetProgramiv(mProgram, GL_LINK_STATUS, &compile_status);
 
     if (compile_status == GL_FALSE) {
-        qWarning("Failed to link program");
+        qCWarning(emu, "Failed to link program");
         return false;
     }
 

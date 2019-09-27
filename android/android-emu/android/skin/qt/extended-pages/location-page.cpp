@@ -30,6 +30,7 @@
 #include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/logging-category.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/utils/path.h"
@@ -121,7 +122,7 @@ LocationPage::LocationPage(QWidget *parent) :
     mUi->setupUi(this);
 
     if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
-        qDebug() << "Location UI disabled by command-line option.";
+        qCDebug(emu) << "Location UI disabled by command-line option.";
         return;
     }
     bool useLocationV2 = false;

@@ -12,6 +12,7 @@
 #include "android/skin/qt/stylesheet.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/skin/qt/logging-category.h"
 
 #include <QApplication>
 #include <QFile>
@@ -141,7 +142,7 @@ public:
     explicit StylesheetTemplate(const QString& location) : mOk(true) {
         QFile source_file(location);
         if (!source_file.open(QIODevice::ReadOnly)) {
-            qWarning("StylesheetTemplate: could not open input file %s",
+            qCWarning(emu, "StylesheetTemplate: could not open input file %s",
                      location.toStdString().c_str());
             mOk = false;
             return;
@@ -173,7 +174,7 @@ public:
                         current_block_type = TemplateBlockType::RawText;
                         buf.clear();
                     } else {
-                        qWarning("StylesheetTemplate: Bad variable name %s",
+                        qCWarning(emu, "StylesheetTemplate: Bad variable name %s",
                                  buf.toStdString().c_str());
                         buf.clear();
                         current_block_type = TemplateBlockType::RawText;
@@ -192,7 +193,7 @@ public:
             break;
         case TemplateBlockType::UnboundVariable:
             // This shouldn't happen for valid inputs.
-            qWarning("StylesheetTemplate: Unterminated variable name %s",
+            qCWarning(emu, "StylesheetTemplate: Unterminated variable name %s",
                      buf.toStdString().c_str());
             mOk = false;
             break;
@@ -213,7 +214,7 @@ public:
                 if (value_iterator != arguments.end()) {
                     (*stream) << value_iterator.value();
                 } else {
-                    qWarning("StylesheetTemplate: variable %s unbound",
+                    qCWarning(emu, "StylesheetTemplate: variable %s unbound",
                              block.text.toStdString().c_str());
                     return false;
                 }
@@ -336,7 +337,7 @@ struct StylesheetValues {
 
     StylesheetValues() {
         if (!initializeStylesheets()) {
-            qWarning("Failed to initialize UI stylesheets!");
+            qCWarning(emu, "Failed to initialize UI stylesheets!");
         }
     }
 
@@ -344,7 +345,7 @@ private:
     bool initializeStylesheets() {
         StylesheetTemplate tpl(":/styles/stylesheet_template.css");
         if (!tpl.isOk()) {
-            qWarning("Failed to load stylesheet template!");
+            qCWarning(emu, "Failed to load stylesheet template!");
             return false;
         }
 
@@ -360,7 +361,7 @@ private:
 
         StylesheetTemplate font_tpl(":/styles/fonts_stylesheet_template.css");
         if (!font_tpl.isOk()) {
-            qWarning("Failed to load font stylesheet template!");
+            qCWarning(emu, "Failed to load font stylesheet template!");
             return false;
         }
 

@@ -39,6 +39,11 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     std::string qtPluginsSubDir = androidQtGetPluginsDir(bitness, emulatorDir);
 
     VERBOSE_PRINT(init,
+        "Silencing all qWarning(); use qCWarning(...) instead: QT_LOGGING_RULES=%s",
+        "default.warning=false");
+    system->envSet("QT_LOGGING_RULES", "default.warning=false");
+
+    VERBOSE_PRINT(init,
         "Setting Qt plugin search path: QT_QPA_PLATFORM_PLUGIN_PATH=%s",
         qtPluginsSubDir.c_str());
     system->envSet("QT_QPA_PLATFORM_PLUGIN_PATH", qtPluginsSubDir);
