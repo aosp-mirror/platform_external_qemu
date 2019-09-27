@@ -1,3 +1,4 @@
+project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
@@ -116,7 +117,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
   set(CMAKE_INSTALL_DO_STRIP TRUE)
   add_definitions("-DNDEBUG=1")
-  if(WINDOWS_X86_64)
+  if(WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64)
+    # clang-cl takes msvc based parameters, so -O3 is a nop
     add_c_flag("-O2")
   else()
     add_c_flag("-O3 -g3")
@@ -170,19 +172,26 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 if(WINDOWS_MSVC_X86_64)
-  add_c_flag("-Wno-microsoft-enum-forward-reference")
-  add_c_flag("-Wno-address-of-packed-member")
-  add_c_flag("-Wno-incompatible-ms-struct")
-  add_c_flag("-Wno-c++11-narrowing")
-  add_c_flag("-Wno-unknown-argument")
-  add_c_flag("-Wno-return-type")
-  add_c_flag("-Wno-microsoft-include")
-  add_c_flag("-Wno-incompatible-pointer-types")
-  add_c_flag("-Wno-incompatible-pointer-types-discards-qualifiers")
-  add_c_flag("-Wno-int-to-void-pointer-cast")
-  add_c_flag("-Wno-inconsistent-dllimport")
-  add_c_flag("-Wno-int-conversion") # Needed for setjmp hack.
   add_c_flag("-MD")
+  # b/141774858 to track turning them back on again.
+  add_c_flag("-Wno-everything")
+  add_definitions("-D_NO_EXCEPTIONS")
+
+  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Disable security checks, "we know what we are doing"
+    add_c_flag("-GS-")
+    # Disable rtti, we are not going to be needing it, this is the msvc equivalent
+    # of -fno-rtti
+    add_c_flag("-GR-")
+
+    # Link time optization tragically fails when cross compiling.
+    if (NOT CROSSCOMPILE)
+      # Do a global optimization pass (note, link times --> infinity)
+      add_c_flag("-flto=thin")
+      # Optimize a bit more on the vtables in use, note this requires -flto
+      add_c_flag("-fwhole-program-vtables")
+    endif()
+  endif()
 endif()
 
 if (OPTION_CLANG_TIDY)
@@ -201,9 +210,7 @@ add_c_flag("-g")
 # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
 # The  dynamic_cast operator can still be used for casts that do not require runtime type information, i.e. casts to
 # void * or to unambiguous base classes.
-#
-# For msvc build, the msvc C++ headers are using RTTI features (typeid) so have cannot disable it.
-if(NOT WINDOWS_MSVC_X86_64)
+if (NOT WINDOWS_MSVC_X86_64)
   add_cxx_flag("-fno-rtti")
 endif()
 
