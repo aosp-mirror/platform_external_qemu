@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e58e634a_d2250232",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-09-27T21:31:53Z",
+      "side": 1,
+      "message": "if you\u0027re using MSVC\u0027s STL you may want to define _NO_EXCEPTIONS to make it a bit smaller and a bit faster",
+      "range": {
+        "startLine": 120,
+        "startChar": 2,
+        "endLine": 120,
+        "endChar": 43
+      },
+      "revId": "2f15e143124e3ce6e1478f836a7d14ef71a0b1e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
