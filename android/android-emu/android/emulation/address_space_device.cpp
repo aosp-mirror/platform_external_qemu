@@ -320,6 +320,19 @@ struct address_space_device_control_ops* get_address_space_device_control_ops(vo
     return &sAddressSpaceDeviceOps;
 }
 
+static const struct AddressSpaceHwFuncs* sAddressSpaceHwFuncs = nullptr;
+
+const struct AddressSpaceHwFuncs* address_space_set_hw_funcs(
+        const AddressSpaceHwFuncs* hwFuncs) {
+    const AddressSpaceHwFuncs* result = sAddressSpaceHwFuncs;
+    sAddressSpaceHwFuncs = hwFuncs;
+    return result;
+}
+
+const struct AddressSpaceHwFuncs* get_address_space_device_hw_funcs(void) {
+    return sAddressSpaceHwFuncs;
+}
+
 } // extern "C"
 
 namespace android {

@@ -28,4 +28,3 @@ int goldfish_address_space_memory_state_save(android::base::Stream *stream);
 
 }  // namespace emulation
 }  // namespace android
-
