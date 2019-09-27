@@ -19,7 +19,11 @@
 
 #include <gtest/gtest.h>
 
+
 namespace emugl {
+
+extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
+
 
 TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
@@ -56,7 +60,16 @@ protected:
 template <typename T>
 class SnapshotGlRenderingSampleTest : public ::testing::Test {
 protected:
-    virtual void SetUp() override { mApp.reset(new T()); }
+    virtual void SetUp() override {
+        setupStandaloneLibrarySearchPaths();
+        emugl::set_emugl_window_operations(*gQAndroidEmulatorWindowAgent);
+        //const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+
+        const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+        const GLESv2Dispatch* testGl = getSnapshotTestDispatch();
+
+        mApp.reset(new T());
+    }
 
     virtual void TearDown() override {
         mApp.reset();
