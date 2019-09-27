@@ -12,16 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <google/protobuf/text_format.h>
-#include <grpcpp/support/server_interceptor.h>
+#include <grpcpp/grpcpp.h>  // for InterceptionHookPoints, InterceptionHookP...
+#include <stdint.h>         // for uint64_t
+#include <array>            // for array
+#include <functional>       // for function
+#include <string>           // for string
 
-#include <array>
+namespace google {
+namespace protobuf {
+class Message;
+}  // namespace protobuf
+}  // namespace google
+
 namespace android {
 namespace control {
 namespace interceptor {
 
 using namespace grpc::experimental;
-class LoggingInterceptorFactory;
 
 typedef struct InvocationRecord {
     std::string method = "unknown";          // Invoked method.

@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include "android/console.h"
-#include "android/emulation/control/RtcBridge.h"
-#include <grpcpp/grpcpp.h>
+#include <memory>                                // for shared_ptr, unique_ptr
+
+#include "android/console.h"                     // for AndroidConsoleAgents
+#include "grpcpp/security/server_credentials.h"  // for ServerCredentials
 
 namespace android {
 namespace emulation {
 namespace control {
+class RtcBridge;
+
 class EmulatorControllerService {
 public:
     class Builder;
+
     virtual ~EmulatorControllerService() {}
     virtual void stop() = 0;
 };

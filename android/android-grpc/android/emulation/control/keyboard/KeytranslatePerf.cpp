@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <stddef.h>
+#include <stdint.h>
+#include <map>
 // A small benchmark used to compare the performance of android::base::Lock
 // with other mutex implementions.
 #include <unordered_map>
+#include <utility>
 
+#include "android/base/ArraySize.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "benchmark/benchmark_api.h"
 

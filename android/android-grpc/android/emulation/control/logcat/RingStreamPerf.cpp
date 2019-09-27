@@ -15,11 +15,12 @@
 // A small benchmark used to compare the performance of android::base::Lock
 // with other mutex implementions.
 
-#include "android/emulation/control/logcat/RingStreambuf.h"
+#include <iostream>                                          // for operator<<
+#include <string>                                            // for string
+#include <utility>                                           // for pair
 
-#include <iostream>
-#include <string>
-#include "benchmark/benchmark_api.h"
+#include "android/emulation/control/logcat/RingStreambuf.h"  // for RingStre...
+#include "benchmark/benchmark_api.h"                         // for State
 
 using android::emulation::control::RingStreambuf;
 

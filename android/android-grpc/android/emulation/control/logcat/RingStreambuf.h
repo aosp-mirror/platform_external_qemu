@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <streambuf>
-#include <vector>
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
+#include <stdint.h>                                          // for uint16_t
+#include <stdio.h>                                           // for EOF
+#include <ios>                                               // for streamsize
+#include <streambuf>                                         // for streambuf
+#include <string>                                            // for string
+#include <utility>                                           // for pair
+#include <vector>                                            // for vector
+
+#include "android/base/CpuTime.h"                            // for base
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
 
 namespace android {
 namespace emulation {

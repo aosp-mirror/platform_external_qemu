@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <functional>
+#include <atomic>
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -22,15 +23,17 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
 #include "control_socket.pb.h"
-#include "grpcpp/create_channel_posix.h"
 #include "waterfall.grpc.pb.h"
+
+namespace grpc {
+class ChannelInterface;
+}  // namespace grpc
 
 namespace android {
 namespace emulation {
 namespace control {
 
 using Stub = waterfall::Waterfall::Stub;
-class ControlSocketLibrary;
 
 /**
  * A ControlSocket is a WaterfallGuest <-> Host connection that implements the

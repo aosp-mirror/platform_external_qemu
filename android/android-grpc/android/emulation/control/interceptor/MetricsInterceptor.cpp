@@ -14,11 +14,15 @@
 // limitations under the License.
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
 
-#include <zlib.h>
+#include <grpcpp/grpcpp.h>                          // for ServerRpcInfo
+#include <stdint.h>                                 // for uint32_t, uint8_t
+#include <zlib.h>                                   // for crc32
+#include <functional>                               // for __base
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "android/base/Log.h"                       // for LogStream, LOG
+#include "android/base/memory/LazyInstance.h"       // for LazyInstance, LAZ...
+#include "android/metrics/MetricsReporter.h"        // for MetricsReporter
+#include "android/metrics/proto/studio_stats.pb.h"  // for EmulatorGrpc, And...
 
 namespace android {
 namespace control {

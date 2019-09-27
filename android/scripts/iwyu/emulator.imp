@@ -4,6 +4,7 @@
 
 # Or gtest.
 { include: ["@.*gtest/gtest-.+", private, "<gtest/gtest.h>", public] },
+{ include: ["@.*gmock/gmock-.+", private, "<gmock/gmock.h>", public] },
 
 
 { ref: clang-6.intrinsics.imp },
