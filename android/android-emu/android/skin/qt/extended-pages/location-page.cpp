@@ -131,12 +131,13 @@ LocationPage::LocationPage(QWidget *parent) :
     if (feature_is_enabled(kFeature_LocationUiV2)) {
         useLocationV2 = true;
         auto mapsKeyHolder = android::location::MapsKey::get();
+        QObject::connect(this,
+                         &LocationPage::onMapsKeyUpdated,
+                         this,
+                         &LocationPage::setUpWebEngine,
+                         Qt::QueuedConnection);
         // Always prefer user-provided maps key
         if (strlen(mapsKeyHolder->userMapsKey()) == 0) {
-            QObject::connect(this,
-                             &LocationPage::onMapsKeyUpdated,
-                             this,
-                             &LocationPage::setUpWebEngine);
             auto studioMapsKey = android::location::StudioMapsKey::create(
                 [](android::base::StringView mapsFile, void* opaque) {
                     auto s = reinterpret_cast<LocationPage*>(opaque);
@@ -151,6 +152,7 @@ LocationPage::LocationPage(QWidget *parent) :
                 }, this);
         } else {
             mMapsApiKey = mapsKeyHolder->userMapsKey();
+            emit onMapsKeyUpdated();
         }
     }
 #endif
