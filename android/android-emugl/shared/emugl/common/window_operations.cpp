@@ -15,19 +15,23 @@
 */
 
 #include "emugl/common/misc.h"
+#include <cassert>
 
 namespace {
 
 QAndroidEmulatorWindowAgent g_window_operations;
+static bool g_window_initialized = false;
 
 }  // namespace
 
 void emugl::set_emugl_window_operations(const QAndroidEmulatorWindowAgent &window_operations)
 {
     g_window_operations = window_operations;
+    g_window_initialized = true;
 }
 
 const QAndroidEmulatorWindowAgent &emugl::get_emugl_window_operations()
 {
+    assert(g_window_initialized);
     return g_window_operations;
 }
