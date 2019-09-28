@@ -98,14 +98,12 @@ class MapController extends GoogleMapPageComponent {
     }
 
     showGpxKmlPanel(title, subtitle) {
-        this.viewModel.setIsPlayingRoute(true);
         this.routePanel.close();
         this.searchBox.hide();
         this.locationPanel.showTitleSubtitle(title || '', subtitle || '');
     }
 
     hideGpxKmlPanel() {
-        this.viewModel.setIsPlayingRoute(false);
         this.routePanel.close();
         this.locationPanel.hide();
         this.searchBox.show();
@@ -117,6 +115,7 @@ class MapController extends GoogleMapPageComponent {
             return;
         }
 
+        this.viewModel.setIsLoadingRoute(true);
         this.mapManager.clearDirections();
         this.showGpxKmlPanel(title, subtitle);
 
@@ -140,6 +139,7 @@ class MapController extends GoogleMapPageComponent {
 
         this.mapManager.zoomToPath(path);
         channel.objects.emulocationserver.onSavedRouteDrawn();
+        this.viewModel.setIsLoadingRoute(false);
     }
 
     displayRouteEditor(latLng, address) {

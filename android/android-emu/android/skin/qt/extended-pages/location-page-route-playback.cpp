@@ -230,6 +230,7 @@ bool LocationPage::parseGpxKmlJson(const QJsonDocument& jsonDoc,
         mRouteNumPoints = 0;
         return false;
     }
+    mRouteNumPoints = pathArray.size();
 
     mUi->loc_routePlayingTitleItem->setSubtitle(description);
     mUi->loc_routePlayingTitleItem->showFileIcon();
