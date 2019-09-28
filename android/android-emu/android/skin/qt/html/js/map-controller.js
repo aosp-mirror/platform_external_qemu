@@ -83,8 +83,8 @@ class MapController extends GoogleMapPageComponent {
         console.log('MapController::showRoutePlaybackPanel called', visible);
         if (visible) {
             // in route playback mode
-            this.locationPanel.hide();
             this.viewModel.setIsPlayingRoute(true);
+            this.locationPanel.hide();
             this.routePanel.close();
             this.searchBox.hide();
             this.mapManager.map.setOptions({ zoomControl: false });
@@ -101,6 +101,7 @@ class MapController extends GoogleMapPageComponent {
         this.routePanel.close();
         this.searchBox.hide();
         this.locationPanel.showTitleSubtitle(title || '', subtitle || '');
+        this.viewModel.setInGpxKmlState(true);
     }
 
     hideGpxKmlPanel() {
@@ -166,6 +167,10 @@ class MapController extends GoogleMapPageComponent {
         if (this.viewModel.getIsPlayingRoute()) {
             return;
         }
+        if (this.viewModel.isInGpxKmlState()) {
+            this.searchBox.show();
+            this.viewModel.setInGpxKmlState(false);
+        }
         const latLng = event.latLng;
         const self = this;
         if (this.viewModel.isEditingRoute) {
@@ -230,8 +235,13 @@ class MapController extends GoogleMapPageComponent {
 
     onLocationPanelClosed() {
         this.moveZoomControls(google.maps.ControlPosition.RIGHT_BOTTOM);
-        if (this.viewModel.getIsPlayingRoute()) {
-            this.hideGpxKmlPanel();
+        if (!this.viewModel.getIsPlayingRoute() && this.viewModel.isInGpxKmlState()) {
+            // map is showing a gpx/kml route, then clicked on the 'x' button in the map.
+            this.viewModel.sendRouteToEmulator();
+            this.mapManager.clearDirections();
+            this.mapManager.clearMarkers();
+            this.searchBox.show();
+            this.viewModel.setInGpxKmlState(false);
         }
     }
 }
