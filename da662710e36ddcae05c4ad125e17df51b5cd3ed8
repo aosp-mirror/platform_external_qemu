@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46d1bf65_e5791224",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 10
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-09-28T13:55:33Z",
+      "side": 1,
+      "message": "Formatting issue?",
+      "range": {
+        "startLine": 341,
+        "startChar": 104,
+        "endLine": 397,
+        "endChar": 119
+      },
+      "revId": "da662710e36ddcae05c4ad125e17df51b5cd3ed8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
