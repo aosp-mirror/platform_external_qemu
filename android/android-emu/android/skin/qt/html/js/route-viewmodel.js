@@ -6,6 +6,7 @@ class RouteViewModel {
         this.isEditingRoute = false;
         this.isLoadingRoute = false;
         this.allowEdits = true;
+        this.inGpxKmlState = false;
     }
 
     renderDirections(mapManager) {
@@ -36,6 +37,14 @@ class RouteViewModel {
 
     setIsLoadingRoute(loading) {
         this.isLoadingRoute = loading;
+    }
+
+    setInGpxKmlState(isInState) {
+        this.inGpxKmlState = isInState;
+    }
+
+    isInGpxKmlState() {
+        return this.inGpxKmlState;
     }
 
     setRoute(routeJson) {
@@ -128,8 +137,9 @@ class RouteViewModel {
     }
 
     formatLatLngString(latLng, elevation) {
-        const latitude = latLng.lat().toFixed(4);
-        const longitude = latLng.lng().toFixed(4);
+        // 6-digit precision ≈ 0.1 meter precision
+        const latitude = latLng.lat().toFixed(6);
+        const longitude = latLng.lng().toFixed(6);
         return `${latitude}, ${longitude} ` + (elevation || '');
     }
 
