@@ -10,11 +10,17 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_camera-virtualscene-subpage.h"
+#include <qobjectdefs.h>                     // for Q_OBJECT, slots
+#include <QString>                           // for QString
+#include <QWidget>                           // for QWidget
+#include <memory>                            // for unique_ptr
 
-#include <QWidget>
-#include <memory>
+#include "ui_camera-virtualscene-subpage.h"  // for CameraVirtualSceneSubpage
 
+class QObject;
+class QShowEvent;
+class QString;
+class QWidget;
 struct QAndroidVirtualSceneAgent;
 
 class CameraVirtualSceneSubpage : public QWidget {

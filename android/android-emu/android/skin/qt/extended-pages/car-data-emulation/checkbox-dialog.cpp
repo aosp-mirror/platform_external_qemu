@@ -10,6 +10,22 @@
 // GNU General Public License for more details.
 #include "checkbox-dialog.h"
 
+#include <qdialogbuttonbox.h>  // for operator|, QDialogButtonBox::Cancel
+#include <qnamespace.h>        // for CheckState, Checked
+#include <QCheckBox>           // for QCheckBox
+#include <QDialogButtonBox>    // for QDialogButtonBox
+#include <QGridLayout>         // for QGridLayout
+#include <QPair>               // for QPair
+#include <QSet>                // for QSet
+#include <cstdint>             // for int32_t
+#include <utility>             // for pair
+
+class QGridLayout;
+class QString;
+class QWidget;
+template <class T1, class T2> struct QPair;
+template <typename T> class QSet;
+
 CheckboxDialog::CheckboxDialog(QWidget* parent,
                                std::map<int32_t, QString>* lookupTable,
                                QSet<QString>* checkedTitleSet,

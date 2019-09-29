@@ -10,7 +10,11 @@
 // GNU General Public License for more details.
 #include "vhal-item.h"
 
-#include "ui_vhal-item.h"
+#include <QLabel>          // for QLabel
+
+#include "ui_vhal-item.h"  // for VhalItem
+
+class QWidget;
 
 VhalItem::VhalItem(QWidget* parent, QString name, QString proID)
     : QWidget(parent), ui(new Ui::VhalItem) {

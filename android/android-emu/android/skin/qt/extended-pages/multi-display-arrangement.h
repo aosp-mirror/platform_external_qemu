@@ -11,11 +11,19 @@
 
 #pragma once
 
-#include <QWidget>
-#include <memory>
-#include <string>
-#include <utility>
-#include <unordered_map>
+#include <qobjectdefs.h>  // for Q_OBJECT
+#include <stdint.h>       // for uint32_t
+#include <QColor>         // for QColor
+#include <QString>        // for QString
+#include <QWidget>        // for QWidget
+#include <string>         // for basic_string, string
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair
+
+class QObject;
+class QPaintEvent;
+class QPainter;
+class QWidget;
 
 class MultiDisplayArrangement : public QWidget {
     Q_OBJECT

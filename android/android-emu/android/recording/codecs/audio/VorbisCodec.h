@@ -17,10 +17,13 @@
 
 #pragma once
 
-#include "android/recording/codecs/Codec.h"
+#include "android/recording/codecs/Codec.h"  // for Codec, CodecParams (ptr ...
 
 extern "C" {
-#include "libswresample/swresample.h"
+#include <libavcodec/avcodec.h>              // for AVCodecContext
+#include <libavformat/avformat.h>            // for AVFormatContext, AVStream
+#include <libavutil/samplefmt.h>             // for AVSampleFormat, AV_SAMPL...
+#include "libswresample/swresample.h"        // for SwrContext
 }
 
 namespace android {

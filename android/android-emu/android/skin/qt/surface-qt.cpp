@@ -10,29 +10,28 @@
 ** GNU General Public License for more details.
 */
 
-#include <QtCore>
-#include <QColor>
-#include <QImage>
-#include <QObject>
-#include <QPainter>
-#include <QRect>
-#include <QWidget>
+#include <assert.h>                              // for assert
+#include <qpainter.h>                            // for QPainter::Compositio...
+#include <qsize.h>                               // for operator==
+#include <stdint.h>                              // for uint32_t
+#include <string.h>                              // for NULL, memcpy
+#include <QColor>                                // for QColor
+#include <QImage>                                // for QImage
+#include <QPainter>                              // for QPainter
+#include <QPoint>                                // for QPoint
+#include <QRect>                                 // for QRect
+#include <QSize>                                 // for QSize
+#include <memory>                                // for unique_ptr, shared_ptr
+#include <type_traits>                           // for swap
 
-#ifndef _MSC_VER
-#include "android/skin/argb.h"
-#endif
-#include "android/skin/rect.h"
-#include "android/skin/surface.h"
-#include "android/skin/winsys.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/utils/setenv.h"
-
-#include <memory>
+#include "android/skin/qt/emulator-qt-window.h"  // for SkinSurface, SkinSur...
+#include "android/skin/rect.h"                   // for SkinRect, SkinPos
+#include "android/skin/surface.h"                // for SKIN_BLIT_COPY, SKIN...
 
 #define  DEBUG  1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                 // for VERBOSE_PRINT, VERBO...
 
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else

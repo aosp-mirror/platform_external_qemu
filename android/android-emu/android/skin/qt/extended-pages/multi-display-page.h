@@ -10,10 +10,19 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_multi-display-page.h"
-#include <QWidget>
+#include <qobjectdefs.h>            // for Q_OBJECT, slots
+#include <stdint.h>                 // for uint32_t, uint64_t
+#include <QString>                  // for QString
+#include <QWidget>                  // for QWidget
+#include <memory>                   // for unique_ptr
+#include <vector>                   // for vector
+
+#include "ui_multi-display-page.h"  // for MultiDisplayPage
 
 class MultiDisplayItem;
+class QObject;
+class QString;
+class QWidget;
 
 class MultiDisplayPage : public QWidget {
     Q_OBJECT

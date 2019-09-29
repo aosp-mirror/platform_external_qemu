@@ -9,22 +9,20 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _MSC_VER
-#include "android/skin/argb.h"
-#endif
-#include "android/skin/rect.h"
-#include "android/skin/surface.h"
-#include "android/skin/winsys.h"
-#include "android/skin/qt/emulator-no-qt-no-window.h"
-#include "android/utils/setenv.h"
+#include <stddef.h>                                    // for NULL
+#include <stdint.h>                                    // for uint32_t
+#include <functional>                                  // for __base, function
+#include <memory>                                      // for unique_ptr
+#include <type_traits>                                 // for swap
 
-#include <functional>
-#include <memory>
+#include "android/skin/qt/emulator-no-qt-no-window.h"  // for SkinSurface
+#include "android/skin/rect.h"                         // for SkinRect, Skin...
+#include "android/skin/surface.h"                      // for SkinBlitOp
 
 #define  DEBUG  1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                       // for VERBOSE_PRINT
 
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else

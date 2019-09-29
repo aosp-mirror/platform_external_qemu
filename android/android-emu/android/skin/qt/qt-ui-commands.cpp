@@ -11,8 +11,11 @@
 
 #include "android/skin/qt/qt-ui-commands.h"
 
-#include <QApplication>
-#include <algorithm>
+#include <qapplication.h>  // for QApplication (ptr only), qApp
+#include <qstring.h>       // for operator==, QString (ptr only)
+#include <QApplication>    // for QApplication
+#include <algorithm>       // for find_if
+#include <iterator>        // for end, begin
 
 namespace {
 

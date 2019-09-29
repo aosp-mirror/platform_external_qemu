@@ -11,10 +11,13 @@
 */
 #include "android/skin/keycode.h"
 
-#include "android/utils/bufprint.h"
-
 #include <stddef.h>
 #include <string.h>
+
+#ifdef __APPLE__
+#import <Carbon/Carbon.h>
+#endif
+#include "android/utils/bufprint.h"
 
 SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     static const SkinKeyCode  wheel[4] = { kKeyCodeDpadUp,
@@ -320,6 +323,7 @@ typedef struct {
     { win, code }
 #endif
 #include "android/skin/keycode_converter_data.inc"
+
 #undef LINUX_KEYMAP
 #undef LINUX_KEYMAP_DECLARATION
 
@@ -352,8 +356,6 @@ static struct keypad_num_mapping {
 };
 
 #elif defined(__APPLE__)
-
-#include <Carbon/Carbon.h>
 
 static struct keypad_num_mapping {
     int32_t keypad;

@@ -11,16 +11,31 @@
 
 #include "android/skin/qt/ModalOverlay.h"
 
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/stylesheet.h"
+#include <qabstractanimation.h>                 // for QAbstractAnimation::D...
+#include <qglobal.h>                            // for Q_ASSERT
+#include <qnamespace.h>                         // for operator|, AlignHCenter
+#include <qstring.h>                            // for operator+, operator==
+#include <qwindowdefs.h>                        // for WId
+#include <QAbstractAnimation>                   // for QAbstractAnimation
+#include <QFlags>                               // for QFlags
+#include <QFrame>                               // for QFrame
+#include <QHash>                                // for QHash
+#include <QLabel>                               // for QLabel
+#include <QMovie>                               // for QMovie
+#include <QPropertyAnimation>                   // for QPropertyAnimation
+#include <QSize>                                // for QSize
+#include <QVBoxLayout>                          // for QVBoxLayout
+#include <algorithm>                            // for max, min
 
-#include <QBoxLayout>
-#include <QLabel>
-#include <QMovie>
-#include <QPropertyAnimation>
+#include "android/settings-agent.h"             // for SETTINGS_THEME_DARK
+#include "android/skin/qt/stylesheet.h"         // for stylesheetFontSize
+
+class QShowEvent;
+class QSize;
+class QWidget;
 
 #if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
+#include "android/skin/qt/mac-native-window.h"  // for getNSWindow, nsWindow...
 #endif
 
 namespace Ui {

@@ -37,18 +37,21 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-#include "android/recording/Frame.h"
-#include "android/recording/Producer.h"
-#include "android/recording/codecs/Codec.h"
+#include "android/base/StringView.h"   // for StringView
+#include <stdint.h>                    // for uint16_t
+#include <memory>                      // for unique_ptr
+
+namespace android {
+namespace recording {
+class Producer;
+template <class T> class Codec;
+}  // namespace recording
+}  // namespace android
 
 extern "C" {
-#include "libswresample/swresample.h"
-#include "libswscale/swscale.h"
+struct SwrContext;
+struct SwsContext;
 }
-
-#include <stdbool.h>
-#include <stdint.h>
 
 namespace android {
 namespace recording {

@@ -11,13 +11,18 @@
 
 #pragma once
 
-#include <QBoxLayout>
-#include <QString>
-#include <QWidget>
-
-#include <functional>
+#include <qobjectdefs.h>  // for Q_OBJECT, slots
+#include <QString>        // for QString
+#include <QWidget>        // for QWidget
+#include <functional>     // for function
 
 class QFrame;
+class QObject;
+class QShowEvent;
+class QSize;
+class QString;
+class QVBoxLayout;
+class QWidget;
 
 namespace Ui {
 

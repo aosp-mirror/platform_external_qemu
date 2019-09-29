@@ -19,6 +19,7 @@
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/resource.h"
+#include "android/skin/charmap.h"
 #include "android/skin/file.h"
 #include "android/skin/image.h"
 #include "android/skin/keyboard.h"

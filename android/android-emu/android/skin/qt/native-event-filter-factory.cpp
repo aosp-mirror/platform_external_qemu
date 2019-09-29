@@ -16,16 +16,15 @@
 
 #include "android/skin/qt/native-event-filter-factory.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/native-keyboard-event-handler.h"
+#include "android/base/memory/LazyInstance.h"         // for LazyInstance
+
+class QAbstractNativeEventFilter;
 
 #define DEBUG 1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                      // for VERBOSE_PRINT
+
 #define D(...) VERBOSE_PRINT(surface, __VA_ARGS__)
 #else
 #define D(...) ((void)0)
@@ -36,7 +35,13 @@
 #import "android/skin/qt/mac-native-event-filter.h"
 
 #elif defined(__linux__)
+#include <cstdio>
 
+#include "android/skin/keycode.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/native-keyboard-event-handler.h"
+#include <QAbstractNativeEventFilter>
+#include <QByteArray>
 #include <X11/XKBlib.h>
 #include <xcb/xcb.h>
 
@@ -124,6 +129,12 @@ private:
 #else  // windows
 
 #include <windows.h>
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/skin/keycode.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/native-keyboard-event-handler.h"
+#include <QAbstractNativeEventFilter>
+#include <QByteArray>
 
 class NativeEventFilter : public QAbstractNativeEventFilter {
 public:

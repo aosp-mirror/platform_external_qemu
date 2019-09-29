@@ -33,17 +33,29 @@
 
 #include "android/recording/GifConverter.h"
 
-#include "android/base/Log.h"
-#include "android/recording/AVScopedPtr.h"
-#include "android/utils/debug.h"
+#include <stddef.h>                         // for NULL
+#include <errno.h>                          // for ENOMEM
+
+#include "android/base/Log.h"               // for LOG, LogMessage, LogStream
+#include "android/base/memory/ScopedPtr.h"  // for FuncDelete
+#include "android/recording/AVScopedPtr.h"  // for makeAVScopedPtr
 
 extern "C" {
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
+#include <libavcodec/avcodec.h>             // for AVCodecContext, AVPacket
+#include <libavformat/avformat.h>           // for AVStream, AVFormatContext
+#include <libavformat/avio.h>               // for avio_open, AVIO_FLAG_WRITE
+#include <libavutil/avutil.h>               // for AVMEDIA_TYPE_VIDEO
+#include <libavutil/error.h>                // for AVERROR, AVERROR_EOF
+#include <libavutil/frame.h>                // for AVFrame, av_frame_alloc
+#include <libavutil/log.h>                  // for av_log, AV_LOG_INFO
+#include <libavutil/mathematics.h>          // for av_rescale_q
+#include <libavutil/pixfmt.h>               // for AVPixelFormat
+#include <libavutil/rational.h>             // for AVRational
+#include <libswscale/swscale.h>             // for sws_getContext, sws_scale
+struct SwsContext;
 }
 
-#include <functional>
-#include <memory>
+#include <memory>                           // for unique_ptr
 
 static constexpr int SCALE_FLAGS = SWS_BICUBIC;
 

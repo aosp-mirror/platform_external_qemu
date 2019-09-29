@@ -10,10 +10,11 @@
 
 #pragma once
 
-#include "GLES2/gl2.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include <cstdio>     // for stderr
 
-#include <cstdio>
+#include "GLES/gl.h"  // for GL_NO_ERROR, GLint, GLuint
+
+struct GLESv2Dispatch;
 
 // Helper macro for checking error status and cleaning up.
 #define CHECK_GL_ERROR(error_msg) \

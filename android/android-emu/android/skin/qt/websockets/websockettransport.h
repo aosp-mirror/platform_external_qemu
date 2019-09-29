@@ -50,10 +50,19 @@
 
 #pragma once
 
-#include <QWebChannelAbstractTransport>
+#include <qglobal.h>                     // for QT_BEGIN_NAMESPACE, QT_END_N...
+#include <qobjectdefs.h>                 // for Q_OBJECT, slots
+#include <QJsonObject>                   // for QJsonObject
+#include <QString>                       // for QString
+#include <QWebChannelAbstractTransport>  // for QWebChannelAbstractTransport
+
+class QJsonObject;
+class QObject;
+class QString;
 
 QT_BEGIN_NAMESPACE
 class QWebSocket;
+
 QT_END_NAMESPACE
 
 class WebSocketTransport : public QWebChannelAbstractTransport

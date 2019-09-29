@@ -12,14 +12,12 @@
 
 #include "android/skin/image.h"
 
-#include "android/loadpng.h"
-#include "android/skin/resource.h"
+#include <assert.h>                 // for assert
+#include <stdio.h>                  // for NULL, fprintf, stderr, size_t
+#include <stdlib.h>                 // for calloc, free
+#include <string.h>                 // for strcmp, strlen, memcpy, memset
 
-#include <assert.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "android/skin/resource.h"  // for skin_resource_find
 
 #define  DEBUG  0
 

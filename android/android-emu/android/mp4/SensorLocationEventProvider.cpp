@@ -14,18 +14,21 @@
 
 #include "android/mp4/SensorLocationEventProvider.h"
 
-#include <cmath>
-#include <memory>
-#include <queue>
+#include <algorithm>                             // for max
+#include <memory>                                // for unique_ptr, shared_ptr
+#include <queue>                                 // for priority_queue
+#include <utility>                               // for move
+#include <vector>                                // for vector
 
+#include "android/automation/EventSource.h"      // for DurationNs
 #include "android/automation/AutomationController.h"
-#include "android/automation/EventSource.h"
-#include "android/hw-sensors.h"
-#include "android/mp4/FieldDecodeInfo.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "android/base/Log.h"                    // for LogMessage, LOG, CHECK
+#include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
+#include "android/mp4/FieldDecodeInfo.h"         // for FieldDecodeInfo
+#include "android/offworld/proto/offworld.pb.h"  // for SensorDataPacketInfo
 
 extern "C" {
-#include "libavcodec/avcodec.h"
+#include "libavcodec/avcodec.h"                  // for AVPacket
 }
 
 namespace android {

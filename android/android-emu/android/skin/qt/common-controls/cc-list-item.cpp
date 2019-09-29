@@ -11,9 +11,19 @@
 
 #include "cc-list-item.h"
 
-#include "android/skin/qt/extended-pages/common.h"
+#include <qnamespace.h>                             // for ElideRight
+#include <QByteArray>                               // for QByteArray
+#include <QFontMetrics>                             // for QFontMetrics
+#include <QGraphicsOpacityEffect>                   // for QGraphicsOpacityE...
+#include <QLabel>                                   // for QLabel
+#include <QPixmap>                                  // for QPixmap
+#include <QPushButton>                              // for QPushButton
 
-#include <QGraphicsOpacityEffect>
+#include "android/settings-agent.h"                 // for SETTINGS_THEME_DARK
+#include "android/skin/qt/extended-pages/common.h"  // for getIconForCurrent...
+
+class QGraphicsOpacityEffect;
+class QWidget;
 
 const double kDisplayInfoOpacity = 0.66f;
 const int kNameLabelWidth = 170;

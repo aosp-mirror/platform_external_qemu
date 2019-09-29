@@ -10,17 +10,19 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/utils/compiler.h"
-
-#include "ui_car-cluster-window.h"
-
-#include <QFrame>
-#include <QWidget>
-
-#include <memory>
+#include <qobjectdefs.h>  // for Q_OBJECT
+#include <QFrame>         // for QFrame
+#include <QString>        // for QString
+#include <memory>         // for unique_ptr
 
 class EmulatorQtWindow;
-class ExtendedWindow;
+class QHideEvent;
+class QObject;
+class QShowEvent;
+class QWidget;
+namespace Ui {
+class CarClusterWindow;
+}  // namespace Ui
 
 // This window is used to show car cluster window. It shows when
 // android auto emulator start. Car cluster shows car sensors,

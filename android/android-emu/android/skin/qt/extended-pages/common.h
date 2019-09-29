@@ -9,12 +9,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/settings-agent.h"
+#include <QColor>                    // for QColor
+#include <QIcon>                     // for QIcon
+#include <QString>                   // for QString
 
-#include <QFrame>
-#include <QIcon>
-#include <QPushButton>
-#include <QString>
+#include "android/settings-agent.h"  // for SettingsTheme
+
+class QColor;
+class QFrame;
+class QIcon;
+class QPushButton;
+class QString;
 
 // Sets the button state to enabled or disabled, and sets the
 // corresponding icon for the button.

@@ -12,7 +12,8 @@
 
 #include "android/skin/keycode.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for Test, Message, SuiteApiResolver, TestInfo (...
+#include <stddef.h>       // for size_t
 
 namespace android_skin {
 

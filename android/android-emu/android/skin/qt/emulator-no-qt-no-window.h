@@ -12,15 +12,27 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-#include "android/emulation/control/AdbInterface.h"
-#include "android/skin/event.h"
-#include "android/skin/surface.h"
-#include "android/ui-emu-agent.h"
+#include <string.h>                             // for memcpy
+#include <functional>                           // for function
+#include <memory>                               // for shared_ptr
+#include <queue>                                // for queue
+#include <string>                               // for basic_string, string
+#include <vector>                               // for vector
 
-#include <queue>
-#include <string>
-#include <vector>
+#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
+#include "android/base/synchronization/Lock.h"  // for Lock
+#include "android/skin/event.h"                 // for SkinEvent
+#include "android/ui-emu-agent.h"               // for UiEmuAgent
+
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
+struct SkinSurface;
 
 // The EmulatorNoQtNoWindow class is used to build a QT-Widget-less
 // event loop when the parameter -no-window is passed to the android

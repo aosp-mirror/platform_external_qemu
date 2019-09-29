@@ -12,28 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <QPixmap>
-#include <QWidget>
-#include <QImage>
+#include <qobjectdefs.h>  // for Q_OBJECT
+#include <stdint.h>       // for uint8_t
+#include <QPixmap>        // for QPixmap
+#include <QString>        // for QString
+#include <QWidget>        // for QWidget
+
+class QImage;
+class QObject;
+class QPaintEvent;
+class QWidget;
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <sys/time.h>
 #endif
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/WorkerThread.h"
-
 extern "C" {
-#include "libswscale/swscale.h"
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/log.h"
 }
 
 class CarClusterWidget : public QWidget

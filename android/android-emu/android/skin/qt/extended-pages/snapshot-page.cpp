@@ -11,40 +11,104 @@
 
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/ProcessControl.h"
-#include "android/emulator-window.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/ui.h"
-#include "android/snapshot/interface.h"
-#include "android/snapshot/PathUtils.h"
-#include "android/snapshot/proto/snapshot.pb.h"
-#include "android/snapshot/Quickboot.h"
-#include "android/snapshot/Snapshot.h"
+#include <qbytearray.h>                              // for operator==
+#include <qdialog.h>                                 // for QDialog::Rejected
+#include <qdialogbuttonbox.h>                        // for operator|, QDial...
+#include <qdir.h>                                    // for operator|, QDir:...
+#include <qeasingcurve.h>                            // for QEasingCurve::Ou...
+#include <qheaderview.h>                             // for QHeaderView::Fixed
+#include <qiodevice.h>                               // for operator|, QIODe...
+#include <qmessagebox.h>                             // for operator|, QMess...
+#include <qnamespace.h>                              // for WaitCursor, Asce...
+#include <qsettings.h>                               // for QSettings::IniFo...
+#include <qstring.h>                                 // for operator+, QStri...
+#include <stdio.h>                                   // for fprintf, printf
+#include <string.h>                                  // for strcmp
+#include <QApplication>                              // for QApplication
+#include <QBrush>                                    // for QBrush
+#include <QByteArray>                                // for QByteArray
+#include <QCheckBox>                                 // for QCheckBox
+#include <QComboBox>                                 // for QComboBox
+#include <QDateTime>                                 // for QDateTime
+#include <QDialog>                                   // for QDialog
+#include <QDialogButtonBox>                          // for QDialogButtonBox
+#include <QDir>                                      // for QDir
+#include <QEasingCurve>                              // for QEasingCurve
+#include <QFile>                                     // for QFile
+#include <QFont>                                     // for QFont
+#include <QGraphicsPixmapItem>                       // for QGraphicsPixmapItem
+#include <QGraphicsTextItem>                         // for QGraphicsTextItem
+#include <QGraphicsView>                             // for QGraphicsView
+#include <QHash>                                     // for QHash
+#include <QHeaderView>                               // for QHeaderView
+#include <QIcon>                                     // for QIcon
+#include <QLabel>                                    // for QLabel
+#include <QLineEdit>                                 // for QLineEdit
+#include <QList>                                     // for QList
+#include <QMessageBox>                               // for QMessageBox
+#include <QObject>                                   // for QObject
+#include <QPixmap>                                   // for QPixmap
+#include <QPlainTextEdit>                            // for QPlainTextEdit
+#include <QPropertyAnimation>                        // for QPropertyAnimation
+#include <QPushButton>                               // for QPushButton
+#include <QRectF>                                    // for QRectF
+#include <QSettings>                                 // for QSettings
+#include <QSizeF>                                    // for QSizeF
+#include <QTabWidget>                                // for QTabWidget
+#include <QTextDocument>                             // for QTextDocument
+#include <QTextEdit>                                 // for QTextEdit
+#include <QTreeWidget>                               // for QTreeWidget
+#include <QTreeWidgetItem>                           // for QTreeWidgetItem
+#include <QTreeWidgetItemIterator>                   // for QTreeWidgetItemI...
+#include <QVBoxLayout>                               // for QVBoxLayout
+#include <QVariant>                                  // for QVariant
+#include <fstream>                                   // for ofstream
+#include <functional>                                // for __base
+#include <string>                                    // for string
 
-#include "android/skin/qt/stylesheet.h"
+#include "android/avd/info.h"                        // for AVDINFO_NO_SNAPS...
+#include "android/avd/util.h"                        // for path_getAvdConte...
+#include "android/base/Log.h"                        // for base
+#include "android/base/ProcessControl.h"             // for isRestartDisabled
+#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "android/base/files/PathUtils.h"            // for PathUtils
+#include "android/base/system/System.h"              // for System, System::...
+#include "android/cmdline-option.h"                  // for AndroidOptions
+#include "android/emulation/control/window_agent.h"  // for EmulatorWindow
+#include "android/emulator-window.h"                 // for emulator_window_get
+#include "android/featurecontrol/FeatureControl.h"   // for isEnabled
+#include "android/featurecontrol/Features.h"         // for QuickbootFileBacked
+#include "android/globals.h"                         // for android_avdParams
+#include "android/metrics/MetricsReporter.h"         // for MetricsReporter
+#include "android/metrics/MetricsWriter.h"           // for android_studio
+#include "android/metrics/proto/studio_stats.pb.h"   // for EmulatorSnapshot...
+#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/skin/qt/error-dialog.h"            // for showErrorDialog
+#include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
+#include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
+#include "android/skin/qt/stylesheet.h"              // for stylesheetForTheme
+#include "android/snapshot/PathUtils.h"              // for getSnapshotBaseDir
+#include "android/snapshot/Quickboot.h"              // for Quickboot, Quick...
+#include "android/snapshot/Snapshot.h"               // for Snapshot
+#include "android/snapshot/interface.h"              // for androidSnapshot_...
+#include "android/snapshot/proto/snapshot.pb.h"      // for Snapshot
 
-#include <QCheckBox>
-#include <QDialogButtonBox>
-#include <QDir>
-#include <QGraphicsPixmapItem>
-#include <QInputDialog>
-#include <QLabel>
-#include <QMenu>
-#include <QMessageBox>
-#include <QPlainTextEdit>
-#include <QPropertyAnimation>
-#include <QSemaphore>
-#include <QSettings>
-#include <QVBoxLayout>
-
-#include <fstream>
+class QCheckBox;
+class QCloseEvent;
+class QDateTime;
+class QGraphicsItem;
+class QGraphicsPixmapItem;
+class QGraphicsTextItem;
+class QLineEdit;
+class QPlainTextEdit;
+class QPropertyAnimation;
+class QPushButton;
+class QShowEvent;
+class QTextDocument;
+class QTreeWidget;
+class QTreeWidgetItem;
+class QVBoxLayout;
+class QWidget;
 
 using android::metrics::MetricsReporter;
 using android::snapshot::Quickboot;

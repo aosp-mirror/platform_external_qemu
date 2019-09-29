@@ -49,9 +49,12 @@
 ****************************************************************************/
 
 #include "android/skin/qt/websockets/websocketclientwrapper.h"
-#include "android/skin/qt/websockets/websockettransport.h"
 
-#include <QWebSocketServer>
+#include <QWebSocketServer>                                 // for QWebSocke...
+
+#include "android/skin/qt/websockets/websockettransport.h"  // for WebSocket...
+
+class QObject;
 
 /*!
     \brief Wraps connected QWebSockets clients in WebSocketTransport objects.

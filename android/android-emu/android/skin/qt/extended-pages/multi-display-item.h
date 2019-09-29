@@ -11,12 +11,20 @@
 
 #pragma once
 
-#include "ui_multi-display-item.h"
-#include <QWidget>
-#include <memory>
-#include <string>
+#include <qobjectdefs.h>            // for Q_OBJECT, signals, slots
+#include <stdint.h>                 // for uint32_t
+#include <QString>                  // for QString
+#include <QWidget>                  // for QWidget
+#include <memory>                   // for unique_ptr
+#include <string>                   // for string
+#include <vector>                   // for vector
+
+#include "ui_multi-display-item.h"  // for MultiDisplayItem
 
 class MultiDisplayPage;
+class QFocusEvent;
+class QObject;
+class QWidget;
 
 class MultiDisplayItem : public QWidget {
     Q_OBJECT

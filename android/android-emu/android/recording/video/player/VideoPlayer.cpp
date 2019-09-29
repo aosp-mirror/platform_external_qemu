@@ -30,15 +30,22 @@
 // THE SOFTWARE.
 
 #include "android/recording/video/player/VideoPlayer.h"
+
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <functional>
 #include <string>
+#include <utility>
 
 #include "android/automation/AutomationController.h"
-#include "android/base/Log.h"
+#include "android/base/Log.h"                                        // for LOG
 #include "android/base/Result.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/Thread.h"
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/MP4Demuxer.h"
@@ -49,19 +56,33 @@
 #include "android/recording/video/player/Clock.h"
 #include "android/recording/video/player/FrameQueue.h"
 #include "android/recording/video/player/PacketQueue.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
+#include "android/recording/video/player/VideoPlayerWaitInfo.h"
 #include "android/utils/debug.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
-#include "libavutil/opt.h"
-#include "libavutil/samplefmt.h"
-#include "libavutil/time.h"
+
+#include <libavutil/avutil.h>
+#include <libavutil/error.h>
+#include <libavutil/frame.h>
+#include <libavutil/mathematics.h>
+#include <libavutil/mem.h>
+#include <libavutil/opt.h>
+#include <libavutil/pixfmt.h>
+#include <libavutil/rational.h>
+#include <libavutil/time.h>
+
 #include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
+
+struct SwsContext;
 }
 
 #include <cmath>
+
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
 using android::automation::AutomationController;

@@ -11,8 +11,19 @@
 
 #include "android/recording/codecs/video/VP9Codec.h"
 
-#include "android/base/Log.h"
-#include "android/base/system/System.h"
+#include <stddef.h>                      // for NULL
+#include <algorithm>                     // for min
+#include <utility>                       // for move
+
+#include "android/base/Log.h"            // for LOG, LogMessage, LogStream
+#include "android/base/system/System.h"  // for System
+
+extern "C" {
+#include <libavutil/dict.h>              // for av_dict_set, av_dict_free
+#include <libavutil/rational.h>          // for AVRational
+#include <libswscale/swscale.h>          // for sws_getContext, SWS_BICUBIC
+struct SwsContext;
+}
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC

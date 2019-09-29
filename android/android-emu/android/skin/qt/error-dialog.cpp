@@ -11,9 +11,15 @@
 
 #include "android/skin/qt/error-dialog.h"
 
-#include "android/base/memory/OnDemand.h"
+#include <qmessagebox.h>                   // for QMessageBox::Icon, QMessag...
+#include <QMessageBox>                     // for QMessageBox
+#include <functional>                      // for __base
+#include <tuple>                           // for tuple
 
-#include <QMessageBox>
+#include "android/base/memory/OnDemand.h"  // for OnDemand
+
+class QString;
+class QWidget;
 
 using Dialog = android::base::AtomicMemberOnDemandT<QMessageBox,
                                                     QMessageBox::Icon,

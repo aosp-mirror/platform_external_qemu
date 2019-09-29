@@ -13,13 +13,15 @@
 // limitations under the License.
 
 #include "android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h"
-#include "android/car-cluster.h"
 
-#include <math.h>
-#include <fstream>
-#include <iostream>
+#include <qnamespace.h>                         // for AlignCenter, black
+#include <QPainter>                             // for QPainter
 
-#include <QPainter>
+#include "android/base/threads/WorkerThread.h"  // for WorkerProcessingResult
+
+class QImage;
+class QPaintEvent;
+class QWidget;
 
 using android::base::WorkerProcessingResult;
 

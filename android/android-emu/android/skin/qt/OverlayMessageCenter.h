@@ -11,17 +11,22 @@
 
 #pragma once
 
-#include "android/skin/qt/size-tweaker.h"
+#include <qobjectdefs.h>                   // for Q_OBJECT, signals, slots
+#include <QFrame>                          // for QFrame
+#include <QPixmap>                         // for QPixmap
+#include <QString>                         // for QString
+#include <QWidget>                         // for QWidget
+#include <functional>                      // for function
 
-#include <QFrame>
-#include <QPixmap>
-#include <QString>
-#include <QWidget>
-
-#include <functional>
+#include "android/skin/qt/size-tweaker.h"  // for SizeTweaker
 
 class QHBoxLayout;
 class QLabel;
+class QObject;
+class QPixmap;
+class QShowEvent;
+class QString;
+class QWidget;
 
 namespace Ui {
 

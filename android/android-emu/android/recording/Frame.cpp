@@ -14,6 +14,9 @@
 
 #include "android/recording/Frame.h"
 
+#include <libavutil/pixfmt.h>     // for AVPixelFormat, AV_PIX_FMT_BGRA, AV_...
+#include <libavutil/samplefmt.h>  // for AVSampleFormat, AV_SAMPLE_FMT_NONE
+
 namespace android {
 namespace recording {
 

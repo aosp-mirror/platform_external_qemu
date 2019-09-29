@@ -11,7 +11,12 @@
 
 #include "record-macro-edit-dialog.h"
 
-#include "android/skin/qt/extended-pages/common.h"
+#include <QLineEdit>                                // for QLineEdit
+#include <QPushButton>                              // for QPushButton
+
+#include "android/skin/qt/extended-pages/common.h"  // for getIconForCurrent...
+
+class QWidget;
 
 RecordMacroEditDialog::RecordMacroEditDialog(QWidget *parent) :
     QDialog(parent),

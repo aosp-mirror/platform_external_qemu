@@ -10,13 +10,19 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 
-#include "android/emulation/proto/VehicleHalProto.pb.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/utils/debug.h"
-#include "ui_car-sensor-data.h"
-#include "vehicle_constants_generated.h"
+#include <stdint.h>                                      // for int32_t
+#include <QCheckBox>                                     // for QCheckBox
+#include <QComboBox>                                     // for QComboBox
+#include <QLabel>                                        // for QLabel
+#include <QSlider>                                       // for QSlider
+#include <utility>                                       // for move
 
-#include <QSettings>
+#include "android/emulation/proto/VehicleHalProto.pb.h"  // for EmulatorMessage
+#include "android/utils/debug.h"                         // for VERBOSE_PRINT
+#include "ui_car-sensor-data.h"                          // for CarSensorData
+#include "vehicle_constants_generated.h"                 // for VehicleIgnit...
+
+class QWidget;
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 

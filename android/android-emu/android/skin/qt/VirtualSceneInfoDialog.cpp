@@ -11,18 +11,32 @@
 
 #include "android/skin/qt/VirtualSceneInfoDialog.h"
 
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/raised-material-button.h"
-#include "android/skin/qt/stylesheet.h"
+#include <QtCore/qglobal.h>                          // for Q_OS_MAC
+#include <qabstractanimation.h>                      // for QAbstractAnimati...
+#include <qglobal.h>                                 // for Q_ASSERT
+#include <qnamespace.h>                              // for WindowFlags, Dialog
+#include <qsize.h>                                   // for operator!=, QSiz...
+#include <qwindowdefs.h>                             // for WId
+#include <QAbstractAnimation>                        // for QAbstractAnimation
+#include <QCheckBox>                                 // for QCheckBox
+#include <QFlags>                                    // for QFlags
+#include <QLabel>                                    // for QLabel
+#include <QPropertyAnimation>                        // for QPropertyAnimation
+#include <QSettings>                                 // for QSettings
+#include <QSvgWidget>                                // for QSvgWidget
+#include <algorithm>                                 // for min
 
-#include <QBoxLayout>
-#include <QLabel>
-#include <QMovie>
-#include <QPropertyAnimation>
+#include "android/settings-agent.h"                  // for SETTINGS_THEME_DARK
+#include "android/skin/qt/emulator-container.h"      // for EmulatorContainer
+#include "android/skin/qt/qt-settings.h"             // for SHOW_VIRTUALSCEN...
+#include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
+#include "android/skin/qt/stylesheet.h"              // for stylesheetForTheme
+
+class QKeyEvent;
+class QShowEvent;
 
 #if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
+#include "android/skin/qt/mac-native-window.h"       // for getNSWindow, nsW...
 #endif
 
 static constexpr int kDefaultBorderRadius = 10;

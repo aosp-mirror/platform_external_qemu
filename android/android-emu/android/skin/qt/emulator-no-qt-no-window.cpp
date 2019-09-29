@@ -12,16 +12,28 @@
 
 #include "android/skin/qt/emulator-no-qt-no-window.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
-#include "android/hw-events.h"
-#include "android/metrics/metrics.h"
-#include "android/test/checkboot.h"
-#include "android/utils/filelock.h"
+#include <stdio.h>                                       // for fprintf, spr...
+#include <string.h>                                      // for memcpy
+#ifdef CONFIG_POSIX
+#include <pthread.h>                                     // for pthread_create
+#endif
+#include <string>                                        // for basic_string
+
+#include "android/avd/info.h"                            // for avdInfo_getA...
+#include "android/base/async/Looper.h"                   // for Looper
+#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
+#include "android/base/memory/LazyInstance.h"            // for LazyInstance
+#include "android/emulation/control/AdbInterface.h"      // for OptionalAdbC...
+#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
+#include "android/emulation/control/vm_operations.h"     // for QEMU_SHUTDOW...
+#include "android/featurecontrol/FeatureControl.h"       // for isEnabled
+#include "android/featurecontrol/Features.h"             // for FastSnapshotV1
+#include "android/globals.h"                             // for android_hw
+#include "android/hw-events.h"                           // for EV_SW, EV_SYN
+#include "android/metrics/metrics.h"                     // for android_metr...
+#include "android/test/checkboot.h"                      // for android_test...
+#include "android/utils/filelock.h"                      // for filelock_create
+
 #define DEBUG 0
 
 #if DEBUG

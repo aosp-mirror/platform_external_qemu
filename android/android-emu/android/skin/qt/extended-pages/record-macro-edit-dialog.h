@@ -11,10 +11,16 @@
 
 #pragma once
 
-#include "ui_record-macro-edit-dialog.h"
+#include <qobjectdefs.h>                  // for Q_OBJECT, slots
+#include <QDialog>                        // for QDialog
+#include <QString>                        // for QString
+#include <memory>                         // for unique_ptr
 
-#include <memory>
-#include <QDialog>
+#include "ui_record-macro-edit-dialog.h"  // for RecordMacroEditDialog
+
+class QObject;
+class QString;
+class QWidget;
 
 enum class ButtonClicked : int { Delete = 2 };
 

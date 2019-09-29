@@ -12,34 +12,28 @@
 
 #pragma once
 
-#include "android/emulation/control/location_agent.h"
-#include "android/emulation/control/sensors_agent.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/gps/GpsFix.h"
-#include "android/hw-sensors.h"
-#include "android/settings-agent.h"
-#include "android/skin/qt/extended-window-styles.h"
-#include "android/skin/qt/shortcut-key-store.h"
-#include "android/skin/qt/size-tweaker.h"
-#include "android/skin/qt/qt-ui-commands.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/ui-emu-agent.h"
-#include "android/utils/path.h"
+#include <qobjectdefs.h>                             // for Q_OBJECT, slots
+#include <QButtonGroup>                              // for QButtonGroup
+#include <QFrame>                                    // for QFrame
+#include <QString>                                   // for QString
+#include <map>                                       // for map
+#include <memory>                                    // for unique_ptr
 
-#include <QButtonGroup>
-#include <QFrame>
-#include <QPushButton>
-#include <QString>
-#include <QShowEvent>
-
-#include <map>
-#include <memory>
-#include <vector>
+#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/skin/qt/extended-window-styles.h"  // for ExtendedWindowPane
+#include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand
+#include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
+#include "android/ui-emu-agent.h"                    // for UiEmuAgent
 
 class EmulatorQtWindow;
+class QCloseEvent;
+class QKeyEvent;
+class QObject;
+class QPushButton;
+class QShowEvent;
 class ToolWindow;
-class GeoDataLoaderThread;
 class VirtualSceneControlWindow;
+template <class CommandType> class ShortcutKeyStore;
 
 namespace Ui {
     class ExtendedControls;

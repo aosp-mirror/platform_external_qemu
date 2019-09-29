@@ -10,27 +10,24 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
-#include <QWidget>
-#include "android/emulation/proto/VehicleHalProto.pb.h"
+#include <stdint.h>  // for int32_t, int64_t
+#include <QString>   // for QString
+#include <map>       // for map
+#include <vector>    // for vector
 
-#include <string>
-#include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
-#include <map>
-#include <vector>
+class QString;
+namespace android {
+namespace base {
+class FunctorThread;
+class System;
+}  // namespace base
+}  // namespace android
+namespace emulator {
+class VehiclePropValue;
+}  // namespace emulator
 
-#ifdef _MSC_VER
-#include "msvc-posix.h"
-#else
-#include <sys/time.h>
-#endif
 
 using android::base::System;
 using android::base::FunctorThread;

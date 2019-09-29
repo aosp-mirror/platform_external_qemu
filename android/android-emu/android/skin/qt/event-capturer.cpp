@@ -10,6 +10,11 @@
 
 #include "android/skin/qt/event-capturer.h"
 
+#include <QList>    // for QList
+#include <utility>  // for move
+
+class QObject;
+
 EventCapturer::SubscriberToken EventCapturer::subscribeToEvents(
         QObject* root,
         const EventCapturer::ObjectPredicate& child_predicate,

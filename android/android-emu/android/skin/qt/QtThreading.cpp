@@ -11,10 +11,13 @@
 
 #include "android/skin/qt/QtThreading.h"
 
-#include <QApplication>
-#include <QThread>
+#include <assert.h>          // for assert
+#include <QApplication>      // for QApplication
+#include <QCoreApplication>  // for QCoreApplication
+#include <QObject>           // for QObject
+#include <QThread>           // for QThread
 
-#include <assert.h>
+class QObject;
 
 namespace android {
 namespace qt {

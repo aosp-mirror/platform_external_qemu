@@ -14,7 +14,8 @@
 
 #pragma once
 
-#include <QEvent>
-#include <ostream>
+#include <ostream>  // for ostream
+
+class QEvent;
 
 std::ostream& operator<<(std::ostream& out, const QEvent&);

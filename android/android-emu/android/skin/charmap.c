@@ -11,14 +11,17 @@
 */
 #include "android/skin/charmap.h"
 
-#include "android/base/ArraySize.h"
-#include "android/utils/path.h"
-#include "android/utils/misc.h"
-#include "android/utils/debug.h"
-#include "android/utils/system.h"
-#include "android/utils/file_io.h"
-#include <stdio.h>
-#include <errno.h>
+#include <stdint.h>                  // for uint8_t
+#include <stdio.h>                   // for NULL, fclose, feof, fgets, size_t
+#include <string.h>                  // for strlen, strcmp, strerror, strrchr
+#include <errno.h>                   // for errno
+
+#include "android/base/ArraySize.h"  // for ARRAY_SIZE
+#include "android/skin/keycode.h"    // for kKeyCode0, kKeyCode1, kKeyCode2
+#include "android/utils/debug.h"     // for derror
+#include "android/utils/file_io.h"   // for android_fopen
+#include "android/utils/misc.h"      // for hex2int
+#include "android/utils/system.h"    // for AFREE, AARRAY_NEW0, AARRAY_RENEW
 
 /* Parses .kcm file producing key characters map.
  * .kcm file parsed by this module is expected to contain 4 types of

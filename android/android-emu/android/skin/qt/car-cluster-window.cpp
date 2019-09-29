@@ -9,7 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #include "android/skin/qt/car-cluster-window.h"
-#include "android/skin/qt/emulator-qt-window.h"
+
+#include "ui_car-cluster-window.h"  // for CarClusterWindow
+
+class QHideEvent;
+class QShowEvent;
+class QWidget;
 
 static const int kCarClusterWindowWidth = 650;
 static const int kCarClusterWindowHeight = 360;

@@ -9,35 +9,32 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include <stdio.h>
+#include <stdio.h>                                     // for fprintf, stderr
 #ifdef CONFIG_POSIX
 #include <pthread.h>
+#include <signal.h>                                    // for kill, pthread_...
+#include <unistd.h>                                    // for getpid
 #endif
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/system/System.h"
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/globals.h"
-#include "android/skin/rect.h"
-#include "android/skin/resource.h"
-#include "android/skin/winsys.h"
-#include "android/skin/qt/emulator-no-qt-no-window.h"
-#include "android/utils/setenv.h"
-#include "android/main-common-ui.h"
+#include <functional>                                  // for __base
+#include <memory>                                      // for static_pointer...
 
-#include <string>
+#include "android/globals.h"                           // for android_hw
+#include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
+#include "android/skin/rect.h"                         // for SkinRect, SkinPos
+#include "android/skin/winsys.h"                       // for WinsysPreferre...
+#include "android/ui-emu-agent.h"                      // for UiEmuAgent
 
-#include <signal.h>
+namespace android {
+namespace base {
+class System;
+}  // namespace base
+}  // namespace android
 
 #ifdef _WIN32
-#include <windows.h>
 #include <shellapi.h>
-#endif
-
-#ifdef __APPLE__
-#include <Carbon/Carbon.h>
-#include <signal.h>
+#include <windows.h>
+#include "android/base/system/Win32UnicodeString.h"
 #endif
 
 using android::base::System;
@@ -48,7 +45,7 @@ using android::base::Win32UnicodeString;
 #define  DEBUG  1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                       // for VERBOSE_PRINT
 
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else

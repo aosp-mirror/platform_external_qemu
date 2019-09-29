@@ -9,17 +9,20 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/globals.h"
+#include <stdbool.h>                     // for true
+#include <stdlib.h>                      // for NULL, strtol
+#include <string.h>                      // for memcmp, strchr, strcmp, memcpy
 
-#include "android/skin/file.h"
-
-#include "android/skin/keycode.h"
-#include "android/utils/path.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/system.h"
-#include "android/utils/debug.h"
-
-#include <stdlib.h>
+#include "android/globals.h"             // for android_hw
+#include "android/skin/file.h"           // for SkinPart, SkinLayout, SkinLo...
+#include "android/skin/image.h"          // for skin_image_clone_rotated
+#include "android/skin/keycode.h"        // for kKeyCodeDel, kKeyCodeDpadUp
+#include "android/skin/rect.h"           // for SkinRect, SkinSize, SkinPos
+#include "android/utils/aconfig-file.h"  // for aconfig_int, aconfig_find_const
+#include "android/utils/bufprint.h"      // for bufprint
+#include "android/utils/debug.h"         // for dprint
+#include "android/utils/path.h"          // for PATH_SEP
+#include "android/utils/system.h"        // for ANEW0, AFREE
 
 /** UTILITY ROUTINES
  **/

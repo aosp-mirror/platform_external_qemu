@@ -11,18 +11,38 @@
 
 #include "android/skin/qt/extended-pages/help-page.h"
 
-#include "android/android.h"
-#include "android/base/Uri.h"
-#include "android/base/system/System.h"
-#include "android/globals.h"
-#include "android/update-check/UpdateChecker.h"
-#include "android/update-check/VersionExtractor.h"
+#include <QtCore/qglobal.h>                         // for Q_OS_MAC
+#include <qiodevice.h>                              // for QIODevice::ReadOnly
+#include <qkeysequence.h>                           // for QKeySequence::Nat...
+#include <qmap.h>                                   // for QMap<>::const_ite...
+#include <qstring.h>                                // for operator+, QStrin...
+#include <QDesktopServices>                         // for QDesktopServices
+#include <QFile>                                    // for QFile
+#include <QIODevice>                                // for QIODevice
+#include <QKeySequence>                             // for QKeySequence
+#include <QPlainTextEdit>                           // for QPlainTextEdit
+#include <QTableWidget>                             // for QTableWidget
+#include <QTableWidgetItem>                         // for QTableWidgetItem
+#include <QTextStream>                              // for QTextStream
+#include <QThread>                                  // for QThread
+#include <QUrl>                                     // for QUrl
+#include <string>                                   // for basic_string, ope...
+#include <utility>                                  // for pair
 
-#include <QDesktopServices>
-#include <QThread>
-#include <QUrl>
+#include "android/android.h"                        // for android_serial_nu...
+#include "android/avd/info.h"                       // for avdInfo_getApiLevel
+#include "android/base/Optional.h"                  // for Optional
+#include "android/base/Uri.h"                       // for Uri
+#include "android/base/Version.h"                   // for Version
+#include "android/base/system/System.h"             // for System
+#include "android/globals.h"                        // for android_avdInfo
+#include "android/metrics/StudioConfig.h"           // for UpdateChannel
+#include "android/skin/qt/shortcut-key-store.h"     // for ShortcutKeyStore
+#include "android/update-check/UpdateChecker.h"     // for UpdateChecker
+#include "android/update-check/VersionExtractor.h"  // for VersionExtractor
 
-#include <cassert>
+class QTableWidget;
+class QWidget;
 
 using android::base::Uri;
 

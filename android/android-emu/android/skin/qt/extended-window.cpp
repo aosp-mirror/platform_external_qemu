@@ -11,23 +11,70 @@
  */
 
 #include "android/skin/qt/extended-window.h"
-#include "android/skin/qt/extended-window-styles.h"
+
+#include <qnamespace.h>
+#include <qstring.h>
+#include <QApplication>
+#include <QCloseEvent>
+#include <QDesktopWidget>
+#include <QLayoutItem>
+#include <QList>
+#include <QPushButton>
+#include <QRect>
+#include <QSettings>
+#include <QShowEvent>
+#include <QStackedWidget>
+#include <QStyle>
+#include <QVBoxLayout>
+#include <QVariant>
+#include <QWidget>
+#include <utility>
 
 #include "android/android.h"
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
+#include "android/avd/util.h"
+#include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/Features.h"
 #include "android/globals.h"
-#include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/battery-page.h"
+#include "android/skin/qt/extended-pages/bug-report-page.h"
+#include "android/skin/qt/extended-pages/camera-page.h"
+#include "android/skin/qt/extended-pages/car-data-page.h"
+#include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/dpad-page.h"
+#include "android/skin/qt/extended-pages/finger-page.h"
+#include "android/skin/qt/extended-pages/google-play-page.h"
 #include "android/skin/qt/extended-pages/help-page.h"
+#include "android/skin/qt/extended-pages/location-page.h"
+#include "android/skin/qt/extended-pages/microphone-page.h"
+#include "android/skin/qt/extended-pages/multi-display-page.h"
+#include "android/skin/qt/extended-pages/record-and-playback-page.h"
+#include "android/skin/qt/extended-pages/record-macro-page.h"
+#include "android/skin/qt/extended-pages/record-screen-page.h"
+#include "android/skin/qt/extended-pages/rotary-input-page.h"
+#include "android/skin/qt/extended-pages/settings-page.h"
+#include "android/skin/qt/extended-pages/telephony-page.h"
+#include "android/skin/qt/extended-pages/virtual-sensors-page.h"
+#include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/skin/qt/virtualscene-control-window.h"
 #include "android/ui-emu-agent.h"
-
 #include "ui_extended.h"
 
-#include <QDesktopWidget>
+class QApplication;
+class QCloseEvent;
+class QDesktopWidget;
+class QKeyEvent;
+class QPushButton;
+class QShowEvent;
+class QWidget;
+
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
     ToolWindow  *tW) :

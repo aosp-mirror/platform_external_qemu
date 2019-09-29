@@ -12,13 +12,20 @@
 
 #pragma once
 
-#include <QDoubleValidator>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QSlider>
-#include <QVBoxLayout>
-#include <QWidget>
+#include <qobjectdefs.h>     // for Q_PROPERTY, Q_OBJECT, signals, slots
+#include <QDoubleValidator>  // for QDoubleValidator
+#include <QHBoxLayout>       // for QHBoxLayout
+#include <QLabel>            // for QLabel
+#include <QLineEdit>         // for QLineEdit
+#include <QSlider>           // for QSlider
+#include <QString>           // for QString
+#include <QVBoxLayout>       // for QVBoxLayout
+#include <QWidget>           // for QWidget
+
+class QEvent;
+class QObject;
+class QString;
+class QWidget;
 
 // This widget is souped-up slider that supports fractional values, and has an editable
 // text box next to it that displays the current value.

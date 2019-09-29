@@ -14,8 +14,11 @@
 
 #pragma once
 
-#include "android/emulation/control/display_agent.h"
-#include "android/recording/Frame.h"
+#include <stdint.h>                                   // for uint32_t
+#include <memory>                                     // for unique_ptr
+
+#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "android/recording/Frame.h"                  // for Frame (ptr only)
 
 namespace android {
 namespace recording {
