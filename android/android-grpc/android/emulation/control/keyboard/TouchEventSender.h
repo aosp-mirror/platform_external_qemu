@@ -1,14 +1,16 @@
 
-#include <unordered_map>
-#include <unordered_set>
+#include <unordered_set>      // for unordered_set
 
-#include "android/base/synchronization/Lock.h"
-#include "android/console.h"
-#include "emulator_controller.pb.h"
+#include "android/console.h"  // for AndroidConsoleAgents
 
 namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+
 namespace emulation {
 namespace control {
+class TouchEvent;
 
 using base::Looper;
 

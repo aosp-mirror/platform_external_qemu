@@ -14,20 +14,25 @@
 
 #include "android/emulation/control/waterfall/SocketController.h"
 
-#include <cassert>
-#include <thread>
+#include <errno.h>                                // for errno, EAGAIN
+#include <unistd.h>                               // for close
+#include <__hash_table>                           // for __hash_const_iterator
+#include <cassert>                                // for assert
+#include <functional>                             // for __base
+#include <string>                                 // for basic_string
+#include <utility>                                // for pair
+#include <vector>                                 // for vector
 
-#include "android/base/Log.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/containers/BufferQueue.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/android_pipe_unix.h"
-#include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
-#include "android/utils/path.h"
-#include "android/utils/sockets.h"
-#include "control_socket.pb.h"
+#include "android/base/Log.h"                     // for LogStream, LOG, Log...
+#include "android/base/async/ThreadLooper.h"      // for ThreadLooper
+#include "android/base/sockets/SocketUtils.h"     // for socketAcceptAny
+#include "android/base/system/System.h"           // for System, System::Dur...
+#include "android/emulation/android_pipe_unix.h"  // for android_unix_pipes_...
+#include "android/utils/path.h"                   // for path_delete_file
+#include "android/utils/sockets.h"                // for SockAddress, errno_str
+#include "control_socket.pb.h"                    // for SocketControl, Sock...
+#include "grpcpp/create_channel_posix.h"          // for CreateCustomInsecur...
+#include "waterfall.pb.h"                         // for waterfall
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0

@@ -13,13 +13,14 @@
 // limitations under the License.
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 
-#include <android/base/Log.h>
-#include <google/protobuf/message.h>
-#include <google/protobuf/text_format.h>
+#include <android/base/Log.h>             // for LogStream, LOG, LogMessage
+#include <assert.h>                       // for assert
+#include <google/protobuf/message.h>      // for Message
+#include <google/protobuf/text_format.h>  // for TextFormat::Printer, TextFo...
+#include <algorithm>                      // for min
+#include <utility>                        // for move
 
-#include <algorithm>
-
-#include "android/base/system/System.h"
+#include "android/base/system/System.h"   // for System
 
 namespace android {
 namespace control {

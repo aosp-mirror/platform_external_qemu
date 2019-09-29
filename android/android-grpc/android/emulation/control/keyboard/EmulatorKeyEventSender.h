@@ -1,14 +1,13 @@
-#include <inttypes.h>
+#include <stdint.h>                                      // for uint32_t
+#include <cstddef>                                       // for offsetof
+#include <string>                                        // for string
 
-#include <cstddef>
-#include <string>
-
-#include "android/base/ArraySize.h"
-#include "android/base/containers/BufferQueue.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/console.h"
-#include "emulator_controller.pb.h"
-#include "android/emulation/control/keyboard/dom_key.h"
+#include "android/base/containers/BufferQueue.h"         // for BufferQueue
+#include "android/base/synchronization/Lock.h"           // for AutoLock (pt...
+#include "android/base/threads/FunctorThread.h"          // for FunctorThread
+#include "android/console.h"                             // for AndroidConso...
+#include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
+#include "emulator_controller.pb.h"                      // for KeyboardEvent
 
 namespace android {
 namespace emulation {
@@ -45,6 +44,7 @@ typedef struct {
     { DomCode::id, usb, evdev, xkb, win, mac, code }
 #define USB_KEYMAP_DECLARATION const KeycodeMapEntry usb_keycode_map[] =
 #include "android/emulation/control/keyboard/keycode_converter_data.inc"
+
 #undef USB_KEYMAP
 #undef USB_KEYMAP_DECLARATION
 
@@ -59,6 +59,7 @@ struct DomKeyMapEntry {
 #define DOM_KEY_MAP(key, id, value) \
     { DomKey::id, key }
 #include "android/emulation/control/keyboard/dom_key_data.inc"
+
 #undef DOM_KEY_MAP_DECLARATION
 #undef DOM_KEY_MAP
 #undef DOM_KEY_UNI

@@ -15,28 +15,62 @@
 #include "android/emulation/control/EmulatorService.h"
 
 #include <grpcpp/grpcpp.h>
-
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/time.h>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/display_agent.h"
+#include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
+#include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/SocketController.h"
 #include "android/emulation/control/waterfall/WaterfallForwarder.h"
-#include "android/loadpng.h"
+#include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/opengles.h"
+#include "android/skin/rect.h"
 #include "emulator_controller.grpc.pb.h"
+#include "emulator_controller.pb.h"
+#include "grpcpp/server.h"
+#include "grpcpp/server_builder.h"
+#include "grpcpp/server_builder_impl.h"
+#include "grpcpp/server_impl.h"
 #include "waterfall.grpc.pb.h"
+
+namespace google {
+namespace protobuf {
+class Empty;
+}  // namespace protobuf
+}  // namespace google
+namespace waterfall {
+class CmdProgress;
+class ForwardMessage;
+class Message;
+class Transfer;
+class VersionMessage;
+}  // namespace waterfall
 
 using grpc::Server;
 using grpc::ServerBuilder;

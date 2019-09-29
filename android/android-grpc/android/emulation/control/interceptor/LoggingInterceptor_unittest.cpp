@@ -20,8 +20,8 @@ namespace android {
 namespace control {
 namespace interceptor {
 
-using namespace grpc;
 using namespace testing;
+using namespace grpc;
 using namespace grpc::experimental;
 
 class MockInterceptorBatchMethods : public InterceptorBatchMethods {

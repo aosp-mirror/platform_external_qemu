@@ -14,15 +14,17 @@
 
 #pragma once
 
-#include <string>
-#include "android/console.h"
-#include "android/emulation/control/EmulatorService.h"
-#include "android/emulation/control/RtcBridge.h"
+#include <memory>             // for unique_ptr
+
+#include "android/console.h"  // for AndroidConsoleAgents
 
 namespace android {
 namespace emulation {
 
 namespace control {
+class EmulatorControllerService;
+class RtcBridge;
+
 class GrpcServices {
 public:
     static void setup(int port,
