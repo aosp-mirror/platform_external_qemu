@@ -30,8 +30,11 @@
 // THE SOFTWARE.
 
 #include "android/recording/video/player/FrameQueue.h"
-#include "android/recording/video/player/PacketQueue.h"
-#include "android/recording/video/player/VideoPlayer.h"
+
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/recording/video/player/PacketQueue.h"      // for PacketQueue
+#include "android/recording/video/player/VideoPlayer.h"      // for VideoPlayer
 
 namespace android {
 namespace videoplayer {

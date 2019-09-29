@@ -11,6 +11,8 @@
 
 #include "record-macro-saved-item.h"
 
+class QWidget;
+
 RecordMacroSavedItem::RecordMacroSavedItem(QWidget* parent)
     : CCListItem(parent) {
 }

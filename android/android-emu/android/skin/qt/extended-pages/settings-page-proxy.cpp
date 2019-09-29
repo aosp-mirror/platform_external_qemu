@@ -12,17 +12,30 @@
 // This file contains the methods for the Proxy
 // tab of the Settings page
 
-#include "android/skin/qt/extended-pages/settings-page.h"
+#include <qbytearray.h>                                    // for operator==
+#include <qiodevice.h>                                     // for operator|
+#include <qstring.h>                                       // for operator+
+#include <QByteArray>                                      // for QByteArray
+#include <QCheckBox>                                       // for QCheckBox
+#include <QFile>                                           // for QFile
+#include <QLineEdit>                                       // for QLineEdit
+#include <QRadioButton>                                    // for QRadioButton
+#include <QSettings>                                       // for QSettings
+#include <QSpinBox>                                        // for QSpinBox
+#include <QString>                                         // for QString
+#include <QVariant>                                        // for QVariant
+#include <memory>                                          // for unique_ptr
+#include <string>                                          // for string
 
-#include "android/emulation/control/http_proxy_agent.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulator-window.h"
-#include "android/proxy/proxy_common.h"
-#include "android/proxy/proxy_errno.h"
-#include "android/skin/qt/qt-settings.h"
-
-#include <QFile>
-#include <QSettings>
+#include "android/emulation/VmLock.h"                      // for RecursiveS...
+#include "android/emulation/control/http_proxy_agent.h"    // for QAndroidHt...
+#include "android/emulator-window.h"                       // for EmulatorWi...
+#include "android/proxy/proxy_common.h"                    // for proxy_erro...
+#include "android/proxy/proxy_errno.h"                     // for PROXY_ERR_OK
+#include "android/skin/qt/extended-pages/settings-page.h"  // for SettingsPage
+#include "android/skin/qt/qt-settings.h"                   // for HTTP_PROXY...
+#include "android/skin/qt/raised-material-button.h"        // for RaisedMate...
+#include "ui_settings-page.h"                              // for SettingsPage
 
 static QString sHttpProxyResults;
 static QString sStudioProxyString;

@@ -11,16 +11,19 @@
 
 #pragma once
 
-#include "ui_cc-list-item.h"
+#include <qobjectdefs.h>                                          // for Q_O...
+#include <QString>                                                // for QSt...
+#include <QWidget>                                                // for QWi...
+#include <memory>                                                 // for uni...
+#include <string>                                                 // for string
 
-#include "android/skin/qt/common-controls/cc-layout-direction.h"
+#include "android/skin/qt/common-controls/cc-layout-direction.h"  // for CCL...
+#include "ui_cc-list-item.h"                                      // for CCL...
 
-#include <QWidget>
-#include <memory>
-
-namespace Ui {
-class CCListItem;
-}
+class QObject;
+class QPixmap;
+class QString;
+class QWidget;
 
 class CCListItem : public QWidget {
     Q_OBJECT

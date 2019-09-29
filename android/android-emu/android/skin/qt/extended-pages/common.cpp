@@ -10,16 +10,34 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/raised-material-button.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/qt-settings.h"
-#include <QApplication>
-#include <QDir>
-#include <QSettings>
-#include <QStandardPaths>
-#include <QStringList>
-#include <QTemporaryFile>
-#include <QVariant>
+
+#include <qicon.h>                                   // for QIcon::Disabled
+#include <qnamespace.h>                              // for WindowFlags, Win...
+#include <qobject.h>                                 // for qobject_cast
+#include <qstandardpaths.h>                          // for QStandardPaths::...
+#include <qstring.h>                                 // for operator+, QStri...
+#include <QApplication>                              // for QApplication
+#include <QDir>                                      // for QDir
+#include <QFrame>                                    // for QFrame
+#include <QHash>                                     // for QHash
+#include <QList>                                     // for QList
+#include <QPixmap>                                   // for QPixmap
+#include <QPushButton>                               // for QPushButton
+#include <QSettings>                                 // for QSettings
+#include <QStandardPaths>                            // for QStandardPaths
+#include <QStringList>                               // for QStringList
+#include <QTemporaryFile>                            // for QTemporaryFile
+#include <QVariant>                                  // for QVariant
+#include <QWidget>                                   // for QWidget
+#include <QWidgetList>                               // for QWidgetList
+
+#include "android/skin/qt/qt-settings.h"             // for SAVE_PATH, SCREE...
+#include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
+#include "android/skin/qt/stylesheet.h"              // for stylesheetValues
+
+class QFrame;
+class QPushButton;
+class QWidget;
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
 {

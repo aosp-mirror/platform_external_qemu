@@ -10,18 +10,20 @@
 
 #pragma once
 
-#include "android/skin/qt/gl-widget.h"
-#include "GLES2/gl2.h"
+#include <glm/gtc/quaternion.hpp>             // for tquat
+#include <qobjectdefs.h>                      // for Q_PROPERTY, Q_OBJECT
+#include <QString>                            // for QString
 
-#include <QMouseEvent>
-
+#include "GLES3/gl3.h"                        // for GLuint
+#include "android/skin/qt/gl-widget.h"        // for GLWidget
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <array>
-#include <string>
-
+class QMouseEvent;
+class QObject;
+class QWheelEvent;
+class QWidget;
 struct QAndroidSensorsAgent;
 
 // A widget that displays a 3D model of a device and lets the user

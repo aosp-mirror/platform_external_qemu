@@ -12,9 +12,13 @@
 
 #pragma once
 
-#include "android/skin/event.h"
-#include "android/skin/file.h"
-#include "android/skin/trackball.h"
+#include <stdbool.h>                 // for bool
+
+#include "android/skin/event.h"      // for SkinEvent
+#include "android/skin/file.h"       // for SkinLayout
+#include "android/skin/image.h"      // for SkinImage
+#include "android/skin/rect.h"       // for SkinRotation, SkinRect
+#include "android/skin/trackball.h"  // for SkinTrackBall
 
 typedef struct SkinWindow  SkinWindow;
 

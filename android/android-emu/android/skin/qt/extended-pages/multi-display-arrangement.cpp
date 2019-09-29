@@ -11,11 +11,24 @@
 
 #include "multi-display-arrangement.h"
 
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/base/Log.h"
+#include <qnamespace.h>                             // for operator|, AlignC...
+#include <qpainter.h>                               // for QPainter (ptr only)
+#include <QBrush>                                   // for QBrush
+#include <QFont>                                    // for QFont
+#include <QFontMetrics>                             // for QFontMetrics
+#include <QIncompatibleFlag>                        // for QIncompatibleFlag
+#include <QPainter>                                 // for QPainter
+#include <QPainterPath>                             // for QPainterPath
+#include <QPen>                                     // for QPen
+#include <QRectF>                                   // for QRectF
+#include <algorithm>                                // for max
+#include <cstdint>                                  // for uint32_t
 
-#include <QGraphicsOpacityEffect>
-#include <QPainter>
+#include "android/settings-agent.h"                 // for SETTINGS_THEME_LIGHT
+#include "android/skin/qt/extended-pages/common.h"  // for getSelectedTheme
+
+class QPaintEvent;
+class QWidget;
 
 static const int kBorderX = 10;
 static const int kBorderY = 50;

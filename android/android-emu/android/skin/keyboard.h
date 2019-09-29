@@ -12,11 +12,10 @@
 
 #pragma once
 
-#include "android/skin/charmap.h"
-#include "android/skin/event.h"
-#include "android/skin/image.h"  /* for SkinRotation */
-#include "android/skin/keycode-buffer.h"
-#include "android/utils/aconfig-file.h"
+#include "android/skin/event.h"           // for SkinEvent
+#include "android/skin/keycode-buffer.h"  // for SkinKeyCodeFlushFunc
+#include "android/skin/keycode.h"         // for SkinKeyCode
+#include "android/skin/rect.h"            // for SkinRotation
 
 typedef struct SkinKeyboard   SkinKeyboard;
 

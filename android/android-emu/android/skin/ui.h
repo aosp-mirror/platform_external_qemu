@@ -12,13 +12,16 @@
 
 #pragma once
 
-#include "android/skin/generic-event-buffer.h"
-#include "android/skin/generic-event.h"
-#include "android/skin/keyboard.h"
-#include "android/skin/keycode-buffer.h"
-#include "android/skin/rect.h"
+#include <stdbool.h>                            // for bool
 
-#include <stdbool.h>
+#include "android/skin/generic-event-buffer.h"  // for SkinGenericEventFlush...
+#include "android/skin/keyboard.h"              // for SkinKeyEventFunc
+#include "android/skin/keycode-buffer.h"        // for SkinKeyCodeFlushFunc
+#include "android/skin/rect.h"                  // for SkinRotation
+#include "android/utils/compiler.h"             // for ANDROID_BEGIN_HEADER
+
+struct SkinFile;
+struct SkinImage;
 
 ANDROID_BEGIN_HEADER
 

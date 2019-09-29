@@ -10,14 +10,18 @@
 
 #pragma once
 
-#include "android/base/system/System.h"
-#include "android/skin/qt/event-subscriber.h"
+#include <QObject>                             // for QObject
+#include <QString>                             // for QString
+#include <sstream>                             // for ostream, ostringstream
+#include <string>                              // for allocator, string, bas...
+#include <utility>                             // for forward
 
-#include <QEvent>
+#include "android/base/system/System.h"        // for System, System::Times
+#include "android/skin/qt/event-capturer.h"    // for EventCapturer, EventCa...
+#include "android/skin/qt/event-subscriber.h"  // for EventSubscriber
 
-#include <sstream>
-#include <string>
-#include <utility>
+class QEvent;
+class QObject;
 
 // Base non-template class so eventTypes() can be implemented in .cpp
 class UIEventRecorderBase {

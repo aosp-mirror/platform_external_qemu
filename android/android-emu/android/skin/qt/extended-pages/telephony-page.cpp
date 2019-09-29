@@ -11,18 +11,33 @@
 
 #include "android/skin/qt/extended-pages/telephony-page.h"
 
-#include "android/avd/info.h"
-#include "android/emulation/control/telephony_agent.h"
-#include "android/emulation/VmLock.h"
-#include "android/globals.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/telephony/modem.h"
-#include "android/telephony/sms.h"
-#include <QSettings>
-#include <cassert>
-#include <cctype>
+#include <limits.h>                                     // for CHAR_BIT
+#include <qchar.h>                                      // for operator==
+#include <stddef.h>                                     // for NULL
+#include <QChar>                                        // for QChar
+#include <QComboBox>                                    // for QComboBox
+#include <QCoreApplication>                             // for QCoreApplication
+#include <QIcon>                                        // for QIcon
+#include <QPlainTextEdit>                               // for QPlainTextEdit
+#include <QRegularExpression>                           // for QRegularExpre...
+#include <cassert>                                      // for assert
+#include <string>                                       // for basic_string
+
+#include "android/avd/info.h"                           // for avdInfo_getAv...
+#include "android/avd/util.h"                           // for AVD_ANDROID_AUTO
+#include "android/emulation/VmLock.h"                   // for RecursiveScop...
+#include "android/emulation/control/telephony_agent.h"  // for QAndroidTelep...
+#include "android/globals.h"                            // for android_avdInfo
+#include "android/settings-agent.h"                     // for SettingsTheme
+#include "android/skin/qt/error-dialog.h"               // for showErrorDialog
+#include "android/skin/qt/extended-pages/common.h"      // for setButtonEnabled
+#include "android/skin/qt/raised-material-button.h"     // for RaisedMateria...
+#include "android/telephony/modem.h"                    // for amodem_get_ra...
+#include "android/telephony/sms.h"                      // for SmsPDU, is_in...
+#include "ui_telephony-page.h"                          // for TelephonyPage
+
+class QString;
+class QWidget;
 
 #define MAX_SMS_MSG_SIZE 1024 // Arbitrary emulator limitation
 #define MAX_SMS_MSG_SIZE_STRING "1024"

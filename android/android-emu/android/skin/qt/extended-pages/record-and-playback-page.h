@@ -10,11 +10,16 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_record-and-playback-page.h"
+#include <qobjectdefs.h>                  // for Q_OBJECT, signals, slots
+#include <QString>                        // for QString
+#include <QWidget>                        // for QWidget
+#include <memory>                         // for unique_ptr
 
-#include <QWidget>
-#include <QTabBar>
-#include <memory>
+#include "ui_record-and-playback-page.h"  // for RecordAndPlaybackPage
+
+class QObject;
+class QTabBar;
+class QWidget;
 
 class RecordAndPlaybackPage : public QWidget {
     Q_OBJECT

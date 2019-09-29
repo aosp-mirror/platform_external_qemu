@@ -12,21 +12,22 @@
 
 #include "android/skin/ui.h"
 
-#include "android/emulator-window.h"
-#include "android/skin/file.h"
-#include "android/skin/generic-event.h"
-#include "android/skin/image.h"
-#include "android/skin/keyboard.h"
-#include "android/skin/rect.h"
-#include "android/skin/trackball.h"
-#include "android/skin/window.h"
+#include <stdbool.h>                     // for bool, true, false
+#include <stdio.h>                       // for NULL, snprintf
+#include <string.h>                      // for strcmp
 
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/system.h"
-
-#include <stdbool.h>
-#include <stdio.h>
+#include "android/emulator-window.h"     // for emulator_window_set_no_skin
+#include "android/skin/event.h"          // for SkinEvent, (anonymous struct...
+#include "android/skin/file.h"           // for SkinLayout, SkinFile, skin_l...
+#include "android/skin/generic-event.h"  // for skin_generic_event_create
+#include "android/skin/image.h"          // for skin_image_unref, skin_image...
+#include "android/skin/keyboard.h"       // for skin_keyboard_process_event
+#include "android/skin/rect.h"           // for SkinRotation
+#include "android/skin/trackball.h"      // for skin_trackball_create, skin_...
+#include "android/skin/window.h"         // for skin_window_process_event
+#include "android/utils/bufprint.h"      // for bufprint
+#include "android/utils/debug.h"         // for dprint, VERBOSE_CHECK, VERBO...
+#include "android/utils/system.h"        // for AFREE, ANEW0
 
 #ifdef _WIN32
 #include <windows.h>

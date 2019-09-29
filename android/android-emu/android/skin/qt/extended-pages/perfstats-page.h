@@ -13,9 +13,19 @@
 // limitations under the License.
 #pragma once
 
-#include "ui_perfstats-page.h"
+#include <qobjectdefs.h>  // for Q_OBJECT, signals, slots
+#include <QFrame>         // for QFrame
+#include <QString>        // for QString
+#include <memory>         // for unique_ptr
 
-#include <memory>
+class QCloseEvent;
+class QHideEvent;
+class QObject;
+class QShowEvent;
+class QWidget;
+namespace Ui {
+class PerfStatsPage;
+}  // namespace Ui
 
 class PerfStatsPage : public QFrame {
     Q_OBJECT

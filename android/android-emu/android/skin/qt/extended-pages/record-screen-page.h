@@ -10,16 +10,28 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_record-screen-page.h"
+#include <qmetatype.h>                          // for Q_DECLARE_METATYPE
+#include <qobjectdefs.h>                        // for slots, Q_OBJECT, signals
+#include <QString>                              // for QString
+#include <QTimer>                               // for QTimer
+#include <QWidget>                              // for QWidget
+#include <memory>                               // for unique_ptr
+#include <string>                               // for string
 
-#include "android/recording/screen-recorder.h"
-#include "android/recording/video/player/VideoPlayer.h"
-#include "android/skin/qt/video-player/VideoInfo.h"
+#include "android/recording/screen-recorder.h"  // for RecordingStatus
 
-#include <QTimer>
-#include <QWidget>
-#include <memory>
-
+class QObject;
+class QString;
+class QWidget;
+namespace Ui {
+class RecordScreenPage;
+}  // namespace Ui
+namespace android {
+namespace videoplayer {
+class VideoInfo;
+class VideoPlayer;
+}  // namespace videoplayer
+}  // namespace android
 struct QAndroidRecordScreenAgent;
 
 Q_DECLARE_METATYPE(RecordingStatus);

@@ -11,11 +11,17 @@
 
 #pragma once
 
-#include "ui_cellular-page.h"
-#include <QWidget>
-#include <memory>
+#include <qobjectdefs.h>       // for Q_OBJECT, slots
+#include <QString>             // for QString
+#include <QWidget>             // for QWidget
+#include <memory>              // for unique_ptr
 
+#include "ui_cellular-page.h"  // for CellularPage
+
+class QObject;
+class QWidget;
 struct QAndroidCellularAgent;
+
 class CellularPage : public QWidget
 {
     Q_OBJECT

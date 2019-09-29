@@ -50,12 +50,17 @@
 
 #pragma once
 
-#include <QObject>
+#include <qglobal.h>      // for QT_BEGIN_NAMESPACE, QT_END_NAMESPACE
+#include <qobjectdefs.h>  // for Q_OBJECT, signals, slots
+#include <QObject>        // for QObject
+#include <QString>        // for QString
 
+class QObject;
 class WebSocketTransport;
 
 QT_BEGIN_NAMESPACE
 class QWebSocketServer;
+
 QT_END_NAMESPACE
 
 class WebSocketClientWrapper : public QObject

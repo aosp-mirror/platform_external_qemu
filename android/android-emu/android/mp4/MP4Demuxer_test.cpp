@@ -14,19 +14,20 @@
 
 #include "android/mp4/MP4Demuxer.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/Thread.h"
-#include "android/offworld/proto/offworld.pb.h"
-#include "android/recording/video/player/VideoPlayer.h"
-#include "android/recording/video/player/VideoPlayerWaitInfo.h"
-#include "string.h"
+#include "android/base/files/PathUtils.h"                        // for Path...
+#include "android/base/system/System.h"                          // for System
+#include "android/mp4/MP4Dataset.h"                              // for Mp4D...
+#include "android/offworld/proto/offworld.pb.h"                  // for Data...
+#include "android/recording/video/player/PacketQueue.h"          // for Pack...
+#include "android/recording/video/player/VideoPlayer.h"          // for Play...
+#include "android/recording/video/player/VideoPlayerWaitInfo.h"  // for vide...
 
 extern "C" {
-#include "libavcodec/avcodec.h"
+#include "libavcodec/avcodec.h"                                  // for AVPa...
 }
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>                                         // for Message
+#include <string>                                                // for string
 
 using namespace android::mp4;
 using namespace android::videoplayer;

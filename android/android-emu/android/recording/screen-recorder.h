@@ -14,10 +14,11 @@
 
 #pragma once
 
-#include "android/emulation/control/display_agent.h"
-#include "android/utils/compiler.h"
-
+#include <stdint.h>                                   // for uint32_t
 #include <stdbool.h>
+
+#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "android/utils/compiler.h"                   // for ANDROID_BEGIN_H...
 
 ANDROID_BEGIN_HEADER
 // This callback will be called in the following scenarios:

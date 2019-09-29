@@ -9,34 +9,70 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/extended-pages/location-page.h"
-
-#include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
-#include "android/base/StringView.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/location/Route.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/extended-pages/location-route-playback-item.h"
-#include "android/utils/path.h"
-
-#include <QCheckBox>
+#include <QtCore/qglobal.h>
+#include <qdialog.h>
+#include <qdialogbuttonbox.h>
+#include <qdir.h>
+#include <qiodevice.h>
+#include <qmessagebox.h>
+#include <qnamespace.h>
+#include <qobject.h>
+#include <qobjectdefs.h>
+#include <qstring.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <QApplication>
+#include <QCursor>
 #include <QDateTime>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
-#include <QDoubleValidator>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <QFile>
+#include <QFlags>
+#include <QLabel>
+#include <QLineEdit>
+#include <QList>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
-#include <QPainter>
 #include <QPlainTextEdit>
-#include <QtConcurrent/QtConcurrentRun>
-
+#include <QPushButton>
+#include <QSignalBlocker>
+#include <QString>
+#include <QStringList>
+#include <QTabWidget>
+#include <QTextStream>
+#include <QVBoxLayout>
+#include <QWidget>
 #include <fstream>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
+#include "android/emulation/ConfigDirs.h"
+#include "android/gps/GpsFix.h"
+#include "android/location/Route.h"
+#include "android/settings-agent.h"
+#include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/location-page.h"
+#include "android/skin/qt/extended-pages/location-route-playback-item.h"
+#include "android/skin/qt/raised-material-button.h"
+#include "android/utils/path.h"
+#include "route.pb.h"
+#include "ui_location-page.h"
+
+class CCListItem;
+class QAction;
+class QLineEdit;
+class QListWidget;
+class QListWidgetItem;
+class QMenu;
+class QPlainTextEdit;
+class QPushButton;
+class QVBoxLayout;
 
 static const char JSON_FILE_NAME[]  = "route.json";
 static const char PROTO_FILE_NAME[] = "route_metadata.pb";

@@ -30,9 +30,8 @@
 // THE SOFTWARE.
 
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
 
-#include "android/recording/video/player/VideoPlayer.h"
+#include "android/recording/video/player/VideoPlayer.h"  // for VideoPlayer
 
 namespace android {
 namespace videoplayer {

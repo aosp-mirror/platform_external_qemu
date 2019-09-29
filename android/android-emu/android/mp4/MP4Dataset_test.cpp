@@ -14,12 +14,13 @@
 
 #include "android/mp4/MP4Dataset.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>                         // for EXPECT_EQ, Message
+#include <libavformat/avformat.h>                // for AVFormatContext
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/hw-sensors.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "android/base/files/PathUtils.h"        // for PathUtils
+#include "android/base/system/System.h"          // for System
+#include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
+#include "android/offworld/proto/offworld.pb.h"  // for DataStreamInfo
 
 using namespace android::mp4;
 

@@ -11,8 +11,14 @@
 
 #include "rotary-input-dial.h"
 
-#include <QPainter>
-#include <QSvgRenderer>
+#include <qnamespace.h>  // for TransparentMode
+#include <qpainter.h>    // for QPainter::Antialiasing
+#include <QPainter>      // for QPainter
+#include <QSvgRenderer>  // for QSvgRenderer
+
+class QPaintEvent;
+class QString;
+class QWidget;
 
 RotaryInputDial::RotaryInputDial(QWidget* parent)
 : QDial(parent),

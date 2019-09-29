@@ -16,16 +16,15 @@
 
 #include "android/skin/qt/native-event-filter-factory.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/native-keyboard-event-handler.h"
+#include "android/base/memory/LazyInstance.h"         // for LazyInstance
+
+class QAbstractNativeEventFilter;
 
 #define DEBUG 1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                      // for VERBOSE_PRINT
+
 #define D(...) VERBOSE_PRINT(surface, __VA_ARGS__)
 #else
 #define D(...) ((void)0)

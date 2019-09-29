@@ -11,17 +11,20 @@
 */
 #include "android/skin/keyboard.h"
 
-#include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
-#include "android/skin/charmap.h"
-#include "android/skin/keycode-buffer.h"
-#include "android/skin/keycode.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/system.h"
-#include "android/utils/utf8_utils.h"
+#include <stdbool.h>                                 // for bool, true, false
+#include <stdint.h>                                  // for uint8_t, uint32_t
+#include <stdio.h>                                   // for fprintf, NULL
 
-#include <stdio.h>
+#include "android/featurecontrol/feature_control.h"  // for feature_is_enabled
+#include "android/globals.h"                         // for android_hw
+#include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
+#include "android/skin/charmap.h"                    // for skin_charmap_get...
+#include "android/skin/keycode-buffer.h"             // for skin_keycode_buf...
+#include "android/skin/keycode.h"                    // for skin_key_pair_to...
+#include "android/skin/linux_keycodes.h"             // for LINUX_KEY_LEFTSHIFT
+#include "android/utils/debug.h"                     // for VERBOSE_PRINT
+#include "android/utils/system.h"                    // for AFREE, ANEW0
+#include "android/utils/utf8_utils.h"                // for android_utf8_decode
 
 #define  DEBUG  1
 

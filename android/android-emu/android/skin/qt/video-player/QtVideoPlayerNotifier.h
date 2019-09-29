@@ -31,16 +31,17 @@
 
 #pragma once
 
-#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include <qobjectdefs.h>                                         // for emit
+#include <QObject>                                               // for QObject
+#include <QString>                                               // for QString
+#include <QTimer>                                                // for QTimer
 
-#include <QObject>
-#include <QTimer>
+#include "android/recording/video/player/VideoPlayerNotifier.h"  // for Vide...
+
+class QObject;
 
 namespace android {
 namespace videoplayer {
-
-class VideoPlayer;
-class VideoPlayerWidget;
 
 // Qt related functions for the video player
 // to notifier updates to the caller and a timer for the player

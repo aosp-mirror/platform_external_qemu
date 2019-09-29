@@ -11,7 +11,15 @@
 
 #pragma once
 
-#include "android/skin/qt/common-controls/cc-list-item.h"
+#include <qobjectdefs.h>                                   // for Q_OBJECT
+#include <QString>                                         // for QString
+#include <string>                                          // for string
+
+#include "android/skin/qt/common-controls/cc-list-item.h"  // for CCListItem
+
+class QObject;
+class QString;
+class QWidget;
 
 class RecordMacroSavedItem : public CCListItem {
     Q_OBJECT

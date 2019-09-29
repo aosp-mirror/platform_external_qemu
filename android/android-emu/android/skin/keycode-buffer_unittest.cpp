@@ -10,11 +10,11 @@
 ** GNU General Public License for more details.
 */
 #include "android/skin/keycode-buffer.h"
-#include "android/skin/linux_keycodes.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>                  // for Test, Message, EXPECT_EQ
+#include <stddef.h>                       // for size_t
 
-#include <vector>
+#include "android/skin/linux_keycodes.h"  // for LINUX_KEY_COMPOSE, LINUX_KE...
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 

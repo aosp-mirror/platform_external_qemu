@@ -9,13 +9,33 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/extended-pages/location-page.h"
-
-#include "android/base/Log.h"
-
+#include <math.h>
+#include <qobject.h>
+#include <qobjectdefs.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
+#include <QList>
+#include <QListWidget>
+#include <QString>
+#include <QTabWidget>
+#include <QTimer>
+#include <QWidget>
+#include <memory>
+#include <vector>
+
+#include "android/base/Log.h"
+#include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/location-page.h"
+#include "android/skin/qt/extended-pages/location-route-playback-item.h"
+#include "android/skin/qt/raised-material-button.h"
+#include "route.pb.h"
+#include "ui_location-page.h"
+
+class QJsonDocument;
+class QListWidgetItem;
+class QString;
 
 #ifdef USE_WEBENGINE
 void LocationPage::on_loc_playRouteButton_clicked() {

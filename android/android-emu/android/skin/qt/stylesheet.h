@@ -11,9 +11,10 @@
 
 #pragma once
 
-#include "android/settings-agent.h"
-#include <QString>
-#include <QHash>
+#include "android/settings-agent.h"  // for SettingsTheme
+
+class QString;
+template <class Key, class T> class QHash;
 
 namespace Ui {
 

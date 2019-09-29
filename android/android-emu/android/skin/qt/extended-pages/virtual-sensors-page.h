@@ -12,25 +12,26 @@
 
 #include "ui_virtual-sensors-page.h"
 
-#include "android/hw-sensors.h"
-#include "android/metrics/PeriodicReporter.h"
-#include "android/physics/Physics.h"
-#include "android/physics/physical_state_agent.h"
-#include "android/skin/file.h"
-#include "android/skin/rect.h"
-#include "android/avd/info.h"
-#include "android/globals.h"
+#include <qobjectdefs.h>                           // for slots, Q_OBJECT
+#include <QDoubleValidator>                        // for QDoubleValidator
+#include <QElapsedTimer>                           // for QElapsedTimer
+#include <QString>                                 // for QString
+#include <QTimer>                                  // for QTimer
+#include <QWidget>                                 // for QWidget
+#include <memory>                                  // for unique_ptr
 
-#include <QDoubleValidator>
-#include <QElapsedTimer>
-#include <QTimer>
-#include <QWidget>
+#include "android/hw-sensors.h"                    // for PhysicalParameter
+#include "android/metrics/PeriodicReporter.h"      // for PeriodicReporter
+#include "android/physics/Physics.h"               // for PhysicalInterpolation
+#include "android/physics/physical_state_agent.h"  // for QAndroidPhysicalSt...
+#include "android/skin/rect.h"                     // for SkinRotation, SKIN...
+#include "glm/detail/../fwd.hpp"                   // for quat
+#include "glm/detail/type_vec.hpp"                 // for vec3
+#include "glm/detail/type_vec3.hpp"                // for tvec3
 
-#include <memory>
-
-#include <glm/vec3.hpp>
-#include <glm/gtc/quaternion.hpp>
-
+class QObject;
+class QShowEvent;
+class QWidget;
 struct QAndroidSensorsAgent;
 
 class VirtualSensorsPage : public QWidget

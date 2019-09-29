@@ -10,10 +10,11 @@
 
 #include "android/skin/qt/gl-canvas.h"
 
-#include "android/skin/qt/gl-common.h"
-#include "GLES2/gl2.h"
+#include <stdio.h>                            // for fprintf, stderr
+#include <cassert>                            // for assert
 
-#include <cassert>
+#include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
+#include "android/skin/qt/gl-common.h"        // for CHECK_GL_ERROR
 
 GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
         // Note that width and height must be powers of 2 to comply with

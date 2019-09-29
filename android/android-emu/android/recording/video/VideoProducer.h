@@ -14,11 +14,14 @@
 
 #pragma once
 
-#include "android/emulation/control/display_agent.h"
-#include "android/recording/Producer.h"
+#include <stdint.h>                                   // for uint32_t, uint8_t
+#include <memory>                                     // for unique_ptr
+
+#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
 
 namespace android {
 namespace recording {
+class Producer;
 
 // Create a new VideoProducer instance. |cb| is a function that
 // will be called from this thread with new video frames.

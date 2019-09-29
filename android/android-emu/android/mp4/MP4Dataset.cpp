@@ -14,16 +14,19 @@
 
 #include "android/mp4/MP4Dataset.h"
 
-#include <string>
+#include <libavutil/avutil.h>                    // for AVMEDIA_TYPE_AUDIO
+#include <stddef.h>                              // for NULL
+#include <string>                                // for string
+#include <utility>                               // for move
 
-#include "android/base/Log.h"
-#include "android/offworld/proto/offworld.pb.h"
-#include "android/recording/AVScopedPtr.h"
-#include "android/recording/video/player/PacketQueue.h"
+#include "android/base/Log.h"                    // for LOG, LogMessage
+#include "android/base/memory/ScopedPtr.h"       // for FuncDelete
+#include "android/offworld/proto/offworld.pb.h"  // for DataStreamInfo, Data...
+#include "android/recording/AVScopedPtr.h"       // for makeAVScopedPtr, AVS...
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"                  // for AVCodecContext
+#include "libavformat/avformat.h"                // for AVFormatContext, AVS...
 }
 
 using android::recording::AVScopedPtr;

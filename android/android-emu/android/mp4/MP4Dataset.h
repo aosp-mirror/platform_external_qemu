@@ -14,15 +14,14 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
+#include <memory>                                // for unique_ptr
+#include <string>                                // for string
 
-#include "android/hw-sensors.h"
-#include "android/offworld/proto/offworld.pb.h"
-#include "android/utils/compiler.h"
+#include "android/hw-sensors.h"                  // for AndroidSensor
+#include "android/offworld/proto/offworld.pb.h"  // for DatasetInfo
 
 extern "C" {
-#include "libavformat/avformat.h"
+#include "libavformat/avformat.h"                // for AVFormatContext
 }
 
 namespace android {

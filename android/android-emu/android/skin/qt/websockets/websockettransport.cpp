@@ -50,12 +50,19 @@
 
 #include "android/skin/qt/websockets/websockettransport.h"
 
-#include "android/skin/qt/logging-category.h"
+#include <qjsondocument.h>                     // for QJsonDocument::Compact
+#include <qloggingcategory.h>                  // for qCWarning
+#include <QDebug>                              // for QDebug
+#include <QJsonDocument>                       // for QJsonDocument
+#include <QJsonObject>                         // for QJsonObject
+#include <QJsonParseError>                     // for QJsonParseError
+#include <QObject>                             // for QObject
+#include <QWebSocket>                          // for QWebSocket
 
-#include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QWebSocket>
+#include "android/skin/qt/logging-category.h"  // for emu
+
+class QJsonObject;
+class QString;
 
 /*!
     \brief QWebChannelAbstractSocket implementation that uses a QWebSocket internally.

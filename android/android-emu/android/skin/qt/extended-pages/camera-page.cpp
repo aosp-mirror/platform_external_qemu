@@ -11,6 +11,10 @@
 
 #include "android/skin/qt/extended-pages/camera-page.h"
 
+#include "android/skin/qt/extended-pages/camera-virtualscene-subpage.h"
+
+class QWidget;
+
 CameraPage::CameraPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CameraPage()) {
     mUi->setupUi(this);

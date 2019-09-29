@@ -10,11 +10,40 @@
 // GNU General Public License for more details.
 #include "vhal-table.h"
 
+#include <limits.h>
+#include <qdialog.h>
+#include <qnamespace.h>
+#include <qobject.h>
+#include <qstring.h>
+#include <QDialog>
+#include <QFontMetrics>
+#include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QList>
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <QSet>
+#include <QStringList>
 #include <cfloat>
+#include <cstdint>
+#include <functional>
+#include <new>
+#include <string>
+#include <utility>
 
+#include "VehicleHalProto.pb.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
-#include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/raised-material-button.h"
+#include "ui_vhal-table.h"
+#include "vhal-item.h"
+
+class QHideEvent;
+class QLabel;
+class QListWidgetItem;
+class QShowEvent;
+class QWidget;
 
 using std::map;
 using std::string;

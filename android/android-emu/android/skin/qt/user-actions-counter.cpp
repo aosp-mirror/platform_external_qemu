@@ -11,9 +11,13 @@
 
 #include "android/skin/qt/user-actions-counter.h"
 
-#include <QVariant>
+#include <assert.h>      // for assert
+#include <qcoreevent.h>  // for QEvent (ptr only), QEvent::FileOpen, QEvent:...
+#include <QEvent>        // for QEvent
+#include <QVariant>      // for QVariant
+#include <functional>    // for __base
 
-#include <assert.h>
+class QObject;
 
 namespace android {
 namespace qt {

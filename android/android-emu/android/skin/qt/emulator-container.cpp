@@ -11,23 +11,44 @@
 
 #include "android/skin/qt/emulator-container.h"
 
-#include "android/skin/qt/ModalOverlay.h"
-#include "android/skin/qt/VirtualSceneInfoDialog.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/tool-window.h"
-#include "android/utils/debug.h"
+#include <qframe.h>                                  // for QFrame::NoFrame
+#include <qglobal.h>                                 // for Q_ASSERT
+#include <qlist.h>                                   // for QList<>::iterator
+#include <qnamespace.h>                              // for WindowMinimized
+#include <qwindowdefs.h>                             // for WId
+#include <QFlags>                                    // for QFlags
+#include <QFrame>                                    // for QFrame
+#include <QMoveEvent>                                // for QMoveEvent
+#include <QObject>                                   // for QObject
+#include <QPoint>                                    // for QPoint
+#include <QScrollBar>                                // for QScrollBar
+#include <QStyle>                                    // for QStyle
+#include <QStyleFactory>                             // for QStyleFactory
+#include <QVector2D>                                 // for QVector2D
+#include <algorithm>                                 // for min, find, max
+#include <functional>                                // for __base
+#include <tuple>                                     // for tuple
+#include <utility>                                   // for move
 
-#include <QApplication>
-#include <QObject>
-#include <QScrollBar>
-#include <QStyle>
-#include <QStyleFactory>
-#include <QtCore>
+#include "android/skin/qt/ModalOverlay.h"            // for ModalOverlay
+#include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageCe...
+#include "android/skin/qt/VirtualSceneInfoDialog.h"  // for VirtualSceneInfo...
+#include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtWindow
+#include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
+#include "android/skin/qt/tool-window.h"             // for ToolWindow
+#include "android/utils/debug.h"                     // for VERBOSE_PRINT
 
-#include <algorithm>
+class QCloseEvent;
+class QFocusEvent;
+class QKeyEvent;
+class QMoveEvent;
+class QResizeEvent;
+class QScrollBar;
+class QShowEvent;
+class QStyle;
 
 #if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
+#include "android/skin/qt/mac-native-window.h"       // for getNSWindow, nsW...
 #endif
 
 #if defined(_WIN32)

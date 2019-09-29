@@ -11,9 +11,16 @@
 
 #pragma once
 
+#include <qobjectdefs.h>
+#include <stddef.h>
+#include <QString>
+#include <QWidget>
+
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 
-#include <QtWidgets/QWidget>
+class QObject;
+class QPaintEvent;
+class QWidget;
 
 namespace android {
 namespace videoplayer {

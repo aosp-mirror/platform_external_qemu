@@ -11,7 +11,25 @@
 
 #include "android/skin/qt/extended-pages/google-play-page.h"
 
-#include "android/skin/qt/error-dialog.h"
+#include <qapplication.h>                  // for QApplication (ptr only), qApp
+#include <QApplication>                    // for QApplication
+#include <QObject>                         // for QObject
+#include <QPlainTextEdit>                  // for QPlainTextEdit
+#include <algorithm>                       // for find_if
+#include <functional>                      // for __base
+#include <iterator>                        // for end, begin
+
+#include "android/skin/qt/error-dialog.h"  // for showErrorDialog
+#include "ui_google-play-page.h"           // for GooglePlayPage
+
+class QPlainTextEdit;
+class QString;
+class QWidget;
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
 
 using android::base::c_str;
 using android::base::StringView;

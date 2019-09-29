@@ -9,20 +9,31 @@
 
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 
-#include "android/base/LayoutResolver.h"
-#include "android/base/Log.h"
-#include "android/globals.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/extended-pages/multi-display-item.h"
-#include "android/skin/qt/qt-settings.h"
-#include <QSettings>
-#include <QGroupBox>
+#include <qnamespace.h>
 #include <QLabel>
-#include <QListWidgetItem>
+#include <QSize>
 #include <QVBoxLayout>
+#include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
+#include <utility>
+
+#include "android/avd/info.h"
+#include "android/base/LayoutResolver.h"
+#include "android/base/Log.h"
+#include "android/base/system/System.h"
+#include "android/globals.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/multi-display-arrangement.h"
+#include "android/skin/qt/extended-pages/multi-display-item.h"
+#include "android/skin/qt/raised-material-button.h"
+#include "studio_stats.pb.h"
+
+class QString;
+class QWidget;
 
 // Allow at most 5 reports every 60 seconds.
 static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;

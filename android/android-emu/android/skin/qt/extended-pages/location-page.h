@@ -11,40 +11,60 @@
 #pragma once
 
 #ifdef USE_WEBENGINE
-#include "ui_location-page.h"
 #else
 #include "ui_location-page_noMaps.h"
 #endif
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/gps/GpsFix.h"
-#include "android/location/Point.h"
-#include "android/location/Route.h"
-#include "android/metrics/PeriodicReporter.h"
-#include "android/skin/qt/common-controls/cc-list-item.h"
-#include "android/skin/qt/websockets/websocketclientwrapper.h"
-#include "android/skin/qt/websockets/websockettransport.h"
+#include <qobjectdefs.h>                                   // for Q_OBJECT
+#include <qstring.h>                                       // for QString (p...
+#include <stdint.h>                                        // for uint32_t
+#include <QDateTime>                                       // for QDateTime
+#include <QIcon>                                           // for QIcon
+#include <QList>                                           // for QList
+#include <QListWidget>                                     // for QListWidget
+#include <QListWidgetItem>                                 // for QListWidge...
+#include <QObject>                                         // for QObject
+#include <QPixmap>                                         // for QPixmap
+#include <QSize>                                           // for QSize
+#include <QString>                                         // for QString
+#include <QThread>                                         // for QThread
+#include <QTimer>                                          // for QTimer
+#include <QWidget>                                         // for QWidget
+#include <memory>                                          // for unique_ptr
+#include <string>                                          // for string
+#include <utility>                                         // for move
+#include <vector>                                          // for vector
 
-#include <QDateTime>
-#include <QListWidgetItem>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QTimer>
-#include <QThread>
-#include <QVector>
-#include <QWebChannel>
-#include <QWebEngineView>
-#include <QWebSocketServer>
-#include <QWidget>
-#include <memory>
+#include "android/gps/GpsFix.h"                            // for GpsFixArray
+#include "android/metrics/PeriodicReporter.h"              // for PeriodicRe...
+#include "android/settings-agent.h"                        // for SETTINGS_T...
+#include "android/skin/qt/common-controls/cc-list-item.h"  // for CCListItem
+#include "android/skin/qt/extended-pages/common.h"         // for getIconFor...
 
-struct QAndroidLocationAgent;
 class GeoDataLoaderThread;
-class RouteSenderThread;
 class MapBridge;
 class PointWidgetItem;
+class QJsonDocument;
+class QKeyEvent;
+class QListWidget;
+class QListWidgetItem;
+class QMenu;
+class QObject;
+class QTableWidget;
+class QWebChannel;
+class QWebSocketServer;
+class QWidget;
+class RouteSenderThread;
 class RouteWidgetItem;
+class WebSocketClientWrapper;
+namespace Ui {
+class LocationPage;
+}  // namespace Ui
+namespace emulator_location {
+class PointMetadata;
+class RouteMetadata;
+}  // namespace emulator_location
+struct QAndroidLocationAgent;
 
 class LocationPage : public QWidget
 {

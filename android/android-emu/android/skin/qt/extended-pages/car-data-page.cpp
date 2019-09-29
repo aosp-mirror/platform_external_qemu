@@ -10,18 +10,22 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/car-data-page.h"
 
+#include <QTabWidget>
+#include <functional>
+
 #include "android/emulation/control/car_data_agent.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/vhal-table.h"
+
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this, since it is
 // defined in windows.h & redefined in VehicleHalProto.proto, causing conflicts.
 #undef ERROR_INVALID_OPERATION
 #include "android/emulation/proto/VehicleHalProto.pb.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/main-common.h"
-#include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
 #include "ui_car-data-page.h"
 
-#include <QSettings>
+class QWidget;
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
