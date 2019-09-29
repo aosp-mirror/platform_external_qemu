@@ -15,9 +15,8 @@
  */
 
 #pragma once
-#include <QAbstractNativeEventFilter>
-#include <QByteArray>
-#include <functional>
+
+class QAbstractNativeEventFilter;
 
 class NativeEventFilterFactory {
 public:

@@ -11,13 +11,16 @@
 
 #include "android/skin/qt/extended-pages/microphone-page.h"
 
-#include "android/emulation/control/vm_operations.h"
-#include "android/hw-events.h"
-#include "android/skin/event.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include <QSettings>
+#include <QCheckBox>                                  // for QCheckBox
+
+#include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
+#include "android/hw-events.h"                        // for EV_KEY, EV_SW
+#include "android/skin/event.h"                       // for SkinEvent, Skin...
+#include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
+#include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
+#include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+
+class QWidget;
 
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),

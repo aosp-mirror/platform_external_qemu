@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <QObject>
+class QObject;
 
 namespace android {
 namespace qt {

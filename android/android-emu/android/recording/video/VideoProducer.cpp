@@ -14,17 +14,25 @@
 
 #include "android/recording/video/VideoProducer.h"
 
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
-#include "android/emulation/control/display_agent.h"
-#include "android/gpu_frame.h"
-#include "android/opengles.h"
-#include "android/recording/Frame.h"
-#include "android/recording/video/GuestReadbackWorker.h"
-#include "android/utils/debug.h"
+#include <assert.h>                                       // for assert
+#include <cstdint>                                        // for uint8_t
+#include <functional>                                     // for __base, fun...
+#include <memory>                                         // for unique_ptr
+#include <new>                                            // for operator new
+#include <utility>                                        // for move
+#include <vector>                                         // for vector
 
-#include <memory>
+#include "android/base/Optional.h"                        // for Optional
+#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "android/base/system/System.h"                   // for System
+#include "android/base/threads/Async.h"                   // for async
+#include "android/emulation/control/display_agent.h"      // for QAndroidDis...
+#include "android/gpu_frame.h"                            // for gpu_frame_s...
+#include "android/opengles.h"                             // for android_red...
+#include "android/recording/Frame.h"                      // for Frame, AVFo...
+#include "android/recording/Producer.h"                   // for Producer
+#include "android/recording/video/GuestReadbackWorker.h"  // for GuestReadba...
+#include "android/utils/debug.h"                          // for VERBOSE_PRINT
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__);
 

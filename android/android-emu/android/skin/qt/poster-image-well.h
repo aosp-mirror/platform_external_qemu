@@ -10,11 +10,20 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_poster-image-well.h"
+#include <qobjectdefs.h>           // for Q_PROPERTY, Q_OBJECT, signals, slots
+#include <QString>                 // for QString
+#include <QWidget>                 // for QWidget
+#include <memory>                  // for unique_ptr
 
-#include <QMimeData>
-#include <QWidget>
-#include <memory>
+#include "ui_poster-image-well.h"  // for PosterImageWell
+
+class QDragEnterEvent;
+class QDragLeaveEvent;
+class QDropEvent;
+class QMimeData;
+class QObject;
+class QString;
+class QWidget;
 
 // This widget provides an image viewer and file picker, and exposes the path
 // of the file it is referencing.

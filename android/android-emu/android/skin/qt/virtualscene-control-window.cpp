@@ -11,25 +11,71 @@
 
 #include "android/skin/qt/virtualscene-control-window.h"
 
+#include <QtCore/qglobal.h>
+#include <qapplication.h>
+#include <qcoreevent.h>
+#include <qglobal.h>
+#include <qnamespace.h>
+#include <qpoint.h>
+#include <qwindowdefs.h>
+#include <QApplication>
+#include <QColor>
+#include <QCoreApplication>
+#include <QCursor>
+#include <QDesktopWidget>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QList>
+#include <QObject>
+#include <QPainter>
+#include <QPen>
+#include <QRect>
+#include <QScreen>
+#include <QSettings>
+#include <QSize>
+#include <QStyle>
+#include <QTextStream>
+#include <QVariant>
+#include <QWidget>
+#include <algorithm>
+#include <cmath>
+#include <functional>
+
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/featurecontrol/feature_control.h"
+#include "android/hw-sensors.h"
+#include "android/metrics/MetricsReporter.h"
 #include "android/physics/GlmHelpers.h"
+#include "android/physics/Physics.h"
+#include "android/settings-agent.h"
+#include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/raised-material-button.h"
+#include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
-#include "android/utils/debug.h"
+#include "android/virtualscene/WASDInputHandler.h"
+// #include "glm/gtc/../detail/func_geometric.inl"
+// #include "glm/gtc/../detail/func_trigonometric.inl"
+#include "glm/gtc/quaternion.hpp"
+#include "studio_stats.pb.h"
+#include "ui_virtualscene-controls.h"
 
-#include <QDesktopWidget>
-#include <QPainter>
-#include <QScreen>
-#include <QStyle>
-#include <QTextStream>
+class QHideEvent;
+class QKeyEvent;
+class QObject;
+class QPaintEvent;
+class QScreen;
+class QShowEvent;
+class QString;
+class QWidget;
 
 #ifdef __APPLE__
-#include <Carbon/Carbon.h>  // For kVK_ANSI_E
+#import <Carbon/Carbon.h>  // For kVK_ANSI_E
 #include "android/skin/qt/mac-native-window.h"
 #endif
 

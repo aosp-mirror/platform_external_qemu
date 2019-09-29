@@ -11,21 +11,22 @@
 */
 #include "android/skin/window.h"
 
-#include "android/config/config.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/multitouch-screen.h"
-#include "android/skin/charmap.h"
-#include "android/skin/event.h"
-#include "android/skin/image.h"
-#include "android/skin/winsys.h"
-#include "android/utils/debug.h"
-#include "android/utils/setenv.h"
-#include "android/utils/system.h"
-#include "android/utils/duff.h"
+#include <math.h>                               // for ceil
+#include <stdint.h>                             // for uint32_t, uint8_t
+#include <stdio.h>                              // for NULL, fprintf, stderr
+#include <stdlib.h>                             // for calloc, free, malloc
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "android/crashreport/crash-handler.h"  // for crashhandler_die_format
+#include "android/multitouch-screen.h"          // for multitouch_create_but...
+#include "android/skin/event.h"                 // for SkinEvent, (anonymous...
+#include "android/skin/image.h"                 // for skin_image_unref, ski...
+#include "android/skin/keycode.h"               // for skin_keycode_rotate
+#include "android/skin/linux_keycodes.h"        // for LINUX_BTN_MOUSE
+#include "android/skin/surface.h"               // for skin_surface_blit
+#include "android/skin/winsys.h"                // for skin_winsys_set_windo...
+#include "android/utils/debug.h"                // for derror, dprint, VERBO...
+#include "android/utils/duff.h"                 // for DUFF4
+#include "android/utils/system.h"               // for AFREE, AARRAY_NEW0
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6

@@ -10,25 +10,41 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 
-#include "android/emulation/control/sensors_agent.h"
-#include "android/hw-sensors.h"
-#include "android/metrics/PeriodicReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/physics/GlmHelpers.h"
-#include "android/skin/ui.h"
+#include <glm/gtc/quaternion.hpp>                     // for tquat
+#include <math.h>                                     // for fabs
+#include <qtextstream.h>                              // for QTextStream::Fi...
+#include <stdint.h>                                   // for uint64_t
+#include <QDesktopServices>                           // for QDesktopServices
+#include <QDoubleSpinBox>                             // for QDoubleSpinBox
+#include <QFlags>                                     // for QFlags
+#include <QLocale>                                    // for QLocale
+#include <QRadioButton>                               // for QRadioButton
+#include <QStackedWidget>                             // for QStackedWidget
+#include <QTabWidget>                                 // for QTabWidget
+#include <QTextBrowser>                               // for QTextBrowser
+#include <QTextStream>                                // for QTextStream
+#include <QUrl>                                       // for QUrl
+#include <array>                                      // for array
+#include <functional>                                 // for __base
+#include <utility>                                    // for make_pair, pair
 
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/stylesheet.h"
+#include "android/avd/info.h"                         // for avdInfo_getAvdF...
+#include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
+#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/globals.h"                          // for android_avdInfo
+#include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
+#include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
+#include "android/metrics/proto/studio_stats.pb.h"    // for AndroidStudioEvent
+#include "android/physics/GlmHelpers.h"               // for vecNearEqual
+#include "android/skin/qt/accelerometer-3d-widget.h"  // for Accelerometer3D...
+#include "android/skin/qt/editable-slider-widget.h"   // for EditableSliderW...
+#include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
+#include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+#include "android/skin/qt/stylesheet.h"               // for stylesheetFontSize
 
-#include <QDesktopServices>
-#include <QTextStream>
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/gtc/quaternion.hpp>
-
-#include <array>
-#include <cassert>
+class QShowEvent;
+class QWidget;
 
 constexpr float kMetersPerInch = 0.0254f;
 constexpr uint64_t kMinInteractionTimeMilliseconds = 500;

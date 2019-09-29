@@ -10,30 +10,28 @@
 ** GNU General Public License for more details.
 */
 #pragma once
-#include <QImage>
-#include <QPixmap>
-#include <QWidget>
+#include <QPixmap>                                           // for QPixmap
+#include <cstdint>                                           // for uint8_t
+#include <vector>                                            // for vector
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <sys/time.h>
 #endif
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/WorkerThread.h"
-#include "android/skin/qt/car-cluster-window.h"
-#include "android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h"
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/synchronization/MessageChannel.h"     // for MessageC...
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/base/threads/WorkerThread.h"               // for WorkerPr...
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/log.h"
-#include "libswscale/swscale.h"
+#include "libavcodec/avcodec.h"                              // for AVCodec
+#include <libavutil/frame.h>                                 // for AVFrame
+class CarClusterWidget;
+class CarClusterWindow;
+struct SwsContext;
 }
 
 // This class is used to build video connection between emulator and Android.

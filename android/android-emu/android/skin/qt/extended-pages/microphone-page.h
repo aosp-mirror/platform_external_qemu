@@ -11,12 +11,16 @@
 
 #pragma once
 
-#include "ui_microphone-page.h"
+#include <qobjectdefs.h>         // for Q_OBJECT, slots
+#include <QString>               // for QString
+#include <QWidget>               // for QWidget
+#include <memory>                // for unique_ptr
 
-#include <QWidget>
-#include <memory>
+#include "ui_microphone-page.h"  // for MicrophonePage
 
 class EmulatorQtWindow;
+class QObject;
+class QWidget;
 
 class MicrophonePage : public QWidget
 {

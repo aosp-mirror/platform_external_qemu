@@ -11,9 +11,16 @@
 
 #pragma once
 
-#include "android/skin/qt/event-subscriber.h"
+#include <qobjectdefs.h>                     // for slots, Q_OBJECT
+#include <stdint.h>                          // for uint64_t
+#include <QObject>                           // for QObject
+#include <QString>                           // for QString
+#include <unordered_map>                     // for unordered_map
 
-#include <QObject>
+#include "android/skin/qt/event-capturer.h"  // for EventCapturer, EventCapt...
+
+class QEvent;
+class QObject;
 
 namespace android {
 namespace qt {

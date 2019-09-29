@@ -14,14 +14,15 @@
 
 #pragma once
 
-#include <memory>
+#include <stdint.h>                              // for uint64_t
+#include <memory>                                // for shared_ptr
 
-#include "android/automation/AutomationController.h"
-#include "android/automation/EventSource.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "android/automation/EventSource.h"      // for DurationNs, EventSource
+#include "android/offworld/proto/offworld.pb.h"  // for DatasetInfo
+#include "automation.pb.h"                       // for RecordedEvent
 
 extern "C" {
-#include "libavcodec/avcodec.h"
+#include "libavcodec/avcodec.h"                  // for AVPacket
 }
 
 namespace android {

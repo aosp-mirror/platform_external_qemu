@@ -10,13 +10,18 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_car-sensor-data.h"
+#include <qobjectdefs.h>         // for Q_OBJECT, slots
+#include <QString>               // for QString
+#include <QWidget>               // for QWidget
+#include <functional>            // for function
+#include <memory>                // for unique_ptr
+#include <string>                // for string
 
-#include <QWidget>
-#include <functional>
-#include <memory>
+#include "ui_car-sensor-data.h"  // for CarSensorData
 
-struct QCarDataAgent;
+class QObject;
+class QWidget;
+
 namespace emulator {
 class EmulatorMessage;
 }

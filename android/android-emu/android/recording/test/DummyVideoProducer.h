@@ -14,12 +14,15 @@
 
 #pragma once
 
-#include "android/recording/Producer.h"
+#include <stdint.h>                   // for uint32_t, uint8_t
+#include <functional>                 // for function
+#include <memory>                     // for unique_ptr
 
-#include <memory>
+#include "android/recording/Frame.h"  // for VideoFormat
 
 namespace android {
 namespace recording {
+class Producer;
 
 // Creates a dummy video producer for testing.
 std::unique_ptr<Producer> createDummyVideoProducer(

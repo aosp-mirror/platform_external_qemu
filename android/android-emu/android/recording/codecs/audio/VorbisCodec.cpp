@@ -11,12 +11,18 @@
 
 #include "android/recording/codecs/audio/VorbisCodec.h"
 
+#include <stdint.h>                    // for uint64_t
+#include <utility>                     // for move
+
 extern "C" {
-#include "libavutil/opt.h"
+#include <libavutil/channel_layout.h>  // for AV_CH_LAYOUT_STEREO, av_get_ch...
+#include <libavutil/dict.h>            // for av_dict_free, AVDictionary
+#include "libavutil/opt.h"             // for av_opt_set_int, av_opt_set_sam...
+#include <libavutil/rational.h>        // for AVRational
+#include <libswresample/swresample.h>  // for swr_init, SwrContext
 }
 
-#include "android/base/Log.h"
-#include "android/base/system/System.h"
+#include "android/base/Log.h"          // for LOG, LogMessage, LogStream
 
 namespace android {
 namespace recording {

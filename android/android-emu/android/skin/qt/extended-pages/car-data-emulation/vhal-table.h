@@ -20,21 +20,31 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
-#include "ui_vhal-table.h"
-#include "vhal-item.h"
 
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
-#include <QListWidgetItem>
-#include <QStringList>
+#include <qobjectdefs.h>
+#include <stdint.h>
+#include <QString>
 #include <QWidget>
+#include <map>
+#include <memory>
+#include <vector>
 
 #include "android/emulation/proto/VehicleHalProto.pb.h"
+
+class QHideEvent;
+class QLabel;
+class QListWidgetItem;
+class QObject;
+class QShowEvent;
+class QString;
+class QWidget;
+class VhalItem;
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <sys/time.h>
 #endif
 
 using android::base::FunctorThread;

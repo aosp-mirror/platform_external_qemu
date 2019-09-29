@@ -11,10 +11,17 @@
 
 #pragma once
 
-#include <QObject>
-#include <QWidget>
-#include <QVector2D>
-#include <QPointer>
+#include <qglobal.h>      // for qreal
+#include <qobjectdefs.h>  // for Q_OBJECT
+#include <QObject>        // for QObject
+#include <QPointer>       // for QPointer
+#include <QString>        // for QString
+#include <QVector2D>      // for QVector2D
+
+class QEvent;
+class QObject;
+class QVector2D;
+class QWidget;
 
 // This is a special component that adjusts widget sizes for
 // high-density displays. We don't need it on OS X, but we need

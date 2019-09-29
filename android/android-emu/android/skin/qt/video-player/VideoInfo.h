@@ -35,11 +35,23 @@
 
 #pragma once
 
-#include "android/recording/video/player/FrameQueue.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include <qobjectdefs.h>                                // for Q_OBJECT, sig...
+#include <QObject>                                      // for QObject
+#include <QString>                                      // for QString
+#include <string>                                       // for string, basic...
+
+#include "android/recording/video/player/FrameQueue.h"  // for Frame
+
+class QObject;
+
+extern "C" {
+    struct AVCodecContext;
+    #include <libavformat/avformat.h>
+}
 
 namespace android {
 namespace videoplayer {
+class VideoPlayerWidget;
 
 // Class to grab any useful metadata from a video. Also grabs the first frame
 // of a video file for displaying to a widget.

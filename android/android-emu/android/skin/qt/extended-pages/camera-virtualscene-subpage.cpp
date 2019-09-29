@@ -11,15 +11,28 @@
 
 #include "android/skin/qt/extended-pages/camera-virtualscene-subpage.h"
 
-#include "android/emulation/control/virtual_scene_agent.h"
-#include "android/globals.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/qt-settings.h"
+#include <qsettings.h>                                      // for QSettings...
+#include <qstring.h>                                        // for operator+
+#include <QByteArray>                                       // for QByteArray
+#include <QCheckBox>                                        // for QCheckBox
+#include <QFileInfo>                                        // for QFileInfo
+#include <QMap>                                             // for QMap
+#include <QMapIterator>                                     // for QMapIterator
+#include <QSettings>                                        // for QSettings
+#include <QVariant>                                         // for QVariant
+#include <functional>                                       // for __base
 
-#include <QDebug>
-#include <QFileInfo>
-#include <QSettings>
+#include "android/avd/util.h"                               // for path_getA...
+#include "android/emulation/control/virtual_scene_agent.h"  // for QAndroidV...
+#include "android/globals.h"                                // for android_hw
+#include "android/metrics/MetricsReporter.h"                // for MetricsRe...
+#include "android/metrics/proto/studio_stats.pb.h"          // for AndroidSt...
+#include "android/skin/qt/poster-image-well.h"              // for PosterIma...
+#include "android/skin/qt/qt-settings.h"                    // for PER_AVD_S...
+
+class QShowEvent;
+class QVariant;
+class QWidget;
 
 const QAndroidVirtualSceneAgent* CameraVirtualSceneSubpage::sVirtualSceneAgent =
         nullptr;

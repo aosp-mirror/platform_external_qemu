@@ -30,7 +30,16 @@
 // THE SOFTWARE.
 
 #include "android/recording/video/player/PacketQueue.h"
-#include "android/recording/video/player/VideoPlayer.h"
+
+#include <libavcodec/avcodec.h>                              // for AVPacket
+#include <libavutil/avutil.h>                                // for AV_NOPTS...
+#include <libavutil/mem.h>                                   // for av_free
+#include <stddef.h>                                          // for NULL
+
+#include "android/base/Log.h"                                // for LOG, Log...
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/recording/video/player/VideoPlayer.h"      // for VideoPlayer
 
 namespace android {
 namespace videoplayer {

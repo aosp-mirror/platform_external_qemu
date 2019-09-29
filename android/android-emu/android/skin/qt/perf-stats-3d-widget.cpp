@@ -14,24 +14,31 @@
 
 #include "android/skin/qt/perf-stats-3d-widget.h"
 
-#include "android/skin/qt/logging-category.h"
-#include "android/skin/qt/vector-text-font.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include <ctype.h>                              // for toupper
+#include <qloggingcategory.h>                   // for qCWarning
+#include <qnamespace.h>                         // for ClickFocus
+#include <stdint.h>                             // for uint32_t
+#include <string.h>                             // for memmove, size_t
+#include <QTimer>                               // for QTimer
+#include <algorithm>                            // for transform
+#include <atomic>                               // for atomic
+#include <memory>                               // for unique_ptr
+#include <sstream>                              // for operator<<, stringstream
 
-#include "android/base/ArraySize.h"
-#include "android/base/CpuUsage.h"
-#include "android/base/Log.h"
-#include "android/base/memory/MemoryTracker.h"
-#include "android/base/system/System.h"
-#include "android/globals.h"
-#include "android/skin/qt/gl-common.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"    // for GLESv2Dispatch
+#include "android/base/ArraySize.h"             // for base
+#include "android/base/CpuUsage.h"              // for CpuUsage, CpuUsage::U...
+#include "android/base/Log.h"                   // for LOG, LogMessage
+#include "android/base/memory/MemoryTracker.h"  // for MemoryTracker, Memory...
+#include "android/base/system/System.h"         // for System, System::MemUsage
+#include "android/globals.h"                    // for android_hw
+#include "android/skin/qt/gl-common.h"          // for createShader, CHECK_G...
+#include "android/skin/qt/logging-category.h"   // for emu
+#include "android/skin/qt/vector-text-font.h"   // for kVectorFontGlyphs
 
-#include <QTimer>
-
-#include <algorithm>
-#include <sstream>
-
-#include <string.h>
+class QMouseEvent;
+class QWheelEvent;
+class QWidget;
 
 using namespace android::base;
 

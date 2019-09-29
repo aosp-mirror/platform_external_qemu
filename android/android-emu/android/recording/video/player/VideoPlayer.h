@@ -31,17 +31,18 @@
 
 #pragma once
 
-#include <atomic>
-#include <memory>
+#include <atomic>  // for atomic
+#include <memory>  // for unique_ptr
+#include <string>  // for string
 
-#include "android/offworld/proto/offworld.pb.h"
-#include "android/recording/video/player/VideoPlayerNotifier.h"
-#include "android/recording/video/player/VideoPlayerRenderTarget.h"
-#include "android/utils/compiler.h"
-#include <string>
+class VideoPlayerRenderTarget;
+namespace offworld {
+class DatasetInfo;
+}  // namespace offworld
 
 namespace android {
 namespace videoplayer {
+class VideoPlayerNotifier;
 
 struct PlayConfig {
     // absolute timestamp from the beginning of the video, measured in seconds

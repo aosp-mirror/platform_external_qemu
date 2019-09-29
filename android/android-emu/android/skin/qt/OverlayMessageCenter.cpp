@@ -11,23 +11,47 @@
 
 #include "android/skin/qt/OverlayMessageCenter.h"
 
-#include "android/base/Optional.h"
-#include "android/skin/qt/stylesheet.h"
+#include <qabstractanimation.h>                 // for QAbstractAnimation::D...
+#include <qlayout.h>                            // for QLayout::SetMaximumSize
+#include <qmath.h>                              // for qCeil
+#include <qnamespace.h>                         // for operator|, AlignLeft
+#include <qsizepolicy.h>                        // for QSizePolicy::Expanding
+#include <qwindowdefs.h>                        // for WId
+
+#include "android/base/Optional.h"              // for Optional
+#include "android/settings-agent.h"             // for SETTINGS_THEME_DARK
+#include "android/skin/qt/stylesheet.h"         // for stylesheetFontSize
+
+class QGraphicsOpacityEffect;
+class QShowEvent;
+class QString;
+class QVariant;
+class QWidget;
 
 #ifdef __APPLE__
-#include "android/skin/qt/mac-native-window.h"
+#include "android/skin/qt/mac-native-window.h"  // for getNSWindow, nsWindow...
 #endif
 
-#include <QBoxLayout>
-#include <QGraphicsOpacityEffect>
-#include <QIcon>
-#include <QLabel>
-#include <QPointer>
-#include <QStyle>
-#include <QtMath>
-#include <QTextLayout>
-#include <QTimer>
-#include <QVariantAnimation>
+#include <QAbstractAnimation>                   // for QAbstractAnimation
+#include <QFlags>                               // for QFlags
+#include <QFontMetrics>                         // for QFontMetrics
+#include <QGraphicsOpacityEffect>               // for QGraphicsOpacityEffect
+#include <QHBoxLayout>                          // for QHBoxLayout
+#include <QLabel>                               // for QLabel
+#include <QLayout>                              // for QLayout
+#include <QList>                                // for QList
+#include <QPointer>                             // for QPointer
+#include <QRect>                                // for QRect
+#include <QSize>                                // for QSize
+#include <QSizePolicy>                          // for QSizePolicy
+#include <QTextLayout>                          // for QTextLayout
+#include <QTextLine>                            // for QTextLine
+#include <QTimer>                               // for QTimer
+#include <QVariant>                             // for QVariant
+#include <QVariantAnimation>                    // for QVariantAnimation
+#include <QVector2D>                            // for QVector2D
+#include <algorithm>                            // for max, min
+#include <utility>                              // for move
 
 using android::base::Optional;
 

@@ -11,20 +11,37 @@
 
 #pragma once
 
-#include "ui_record-macro-page.h"
+#include <qobjectdefs.h>                            // for Q_OBJECT, signals
+#include <stdint.h>                                 // for uint64_t, uint32_t
+#include <QString>                                  // for QString
+#include <QTime>                                    // for QTime
+#include <QTimer>                                   // for QTimer
+#include <QWidget>                                  // for QWidget
+#include <memory>                                   // for unique_ptr
+#include <string>                                   // for string, operator==
+#include <unordered_map>                            // for unordered_map
+#include <vector>                                   // for vector
 
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/recording/video/player/VideoPlayer.h"
-#include "android/skin/qt/extended-pages/record-macro-saved-item.h"
-#include "android/skin/qt/video-player/VideoInfo.h"
+#include "android/metrics/proto/studio_stats.pb.h"  // for EmulatorAutomatio...
 
-#include <QTime>
-#include <QTimer>
-#include <QWidget>
-#include <memory>
-#include <unordered_map>
-
+class CCListItem;
+class QHideEvent;
+class QListWidgetItem;
+class QMouseEvent;
+class QObject;
+class QShowEvent;
+class QString;
+class QWidget;
+class RecordMacroSavedItem;
+namespace Ui {
+class RecordMacroPage;
+}  // namespace Ui
+namespace android {
+namespace videoplayer {
+class VideoInfo;
+class VideoPlayer;
+}  // namespace videoplayer
+}  // namespace android
 struct QAndroidAutomationAgent;
 
 class RecordMacroPage : public QWidget {

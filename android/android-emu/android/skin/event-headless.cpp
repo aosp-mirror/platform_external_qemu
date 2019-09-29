@@ -9,17 +9,14 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include <stdbool.h>
-
-#include "android/skin/event.h"
-#include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-no-qt-no-window.h"
-#include "android/utils/utf8_utils.h"
+#include "android/skin/event.h"                        // for SkinEvent, ski...
+#include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
 
 #define  DEBUG  1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                       // for VERBOSE_PRINT
+
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else
 #define  D(...)   ((void)0)

@@ -14,13 +14,20 @@
 
 #pragma once
 
-#include "android/hw-sensors.h"
-#include "android/mp4/MP4Dataset.h"
-#include "android/mp4/SensorLocationEventProvider.h"
-#include "android/mp4/VideoMetadataProvider.h"
-#include "android/recording/video/player/PacketQueue.h"
-#include "android/recording/video/player/VideoPlayer.h"
-#include "android/recording/video/player/VideoPlayerWaitInfo.h"
+#include <memory>  // for shared_ptr, unique_ptr
+
+namespace android {
+namespace mp4 {
+class Mp4Dataset;
+class SensorLocationEventProvider;
+class VideoMetadataProvider;
+}  // namespace mp4
+namespace videoplayer {
+class PacketQueue;
+class VideoPlayer;
+struct VideoPlayerWaitInfo;
+}  // namespace videoplayer
+}  // namespace android
 
 using android::videoplayer::PacketQueue;
 using android::videoplayer::VideoPlayerWaitInfo;

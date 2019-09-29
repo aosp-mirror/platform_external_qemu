@@ -10,11 +10,12 @@
 
 #include "android/skin/qt/gl-common.h"
 
-#include "android/skin/qt/logging-category.h"
+#include <qloggingcategory.h>                  // for qCWarning
+#include <cstring>                             // for strlen
 
-#include <cstring>
-
-#include <QtGlobal>
+#include "GLES2/gl2.h"                         // for GL_COMPILE_STATUS, GL_...
+#include "OpenGLESDispatch/GLESv2Dispatch.h"   // for GLESv2Dispatch
+#include "android/skin/qt/logging-category.h"  // for emu
 
 GLuint createShader(const GLESv2Dispatch* gles2,
                     GLint shader_type,

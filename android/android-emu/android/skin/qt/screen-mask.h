@@ -12,7 +12,11 @@
 
 #pragma once
 
-#include "android/emulation/control/AdbInterface.h"
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
 
 namespace ScreenMask {
 

@@ -10,15 +10,17 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h"
 
-#include "android/skin/qt/qt-settings.h"
-#include "android/utils/debug.h"
-#include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
-
+#include <qstring.h>
+#include <QByteArray>
 #include <QObject>
-#include <QSettings>
-#include <QDoubleValidator>
+#include <cstdint>
 #include <sstream>
-#include <iomanip>
+#include <string>
+#include <utility>
+
+#include "VehicleHalProto.pb.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
+#include "android/utils/debug.h"
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 

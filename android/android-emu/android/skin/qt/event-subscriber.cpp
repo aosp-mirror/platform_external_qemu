@@ -10,6 +10,11 @@
 
 #include "android/skin/qt/event-subscriber.h"
 
+#include <functional>  // for __base
+
+class QEvent;
+class QObject;
+
 EventSubscriber::EventSubscriber(EventCapturer* ecap) : mEventCapturer(ecap) {}
 
 void EventSubscriber::startRecording(QObject* target) {

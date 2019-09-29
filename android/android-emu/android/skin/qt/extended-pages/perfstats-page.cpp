@@ -13,6 +13,16 @@
 // limitations under the License.
 #include "android/skin/qt/extended-pages/perfstats-page.h"
 
+#include <QCloseEvent>                             // for QCloseEvent
+
+#include "android/skin/qt/perf-stats-3d-widget.h"  // for PerfStats3DWidget
+#include "ui_perfstats-page.h"                     // for PerfStatsPage
+
+class QCloseEvent;
+class QHideEvent;
+class QShowEvent;
+class QWidget;
+
 PerfStatsPage::PerfStatsPage(QWidget* parent)
     : QFrame(parent), mUi(new Ui::PerfStatsPage()) {
     mUi->setupUi(this);

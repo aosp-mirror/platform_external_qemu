@@ -10,16 +10,29 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_snapshot-page.h"
+#include <qglobal.h>                      // for qint64, qreal
+#include <qmetatype.h>                    // for Q_DECLARE_METATYPE
+#include <qobjectdefs.h>                  // for slots, Q_OBJECT, signals
+#include <QGraphicsScene>                 // for QGraphicsScene
+#include <QRect>                          // for QRect
+#include <QString>                        // for QString
+#include <QStringList>                    // for QStringList
+#include <QWidget>                        // for QWidget
+#include <memory>                         // for unique_ptr
 
-#include "android/skin/qt/qt-settings.h"
-#include "android/snapshot/proto/snapshot.pb.h"
+#include "android/skin/qt/qt-settings.h"  // for SaveSnapshotOnExit
+#include "ui_snapshot-page.h"             // for SnapshotPage
 
-#include <QDateTime>
-#include <QSemaphore>
-#include <QString>
-#include <QWidget>
-#include <memory>
+class QCloseEvent;
+class QObject;
+class QShowEvent;
+class QString;
+class QStringList;
+class QTreeWidget;
+class QWidget;
+namespace emulator_snapshot {
+class Snapshot;
+}  // namespace emulator_snapshot
 
 Q_DECLARE_METATYPE(Ui::Settings::SaveSnapshotOnExit);
 

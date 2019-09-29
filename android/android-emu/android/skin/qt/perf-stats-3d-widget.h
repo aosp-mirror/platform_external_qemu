@@ -14,15 +14,20 @@
 
 #pragma once
 
-#include "android/skin/qt/gl-widget.h"
-#include "GLES2/gl2.h"
+#include <qobjectdefs.h>                // for Q_OBJECT, slots
+#include <QString>                      // for QString
+#include <QTimer>                       // for QTimer
+#include <functional>                   // for function
+#include <string>                       // for string
+#include <vector>                       // for vector
 
-#include <QMouseEvent>
-#include <QTimer>
+#include "GLES3/gl3.h"                  // for GLuint, GLint
+#include "android/skin/qt/gl-widget.h"  // for GLWidget
 
-#include <array>
-#include <functional>
-#include <string>
+class QMouseEvent;
+class QObject;
+class QWheelEvent;
+class QWidget;
 
 // Widget for graphing emulator performance stats over time.
 class PerfStats3DWidget : public GLWidget {

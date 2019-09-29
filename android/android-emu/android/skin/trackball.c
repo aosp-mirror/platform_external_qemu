@@ -14,17 +14,19 @@
 #endif
 
 #include "android/skin/trackball.h"
-#include "android/skin/image.h"
-#include "android/utils/system.h"
+
+#include "android/utils/system.h"  // for AFREE, ANEW0
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <sys/time.h>
+#include <sys/time.h>              // for gettimeofday, timeval
 #endif
 
-#include <math.h>
-#include <stdlib.h>
+#include <math.h>                  // for sqrt, cos, sin, M_PI
+#include <stdint.h>                // for uint32_t
+#include <stdlib.h>                // for calloc, free, rand, NULL
+#include <string.h>                // for memset
 
 // Return the number of milliseconds since the start of this module.
 static uint32_t get_ticks(void) {

@@ -1,16 +1,21 @@
 #include "android/skin/qt/size-tweaker.h"
 
-#include <QApplication>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QDesktopWidget>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QScreen>
-#include <QStyle>
-#include <QTableWidget>
+#include <sstream>           // for ostringstream
+#include <QtCore/qglobal.h>  // for Q_OS_MAC
+#include <qcoreevent.h>      // for QEvent (ptr only), QEvent::ScreenChangeI...
+#include <QApplication>      // for QApplication
+#include <QCheckBox>         // for QCheckBox
+#include <QComboBox>         // for QComboBox
+#include <QDesktopWidget>    // for QDesktopWidget
+#include <QEvent>            // for QEvent
+#include <QRadioButton>      // for QRadioButton
+#include <QScreen>           // for QScreen
+#include <QStyle>            // for QStyle
+#include <QTableWidget>      // for QTableWidget
+#include <QWidget>           // for QWidget
 
-#include <sstream>
+class QObject;
+class QWidget;
 
 const qreal SizeTweaker::BaselineDpi = 96.0;
 

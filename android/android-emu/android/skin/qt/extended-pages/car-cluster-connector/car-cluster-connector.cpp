@@ -11,12 +11,26 @@
 */
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
 
-#include "android/skin/winsys.h"
+#include <qimage.h>
+#include <stddef.h>
+#include <QImage>
+#include <functional>
+#include <new>
 
-#include <math.h>
-#include <fstream>
-#include <iostream>
+extern "C" {
+
+#include <libavcodec/avcodec.h>
+#include <libavutil/log.h>
+#include <libavutil/mem.h>
+#include <libavutil/pixfmt.h>
+#include <libswscale/swscale.h>
+
+}
+
 #include "android/car-cluster.h"
+#include "android/skin/qt/car-cluster-window.h"
+#include "android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h"
+#include "android/skin/winsys.h"
 
 using android::base::AutoLock;
 using android::base::System;

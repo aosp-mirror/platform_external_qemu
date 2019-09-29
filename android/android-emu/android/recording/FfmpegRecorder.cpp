@@ -33,31 +33,51 @@
 
 #include "android/recording/FfmpegRecorder.h"
 
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
-#include "android/recording/AVScopedPtr.h"
-#include "android/recording/Producer.h"
-#include "android/utils/debug.h"
+#include "android/base/Log.h"                   // for LogStream, LogMessage
+#include "android/base/memory/ScopedPtr.h"      // for FuncDelete
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/base/system/System.h"         // for System
+#include "android/recording/AVScopedPtr.h"      // for makeAVScopedPtr
+#include "android/recording/Frame.h"            // for Frame, AVFormat, getV...
+#include "android/recording/Producer.h"         // for Producer
+#include "android/recording/codecs/Codec.h"     // for Codec, CodecParams
+#include "android/utils/debug.h"                // for VERBOSE_record, VERBO...
 
 extern "C" {
-#include "libavformat/avformat.h"
-#include "libavutil/avassert.h"
-#include "libavutil/channel_layout.h"
-#include "libavutil/mathematics.h"
-#include "libavutil/opt.h"
-#include "libavutil/timestamp.h"
-#include "libswresample/swresample.h"
-#include "libswscale/swscale.h"
+#include "libavformat/avformat.h"               // for AVStream, AVFormatCon...
+#include "libavutil/avassert.h"                 // for av_assert0
+#include "libavutil/mathematics.h"              // for av_rescale_rnd, AV_RO...
+#include "libavutil/timestamp.h"                // for av_ts_make_string
+#include "libswresample/swresample.h"           // for SwrContext, swr_alloc
+#include "libswscale/swscale.h"                 // for sws_scale
+
+namespace android {
+namespace base {
+class PathUtils;
+}  // namespace base
+}  // namespace android
+struct SwsContext;
 }
 
-#include <string>
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>                             // for assert
+#include <libavcodec/avcodec.h>                 // for AVCodecContext, AVPacket
+#include <libavformat/avio.h>                   // for avio_open, AVIO_FLAG_...
+#include <libavutil/avutil.h>                   // for AVMediaType, AVMEDIA_...
+#include <libavutil/dict.h>                     // for AVDictionary
+#include <libavutil/error.h>                    // for av_make_error_string
+#include <libavutil/frame.h>                    // for AVFrame, av_frame_alloc
+#include <libavutil/log.h>                      // for av_log_set_callback
+#include <libavutil/pixfmt.h>                   // for AVPixelFormat, AV_PIX...
+#include <libavutil/rational.h>                 // for AVRational
+#include <libavutil/samplefmt.h>                // for AVSampleFormat
+#include <stdarg.h>                             // for va_list
+#include <stdio.h>                              // for vprintf, NULL
+#include <string.h>                             // for memcpy
+#include <cstdint>                              // for uint8_t
+#include <functional>                           // for __base
+#include <string>                               // for string, basic_string
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 

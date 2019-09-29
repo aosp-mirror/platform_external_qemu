@@ -14,13 +14,17 @@
 
 #pragma once
 
-#include "android/base/memory/SharedMemory.h"
-#include "android/emulation/control/display_agent.h"
-#include "android/opengles.h"
-#include "android/recording/Producer.h"
+#include <stddef.h>                            // for size_t
+#include <stdint.h>                            // for uint32_t, uint64_t
+#include <memory>                              // for unique_ptr
+#include <string>                              // for string, basic_string
+
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory
+#include "android/opengles.h"                  // for ReadPixelsFunc
 
 namespace android {
 namespace recording {
+class Producer;
 
 // A class that produces video frames in the YUV-I420 pixel format.
 // It has the luma "luminance" plane Y first, then the U chroma plane and last

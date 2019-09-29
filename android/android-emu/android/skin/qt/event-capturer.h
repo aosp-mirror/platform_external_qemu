@@ -10,16 +10,19 @@
 
 #pragma once
 
-#include "android/base/async/SubscriberList.h"
-#include "android/base/Compiler.h"
-#include "android/skin/qt/qt-std-hash.h"
+#include <qcoreevent.h>                         // for QEvent (ptr only)
+#include <qobjectdefs.h>                        // for Q_OBJECT
+#include <QEvent>                               // for QEvent
+#include <QObject>                              // for QObject
+#include <QString>                              // for QString
+#include <functional>                           // for function
+#include <unordered_set>                        // for unordered_set
 
-#include <QEvent>
-#include <QObject>
+#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
+#include "android/base/async/SubscriberList.h"  // for SubscriberList, Subsc...
+#include "android/skin/qt/qt-std-hash.h"        // for hash
 
-#include <list>
-#include <memory>
-#include <unordered_set>
+class QObject;
 
 // Use this class to "spy" on events received by other objects.
 // This class is not thread-safe. All subscribers should be on

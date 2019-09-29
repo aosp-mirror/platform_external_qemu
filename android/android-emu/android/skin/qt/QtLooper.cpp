@@ -11,14 +11,23 @@
 
 #include "android/skin/qt/QtLooper.h"
 
-#include "android/skin/qt/logging-category.h"
-#include "android/skin/qt/QtLooperImpl.h"
+#include <qglobal.h>                           // for Q_ASSERT_X
+#include <qloggingcategory.h>                  // for qCWarning, qCDebug
+#include <errno.h>                             // for ENOSYS, errno
+#include <QTime>                               // for QTime
+#include <utility>                             // for move
 
-#include <QTime>
-
-#include <errno.h>
+#include "android/base/Compiler.h"             // for DISALLOW_COPY_AND_ASSIGN
+#include "android/base/StringView.h"           // for StringView
+#include "android/base/async/Looper.h"         // for Looper::ClockType, Looper
+#include "android/skin/qt/QtLooperImpl.h"      // for TimerImpl, TaskImpl
+#include "android/skin/qt/logging-category.h"  // for emu
 
 namespace android {
+namespace base {
+class Stream;
+}  // namespace base
+
 namespace qt {
 namespace internal {
 
@@ -155,7 +164,7 @@ public:
 protected:
     ClockType validateClockType(ClockType clock) {
         if (clock != ClockType::kHost) {
-            qCWarning(emu, 
+            qCWarning(emu,
                       "QtLooper::Timer does not support %s."
                       "Defaulting to  ClockType::kHost.",
                       Looper::clockTypeToString(clock));

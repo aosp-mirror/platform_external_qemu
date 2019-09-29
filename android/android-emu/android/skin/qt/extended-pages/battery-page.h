@@ -10,11 +10,18 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_battery-page.h"
-#include <QWidget>
-#include <initializer_list>
-#include <memory>
+#include <qobjectdefs.h>      // for Q_OBJECT, slots
+#include <QString>            // for QString
+#include <QWidget>            // for QWidget
+#include <initializer_list>   // for initializer_list
+#include <memory>             // for unique_ptr
+#include <utility>            // for pair
 
+#include "ui_battery-page.h"  // for BatteryPage
+
+class QComboBox;
+class QObject;
+class QWidget;
 struct QAndroidBatteryAgent;
 
 class BatteryPage : public QWidget {

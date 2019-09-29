@@ -30,8 +30,7 @@
 // THE SOFTWARE.
 #pragma once
 
-#include <functional>
-#include <memory>
+#include <functional>  // for function
 
 namespace android {
 namespace videoplayer {

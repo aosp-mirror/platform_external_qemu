@@ -11,12 +11,23 @@
 
 #pragma once
 
-#include "ui_telephony-page.h"
-#include <QValidator>
-#include <QWidget>
-#include <memory>
+#include <qcoreevent.h>   // for QEvent (ptr only), QEvent::Type
+#include <qobjectdefs.h>  // for Q_OBJECT, slots
+#include <qvalidator.h>   // for QValidator::State
+#include <QEvent>         // for QEvent
+#include <QString>        // for QString
+#include <QValidator>     // for QValidator
+#include <QWidget>        // for QWidget
+#include <memory>         // for unique_ptr
 
+class QObject;
+class QString;
+class QWidget;
+namespace Ui {
+class TelephonyPage;
+}  // namespace Ui
 struct QAndroidTelephonyAgent;
+
 class TelephonyPage : public QWidget
 {
     Q_OBJECT

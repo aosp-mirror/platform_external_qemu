@@ -14,11 +14,13 @@
 
 #pragma once
 
-#include "android/recording/Frame.h"
-#include "android/recording/Producer.h"
+#include <memory>                     // for unique_ptr
+
+#include "android/recording/Frame.h"  // for AudioFormat
 
 namespace android {
 namespace recording {
+class Producer;
 
 // Create a new AudioProducer instance.
 std::unique_ptr<Producer> createAudioProducer(int sampleRate,

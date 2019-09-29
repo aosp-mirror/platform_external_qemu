@@ -12,9 +12,7 @@
 
 #pragma once
 
-#include "android/utils/compiler.h"
-
-#include <stdbool.h>
+#include "android/utils/compiler.h"  // for ANDROID_BEGIN_HEADER, ANDROID_EN...
 
 ANDROID_BEGIN_HEADER
 

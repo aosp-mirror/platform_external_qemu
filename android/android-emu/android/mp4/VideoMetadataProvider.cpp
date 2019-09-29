@@ -14,12 +14,14 @@
 
 #include "android/mp4/VideoMetadataProvider.h"
 
-#include <memory>
-#include <queue>
+#include <libavcodec/avcodec.h>                  // for AVPacket
+#include <memory>                                // for unique_ptr
+#include <queue>                                 // for queue
+#include <utility>                               // for move
 
-#include "android/base/Log.h"
-#include "android/mp4/FieldDecodeInfo.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "android/base/Log.h"                    // for LogMessage, LOG, CHECK
+#include "android/mp4/FieldDecodeInfo.h"         // for FieldDecodeInfo
+#include "android/offworld/proto/offworld.pb.h"  // for DataStreamInfo, Fiel...
 
 namespace android {
 namespace mp4 {

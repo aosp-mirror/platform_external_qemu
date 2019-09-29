@@ -10,7 +10,9 @@
 
 #pragma once
 
-#include <QString>
+#include <QString>  // for QString
+
+class QString;
 
 enum class QtUICommand {
     SHOW_PANE_LOCATION,

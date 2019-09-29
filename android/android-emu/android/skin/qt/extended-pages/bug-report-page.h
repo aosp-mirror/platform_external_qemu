@@ -11,17 +11,26 @@
 
 #pragma once
 
-#include "android/avd/BugreportInfo.h"
-#include "android/base/StringView.h"
-#include "android/emulation/control/AdbInterface.h"
+#include <qobjectdefs.h>                             // for Q_OBJECT, slots
+#include <stddef.h>                                  // for size_t
+#include <QString>                                   // for QString
+#include <QWidget>                                   // for QWidget
+#include <memory>                                    // for unique_ptr
+#include <string>                                    // for string
 
-#include "ui_bug-report-page.h"
+#include "android/avd/BugreportInfo.h"               // for BugreportInfo
+#include "android/base/StringView.h"                 // for StringView
+#include "android/emulation/control/AdbInterface.h"  // for AdbCommandPtr
+#include "android/settings-agent.h"                  // for SettingsTheme
 
-#include <QMessageBox>
-#include <QWidget>
-
-#include <memory>
-#include <string>
+class QEvent;
+class QMessageBox;
+class QObject;
+class QShowEvent;
+class QWidget;
+namespace Ui {
+class BugreportPage;
+}  // namespace Ui
 
 class BugreportPage : public QWidget {
     Q_OBJECT
