@@ -11,31 +11,42 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/qt-ui-commands.h"
-#include "android/skin/qt/shortcut-key-store.h"
-#include "android/skin/qt/size-tweaker.h"
-#include "android/skin/rect.h"
-#include "android/ui-emu-agent.h"
-#include "android/virtualscene/WASDInputHandler.h"
+#include <glm/gtc/quaternion.hpp>                     // for tquat
+#include <limits.h>                                   // for INT_MAX
+#include <qobjectdefs.h>                              // for slots, Q_OBJECT
+#include <stdint.h>                                   // for uint32_t, uint64_t
+#include <QElapsedTimer>                              // for QElapsedTimer
+#include <QFrame>                                     // for QFrame
+#include <QPoint>                                     // for QPoint
+#include <QString>                                    // for QString
+#include <QTimer>                                     // for QTimer
+#include <memory>                                     // for unique_ptr
 
-#include "ui_virtualscene-controls.h"
+#include "android/base/Optional.h"                    // for Optional
+#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/skin/qt/qt-ui-commands.h"           // for QtKeyEventSource
+#include "android/skin/qt/size-tweaker.h"             // for SizeTweaker
+#include "android/skin/rect.h"                        // for SkinRotation
+#include "android/ui-emu-agent.h"                     // for UiEmuAgent
+#include "android/virtualscene/WASDInputHandler.h"    // for WASDInputHandler
 
-#include <QElapsedTimer>
-#include <QFrame>
-#include <QObject>
-#include <QWidget>
-#include <QtCore>
-
-#include <glm/gtc/quaternion.hpp>
-#include <glm/vec3.hpp>
-
-#include <memory>
+#include <glm/gtc/quaternion.hpp>                     // for tquat::tquat<T, P>
+#include <glm/vec3.hpp>                               // for tvec3
 
 class EmulatorQtWindow;
+class QEvent;
+class QHideEvent;
+class QKeyEvent;
+class QObject;
+class QPaintEvent;
+class QPoint;
+class QShowEvent;
+class QString;
 class ToolWindow;
+namespace Ui {
+class VirtualSceneControls;
+}  // namespace Ui
+template <class CommandType> class ShortcutKeyStore;
 
 // Design requested a max width of 700 dp, and offset of 16 from the emulator
 // window.  This is defined here.

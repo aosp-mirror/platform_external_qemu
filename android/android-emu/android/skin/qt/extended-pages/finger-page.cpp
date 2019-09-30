@@ -10,10 +10,19 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/finger-page.h"
-#include "android/emulation/control/finger_agent.h"
-#include "android/emulation/VmLock.h"
 
-#include "android/globals.h"
+#include <qnamespace.h>                              // for RichText
+#include <qstring.h>                                 // for operator+
+#include <QComboBox>                                 // for QComboBox
+#include <QLabel>                                    // for QLabel
+#include <QVariant>                                  // for QVariant
+
+#include "android/avd/info.h"                        // for avdInfo_getApiDe...
+#include "android/emulation/VmLock.h"                // for RecursiveScopedV...
+#include "android/emulation/control/finger_agent.h"  // for QAndroidFingerAgent
+#include "android/globals.h"                         // for android_avdInfo
+
+class QWidget;
 
 static const QAndroidFingerAgent* sFingerAgent = nullptr;
 

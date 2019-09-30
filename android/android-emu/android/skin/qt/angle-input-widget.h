@@ -10,12 +10,20 @@
 
 #pragma once
 
-#include <QDoubleValidator>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QIntValidator>
-#include <QWidget>
+#include <qobjectdefs.h>     // for slots, Q_OBJECT, Q_PROPERTY, signals
+#include <QDoubleValidator>  // for QDoubleValidator
+#include <QFrame>            // for QFrame
+#include <QHBoxLayout>       // for QHBoxLayout
+#include <QIntValidator>     // for QIntValidator
+#include <QLabel>            // for QLabel
+#include <QLineEdit>         // for QLineEdit
+#include <QString>           // for QString
+#include <QWidget>           // for QWidget
+
+class QDoubleValidator;
+class QKeyEvent;
+class QObject;
+class QWidget;
 
 // This is a widget for specifying angle values.
 // It has two input modes - decimal and sexagesimal.

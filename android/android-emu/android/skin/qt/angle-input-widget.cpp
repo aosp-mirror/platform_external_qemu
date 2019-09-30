@@ -9,9 +9,24 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/angle-input-widget.h"
-#include <QtMath>
-#include <QKeyEvent>
-#include "android/base/Log.h"
+
+#include <qchar.h>       // for operator==
+#include <qlocale.h>     // for QLocale::C
+#include <qmath.h>       // for qFloor, qFabs
+#include <qnamespace.h>  // for Key_Enter, Key_Return
+#include <qstring.h>     // for operator+, QString (ptr only)
+#include <qvalidator.h>  // for QDoubleValidator::StandardNotation, QValidat...
+#include <stdlib.h>      // for abs
+#include <QChar>         // for QChar
+#include <QCharRef>      // for QCharRef
+#include <QKeyEvent>     // for QKeyEvent
+#include <QLocale>       // for QLocale
+#include <QValidator>    // for QValidator
+
+class QKeyEvent;
+class QLabel;
+class QLineEdit;
+class QWidget;
 
 // Helper function for AngleInputWidget ctor
 static void setUpLineEdit(QLineEdit* editor, const QValidator* validator) {

@@ -14,46 +14,98 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <QCoreApplication>
-#include <QDateTime>
-#include <QPushButton>
-#include <QSettings>
-#include <QtWidgets>
+#include <QtCore/qglobal.h>                               // for Q_OS_MAC
+#include <qapplication.h>                                 // for QApplicatio...
+#include <qcoreevent.h>                                   // for QEvent::Key...
+#include <qkeysequence.h>                                 // for QKeySequenc...
+#include <qmessagebox.h>                                  // for operator|
+#include <qnamespace.h>                                   // for AlignCenter
+#include <qobjectdefs.h>                                  // for SIGNAL, SLOT
+#include <qsettings.h>                                    // for QSettings::...
+#include <qstring.h>                                      // for operator+
+#include <stdint.h>                                       // for int64_t
+#include <stdio.h>                                        // for sprintf
+#include <QApplication>                                   // for QApplication
+#include <QByteArray>                                     // for QByteArray
+#include <QClipboard>                                     // for QClipboard
+#include <QCloseEvent>                                    // for QCloseEvent
+#include <QDesktopWidget>                                 // for QDesktopWidget
+#include <QEvent>                                         // for QEvent
+#include <QFlags>                                         // for QFlags
+#include <QFrame>                                         // for QFrame
+#include <QGuiApplication>                                // for QGuiApplica...
+#include <QHBoxLayout>                                    // for QHBoxLayout
+#include <QKeyEvent>                                      // for QKeyEvent
+#include <QKeySequence>                                   // for QKeySequence
+#include <QList>                                          // for QList
+#include <QMessageBox>                                    // for QMessageBox
+#include <QPainter>                                       // for QPainter
+#include <QPen>                                           // for QPen
+#include <QPushButton>                                    // for QPushButton
+#include <QRect>                                          // for QRect
+#include <QScreen>                                        // for QScreen
+#include <QSettings>                                      // for QSettings
+#include <QSignalBlocker>                                 // for QSignalBlocker
+#include <QString>                                        // for QString
+#include <QTextStream>                                    // for QTextStream
+#include <QVBoxLayout>                                    // for QVBoxLayout
+#include <QVariant>                                       // for QVariant
+#include <QVector>                                        // for QVector
+#include <QWidget>                                        // for QWidget
+#include <cassert>                                        // for assert
+#include <functional>                                     // for __base
+#include <memory>                                         // for unique_ptr
+#include <string>                                         // for string
+#include <tuple>                                          // for tuple
 
-#include "android/android.h"
-#include "android/avd/info.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/emulation/control/clipboard_agent.h"
-#include "android/emulator-window.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
-#include "android/hw-events.h"
-#include "android/hw-sensors.h"
-#include "android/main-common.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/event.h"
-#include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/extended-pages/location-page.h"
-#include "android/skin/qt/extended-window.h"
-#include "android/skin/qt/extended-window-styles.h"
-#include "android/skin/qt/extended-window.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/qt-ui-commands.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/tool-window.h"
-#include "android/snapshot/common.h"
-#include "android/snapshot/interface.h"
-#include "android/utils/debug.h"
-#include "android/utils/system.h"
+#include "android/avd/info.h"                             // for avdInfo_get...
+#include "android/avd/util.h"                             // for path_getAvd...
+#include "android/base/Log.h"                             // for LogMessage
+#include "android/base/memory/OnDemand.h"                 // for OnDemand
+#include "android/base/system/System.h"                   // for System
+#include "android/cmdline-option.h"                       // for AndroidOptions
+#include "android/emulation/control/AdbInterface.h"       // for OptionalAdb...
+#include "android/emulation/control/clipboard_agent.h"    // for QAndroidCli...
+#include "android/emulator-window.h"                      // for emulator_wi...
+#include "android/featurecontrol/FeatureControl.h"        // for isEnabled
+#include "android/featurecontrol/Features.h"              // for QuickbootFi...
+#include "android/globals.h"                              // for android_hw
+#include "android/hw-events.h"                            // for EV_SW, EV_SYN
+#include "android/metrics/MetricsReporter.h"              // for MetricsRepo...
+#include "android/metrics/MetricsWriter.h"                // for android_studio
+#include "android/metrics/proto/studio_stats.pb.h"        // for EmulatorSna...
+#include "android/settings-agent.h"                       // for SettingsTheme
+#include "android/skin/android_keycodes.h"                // for KEY_APPSWITCH
+#include "android/skin/event.h"                           // for SkinEvent
+#include "android/skin/linux_keycodes.h"                  // for LINUX_KEY_BACK
+#include "android/skin/qt/emulator-qt-window.h"           // for EmulatorQtW...
+#include "android/skin/qt/extended-pages/common.h"        // for adjustAllBu...
+#include "android/skin/qt/extended-window-styles.h"       // for PANE_IDX_BA...
+#include "android/skin/qt/extended-window.h"              // for ExtendedWindow
+#include "android/skin/qt/qt-settings.h"                  // for SaveSnapsho...
+#include "android/skin/qt/qt-ui-commands.h"               // for QtUICommand
+#include "android/skin/qt/shortcut-key-store.h"           // for ShortcutKey...
+#include "android/skin/qt/stylesheet.h"                   // for stylesheetF...
+#include "android/skin/qt/tool-window.h"                  // for ToolWindow
+#include "android/skin/qt/ui-event-recorder.h"            // for UIEventReco...
+#include "android/skin/qt/user-actions-counter.h"         // for UserActions...
+#include "android/skin/qt/virtualscene-control-window.h"  // for VirtualScen...
+#include "android/snapshot/common.h"                      // for kDefaultBoo...
+#include "android/snapshot/interface.h"                   // for androidSnap...
+#include "android/ui-emu-agent.h"                         // for UiEmuAgent
+#include "android/utils/debug.h"                          // for VERBOSE_fol...
+#include "android/utils/system.h"                         // for get_uptime_ms
+#include "ui_tools.h"                                     // for ToolControls
 
-#include <cassert>
-#include <string>
+class QCloseEvent;
+class QHideEvent;
+class QKeyEvent;
+class QMouseEvent;
+class QPaintEvent;
+class QPushButton;
+class QScreen;
+class QWidget;
+template <typename T> class QVector;
 
 
 namespace {

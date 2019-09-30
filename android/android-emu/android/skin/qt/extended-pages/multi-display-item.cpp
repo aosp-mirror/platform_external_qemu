@@ -10,9 +10,20 @@
 // GNU General Public License for more details.
 
 #include "multi-display-item.h"
-#include "multi-display-page.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/common.h"
+
+#include <stddef.h>                                 // for NULL
+#include <QComboBox>                                // for QComboBox
+#include <QLabel>                                   // for QLabel
+#include <QPushButton>                              // for QPushButton
+#include <QStyle>                                   // for QStyle
+
+#include "android/skin/qt/angle-input-widget.h"     // for AngleInputWidget
+#include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
+#include "android/skin/qt/extended-pages/common.h"  // for getIconForCurrent...
+#include "multi-display-page.h"                     // for MultiDisplayPage
+
+class QFocusEvent;
+class QWidget;
 
 std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes =
     {{"480p(720x480)", "480p", 720, 480, 142},

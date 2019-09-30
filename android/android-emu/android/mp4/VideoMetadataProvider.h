@@ -14,12 +14,13 @@
 
 #pragma once
 
-#include <memory>
+#include <stdint.h>                              // for int32_t, uint64_t
+#include <memory>                                // for unique_ptr
 
-#include "android/offworld/proto/offworld.pb.h"
+#include "android/offworld/proto/offworld.pb.h"  // for DatasetInfo
 
 extern "C" {
-#include "libavcodec/avcodec.h"
+#include "libavcodec/avcodec.h"                  // for AVPacket
 }
 
 namespace android {

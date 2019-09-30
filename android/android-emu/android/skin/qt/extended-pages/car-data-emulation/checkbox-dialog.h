@@ -10,14 +10,21 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include <QDialog>
-#include <QSet>
-#include <QVector>
-#include <QPair>
-#include <QtWidgets>
+#include <qobjectdefs.h>  // for Q_OBJECT, slots
+#include <stdint.h>       // for int32_t
+#include <QDialog>        // for QDialog
+#include <QString>        // for QString
+#include <QVector>        // for QVector
+#include <map>            // for map
+#include <vector>         // for vector
 
 class QCheckBox;
 class QDialogButtonBox;
+class QObject;
+class QString;
+class QWidget;
+template <class T1, class T2> struct QPair;
+template <typename T> class QSet;
 
 // This CheckboxDialog is for user input for VHAL property whose type is
 // VehiclePropertyType:INT32_VEC, like INFO_FUEL_TYPE and INFO_EV_CONNECTOR_TYPE

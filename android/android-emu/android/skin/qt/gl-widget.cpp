@@ -10,16 +10,28 @@
 
 #include "android/skin/qt/gl-widget.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/skin/qt/logging-category.h"
+#include <qloggingcategory.h>                   // for qCWarning
+#include <qnamespace.h>                         // for WA_DontCreateNativeAn...
+#include <QRegion>                              // for QRegion
+#include <QResizeEvent>                         // for QResizeEvent
+#include <QSize>                                // for QSize
+#include <QWindow>                              // for QWindow
 
-#include "GLES2/gl2.h"
+#include "EGL/egl.h"                            // for EGL_FALSE, EGL_NONE
+#include "EGL/eglplatform.h"                    // for EGLint, EGLNativeWind...
+#include "GLES3/gl3.h"                          // for GL_TEXTURE_2D
+#include "OpenGLESDispatch/EGLDispatch.h"       // for EGLDispatch
+#include "OpenGLESDispatch/GLESv2Dispatch.h"    // for GLESv2Dispatch
+#include "android/skin/qt/gl-canvas.h"          // for GLCanvas
+#include "android/skin/qt/gl-texture-draw.h"    // for TextureDraw
+#include "android/skin/qt/logging-category.h"   // for emu
+#include "emugl/common/OpenGLDispatchLoader.h"  // for LazyLoadedEGLDispatch
 
-#include <QResizeEvent>
-#include <QtGlobal>
-#include <QWindow>
-
-#include "emugl/common/OpenGLDispatchLoader.h"
+class QPaintEvent;
+class QResizeEvent;
+class QScreen;
+class QShowEvent;
+class QWidget;
 
 struct EGLState {
     EGLDisplay display;

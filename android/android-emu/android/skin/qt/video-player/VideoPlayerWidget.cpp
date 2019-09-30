@@ -10,8 +10,14 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
-#include <QtGui/QImage>
-#include <QtGui/QPainter>
+
+#include <QImage>        // for QImage
+#include <QPaintDevice>  // for QPaintDevice
+#include <QPainter>      // for QPainter
+#include <QRect>         // for QRect
+
+class QPaintEvent;
+class QWidget;
 
 namespace android {
 namespace videoplayer {

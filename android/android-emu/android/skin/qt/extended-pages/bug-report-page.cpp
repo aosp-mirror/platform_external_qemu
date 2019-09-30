@@ -11,31 +11,52 @@
 
 #include "android/skin/qt/extended-pages/bug-report-page.h"
 
-#include "android/avd/keys.h"
-#include "android/base/StringFormat.h"
-#include "android/base/Uri.h"
-#include "android/base/Uuid.h"
-#include "android/base/files/PathUtils.h"
-#include "android/emulation/control/ScreenCapturer.h"
-#include "android/globals.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/utils/file_io.h"
-#include "android/utils/path.h"
+#include <QtConcurrent/qtconcurrentrun.h>              // for run
+#include <QtCore/qglobal.h>                            // for Q_NULLPTR
+#include <qcoreevent.h>                                // for QEvent (ptr only)
+#include <qfuture.h>                                   // for QFutureInterfa...
+#include <qmessagebox.h>                               // for QMessageBox::C...
+#include <qnamespace.h>                                // for ElideRight
+#include <qstring.h>                                   // for operator+, ope...
+#include <time.h>                                      // for localtime, str...
+#include <QCheckBox>                                   // for QCheckBox
+#include <QDesktopServices>                            // for QDesktopServices
+#include <QEvent>                                      // for QEvent
+#include <QFileDialog>                                 // for QFileDialog
+#include <QFontMetrics>                                // for QFontMetrics
+#include <QFuture>                                     // for QFuture
+#include <QHash>                                       // for QHash
+#include <QLabel>                                      // for QLabel
+#include <QMessageBox>                                 // for QMessageBox
+#include <QMovie>                                      // for QMovie
+#include <QPixmap>                                     // for QPixmap
+#include <QPlainTextEdit>                              // for QPlainTextEdit
+#include <QPushButton>                                 // for QPushButton
+#include <QUrl>                                        // for QUrl
+#include <fstream>                                     // for ofstream, ios_...
+#include <functional>                                  // for __base
+#include <iterator>                                    // for istreambuf_ite...
+#include <vector>                                      // for vector
 
-#include "ui_bug-report-page.h"
+#include "android/avd/info.h"                          // for avdInfo_getApi...
+#include "android/base/StringFormat.h"                 // for StringFormat
+#include "android/base/Uri.h"                          // for Uri
+#include "android/base/Uuid.h"                         // for Uuid
+#include "android/base/files/PathUtils.h"              // for PathUtils
+#include "android/base/system/System.h"                // for System, System...
+#include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
+#include "android/globals.h"                           // for android_avdInfo
+#include "android/skin/qt/error-dialog.h"              // for showErrorDialog
+#include "android/skin/qt/extended-pages/common.h"     // for getSelectedTheme
+#include "android/skin/qt/raised-material-button.h"    // for RaisedMaterial...
+#include "android/skin/qt/stylesheet.h"                // for stylesheetValues
+#include "android/utils/path.h"                        // for path_copy_file
+#include "ui_bug-report-page.h"                        // for BugreportPage
 
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QFontMetrics>
-#include <QFuture>
-#include <QMovie>
-#include <QtConcurrent/QtConcurrentRun>
-
-#include <algorithm>
-#include <fstream>
+class QMovie;
+class QObject;
+class QShowEvent;
+class QWidget;
 
 using android::base::PathUtils;
 using android::base::StringAppendFormat;

@@ -11,6 +11,8 @@
 
 #include "record-settings-page.h"
 
+class QWidget;
+
 RecordSettingsPage::RecordSettingsPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::RecordSettingsPage()) {

@@ -14,11 +14,15 @@
 
 #include "android/recording/video/GuestReadbackWorker.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulation/control/display_agent.h"
-#include "android/framebuffer.h"
-#include "android/utils/debug.h"
+#include <assert.h>                                   // for assert
+#include <vector>                                     // for vector
+
+#include "android/base/synchronization/Lock.h"        // for AutoLock, Lock
+#include "android/base/system/System.h"               // for System
+#include "android/emulation/VmLock.h"                 // for RecursiveScoped...
+#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "android/framebuffer.h"                      // for qframebuffer_ch...
+#include "android/utils/debug.h"                      // for VERBOSE_PRINT
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__);
 

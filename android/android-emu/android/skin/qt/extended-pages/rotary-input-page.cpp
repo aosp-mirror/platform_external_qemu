@@ -11,11 +11,20 @@
 
 #include "android/skin/qt/extended-pages/rotary-input-page.h"
 
-#include "android/globals.h"
-#include "android/skin/event.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/utils/debug.h"
+#include <qstring.h>                                           // for operator+
+#include <stddef.h>                                            // for NULL
+#include <QAbstractSlider>                                     // for QAbstr...
+#include <QDial>                                               // for QDial
+#include <QHash>                                               // for QHash
+
+#include "android/skin/event.h"                                // for SkinEvent
+#include "android/skin/qt/emulator-qt-window.h"                // for Emulat...
+#include "android/skin/qt/extended-pages/common.h"             // for getSel...
+#include "android/skin/qt/extended-pages/rotary-input-dial.h"  // for Rotary...
+#include "android/skin/qt/stylesheet.h"                        // for styles...
+#include "android/utils/debug.h"                               // for VERBOS...
+
+class QWidget;
 
 RotaryInputPage::RotaryInputPage(QWidget *parent) :
     QWidget(parent),

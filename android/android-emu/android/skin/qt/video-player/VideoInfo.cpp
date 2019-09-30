@@ -31,18 +31,26 @@
 
 #include "android/skin/qt/video-player/VideoInfo.h"
 
+#include <stdint.h>
+#include <stdio.h>
+
 #include "android/base/memory/ScopedPtr.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
+#include "android/skin/qt/video-player/VideoPlayerWidget.h"
 #include "android/utils/debug.h"
 
 extern "C" {
+
+#include <libavutil/avutil.h>
+#include <libavutil/frame.h>
+#include <libavutil/pixfmt.h>
+#include <libavutil/rational.h>
+
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
-#include "libavutil/opt.h"
-#include "libavutil/samplefmt.h"
-#include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
+struct SwsContext;
 }
 
 namespace android {

@@ -10,14 +10,24 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/battery-page.h"
 
-#include "android/emulation/control/battery_agent.h"
-#include "android/emulation/VmLock.h"
-#include "android/globals.h"
-#include "android/skin/qt/qt-settings.h"
+#include <qsettings.h>                                // for QSettings::IniF...
+#include <qstring.h>                                  // for operator+
+#include <QComboBox>                                  // for QComboBox
+#include <QLabel>                                     // for QLabel
+#include <QLineEdit>                                  // for QLineEdit
+#include <QSettings>                                  // for QSettings
+#include <QSlider>                                    // for QSlider
+#include <QVariant>                                   // for QVariant
 
-#include "ui_battery-page.h"
+#include "android/avd/info.h"                         // for avdInfo_getApiL...
+#include "android/avd/util.h"                         // for path_getAvdCont...
+#include "android/emulation/control/battery_agent.h"  // for BatteryHealth
+#include "android/globals.h"                          // for android_hw, and...
+#include "android/skin/qt/qt-settings.h"              // for PER_AVD_SETTING...
+#include "ui_battery-page.h"                          // for BatteryPage
 
-#include <QSettings>
+class QComboBox;
+class QWidget;
 
 // Must be protected by the BQL!
 static const QAndroidBatteryAgent* sBatteryAgent = nullptr;

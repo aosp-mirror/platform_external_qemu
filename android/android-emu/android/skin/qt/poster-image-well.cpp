@@ -11,15 +11,32 @@
 
 #include "android/skin/qt/poster-image-well.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/logging-category.h"
+#include <qloggingcategory.h>                        // for qCWarning
+#include <qnamespace.h>                              // for KeepAspectRatio
+#include <qstring.h>                                 // for operator!=, oper...
+#include <QApplication>                              // for QApplication
+#include <QDebug>                                    // for QDebug
+#include <QDragEnterEvent>                           // for QDragEnterEvent
+#include <QDropEvent>                                // for QDropEvent
+#include <QFileDialog>                               // for QFileDialog
+#include <QFileInfo>                                 // for QFileInfo
+#include <QLabel>                                    // for QLabel
+#include <QLineEdit>                                 // for QLineEdit
+#include <QList>                                     // for QList
+#include <QMimeData>                                 // for QMimeData
+#include <QPixmap>                                   // for QPixmap
+#include <QStackedWidget>                            // for QStackedWidget
+#include <QUrl>                                      // for QUrl
 
-#include <QDebug>
-#include <QDragEnterEvent>
-#include <QDropEvent>
-#include <QFileDialog>
-#include <QMimeData>
-#include <QPainter>
+#include "android/skin/qt/editable-slider-widget.h"  // for EditableSliderWi...
+#include "android/skin/qt/logging-category.h"        // for emu
+
+class QDragEnterEvent;
+class QDragLeaveEvent;
+class QDropEvent;
+class QMimeData;
+class QUrl;
+class QWidget;
 
 static constexpr int kPageNoImage = 0;
 static constexpr int kPageImage = 1;

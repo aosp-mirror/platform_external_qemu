@@ -1,8 +1,20 @@
 #include "android/skin/qt/editable-slider-widget.h"
 
-#include <QEvent>
-#include <QStyle>
-#include <QtMath>
+#include <math.h>          // for M_LN10
+#include <qcoreevent.h>    // for QEvent (ptr only), QEvent::FocusIn, QEvent...
+#include <qmath.h>         // for qCeil, qLn
+#include <qnamespace.h>    // for operator|, AlignTop, AlignRight, AlignLeft
+#include <qstring.h>       // for operator==
+#include <qvalidator.h>    // for QDoubleValidator::StandardNotation, QValid...
+#include <QEvent>          // for QEvent
+#include <QLocale>         // for QLocale
+#include <QSignalBlocker>  // for QSignalBlocker
+#include <QStyle>          // for QStyle
+#include <QValidator>      // for QValidator
+#include <QVariant>        // for QVariant
+
+class QObject;
+class QWidget;
 
 EditableSliderWidget::EditableSliderWidget(QWidget* parent)
     : QWidget(parent),

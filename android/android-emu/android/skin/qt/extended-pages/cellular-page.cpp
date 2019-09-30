@@ -10,15 +10,22 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/cellular-page.h"
 
-#include "android/emulation/control/cellular_agent.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulator-window.h"
-#include "android/globals.h"
-#include "android/main-common.h"
-#include "android/skin/qt/qt-settings.h"
-#include "ui_cellular-page.h"
+#include <qsettings.h>                                 // for QSettings::Ini...
+#include <qstring.h>                                   // for operator+
+#include <QComboBox>                                   // for QComboBox
+#include <QSettings>                                   // for QSettings
+#include <QVariant>                                    // for QVariant
 
-#include <QSettings>
+#include "android/avd/util.h"                          // for path_getAvdCon...
+#include "android/emulation/VmLock.h"                  // for RecursiveScope...
+#include "android/emulation/control/cellular_agent.h"  // for QAndroidCellul...
+#include "android/emulator-window.h"                   // for emulator_windo...
+#include "android/globals.h"                           // for android_hw
+#include "android/main-common.h"                       // for emulator_has_n...
+#include "android/skin/qt/qt-settings.h"               // for PER_AVD_SETTIN...
+#include "ui_cellular-page.h"                          // for CellularPage
+
+class QWidget;
 
 // Must be protected by the BQL!
 static const QAndroidCellularAgent* sCellularAgent = nullptr;

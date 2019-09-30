@@ -10,12 +10,14 @@
 
 #include "android/skin/qt/ui-event-recorder.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/skin/qt/event-serializer.h"
+#include <qcoreevent.h>                        // for QEvent::Close, QEvent:...
+#include <QEvent>                              // for QEvent
+#include <QMetaEnum>                           // for QMetaEnum
+#include <QMetaObject>                         // for QMetaObject
+#include <iomanip>                             // for operator<<, setw
 
-#include <QEvent>
-#include <QMetaEnum>
-#include <iomanip>
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "android/skin/qt/event-serializer.h"  // for operator<<
 
 namespace {
 

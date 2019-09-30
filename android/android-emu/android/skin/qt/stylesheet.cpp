@@ -11,17 +11,26 @@
 
 #include "android/skin/qt/stylesheet.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/skin/qt/logging-category.h"
+#include <ctype.h>                             // for isalpha
+#include <qfont.h>                             // for QFont::PercentageSpacing
+#include <qhash.h>                             // for QHash (ptr only), QHas...
+#include <qiodevice.h>                         // for QIODevice (ptr only)
+#include <qloggingcategory.h>                  // for qCWarning
+#include <qstring.h>                           // for QString (ptr only)
+#include <QApplication>                        // for QApplication
+#include <QFile>                               // for QFile
+#include <QFont>                               // for QFont
+#include <QHash>                               // for QHash
+#include <QIODevice>                           // for QIODevice
+#include <QString>                             // for QString
+#include <QTextStream>                         // for QTextStream
+#include <string>                              // for basic_string, string
+#include <vector>                              // for vector
 
-#include <QApplication>
-#include <QFile>
-#include <QFont>
-#include <QHash>
-#include <QTextStream>
-#include <QtGlobal>
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "android/skin/qt/logging-category.h"  // for emu
 
-#include <math.h>
+class QTextStream;
 
 namespace Ui {
 

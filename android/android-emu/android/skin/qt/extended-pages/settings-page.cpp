@@ -11,29 +11,60 @@
 
 #include "android/skin/qt/extended-pages/settings-page.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/FramelessDetector.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/stylesheet.h"
+#include <qcoreevent.h>                                     // for QEvent::F...
+#include <qfiledialog.h>                                    // for QFileDial...
+#include <qmessagebox.h>                                    // for QMessageB...
+#include <qnamespace.h>                                     // for Checked
+#include <qsettings.h>                                      // for QSettings...
+#include <qstring.h>                                        // for operator+
+#include <stdio.h>                                          // for fprintf
+
+#include "android/avd/info.h"                               // for AVDINFO_N...
+#include "android/avd/util.h"                               // for path_getA...
+#include "android/base/files/PathUtils.h"                   // for PathUtils
+#include "android/emulation/control/AdbInterface.h"         // for AdbInterface
+#include "android/featurecontrol/Features.h"                // for GenericSn...
+#include "android/globals.h"                                // for android_a...
+#include "android/metrics/MetricsWriter.h"                  // for android_s...
+#include "android/skin/qt/FramelessDetector.h"              // for Frameless...
+#include "android/skin/qt/extended-pages/common.h"          // for getSelect...
+#include "android/skin/qt/extended-pages/perfstats-page.h"  // for PerfStats...
+#include "android/skin/qt/qt-settings.h"                    // for SaveSnaps...
+#include "android/skin/qt/raised-material-button.h"         // for RaisedMat...
+#include "android/skin/qt/stylesheet.h"                     // for fontStyle...
+#include "android/skin/winsys.h"                            // for WinsysPre...
+#include "ui_settings-page.h"                               // for SettingsPage
+
+class QLineEdit;
+class QObject;
+class QWidget;
 
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
-#include "android/base/async/ThreadLooper.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/snapshot/common.h"
-#include "android/snapshot/interface.h"
-
-#include <QApplication>
+#include "android/base/async/ThreadLooper.h"                // for ThreadLooper
+#include "android/featurecontrol/FeatureControl.h"          // for isEnabled
+#include "android/metrics/MetricsReporter.h"                // for MetricsRe...
+#include "android/metrics/proto/studio_stats.pb.h"          // for EmulatorS...
+#include "android/skin/qt/error-dialog.h"                   // for showError...
+#include "android/snapshot/common.h"                        // for kDefaultB...
+#include "android/snapshot/interface.h"                     // for androidSn...
 #endif
 
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSettings>
+#include <QCheckBox>                                        // for QCheckBox
+#include <QComboBox>                                        // for QComboBox
+#include <QDir>                                             // for QDir
+#include <QEvent>                                           // for QEvent
+#include <QFileDialog>                                      // for QFileDialog
+#include <QFileInfo>                                        // for QFileInfo
+#include <QFontMetrics>                                     // for QFontMetrics
+#include <QGroupBox>                                        // for QGroupBox
+#include <QLabel>                                           // for QLabel
+#include <QLineEdit>                                        // for QLineEdit
+#include <QMessageBox>                                      // for QMessageBox
+#include <QPushButton>                                      // for QPushButton
+#include <QSettings>                                        // for QSettings
+#include <QVariant>                                         // for QVariant
+#include <functional>                                       // for __base
+#include <string>                                           // for string
 
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
 using Ui::Settings::SaveSnapshotOnExit;

@@ -11,27 +11,79 @@
 
 #include "android/skin/qt/extended-pages/record-macro-page.h"
 
-#include "android/base/StringFormat.h"
+#include <qdialog.h>
+#include <qdialogbuttonbox.h>
+#include <qmessagebox.h>
+#include <qnamespace.h>
+#include <qobject.h>
+#include <qstandardpaths.h>
+#include <qstring.h>
+#include <QAbstractItemModel>
+#include <QByteArray>
+#include <QDateTime>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QDir>
+#include <QFileInfo>
+#include <QFlags>
+#include <QHash>
+#include <QIcon>
+#include <QLabel>
+#include <QLineEdit>
+#include <QList>
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <QMessageBox>
+#include <QObject>
+#include <QPushButton>
+#include <QRegExp>
+#include <QSize>
+#include <QStackedWidget>
+#include <QStandardPaths>
+#include <QVBoxLayout>
+#include <QVariant>
+#include <algorithm>
+#include <cstdint>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <sstream>
+#include <type_traits>
+#include <utility>
+
+#include "android/automation/AutomationController.h"
+#include "android/base/EnumFlags.h"
+#include "android/base/Log.h"
+#include "android/base/Result.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/Features.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/recording/video/player/VideoPlayer.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/settings-agent.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-macro-edit-dialog.h"
-#include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/extended-pages/record-macro-saved-item.h"
+#include "android/skin/qt/raised-material-button.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
+#include "android/skin/qt/video-player/VideoInfo.h"
+#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include "studio_stats.pb.h"
+#include "ui_record-macro-page.h"
 
-#include <QDateTime>
-#include <QDialogButtonBox>
-#include <QDir>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QRegExp>
-#include <QStandardPaths>
-#include <QVBoxLayout>
-#include <iostream>
-#include <sstream>
+class CCListItem;
+class QHideEvent;
+class QLineEdit;
+class QListWidgetItem;
+class QMouseEvent;
+class QPushButton;
+class QShowEvent;
+class QVBoxLayout;
+class QWidget;
 
 static const char SECONDS_RECORDING[] = "%1s Recording...";
 
@@ -817,7 +869,7 @@ void RecordMacroPage::createMacroItem(std::string& macroName, bool isPreset) {
                 SIGNAL(editButtonClickedSignal(CCListItem*)), this,
                 SLOT(editButtonClicked(CCListItem*)));
     }
-    
+
     listItem->setSizeHint(QSize(0, 50));
     mUi->macroList->addItem(listItem);
     mUi->macroList->setItemWidget(listItem, macroSavedItem);

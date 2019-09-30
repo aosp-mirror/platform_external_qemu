@@ -11,22 +11,30 @@
 
 #pragma once
 
-#include "android/base/memory/OnDemand.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/skin/qt/ModalOverlay.h"
+#include <qcoreevent.h>                    // for QEvent::Type, QEvent (ptr ...
+#include <qobjectdefs.h>                   // for Q_OBJECT, signals, slots
+#include <QEvent>                          // for QEvent
+#include <QList>                           // for QList
+#include <QScrollArea>                     // for QScrollArea
+#include <QSize>                           // for QSize
+#include <QString>                         // for QString
+#include <QTimer>                          // for QTimer
+
+#include "android/base/memory/OnDemand.h"  // for OnDemand
+#include "android/skin/qt/ModalOverlay.h"  // for ModalOverlay, ModalOverlay...
 #include "android/skin/qt/OverlayMessageCenter.h"
-
-#include <QObject>
-#include <QScrollArea>
-#include <QTimer>
-#include <QWidget>
-#include <QtCore>
-
 class EmulatorQtWindow;
+class QCloseEvent;
+class QFocusEvent;
+class QKeyEvent;
+class QMoveEvent;
+class QObject;
+class QResizeEvent;
+class QShowEvent;
+class QSize;
+class QString;
+class QWidget;
 class VirtualSceneInfoDialog;
-namespace Ui {
-class ModalOverlay;
-}
 
 class EmulatorContainer : public QScrollArea {
     Q_OBJECT

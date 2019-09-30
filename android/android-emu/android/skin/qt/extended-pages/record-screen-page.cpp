@@ -11,23 +11,46 @@
 
 #include "android/skin/qt/extended-pages/record-screen-page.h"
 
+#include <qstring.h>
+#include <QComboBox>
+#include <QDir>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QHash>
+#include <QLabel>
+#include <QMovie>
+#include <QObject>
+#include <QPixmap>
+#include <QSettings>
+#include <QSize>
+#include <QSizePolicy>
+#include <QStackedWidget>
+#include <QThread>
+#include <utility>
+
+#include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/globals.h"
 #include "android/recording/GifConverter.h"
+#include "android/recording/video/player/VideoPlayer.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/raised-material-button.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
+#include "android/skin/qt/video-player/VideoInfo.h"
+#include "android/skin/qt/video-player/VideoPlayerWidget.h"
 #include "android/utils/debug.h"
+#include "ui_record-screen-page.h"
 
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QMovie>
-#include <QSettings>
-#include <QThread>
+class QMovie;
+class QWidget;
 
 static const char CONVERTING_TO_GIF[]  = "Converting to GIF";
 static const char FINISHING_ENCODING[] = "Finishing encoding";

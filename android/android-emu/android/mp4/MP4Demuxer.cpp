@@ -14,19 +14,33 @@
 
 #include "android/mp4/MP4Demuxer.h"
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/hw-sensors.h"
-#include "android/mp4/MP4Dataset.h"
-#include "android/mp4/SensorLocationEventProvider.h"
-#include "android/mp4/VideoMetadataProvider.h"
-#include "android/recording/video/player/PacketQueue.h"
-#include "android/recording/video/player/VideoPlayerWaitInfo.h"
+#include <stddef.h>                                      // for size_t
+#include <stdint.h>                                      // for int64_t
+#include <utility>                                       // for move
+
+#include "android/base/Log.h"                            // for LOG, LogMessage
+#include "android/base/synchronization/Lock.h"           // for Lock, AutoLock
+#include "android/hw-sensors.h"                          // for AndroidSensor
+#include "android/mp4/MP4Dataset.h"                      // for Mp4Dataset
+#include "android/mp4/SensorLocationEventProvider.h"     // for SensorLocati...
+#include "android/mp4/VideoMetadataProvider.h"           // for VideoMetadat...
+#include "android/recording/video/player/PacketQueue.h"  // for PacketQueue
+#include "android/recording/video/player/VideoPlayer.h"  // for VideoPlayer
 
 extern "C" {
-#include "libavcodec/avcodec.h"
+#include "libavcodec/avcodec.h"                          // for AVPacket
+#include <libavformat/avformat.h>                        // for av_seek_frame
+#include <libavformat/avio.h>                            // for avio_feof
+#include <libavutil/avutil.h>                            // for AV_TIME_BASE
+#include <libavutil/error.h>                             // for AVERROR_EOF
 }
+
+namespace android {
+namespace videoplayer {
+struct VideoPlayerWaitInfo;
+}  // namespace videoplayer
+}  // namespace android
+
 
 using android::videoplayer::PacketQueue;
 using android::videoplayer::VideoPlayerWaitInfo;

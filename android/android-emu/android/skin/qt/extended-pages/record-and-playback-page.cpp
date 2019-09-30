@@ -11,6 +11,14 @@
 
 #include "android/skin/qt/extended-pages/record-and-playback-page.h"
 
+#include <QTabWidget>                                             // for QTa...
+
+#include "android/skin/qt/extended-pages/record-macro-page.h"     // for Rec...
+#include "android/skin/qt/extended-pages/record-screen-page.h"    // for Rec...
+#include "android/skin/qt/extended-pages/record-settings-page.h"  // for Rec...
+
+class QWidget;
+
 RecordAndPlaybackPage::RecordAndPlaybackPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordAndPlaybackPage()) {
     mUi->setupUi(this);

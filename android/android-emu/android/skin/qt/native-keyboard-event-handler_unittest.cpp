@@ -12,13 +12,12 @@
 
 #include "android/skin/qt/native-keyboard-event-handler.h"
 
-#include "android/base/ArraySize.h"
-#include "android/emulation/control/vm_operations.h"
+#include <gtest/gtest.h>
+#include <stddef.h>
+
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/linux_keycodes.h"
-
-#include <gtest/gtest.h>
 
 #define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
 
@@ -27,6 +26,7 @@ namespace {
 #if defined(__linux__)
 #include <X11/XKBlib.h>
 #include <xcb/xcb.h>
+
 const struct {
     int scancode;
     int linuxKeyCode;
@@ -75,7 +75,6 @@ const struct {
 #include "android/skin/macos_keycodes.h"
 
 #include <Carbon/Carbon.h>
-
 const struct {
     int scancode;
     int linuxKeyCode;

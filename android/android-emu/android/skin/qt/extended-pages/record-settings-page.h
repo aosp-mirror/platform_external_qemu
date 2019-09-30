@@ -11,14 +11,15 @@
 
 #pragma once
 
-#include "ui_record-settings-page.h"
+#include <qobjectdefs.h>              // for Q_OBJECT, signals
+#include <QString>                    // for QString
+#include <QWidget>                    // for QWidget
+#include <memory>                     // for unique_ptr
 
-#include <QWidget>
-#include <memory>
+#include "ui_record-settings-page.h"  // for RecordSettingsPage
 
-namespace Ui {
-class RecordSettingsPage;
-}
+class QObject;
+class QWidget;
 
 class RecordSettingsPage : public QWidget {
     Q_OBJECT

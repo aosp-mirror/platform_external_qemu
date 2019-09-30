@@ -11,11 +11,17 @@
 
 #pragma once
 
-#include "ui_finger-page.h"
-#include <QWidget>
-#include <memory>
+#include <qobjectdefs.h>     // for Q_OBJECT, slots
+#include <QString>           // for QString
+#include <QWidget>           // for QWidget
+#include <memory>            // for unique_ptr
 
+#include "ui_finger-page.h"  // for FingerPage
+
+class QObject;
+class QWidget;
 struct QAndroidFingerAgent;
+
 class FingerPage : public QWidget
 {
     Q_OBJECT

@@ -10,7 +10,9 @@
 
 #pragma once
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "GLES3/gl3.h"  // for GLuint
+
+struct GLESv2Dispatch;
 
 // This is a 2D RGB texture that can be rendered to.
 class GLCanvas {

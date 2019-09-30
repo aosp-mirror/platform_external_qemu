@@ -10,7 +10,13 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include <QWidget>
+#include <qobjectdefs.h>  // for Q_OBJECT
+#include <QString>        // for QString
+#include <QWidget>        // for QWidget
+
+class QObject;
+class QString;
+class QWidget;
 
 namespace Ui {
 class VhalItem;

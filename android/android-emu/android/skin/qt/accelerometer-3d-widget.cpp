@@ -10,23 +10,35 @@
 
 #include "android/skin/qt/accelerometer-3d-widget.h"
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/system/System.h"
-#include "android/emulation/control/sensors_agent.h"
-#include "android/hw-sensors.h"
-#include "android/physics/GlmHelpers.h"
-#include "android/skin/qt/gl-common.h"
-#include "android/skin/qt/logging-category.h"
-#include "android/skin/qt/wavefront-obj-parser.h"
+#include <assert.h>                                   // for assert
+#include <glm/gtc/quaternion.hpp>                     // for tquat
+#include <qimage.h>                                   // for QImage::Format_...
+#include <qiodevice.h>                                // for operator|, QIOD...
+#include <qloggingcategory.h>                         // for qCWarning
+#include <qnamespace.h>                               // for ClickFocus
+#include <QByteArray>                                 // for QByteArray
+#include <QFile>                                      // for QFile
+#include <QImage>                                     // for QImage
+#include <QMouseEvent>                                // for QMouseEvent
+#include <QPoint>                                     // for QPoint
+#include <QTextStream>                                // for QTextStream
+#include <QWheelEvent>                                // for QWheelEvent
+#include <algorithm>                                  // for max, min
+#include <vector>                                     // for vector
 
-#include <glm/gtc/epsilon.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include "OpenGLESDispatch/GLESv2Dispatch.h"          // for GLESv2Dispatch
+#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
+#include "android/physics/GlmHelpers.h"               // for fromEulerAnglesXYZ
+#include "android/physics/Physics.h"                  // for PARAMETER_VALUE...
+#include "android/skin/qt/gl-common.h"                // for createShader
+#include "android/skin/qt/logging-category.h"         // for emu
+#include "android/skin/qt/wavefront-obj-parser.h"     // for parseWavefrontOBJ
 
-#include "android/utils/debug.h"
+
+class QMouseEvent;
+class QWheelEvent;
+class QWidget;
 
 static glm::vec3 clampPosition(glm::vec3 position) {
     return glm::clamp(

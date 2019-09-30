@@ -31,15 +31,12 @@
 
 #pragma once
 
-#include "android/recording/video/player/VideoPlayerWaitInfo.h"
+#include <stdint.h>                                              // for int64_t
+
+#include "android/recording/video/player/VideoPlayerWaitInfo.h"  // for Vide...
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/opt.h"
-#include "libavutil/time.h"
-#include "libswresample/swresample.h"
-#include "libswscale/swscale.h"
+#include "libavcodec/avcodec.h"                                  // for AVPa...
 }
 
 namespace android {

@@ -9,47 +9,70 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include <QtCore/qglobal.h>
+#include <qapplication.h>
+#include <qloggingcategory.h>
+#include <qmenu.h>
+#include <qnamespace.h>
+#include <qwindowdefs.h>
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef CONFIG_POSIX
 #include <pthread.h>
+#include <sys/signal.h>
+#include <unistd.h>
 #endif
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/system/System.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include <QAction>
+#include <QApplication>
+#include <QByteArray>
+#include <QCoreApplication>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageLogContext>
+#include <QObject>
+#include <QRect>
+#include <QSemaphore>
+#include <QSettings>
+#include <QString>
+#include <QStringList>
+#include <QThread>
+#include <QVariant>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "android/base/Log.h"
+#include "android/cmdline-option.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/globals.h"
-#include "android/main-common-ui.h"
+#include "android/location/MapsKey.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/qt/QtLogger.h"
 #include "android/skin/qt/emulator-no-qt-no-window.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/init-qt.h"
+#include "android/skin/qt/logging-category.h"
 #include "android/skin/qt/native-event-filter-factory.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/tool-window.h"
 #include "android/skin/rect.h"
-#include "android/skin/resource.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/location/MapsKey.h"
-#include "android/utils/setenv.h"
 
-#include <QtCore>
-#include <QApplication>
-#include <QCoreApplication>
-#include <QDesktopWidget>
-#include <QFontDatabase>
-#include <QMenu>
-#include <QMenuBar>
-#include <QRect>
-#include <QSemaphore>
-#include <QThread>
-#include <QWidget>
-
-#include <string>
+class QAction;
+class QCoreApplication;
+class QMenuBar;
+class QString;
+namespace android {
+namespace base {
+class System;
+}  // namespace base
+}  // namespace android
 
 #ifdef Q_OS_LINUX
 // This include needs to be after all the Qt includes
@@ -59,12 +82,16 @@
 #endif
 
 #ifdef _WIN32
-#include <windows.h>
 #include <shellapi.h>
+#include <windows.h>
+#include "android/base/system/Win32UnicodeString.h"
 #endif
 
 #ifdef __APPLE__
-#include <Carbon/Carbon.h>
+#include <ApplicationServices/ApplicationServices.h>
+#endif
+
+#ifdef CONFIG_POSIX
 #include <signal.h>
 #endif
 

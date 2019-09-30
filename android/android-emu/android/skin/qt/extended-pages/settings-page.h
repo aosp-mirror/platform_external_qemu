@@ -11,16 +11,26 @@
 
 #pragma once
 
-#include "ui_settings-page.h"
+#include <qobjectdefs.h>             // for slots, Q_OBJECT, signals
+#include <QString>                   // for QString
+#include <QWidget>                   // for QWidget
+#include <memory>                    // for unique_ptr
 
-#include "android/settings-agent.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/perfstats-page.h"
+#include "android/settings-agent.h"  // for SettingsTheme
 
-#include <QString>
-#include <QWidget>
-#include <memory>
-
+class PerfStatsPage;
+class QEvent;
+class QObject;
+class QString;
+class QWidget;
+namespace Ui {
+class SettingsPage;
+}  // namespace Ui
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
 struct QAndroidHttpProxyAgent;
 
 class SettingsPage : public QWidget

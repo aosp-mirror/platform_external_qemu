@@ -10,12 +10,16 @@
 
 #pragma once
 
-#include "android/skin/qt/event-capturer.h"
+#include <qobjectdefs.h>                     // for Q_OBJECT, slots
+#include <QObject>                           // for QObject
+#include <QPointer>                          // for QPointer
+#include <QString>                           // for QString
+#include <unordered_map>                     // for unordered_map
 
-#include <QObject>
-#include <QPointer>
+#include "android/skin/qt/event-capturer.h"  // for EventCapturer, EventCapt...
 
-#include <unordered_map>
+class QEvent;
+class QObject;
 
 // This is a suggested base class for all clients of EventCapturer.
 // They're not strictly required to use it, but it makes things

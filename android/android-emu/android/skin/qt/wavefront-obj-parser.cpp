@@ -10,12 +10,23 @@
 
 #include "android/skin/qt/wavefront-obj-parser.h"
 
-#include "android/skin/qt/logging-category.h"
+#include <qchar.h>                             // for operator==
+#include <qloggingcategory.h>                  // for qCWarning
+#include <qstring.h>                           // for QString::SkipEmptyParts
+#include <qtextstream.h>                       // for QTextStream::Ok, QText...
+#include <QChar>                               // for QChar
+#include <QCharRef>                            // for QCharRef
+#include <QList>                               // for QList
+#include <QString>                             // for QString
+#include <QStringList>                         // for QStringList
+#include <QTextStream>                         // for QTextStream
+#include <cstddef>                             // for size_t
+#include <string>                              // for basic_string, string
+#include <tuple>                               // for tuple, get, make_tuple
+#include <unordered_map>                       // for unordered_map, operator==
+#include <utility>                             // for hash, pair
 
-#include <QString>
-
-#include <tuple>
-#include <unordered_map>
+#include "android/skin/qt/logging-category.h"  // for emu
 
 namespace std {
 template <>

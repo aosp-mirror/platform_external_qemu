@@ -11,12 +11,10 @@
 */
 #include "android/skin/generic-event.h"
 
-#include "android/skin/generic-event-buffer.h"
-#include "android/utils/debug.h"
+#include <memory>                               // for unique_ptr
 
-#include <stdio.h>
-
-#include <memory>
+#include "android/skin/generic-event-buffer.h"  // for skin_generic_event_bu...
+#include "android/utils/debug.h"                // for VERBOSE_PRINT
 
 #define DEBUG 1
 
