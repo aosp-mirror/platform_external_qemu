@@ -3552,8 +3552,7 @@ private:
     ) {
         // BUG: 139193497
         return !(usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-            && !(usage & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT &&
-                type == VK_IMAGE_TYPE_1D);
+            && !(type == VK_IMAGE_TYPE_1D);
     }
 
     std::vector<const char*>
