@@ -302,10 +302,8 @@ void onOffworldLoad(base::Stream* stream) {
                          << pipe.id;
             offworld::sendResponse(pipe, overrideIt->second);
         } else {
-            // No override response, send default.
-            LOG(VERBOSE) << "Sending default response pipe=" << pipe.id
-                         << ", type=" << uint32_t(type);
-            sendDefaultResponse(pipe, type);
+            LOG(VERBOSE) << "Loading from UI / command line, closing pipe\n";
+            offworld::close(pipe);
         }
     }
 

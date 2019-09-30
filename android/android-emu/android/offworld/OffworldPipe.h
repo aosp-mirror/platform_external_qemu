@@ -39,5 +39,7 @@ void registerOffworldPipeServiceForTest(
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
                   const pb::Response& response);
 
+void close(android::AsyncMessagePipeHandle pipe);
+
 }  // namespace offworld
 }  // namespace android

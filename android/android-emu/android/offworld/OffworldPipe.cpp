@@ -434,5 +434,13 @@ bool sendResponse(android::AsyncMessagePipeHandle pipe,
     }
 }
 
+void close(android::AsyncMessagePipeHandle pipe) {
+    OffworldPipe::Service* service = OffworldPipe::Service::get();
+    auto pipeRefOpt = service->getPipe(pipe);
+    if (pipeRefOpt) {
+        pipeRefOpt->pipe->closeFromHost();
+    }
+}
+
 }  // namespace offworld
 }  // namespace android
