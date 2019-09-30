@@ -39,19 +39,16 @@ set(OpenglRender_vulkan_src
 android_add_library(OpenglRender_vulkan)
 target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal PRIVATE emugl_base GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden)
-target_include_directories(
-    OpenglRender_vulkan
-    PUBLIC
-        ./vulkan/cereal/
-        ./vulkan/
-    PRIVATE
-        .
-        ${ANDROID_EMUGL_DIR}/../android-emu
-        ${ANDROID_EMUGL_DIR}/shared/
-        ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
-        ${ANDROID_EMUGL_DIR}/host/include
-        ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
+target_compile_options(OpenglRender_vulkan
+                       PRIVATE -fvisibility=hidden -Wno-unused-value -Wno-return-type -Wno-return-type-c-linkage)
+target_include_directories(OpenglRender_vulkan
+                           PUBLIC ./vulkan/cereal/ ./vulkan/
+                           PRIVATE .
+                                   ${ANDROID_EMUGL_DIR}/../android-emu
+                                   ${ANDROID_EMUGL_DIR}/shared/
+                                   ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
+                                   ${ANDROID_EMUGL_DIR}/host/include
+                                   ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
 
 set(OpenglRender_src
     ChannelStream.cpp
@@ -83,26 +80,23 @@ set(OpenglRender_windows_src NativeSubWindow_win32.cpp)
 android_add_shared_library(OpenglRender)
 
 target_link_libraries(OpenglRender
-                              PUBLIC
-                              GLESv1_dec
-                              OpenglCodecCommon
-                              emugl_common
-                              gtest
-                              GLESv2_dec
-                              renderControl_dec
-                              OpenglRender_vulkan
-                              OpenGLESDispatch
-                              GLSnapshot)
+                      PUBLIC GLESv1_dec
+                             OpenglCodecCommon
+                             emugl_common
+                             gtest
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OpenGLESDispatch
+                             GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
-target_include_directories(
-    OpenglRender
-    PUBLIC
-        ${ANDROID_EMUGL_DIR}/host/libs/Translator/include
-        .
-        ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
+target_include_directories(OpenglRender
+                           PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include .
+                                  ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
 android_target_link_libraries(OpenglRender linux-x86_64 PRIVATE "-WL,--version-script=render_api.entries")
 android_target_link_libraries(OpenglRender darwin-x86_64 PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
@@ -141,24 +135,20 @@ set(OpenglRender_standalone_common_windows_src NativeSubWindow_win32.cpp)
 android_add_library(OpenglRender_standalone_common)
 
 target_link_libraries(OpenglRender_standalone_common
-                              PUBLIC
-                              OpenglCodecCommon
-                              emugl_common
-                              OpenglRender
-                              GLESv1_dec
-                              GLESv2_dec
-                              renderControl_dec
-                              OpenglRender_vulkan
-                              OSWindow)
+                      PUBLIC OpenglCodecCommon
+                             emugl_common
+                             OpenglRender
+                             GLESv1_dec
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OSWindow)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
 target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
 android_target_compile_definitions(OpenglRender_standalone_common windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_include_directories(OpenglRender_standalone_common
-                                   PUBLIC
-                                   ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
-                                   standalone_common
-                                   vulkan
-                                   ${ANDROID_EMUGL_DIR}/host/include/vulkan)
+                           PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common vulkan
+                                  ${ANDROID_EMUGL_DIR}/host/include/vulkan)
 
 # Unit tests
 set(OpenglRender_unittests_src
@@ -190,118 +180,99 @@ set(OpenglRender_unittests_src
     tests/TextureDraw_unittest.cpp
     tests/Vulkan_unittest.cpp)
 
-# Note! We build the test but are not registering it, as the darwin build has
-# some concurrency issues with these tests.
+# Note! We build the test but are not registering it, as the darwin build has some concurrency issues with these tests.
 android_add_test(OpenglRender_unittests)
-target_link_libraries(OpenglRender_unittests
-                              PRIVATE
-                              android-emu-base
-                              gmock_main
-                              OpenglRender_standalone_common)
+target_link_libraries(OpenglRender_unittests PRIVATE android-emu-base gmock_main OpenglRender_standalone_common)
 android_target_compile_definitions(OpenglRender_unittests windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 add_opengl_dependencies(OpenglRender_unittests)
 
 # Unit tests
-set(OpenglRender_vulkan_unittests_src
-    vulkan/VulkanStream_unittest.cpp
-    vulkan/VulkanProtobuf_unittest.cpp)
+set(OpenglRender_vulkan_unittests_src vulkan/VulkanStream_unittest.cpp vulkan/VulkanProtobuf_unittest.cpp)
 android_add_test(OpenglRender_vulkan_unittests)
 target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_unittests
-                              PUBLIC
-                              OpenglRender_standalone_common
-                              OpenglRender_vulkan
-                              gmock_main)
+                      PUBLIC OpenglRender_standalone_common OpenglRender_vulkan gmock_main)
 target_include_directories(OpenglRender_vulkan_unittests
-                                   PRIVATE
-                                   .
-                                   cereal
-                                   ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
+                           PRIVATE . cereal ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
                                    ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
                                    ${ANDROID_EMUGL_DIR}/host/include/vulkan)
 
 set(HelloTriangle_src samples/HelloTriangle.cpp samples/HelloTriangleImp.cpp)
 android_add_executable(HelloTriangle)
 target_link_libraries(HelloTriangle
-                              PUBLIC
-                              OpenglRender_standalone_common
-                              OpenglCodecCommon
-                              android-emu-base
-                              emugl_common
-                              gmock_main
-                              OpenglRender
-                              GLESv1_dec
-                              GLESv2_dec
-                              renderControl_dec
-                              OpenglRender_vulkan
-                              OSWindow)
+                      PUBLIC OpenglRender_standalone_common
+                             OpenglCodecCommon
+                             android-emu-base
+                             emugl_common
+                             gmock_main
+                             OpenglRender
+                             GLESv1_dec
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OSWindow)
 add_opengl_dependencies(HelloTriangle)
 
 set(HelloSurfaceFlinger_src samples/HelloSurfaceFlinger.cpp)
 android_add_executable(HelloSurfaceFlinger)
 target_link_libraries(HelloSurfaceFlinger
-                              PUBLIC
-                              OpenglRender_standalone_common
-                              OpenglCodecCommon
-                              android-emu-base
-                              emugl_common
-                              gmock_main
-                              OpenglRender
-                              GLESv1_dec
-                              GLESv2_dec
-                              renderControl_dec
-                              OpenglRender_vulkan
-                              OSWindow)
+                      PUBLIC OpenglRender_standalone_common
+                             OpenglCodecCommon
+                             android-emu-base
+                             emugl_common
+                             gmock_main
+                             OpenglRender
+                             GLESv1_dec
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OSWindow)
 add_opengl_dependencies(HelloSurfaceFlinger)
 
 set(CreateDestroyContext_src samples/CreateDestroyContext.cpp)
 android_add_executable(CreateDestroyContext)
 target_link_libraries(CreateDestroyContext
-                              PUBLIC
-                              OpenglRender_standalone_common
-                              OpenglCodecCommon
-                              android-emu-base
-                              emugl_common
-                              gmock_main
-                              OpenglRender
-                              GLESv1_dec
-                              GLESv2_dec
-                              renderControl_dec
-                              OpenglRender_vulkan
-                              OSWindow)
+                      PUBLIC OpenglRender_standalone_common
+                             OpenglCodecCommon
+                             android-emu-base
+                             emugl_common
+                             gmock_main
+                             OpenglRender
+                             GLESv1_dec
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OSWindow)
 add_opengl_dependencies(CreateDestroyContext)
 
 set(HelloHostComposition_src samples/HelloHostComposition.cpp)
 android_add_executable(HelloHostComposition)
 target_link_libraries(HelloHostComposition
-                              PUBLIC
-                              OpenglRender_standalone_common
-                              OpenglCodecCommon
-                              android-emu-base
-                              emugl_common
-                              gmock_main
-                              OpenglRender
-                              GLESv1_dec
-                              GLESv2_dec
-                              renderControl_dec
-                              OpenglRender_vulkan
-                              OSWindow)
+                      PUBLIC OpenglRender_standalone_common
+                             OpenglCodecCommon
+                             android-emu-base
+                             emugl_common
+                             gmock_main
+                             OpenglRender
+                             GLESv1_dec
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OSWindow)
 add_opengl_dependencies(HelloHostComposition)
 
 set(HelloVulkan_src samples/HelloVulkan.cpp)
 android_add_executable(HelloVulkan)
 target_link_libraries(HelloVulkan
-                      PUBLIC
-                      OpenglRender_standalone_common
-                      OpenglCodecCommon
-                      android-emu-base
-                      emugl_common
-                      gmock_main
-                      OpenglRender
-                      GLESv1_dec
-                      GLESv2_dec
-                      renderControl_dec
-                      OpenglRender_vulkan
-                      OSWindow)
+                      PUBLIC OpenglRender_standalone_common
+                             OpenglCodecCommon
+                             android-emu-base
+                             emugl_common
+                             gmock_main
+                             OpenglRender
+                             GLESv1_dec
+                             GLESv2_dec
+                             renderControl_dec
+                             OpenglRender_vulkan
+                             OSWindow)
 add_opengl_dependencies(HelloVulkan)
-

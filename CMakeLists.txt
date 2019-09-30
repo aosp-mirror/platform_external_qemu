@@ -1,20 +1,20 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
 if(NOT DEFINED ANDROID_TARGET_TAG)
-  message(
-    WARNING
-      "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, "
-      "It is best to invoke: android/scripts/rebuild. "
-      "Using the system toolchain might have unintended consequences, and you will need all required "
-      "packages to build qemu (https://wiki.qemu.org/Hosts/Linux,https://wiki.qemu.org/Hosts/Mac)."
-    )
-   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake/")
-   include(toolchain)
-   _get_host_tag(TAG)
-   toolchain_configure_tags(${TAG})
+  message(WARNING "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, "
+                  "It is best to invoke: android/scripts/rebuild. "
+                  "Using the system toolchain might have unintended consequences, and you will need all required "
+                  "packages to build qemu (https://wiki.qemu.org/Hosts/Linux,https://wiki.qemu.org/Hosts/Mac).")
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake/")
+  include(toolchain)
+  _get_host_tag(TAG)
+  toolchain_configure_tags(${TAG})
 endif()
 
-message(STATUS "Configured host ${ANDROID_HOST_TAG} to target: ${ANDROID_TARGET_TAG}, target os: ${ANDROID_TARGET_OS}/${ANDROID_TARGET_OS_FLAVOR}")
+message(
+  STATUS
+    "Configured host ${ANDROID_HOST_TAG} to target: ${ANDROID_TARGET_TAG}, target os: ${ANDROID_TARGET_OS}/${ANDROID_TARGET_OS_FLAVOR}"
+  )
 
 include(android)
 include(prebuilts)
@@ -29,15 +29,15 @@ set(OPTION_TIME_INFO FALSE CACHE BOOL "True if you wish to collect compile time 
 set(OPTION_CLANG_TIDY "" CACHE STRING "List of targets for which you wish to run clang-tidy for code analysis.")
 set(OPTION_CLANG_TIDY_FIX FALSE CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-if (LINUX_X86_64 OR DARWIN_X86_64)
-set(GRPC TRUE CACHE BOOL "True if the emulator should be build with GRPC support. Defaults on for Linux/Mac.")
+if(LINUX_X86_64 OR DARWIN_X86_64)
+  set(GRPC TRUE CACHE BOOL "True if the emulator should be build with GRPC support. Defaults on for Linux/Mac.")
 else()
-set(GRPC FALSE CACHE BOOL "True if the emulator should be build with GRPC support. Defaults off for Windows.")
+  set(GRPC FALSE CACHE BOOL "True if the emulator should be build with GRPC support. Defaults off for Windows.")
 endif()
-if (LINUX_X86_64)
-set(WEBRTC TRUE CACHE BOOL "True if the emulator should be build with WEBRTC support. Defaults on for Linux")
+if(LINUX_X86_64)
+  set(WEBRTC TRUE CACHE BOOL "True if the emulator should be build with WEBRTC support. Defaults on for Linux")
 else()
-set(WEBRTC FALSE CACHE BOOL "True if the emulator should be build with WEBRTC support. Defaults on for Linux")
+  set(WEBRTC FALSE CACHE BOOL "True if the emulator should be build with WEBRTC support. Defaults on for Linux")
 endif()
 set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
 set(ANDROIDSTUDIO TRUE CACHE BOOL "True if we should build android studio components. Default on.")
@@ -47,7 +47,7 @@ string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 
-if (WEBRTC AND NOT GRPC)
+if(WEBRTC AND NOT GRPC)
   message(FATAL_ERROR "You need to enable GRPC if you wish to use WEBRTC")
 endif()
 
@@ -61,19 +61,22 @@ else()
   message(STATUS "Uploading symbols to ${OPTION_CRASHUPLOAD}")
 endif()
 
-if (ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE AND NOT WINDOWS_X86_64)
-  message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling.")
+if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE AND NOT WINDOWS_X86_64)
+  message(
+    WARNING
+      "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling."
+    )
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
-# So we are using some C++14 features..
+# So we are using some C++14 features
 set(CMAKE_CXX_STANDARD 14)
 
 # Gather compile time statistics
-if (OPTION_TIME_INFO)
+if(OPTION_TIME_INFO)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 endif()
@@ -125,50 +128,25 @@ else()
   endif()
 endif()
 
+# We are slowly removing all the warnings, or at least pushing them to the targets
+# that truely need them.
+if(LINUX_X86_64)
+  add_c_flag("-Werror")
+elseif(WINDOWS_X86_64)
+  add_c_flag("-Wno-all")
+else()
+  add_c_flag("-Wno-everything")
+endif()
+
 # Note that clang in windows act as a drop in replacement for cl
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
-
   # If macro expansion goes wrong, we like to see why
   add_c_flag("-fmacro-backtrace-limit=0")
 
-  # Clang goes balistic on our codebase, so let's just suppress all the things.
-  add_c_flag("-Wno-mismatched-tags")
-  add_c_flag("-Wno-\#warnings")
-  add_c_flag("-Wno-nonportable-include-path") # Let's not break cross compilers.
-  add_c_flag("-Wno-unused-variable")
-  add_c_flag("-Wno-deprecated-declarations")
-  add_c_flag("-Wno-c++14-extensions")
-  add_c_flag("-Wno-array-bounds")
-  add_c_flag("-Wno-builtin-requires-header")
-  add_c_flag("-Wno-constant-conversion")
-  add_c_flag("-Wno-deprecated-register")
-  add_c_flag("-Wno-extern-c-compat")
-  add_c_flag("-Wno-gnu-designator")
-  add_c_flag("-Wno-inconsistent-missing-override")
-  add_c_flag("-Wno-initializer-overrides")
-  add_c_flag("-Wno-invalid-constexpr")
-  add_c_flag("-Wno-macro-redefined")
-  add_c_flag("-Wno-missing-braces")
-  add_c_flag("-Wno-missing-field-initializers")
-  add_c_flag("-Wno-parentheses-equality")
-  add_c_flag("-Wno-pessimizing-move")
-  add_c_flag("-Wno-pointer-bool-conversion")
-  add_c_flag("-Wno-return-type-c-linkage")
-  add_c_flag("-Wno-self-assign")
-  add_c_flag("-Wno-shift-negative-value")
-  add_c_flag("-Wno-string-plus-int")
-  add_c_flag("-Wno-uninitialized")
-  add_c_flag("-Wno-unknown-pragmas")
-  add_c_flag("-Wno-unused-command-line-argument")
-  add_c_flag("-Wno-unused-const-variable")
-  add_c_flag("-Wno-unused-function")
-  add_c_flag("-Wno-unused-lambda-capture")
-  add_c_flag("-Wno-unused-private-field")
-  add_c_flag("-Wno-unused-value")
-  add_c_flag("-Wswitch")
-  add_c_flag("-Wno-defaulted-function-deleted")
-  add_c_flag("-Wno-return-type")
+  # Let's not trip over warnings & errors that do not exist on every platform clang-cl != clang-lin != clang-darwin
+  add_c_flag("-Wno-unknown-warning-option")
+  add_c_flag("-Wno-unknown-argument")
 endif()
 
 if(WINDOWS_MSVC_X86_64)
@@ -194,9 +172,10 @@ if(WINDOWS_MSVC_X86_64)
   endif()
 endif()
 
-if (OPTION_CLANG_TIDY)
+
+if(OPTION_CLANG_TIDY)
   set(DO_FIX "")
-  if (OPTION_CLANG_TIDY_FIX)
+  if(OPTION_CLANG_TIDY_FIX)
     set(DO_FIX "--fix")
   endif()
   # Workaround to ignore generated code.
@@ -215,10 +194,10 @@ if (NOT WINDOWS_MSVC_X86_64)
 endif()
 
 # Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
-# Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-
-# exceptions automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to
-# diagnose whether the objects being linked contain exceptions. If an exception propagates into a function that has
-# been compiled without exceptions support, then the program terminates.
+# Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno- exceptions
+# automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to diagnose
+# whether the objects being linked contain exceptions. If an exception propagates into a function that has been compiled
+# without exceptions support, then the program terminates.
 add_cxx_flag("-fno-exceptions")
 add_cxx_flag("-Wno-invalid-offsetof")
 
@@ -248,12 +227,10 @@ if(OPTION_ASAN AND (LINUX_X86_64 OR DARWIN_X86_64))
   endif()
 endif()
 
-# Toolchain file can get loaded multiple times, resulting in this
-# variable being overwritten on native windows.
+# Toolchain file can get loaded multiple times, resulting in this variable being overwritten on native windows.
 if(MSVC AND WINDOWS_MSVC_X86_64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 endif()
-
 
 # We now have configured our base compiler..
 
@@ -273,11 +250,13 @@ set(
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
 
-if (WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64)
-  set(ANGLE_RENDERER_DEPENDENCIES
+if(WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64)
+  set(
+    ANGLE_RENDERER_DEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/dx/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/dx/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/dx/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/dx/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    )
 endif()
 
 prebuilt(GLIB2)
@@ -343,6 +322,7 @@ endif()
 
 target_compile_options(android-qemu-deps
                        INTERFACE "-Werror=implicit-function-declaration" "-Wno-unused-function"
+                                 "-Wno-address-of-packed-member" "-Wno-shift-negative-value"
                                  # Do not allow the compiler to assume the strictest aliasing rules
                                  # applicable to the language being compiled. For C (and C++), this activates
                                  # optimizations based on the type of expressions. In particular, an object
@@ -352,24 +332,69 @@ target_compile_options(android-qemu-deps
                                  # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
                                  "-fno-strict-aliasing")
 
-  target_compile_options(android-qemu-deps
-                         INTERFACE # This option instructs the compiler to assume that signed arithmetic
-                                   # overflow of addition, subtraction and multiplication wraps around using
-                                   # twos-complement representation. This flag enables some optimizations and
-                                   # disables others. The options -ftrapv and -fwrapv override each other, so
-                                   # using -ftrapv -fwrapv on the command-line results in -fwrapv being
-                                   # effective. Qemu is using this, so we use it as well.
-                                   "-fwrapv"
-                                   # The -fno-common option specifies that the compiler should instead place
-                                   # uninitialized global variables in the data section of the object file.
-                                   # This inhibits the merging of tentative definitions by the linker so you
-                                   # get a multiple-definition error if the same variable is defined in more
-                                   # than one compilation unit. Compiling with -fno-common is useful on targets
-                                   # for which it provides better performance, or if you wish to verify that
-                                   # the program will work on other systems that always treat uninitialized
-                                   # variable definitions this way.
-                                   # Remove this and you'll get all sorts of fun linker issues.
-                                   "-fno-common")
+target_compile_options(
+  android-qemu-deps
+  INTERFACE # This option instructs the compiler to assume that signed arithmetic overflow of addition, subtraction and
+            # multiplication wraps around using twos-complement representation. This flag enables some optimizations and
+            # disables others. The options -ftrapv and -fwrapv override each other, so using -ftrapv -fwrapv on the
+            # command-line results in -fwrapv being effective. Qemu is using this, so we use it as well. "-fwrapv"
+                                                                                                         # The -fno-
+                                                                                                         # common option
+                                                                                                         # specifies
+                                                                                                         # that the
+                                                                                                         # compiler
+                                                                                                         # should
+                                                                                                         # instead place
+                                                                                                         # uninitialized
+                                                                                                         # global
+                                                                                                         # variables in
+                                                                                                         # the data
+                                                                                                         # section of
+                                                                                                         # the object
+                                                                                                         # file.
+                                                                                                         # This inhibits
+                                                                                                         # the merging
+                                                                                                         # of tentative
+                                                                                                         # definitions
+                                                                                                         # by the linker
+                                                                                                         # so you
+                                                                                                         # get a
+                                                                                                         # multiple-
+                                                                                                         # definition
+                                                                                                         # error if the
+                                                                                                         # same variable
+                                                                                                         # is defined in
+                                                                                                         # more
+                                                                                                         # than one
+                                                                                                         # compilation
+                                                                                                         # unit.
+                                                                                                         # Compiling
+                                                                                                         # with -fno-
+                                                                                                         # common is
+                                                                                                         # useful on
+                                                                                                         # targets
+                                                                                                         # for which it
+                                                                                                         # provides
+                                                                                                         # better
+                                                                                                         # performance,
+                                                                                                         # or if you
+                                                                                                         # wish to
+                                                                                                         # verify that
+                                                                                                         # the program
+                                                                                                         # will work on
+                                                                                                         # other systems
+                                                                                                         # that always
+                                                                                                         # treat
+                                                                                                         # uninitialized
+                                                                                                         # variable
+                                                                                                         # definitions
+                                                                                                         # this way.
+                                                                                                         # Remove this
+                                                                                                         # and you'll
+                                                                                                         # get all sorts
+                                                                                                         # of fun linker
+                                                                                                         # issues.
+                                                                                                         "-fno-common")
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN zlib)
 
@@ -410,7 +435,10 @@ android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
                                "-Wno-tautological-compare"
                                "-Wno-tautological-pointer-compare"
                                "-Wno-unused-variable"
-                               "-Wno-format")
+                               "-Wno-return-type"
+                               "-Wno-shift-negative-value"
+                               # There are a series of out of bounds issues in hvf.
+                               "-Wno-array-bounds" "-Wno-format")
 android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE "-D_DARWIN_C_SOURCE=1")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework IOKit" "-framework CoreFoundation")
 
@@ -422,16 +450,22 @@ set(ANDROID_QEMU_i386_DEVICES_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${
 set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 android_target_compile_options(android-qemu-deps
-                               windows_msvc
+                               windows_msvc-x86_64
                                INTERFACE
+                               "-Wno-sometimes-uninitialized"
+                               "-Wno-return-type"
+                               "-Wno-initializer-overrides"
                                "-Wno-int-to-void-pointer-cast"
-                               "-Werror=implicit-function-declaration"
+                               "-Wno-incompatible-pointer-types"
                                "-Wno-unused-variable"
+                               "-Wno-microsoft-include"
+                               "-Wno-address-of-packed-member"
+                               "-Wno-address-of"
                                "-mms-bitfields"
                                "-mcx16")
 
 android_target_compile_options(android-qemu-deps
-                               windows-x86
+                               windows-x86_64
                                INTERFACE
                                "-Werror=implicit-function-declaration"
                                "-mms-bitfields"
@@ -477,11 +511,11 @@ set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
-
 # Once we have a newer version of cmake we can generate the object library in a platform independent way b/121393952
 set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 android_add_library(qemu2-common)
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
+target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int" "-Wno-return-type")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 # Not allowed to have libraries without source files.
@@ -525,7 +559,7 @@ android_add_qemu_headless_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDRO
 # and the upstream qemu targets, if desired.
 if(QEMU_UPSTREAM)
   message(STATUS "Building upstream qemu.")
-  android_add_qemu_upstream_executable(i386  "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_upstream_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_upstream_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_upstream_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_upstream_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")

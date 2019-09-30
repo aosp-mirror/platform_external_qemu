@@ -52,7 +52,7 @@ public:
     // The real capacity will be a power of 2 above capacity.
     // For example:
     // A capacity of 4 allows you to store 7 characters, and takes up 2^3
-    RingStreambuf(uint16_t capacity);
+    RingStreambuf(uint32_t capacity);
 
     // Retrieves the string stored at the given offset.
     // It will block at most timeoutMs.
@@ -67,8 +67,8 @@ protected:
     // data and will report as though all bytes have been written.
     std::streamsize xsputn(const char* s, std::streamsize n) override;
     int overflow(int c = EOF) override;
-    std::streamsize showmanyc();
-    std::streamsize xsgetn(char* s, std::streamsize n);
+    std::streamsize showmanyc() override;
+    std::streamsize xsgetn(char* s, std::streamsize n) override;
     int underflow() override;
     int uflow() override;
 
@@ -76,8 +76,8 @@ protected:
 private:
     std::vector<char> mRingbuffer;
 
-    uint16_t mHead{0};        // Ringbuffer write pointer (front)
-    uint16_t mTail{0};        // Ringbuffer read pointer (tail)
+    uint32_t mHead{0};        // Ringbuffer write pointer (front)
+    uint32_t mTail{0};        // Ringbuffer read pointer (tail)
     uint64_t mHeadOffset{0};  // Accumulated offset.
     bool     mFull{false};
 

@@ -25,23 +25,28 @@ set(png_src
 # TODO(jansene): We can likely turn this into a shared library. Which would save around 280kb per executable.
 android_add_library(png)
 target_compile_options(png
-                       PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
-                               -Wno-tautological-constant-out-of-range-compare)
+                       PRIVATE -std=gnu89 -Wall -Wno-unused-parameter -Wno-tautological-constant-out-of-range-compare)
 target_compile_definitions(png PRIVATE -DPNG_INTEL_SSE_OPT=1)
 target_include_directories(png PUBLIC ${PNG_SRC_DIR})
 target_link_libraries(png PUBLIC zlib)
 android_target_link_libraries(png linux-x86_64 PRIVATE m)
 android_target_compile_options(png darwin-x86_64 PRIVATE -Wno-unguarded-availability-new)
-android_target_compile_options(png windows_msvc-x86_64 PRIVATE -Wno-nonportable-system-include-path
-                                                               -Wno-unused-macros -Wno-sign-conversion -Wno-float-equal
-                                                               -Wno-language-extension-token -Wno-reserved-id-macro)
+android_target_compile_options(png
+                               windows_msvc-x86_64
+                               PRIVATE
+                               -Wno-nonportable-system-include-path
+                               -Wno-unused-macros
+                               -Wno-sign-conversion
+                               -Wno-float-equal
+                               -Wno-extra-semi-stmt
+                               -Wno-language-extension-token
+                               -Wno-reserved-id-macro)
 
 function(png_add_test)
   # We cannot run tests when we are cross compiling.
   if(CROSSCOMPILE)
     return()
   endif()
-
 
   set(options)
   set(oneValueArgs NAME COMMAND)
@@ -85,8 +90,8 @@ target_link_libraries(pngtest PRIVATE png)
 png_add_test(NAME pngtest COMMAND pngtest FILES "${PNGTEST_PNG}")
 
 android_add_executable(pngvalid)
-target_link_libraries(pngvalid PRIVATE  png)
-
+target_link_libraries(pngvalid PRIVATE png)
+target_compile_options(pngvalid PRIVATE -Wno-incompatible-pointer-types-discards-qualifiers)
 png_add_test(NAME pngvalid-gamma-16-to-8 COMMAND pngvalid OPTIONS --gamma-16-to-8)
 png_add_test(NAME pngvalid-gamma-alpha-mode COMMAND pngvalid OPTIONS --gamma-alpha-mode)
 png_add_test(NAME pngvalid-gamma-background COMMAND pngvalid OPTIONS --gamma-background)
@@ -110,7 +115,8 @@ png_add_test(NAME pngvalid-standard COMMAND pngvalid OPTIONS --standard)
 png_add_test(NAME pngvalid-transform COMMAND pngvalid OPTIONS --transform)
 
 android_add_executable(pngstest)
-target_link_libraries(pngstest PRIVATE  png)
+target_link_libraries(pngstest PRIVATE png)
+target_compile_options(pngstest PRIVATE "-Wno-tautological-constant-out-of-range-compare")
 
 foreach(gamma_type 1.8 linear none sRGB)
   foreach(alpha_type none alpha)

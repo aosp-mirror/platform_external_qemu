@@ -98,7 +98,7 @@ public:
     using memory_type = void*;
     using handle_type = int;
     constexpr static handle_type invalidHandle() { return -1; }
-    constexpr static memory_type unmappedMemory() { return (void*)-1; }
+    static memory_type unmappedMemory() { return reinterpret_cast<memory_type>(-1); }
 #endif
     enum class AccessMode { READ_ONLY, READ_WRITE };
 

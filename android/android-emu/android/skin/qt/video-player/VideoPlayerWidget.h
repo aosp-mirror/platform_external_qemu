@@ -51,7 +51,7 @@ private:
     size_t mBufferLen;
 
 private:
-    void paintEvent(QPaintEvent*);
+    void paintEvent(QPaintEvent*) override;
 };
 
 }  // namespace videoplayer

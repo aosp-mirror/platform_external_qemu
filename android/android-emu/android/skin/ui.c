@@ -263,6 +263,7 @@ bool skin_ui_update_and_rotate(SkinUI* ui,
                                SkinRotation rotation) {
     ui->layout_file = layout_file;
     skin_ui_rotate(ui, rotation);
+    return true;
 }
 
 bool skin_ui_process_events(SkinUI* ui) {

@@ -59,7 +59,7 @@ public:
     // Returns true if there was save with measurable time
     // (and writes it to |duration| if |duration| is not null),
     // otherwise returns false.
-    bool getDuration(base::System::Duration* duration) {
+    bool getDuration(base::System::Duration* duration) override {
         if (mEndTime < mStartTime) {
             return false;
         }

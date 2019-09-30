@@ -29,8 +29,8 @@ public:
     // Key provided by the command-line flag
     const char* userMapsKey() const override;
     const char* androidStudioMapsKey() const override;
-    void setUserMapsKey(const base::StringView& key);
-    void setAndroidStudioMapsKey(const base::StringView& Key);
+    void setUserMapsKey(const base::StringView& key) override;
+    void setAndroidStudioMapsKey(const base::StringView& Key) override;
 
 private:
     std::string mUserKey;

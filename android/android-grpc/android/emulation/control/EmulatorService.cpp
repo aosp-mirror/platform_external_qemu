@@ -341,7 +341,7 @@ public:
         auto start = System::get()->getUnixTimeUs();
         auto desiredFormat = android::emulation::ImageFormat::PNG;
         if (request->format() == ImageFormat_ImgFormat_RAW) {
-            desiredFormat == android::emulation::ImageFormat::RAW;
+            desiredFormat = android::emulation::ImageFormat::RAW;
         }
 
         // Screenshots can come from either the gl renderer, or the guest.
@@ -426,7 +426,7 @@ private:
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
-    static constexpr uint16_t k128KB = (128 * 1024) - 1;
+    static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
     const uint16_t kNoWait = 0;
 };

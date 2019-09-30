@@ -304,12 +304,8 @@ set(android-emu_darwin-x86_64_src
     android/crashreport/CrashReporter_darwin.cpp)
 
 # Linux specific sources.
-set(android-emu_linux-x86_64_src
-    android/opengl/NativeGpuInfo_linux.cpp
-    android/snapshot/MemoryWatch_linux.cpp
-    android/camera/camera-capture-linux.c
-    android/crashreport/CrashReporter_linux.cpp)
-
+set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
+    android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
 
 android_add_library(android-emu)
 
@@ -388,23 +384,50 @@ android_target_link_libraries(android-emu
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
 
-target_include_directories(android-emu PUBLIC
-                                   # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
-                                   # we have not yet made explicit
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
-                                   # TODO(jansene): We actually have a hard dependency on qemu-glue
-                                   # as there are a lot of externs that are actually defined in qemu2-glue.
-                                   # this has to be sorted out,
-                                   ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-                                   # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR}
-                                   ${CMAKE_CURRENT_BINARY_DIR}
-                                   ${DARWINN_INCLUDE_DIRS})
+target_include_directories(
+  android-emu
+  PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have not yet made explicit
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
+    # TODO(jansene): We actually have a hard dependency on qemu-glue
+    # as there are a lot of externs that are actually defined in qemu2-glue.
+    # this has to be sorted out,
+    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
+    # If you use our library, you get access to our headers.
+    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${DARWINN_INCLUDE_DIRS})
 
-android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+android_target_compile_options(android-emu
+                               Clang
+                               PRIVATE
+                               -Wno-invalid-constexpr
+                               -Wno-return-type-c-linkage
+                               -fvisibility=default)
+
+android_target_compile_options(android-emu
+                               Clang
+                               PUBLIC
+                               -Wno-extern-c-compat # Needed for serial_line.h
+                               -Wno-return-type-c-linkage # android_getOpenglesRenderer
+                               )
+
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
-android_target_compile_options(android-emu darwin-x86_64 PRIVATE -Wno-error -Wno-objc-method-access -Wno-missing-selector-name -Wno-receiver-expr -Wno-incomplete-implementation -Wno-incompatible-pointer-types)
+android_target_compile_options(android-emu
+                               darwin-x86_64
+                               PRIVATE
+                               -Wno-objc-method-access
+                               -Wno-missing-selector-name
+                               -Wno-receiver-expr
+                               -Wno-incomplete-implementation
+                               -Wno-incompatible-pointer-types
+                               -Wno-deprecated-declarations)
+
+android_target_compile_options(android-emu
+                               windows_msvc-x86_64
+                               PRIVATE
+                               -Wno-unused-private-field
+                               -Wno-reorder
+                               -Wno-missing-braces
+                               -Wno-pessimizing-move
+                               -Wno-unused-lambda-capture)
 
 android_target_compile_definitions(android-emu
                                    darwin-x86_64
@@ -413,18 +436,16 @@ android_target_compile_definitions(android-emu
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
 
-target_compile_definitions(android-emu
-                                   PRIVATE
-                                   "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                                   "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                                   "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+target_compile_definitions(android-emu PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
+                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
+                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 if(WEBRTC)
-    target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
+  target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
 endif()
 
-if (GRPC)
-    target_compile_definitions(android-emu PUBLIC -DANDROID_GRPC)
+if(GRPC)
+  target_compile_definitions(android-emu PUBLIC -DANDROID_GRPC)
 endif()
 
 # Boo, we need the make_ext4fs executable
@@ -457,8 +478,7 @@ android_add_shared_library(android-emu-shared)
 
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
-                              PRIVATE
-                              emulator-libext4_utils
+                      PRIVATE emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
                               emulator-libselinux
@@ -496,11 +516,7 @@ target_link_libraries(android-emu-shared
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu-shared
-android_target_link_libraries(android-emu-shared
-                              windows
-                              PRIVATE
-                              emulator-libmman-win32
-                              d3d9::d3d9
+android_target_link_libraries(android-emu-shared windows PRIVATE emulator-libmman-win32 d3d9::d3d9
                               # IID_IMFSourceReaderCallback
                               mfuuid::mfuuid
                               # For CoTaskMemFree used in camera-capture-windows.cpp
@@ -510,37 +526,53 @@ android_target_link_libraries(android-emu-shared
                               # Winsock functions
                               ws2_32::ws2_32
                               # GetNetworkParams() for android/utils/dns.c
-                              iphlpapi::iphlpapi
-)
-
+                              iphlpapi::iphlpapi)
 
 # These are the libs needed for android-emu-shared on linux.
 android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
-# android-emu-shared. You should really only add things that are crucial for this library to link
-# If you don't you might see bizarre errors. (Add opengl as a link dependency, you will have fun)
-android_target_link_libraries(android-emu-shared
-                              darwin-x86_64
-                              PRIVATE
-                              "-framework AppKit"
-)
+# android-emu-shared. You should really only add things that are crucial for this library to link If you don't you might
+# see bizarre errors. (Add opengl as a link dependency, you will have fun)
+android_target_link_libraries(android-emu-shared darwin-x86_64 PRIVATE "-framework AppKit")
 
-target_include_directories(android-emu-shared PUBLIC
-                                   # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
-                                   # we have not yet made explicit
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
-                                   # TODO(jansene): We actually have a hard dependency on qemu-glue
-                                   # as there are a lot of externs that are actually defined in qemu2-glue.
-                                   # this has to be sorted out,
-                                   ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-                                   # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(
+  android-emu-shared
+  PUBLIC # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which we have not yet made explicit
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
+    # TODO(jansene): We actually have a hard dependency on qemu-glue
+    # as there are a lot of externs that are actually defined in qemu2-glue.
+    # this has to be sorted out,
+    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
+    # If you use our library, you get access to our headers.
+    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-android_target_compile_options(android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
-android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
-android_target_compile_options(android-emu-shared darwin-x86_64 PRIVATE -Wno-error -Wno-objc-method-access -Wno-receiver-expr -Wno-incomplete-implementation -Wno-missing-selector-name -Wno-incompatible-pointer-types)
+android_target_compile_options(android-emu-shared
+                               Clang
+                               PRIVATE
+                               -Wno-extern-c-compat
+                               -Wno-invalid-constexpr
+                               -fvisibility=default)
+
+android_target_compile_options(android-emu-shared Clang PUBLIC -Wno-return-type-c-linkage) # android_getOpenGlesRenderer
+android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter
+                               ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
+android_target_compile_options(android-emu-shared
+                               darwin-x86_64
+                               PRIVATE
+                               -Wno-error
+                               -Wno-objc-method-access
+                               -Wno-receiver-expr
+                               -Wno-incomplete-implementation
+                               -Wno-missing-selector-name
+                               -Wno-incompatible-pointer-types)
+
+android_target_compile_options(android-emu-shared
+                               windows_msvc-x86_64
+                               PRIVATE
+                               -Wno-unused-private-field
+                               -Wno-reorder
+                               -Wno-unused-lambda-capture)
 
 # Definitions needed to compile our deps as static
 target_compile_definitions(android-emu-shared PUBLIC ${CURL_DEFINITIONS} ${LIBXML2_DEFINITIONS})
@@ -551,22 +583,19 @@ android_target_compile_definitions(android-emu-shared
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
 
-target_compile_definitions(android-emu-shared
-                                   PRIVATE
-                                   "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                                   "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                                   "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+target_compile_definitions(android-emu-shared PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
+                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
+                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 if(WEBRTC)
-    target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
+  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
 endif()
 
-if (GRPC)
-    target_compile_definitions(android-emu-shared PUBLIC -DANDROID_GRPC)
+if(GRPC)
+  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_GRPC)
 endif()
 
-set(android-mock-vm-operations_src
-    android/emulation/testing/MockAndroidVmOperations.cpp)
+set(android-mock-vm-operations_src android/emulation/testing/MockAndroidVmOperations.cpp)
 
 android_add_library(android-mock-vm-operations)
 
@@ -767,20 +796,18 @@ set(android-emu_unittests_windows_src
     android/windows_installer_unittest.cpp)
 
 # msvc specific unittests
-set(android-emu_unittests_windows_msvc-x86_64_src
-    android/base/system/WinMsvcSystem_unittest.cpp)
+set(android-emu_unittests_windows_msvc-x86_64_src android/base/system/WinMsvcSystem_unittest.cpp)
 
 # Darwin & Linux only tests
 set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp)
 
-set(android-emu_unittests_linux-x86_64_src
-    android/emulation/nand_limits_unittest.cpp)
+set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittest.cpp)
 
 # And declare the test
 android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
-android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr -Wno-string-plus-int)
 target_include_directories(android-emu_unittests PRIVATE ../android-emugl/host/include/)
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
@@ -792,6 +819,7 @@ android_target_compile_definitions(android-emu_unittests
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+android_target_compile_options(android-emu_unittests darwin-x86_64 PRIVATE "-Wno-deprecated-declarations")
 
 # Dependecies are exported from android-emu.
 target_link_libraries(android-emu_unittests PRIVATE android-emu android-mock-vm-operations gtest gmock gtest_main)
@@ -825,8 +853,12 @@ prebuilt(VIRTUALSCENE)
 android_copy_test_files(android-emu_unittests "${android-emu-testdata}" testdata)
 android_target_dependency(android-emu_unittests all VIRTUAL_SCENE_DEPENDENCIES)
 android_copy_test_dir(android-emu_unittests test-sdk test-sdk)
-android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat")
-android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2")
+android_copy_file(
+  android-emu_unittests "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat"
+  "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat")
+android_copy_file(
+  android-emu_unittests "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2"
+  "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2")
 
 android_target_dependency(android-emu_unittests all E2FSPROGS_DEPENDENCIES)
 

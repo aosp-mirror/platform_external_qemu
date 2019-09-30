@@ -39,7 +39,7 @@ public:
     explicit BugreportPage(QWidget* parent = 0);
     ~BugreportPage();
     void setAdbInterface(android::emulation::AdbInterface* adb);
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
     void updateTheme();
 
     struct SavingStates {

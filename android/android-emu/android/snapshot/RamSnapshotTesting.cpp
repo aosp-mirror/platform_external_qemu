@@ -124,7 +124,7 @@ TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance, int seed)
     // invalid template argument for uniform_int_distribution: N4659 29.6.1.1 [rand.req.genl]/1e requires one of short, int, long, long long, unsigned short, unsigned int, unsigned long, or unsigned long long
     std::uniform_int_distribution<unsigned short> patternDistribution(0, 255);
 #else
-    std::uniform_int_distribution<char> patternDistribution(0, 255);
+    std::uniform_int_distribution<uint8_t> patternDistribution(0, 255);
 #endif
     std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
 
@@ -152,7 +152,7 @@ void randomMutateRam(TestRamBuffer& ram, float noChangeChance, float zeroPageCha
 #ifdef _MSC_VER
     std::uniform_int_distribution<unsigned short> patternDistribution(0, 255);
 #else
-    std::uniform_int_distribution<char> patternDistribution(0, 255);
+    std::uniform_int_distribution<uint8_t> patternDistribution(0, 255);
 #endif
     std::bernoulli_distribution noChangeDistribution(noChangeChance);
     std::bernoulli_distribution zeroPageDistribution(zeroPageChance);

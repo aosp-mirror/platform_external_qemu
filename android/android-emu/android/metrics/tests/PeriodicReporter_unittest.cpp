@@ -50,7 +50,7 @@ public:
         PeriodicReporter::start(&mReporter, &mLooper);
     }
 
-    void TearDown() {
+    void TearDown() override {
         mReporter.mOnReportConditional = {};
         PeriodicReporter::stop();
     }

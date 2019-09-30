@@ -1608,7 +1608,7 @@ void SnapshotPage::getOutputFileName() {
 
     // Get the name of the file containing parameters from Android Studio
     EmulatorWindow* const ew = emulator_window_get();
-    if (!ew || !ew->opts || !ew->opts->studio_params) {
+    if (!ew || !ew->opts->studio_params) {
         // No file to read
         return;
     }
