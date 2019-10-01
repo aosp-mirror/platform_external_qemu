@@ -16,20 +16,12 @@ add_jar(emulator-studio-view
         android/emulation/studio/net/EmulatorTelnetClient.java
         ENTRY_POINT
         android/emulation/studio/SampleWindow
+        GENERATE_NATIVE_HEADERS studio-native
         )
 
-create_javah(TARGET
-             emulator-studio-view-headers
-             CLASSES
-             android.emulation.studio.SharedMemory
-             CLASSPATH
-             emulator-studio-view
-             OUTPUT_NAME
-             ${CMAKE_CURRENT_BINARY_DIR}/studio-view-headers.h)
-
-set(android-studio_src android/emulation/studio/SharedMemory.cpp ${CMAKE_CURRENT_BINARY_DIR}/studio-view-headers.h)
+set(android-studio_src android/emulation/studio/SharedMemory.cpp)
 android_add_shared_library(android-studio)
-target_link_libraries(android-studio PRIVATE android-emu)
+target_link_libraries(android-studio PRIVATE android-emu studio-native)
 
 target_include_directories(android-studio PRIVATE . ${CMAKE_CURRENT_BINARY_DIR})
 android_install_shared(android-studio)
