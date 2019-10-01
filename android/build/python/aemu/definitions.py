@@ -16,8 +16,11 @@
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
+from distutils.spawn import find_executable
+from pkg_resources import parse_version
 from enum import Enum
 
 from absl import flags, logging
@@ -49,14 +52,23 @@ def get_cmake_dir():
     return os.path.join(
         get_aosp_root(), 'prebuilts/cmake/%s-x86/bin/' % platform.system().lower())
 
+def get_cmake_version(exe):
+    '''Retrieve the version of the cmake executable.'''
+    if not exe:
+        return parse_version('0')
+    vline = subprocess.check_output([exe, '--version']).splitlines()[0]
+    m = re.search('(\\d+.\\d+.\\d+)', vline)
+    if not m:
+        return parse_version('0')
+    return parse_version(m.group(0))
 
 def get_cmake():
-    '''Return the path of cmake executable.'''
-    if platform.system() == 'Windows':
-        # Temporary use visual studio cmake until we have upgraded
-        # cmake to 3.12 (see b/121393952)
-        return 'cmake.exe'
-    return os.path.join(get_cmake_dir(), 'cmake%s' % EXE_POSTFIX)
+    '''Return the path of cmake executable with highest version.'''
+    internal = os.path.join(get_cmake_dir(), 'cmake%s' % EXE_POSTFIX)
+    external = find_executable('cmake')
+    if get_cmake_version(internal) >= get_cmake_version(external):
+        return internal
+    return external
 
 
 def get_ctest():
