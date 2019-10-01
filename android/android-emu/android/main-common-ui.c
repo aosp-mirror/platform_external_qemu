@@ -13,8 +13,10 @@
 #include "android/main-common-ui.h"
 
 #include "android/avd/util.h"
+#include "android/boot-properties.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/emulator-window.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/main-common.h"
@@ -55,6 +57,17 @@ static AConfig* s_skinConfig = NULL;
 static char* s_skinPath = NULL;
 static int s_deviceLcdWidth = 0;
 static int s_deviceLcdHeight = 0;
+
+// TODO (wdu) Fix the QT libxcb, then remove the ifdef.
+// After QT upgrades to 5.12.1, X11 doesn't produce the correct key symbol when
+// keyboard layout is set to Non-English. The workaround is to always use
+// keycode forwarding on Linux platform.
+// Bug: 141318682
+#if defined(_WIN32) || defined(__APPLE__)
+int use_keycode_forwarding = 0;
+#else
+int use_keycode_forwarding = 1;
+#endif
 
 bool emulator_initMinimalSkinConfig(
     int lcd_width, int lcd_height,
@@ -431,6 +444,30 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                  sizeof(charmap_name));
         str_reset(&hw->hw_keyboard_charmap, charmap_name);
     }
+
+#ifndef CONFIG_HEADLESS
+    if (opts->use_keycode_forwarding ||
+        feature_is_enabled(kFeature_KeycodeForwarding)) {
+        use_keycode_forwarding = 1;
+    }
+
+    if (use_keycode_forwarding) {
+        const char* cur_keyboard_layout = skin_keyboard_host_layout_name();
+        const char* android_keyboard_layout =
+                skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
+        if (android_keyboard_layout) {
+            boot_property_add("qemu.keyboard_layout", android_keyboard_layout);
+        } else {
+// Always use keycode forwarding on Linux due to bug in prebuilt Libxkb.
+#if defined(_WIN32) || defined(__APPLE__)
+            D("No matching Android keyboard layout for %s. Fall back to host "
+              "translation.",
+              cur_keyboard_layout);
+            use_keycode_forwarding = 0;
+#endif
+        }
+    }
+#endif
 
     return true;
 }

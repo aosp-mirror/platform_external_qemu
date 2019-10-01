@@ -244,6 +244,9 @@ OPT_PARAM(google_maps_key, "<API key>", "API key to use with the Google Maps GUI
 
 OPT_FLAG(no_location_ui, "Disable the location UI in the extended window.")
 
+OPT_FLAG(use_keycode_forwarding,
+         "Use keycode forwarding instead of host charmap translation.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

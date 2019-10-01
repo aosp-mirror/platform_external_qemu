@@ -37,6 +37,7 @@ class QAbstractNativeEventFilter;
 #elif defined(__linux__)
 #include <cstdio>
 
+#include "android/globals.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/native-keyboard-event-handler.h"
@@ -107,15 +108,19 @@ public:
                     keyEv->detail =
                             skin_keycode_native_map_keypad(keyEv->detail);
                 }
-                if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
-                    NativeKeyboardEventHandler::KeyEvent inputEv;
-                    inputEv.scancode = keyEv->detail;
-                    inputEv.modifiers = keyEv->state;
-                    inputEv.eventType = kEventKeyDown;
-                    SkinEvent* event = NativeKeyboardEventHandler::getInstance()
-                                               ->handleKeyEvent(inputEv);
-                    if (event)
-                        EmulatorQtWindow::getInstance()->queueSkinEvent(event);
+                if (use_keycode_forwarding) {
+                    if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
+                        NativeKeyboardEventHandler::KeyEvent inputEv;
+                        inputEv.scancode = keyEv->detail;
+                        inputEv.modifiers = keyEv->state;
+                        inputEv.eventType = kEventKeyDown;
+                        SkinEvent* event =
+                                NativeKeyboardEventHandler::getInstance()
+                                        ->handleKeyEvent(inputEv);
+                        if (event)
+                            EmulatorQtWindow::getInstance()->queueSkinEvent(
+                                    event);
+                    }
                 }
             }
         }
@@ -156,8 +161,7 @@ public:
                     scancode = skin_keycode_native_map_keypad(scancode);
                     ev->wParam = MapVirtualKeyA(scancode, MAPVK_VSC_TO_VK);
                 }
-                if (android::featurecontrol::isEnabled(
-                            android::featurecontrol::KeycodeForwarding)) {
+                if (use_keycode_forwarding) {
                     if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
                         NativeKeyboardEventHandler::KeyEvent keyEv;
                         keyEv.scancode = scancode;
