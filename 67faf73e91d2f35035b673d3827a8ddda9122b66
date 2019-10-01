@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "880e5f0c_27407c29",
+        "filename": "include/sysemu/gvm-interface.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 960,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T21:58:07Z",
+      "side": 1,
+      "message": "gvm_cpuid2 or gvm_cpuid?",
+      "range": {
+        "startLine": 960,
+        "startChar": 61,
+        "endLine": 960,
+        "endChar": 71
+      },
+      "revId": "67faf73e91d2f35035b673d3827a8ddda9122b66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
