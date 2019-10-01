@@ -1,0 +1,232 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de67f25c_b3be9400",
+        "filename": "hw/i386/pc_piix.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "should we keep or not? please add a comment in the code",
+      "range": {
+        "startLine": 203,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 6
+      },
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d6168c8_d316e033",
+        "filename": "hw/i386/pc_piix.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 247,
+        "endChar": 6
+      },
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4edaed99_3b0b3905",
+        "filename": "hw/i386/pc_q35.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "comments in code",
+      "range": {
+        "startLine": 171,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 6
+      },
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d805c1e6_8f5ea768",
+        "filename": "target/i386/gvm-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1020,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please go back through the code and remove the trailing spaces",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1fd14db_5d2dbc1a",
+        "filename": "target/i386/gvm-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please explain why this is commented out in code comments",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "324444b4_7ce1049b",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9c17971_3d411e0f",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85d81665_538a2ed1",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "437da431_e55eda8e",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1244,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0, and add a define preprocessor variable whose name explains why it\u0027s removed",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16fb3a27_5a9bdcd9",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1651,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c8deb01_9b90bba5",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1852,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd4a11c2_04324e96",
+        "filename": "target/i386/gvm.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2842,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 1,
+      "message": "please add comments on why this is #if 0",
+      "range": {
+        "startLine": 2842,
+        "startChar": 0,
+        "endLine": 2842,
+        "endChar": 5
+      },
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

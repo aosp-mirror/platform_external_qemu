@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "389b5b59_60476a66",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/scripts/htmldiff.orig",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 0,
+      "message": "can we keep this file so that unrelated changes are not included in this cl?",
+      "revId": "142c17443ddad64915c23a6df1df4801007aa31d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2df04991_99f7df61",
+        "filename": "cpus.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:54:44Z",
+      "side": 0,
+      "message": "please keep whpx",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "142c17443ddad64915c23a6df1df4801007aa31d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
