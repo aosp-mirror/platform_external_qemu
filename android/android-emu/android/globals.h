@@ -61,4 +61,8 @@ extern const char* to_set_language;
 extern const char* to_set_country;
 extern const char* to_set_locale;
 
+/* are we using keycode forwarding instead of translation keycode on emulator
+ * host. */
+extern int use_keycode_forwarding;
+
 ANDROID_END_HEADER
