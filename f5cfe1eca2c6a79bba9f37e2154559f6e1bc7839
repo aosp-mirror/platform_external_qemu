@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4149ceb0_2954da6c",
+        "filename": "cpus.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1834,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-01T20:55:57Z",
+      "side": 0,
+      "message": "why is this removed? please explain in code comments",
+      "revId": "f5cfe1eca2c6a79bba9f37e2154559f6e1bc7839",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
