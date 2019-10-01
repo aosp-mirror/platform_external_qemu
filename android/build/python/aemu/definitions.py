@@ -18,6 +18,7 @@ import os
 import platform
 import shutil
 import subprocess
+from distutils.spawn import find_executable
 from enum import Enum
 
 from absl import flags, logging
@@ -56,7 +57,7 @@ def get_cmake():
         # Temporary use visual studio cmake until we have upgraded
         # cmake to 3.12 (see b/121393952)
         return 'cmake.exe'
-    return os.path.join(get_cmake_dir(), 'cmake%s' % EXE_POSTFIX)
+    return find_executable('cmake') or os.path.join(get_cmake_dir(), 'cmake%s' % EXE_POSTFIX)
 
 
 def get_ctest():

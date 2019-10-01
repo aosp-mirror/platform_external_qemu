@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #include "android/base/memory/SharedMemory.h"
 
-#include "studio-view-headers.h"
+#include "android_emulation_studio_SharedMemory.h"
 
 using android::base::SharedMemory;
 
