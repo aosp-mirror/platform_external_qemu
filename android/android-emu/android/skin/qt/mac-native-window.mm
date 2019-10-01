@@ -10,7 +10,10 @@
  ** GNU General Public License for more details.
  */
 
+#include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
+
+#include "android/utils/system.h"
 
 #import "android/skin/qt/mac-native-window.h"
 
@@ -47,4 +50,11 @@ int numHeldMouseButtons() {
 void nsWindowAdopt(void *ns_parent, void *ns_child) {
     NSWindow *parent = (NSWindow*)ns_parent, *child = (NSWindow*)ns_child;
     [parent addChildWindow:child ordered:NSWindowAbove];
+}
+
+const char* keyboard_host_layout_name_macImpl() {
+    TISInputSourceRef inputSource = TISCopyCurrentKeyboardLayoutInputSource();
+    NSString* inputSourceID = (NSString*)TISGetInputSourceProperty(
+            inputSource, kTISPropertyInputSourceID);
+    return [inputSourceID UTF8String];
 }
