@@ -60,6 +60,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    bool isQemu2,
                                    bool isCros,
                                    uint32_t lcd_width,
-                                   uint32_t lcd_height);
+                                   uint32_t lcd_height,
+                                   uint32_t lcd_vsync);
 
 ANDROID_END_HEADER
