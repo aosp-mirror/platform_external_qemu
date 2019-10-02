@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "016ce70b_08773930",
+        "filename": "target/i386/gvm-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-02T02:31:13Z",
+      "side": 0,
+      "message": "just curious, does this mean with gvm, now that we enabled kernel irqchip, we can have async interrupts too?",
+      "range": {
+        "startLine": 872,
+        "startChar": 3,
+        "endLine": 872,
+        "endChar": 43
+      },
+      "revId": "12cc34c100a0a7da2f46885f99942f6c3b3fe2b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
