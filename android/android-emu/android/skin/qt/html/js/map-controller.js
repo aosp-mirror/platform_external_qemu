@@ -77,6 +77,7 @@ class MapController extends GoogleMapPageComponent {
         this.searchBox.update('');
         channel.objects.emulocationserver.onSavedRouteDrawn();
         this.viewModel.setIsLoadingRoute(false);
+        this.viewModel.renderDirections(this.mapManager, routeJson);
     }
 
     showRoutePlaybackPanel(visible) {
