@@ -2318,36 +2318,30 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     bool qtEvent = mToolWindow->handleQtKeyEvent(
             event, QtKeyEventSource::EmulatorWindow);
 
-// TODO (wdu) Fix the QT libxcb, then remove the ifdef.
-// After QT upgrades to 5.12.1, X11 doesn't produce the correct key symbol when
-// keyboard layout is set to Non-English. The workaround is to always use
-// keycode forwarding on Linux platform. Bug: 141318682
-#if defined(_WIN32) || defined(__APPLE__)
-    if (!android::featurecontrol::isEnabled(
-                android::featurecontrol::KeycodeForwarding)) {
-        if (mForwardShortcutsToDevice || !qtEvent) {
-            forwardKeyEventToEmulator(type, event);
+    if (use_keycode_forwarding) {
+        return;
+    }
 
-            if (type == kEventKeyDown && event->text().length() > 0) {
-                Qt::KeyboardModifiers mods = event->modifiers();
-                mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
-                if (mods == 0) {
-                    // The key event generated text without Ctrl, Alt, etc.
-                    // Send an additional TextInput event to the emulator.
-                    SkinEvent* skin_event = createSkinEvent(kEventTextInput);
-                    skin_event->u.text.down = false;
-                    strncpy((char*)skin_event->u.text.text,
-                            (const char*)event->text().toUtf8().constData(),
-                            sizeof(skin_event->u.text.text) - 1);
-                    // Ensure the event's text is 0-terminated
-                    skin_event->u.text
-                            .text[sizeof(skin_event->u.text.text) - 1] = 0;
-                    queueSkinEvent(skin_event);
-                }
+    if (mForwardShortcutsToDevice || !qtEvent) {
+        forwardKeyEventToEmulator(type, event);
+        if (type == kEventKeyDown && event->text().length() > 0) {
+            Qt::KeyboardModifiers mods = event->modifiers();
+            mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
+            if (mods == 0) {
+                // The key event generated text without Ctrl, Alt, etc.
+                // Send an additional TextInput event to the emulator.
+                SkinEvent* skin_event = createSkinEvent(kEventTextInput);
+                skin_event->u.text.down = false;
+                strncpy((char*)skin_event->u.text.text,
+                        (const char*)event->text().toUtf8().constData(),
+                        sizeof(skin_event->u.text.text) - 1);
+                // Ensure the event's text is 0-terminated
+                skin_event->u.text.text[sizeof(skin_event->u.text.text) - 1] =
+                        0;
+                queueSkinEvent(skin_event);
             }
         }
     }
-#endif
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers) {
