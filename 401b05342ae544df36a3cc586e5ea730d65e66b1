@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec88497e_402e231e",
+        "filename": "android/android-emu/android/globals.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-02T00:25:44Z",
+      "side": 1,
+      "message": "True if we are using ..",
+      "revId": "401b05342ae544df36a3cc586e5ea730d65e66b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8928b60_44b5d3df",
+        "filename": "android/android-emu/android/main-common-ui.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-02T00:25:44Z",
+      "side": 1,
+      "message": "Do we need to leave a message for the user?",
+      "revId": "401b05342ae544df36a3cc586e5ea730d65e66b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4cf3a2b_40042158",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 2335,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-02T00:25:44Z",
+      "side": 1,
+      "message": "Do we always have enough space to hold the data?",
+      "revId": "401b05342ae544df36a3cc586e5ea730d65e66b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

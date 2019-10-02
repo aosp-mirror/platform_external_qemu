@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "afbc366f_74d2e607",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-02T00:25:44Z",
+      "side": 1,
+      "message": "You can use standard arraysize macros.",
+      "revId": "5dbb0c84397021d7ce8a977dae64df8e91dbfffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
