@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb273a3f_4f39c90b",
+        "filename": "target/i386/gvm-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1611,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-02T02:37:33Z",
+      "side": 1,
+      "message": "brackets around the { } (and below)",
+      "range": {
+        "startLine": 1610,
+        "startChar": 2,
+        "endLine": 1611,
+        "endChar": 16
+      },
+      "revId": "3178dda25e770e11c32c68fc2cc2f19f7ae0535e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
