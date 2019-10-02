@@ -52,7 +52,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    bool isQemu2,
                                    bool isCros,
                                    uint32_t lcd_width,
-                                   uint32_t lcd_height) {
+                                   uint32_t lcd_height,
+                                   uint32_t lcd_vsync) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -135,6 +136,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             params.addFormat("qemu.mediaprofile.video=%s", "/data/vendor/etc/media_codecs_google_video_v2.xml");
         }
     }
+
+    // Set vsync rate
+    params.addFormat("qemu.vsync=%u", lcd_vsync);
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
