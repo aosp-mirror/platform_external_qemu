@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5944e57_97f35391",
+        "filename": "target/i386/gvm-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-02T02:27:47Z",
+      "side": 1,
+      "message": "add comment on why we can\u0027t use this log sync function",
+      "range": {
+        "startLine": 771,
+        "startChar": 0,
+        "endLine": 771,
+        "endChar": 5
+      },
+      "revId": "78a489a593410e6846b3f97e741cd4fa9319b001",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
