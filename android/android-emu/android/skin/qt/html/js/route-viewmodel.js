@@ -7,6 +7,7 @@ class RouteViewModel {
         this.isLoadingRoute = false;
         this.allowEdits = true;
         this.inGpxKmlState = false;
+        this.routeComputedSuccesfully = true;
     }
 
     renderDirections(mapManager, routeJson) {
@@ -63,6 +64,10 @@ class RouteViewModel {
 
     isInGpxKmlState() {
         return this.inGpxKmlState;
+    }
+
+    setRouteComputed(success) {
+        this.routeComputedSuccesfully = success;
     }
 
     setRoute(routeJson) {
@@ -259,7 +264,7 @@ class RouteViewModel {
     }
 
     shouldShowAddDestinationButton() {
-        return this.model.isValidRoute() && this.totalWaypointsCount() < 4 && this.allowEdits;
+        return this.model.isValidRoute() && this.totalWaypointsCount() < 4 && this.allowEdits && this.routeComputedSuccesfully;
     }
 
     shouldShowRemoveWaypointButtons() {
@@ -271,7 +276,7 @@ class RouteViewModel {
     }
 
     shouldShowSaveRouteButton() {
-        return this.model.isValidRoute() && this.allowEdits;
+        return this.model.isValidRoute() && this.allowEdits && this.routeComputedSuccesfully;
     }
 }
 

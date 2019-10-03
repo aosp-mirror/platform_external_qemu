@@ -5,6 +5,7 @@ class LocationPanelController extends GoogleMapPageComponent {
         this.panelCollapsedCssClassName = collapsedClassName;
         this.actionButtonPanelHiddenCssClassName = actionButtonPanelHiddenCssClassName;
         this.shouldHideActionButtonPanel = false;
+        this.hide.bind(this);
     }
 
     onMapInitialized(mapManager, eventBus) {
@@ -51,6 +52,23 @@ class LocationPanelController extends GoogleMapPageComponent {
         $('#location-action-button-container').css('display', hideActionButtonPanel ? 'none' : 'flex');
         this.eventBus.dispatch('location_panel_opened', this);
     }
+
+    showError(title, subtitle, timeout, hideActionButtonPanel) {
+        const errorDisplayDuration = timeout || 3000;
+        $('#floating-action-button').hide();
+        $('#location-panel-close-button').hide();
+        $('#location-title').html(title);
+        $('#location-subtitle').html(subtitle);
+        if (hideActionButtonPanel) {
+            $('#location-panel').removeClass().addClass(this.actionButtonPanelHiddenCssClassName);
+        }
+        else {
+            $('#location-panel').removeClass().addClass(this.panelExpandedCssClassName);
+        }
+        $('#location-action-button-container').css('display', hideActionButtonPanel ? 'none' : 'flex');
+        this.eventBus.dispatch('location_panel_opened', this);
+        setTimeout(() => this.hide(), errorDisplayDuration);
+    }    
 
     hide() {
         $('#location-panel').removeClass().addClass(this.panelCollapsedCssClassName);

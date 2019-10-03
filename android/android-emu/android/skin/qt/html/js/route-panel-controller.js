@@ -289,6 +289,11 @@ class RoutePanelController extends GoogleMapPageComponent {
         $('#transport-mode-' + mode).removeClass(this.normalTransportModeCssClassName).addClass(this.selectedTransportModeCssClassName)
     }
 
+    routeComputed() {
+        this.showSaveRouteButton(this.viewModel.shouldShowSaveRouteButton());
+        this.showAddDestinationButton(this.viewModel.shouldShowAddDestinationButton());
+    }
+
     _element() { return $('#route-panel'); }
 }
 
