@@ -194,6 +194,9 @@ static constexpr android::base::StringView kYUV420888toNV21 = "ANDROID_EMU_YUV42
 // Cache YUV frame
 static constexpr android::base::StringView kYUVCache = "ANDROID_EMU_YUV_Cache";
 
+// GL Pipe Call
+static constexpr android::base::StringView kGLPipeCall = "ANDROID_EMU_gl_pipe_call";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -403,6 +406,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         emugl_feature_is_enabled(android::featurecontrol::YUV420888toNV21);
     bool YUVCacheEnabled =
         emugl_feature_is_enabled(android::featurecontrol::YUVCache);
+    bool GLPipeCallEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLPipeCall);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -471,6 +476,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (YUVCacheEnabled && name == GL_EXTENSIONS) {
         glStr += kYUVCache;
+        glStr += " ";
+    }
+
+    if (GLPipeCallEnabled && name == GL_EXTENSIONS) {
+        glStr += kGLPipeCall;
         glStr += " ";
     }
 

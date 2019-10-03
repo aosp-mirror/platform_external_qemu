@@ -15,7 +15,10 @@
 #include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/ring_buffer.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Tracing.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/loadpng.h"
 #include "android/opengl/GLProcessPipe.h"
@@ -264,6 +267,14 @@ public:
         mChannel->setEventCallback([this](RenderChannel::State events) {
             onChannelHostEvent(events);
         });
+
+        if (android::featurecontrol::isEnabled(featurecontrol::GLPipeCall)) {
+            mSpinCount = 50;
+            mYieldOnSpin = true;
+        } else {
+            mSpinCount = 20;
+            mYieldOnSpin = false;
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -326,19 +337,19 @@ public:
             if (mDataForReadingLeft == 0) {
                 if (android::opengl::recvMode == android::opengl::RecvMode::Android) {
                     // No data left, read a new chunk from the channel.
-                    int spinCount = 20;
+                    int spinCount = mSpinCount;
                     for (;;) {
 
+                        if (len > 0) {
+                            DD("%s: returning %d bytes", __func__, (int)len);
+                            return len;
+                        }
                         auto result = mChannel->tryRead(&mDataForReading);
                         if (result == IoResult::Ok) {
                             mDataForReadingLeft = mDataForReading.size();
                             break;
                         }
                         DD("%s: tryRead() failed with %d", __func__, (int)result);
-                        if (len > 0) {
-                            DD("%s: returning %d bytes", __func__, (int)len);
-                            return len;
-                        }
                         // This failed either because the channel was stopped
                         // from the host, or if there was no data yet in the
                         if (result == IoResult::Error) {
@@ -348,6 +359,10 @@ public:
                         // to read. Many GL calls are much faster than the
                         // whole host-to-guest-to-host transition.
                         if (--spinCount > 0) {
+                            // With PIPE_CALL,
+                            // let other threads run, perhaps one of them
+                            // will be the one we care about.
+                            if (mYieldOnSpin) ring_buffer_yield();
                             continue;
                         }
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
@@ -527,6 +542,9 @@ private:
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
     uint32_t mDataForReadingLeft = 0;
     ChannelBuffer mDataForReading;
+
+    int mSpinCount = 20;
+    bool mYieldOnSpin = false;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);
 };
