@@ -158,7 +158,7 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
 void SyncThread::doSyncContextInit() {
     const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
-    mDisplay = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    mDisplay = egl->eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
     int eglMaj, eglMin;
     egl->eglInitialize(mDisplay, &eglMaj , &eglMin);
 

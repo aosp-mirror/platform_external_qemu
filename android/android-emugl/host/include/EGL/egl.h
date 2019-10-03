@@ -132,6 +132,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigs (EGLDisplay dpy, EGLConfig *configs,
 EGLAPI EGLDisplay EGLAPIENTRY eglGetCurrentDisplay (void);
 EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface (EGLint readdraw);
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay (EGLNativeDisplayType display_id);
+EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplayAEMU (EGLNativeDisplayType display_id);
 EGLAPI EGLint EGLAPIENTRY eglGetError (void);
 EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY eglGetProcAddress (const char *procname);
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize (EGLDisplay dpy, EGLint *major, EGLint *minor);

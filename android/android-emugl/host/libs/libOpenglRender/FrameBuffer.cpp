@@ -287,7 +287,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     // Initialize backend EGL display
     //
-    fb->m_eglDisplay = s_egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    fb->m_eglDisplay = s_egl.eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
     if (fb->m_eglDisplay == EGL_NO_DISPLAY) {
         GL_LOG("Failed to Initialize backend EGL display");
         ERR("Failed to Initialize backend EGL display\n");

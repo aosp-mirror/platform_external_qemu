@@ -29,7 +29,7 @@ EGLDisplay getDisplay() {
         egl->eglUseOsEglApi(!shouldUseHostGpu());
     }
 
-    EGLDisplay dpy = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLDisplay dpy = egl->eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
     EXPECT_TRUE(dpy != EGL_NO_DISPLAY);
 
     if (sDisplayNeedsInit) {

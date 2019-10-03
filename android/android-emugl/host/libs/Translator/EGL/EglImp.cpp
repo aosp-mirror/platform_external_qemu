@@ -241,7 +241,7 @@ static const GLint kAuxiliaryContextAttribsCore[] = {
 
 static bool createAndBindAuxiliaryContext(EGLContext* context_out, EGLSurface* surface_out) {
     // create the context
-    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLDisplay dpy = eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
 
     eglBindAPI(EGL_OPENGL_ES_API);
 
@@ -285,7 +285,7 @@ static bool createAndBindAuxiliaryContext(EGLContext* context_out, EGLSurface* s
 static bool unbindAndDestroyAuxiliaryContext(EGLContext context, EGLSurface surface) {
 
     // create the context
-    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLDisplay dpy = eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
 
     if (!eglMakeCurrent(
             dpy, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -313,7 +313,7 @@ static bool unbindAndDestroyAuxiliaryContext(EGLContext context, EGLSurface surf
 
 static bool bindAuxiliaryContext(EGLContext context, EGLSurface surface) {
     // create the context
-    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLDisplay dpy = eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
 
     if (!eglMakeCurrent(dpy, surface, surface, context)) {
         fprintf(stderr, "%s: eglMakeCurrent failed\n", __func__);
@@ -326,7 +326,7 @@ static bool bindAuxiliaryContext(EGLContext context, EGLSurface surface) {
 static bool unbindAuxiliaryContext() {
 
     // create the context
-    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLDisplay dpy = eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
 
     if (!eglMakeCurrent(
             dpy, EGL_NO_SURFACE, EGL_NO_SURFACE,
@@ -347,7 +347,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
     return err;
 }
 
-EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
+EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplayAEMU(EGLNativeDisplayType display_id) {
     MEM_TRACE("EMUGL");
     EglDisplay* dpy = NULL;
     EglOS::Display* internalDisplay = NULL;

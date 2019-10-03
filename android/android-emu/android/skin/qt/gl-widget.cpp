@@ -87,7 +87,7 @@ bool GLWidget::ensureInit() {
     mEGLState = new EGLState();
     mValid = false;
 
-    mEGLState->display = mEGL->eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    mEGLState->display = mEGL->eglGetDisplayAEMU(EGL_DEFAULT_DISPLAY);
     if (mEGLState->display == EGL_NO_DISPLAY) {
         qCWarning(emu, "Failed to get EGL display: EGL error %d",
                  mEGL->eglGetError());
