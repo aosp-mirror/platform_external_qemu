@@ -31,6 +31,7 @@ class MapController extends GoogleMapPageComponent {
         eventBus.on('location_panel_opened', () => this.onLocationPanelOpened());
         eventBus.on('location_panel_closed', () => this.onLocationPanelClosed());
         eventBus.on('route_computed', (route) => this.onRouteComputed(route));
+        eventBus.on('route_compute_failed', (route) => this.onRouteComputeFailed(route));
     }
 
     setCurrentLocation(latLng) {
@@ -201,7 +202,16 @@ class MapController extends GoogleMapPageComponent {
     }
 
     onRouteComputed(route) {
+        this.viewModel.setRouteComputed(true);
+        this.routePanel.routeComputed();
         this.viewModel.sendRouteToEmulator(route);
+    }
+
+    onRouteComputeFailed() {
+        this.viewModel.setRouteComputed(false);
+        this.routePanel.routeComputed();
+        this.viewModel.sendRouteToEmulator();
+        this.locationPanel.showError('Route Not Found', 'Oops! Sorry, but no route was found from your origin to your destination. Please edit the route.');
     }
 
     onBeginBuildingRouteButtonClicked() {
