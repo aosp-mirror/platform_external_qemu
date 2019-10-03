@@ -131,6 +131,7 @@ class GoogleMapManager {
         this.directionsRenderer.setMap(this.map);
         this.directionsService.route(renderRequest, (result, status) => {
             if (status !== 'OK') {
+                this.eventBus.dispatch('route_compute_failed', result);
                 return;
             }
 
