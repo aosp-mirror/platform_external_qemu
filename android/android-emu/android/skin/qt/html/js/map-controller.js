@@ -80,6 +80,8 @@ class MapController extends GoogleMapPageComponent {
         }
         catch (error) {
             this.locationPanel.showError('Route Failed To Load', 'Oops! There was a problem loading your route. Please try again with a different route.');
+            this.viewModel.setIsLoadingRoute(false);
+            this.viewModel.sendRouteToEmulator();
             loadedSuccessfully = false;
         }
         finally {
