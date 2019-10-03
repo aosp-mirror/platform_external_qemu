@@ -906,7 +906,7 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
 
 // Windows GVM hypervisor support
 
-#ifdef HAVE_GVM
+#if HAVE_GVM
 
 #include "android/base/system/System.h"
 
