@@ -63,6 +63,9 @@ public:
     // Read/write for a particular pipe, along with C++ versions.
     ssize_t read(void* pipe, void* buffer, size_t len);
     ssize_t write(void* pipe, const void* buffer, size_t len);
+    // Call
+    ssize_t call(void* pipe, const void* writeBuf, void* readBuf,
+                 size_t writeSize, size_t readSize);
 
     ReadResult read(void* pipe, size_t maxLength);
     WriteResult write(void* pipe, const std::vector<uint8_t>& data);
