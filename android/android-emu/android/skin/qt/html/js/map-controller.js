@@ -66,19 +66,32 @@ class MapController extends GoogleMapPageComponent {
         this.routePanel.close();
         this.mapManager.clearDirections();
         this.mapManager.clearMarkers();
-        if (routeJson.length > 0) {
-            this.viewModel.setRoute(routeJson);
-            this.viewModel.setEditable(!isSavedRoute);
-            this.showRouteEditor();
+        var loadedSuccessfully = true;
+        try {
+            if (routeJson.length > 0) {
+                this.viewModel.setRoute(routeJson);
+                this.viewModel.setEditable(!isSavedRoute);
+                this.showRouteEditor();
+            }
+            else {
+                this.viewModel.clearWaypoints();
+                this.viewModel.setEditable(true);
+            }
         }
-        else {
-            this.viewModel.clearWaypoints();
-            this.viewModel.setEditable(true);
+        catch (error) {
+            this.locationPanel.showError('Route Failed To Load', 'Oops! There was a problem loading your route. Please try again with a different route.');
+            this.viewModel.setIsLoadingRoute(false);
+            this.viewModel.sendRouteToEmulator();
+            loadedSuccessfully = false;
         }
-        this.searchBox.update('');
-        channel.objects.emulocationserver.onSavedRouteDrawn();
-        this.viewModel.setIsLoadingRoute(false);
-        this.viewModel.renderDirections(this.mapManager, routeJson);
+        finally {
+            this.searchBox.update('');
+            channel.objects.emulocationserver.onSavedRouteDrawn();
+            this.viewModel.setIsLoadingRoute(false);
+            if (loadedSuccessfully) {
+                this.viewModel.renderDirections(this.mapManager, routeJson);
+            }
+        }
     }
 
     showRoutePlaybackPanel(visible) {
@@ -231,7 +244,7 @@ class MapController extends GoogleMapPageComponent {
         if (!this.viewModel.getIsPlayingRoute()) {
             this.mapManager.clearMarkers();
             this.mapManager.clearDirections();
-            this.viewModel.clearWaypoints();    
+            this.viewModel.clearWaypoints();
         }
         this.viewModel.sendRouteToEmulator();
     }
