@@ -18,8 +18,12 @@
 #ifndef QEMU_GVM_I386_H
 #define QEMU_GVM_I386_H
 
+#ifdef CONFIG_GVM
+
 #include "sysemu/gvm-interface.h"
 #include "sysemu/gvm.h"
+
+#endif
 
 #define gvm_apic_in_kernel() (gvm_irqchip_in_kernel())
 
