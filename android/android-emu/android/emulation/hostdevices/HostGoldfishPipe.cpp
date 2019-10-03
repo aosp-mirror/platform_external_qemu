@@ -346,6 +346,63 @@ HostGoldfishPipeDevice::WriteResult HostGoldfishPipeDevice::write(void* pipe, co
     }
 }
 
+// Call
+ssize_t HostGoldfishPipeDevice::call(
+    void* pipe,
+    const void* writeBuf, void* readBuf,
+    size_t writeSize, size_t readSize) {
+
+    ScopedVmLock lock;
+
+    auto it = mHwPipeToPipe.find(pipe);
+    if (it == mHwPipeToPipe.end()) {
+        LOG(ERROR) << "Pipe not found.";
+        mErrno = EINVAL;
+        return PIPE_ERROR_INVAL;
+    }
+
+    ssize_t writeRes = 0;
+    ssize_t readRes = 0;
+    ssize_t totalXfer = 0;
+
+    while (totalXfer < writeSize) {
+        AndroidPipeBuffer writePipeBuf = {
+            (uint8_t*)(writeBuf) + totalXfer,
+            writeSize - totalXfer
+        };
+
+        ssize_t writeRes =
+            android_pipe_guest_send(it->second, &writePipeBuf, 1);
+        setErrno(writeRes);
+
+        if (writeRes < 0) {
+            return totalXfer > 0 ? totalXfer : writeRes;
+        } else {
+            totalXfer += writeRes;
+        }
+    }
+
+    while (totalXfer < writeSize + readSize) {
+        ssize_t readXfer = totalXfer - writeSize;
+        AndroidPipeBuffer readPipeBuf = {
+            (uint8_t*)(readBuf) + readXfer,
+            readSize - readXfer,
+        };
+
+        ssize_t readRes =
+            android_pipe_guest_recv(it->second, &readPipeBuf, 1);
+        setErrno(readRes);
+
+        if (readRes < 0) {
+            return totalXfer > 0 ? totalXfer : readRes;
+        } else {
+            totalXfer += readRes;
+        }
+    }
+
+    return totalXfer;
+}
+
 unsigned HostGoldfishPipeDevice::poll(void* pipe) const {
     ScopedVmLock lock;
     const auto it = mHwPipeToPipe.find(pipe);
