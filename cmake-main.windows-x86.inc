@@ -970,6 +970,7 @@ set(qemu-system-aarch64_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -1326,6 +1327,7 @@ set(qemu-system-arm_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -1723,6 +1725,9 @@ set(qemu-system-i386_sources ""
    hw/i386/vmport.c
    hw/i386/vmmouse.c
    hw/i386/kvmvapic.c
+   hw/i386/gvm/apic.c
+   hw/i386/gvm/i8259.c
+   hw/i386/gvm/ioapic.c
    target/i386/helper.c
    target/i386/cpu.c
    target/i386/gdbstub.c
@@ -1749,6 +1754,8 @@ set(qemu-system-i386_sources ""
    target/i386/hax-mem.c
    target/i386/hax-windows.c
    target/i386/whpx-all.c
+   target/i386/gvm-all.c
+   target/i386/gvm.c
    hw/acpi/core.c
    hw/acpi/piix4.c
    hw/acpi/pcihp.c
@@ -1850,6 +1857,7 @@ set(qemu-system-mips64el_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2000,6 +2008,7 @@ set(qemu-system-mipsel_sources ""
    accel/accel.c
    accel/stubs/whpx-stub.c
    accel/stubs/kvm-stub.c
+   accel/stubs/gvm-stub.c
    accel/tcg/tcg-all.c
    accel/tcg/cputlb.c
    accel/tcg/tcg-runtime.c
@@ -2191,6 +2200,9 @@ set(qemu-system-x86_64_sources ""
    hw/i386/vmport.c
    hw/i386/vmmouse.c
    hw/i386/kvmvapic.c
+   hw/i386/gvm/apic.c
+   hw/i386/gvm/i8259.c
+   hw/i386/gvm/ioapic.c
    target/i386/helper.c
    target/i386/cpu.c
    target/i386/gdbstub.c
@@ -2217,6 +2229,8 @@ set(qemu-system-x86_64_sources ""
    target/i386/hax-mem.c
    target/i386/hax-windows.c
    target/i386/whpx-all.c
+   target/i386/gvm-all.c
+   target/i386/gvm.c
    hw/acpi/core.c
    hw/acpi/piix4.c
    hw/acpi/pcihp.c
@@ -2327,6 +2341,7 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/pci/t
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/net/can/can_sja1000.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/can/can_pcm3680_pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/can/can_mioe3680_pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/can/can_kvaser_pci.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/net/can")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/core/reset.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/irq.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/hotplug.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/platform-bus.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/qdev-properties-system.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/generic-loader.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/null-machine.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/empty_slot.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/bus.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/nmi.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/ptimer.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/split-irq.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/qdev-fw.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/register.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/sysbus.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/machine.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/loader.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/or-irq.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/fw-path-provider.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/loader-fit.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/stream.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/qdev.c ${ANDROID_QEMU2_TOP_DIR}/hw/core/qdev-properties.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/core")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/i386/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/x86-iommu.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/vmport.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/pc_sysfw.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/amd_iommu.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/pc_q35.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/vmmouse.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/pc.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/multiboot.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/kvmvapic.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/intel_iommu.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/i386")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/i386/gvm/apic.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/gvm/i8259.c ${ANDROID_QEMU2_TOP_DIR}/hw/i386/gvm/ioapic.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/i386/gvm")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/net/trace.c ${ANDROID_QEMU2_TOP_DIR}/net/dump.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-mirror.c ${ANDROID_QEMU2_TOP_DIR}/net/net.c ${ANDROID_QEMU2_TOP_DIR}/net/queue.c ${ANDROID_QEMU2_TOP_DIR}/net/colo.c ${ANDROID_QEMU2_TOP_DIR}/net/checksum.c ${ANDROID_QEMU2_TOP_DIR}/net/hub.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-rewriter.c ${ANDROID_QEMU2_TOP_DIR}/net/util.c ${ANDROID_QEMU2_TOP_DIR}/net/socket.c ${ANDROID_QEMU2_TOP_DIR}/net/tap-win32.c ${ANDROID_QEMU2_TOP_DIR}/net/colo-compare.c ${ANDROID_QEMU2_TOP_DIR}/net/filter.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-replay.c ${ANDROID_QEMU2_TOP_DIR}/net/slirp.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-buffer.c ${ANDROID_QEMU2_TOP_DIR}/net/eth.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/net")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/slirp/ncsi.c ${ANDROID_QEMU2_TOP_DIR}/slirp/socket.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ip6_input.c ${ANDROID_QEMU2_TOP_DIR}/slirp/bootp.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ip_output.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ip6_icmp.c ${ANDROID_QEMU2_TOP_DIR}/slirp/sbuf.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ip6_output.c ${ANDROID_QEMU2_TOP_DIR}/slirp/mbuf.c ${ANDROID_QEMU2_TOP_DIR}/slirp/dnssearch.c ${ANDROID_QEMU2_TOP_DIR}/slirp/udp6.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ndp_table.c ${ANDROID_QEMU2_TOP_DIR}/slirp/dhcpv6.c ${ANDROID_QEMU2_TOP_DIR}/slirp/tcp_input.c ${ANDROID_QEMU2_TOP_DIR}/slirp/tcp_output.c ${ANDROID_QEMU2_TOP_DIR}/slirp/cksum.c ${ANDROID_QEMU2_TOP_DIR}/slirp/slirp.c ${ANDROID_QEMU2_TOP_DIR}/slirp/udp.c ${ANDROID_QEMU2_TOP_DIR}/slirp/tftp.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ip_icmp.c ${ANDROID_QEMU2_TOP_DIR}/slirp/misc.c ${ANDROID_QEMU2_TOP_DIR}/slirp/tcp_subr.c ${ANDROID_QEMU2_TOP_DIR}/slirp/ip_input.c ${ANDROID_QEMU2_TOP_DIR}/slirp/if.c ${ANDROID_QEMU2_TOP_DIR}/slirp/tcp_timer.c ${ANDROID_QEMU2_TOP_DIR}/slirp/arp_table.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/slirp")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/linux-user/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/linux-user")
@@ -2339,7 +2354,7 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/block/tr
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/ipack/ipack.c ${ANDROID_QEMU2_TOP_DIR}/hw/ipack/tpci200.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ipack")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/sparc/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/sparc")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/disas/mips.c ${ANDROID_QEMU2_TOP_DIR}/disas/arm-a64.cc ${ANDROID_QEMU2_TOP_DIR}/disas/i386.c ${ANDROID_QEMU2_TOP_DIR}/disas/arm.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/disas")
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/stubs/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/whpx-stub.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/accel/stubs")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/stubs/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/whpx-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/gvm-stub.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/accel/stubs")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ide/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/ahci.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/atapi.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/isa.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/core.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/ahci-allwinner.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/piix.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/microdrive.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/via.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/ich.c ${ANDROID_QEMU2_TOP_DIR}/hw/ide/qdev.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ide")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/tpm/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_crb.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_tis.c ${ANDROID_QEMU2_TOP_DIR}/hw/tpm/tpm_util.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/tpm")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/mips/trace.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/op_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/dsp_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/cpu.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/lmi_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/msa_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/mips-semi.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/translate.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/cp0_timer.c ${ANDROID_QEMU2_TOP_DIR}/target/mips/machine.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/mips")
@@ -2347,7 +2362,7 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/qobject/qbool.c ${ANDROID_Q
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/backends/hostmem.c ${ANDROID_QEMU2_TOP_DIR}/backends/rng-random-generic.c ${ANDROID_QEMU2_TOP_DIR}/backends/cryptodev.c ${ANDROID_QEMU2_TOP_DIR}/backends/rng-egd.c ${ANDROID_QEMU2_TOP_DIR}/backends/hostmem-ram.c ${ANDROID_QEMU2_TOP_DIR}/backends/rng.c ${ANDROID_QEMU2_TOP_DIR}/backends/tpm.c ${ANDROID_QEMU2_TOP_DIR}/backends/cryptodev-builtin.c ${ANDROID_QEMU2_TOP_DIR}/backends/cryptodev-vhost.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/backends")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/scsi/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/virtio-scsi.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/lsi53c895a.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/virtio-scsi-dataplane.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/megasas.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/scsi-generic.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/mptsas.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/mptendian.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/scsi-disk.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/esp.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/mptconfig.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/esp-pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/vmw_pvscsi.c ${ANDROID_QEMU2_TOP_DIR}/hw/scsi/scsi-bus.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/scsi")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/dma/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/omap_dma.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/xlnx_dpdma.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/pl330.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/xilinx_axidma.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/xlnx-zynq-devcfg.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/i8257.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/pl080.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/rc4030.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/pxa2xx_dma.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/soc_dma.c ${ANDROID_QEMU2_TOP_DIR}/hw/dma/bcm2835_dma.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/dma")
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/i386/trace.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/arch_dump.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/hax-windows.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/monitor.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/mpx_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/smm_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/sev-stub.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/hax-mem.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/excp_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/machine.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/cpu.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/xsave_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/svm_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/seg_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/translate.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/bpt_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/hax-all.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/fpu_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/arch_memory_mapping.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/whpx-all.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/cc_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/mem_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/int_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/misc_helper.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/i386")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/i386/trace.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/arch_dump.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/hax-windows.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/monitor.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/mpx_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/smm_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/sev-stub.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/hax-mem.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/excp_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/machine.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/cpu.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/xsave_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/svm_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/seg_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/translate.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/bpt_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/hax-all.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/fpu_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/arch_memory_mapping.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/whpx-all.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/gvm-all.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/gvm.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/cc_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/mem_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/int_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/i386/misc_helper.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/i386")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/9pfs/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/9pfs")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ppc/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/ppc")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/bt/core.c ${ANDROID_QEMU2_TOP_DIR}/hw/bt/hci-csr.c ${ANDROID_QEMU2_TOP_DIR}/hw/bt/hid.c ${ANDROID_QEMU2_TOP_DIR}/hw/bt/sdp.c ${ANDROID_QEMU2_TOP_DIR}/hw/bt/l2cap.c ${ANDROID_QEMU2_TOP_DIR}/hw/bt/hci.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/bt")

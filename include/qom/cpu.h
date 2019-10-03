@@ -397,6 +397,12 @@ struct CPUState {
     struct KVMState *kvm_state;
     struct kvm_run *kvm_run;
 
+#ifdef _WIN32
+    HANDLE gvm_fd;
+#endif
+    struct GVMState *gvm_state;
+    struct gvm_run *gvm_run;
+
     /* Used for events with 'vcpu' and *without* the 'disabled' properties */
     DECLARE_BITMAP(trace_dstate_delayed, CPU_TRACE_DSTATE_MAX_EVENTS);
     DECLARE_BITMAP(trace_dstate, CPU_TRACE_DSTATE_MAX_EVENTS);
