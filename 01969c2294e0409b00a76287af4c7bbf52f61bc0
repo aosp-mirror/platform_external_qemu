@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "137f35e0_89dfe720",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 38
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-03T21:52:21Z",
+      "side": 1,
+      "message": "recommend removing the ifdef and making pFeatures-\u003etextureCompressionASTC_LDR | mEmulatedASTC; and making mEmulatedASTC equal to the ifdef.",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 20
+      },
+      "revId": "01969c2294e0409b00a76287af4c7bbf52f61bc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab0be716_dcb1f7df",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 38
+      },
+      "lineNbr": 3937,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-03T21:52:21Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 3937,
+        "startChar": 3,
+        "endLine": 3937,
+        "endChar": 51
+      },
+      "revId": "01969c2294e0409b00a76287af4c7bbf52f61bc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
