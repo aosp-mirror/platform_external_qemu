@@ -122,24 +122,9 @@ class GoogleMapManager {
         }
     }
 
-    renderDirections(travelMode, originWaypoint, destinationWaypoint, mapWaypoints) {
+    renderDirections(renderRequest) {
+        console.log("GoogleMapManager::renderDirections called", renderRequest);
         const self = this;
-        const origin = originWaypoint.latLng;
-        const destination = destinationWaypoint.latLng;
-        let waypoints = [];
-        if (travelMode !== TransportationMode.Transit) {
-            waypoints = mapWaypoints.map((value) => { return { location: value.latLng, stopover: false } });
-            waypoints.shift();
-            waypoints.pop();    
-        }
-        console.log("GoogleMapManager::renderDirections called", travelMode, origin, destination, waypoints);
-        const renderRequest = {
-            origin,
-            destination,
-            waypoints,
-            travelMode,
-            optimizeWaypoints: true
-        };
         this.clearDirections();
         this.clearMarkers();
         this.directionsRenderer = new google.maps.DirectionsRenderer();

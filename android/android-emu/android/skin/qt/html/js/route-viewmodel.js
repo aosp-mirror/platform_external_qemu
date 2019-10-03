@@ -9,13 +9,31 @@ class RouteViewModel {
         this.inGpxKmlState = false;
     }
 
-    renderDirections(mapManager) {
-        if (this.model.isValidRoute()) {
+    renderDirections(mapManager, routeJson) {
+        if (this.model.isValidRoute() && !this.isLoadingRoute) {
+            let renderRequest
             mapManager.clearDirections();
-            mapManager.renderDirections(this.getTransportationMode(),
-                this.getOrigin(),
-                this.getDestination(),
-                this.model.waypoints);
+            if (!routeJson) {
+                const travelMode = this.getTransportationMode();
+                const origin = this.getOrigin().latLng;
+                const destination = this.getDestination().latLng;
+                let waypoints = [];
+                if (travelMode !== TransportationMode.Transit) {
+                    waypoints = this.getIntermediateWaypoints().map((value) => { return { location: value.latLng, stopover: false } });
+                }
+                renderRequest = {
+                    origin,
+                    destination,
+                    waypoints,
+                    travelMode,
+                    optimizeWaypoints: true
+                };
+            }
+            else {
+                const route = JSON.parse(routeJson);
+                renderRequest = route.request;
+            }
+            mapManager.renderDirections(renderRequest);
         }
     }
 
@@ -65,7 +83,16 @@ class RouteViewModel {
             latLng: originLatLng,
             address: originAddress
         });
-        this.model.setDestination({
+        for (let i = 0; i < route.routes[0].legs[0].via_waypoint.length; i++) {
+            const waypoint = route.routes[0].legs[0].via_waypoint[i];
+            this.addNewEmptyDestination();
+            this.setDestination({
+                latLng: waypoint.location,
+                address: `waypoint ${i + 1}`
+            });
+        }
+        this.addNewEmptyDestination();
+        this.setDestination({
             latLng: destinationLatLng,
             address: destinationAddress
         });
@@ -193,6 +220,13 @@ class RouteViewModel {
             throw new Error(`intermediateWaypointsCount cannot be calculated. Invalid number of waypoints in route - ${count} [${this.model}]`);
         }
         return count;
+    }
+
+    getIntermediateWaypoints() {
+        let waypoints = [...this.model.waypoints];
+        waypoints.shift();
+        waypoints.pop();
+        return waypoints;
     }
 
     getLastIntermediateWaypoint() {

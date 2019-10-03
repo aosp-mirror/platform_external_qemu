@@ -152,7 +152,6 @@ bool LocationPage::parseGoogleMapsJson(const QJsonDocument& jsonDoc) {
     mUi->loc_routePlayingTitleItem->setSubtitle(QString("%1 - %2").arg(startAddr).arg(endAddr));
     mUi->loc_routePlayingTitleItem->setTransportMode(mRouteTravelMode);
 
-
     // Look at each routes[0].legs[]
     for (int legIdx = 0; legIdx < nLegs; legIdx++) {
         QJsonObject thisLegObject = legsArray.at(legIdx).toObject();
@@ -166,6 +165,17 @@ bool LocationPage::parseGoogleMapsJson(const QJsonDocument& jsonDoc) {
                         RoutePlaybackWaypointItem::WaypointType::Start :
                         RoutePlaybackWaypointItem::WaypointType::Intermediate),
                 mUi->loc_routePlayingList);
+
+        QJsonArray waypointsArray = thisLegObject.value("via_waypoints").toArray();
+
+        for (int waypointIdx = 0; waypointIdx < waypointsArray.size(); waypointIdx++) {
+            QJsonObject waypointObject = waypointsArray.at(waypointIdx).toObject();
+            auto* intermediateWaypointItem = new RoutePlaybackWaypointItem(
+                QString("Waypoint %1").arg(waypointIdx + 1),
+                QString("%1, %2").arg(waypointObject.value("lat").toDouble()).arg(waypointObject.value("lng").toDouble()),
+                RoutePlaybackWaypointItem::WaypointType::Intermediate,
+                mUi->loc_routePlayingList);
+        }
 
         if (legIdx == nLegs - 1) {
             QJsonObject endLocation = thisLegObject.value("end_location").toObject();
