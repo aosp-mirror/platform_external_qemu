@@ -524,6 +524,7 @@ public:
     };
     std::unordered_map<uint32_t, DisplayInfo> m_displays;
     static uint32_t s_maxNumMultiDisplay;
+    static uint32_t s_displayIdInternalBegin;
     static uint32_t s_invalidIdMultiDisplay;
     bool tryLockMultiDisplayOnLoad(void);
     void unlockMultiDisplayOnLoad(void);
@@ -560,7 +561,6 @@ private:
 private:
     static FrameBuffer *s_theFrameBuffer;
     static HandleType s_nextHandle;
-    static uint32_t s_nextDisplayId;
     int m_x = 0;
     int m_y = 0;
     int m_framebufferWidth = 0;
