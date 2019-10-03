@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e4825227_c3705d53",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 38
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-10-03T22:59:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "137f35e0_89dfe720",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 20
+      },
+      "revId": "01969c2294e0409b00a76287af4c7bbf52f61bc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab0be716_dcb1f7df",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 38
@@ -45,6 +69,30 @@
       "revId": "01969c2294e0409b00a76287af4c7bbf52f61bc0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73fe179a_939d4d8e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 38
+      },
+      "lineNbr": 3937,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-10-03T22:59:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab0be716_dcb1f7df",
+      "range": {
+        "startLine": 3937,
+        "startChar": 3,
+        "endLine": 3937,
+        "endChar": 51
+      },
+      "revId": "01969c2294e0409b00a76287af4c7bbf52f61bc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
