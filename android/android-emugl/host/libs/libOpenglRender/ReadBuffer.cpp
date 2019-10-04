@@ -82,8 +82,16 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
     // get fresh data into the buffer;
     int readTotal = 0;
     do {
-        const size_t readNow = stream->read(m_readPtr + m_validData,
+        // fprintf(stderr, "%s: want: %zu. min: %zu\n", __func__,
+                // maxSizeToRead - readTotal, minSizeToRead);
+        const ssize_t readNow = stream->read(m_readPtr + m_validData,
                                             maxSizeToRead - readTotal);
+
+        if (readNow < 0) {
+            // fprintf(stderr, "%s: read returned < 0: %zd\n", __func__, readNow);
+            abort();
+        }
+
         if (!readNow) {
             if (readTotal > 0) {
                 return readTotal;
@@ -91,6 +99,7 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
                 return -1;
             }
         }
+                // fprintf(stderr, "%s: got: %zd\n", __func__, readNow);
         readTotal += readNow;
         m_validData += readNow;
     } while (readTotal < minSizeToRead);
