@@ -353,6 +353,8 @@ void removeExtension(std::string& currExts, const std::string& toRemove) {
 }
 
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
+    fprintf(stderr, "%s: call\n", __func__);
+
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
 
