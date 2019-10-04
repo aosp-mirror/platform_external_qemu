@@ -8,7 +8,7 @@ This document gives you some background on the emulator and outlines how you can
 Make sure to install [Android Studio](https://developer.android.com/studio) and the associated SDKs. Do not forget to install the official emulator and create a few [android virtual devices](http://www.androiddocs.com/tools/devices/index.html). Next follow the instructions for the platform you would like to work on:
 
   - [On Linux](android/docs/LINUX-DEV.md)
-  - [On Mac](android/docs/get_started/macos/README.md)
+  - [On Mac](android/docs/DARWIN-DEV.md)
   - [On Windows](android/docs/WINDOWS-DEV.md)
 
 We use the [Repo](https://source.android.com/setup/develop/repo) tool to manage working accross multiple branches.
