@@ -46,6 +46,13 @@ public:
 
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
+
+    void* createRingRenderThread(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        OnUnavailableReadCallback onUnavailableReadFunc) override final;
+    void destroyRingRenderThread(void* renderThread) override final;
+
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
                          void* context, bool useBgraReadback) final;
