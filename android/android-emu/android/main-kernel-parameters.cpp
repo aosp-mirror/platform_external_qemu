@@ -53,7 +53,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    bool isCros,
                                    uint32_t lcd_width,
                                    uint32_t lcd_height,
-                                   uint32_t lcd_vsync) {
+                                   uint32_t lcd_vsync,
+                                   const char* gltransport) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -139,6 +140,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     // Set vsync rate
     params.addFormat("qemu.vsync=%u", lcd_vsync);
+
+    // Set transport prop
+    params.addFormat("qemu.gltransport=%u", gltransport);
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
