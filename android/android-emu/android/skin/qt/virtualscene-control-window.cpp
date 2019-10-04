@@ -50,6 +50,7 @@
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/Physics.h"
 #include "android/settings-agent.h"
+#include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -209,10 +210,20 @@ bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
                                                  QtKeyEventSource source) {
     const bool down = event->type() == QEvent::KeyPress;
 
+    // Since QT upgraded to 5.12.1, on Linux, when host OS keyboard layout
+    // is non English. GroupSwitchModifier bit in modifiers is alwys set.
+    // To workaround this bug, we don't check if GroupSwitchModifier is set.
+    // BUG: 142010944
+#ifdef __linux__
+    Qt::KeyboardModifiers modifiers =
+            event->modifiers() & ~Qt::GroupSwitchModifier;
+#else
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+#endif
     // Trigger when the Alt key but no other modifiers is held.
     if (event->key() == Qt::Key_Alt &&
         source != QtKeyEventSource::ExtendedWindow) {
-        if (down && !mCaptureMouse && event->modifiers() == Qt::AltModifier) {
+        if (down && !mCaptureMouse && modifiers == Qt::AltModifier) {
             setCaptureMouse(true);
         } else if (!down && mCaptureMouse) {
             setCaptureMouse(false);
@@ -222,7 +233,7 @@ bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
     }
 
     // Look out for other modifier presses and cancel the capture.
-    if (mCaptureMouse && down && event->modifiers() != Qt::AltModifier) {
+    if (mCaptureMouse && down && modifiers != Qt::AltModifier) {
         setCaptureMouse(false);
     }
 
@@ -599,30 +610,25 @@ QString VirtualSceneControlWindow::getInfoText() {
 static android::base::Optional<android::virtualscene::ControlKey> toControlKey(
         QKeyEvent* event) {
     using android::virtualscene::ControlKey;
-
-    switch (event->key()) {
-        case Qt::Key_W:
-            return ControlKey::W;
-        case Qt::Key_A:
-            return ControlKey::A;
-        case Qt::Key_S:
-            return ControlKey::S;
-        case Qt::Key_D:
-            return ControlKey::D;
-        case Qt::Key_Q:
-            return ControlKey::Q;
-        case Qt::Key_E:
-            return ControlKey::E;
 #ifdef __APPLE__
-        case Qt::Key_unknown:
-            // On OS X, when the Alt key is held Qt can't recognize the E key.
-            // Compare the nativeVirtualKey code to see if this is the E key.
-            if (event->nativeVirtualKey() == kVK_ANSI_E) {
-                return ControlKey::E;
-            }
-
-// Otherwise fall through.
+    int nativeCode = event->nativeVirtualKey();
+#else
+    int nativeCode = event->nativeScanCode();
 #endif
+    int linuxKeyCode = skin_native_scancode_to_linux(nativeCode);
+    switch (linuxKeyCode) {
+        case LINUX_KEY_W:
+            return ControlKey::W;
+        case LINUX_KEY_A:
+            return ControlKey::A;
+        case LINUX_KEY_S:
+            return ControlKey::S;
+        case LINUX_KEY_D:
+            return ControlKey::D;
+        case LINUX_KEY_Q:
+            return ControlKey::Q;
+        case LINUX_KEY_E:
+            return ControlKey::E;
         default:
             return {};
     }
