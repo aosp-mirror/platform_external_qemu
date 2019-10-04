@@ -1942,7 +1942,9 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
                 true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width, hw->hw_lcd_height,
-                hw->hw_lcd_vsync));
+                hw->hw_lcd_vsync,
+                hw->hw_gltransport,
+                hw->hw_gltransport_drawFlushInterval));
 
         if (!kernel_parameters.get()) {
             return 1;

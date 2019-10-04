@@ -66,7 +66,8 @@ public:
 
     // Return true iff one can send a buffer to the queue, i.e. if it
     // is not full or it would grow anyway.
-    bool canPushLocked() const { return !mClosed && mCount < (int)mBuffers.size(); }
+    bool canPushLocked() const {
+        return !mClosed && mCount < (int)mBuffers.size(); }
 
     // Return true iff one can receive a buffer from the queue, i.e. if
     // it is not empty.
@@ -179,6 +180,43 @@ public:
 
         }
         return tryPopLocked(buffer);
+    }
+
+    // tryPushLocked, but in the same-thread case. No condition variable calls needed.
+    BufferQueueResult tryPushSameThread(T&& buffer) {
+        if (mClosed) {
+            return BufferQueueResult::Error;
+        }
+        if (mCount >= (int)mBuffers.size()) {
+            if (mSnapshotMode) {
+                grow();
+            } else {
+                return BufferQueueResult::TryAgain;
+            }
+        }
+        int pos = mPos + mCount;
+        if (pos >= (int)mBuffers.size()) {
+            pos -= mBuffers.size();
+        }
+        mBuffers[pos] = std::move(buffer);
+        ++mCount;
+        return BufferQueueResult::Ok;
+    }
+
+    // tryPopLocked, but in the same-thread case. No condition variable calls needed.
+    BufferQueueResult tryPopSameThread(T* buffer) {
+        if (mCount == 0) {
+            return (mClosed || mSnapshotMode) ? BufferQueueResult::Error
+                                              : BufferQueueResult::TryAgain;
+        }
+        *buffer = std::move(mBuffers[mPos]);
+        int pos = mPos + 1;
+        if (pos >= (int)mBuffers.size()) {
+            pos -= mBuffers.size();
+        }
+        mPos = pos;
+        --mCount;
+        return BufferQueueResult::Ok;
     }
 
     // Close the queue, it is no longer possible to push new items
