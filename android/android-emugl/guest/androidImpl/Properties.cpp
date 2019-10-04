@@ -30,6 +30,14 @@ EXPORT int property_get(const char* key, char* value, const char* default_value)
     } else if (!strcmp(key, "qemu.sf.lcd_density")) {
         len = strlen(qemu_sf_lcd_density);
         memcpy(value, qemu_sf_lcd_density, len + 1);
+    } else if (!strcmp(key, "ro.kernel.qemu.gltransport")) {
+        const char* asg = "asg";
+        len = strlen(asg);
+        memcpy(value, asg, len + 1);
+    } else if (!strcmp(key, "ro.kernel.qemu.gltransport.drawFlushInterval")) {
+        const char* res = "8000000";
+        len = strlen(res);
+        memcpy(value, res, len + 1);
     } else if (default_value) {
         len = strlen(qemu_sf_lcd_density);
         memcpy(value, default_value, len + 1);

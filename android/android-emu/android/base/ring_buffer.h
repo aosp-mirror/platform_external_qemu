@@ -22,6 +22,7 @@ ANDROID_BEGIN_HEADER
 
 #define RING_BUFFER_SHIFT 11
 #define RING_BUFFER_SIZE (1 << RING_BUFFER_SHIFT)
+#define NUM_CONFIG_FIELDS 32
 
 // Single producer/consumer ring buffer struct that can be shared
 // between host and guest as-is.
@@ -39,6 +40,7 @@ struct ring_buffer {
     uint32_t state; // An atomically updated variable from both
                     // producer and consumer for other forms of
                     // coordination.
+    uint32_t config[NUM_CONFIG_FIELDS];
 };
 
 void ring_buffer_init(struct ring_buffer* r);
@@ -60,6 +62,13 @@ struct ring_buffer_view {
     uint32_t mask;
 };
 
+// Convenience struct that holds a pointer to a ring along with a view.  It's a
+// common pattern for the ring and the buffer of the view to be shared between
+// two entities (in this case, usually guest and host).
+struct ring_buffer_with_view {
+    struct ring_buffer* ring;
+    struct ring_buffer_view view;
+};
 
 // Calculates the highest power of 2 so that
 // (1 << shift) <= size.
@@ -138,6 +147,11 @@ bool ring_buffer_view_can_read(
 uint32_t ring_buffer_available_read(
     const struct ring_buffer* r,
     const struct ring_buffer_view* v);
+void ring_buffer_copy_contents(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v,
+    uint32_t wanted_bytes,
+    uint8_t* res);
 
 // Lockless synchronization where the consumer is allowed to hang up and go to
 // sleep. This can be considered a sort of asymmetric lock for two threads,
