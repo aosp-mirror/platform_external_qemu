@@ -35,49 +35,41 @@
 #define ASGFX_LOG(fmt,...)
 #endif
 
-#define ADDRESS_SPACE_GRAPHICS_PAGE_SIZE 4096
-#define ADDRESS_SPACE_GRAPHICS_RING_SIZE 16384
-#define ADDRESS_SPACE_GRAPHICS_MAX_CONTEXTS 256
-
-// One control page,
-// two rings per context (guest to host, host to guest),
-// each of
-// ADDRESS_SPACE_GRAPHICS_MAX_CONTEXTS contexts
-#define ADDRESS_SPACE_GRAPHICS_CONTEXT_ALLOCATION_SIZE \
-    (ADDRESS_SPACE_GRAPHICS_PAGE_SIZE * 2 + 2 * ADDRESS_SPACE_GRAPHICS_RING_SIZE)
-
-#define ADDRESS_SPACE_GRAPHICS_BACKING_SIZE \
-    (ADDRESS_SPACE_GRAPHICS_CONTEXT_ALLOCATION_SIZE * ADDRESS_SPACE_GRAPHICS_MAX_CONTEXTS)
-
-#define ADDRESS_SPACE_GRAPHICS_TO_HOST_RING_INFO_OFFSET 0
-#define ADDRESS_SPACE_GRAPHICS_FROM_HOST_RING_INFO_OFFSET ADDRESS_SPACE_GRAPHICS_PAGE_SIZE
-#define ADDRESS_SPACE_GRAPHICS_TO_HOST_RING_BUFFER_OFFSET (2 * ADDRESS_SPACE_GRAPHICS_PAGE_SIZE)
-#define ADDRESS_SPACE_GRAPHICS_FROM_HOST_RING_BUFFER_OFFSET \
-    ADDRESS_SPACE_GRAPHICS_TO_HOST_RING_BUFFER_OFFSET + ADDRESS_SPACE_GRAPHICS_RING_SIZE
-
 using android::base::LazyInstance;
 using android::base::SubAllocator;
 
 namespace android {
 namespace emulation {
 
+// all static
+const int AddressSpaceGraphicsContext::kPageSize = 4096;
+const int AddressSpaceGraphicsContext::kRingInfoSize = kPageSize;
+const int AddressSpaceGraphicsContext::kRingSize = 16384;
+const int AddressSpaceGraphicsContext::kMaxContexts = 256;
+const int AddressSpaceGraphicsContext::kContextAllocationSize = 2 * kRingInfoSize + 2 * kRingSize;
+const int AddressSpaceGraphicsContext::kBackingSize = kMaxContexts * kContextAllocationSize;
+const int AddressSpaceGraphicsContext::kToHostRingInfoOffset = 0;
+const int AddressSpaceGraphicsContext::kFromHostRingInfoOffset = kRingInfoSize;
+const int AddressSpaceGraphicsContext::kToHostRingBufferOffset = kRingInfoSize * 2;
+const int AddressSpaceGraphicsContext::kFromHostRingBufferOffset = kToHostRingBufferOffset + kRingSize;
+
 class GraphicsBackingMemory {
 public:
     GraphicsBackingMemory() :
         mMemory(
             aligned_buf_alloc(
-                ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
-                ADDRESS_SPACE_GRAPHICS_BACKING_SIZE)) {
+                AddressSpaceGraphicsContext::kPageSize,
+                AddressSpaceGraphicsContext::kBackingSize)) {
         if (!mMemory) {
             crashhandler_die(
                 "Failed to allocate graphics backing memory. Wanted %zu bytes",
-                ADDRESS_SPACE_GRAPHICS_BACKING_SIZE);
+                AddressSpaceGraphicsContext::kBackingSize);
         }
 
         mSubAllocator.reset(new SubAllocator(
             mMemory,
-            ADDRESS_SPACE_GRAPHICS_BACKING_SIZE,
-            ADDRESS_SPACE_GRAPHICS_PAGE_SIZE));
+            AddressSpaceGraphicsContext::kBackingSize,
+            AddressSpaceGraphicsContext::kPageSize));
     }
 
     void clear() {
@@ -87,7 +79,7 @@ public:
         mPhysAddr = 0;
 
         if (mInitialized && m_ops) {
-            m_ops->remove_memory_mapping(mPhysAddr, mMemory, ADDRESS_SPACE_GRAPHICS_BACKING_SIZE);
+            m_ops->remove_memory_mapping(mPhysAddr, mMemory, AddressSpaceGraphicsContext::kBackingSize);
             mInitialized = false;
         }
     }
@@ -105,7 +97,7 @@ public:
         if (mInitialized) return;
 
         int allocRes = get_address_space_device_hw_funcs()->allocSharedHostRegionLocked(
-            ADDRESS_SPACE_GRAPHICS_BACKING_SIZE, &mSharedRegionOffset);
+            AddressSpaceGraphicsContext::kBackingSize, &mSharedRegionOffset);
 
         if (allocRes) {
             crashhandler_die(
@@ -117,16 +109,16 @@ public:
                 mSharedRegionOffset;
 
         m_ops = ops;
-        m_ops->add_memory_mapping(mPhysAddr, mMemory, ADDRESS_SPACE_GRAPHICS_BACKING_SIZE);
+        m_ops->add_memory_mapping(mPhysAddr, mMemory, AddressSpaceGraphicsContext::kBackingSize);
         mInitialized = true;
 
         ASGFX_LOG("shared region: [0x%llx 0x%llx]",
                   (unsigned long long)mSharedRegionOffset,
-                  (unsigned long long)mSharedRegionOffset + ADDRESS_SPACE_GRAPHICS_BACKING_SIZE);
+                  (unsigned long long)mSharedRegionOffset + AddressSpaceGraphicsContext::kBackingSize);
     }
 
     char* allocContextBuffer() {
-        return (char*)mSubAllocator->alloc(ADDRESS_SPACE_GRAPHICS_CONTEXT_ALLOCATION_SIZE);
+        return (char*)mSubAllocator->alloc(AddressSpaceGraphicsContext::kContextAllocationSize);
     }
 
     uint64_t getOffsetIntoPhysmem(char* ptr) {
@@ -181,31 +173,32 @@ AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
     mExiting = 1;
     mThreadMessages.send(ThreadCommand::Exit);
     mThread.wait();
+    if (mCurrentConsumer) mConsumerDestroyFunc(mCurrentConsumer);
 }
 
 static void initGraphicsContextRings(
     char* buffer,
-    AddressSpaceGraphicsContext::Ring& toHost,
-    AddressSpaceGraphicsContext::Ring& fromHost) {
+    struct ring_buffer_with_view& toHost,
+    struct ring_buffer_with_view& fromHost) {
 
-    toHost.ring = reinterpret_cast<ring_buffer*>(buffer + ADDRESS_SPACE_GRAPHICS_TO_HOST_RING_INFO_OFFSET);
-    fromHost.ring = reinterpret_cast<ring_buffer*>(buffer + ADDRESS_SPACE_GRAPHICS_FROM_HOST_RING_INFO_OFFSET);
+    toHost.ring = reinterpret_cast<ring_buffer*>(buffer + AddressSpaceGraphicsContext::kToHostRingInfoOffset);
+    fromHost.ring = reinterpret_cast<ring_buffer*>(buffer + AddressSpaceGraphicsContext::kFromHostRingInfoOffset);
 
     ring_buffer_view_init(
         toHost.ring,
         &toHost.view,
-        reinterpret_cast<uint8_t*>(buffer + ADDRESS_SPACE_GRAPHICS_TO_HOST_RING_BUFFER_OFFSET),
-        ADDRESS_SPACE_GRAPHICS_RING_SIZE);
+        reinterpret_cast<uint8_t*>(buffer + AddressSpaceGraphicsContext::kToHostRingBufferOffset),
+        AddressSpaceGraphicsContext::kRingSize);
 
     ring_buffer_view_init(
         fromHost.ring,
         &fromHost.view,
-        reinterpret_cast<uint8_t*>(buffer + ADDRESS_SPACE_GRAPHICS_FROM_HOST_RING_BUFFER_OFFSET),
-        ADDRESS_SPACE_GRAPHICS_RING_SIZE);
+        reinterpret_cast<uint8_t*>(buffer + AddressSpaceGraphicsContext::kFromHostRingBufferOffset),
+        AddressSpaceGraphicsContext::kRingSize);
 }
 
-static void doEcho(AddressSpaceGraphicsContext::Ring& toHost,
-                   AddressSpaceGraphicsContext::Ring& fromHost) {
+static void doEcho(struct ring_buffer_with_view& toHost,
+                   struct ring_buffer_with_view& fromHost) {
     uint32_t availableToEcho =
         ring_buffer_available_read(
             toHost.ring, &toHost.view);
@@ -284,7 +277,7 @@ AddressSpaceGraphicsContext::consumeReadbackLoop(
 
         if (mReadPos == 1024) {
             // fprintf(stderr, "%s: read 1024, send back. view buf [%p %p]. write pos: %u [%p %p]\n", __func__, mFromHost.view.buf,
-                    // mFromHost.view.buf + ADDRESS_SPACE_GRAPHICS_RING_SIZE, ring_buffer_view_get_ring_pos(&mFromHost.view, mFromHost.ring->write_pos),
+                    // mFromHost.view.buf + AddressSpaceGraphicsContext::kRingSize, ring_buffer_view_get_ring_pos(&mFromHost.view, mFromHost.ring->write_pos),
                     // mFromHost.view.buf + ring_buffer_view_get_ring_pos(&mFromHost.view, mFromHost.ring->write_pos),
                     // mFromHost.view.buf + ring_buffer_view_get_ring_pos(&mFromHost.view, mFromHost.ring->write_pos) + 1024);
             ring_buffer_write_fully(
@@ -324,6 +317,32 @@ void AddressSpaceGraphicsContext::threadFunc() {
     fprintf(stderr, "%s: exit thread\n", __func__);
 }
 
+int AddressSpaceGraphicsContext::onUnavailableRead() {
+    static const uint32_t kMaxUnavailableReads = 500;
+    ++mUnavailableReadCount;
+    ring_buffer_yield();
+    ThreadCommand threadCmd;
+    if (mUnavailableReadCount == kMaxUnavailableReads) {
+        *mConsumerStatePtr = ConsumerState::NeedNotify;
+        // go to sleep until another ping
+        mThreadMessages.receive(&threadCmd);
+
+        switch (threadCmd) {
+            case ThreadCommand::Wakeup:
+                *mConsumerStatePtr = ConsumerState::CanConsume;
+                break;
+            case ThreadCommand::Sleep:
+                *mConsumerStatePtr = ConsumerState::NeedNotify;
+                break;
+            case ThreadCommand::Exit:
+                return -1;
+        }
+
+        mThreadReturnMessages.send(threadCmd);
+    }
+    return 0;
+}
+
 void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo *info) {
     uint64_t result;
 
@@ -341,7 +360,7 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo *info) {
         ASGFX_LOG("AllocOrGetOffset: Offset: 0x%llx", result);
         break;
     case Command::GetSize:
-        result = ADDRESS_SPACE_GRAPHICS_CONTEXT_ALLOCATION_SIZE;
+        result = AddressSpaceGraphicsContext::kContextAllocationSize;
         break;
     case Command::GuestInitializedRings: {
         uint32_t hostRingVersion =
@@ -375,6 +394,19 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo *info) {
         mThread.wait();
         result = 0;
         break;
+    case Command::CreateConsumer:
+        mCurrentConsumer = mConsumerCreateFunc(
+            mToHost,
+            mFromHost,
+            [this] {
+                return onUnavailableRead();
+            });
+        break;
+    case Command::DestroyConsumer:
+        mThreadMessages.send(ThreadCommand::Exit);
+        mConsumerDestroyFunc(mCurrentConsumer);
+        mCurrentConsumer = 0;
+        break;
     default:
         result = -1;
         break;
@@ -385,6 +417,13 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo *info) {
 
 AddressSpaceDeviceType AddressSpaceGraphicsContext::getDeviceType() const {
     return AddressSpaceDeviceType::Graphics;
+}
+
+void AddressSpaceGraphicsContext::setConsumer(
+    AddressSpaceGraphicsContext::ConsumerCreateCallback createFunc,
+    AddressSpaceGraphicsContext::ConsumerDestroyCallback destroyFunc) {
+    mConsumerCreateFunc = createFunc;
+    mConsumerDestroyFunc = destroyFunc;
 }
 
 void AddressSpaceGraphicsContext::save(base::Stream* stream) const {

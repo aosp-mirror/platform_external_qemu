@@ -108,6 +108,14 @@ public:
         }
     }
 
+    AddressSpaceDeviceContext* handleToContext(uint32_t handle) {
+        AutoLock lock(mContextsLock);
+        if (mContexts.find(handle) == mContexts.end()) return nullptr;
+
+        auto& contextDesc = mContexts[handle];
+        return contextDesc.device_context.get();
+    }
+
     void save(Stream* stream) const {
         stream->putBe32(mHandleIndex);
         stream->putBe32(mContexts.size());
@@ -304,6 +312,10 @@ void* sAddressSpaceDeviceGetHostPtr(uint64_t gpa) {
     return sAddressSpaceDeviceState->getHostPtr(gpa);
 }
 
+static void* sAddressSpaceHandleToContext(uint32_t handle) {
+    return (void*)(sAddressSpaceDeviceState->handleToContext(handle));
+}
+
 } // namespace
 
 extern "C" {
@@ -315,7 +327,8 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDevicePing,                // ping
     &sAddressSpaceDeviceAddMemoryMapping,    // add_memory_mapping
     &sAddressSpaceDeviceRemoveMemoryMapping, // remove_memory_mapping
-    &sAddressSpaceDeviceGetHostPtr           // get_host_ptr
+    &sAddressSpaceDeviceGetHostPtr,          // get_host_ptr
+    &sAddressSpaceHandleToContext,           // handle_to_context
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
