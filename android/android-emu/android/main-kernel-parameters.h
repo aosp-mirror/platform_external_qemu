@@ -61,6 +61,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    bool isCros,
                                    uint32_t lcd_width,
                                    uint32_t lcd_height,
-                                   uint32_t lcd_vsync);
+                                   uint32_t lcd_vsync,
+                                   const char* gltransport);
 
 ANDROID_END_HEADER

@@ -118,10 +118,32 @@ class MockRenderer : public emugl::Renderer {
 public:
     MockRenderer(bool hasValidScreenshot)
         : mHasValidScreenshot(hasValidScreenshot) { }
+
     emugl::RenderChannelPtr createRenderChannel(
             android::base::Stream* loadStream = nullptr) {
         return nullptr;
     }
+
+    void* createRingRenderThread(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        Renderer::OnUnavailableReadCallback onUnavailableReadFunc) {
+        return nullptr;
+    }
+
+    void* createRingRenderThread2(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        struct ring_buffer_with_view toHostData,
+        Renderer::OnUnavailableReadCallback onUnavailableReadFunc,
+        Renderer::GetPtrAndSizeCallback getPtrAndSizeFunc) {
+        return nullptr;
+    }
+
+    void destroyRingRenderThread(void* renderThread) {
+        (void)renderThread;
+    }
+
     HardwareStrings getHardwareStrings() {
         return {};
     }

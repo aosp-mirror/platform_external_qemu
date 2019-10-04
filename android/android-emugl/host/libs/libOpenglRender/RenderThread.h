@@ -17,12 +17,14 @@
 
 #include "android/base/files/MemStream.h"
 #include "android/base/Optional.h"
+#include "android/base/ring_buffer.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
 #include <atomic>
+#include <functional>
 #include <memory>
 
 namespace emugl {
@@ -30,16 +32,36 @@ namespace emugl {
 class RenderChannelImpl;
 class RendererImpl;
 class ReadBuffer;
+class RingStream;
 
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
 class RenderThread : public emugl::Thread {
     using MemStream = android::base::MemStream;
+    using OnUnavailableReadCallback = std::function<int()>;
+    using GetPtrAndSizeCallback =
+        std::function<void(uint64_t, char**, size_t*)>;
 
 public:
     // Create a new RenderThread instance.
     RenderThread(RenderChannelImpl* channel,
                  android::base::Stream* loadStream = nullptr);
+
+    // Create a new RenderThread instance from ring buffers.
+    RenderThread(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        OnUnavailableReadCallback onUnavailableReadFunc,
+        android::base::Stream* loadStream = nullptr);
+
+    // Create a new RenderThread instance from ring buffers.
+    RenderThread(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        struct ring_buffer_with_view toHostData,
+        OnUnavailableReadCallback onUnavailableReadFunc,
+        GetPtrAndSizeCallback getPtrAndSizeFunc,
+        android::base::Stream* loadStream = nullptr);
 
     virtual ~RenderThread();
 
@@ -63,6 +85,12 @@ private:
         Finished,
     };
 
+    // Whether using RenderChannel or a ring buffer.
+    enum TransportMode {
+        Channel,
+        Ring,
+    };
+
     template <class OpImpl>
     void snapshotOperation(android::base::AutoLock* lock, OpImpl&& impl);
 
@@ -77,6 +105,9 @@ private:
     bool isPausedForSnapshotLocked() const;
 
     RenderChannelImpl* mChannel = nullptr;
+    std::unique_ptr<RingStream> mRingStream;
+    TransportMode mTransportMode = TransportMode::Channel;
+
     SnapshotState mState = SnapshotState::Empty;
     std::atomic<bool> mFinished { false };
     android::base::Lock mLock;
