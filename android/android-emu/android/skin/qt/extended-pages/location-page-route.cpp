@@ -103,10 +103,8 @@ QString LocationPage::toJsonString(const GpsFixArray* arr) {
 
 void LocationPage::stylePopupMenu(QMenu* popMenu) {
     popMenu->setMinimumWidth(100);
-    popMenu->setStyleSheet("QMenu::item {padding: 4px; font-size: 14pt;}"
-        "QMenu::item:selected {background-color: #4285f4;}"
-        "QLabel {font-size: 14pt;}"
-        "QLabel:hover {background-color: #4285f4;}");
+    popMenu->setStyleSheet("QMenu::item {padding: 4px;}"
+        "QMenu::item:selected {background-color: #4285f4;}");
 }
 
 // Populate the saved routes list with the routes that are found on disk

@@ -10,7 +10,7 @@
   GNU General Public License for more details.
  */
 
-QGroupBox { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
+QGroupBox, QMenu::item { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
 QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBox {
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
