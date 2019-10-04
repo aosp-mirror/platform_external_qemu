@@ -1202,4 +1202,12 @@ TEST_F(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
     vk->vkDestroyCommandPool(mDevice, pool, nullptr);
 }
 
+// Tests many vkGetPhysicalDeviceProperties in a row.
+TEST_F(VulkanHalTest, RoundTrips) {
+    for (uint32_t i = 0; i < 200000; ++i) {
+        VkPhysicalDeviceProperties props;
+        vk->vkGetPhysicalDeviceProperties(mPhysicalDevice, &props);
+    }
+}
+
 }  // namespace aemu
