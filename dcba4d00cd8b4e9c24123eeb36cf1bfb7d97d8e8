@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "daf71eee_3e7b3bf0",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-04T22:38:48Z",
+      "side": 1,
+      "message": "this still works on non-Linux, right?",
+      "range": {
+        "startLine": 618,
+        "startChar": 1,
+        "endLine": 631,
+        "endChar": 33
+      },
+      "revId": "dcba4d00cd8b4e9c24123eeb36cf1bfb7d97d8e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
