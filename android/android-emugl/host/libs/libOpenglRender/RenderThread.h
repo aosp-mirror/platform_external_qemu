@@ -30,6 +30,7 @@ namespace emugl {
 class RenderChannelImpl;
 class RendererImpl;
 class ReadBuffer;
+class RingStream;
 
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
@@ -77,6 +78,8 @@ private:
     bool isPausedForSnapshotLocked() const;
 
     RenderChannelImpl* mChannel = nullptr;
+    RingStream* mRingStream = nullptr;
+
     SnapshotState mState = SnapshotState::Empty;
     std::atomic<bool> mFinished { false };
     android::base::Lock mLock;

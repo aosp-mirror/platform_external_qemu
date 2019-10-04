@@ -69,6 +69,7 @@ set(OpenglRender_src
     RenderThreadInfo.cpp
     render_api.cpp
     RenderWindow.cpp
+    RingStream.cpp
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp

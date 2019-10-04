@@ -16,6 +16,7 @@
 #include "RenderThread.h"
 
 #include "ChannelStream.h"
+#include "RingStream.h"
 #include "ErrorLog.h"
 #include "FrameBuffer.h"
 #include "ReadBuffer.h"
@@ -216,6 +217,7 @@ intptr_t RenderThread::main() {
     }
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+    IOStream* ioStream = (IOStream*)&stream;
     ReadBuffer readBuf(kStreamBufferSize);
 
     const SnapshotObjects snapshotObjects = {
@@ -236,7 +238,7 @@ intptr_t RenderThread::main() {
         // Not loading from a snapshot: continue regular startup, read
         // the |flags|.
         uint32_t flags = 0;
-        while (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
+        while (ioStream->read(&flags, sizeof(flags)) != sizeof(flags)) {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
@@ -283,7 +285,7 @@ intptr_t RenderThread::main() {
 
         int stat = 0;
         if (packetSize > (int)readBuf.validData()) {
-            stat = readBuf.getData(&stream, packetSize);
+            stat = readBuf.getData(ioStream, packetSize);
             if (stat <= 0) {
                 if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                     continue;
@@ -358,7 +360,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("glDec.decode");
                 last = tInfo.m_glDec.decode(
-                        readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
+                        readBuf.buf(), readBuf.validData(), ioStream, &checksumCalc);
                 if (last > 0) {
                     progress = true;
                     readBuf.consume(last);
@@ -372,7 +374,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("gl2Dec.decode");
                 last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                             &stream, &checksumCalc);
+                                             ioStream, &checksumCalc);
 
                 if (last > 0) {
                     progress = true;
@@ -388,7 +390,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("rcDec.decode");
                 last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                            &stream, &checksumCalc);
+                                            ioStream, &checksumCalc);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
@@ -402,7 +404,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("vkDec.decode");
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            &stream);
+                                            ioStream);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
