@@ -724,7 +724,7 @@ GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLs
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
-    ctx->dispatcher().glBufferSubData(target, offset, size, data);
+    // ctx->dispatcher().glBufferSubData(target, offset, size, data);
 }
 
 
