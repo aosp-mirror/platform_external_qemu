@@ -1016,10 +1016,16 @@ bool allocExternalMemory(
 #endif
 
     if (exportRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "allocExternalMemory: Failed to get external memory "
+        fprintf(stderr, "allocExternalMemory: Failed to get external memory "
+                        "native handle:\n");
+        LOG(ERROR) << "allocExternalMemory: Failed to get external memory "
                         "native handle: "
                      << exportRes;
         return false;
+    }
+
+    if (info->exportedHandle == VK_EXT_MEMORY_HANDLE_INVALID) {
+        fprintf(stderr, "%s: invalid ext mem handle.\n", __func__);
     }
 
     info->actuallyExternal = true;
@@ -1198,7 +1204,10 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
 }
 
 bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize) {
-    if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
+    if (!isColorBufferVulkanCompatible(colorBufferHandle)) {
+        fprintf(stderr, "%s: cb 0x%x not vk compat\n", __func__, colorBufferHandle);
+        return false;
+    }
 
     auto vk = sVkEmulation->dvk;
 
@@ -1276,6 +1285,10 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
     VkResult createRes = vk->vkCreateImage(sVkEmulation->device, &imageCi,
                                            nullptr, &res.image);
     if (createRes != VK_SUCCESS) {
+        fprintf(stderr, "%s: Failed to create Vulkan image for ColorBuffer 0x%x vkformat %u\n", __func__,
+                colorBufferHandle, res.format);
+        LOG(ERROR) << "Failed to create Vulkan image for ColorBuffer "
+                     << colorBufferHandle;
         LOG(VERBOSE) << "Failed to create Vulkan image for ColorBuffer "
                      << colorBufferHandle;
         return false;
