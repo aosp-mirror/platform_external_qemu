@@ -208,6 +208,12 @@ void EmulatorContainer::changeEvent(QEvent* event) {
             // to ignore this state change, we just want to counteract the
             // effects it had.
             if (windowState() & Qt::WindowMaximized) {
+                // BUG: 142088252 On macOS, if the emulator window
+                // - coincides with the monitor dimensions
+                // - the host's device pixel ratio is 1,
+                // it's possible to enter an infinite recursive event loop if
+                // we try the functions here.
+#ifndef __APPLE__
                 showNormal();
                 if (mModalOverlay) {
                     mModalOverlay->showNormal();
@@ -216,6 +222,7 @@ void EmulatorContainer::changeEvent(QEvent* event) {
                     mVirtualSceneInfo->showNormal();
                 }
                 mMessages->showNormal();
+#endif
             } else if (windowState() & Qt::WindowMinimized) {
                 // In case the window was minimized without pressing the
                 // toolbar's minimize button (which is possible on some
