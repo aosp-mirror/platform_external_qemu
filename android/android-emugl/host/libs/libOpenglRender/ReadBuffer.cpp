@@ -17,12 +17,15 @@
 
 #include "ErrorLog.h"
 
+#include "android/base/system/System.h"
+
 #include <algorithm>
 
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
 
+using android::base::System;
 namespace emugl {
 
 ReadBuffer::ReadBuffer(size_t bufsize) {
@@ -40,6 +43,7 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
     assert(stream);
     assert(minSize > (int)m_validData);
 
+            auto start = System::get()->getHighResTimeUs();
     const int minSizeToRead = minSize - m_validData;
     int maxSizeToRead;
     const int freeTailSize = m_buf + m_size - (m_readPtr + m_validData);
@@ -79,11 +83,21 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         m_readPtr = m_buf;
     }
 
+    auto end = System::get()->getHighResTimeUs();
+    m_tailMoveTimeUs += end - start;
     // get fresh data into the buffer;
     int readTotal = 0;
     do {
-        const size_t readNow = stream->read(m_readPtr + m_validData,
+        // fprintf(stderr, "%s: want: %zu. min: %zu\n", __func__,
+                // maxSizeToRead - readTotal, minSizeToRead);
+        const ssize_t readNow = stream->read(m_readPtr + m_validData,
                                             maxSizeToRead - readTotal);
+
+        if (readNow < 0) {
+            // fprintf(stderr, "%s: read returned < 0: %zd\n", __func__, readNow);
+            abort();
+        }
+
         if (!readNow) {
             if (readTotal > 0) {
                 return readTotal;
@@ -91,6 +105,7 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
                 return -1;
             }
         }
+                // fprintf(stderr, "%s: got: %zd\n", __func__, readNow);
         readTotal += readNow;
         m_validData += readNow;
     } while (readTotal < minSizeToRead);
@@ -123,4 +138,9 @@ void ReadBuffer::onLoad(android::base::Stream* stream) {
     stream->read(m_readPtr, m_validData);
 }
 
+void ReadBuffer::printStats() {
+    printf("ReadBuffer::%s: tail move time %f ms\n", __func__,
+            (float)m_tailMoveTimeUs / 1000.0f);
+    m_tailMoveTimeUs = 0;
+}
 }  // namespace emugl
