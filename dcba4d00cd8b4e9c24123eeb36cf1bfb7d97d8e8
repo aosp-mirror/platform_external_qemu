@@ -22,6 +22,30 @@
       "revId": "dcba4d00cd8b4e9c24123eeb36cf1bfb7d97d8e8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47f6ead7_483068c0",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-10-04T22:44:30Z",
+      "side": 1,
+      "message": "I have verified that this still works on Non-Linux. Previous implementation won\u0027t work on other platforms if the keyboard layout is not English(US).\nLet\u0027s say on AZERTY. \"W\" key will produce \"Qt::key_E\" which will have no effect on the virtual scene.",
+      "parentUuid": "daf71eee_3e7b3bf0",
+      "range": {
+        "startLine": 618,
+        "startChar": 1,
+        "endLine": 631,
+        "endChar": 33
+      },
+      "revId": "dcba4d00cd8b4e9c24123eeb36cf1bfb7d97d8e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
