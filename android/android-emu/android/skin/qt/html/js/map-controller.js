@@ -160,9 +160,18 @@ class MapController extends GoogleMapPageComponent {
 
     displayRouteEditor(latLng, address) {
         console.log('MapController::displayRouteEditor called', latLng, address);
+        this.viewModel.setIsLoadingRoute(true);
+        this.locationPanel.hide();
+        this.routePanel.close();
         this.viewModel.clearWaypoints();
-        this.onWaypointSelected({ latLng });
+        this.viewModel.setDestination({
+            latLng,
+            address
+        });
+        this.mapManager.addMarker(latLng);
+        this.mapManager.centerMapOnLocation(latLng);
         this.routePanel.open();
+        this.viewModel.setIsLoadingRoute(false);
     }
 
     showRouteEditor() {
