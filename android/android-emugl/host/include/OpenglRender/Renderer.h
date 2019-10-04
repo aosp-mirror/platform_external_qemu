@@ -16,6 +16,7 @@
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
 #include "android/base/files/Stream.h"
+#include "android/base/ring_buffer.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
 
@@ -43,6 +44,23 @@ public:
     //   the call as all the required data is copied here synchronously.
     virtual RenderChannelPtr createRenderChannel(
             android::base::Stream* loadStream = nullptr) = 0;
+
+    // createRenderChannel, but for the address space graphics device case.
+    using OnUnavailableReadCallback = std::function<int()>;
+    using GetPtrAndSizeCallback =
+        std::function<void(uint64_t, char**, size_t*)>;
+    
+    virtual void* createRingRenderThread(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        OnUnavailableReadCallback onUnavailableReadFunc) = 0;
+    virtual void* createRingRenderThread2(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        struct ring_buffer_with_view toHostData,
+        OnUnavailableReadCallback onUnavailableReadFunc,
+        GetPtrAndSizeCallback getPtrAndSizeFunc) = 0;
+    virtual void destroyRingRenderThread(void* renderThread) = 0;
 
     // getHardwareStrings - describe the GPU hardware and driver.
     // The underlying GL's vendor/renderer/version strings are returned to the
