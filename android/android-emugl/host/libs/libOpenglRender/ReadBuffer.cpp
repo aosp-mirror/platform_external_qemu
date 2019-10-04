@@ -17,12 +17,15 @@
 
 #include "ErrorLog.h"
 
+#include "android/base/system/System.h"
+
 #include <algorithm>
 
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
 
+using android::base::System;
 namespace emugl {
 
 ReadBuffer::ReadBuffer(size_t bufsize) {
@@ -39,11 +42,13 @@ ReadBuffer::~ReadBuffer() {
 int ReadBuffer::getData(IOStream* stream, int minSize) {
     assert(stream);
     assert(minSize > (int)m_validData);
+   //  fprintf(stderr, "%s: m_buf: %p minSize: %d m_size: %zu readPtr: %p validData: %zu\n", __func__, m_buf, minSize, m_size,
+   //          m_readPtr, m_validData);
 
     const int minSizeToRead = minSize - m_validData;
     int maxSizeToRead;
     const int freeTailSize = m_buf + m_size - (m_readPtr + m_validData);
-    if (freeTailSize >= minSizeToRead) {
+    if (freeTailSize >= minSizeToRead && freeTailSize > 8192) {
         maxSizeToRead = freeTailSize;
     } else {
         if (freeTailSize + (m_readPtr - m_buf) >= minSizeToRead) {
@@ -60,6 +65,15 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
                     2 * m_size);
             if (new_size < m_size) {  // overflow check
                 new_size = INT_MAX;
+            }
+
+            size_t potentialNewSpace = new_size - m_validData;
+
+            size_t unmatched = potentialNewSpace % 8192;
+
+            if (unmatched) {
+                size_t neededToMatch = 8192 + 8192 - unmatched;
+                new_size += neededToMatch;
             }
 
             const auto new_buf = (unsigned char*)malloc(new_size);
@@ -79,18 +93,43 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         m_readPtr = m_buf;
     }
 
+    if (maxSizeToRead < 8192) {
+        int toGrow = 16 * 8192 + (8192 - maxSizeToRead);
+
+        size_t new_size = m_size + toGrow;
+
+        const auto new_buf = (unsigned char*)malloc(new_size);
+
+        memcpy(new_buf, m_readPtr, m_validData);
+        free(m_buf);
+        m_buf = new_buf;
+        m_size = new_size;
+        maxSizeToRead = m_size - m_validData;
+        m_readPtr = m_buf;
+    }
+
     // get fresh data into the buffer;
     int readTotal = 0;
     do {
-        const size_t readNow = stream->read(m_readPtr + m_validData,
+        // fprintf(stderr, "%s: want: %zu. min: %zu\n", __func__,
+                // maxSizeToRead - readTotal, minSizeToRead);
+        const ssize_t readNow = stream->read(m_readPtr + m_validData,
                                             maxSizeToRead - readTotal);
+
+        if (readNow < 0) {
+            // fprintf(stderr, "%s: read returned < 0: %zd\n", __func__, readNow);
+            abort();
+        }
+
         if (!readNow) {
             if (readTotal > 0) {
                 return readTotal;
             } else {
+                fprintf(stderr, "%s: welp\n", __func__);
                 return -1;
             }
         }
+                // fprintf(stderr, "%s: got: %zd\n", __func__, readNow);
         readTotal += readNow;
         m_validData += readNow;
     } while (readTotal < minSizeToRead);
@@ -123,4 +162,9 @@ void ReadBuffer::onLoad(android::base::Stream* stream) {
     stream->read(m_readPtr, m_validData);
 }
 
+void ReadBuffer::printStats() {
+    printf("ReadBuffer::%s: tail move time %f ms\n", __func__,
+            (float)m_tailMoveTimeUs / 1000.0f);
+    m_tailMoveTimeUs = 0;
+}
 }  // namespace emugl

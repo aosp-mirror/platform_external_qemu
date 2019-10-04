@@ -120,6 +120,24 @@ bool ChecksumCalculator::validate(const void* expectedChecksum,
                                   static_cast<const char*>(expectedChecksum) +
                                           sizeof(val),
                                   sizeof(m_numRead));
+
+            if (!isValid) {
+                fprintf(stderr, "%s: difference in checksum: ", __func__);
+                uint8_t* expecteds = (uint8_t*)expectedChecksum;
+                uint8_t* actuals = (uint8_t*)(&val);
+                for (uint32_t i = 0; i < sizeof(val); ++i) {
+                    fprintf(stderr, "[0x%x | 0x%x]", expecteds[i], actuals[i]);
+                }
+                fprintf(stderr, "\n");
+                {
+                uint8_t* expecteds = (uint8_t*)(expectedChecksum) + sizeof(val);
+                uint8_t* actuals = (uint8_t*)(&m_numRead);
+                for (uint32_t i = 0; i < sizeof(m_numRead); ++i) {
+                    fprintf(stderr, "[0x%x | 0x%x]", expecteds[i], actuals[i]);
+                }
+                fprintf(stderr, "\n");
+                }
+            }
             break;
         }
         default:
