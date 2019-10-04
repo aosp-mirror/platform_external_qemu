@@ -60,6 +60,13 @@ struct ring_buffer_view {
     uint32_t mask;
 };
 
+// Convenience struct that holds a pointer to a ring along with a view.  It's a
+// common pattern for the ring and the buffer of the view to be shared between
+// two entities (in this case, usually guest and host).
+struct ring_buffer_with_view {
+    struct ring_buffer* ring;
+    struct ring_buffer_view view;
+};
 
 // Calculates the highest power of 2 so that
 // (1 << shift) <= size.
