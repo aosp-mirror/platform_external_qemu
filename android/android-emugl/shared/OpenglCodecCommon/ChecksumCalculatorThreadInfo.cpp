@@ -90,6 +90,7 @@ void ChecksumCalculatorThreadInfo::validOrDie(ChecksumCalculator* calc,
                                               size_t checksumLen,
                                               const char* message) {
     if (!validate(calc, buf, bufLen, checksum, checksumLen)) {
+        fprintf(stderr, "%s: message %s\n", __func__, message);
         emugl::emugl_crash_reporter(message);
     }
 }
