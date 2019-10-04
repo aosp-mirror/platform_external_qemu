@@ -14,6 +14,7 @@
 #include "RendererImpl.h"
 
 #include "RenderChannelImpl.h"
+#include "RenderThread.h"
 
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
@@ -231,6 +232,22 @@ RenderChannelPtr RendererImpl::createRenderChannel(
     }
 
     return channel;
+}
+
+void* RendererImpl::createRingRenderThread(
+        struct ring_buffer_with_view toHost,
+        struct ring_buffer_with_view fromHost,
+        Renderer::OnUnavailableReadCallback onUnavailableReadFunc) {
+        fprintf(stderr, "%s: call\n", __func__);
+    auto thread = new RenderThread(toHost, fromHost, onUnavailableReadFunc, 0);
+    thread->start();
+    return (void*)thread;
+}
+
+void RendererImpl::destroyRingRenderThread(void* renderThread) {
+        fprintf(stderr, "%s: call\n", __func__);
+    RenderThread* thread = (RenderThread*)renderThread;
+    delete thread;
 }
 
 void RendererImpl::pauseAllPreSave() {
