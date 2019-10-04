@@ -219,6 +219,31 @@ uint32_t ring_buffer_available_read(
     }
 }
 
+void ring_buffer_copy_contents(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v,
+    uint32_t wanted_bytes,
+    uint8_t* res) {
+
+    uint32_t available_at_end =
+        v->size - ring_buffer_view_get_ring_pos(v, r->read_pos);
+
+    if (wanted_bytes > available_at_end) {
+        uint32_t remaining = wanted_bytes - available_at_end;
+        memcpy(res,
+               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+               available_at_end);
+        memcpy(res + available_at_end,
+               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos + available_at_end)],
+               remaining);
+    } else {
+        memcpy(res,
+               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+               wanted_bytes);
+    }
+}
+
+
 long ring_buffer_view_write(
     struct ring_buffer* r,
     struct ring_buffer_view* v,
@@ -303,9 +328,7 @@ long ring_buffer_view_read(
 
 void ring_buffer_yield() {
 #ifdef _WIN32
-    if (!SwitchToThread()) {
-        Sleep(0);
-    }
+    _mm_pause();
 #else
     sched_yield();
 #endif

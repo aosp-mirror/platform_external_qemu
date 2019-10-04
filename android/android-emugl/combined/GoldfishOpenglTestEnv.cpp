@@ -93,7 +93,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
         pj(sTestContentDir->path(), "hardware.ini");
 
     std::ofstream hwIniPathTouch(customHwIniPath, std::ios::out);
-    hwIniPathTouch << "test ini";
+    hwIniPathTouch << "hw.gltransport.asg.writeBufferSize = 4194304\n";
+    hwIniPathTouch << "hw.gltransport.asg.writeStepSize = 4096\n";
     hwIniPathTouch.close();
 
     avdInfo_setCustomCoreHwIniPath(android_avdInfo, customHwIniPath.c_str());
@@ -160,6 +161,11 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     printf("%s: GL strings; [%s] [%s] [%s].\n", __func__, vendor, renderer,
            version);
+
+    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
+    android_hw->hw_gltransport_asg_writeStepSize = 8192;
+    android_hw->hw_gltransport_asg_dataRingSize = 131072;
+    android_hw->hw_gltransport_drawFlushInterval = 1000000;
 
     android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
 
