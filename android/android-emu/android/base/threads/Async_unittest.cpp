@@ -14,6 +14,8 @@
 
 #include "android/base/threads/Async.h"
 
+#include "android/base/async/Looper.h"
+
 #include <gtest/gtest.h>
 
 namespace android {
@@ -23,6 +25,27 @@ TEST(AsyncTest, Simple) {
     for (int i = 0; i < 10; i++) {
         async([] { });
     }
+}
+
+// Tests that we can create and destroy the async thread with looper.
+TEST(AsyncThreadWithLooper, Simple) {
+    AsyncThreadWithLooper thread;
+}
+
+// Tests that we can send a few simple tasks to the async thread with looper.
+TEST(AsyncThreadWithLooper, Tasks) {
+    AsyncThreadWithLooper thread;
+    auto looper = thread.getLooper();
+    auto timer1 = looper->createTimer(
+        [](void* opaque, Looper::Timer* timer) {
+            fprintf(stderr, "%s: timer1\n", __func__);
+        }, 0);
+    timer1->startAbsolute(0);
+    auto timer2 = looper->createTimer(
+        [](void* opaque, Looper::Timer* timer) {
+            fprintf(stderr, "%s: timer2\n", __func__);
+        }, 0);
+    timer2->startAbsolute(0);
 }
 
 }  // namespace base
