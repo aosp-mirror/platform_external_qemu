@@ -57,7 +57,7 @@ const UiEmuAgent* EmulatorNoQtNoWindow::sUiEmuAgent = nullptr;
 
 EmulatorNoQtNoWindow::EmulatorNoQtNoWindow()
     : mLooper(android::base::Looper::create()),
-      mAdbInterface(android::emulation::AdbInterface::createGlobal(mLooper)) {
+      mAdbInterface(android::emulation::AdbInterface::createGlobalOwnThread()) {
     android::base::ThreadLooper::setLooper(mLooper, true);
     android_metrics_start_adb_liveness_checker(mAdbInterface);
     if (android_hw->test_quitAfterBootTimeOut > 0) {
