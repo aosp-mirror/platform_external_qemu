@@ -128,6 +128,8 @@ public:
     static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
     // Creates global interface.
     static AdbInterface* createGlobal(android::base::Looper* looper);
+    // createGlobal, but doesn't hang the UI thread for long running adb operations
+    static AdbInterface* createGlobalOwnThread();
     static AdbInterface* getGlobal();
 };
 

@@ -27,7 +27,7 @@ namespace emulation {
 using android::base::ScopedSocket;
 using android::base::Optional;
 using android::base::StringFormat;
-
+using android::base::System;
 
 static ScopedSocket connectToAdbServer(int adbClientPort) {
     ScopedSocket socket(android::base::socketTcp4LoopbackClient(adbClientPort));
@@ -58,9 +58,16 @@ static std::string readResponse(int fd, int bytesToRead) {
     unsigned int bytesRead = 0;
     while (bytesToRead > 0) {
         auto ret = android::base::socketRecv(fd, (void*)&buffer[bytesRead], bytesToRead);
+
+        if (ret == EAGAIN || ret == EWOULDBLOCK) {
+            System::get()->sleepMs(500);
+            continue;
+        }
+
         if (ret <= 0) {
             break;
         }
+
         bytesToRead -= ret;
         bytesRead += ret;
     }
@@ -76,11 +83,13 @@ static std::string readProtocolString(int fd) {
         LOG(ERROR) << "adb protocol fault (couldn't read status length)";
         return {};
     }
+
     incoming = readResponse(fd, bytesToRead);
     if (incoming.size() != bytesToRead) {
         LOG(ERROR) << "adb protocol fault (couldn't read status message)";
         return {};
     }
+
     return incoming;
 }
 
@@ -99,6 +108,8 @@ Optional<int> AdbHostServer::getProtocolVersion() {
         return {};
     }
 
+    android::base::socketSetNonBlocking(fd.get());
+
     // The server should answer a request with one of the following:
     //
     // 1. For success, the 4-byte "OKAY" string
@@ -110,9 +121,12 @@ Optional<int> AdbHostServer::getProtocolVersion() {
         std::string version_result = readProtocolString(fd.get());
         uint32_t version = 0;
         if (sscanf(version_result.c_str(), "%04x", &version) == 1) {
+            android::base::socketSetBlocking(fd.get());
             return version;
         }
     }
+
+    android::base::socketSetBlocking(fd.get());
 
     return {};
 }
@@ -134,7 +148,7 @@ bool AdbHostServer::notify(int adbEmulatorPort, int adbClientPort) {
 int AdbHostServer::getClientPort() {
     int clientPort = kDefaultAdbClientPort;
     const android::base::StringView kVarName = "ANDROID_ADB_SERVER_PORT";
-    std::string env = android::base::System::get()->envGet(kVarName);
+    std::string env = System::get()->envGet(kVarName);
     if (!env.empty()) {
         long port = strtol(env.c_str(), NULL, 0);
         if (port <= 0 || port >= 65536) {

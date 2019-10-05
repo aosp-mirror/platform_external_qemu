@@ -14,7 +14,9 @@
 
 #include "android/base/threads/Async.h"
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/system/System.h"
 
 #include <memory>
 
@@ -53,6 +55,54 @@ bool async(const ThreadFunctor& func, ThreadFlags flags) {
     }
 
     return false;
+}
+
+class AsyncThreadWithLooper::Impl {
+public:
+    Impl() : mLooper(Looper::create()),
+             mThread([this] { threadFunc(); }) {
+        mThread.start();
+    }
+
+    ~Impl() {
+        auto forceQuitTimer =
+            mLooper->createTimer(
+               [](void* opaque, Looper::Timer* timer) {
+                   auto looper = static_cast<Looper*>(opaque);
+                   looper->forceQuit();
+               }, mLooper);
+
+        forceQuitTimer->startAbsolute(0);
+
+        mQuitting = true;
+
+        mThread.wait();
+    }
+
+    Looper* getLooper() { return mLooper; }
+
+private:
+    void threadFunc() {
+        ThreadLooper::setLooper(mLooper, true /* own */);
+        while (!mQuitting) {
+            mLooper->run();
+            System::get()->sleepMs(500);
+        }
+    }
+
+    bool mLooperObtained = false;
+    FunctorThread mThread;
+    Looper* mLooper = nullptr;
+    bool mQuitting = false;
+};
+
+AsyncThreadWithLooper::AsyncThreadWithLooper() :
+    mImpl(new AsyncThreadWithLooper::Impl) { }
+
+AsyncThreadWithLooper::~AsyncThreadWithLooper() = default;
+
+Looper* AsyncThreadWithLooper::getLooper() {
+    return mImpl->getLooper();
 }
 
 }  // namespace base
