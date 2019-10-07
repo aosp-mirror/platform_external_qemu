@@ -27,6 +27,7 @@ namespace control {
 class NopEmulatorControllerServiceImpl : public EmulatorControllerService {
 public:
     void stop() override {}
+    int port() override { return -1; }
 
 private:
 };

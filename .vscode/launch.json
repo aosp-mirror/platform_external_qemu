@@ -36,7 +36,6 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}\\build",
-            "env": {},
             "environment": [
                 {
                     "name": "ANDROID_SDK_ROOT",
@@ -75,20 +74,21 @@
             "name": "(lldb) Debug Emulator",
             "type": "lldb",
             "request": "launch",
-            // Resolved by CMake Tools:
+            // Resolved by CMake Tools, but likely should point to qemu-system-i386, or qemu-system-x86_64
+            // As there lldb is not capable of following child processes (like gdb can with follow-fork-mode)
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                // You will likely have to change these for emulator launch..
-                "@P",
-                "-verbose",
-                "-grpc",
-                "9090",
+                "@Q",  // Pick the image you would like to use
+                "-verbose", // With some additional parameters.
             ],
             "linux": {
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                     "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
-                    "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
+                    // Setup the LD_LIBRARY_PATH so we can resolve all the dynamic libs properly.
+                    "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan",
+                    // The default location of ANDROID_SDK_ROOT for most, change this as needed.
+                    "ANDROID_SDK_ROOT": "${env:HOME}/Android/Sdk"
                 },
             },
             "osx": {
@@ -106,25 +106,20 @@
             "postRunCommands": [
                 "pro handle -p true -s false SIGUSR1"
             ],
-            "cwd": "${workspaceFolder}",
-            "env": {
-                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
-                "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
-            ]
-        },
+            "cwd": "${workspaceFolder}/build",
     },
     {
         // You need root access to attach debugger
         "name": "(lldb) Debug attach Emulator",
         "type": "lldb",
         "request": "attach",
-        // Resolved by CMake Tools:
-        "program": "/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/build/qemu-upstream-aarch64",
+        // Replace this with the process executable you want to attach to
+        "program": "${command:cmake.launchTargetPath}",
         "pid": 80501, // replace pid with your real pid
         // Ignore signal SIGUSR1
         "postRunCommands": [
-            "pro hand -p true -s false SIGUSR1"
+            "pro hand -p true -s false SIGUSR1",
+            "pro hand -p true -s false SIGUSR2",
         ],
     },
     {
