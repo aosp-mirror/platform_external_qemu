@@ -88,16 +88,23 @@ class EmulatorControllerServiceImpl : public EmulatorControllerService {
 public:
     void stop() override { mServer->Shutdown(); }
 
-    EmulatorControllerServiceImpl(EmulatorController::Service* service,
+    EmulatorControllerServiceImpl(int port,
+                                  EmulatorController::Service* service,
                                   waterfall::Waterfall::Service* waterfall,
                                   grpc::Server* server)
-        : mService(service), mForwarder(waterfall), mServer(server) {}
+        : mPort(port),
+          mService(service),
+          mForwarder(waterfall),
+          mServer(server) {}
+
+    int port() override { return mPort; }
 
 private:
     std::unique_ptr<EmulatorController::Service> mService;
     std::unique_ptr<waterfall::Waterfall::Service> mForwarder;
 
     std::unique_ptr<grpc::Server> mServer;
+    int mPort;
 };
 
 class WaterfallImpl final : public waterfall::Waterfall::Service {
@@ -498,7 +505,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
-            new EmulatorControllerServiceImpl(controller.release(),
+            new EmulatorControllerServiceImpl(mPort, controller.release(),
                                               wfallforwarder.release(),
                                               service.release()));
 }

@@ -18,6 +18,7 @@
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/grpc_agent.h"
 #include "android/emulation/control/libui_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
@@ -49,7 +50,10 @@ ANDROID_BEGIN_HEADER
     X(QAndroidVmOperations, vm)           \
     X(QAndroidNetAgent, net)              \
     X(QAndroidLibuiAgent, libui)          \
-    X(QCarDataAgent, car)
+    X(QCarDataAgent, car)                 \
+    X(QGrpcAgent, grpc)                   \
+
+
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.

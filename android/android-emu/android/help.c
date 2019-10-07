@@ -1187,11 +1187,7 @@ help_rtcfps(stralloc_t*  out)
     PRINTF(
     "  The maximimum frequency at which frames are delivered to the webrtc video bridge. \n\n"
     "   <fps> The maximimum frequency at which frames are delivered.\n\n"
-    "  The emulator will deliver frames to the WebRTC engine at this rate.\n"
-    "  A higher rate will increase the cpu load on both the emulator\n"
-    "  and video bridge executable, but can give a smoother experience.\n"
-    "  The actual framerate you will see in the browser will depend\n"
-    "  on available encoders and network conditions, but will not exceed the.\n"
+    "  DEPRECATED. The emulator will always update every frame immediately without any cpu penalty. \n\n"
     "  <fps> set above.\n\n"
     "  For example:\n\n"
     "  -rtcfps 60\n\n"

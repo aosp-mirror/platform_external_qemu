@@ -55,10 +55,6 @@
 
 #ifdef ANDROID_GRPC
 #include "android/emulation/control/GrpcServices.h"
-#include "android/emulation/control/RtcBridge.h"
-#endif
-#ifdef ANDROID_WEBRTC
-#include "android/emulation/control/WebRtcBridge.h"
 #endif
 
 extern "C" {
@@ -187,7 +183,7 @@ bool qemu_android_emulation_early_setup() {
     return true;
 }
 
-static const AndroidConsoleAgents* getConsoleAgents() {
+const AndroidConsoleAgents* getConsoleAgents() {
     // Initialize UI/console agents.
     static const AndroidConsoleAgents consoleAgents = {
             gQAndroidBatteryAgent,        gQAndroidDisplayAgent,
@@ -196,7 +192,7 @@ static const AndroidConsoleAgents* getConsoleAgents() {
             gQAndroidRecordScreenAgent,   gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,      gQAndroidVmOperations,
             gQAndroidNetAgent,            gQAndroidLibuiAgent,
-            gQCarDataAgent,
+            gQCarDataAgent,               gQGrpcAgent,
     };
     return &consoleAgents;
 }
@@ -204,10 +200,6 @@ static const AndroidConsoleAgents* getConsoleAgents() {
 bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
 }
-
-#ifdef ANDROID_GRPC
-  std::unique_ptr<android::emulation::control::RtcBridge> rtcBridge;
-#endif
 
 bool qemu_android_emulation_setup() {
     android_qemu_init_slirp_shapers();
@@ -223,24 +215,12 @@ bool qemu_android_emulation_setup() {
 #ifdef ANDROID_GRPC
     int grpc = -1;
     if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-        #ifdef ANDROID_WEBRTC
-            std::string turn = "";
-            int fps = android::emulation::control::WebRtcBridge::kMaxFPS;
-            if (android_cmdLineOptions->turncfg) {
-                turn = android_cmdLineOptions->turncfg;
-            }
-            if (android_cmdLineOptions->rtcfps) {
-                if (sscanf(android_cmdLineOptions->rtcfps, "%d",  &fps) != 1) {
-                    dwarning("-rtcfps expected a number, not: %s, using default of: %d\n", android_cmdLineOptions->rtcfps, fps);
-                }
-            }
-            rtcBridge.reset(android::emulation::control::WebRtcBridge::create(grpc + 1, getConsoleAgents(), fps, turn));
-        #else
-            rtcBridge.reset(new android::emulation::control::NopRtcBridge());
-        #endif
+        char *turn = nullptr;
+        if (android_cmdLineOptions->turncfg) {
+            turn = android_cmdLineOptions->turncfg;
+        }
         // Go bridge go!
-        rtcBridge->start();
-        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), rtcBridge.get());
+        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), turn);
     }
 #endif
 
@@ -300,6 +280,5 @@ void qemu_android_emulation_teardown() {
 
     #ifdef ANDROID_GRPC
         android::emulation::control::GrpcServices::teardown();
-        rtcBridge = nullptr;
     #endif
 }
