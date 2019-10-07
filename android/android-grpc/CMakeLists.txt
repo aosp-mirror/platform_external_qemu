@@ -16,7 +16,6 @@ protobuf_generate_grpc_cpp(SOURCE_DIR
 set(android-grpc_src
     ${EMULATOR_GRPC_SRC}
     android/emulation/control/EmulatorService.cpp
-    android/emulation/control/EmulatorServiceStub.cpp
     android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
     android/emulation/control/keyboard/TouchEventSender.cpp
     android/emulation/control/GrpcServices.cpp
@@ -33,7 +32,7 @@ target_include_directories(android-grpc
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
-
+set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 
 if(WEBRTC)
   target_link_libraries(android-grpc PRIVATE android-webrtc)

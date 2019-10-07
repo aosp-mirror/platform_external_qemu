@@ -15,7 +15,7 @@
 #pragma once
 
 #include <memory>             // for unique_ptr
-
+#include <string>
 #include "android/console.h"  // for AndroidConsoleAgents
 
 namespace android {
@@ -36,6 +36,9 @@ public:
 private:
     static std::unique_ptr<EmulatorControllerService> g_controler_service;
     static std::unique_ptr<RtcBridge> g_rtc_bridge;
+
+    static const std::string kCertFileName;
+    static const std::string kPrivateKeyFileName;
 };
 }  // namespace control
 }  // namespace emulation
