@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc124be7_dd4284f7",
+        "filename": "android/android-emu/android/emulation/hostdevices/HostGoldfishPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-07T17:23:47Z",
+      "side": 1,
+      "message": "It looks inconsistent. I believe it is more clear to just return totalXfer and the caller should call errno regardless. Or we should return a pair of \u003csize, errno\u003e.",
+      "range": {
+        "startLine": 379,
+        "startChar": 47,
+        "endLine": 379,
+        "endChar": 55
+      },
+      "revId": "baa6e2ea0fcd5504b32530c38354648eea448028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
