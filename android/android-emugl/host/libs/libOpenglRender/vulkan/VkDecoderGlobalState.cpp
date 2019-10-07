@@ -86,7 +86,6 @@ kEmulatedExtensions[] = {
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
 static constexpr uint32_t kMinVersion = VK_MAKE_VERSION(1, 0, 0);
-static const uint32_t kCompressedTexBlockSize = 4;
 
 class VkDecoderGlobalState::Impl {
 public:
@@ -365,6 +364,7 @@ public:
 
         vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
         pFeatures->textureCompressionETC2 = true;
+        pFeatures->textureCompressionASTC_LDR |= kEmulateAstc;
     }
 
     void on_vkGetPhysicalDeviceFeatures2(
@@ -401,6 +401,7 @@ public:
         }
 
         pFeatures->features.textureCompressionETC2 = true;
+        pFeatures->features.textureCompressionASTC_LDR |= kEmulateAstc;
     }
 
     VkResult on_vkGetPhysicalDeviceImageFormatProperties(
@@ -415,9 +416,12 @@ public:
 
         auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
-        if (needEmulatedEtc2(physicalDevice, vk)) {
+        bool emulatedEtc2 = needEmulatedEtc2(physicalDevice, vk);
+        bool emulatedAstc = needEmulatedAstc(physicalDevice, vk);
+        if (emulatedEtc2 || emulatedAstc) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
-            if (cmpInfo.isCompressed) {
+            if (cmpInfo.isCompressed && ((emulatedEtc2 && cmpInfo.isEtc2) ||
+                                         (emulatedAstc && cmpInfo.isAstc))) {
                 if (!supportEmulatedCompressedImageFormatProperty(
                     format, type, tiling, usage, flags)) {
                     memset(pImageFormatProperties, 0, sizeof(VkImageFormatProperties));
@@ -443,10 +447,13 @@ public:
         auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
         VkPhysicalDeviceImageFormatInfo2 imageFormatInfo;
-        if (needEmulatedEtc2(physicalDevice, vk)) {
+        bool emulatedEtc2 = needEmulatedEtc2(physicalDevice, vk);
+        bool emulatedAstc = needEmulatedAstc(physicalDevice, vk);
+        if (emulatedEtc2 || emulatedAstc) {
             CompressedImageInfo cmpInfo =
                 createCompressedImageInfo(pImageFormatInfo->format);
-            if (cmpInfo.isCompressed) {
+            if (cmpInfo.isCompressed && ((emulatedEtc2 && cmpInfo.isEtc2) ||
+                                         (emulatedAstc && cmpInfo.isAstc))) {
                 if (!supportEmulatedCompressedImageFormatProperty(
                     pImageFormatInfo->format, pImageFormatInfo->type, pImageFormatInfo->tiling,
                     pImageFormatInfo->usage, pImageFormatInfo->flags)) {
@@ -748,6 +755,7 @@ public:
         // Run the underlying API call, filtering extensions.
         VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
         bool emulateTextureEtc2 = false;
+        bool emulateTextureAstc = false;
         VkPhysicalDeviceFeatures featuresFiltered;
 
         if (pCreateInfo->pEnabledFeatures) {
@@ -756,6 +764,12 @@ public:
                 if (needEmulatedEtc2(physicalDevice, vk)) {
                     emulateTextureEtc2 = true;
                     featuresFiltered.textureCompressionETC2 = false;
+                }
+            }
+            if (featuresFiltered.textureCompressionASTC_LDR) {
+                if (needEmulatedAstc(physicalDevice, vk)) {
+                    emulateTextureAstc = true;
+                    featuresFiltered.textureCompressionASTC_LDR = false;
                 }
             }
             createInfoFiltered.pEnabledFeatures = &featuresFiltered;
@@ -769,6 +783,12 @@ public:
                         VkPhysicalDeviceFeatures2* features2 =
                             (VkPhysicalDeviceFeatures2*)ext;
                         features2->features.textureCompressionETC2 = false;
+                    }
+                    if (needEmulatedAstc(physicalDevice, vk)) {
+                        emulateTextureAstc = true;
+                        VkPhysicalDeviceFeatures2* features2 =
+                                (VkPhysicalDeviceFeatures2*)ext;
+                        features2->features.textureCompressionASTC_LDR = false;
                     }
                     break;
                 default:
@@ -793,6 +813,7 @@ public:
         auto& deviceInfo = mDeviceInfo[*pDevice];
         deviceInfo.physicalDevice = physicalDevice;
         deviceInfo.emulateTextureEtc2 = emulateTextureEtc2;
+        deviceInfo.emulateTextureAstc = emulateTextureAstc;
 
         // First, get the dispatch table.
         VkDevice boxed = new_boxed_VkDevice(*pDevice, nullptr, true /* own dispatch */);
@@ -1047,43 +1068,42 @@ public:
         CompressedImageInfo cmpInfo = {};
         VkImageCreateInfo& sizeCompInfo = cmpInfo.sizeCompImgCreateInfo;
         VkImageCreateInfo decompInfo;
-        if (deviceInfoIt->second.emulateTextureEtc2) {
+        if (deviceInfoIt->second.needEmulatedDecompression(
+                    pCreateInfo->format)) {
             cmpInfo = createCompressedImageInfo(pCreateInfo->format);
-            if (cmpInfo.isCompressed) {
-                cmpInfo.imageType = pCreateInfo->imageType;
-                cmpInfo.extent = pCreateInfo->extent;
-                cmpInfo.mipLevels = pCreateInfo->mipLevels;
-                cmpInfo.layerCount = pCreateInfo->arrayLayers;
-                sizeCompInfo = *pCreateInfo;
-                sizeCompInfo.format = cmpInfo.sizeCompFormat;
-                sizeCompInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
-                sizeCompInfo.flags &=
+            cmpInfo.imageType = pCreateInfo->imageType;
+            cmpInfo.extent = pCreateInfo->extent;
+            cmpInfo.mipLevels = pCreateInfo->mipLevels;
+            cmpInfo.layerCount = pCreateInfo->arrayLayers;
+            sizeCompInfo = *pCreateInfo;
+            sizeCompInfo.format = cmpInfo.sizeCompFormat;
+            sizeCompInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+            sizeCompInfo.flags &=
                     ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
-                sizeCompInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
-                // Each block is 4x4 in ETC2 compressed texture
-                sizeCompInfo.extent.width = (sizeCompInfo.extent.width +
-                        kCompressedTexBlockSize - 1) /
-                    kCompressedTexBlockSize;
-                sizeCompInfo.extent.height = (sizeCompInfo.extent.height +
-                        kCompressedTexBlockSize - 1) /
-                    kCompressedTexBlockSize;
-                sizeCompInfo.mipLevels = 1;
-                if (pCreateInfo->queueFamilyIndexCount) {
-                    cmpInfo.sizeCompImgQueueFamilyIndices.assign(
-                            pCreateInfo->pQueueFamilyIndices,
-                            pCreateInfo->pQueueFamilyIndices +
-                            pCreateInfo->queueFamilyIndexCount);
-                    sizeCompInfo.pQueueFamilyIndices =
+            sizeCompInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+            // Each block is 4x4 in ETC2 compressed texture
+            sizeCompInfo.extent.width = (sizeCompInfo.extent.width +
+                                         cmpInfo.compressedBlockWidth - 1) /
+                                        cmpInfo.compressedBlockWidth;
+            sizeCompInfo.extent.height = (sizeCompInfo.extent.height +
+                                          cmpInfo.compressedBlockHeight - 1) /
+                                         cmpInfo.compressedBlockHeight;
+            sizeCompInfo.mipLevels = 1;
+            if (pCreateInfo->queueFamilyIndexCount) {
+                cmpInfo.sizeCompImgQueueFamilyIndices.assign(
+                        pCreateInfo->pQueueFamilyIndices,
+                        pCreateInfo->pQueueFamilyIndices +
+                                pCreateInfo->queueFamilyIndexCount);
+                sizeCompInfo.pQueueFamilyIndices =
                         cmpInfo.sizeCompImgQueueFamilyIndices.data();
-                }
-                decompInfo = *pCreateInfo;
-                decompInfo.format = cmpInfo.decompFormat;
-                decompInfo.flags &=
-                    ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
-                decompInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
-                decompInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
-                pCreateInfo = &decompInfo;
             }
+            decompInfo = *pCreateInfo;
+            decompInfo.format = cmpInfo.decompFormat;
+            decompInfo.flags &=
+                    ~VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR;
+            decompInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+            decompInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+            pCreateInfo = &decompInfo;
         }
         cmpInfo.device = device;
 
@@ -1111,7 +1131,7 @@ public:
 
         if (createRes != VK_SUCCESS) return createRes;
 
-        if (cmpInfo.isCompressed && deviceInfoIt->second.emulateTextureEtc2) {
+        if (deviceInfoIt->second.needEmulatedDecompression(cmpInfo)) {
             cmpInfo.decompImg = *pImage;
             createSizeCompImages(vk, &cmpInfo);
         }
@@ -1201,7 +1221,8 @@ public:
                 return VK_ERROR_OUT_OF_HOST_MEMORY;
             }
         }
-        if (!deviceInfoIt->second.emulateTextureEtc2) {
+        if (!deviceInfoIt->second.emulateTextureEtc2 &&
+            !deviceInfoIt->second.emulateTextureAstc) {
             return VK_SUCCESS;
         }
         auto imageInfoIt = mImageInfo.find(image);
@@ -1209,7 +1230,7 @@ public:
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
         CompressedImageInfo& cmp = imageInfoIt->second.cmpInfo;
-        if (!cmp.isCompressed) {
+        if (!deviceInfoIt->second.needEmulatedDecompression(cmp)) {
             return VK_SUCCESS;
         }
         for (size_t i = 0; i < cmp.sizeCompImgs.size(); i++) {
@@ -1245,11 +1266,12 @@ public:
         }
         VkImageViewCreateInfo createInfo;
         bool needEmulatedAlpha = false;
-        if (deviceInfoIt->second.emulateTextureEtc2) {
+        if (deviceInfoIt->second.emulateTextureEtc2 ||
+            deviceInfoIt->second.emulateTextureAstc) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(
                     pCreateInfo->format
                     );
-            if (cmpInfo.isCompressed) {
+            if (deviceInfoIt->second.needEmulatedDecompression(cmpInfo)) {
                 if (imageInfoIt->second.cmpInfo.decompImg) {
                     createInfo = *pCreateInfo;
                     createInfo.format = cmpInfo.decompFormat;
@@ -1257,7 +1279,8 @@ public:
                     createInfo.image = imageInfoIt->second.cmpInfo.decompImg;
                     pCreateInfo = &createInfo;
                 }
-            } else if (imageInfoIt->second.cmpInfo.isCompressed) {
+            } else if (deviceInfoIt->second.needEmulatedDecompression(
+                               imageInfoIt->second.cmpInfo)) {
                 // Size compatible image view
                 createInfo = *pCreateInfo;
                 createInfo.format = cmpInfo.sizeCompFormat;
@@ -1848,9 +1871,11 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return;
         }
-        if ((!srcIt->second.cmpInfo.isCompressed &&
-             !dstIt->second.cmpInfo.isCompressed) ||
-            !deviceInfoIt->second.emulateTextureEtc2) {
+        bool needEmulatedSrc = deviceInfoIt->second.needEmulatedDecompression(
+                srcIt->second.cmpInfo);
+        bool needEmulatedDst = deviceInfoIt->second.needEmulatedDecompression(
+                dstIt->second.cmpInfo);
+        if (!needEmulatedSrc && !needEmulatedDst) {
             vk->vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout,
                                dstImage, dstImageLayout, regionCount, pRegions);
             return;
@@ -1859,32 +1884,40 @@ public:
         VkImage dstImageMip = dstImage;
         for (uint32_t r = 0; r < regionCount; r++) {
             VkImageCopy region = pRegions[r];
-            if (srcIt->second.cmpInfo.isCompressed) {
+            if (needEmulatedSrc) {
                 uint32_t mipLevel = region.srcSubresource.mipLevel;
+                uint32_t compressedBlockWidth =
+                        srcIt->second.cmpInfo.compressedBlockWidth;
+                uint32_t compressedBlockHeight =
+                        srcIt->second.cmpInfo.compressedBlockHeight;
                 srcImageMip = srcIt->second.cmpInfo.sizeCompImgs[mipLevel];
                 region.srcSubresource.mipLevel = 0;
-                region.srcOffset.x /= kCompressedTexBlockSize;
-                region.srcOffset.y /= kCompressedTexBlockSize;
+                region.srcOffset.x /= compressedBlockWidth;
+                region.srcOffset.y /= compressedBlockHeight;
                 uint32_t width =
                         srcIt->second.cmpInfo.sizeCompMipmapWidth(mipLevel);
                 uint32_t height =
                         srcIt->second.cmpInfo.sizeCompMipmapHeight(mipLevel);
                 // region.extent uses pixel size for source image
                 region.extent.width =
-                        (region.extent.width + kCompressedTexBlockSize - 1) /
-                        kCompressedTexBlockSize;
+                        (region.extent.width + compressedBlockWidth - 1) /
+                        compressedBlockWidth;
                 region.extent.height =
-                        (region.extent.height + kCompressedTexBlockSize - 1) /
-                        kCompressedTexBlockSize;
+                        (region.extent.height + compressedBlockHeight - 1) /
+                        compressedBlockHeight;
                 region.extent.width = std::min(region.extent.width, width);
                 region.extent.height = std::min(region.extent.height, height);
             }
-            if (dstIt->second.cmpInfo.isCompressed) {
+            if (needEmulatedDst) {
+                uint32_t compressedBlockWidth =
+                        dstIt->second.cmpInfo.compressedBlockWidth;
+                uint32_t compressedBlockHeight =
+                        dstIt->second.cmpInfo.compressedBlockHeight;
                 uint32_t mipLevel = region.dstSubresource.mipLevel;
                 dstImageMip = dstIt->second.cmpInfo.sizeCompImgs[mipLevel];
                 region.dstSubresource.mipLevel = 0;
-                region.dstOffset.x /= kCompressedTexBlockSize;
-                region.dstOffset.y /= kCompressedTexBlockSize;
+                region.dstOffset.x /= compressedBlockWidth;
+                region.dstOffset.y /= compressedBlockHeight;
             }
             vk->vkCmdCopyImage(commandBuffer, srcImageMip, srcImageLayout,
                                dstImageMip, dstImageLayout, 1, &region);
@@ -1915,8 +1948,8 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return;
         }
-        if (!it->second.cmpInfo.isCompressed ||
-                !deviceInfoIt->second.emulateTextureEtc2) {
+        if (!deviceInfoIt->second.needEmulatedDecompression(
+                    it->second.cmpInfo)) {
             vk->vkCmdCopyImageToBuffer(commandBuffer, srcImage, srcImageLayout,
                     dstBuffer, regionCount, pRegions);
             return;
@@ -1927,18 +1960,18 @@ public:
             region = pRegions[r];
             uint32_t mipLevel = region.imageSubresource.mipLevel;
             region.imageSubresource.mipLevel = 0;
-            region.bufferRowLength /= kCompressedTexBlockSize;
-            region.bufferImageHeight /= kCompressedTexBlockSize;
-            region.imageOffset.x /= kCompressedTexBlockSize;
-            region.imageOffset.y /= kCompressedTexBlockSize;
+            region.bufferRowLength /= cmp.compressedBlockWidth;
+            region.bufferImageHeight /= cmp.compressedBlockHeight;
+            region.imageOffset.x /= cmp.compressedBlockWidth;
+            region.imageOffset.y /= cmp.compressedBlockHeight;
             uint32_t width = cmp.sizeCompMipmapWidth(mipLevel);
             uint32_t height = cmp.sizeCompMipmapHeight(mipLevel);
             region.imageExtent.width =
-                (region.imageExtent.width + kCompressedTexBlockSize - 1) /
-                kCompressedTexBlockSize;
-            region.imageExtent.height =
-                (region.imageExtent.height + kCompressedTexBlockSize - 1) /
-                kCompressedTexBlockSize;
+                    (region.imageExtent.width + cmp.compressedBlockWidth - 1) /
+                    cmp.compressedBlockWidth;
+            region.imageExtent.height = (region.imageExtent.height +
+                                         cmp.compressedBlockHeight - 1) /
+                                        cmp.compressedBlockHeight;
             region.imageExtent.width =
                 std::min(region.imageExtent.width, width);
             region.imageExtent.height =
@@ -2033,8 +2066,8 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return;
         }
-        if (!it->second.cmpInfo.isCompressed ||
-                !deviceInfoIt->second.emulateTextureEtc2) {
+        if (!deviceInfoIt->second.needEmulatedDecompression(
+                    it->second.cmpInfo)) {
             vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage,
                     dstImageLayout, regionCount, pRegions);
             return;
@@ -2049,18 +2082,18 @@ public:
             dstRegion = pRegions[r];
             uint32_t mipLevel = dstRegion.imageSubresource.mipLevel;
             dstRegion.imageSubresource.mipLevel = 0;
-            dstRegion.bufferRowLength /= kCompressedTexBlockSize;
-            dstRegion.bufferImageHeight /= kCompressedTexBlockSize;
-            dstRegion.imageOffset.x /= kCompressedTexBlockSize;
-            dstRegion.imageOffset.y /= kCompressedTexBlockSize;
+            dstRegion.bufferRowLength /= cmp.compressedBlockWidth;
+            dstRegion.bufferImageHeight /= cmp.compressedBlockHeight;
+            dstRegion.imageOffset.x /= cmp.compressedBlockWidth;
+            dstRegion.imageOffset.y /= cmp.compressedBlockHeight;
             uint32_t width = cmp.sizeCompMipmapWidth(mipLevel);
             uint32_t height = cmp.sizeCompMipmapHeight(mipLevel);
             dstRegion.imageExtent.width = (dstRegion.imageExtent.width +
-                    kCompressedTexBlockSize - 1) /
-                kCompressedTexBlockSize;
+                                           cmp.compressedBlockWidth - 1) /
+                                          cmp.compressedBlockWidth;
             dstRegion.imageExtent.height = (dstRegion.imageExtent.height +
-                    kCompressedTexBlockSize - 1) /
-                kCompressedTexBlockSize;
+                                            cmp.compressedBlockHeight - 1) /
+                                           cmp.compressedBlockHeight;
             dstRegion.imageExtent.width =
                 std::min(dstRegion.imageExtent.width, width);
             dstRegion.imageExtent.height =
@@ -2130,7 +2163,8 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return;
         }
-        if (!deviceInfoIt->second.emulateTextureEtc2) {
+        if (!deviceInfoIt->second.emulateTextureEtc2 &&
+            !deviceInfoIt->second.emulateTextureAstc) {
             vk->vkCmdPipelineBarrier(
                     commandBuffer, srcStageMask, dstStageMask, dependencyFlags,
                     memoryBarrierCount, pMemoryBarriers,
@@ -2145,7 +2179,9 @@ public:
             const VkImageMemoryBarrier& srcBarrier = pImageMemoryBarriers[i];
             auto image = srcBarrier.image;
             auto it = mImageInfo.find(image);
-            if (it == mImageInfo.end() || !it->second.cmpInfo.isCompressed) {
+            if (it == mImageInfo.end() ||
+                !deviceInfoIt->second.needEmulatedDecompression(
+                        it->second.cmpInfo)) {
                 persistentImageBarriers.push_back(srcBarrier);
                 continue;
             }
@@ -3350,10 +3386,11 @@ public:
         if (deviceInfoIt == mDeviceInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
-        if (deviceInfoIt->second.emulateTextureEtc2) {
+        if (deviceInfoIt->second.emulateTextureEtc2 ||
+            deviceInfoIt->second.emulateTextureAstc) {
             for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++) {
-                auto format = pCreateInfo->pAttachments[i].format;
-                if (format != getDecompFormat(format)) {
+                if (deviceInfoIt->second.needEmulatedDecompression(
+                            pCreateInfo->pAttachments[i].format)) {
                     needReformat = true;
                     break;
                 }
@@ -3536,6 +3573,7 @@ public:
         VkDecoderSnapshot* snapshot() { return &mSnapshot; }
 
 private:
+    static const bool kEmulateAstc = true;
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
             if (!strcmp(emulatedExt, name)) return true;
@@ -3667,6 +3705,8 @@ private:
     }
     struct CompressedImageInfo {
         bool isCompressed = false;
+        bool isEtc2 = false;
+        bool isAstc = false;
         VkDevice device = 0;
         VkFormat compFormat;  // The compressed format
         VkImageType imageType;
@@ -3680,6 +3720,8 @@ private:
             VK_FORMAT_R8G8B8A8_UNORM;  // Decompressed format
         VkImage decompImg = 0;  // Decompressed image
         VkExtent3D extent;
+        uint32_t compressedBlockWidth = 1;
+        uint32_t compressedBlockHeight = 1;
         uint32_t layerCount;
         uint32_t mipLevels = 1;
         uint32_t mipmapWidth(uint32_t level) {
@@ -3692,13 +3734,13 @@ private:
             return std::max<uint32_t>(extent.depth >> level, 1);
         }
         uint32_t sizeCompMipmapWidth(uint32_t level) {
-            return (mipmapWidth(level) + kCompressedTexBlockSize - 1) /
-                kCompressedTexBlockSize;
+            return (mipmapWidth(level) + compressedBlockWidth - 1) /
+                   compressedBlockWidth;
         }
         uint32_t sizeCompMipmapHeight(uint32_t level) {
             if (imageType != VK_IMAGE_TYPE_1D) {
-                return (mipmapHeight(level) + kCompressedTexBlockSize - 1) /
-                       kCompressedTexBlockSize;
+                return (mipmapHeight(level) + compressedBlockHeight - 1) /
+                       compressedBlockHeight;
             } else {
                 return 1;
             }
@@ -3722,11 +3764,18 @@ private:
             }
         }
 
-        struct PushConstant {
+        struct Etc2PushConstant {
             uint32_t compFormat;
             uint32_t baseLayer;
         };
 
+        struct AstcPushConstant {
+            uint32_t blockSize[2];
+            uint32_t compFormat;
+            uint32_t baseLayer;
+            uint32_t sRGB;
+            uint32_t smallBlock;
+        };
         VkDescriptorSetLayout decompDescriptorSetLayout = 0;
         VkDescriptorPool decompDescriptorPool = 0;
         std::vector<VkDescriptorSet> decompDescriptorSets = {};
@@ -3824,6 +3873,36 @@ private:
                 case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
                     shaderSrcFileName = "EacRG11Snorm_";
                     break;
+                case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
+                    shaderSrcFileName = "Astc_";
+                    break;
                 default:
                     shaderSrcFileName = "Etc2RGB8_";
                     break;
@@ -3911,7 +3990,11 @@ private:
             VkPushConstantRange pushConstant = {};
             pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
             pushConstant.offset = 0;
-            pushConstant.size = sizeof(PushConstant);
+            if (isEtc2) {
+                pushConstant.size = sizeof(Etc2PushConstant);
+            } else if (isAstc) {
+                pushConstant.size = sizeof(AstcPushConstant);
+            }
 
             VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
             pipelineLayoutInfo.sType =
@@ -3952,6 +4035,36 @@ private:
                 case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
                 case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
                     intermediateFormat = decompFormat;
+                    break;
+                case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
+                    intermediateFormat = VK_FORMAT_R8G8B8A8_UINT;
                     break;
                 default:
                     intermediateFormat = decompFormat;
@@ -4015,18 +4128,71 @@ private:
                 uint32_t _layerCount) {
             vk->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
                     decompPipeline);
-
-            PushConstant pushConstant = {.compFormat = compFormat,
-                .baseLayer = baseLayer};
             int dispatchZ = _layerCount;
-            if (extent.depth > 1) {
-                // 3D texture
-                pushConstant.baseLayer = 0;
-                dispatchZ = extent.depth;
+
+            if (isEtc2) {
+                Etc2PushConstant pushConstant = {compFormat, baseLayer};
+                if (extent.depth > 1) {
+                    // 3D texture
+                    pushConstant.baseLayer = 0;
+                    dispatchZ = extent.depth;
+                }
+                vk->vkCmdPushConstants(commandBuffer, decompPipelineLayout,
+                                       VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                                       sizeof(pushConstant), &pushConstant);
+            } else if (isAstc) {
+                uint32_t srgb = false;
+                uint32_t smallBlock = false;
+                switch (compFormat) {
+                    case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
+                        srgb = true;
+                        break;
+                    default:
+                        break;
+                }
+                switch (compFormat) {
+                    case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+                    case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+                    case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+                    case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+                    case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                    case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                        smallBlock = true;
+                        break;
+                    default:
+                        break;
+                }
+                AstcPushConstant pushConstant = {
+                        {compressedBlockWidth, compressedBlockHeight},
+                        compFormat,
+                        baseLayer,
+                        srgb,
+                        smallBlock,
+                };
+                if (extent.depth > 1) {
+                    // 3D texture
+                    pushConstant.baseLayer = 0;
+                    dispatchZ = extent.depth;
+                }
+                vk->vkCmdPushConstants(commandBuffer, decompPipelineLayout,
+                                       VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                                       sizeof(pushConstant), &pushConstant);
             }
-            vk->vkCmdPushConstants(commandBuffer, decompPipelineLayout,
-                    VK_SHADER_STAGE_COMPUTE_BIT, 0,
-                    sizeof(pushConstant), &pushConstant);
             for (uint32_t i = baseMipLevel; i < baseMipLevel + levelCount;
                     i++) {
                 vk->vkCmdBindDescriptorSets(
@@ -4035,7 +4201,7 @@ private:
                         decompDescriptorSets.data() + i, 0, nullptr);
 
                 vk->vkCmdDispatch(commandBuffer, sizeCompMipmapWidth(i),
-                        sizeCompMipmapHeight(i), dispatchZ);
+                                  sizeCompMipmapHeight(i), dispatchZ);
             }
         }
     };
@@ -4110,7 +4276,8 @@ private:
             VkImage image,
             VkMemoryRequirements* pMemoryRequirements) {
         auto deviceInfoIt = mDeviceInfo.find(device);
-        if (!deviceInfoIt->second.emulateTextureEtc2) {
+        if (!deviceInfoIt->second.emulateTextureEtc2 ||
+            !deviceInfoIt->second.emulateTextureAstc) {
             return;
         }
         auto it = mImageInfo.find(image);
@@ -4118,7 +4285,7 @@ private:
             return;
         }
         CompressedImageInfo& cmpInfo = it->second.cmpInfo;
-        if (!cmpInfo.isCompressed) {
+        if (!deviceInfoIt->second.needEmulatedDecompression(cmpInfo)) {
             return;
         }
         pMemoryRequirements->alignment =
@@ -4131,6 +4298,16 @@ private:
         VkPhysicalDeviceFeatures feature;
         vk->vkGetPhysicalDeviceFeatures(physicalDevice, &feature);
         return !feature.textureCompressionETC2;
+    }
+
+    static bool needEmulatedAstc(VkPhysicalDevice physicalDevice,
+                                 goldfish_vk::VulkanDispatch* vk) {
+        if (!kEmulateAstc) {
+            return false;
+        }
+        VkPhysicalDeviceFeatures feature;
+        vk->vkGetPhysicalDeviceFeatures(physicalDevice, &feature);
+        return !feature.textureCompressionASTC_LDR;
     }
 
     static ETC2ImageFormat getEtc2Format(VkFormat fmt) {
@@ -4178,6 +4355,36 @@ private:
                 return VK_FORMAT_R16G16_UNORM;
             case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
                 return VK_FORMAT_R16G16_SNORM;
+            case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+                return VK_FORMAT_R8G8B8A8_UNORM;
+            case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
+                return VK_FORMAT_R8G8B8A8_SRGB;
             default:
                 return compFmt;
         }
@@ -4198,6 +4405,35 @@ private:
                 return VK_FORMAT_R32G32_UINT;
             case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
             case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                return VK_FORMAT_R32G32B32A32_UINT;
+            case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+            case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+            case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
                 return VK_FORMAT_R32G32B32A32_UINT;
             default:
                 return compFmt;
@@ -4232,6 +4468,111 @@ private:
         cmpInfo.decompFormat = getDecompFormat(compFmt);
         cmpInfo.sizeCompFormat = getSizeCompFormat(compFmt);
         cmpInfo.isCompressed = (cmpInfo.decompFormat != compFmt);
+
+        if (cmpInfo.isCompressed) {
+            switch (compFmt) {
+                case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+                case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                    cmpInfo.compressedBlockWidth = 4;
+                    cmpInfo.compressedBlockHeight = 4;
+                    cmpInfo.isEtc2 = true;
+                    break;
+                case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 4;
+                    cmpInfo.compressedBlockHeight = 4;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 5;
+                    cmpInfo.compressedBlockHeight = 4;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 5;
+                    cmpInfo.compressedBlockHeight = 5;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 6;
+                    cmpInfo.compressedBlockHeight = 5;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 6;
+                    cmpInfo.compressedBlockHeight = 6;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 8;
+                    cmpInfo.compressedBlockHeight = 5;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 8;
+                    cmpInfo.compressedBlockHeight = 6;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 8;
+                    cmpInfo.compressedBlockHeight = 8;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 10;
+                    cmpInfo.compressedBlockHeight = 5;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 10;
+                    cmpInfo.compressedBlockHeight = 6;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 10;
+                    cmpInfo.compressedBlockHeight = 8;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 10;
+                    cmpInfo.compressedBlockHeight = 10;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 12;
+                    cmpInfo.compressedBlockHeight = 10;
+                    cmpInfo.isAstc = true;
+                    break;
+                case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
+                    cmpInfo.compressedBlockWidth = 12;
+                    cmpInfo.compressedBlockHeight = 12;
+                    cmpInfo.isAstc = true;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         return cmpInfo;
     }
@@ -4272,24 +4613,68 @@ private:
                 case VK_FORMAT_EAC_R11_SNORM_BLOCK:
                 case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
                 case VK_FORMAT_EAC_R11G11_SNORM_BLOCK: {
-                                                           if (!needEmulatedEtc2(physicalDevice, vk)) {
-                                                               // Hardware supported ETC2
-                                                               getPhysicalDeviceFormatPropertiesFunc(
-                                                                       physicalDevice, format, pFormatProperties);
-                                                               return;
-                                                           }
-                                                           // Emulate ETC formats
-                                                           CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
-                                                           getPhysicalDeviceFormatPropertiesFunc(physicalDevice,
-                                                                   cmpInfo.decompFormat,
-                                                                   pFormatProperties);
-                                                           maskFormatPropertiesForEmulatedEtc2(pFormatProperties);
-                                                           break;
-                                                       }
+                    if (!needEmulatedEtc2(physicalDevice, vk)) {
+                        // Hardware supported ETC2
+                        getPhysicalDeviceFormatPropertiesFunc(
+                                physicalDevice, format, pFormatProperties);
+                        return;
+                    }
+                    // Emulate ETC formats
+                    CompressedImageInfo cmpInfo =
+                            createCompressedImageInfo(format);
+                    getPhysicalDeviceFormatPropertiesFunc(physicalDevice,
+                                                          cmpInfo.decompFormat,
+                                                          pFormatProperties);
+                    maskFormatPropertiesForEmulatedEtc2(pFormatProperties);
+                    break;
+                }
+                case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x12_SRGB_BLOCK: {
+                    if (!needEmulatedAstc(physicalDevice, vk)) {
+                        // Hardware supported ETC2
+                        getPhysicalDeviceFormatPropertiesFunc(
+                                physicalDevice, format, pFormatProperties);
+                        return;
+                    }
+                    // Emulate ETC formats
+                    CompressedImageInfo cmpInfo =
+                            createCompressedImageInfo(format);
+                    getPhysicalDeviceFormatPropertiesFunc(physicalDevice,
+                                                          cmpInfo.decompFormat,
+                                                          pFormatProperties);
+                    maskFormatPropertiesForEmulatedEtc2(pFormatProperties);
+                    break;
+                }
                 default:
-                                                       getPhysicalDeviceFormatPropertiesFunc(physicalDevice, format,
-                                                               pFormatProperties);
-                                                       break;
+                    getPhysicalDeviceFormatPropertiesFunc(
+                            physicalDevice, format, pFormatProperties);
+                    break;
             }
         }
 
@@ -4566,8 +4951,60 @@ private:
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
         bool emulateTextureEtc2 = false;
+        bool emulateTextureAstc = false;
         VkPhysicalDevice physicalDevice;
         VkDevice boxed = nullptr;
+        bool needEmulatedDecompression(const CompressedImageInfo& imageInfo) {
+            return imageInfo.isCompressed &&
+                   ((imageInfo.isEtc2 && emulateTextureEtc2) ||
+                    (imageInfo.isAstc && emulateTextureAstc));
+        }
+        bool needEmulatedDecompression(VkFormat format) {
+            switch (format) {
+                case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+                case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                    return emulateTextureEtc2;
+                case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_4x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x4_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_5x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_6x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_8x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x5_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x6_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x8_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_10x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x10_SRGB_BLOCK:
+                case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+                case VK_FORMAT_ASTC_12x12_SRGB_BLOCK:
+                    return emulateTextureAstc;
+                default:
+                    return false;
+            }
+        }
     };
 
     struct QueueInfo {
