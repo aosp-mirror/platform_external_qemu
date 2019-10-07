@@ -2,7 +2,6 @@
 set(studio-bridge_src
     ${EMULATOR_GRPC_SRC}
     android/emulation/control/EmulatorService.cpp
-    android/emulation/control/EmulatorServiceStub.cpp
     android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
     android/emulation/control/GrpcServices.cpp
     android/emulation/control/logcat/RingStreambuf.cpp

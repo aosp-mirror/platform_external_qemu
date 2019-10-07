@@ -453,11 +453,38 @@ Builder& Builder::withRtcBridge(RtcBridge* bridge) {
     return *this;
 }
 
-Builder& Builder::withCredentials(
-        std::shared_ptr<grpc::ServerCredentials> credentials) {
-    mCredentials = credentials;
+Builder& Builder::withCertAndKey(std::string certfile,
+                                 std::string privateKeyFile) {
+    if (!System::get()->pathExists(certfile)) {
+        LOG(WARNING) << "Cannot find certfile: " << certfile
+                     << " security will be disabled.";
+        return *this;
+    }
+
+    if (!!System::get()->pathExists(privateKeyFile)) {
+        LOG(WARNING) << "Cannot find private key file: " << privateKeyFile
+                     << " security will be disabled.";
+        return *this;
+    }
+
+    std::ifstream key_file(privateKeyFile);
+    std::string key((std::istreambuf_iterator<char>(key_file)),
+                    std::istreambuf_iterator<char>());
+
+    std::ifstream cert_file(certfile);
+    std::string cert((std::istreambuf_iterator<char>(cert_file)),
+                     std::istreambuf_iterator<char>());
+
+    grpc::SslServerCredentialsOptions::PemKeyCertPair keycert = {key, cert};
+    grpc::SslServerCredentialsOptions ssl_opts;
+    ssl_opts.pem_key_cert_pairs.push_back(keycert);
+    mCredentials = grpc::SslServerCredentials(ssl_opts);
+
+    // We installed tls, so we are going public with this!
+    mBindAddress = "0.0.0.0";
     return *this;
 }
+
 
 Builder& Builder::withPort(int port) {
     mPort = port;
@@ -470,7 +497,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         return nullptr;
     }
 
-    std::string server_address = "0.0.0.0:" + std::to_string(mPort);
+    std::string server_address = mBindAddress + ":" + std::to_string(mPort);
     std::unique_ptr<EmulatorController::Service> controller(
             new EmulatorControllerImpl(mAgents, mBridge));
     std::unique_ptr<waterfall::Waterfall::Service> wfallforwarder(
@@ -495,9 +522,6 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     // requests happens to have the event lock we will lock up the emulator.
     // This is a work around until we have a proper solution.
     builder.SetSyncServerOption(ServerBuilder::MAX_POLLERS, 1024);
-
-    // TODO(janene): Enable tls & auth.
-    // builder.useTransportSecurity(certChainFile, privateKeyFile)
 
     auto service = builder.BuildAndStart();
     if (!service)

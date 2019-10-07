@@ -6,14 +6,9 @@ Emulator over gRPC  Examples
 
 This is currently an experimental feature, and as such there are some things lacking that might be important if you want to use this in production:
 
-- There is no authentication/authorization. The gRPC server does not do any authentication nor authorization. Anyone who has access to the gRPC control port can control your emulator
-- No TLS support. Currently the gRPC service inside the emulato has not turned on TLS.
 - Not all emulator control functions have been enabled. This likely
  means that the .proto file describing the interface will evolve.
 
-In other words, make sure you keep this port private on your network and be ready to recompile your code when changes happen.
-
-**DO NOT RUN THIS AS IS IN A PRODUCTION ENVIRONMENT**
 
 ### Introduction
 
@@ -52,6 +47,37 @@ GRPC to TRUE or by building as follows:
 ```
 
 This will compile in the gRPC feature.
+
+# Enabling SSL/TLS
+
+The gRPC endpoint can be secured using [TLS](https://en.wikipedia.org/wiki/Transport_Layer_Security).
+During the activation of the gRPC endpoint the emulator will look for the following set of files:
+
+- `$ANDROID_EMULATOR_HOME/emulator-grpc.cer`
+- `$ANDROID_EMULATOR_HOME/emulator-grpc.key`
+
+Note that if the environment variable is not set this resolves to `~/.android`. You can find
+more details [here](https://developer.android.com/studio/command-line/variables).
+
+The gRPC endpoint will use the default certificate roots to resolve the certificates. The default roots can
+be overridden using the `GRPC_DEFAULT_SSL_ROOTS_FILE_PATH` environment variable pointing to a file on
+the file system containing the roots.
+
+The example below demonstrates how you can create a [self-signed certificate for localhost]
+(https://letsencrypt.org/docs/certificates-for-localhost/)
+
+```sh
+ $ openssl req -x509 -out localhost.crt -keyout localhost.key \
+  -newkey rsa:2048 -nodes -sha256 \
+  -subj '/CN=localhost' -extensions EXT -config <( \
+   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+ $ cp localhost.key ~/.android/emulator-grpc.key
+ $ cp localhost.cer ~/.android/emulator-grpc.cer
+```
+
+You will be responsible for distributing the `emulator-grpc.cer` to all clients that you wish to give access. Only clients that
+have the cert will be able to connect to the emulator. Keep in mind that if your cert is registered with a well known authorithy, such as
+[letsencrypt](https://letsencrypt.org/), that everyone can automatically retrieve your certificate!
 
 # Controlling the emulator with http.
 
