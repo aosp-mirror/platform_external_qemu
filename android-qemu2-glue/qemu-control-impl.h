@@ -20,6 +20,7 @@
 #include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/grpc_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
@@ -83,6 +84,8 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
 extern const QCarDataAgent* const gQCarDataAgent;
+
+extern const QGrpcAgent* const gQGrpcAgent;
 
 extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 

@@ -333,7 +333,6 @@ bool WebRtcBridge::start() {
 
 RtcBridge* WebRtcBridge::create(int port,
                                 const AndroidConsoleAgents* const consoleAgents,
-                                int fps,
                                 std::string turncfg) {
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
@@ -344,7 +343,7 @@ RtcBridge* WebRtcBridge::create(int port,
 
     Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
-    return new WebRtcBridge(socket, consoleAgents->record, fps, port, turncfg);
+    return new WebRtcBridge(socket, consoleAgents->record, kMaxFPS, port, turncfg);
 }
 }  // namespace control
 }  // namespace emulation

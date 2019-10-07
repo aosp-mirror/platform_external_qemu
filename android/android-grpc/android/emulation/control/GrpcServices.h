@@ -27,13 +27,15 @@ class RtcBridge;
 
 class GrpcServices {
 public:
-    static void setup(int port,
+    // Returns the port or -1 if the service didn't start.
+    static int setup(int port,
                     const AndroidConsoleAgents* const consoleAgents,
-                    RtcBridge* bridge);
+                    const char* turnCfg);
 
     static void teardown();
 private:
     static std::unique_ptr<EmulatorControllerService> g_controler_service;
+    static std::unique_ptr<RtcBridge> g_rtc_bridge;
 };
 }  // namespace control
 }  // namespace emulation

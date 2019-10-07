@@ -29,6 +29,7 @@ set(libqemu2-glue_src
     qemu-clipboard-agent-impl.cpp
     qemu-display-agent-impl.cpp
     qemu-finger-agent-impl.c
+    qemu-grpc-agent-impl.cpp
     qemu-location-agent-impl.c
     qemu-http-proxy-agent-impl.c
     qemu-multi-display-agent-impl.cpp
@@ -57,9 +58,6 @@ android_target_include_directories(libqemu2-glue
                                    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 if(GRPC)
   target_link_libraries(libqemu2-glue PRIVATE android-grpc)
-endif()
-if(WEBRTC)
-  target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 target_link_libraries(libqemu2-glue
                       PRIVATE android-emu
