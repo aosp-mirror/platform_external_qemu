@@ -35,8 +35,8 @@ class EmulatorControllerService::Builder {
 public:
     Builder();
     Builder& withConsoleAgents(const AndroidConsoleAgents* const consoleAgents);
-    Builder& withCredentials(
-            std::shared_ptr<grpc::ServerCredentials> credentials);
+    Builder& withCertAndKey(std::string certfile, std::string privateKeyFile);
+
     Builder& withPort(int port);
     Builder& withRtcBridge(RtcBridge* bridge);
 
@@ -48,6 +48,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     int mPort{5556};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
+    std::string mBindAddress{"127.0.0.1"};
 
     RtcBridge* mBridge{nullptr};
 };
