@@ -11,8 +11,8 @@ html, body {
 
 .loader, .loader:after {
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 48px;
+    height: 48px;
 }
 
 .loader {

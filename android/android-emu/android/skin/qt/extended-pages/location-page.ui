@@ -231,14 +231,11 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="text">
-      <string>PLAY ROUTE</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
      <property name="layoutDirection">
       <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>PLAY ROUTE</string>
      </property>
      <property name="icon">
       <iconset resource="../resources.qrc">
@@ -249,6 +246,9 @@
        <width>24</width>
        <height>24</height>
       </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="themeIconName" stdset="0">
       <string>play_arrow</string>
@@ -554,27 +554,162 @@
     <attribute name="title">
      <string>Settings</string>
     </attribute>
-    <layout class="QGridLayout" name="gridLayout3">
-     <property name="leftMargin">
-      <number>0</number>
+    <widget class="QGroupBox" name="loc_settingsUsePinPointAccuracyLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>581</width>
+       <height>24</height>
+      </rect>
      </property>
-     <property name="topMargin">
-      <number>24</number>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
      </property>
-     <property name="rightMargin">
-      <number>0</number>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
      </property>
-     <property name="bottomMargin">
-      <number>0</number>
+     <property name="title">
+      <string>Use pin point accuracy?</string>
      </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="todoLabel">
-       <property name="text">
-        <string>TODO</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_settingsUsePinPointAccuracy">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>86</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_settingsSimulateWifiHandoffLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>581</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Simulate wifi - cellular handoff in presets?</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_settingsSimulateWifiHandoff">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>100</y>
+       <width>86</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_settingsHidePresetRoutesLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>140</y>
+       <width>581</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Hide preset routes?</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_settingsHidePresetRoutes">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>160</y>
+       <width>86</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
