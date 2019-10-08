@@ -142,6 +142,7 @@ message VmConfiguration {
         HV_HAXM = 3;
         HV_HVF = 4;
         HV_WHPX = 5;
+        HV_GVM = 6;
     };
 
     VmHypervisorType hypervisorType = 1;
