@@ -33,7 +33,11 @@ class SearchBoxController extends GoogleMapPageComponent {
         $('#search-input').val(address);
         $('#search-icon').css("display", "block");
         $('#search-spinner').css("display", "none");
-        this._showCloseIcon();
+        if (address.length > 0) {
+            this._showCloseIcon();
+        } else {
+            this._showSearchIcon();
+        }
     }
 
     showSpinner() {
@@ -56,7 +60,7 @@ class SearchBoxController extends GoogleMapPageComponent {
     show() {
         if (this.searchContainer != null) {
             this.mapManager.map.controls[google.maps.ControlPosition.TOP_CENTER]
-                    .push(this.searchContainer);
+                .push(this.searchContainer);
             this.searchContainer = null;
         }
     }
@@ -64,7 +68,7 @@ class SearchBoxController extends GoogleMapPageComponent {
     hide() {
         if (this.searchContainer == null) {
             this.searchContainer =
-                    this.mapManager.map.controls[google.maps.ControlPosition.TOP_CENTER].pop();
+                this.mapManager.map.controls[google.maps.ControlPosition.TOP_CENTER].pop();
         }
     }
 

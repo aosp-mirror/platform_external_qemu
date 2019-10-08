@@ -63,7 +63,11 @@ class LocationSearchBox {
         $('#search-input').val(address);
         $('#search-icon').css("display", "block");
         $('#search-spinner').css("display", "none");
-        this._showCloseIcon();
+        if (address.length > 0) {
+            this._showCloseIcon();
+        } else {
+            this._showSearchIcon();
+        }        
     }
 
     showSpinner() {
