@@ -3631,6 +3631,34 @@ do_crash( ControlClient  client, char*  args )
 }
 
 static int
+
+do_start_grpc( ControlClient  client, char*  args )
+{
+     if (args) {
+        int port;
+
+        if (sscanf(args, "%d", &port) == 1 && port > 0 && port < 65536) {
+            int active = client->global->grpc_agent->start(port, "");
+            control_write(client, "{ \"port\": \"%d\" }\n", active);
+            if (active < 0) {
+                control_write( client, "KO: Failed to launch gRPC service\n" );
+                return -1;
+            }
+            if (active != port) {
+                control_write( client, "OK: Port has already been activated at port: %d\n", active);
+            } else {
+               control_write( client, "OK: gRPC endpoint available at port %d\r\n", active );
+            }
+            return 0;
+        }
+    }
+
+    control_write( client, "KO: Usage: \"grpc <port>\"\n" );
+    return -1;
+}
+
+
+static int
 do_crash_on_exit( ControlClient  client, char*  args )
 {
     control_write( client, "OK: crashing emulator on exit, bye bye\r\n" );
@@ -3742,6 +3770,10 @@ extern const CommandDefRec main_commands[] = {
          "of the\r\n"
          "emulated device.\r\n",
          NULL, NULL, network_commands},
+
+         {"grpc", "enable the grpc endpoint",
+          "This allows you to start the grpc endpoint at the given port\n",
+          NULL, do_start_grpc, NULL},
 
          {"wifi", "manage wifi settings",
           "allows you to manage wifi settings in the device\r\n",

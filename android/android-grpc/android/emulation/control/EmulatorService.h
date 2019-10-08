@@ -28,6 +28,7 @@ public:
 
     virtual ~EmulatorControllerService() {}
     virtual void stop() = 0;
+    virtual int port() = 0;
 };
 
 class EmulatorControllerService::Builder {
