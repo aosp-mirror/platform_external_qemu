@@ -216,9 +216,11 @@ bool qemu_android_emulation_setup() {
     int grpc = -1;
     if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
         char *turn = nullptr;
+#ifdef ANDROID_WEBRTC
         if (android_cmdLineOptions->turncfg) {
             turn = android_cmdLineOptions->turncfg;
         }
+#endif
         // Go bridge go!
         android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), turn);
     }
