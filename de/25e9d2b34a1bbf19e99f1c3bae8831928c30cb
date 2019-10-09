@@ -1,0 +1,8 @@
+Verified+1: Haitao Shan <hshan@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Submitted-by: Haitao Shan <hshan@google.com>
+Submitted-at: Wed, 09 Oct 2019 04:51:57 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1135050
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
