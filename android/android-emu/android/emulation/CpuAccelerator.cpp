@@ -1035,8 +1035,8 @@ AndroidCpuAcceleration ProbeGVM(std::string* status) {
 
     // Profit!
     StringAppendFormat(status,
-                       "GVM (version %d) is installed and usable.",
-                       version);
+                       "GVM (version %d.%d) is installed and usable.",
+                       version >> 16, version & 0xFFFF);
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%d", version);
     return ANDROID_CPU_ACCELERATION_READY;
