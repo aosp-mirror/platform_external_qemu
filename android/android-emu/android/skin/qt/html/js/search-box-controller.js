@@ -30,6 +30,7 @@ class SearchBoxController extends GoogleMapPageComponent {
     }
 
     update(address) {
+        address = address || ''
         $('#search-input').val(address);
         $('#search-icon').css("display", "block");
         $('#search-spinner').css("display", "none");
