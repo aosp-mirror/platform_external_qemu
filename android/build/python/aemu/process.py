@@ -15,7 +15,10 @@
 # limitations under the License.
 import os
 import platform
-from Queue import Queue
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
 import subprocess
 from threading import Thread
 
@@ -40,7 +43,7 @@ def log_std_out(proc):
     for _ in range(2):
         for _, line in iter(q.get, None):
             try:
-                logging.info(line)
+              logging.info(line.decode('utf-8'))
             except IOError:
                 # We sometimes see IOError, errno = 0 on windows.
                 pass
