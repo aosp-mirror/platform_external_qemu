@@ -735,9 +735,15 @@ vcpu_run:
 
         int hax_ret;
 
+        ht->_exit_reason = 0;
         if (cpu->exit_request) {
-            ret = HAX_EMUL_EXITLOOP;
-            break;
+            if ((ht->_exit_status == HAX_EXIT_IO) ||
+                (ht->_exit_status == HAX_EXIT_FAST_MMIO)) {
+                ht->_exit_reason = HAX_EXIT_PAUSED;
+            } else {
+                ret = HAX_EMUL_EXITLOOP;
+                break;
+            }
         }
 
         hax_vcpu_interrupt(env);
