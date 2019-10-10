@@ -45,5 +45,5 @@ run: protoc
 	python -m sample.logcat
 
 deps:
-		pip install --user grpcio
-		pip install --user grpcio-tools
+		python -m pip install --user grpcio
+		python -m pip install --user grpcio-tools
