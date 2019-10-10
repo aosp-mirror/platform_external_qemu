@@ -37,7 +37,7 @@ typesToMacros = {
     }
 
 # the list of macro names
-macroNames = typesToMacros.values()
+macroNames = list(typesToMacros.values())
 
 # target program header
 targetHeader = """\
@@ -49,7 +49,7 @@ targetHeader = """\
 # locate source and target
 programDir = os.path.dirname(sys.argv[0])
 if len(sys.argv) != 3:
-    print "Usage: %s source target\n" % os.path.basename(sys.argv[0])
+    print("Usage: %s source target\n" % os.path.basename(sys.argv[0]))
     sys.exit(1)
 
 sourceFile = sys.argv[1]
@@ -79,14 +79,14 @@ class Item:
             self.enum_values = [ s.strip() for s in val.split(',') ]
             # If default value has been already set, make sure it's in the list
             if self.default and not self.default in self.enum_values:
-                print "Property '" + self.name + "': Default value '" + self.default + "' is missing in enum: ",
-                print self.enum_values,
+                print("Property '" + self.name + "': Default value '" + self.default + "' is missing in enum: ")
+                print(self.enum_values)
                 sys.exit(1)
         elif key == 'default':
             # If this is an enum, make sure that default value is in the list.
             if val and self.enum_values and not val in self.enum_values:
-                print "Property '" + self.name + "': Default value '" + val + "' is missing in enum: ",
-                print self.enum_values,
+                print("Property '" + self.name + "': Default value '" + val + "' is missing in enum: ")
+                print(self.enum_values)
                 sys.exit(1)
             else:
                 self.default = val
@@ -120,7 +120,7 @@ else:
     targetDir = os.path.dirname(targetFile)
     if not os.path.exists(targetDir):
         os.makedirs(targetDir)
-    out = open(targetFile,"wb")
+    out = open(targetFile,"w")
 
 out.write(targetHeader)
 
@@ -138,7 +138,7 @@ for item in items:
         sys.stderr.write("ignoring config item with no type '%s'\n" % item.name)
         continue
 
-    if not typesToMacros.has_key(item.type):
+    if item.type not in typesToMacros:
         sys.stderr.write("ignoring config item with unknown type '%s': '%s'\n" % \
                 (item.type, item.name))
         continue
