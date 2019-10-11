@@ -132,6 +132,41 @@ message LogMessage {
     // console output. Use this value in the next request as the start
     // parameter.
     int64 next = 3;
+
+    // Set the sort of response you are interested it in.
+    // It the type is "Parsed" the entries field will contain the parsed results.
+    // otherwise the contents field will be set.
+    LogType sort = 4;
+
+    // [Output Only] The parsed logcat entries so far. Only set if sort is set to Parsed
+    repeated LogcatEntry entries = 5;
+
+    enum LogType {
+        Text = 0;
+        Parsed = 1;
+    }
+}
+
+message LogcatEntry {
+
+    enum LogLevel {
+        UNKNOWN = 0;
+        DEFAULT = 1;
+        VERBOSE = 2;
+        DEBUG = 3;
+        INFO = 4;
+        WARN = 5;
+        ERROR = 6;
+        FATAL = 7;
+        SILENT = 8;
+    };
+
+    uint64 timestamp = 1;
+    uint32 pid = 2;
+    uint32 tid = 3;
+    LogLevel level = 4;
+    string tag = 5;
+    string msg = 6;
 }
 
 message VmConfiguration {
