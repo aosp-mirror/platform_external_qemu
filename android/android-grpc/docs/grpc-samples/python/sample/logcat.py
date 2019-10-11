@@ -24,6 +24,7 @@ channel = grpc.insecure_channel('localhost:5556')
 stub = emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
 # Let's dump the latest logcat data..
-logcat = emulator_controller_pb2.LogMessage(start=0)
+logcat = emulator_controller_pb2.LogMessage(start=0, sort=1)
 for response in stub.streamLogcat(logcat):
-    print(response.contents.strip())
+    for e in response.entries:
+            print("{}: {}".format(e.tag, e.msg))
