@@ -16,14 +16,19 @@
 #include "android/emulation/control/TestAdbInterface.h"
 #include "android/base/Optional.h"
 
+#include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
+#include "android/base/threads/Async.h"
 #include "android/emulation/ConfigDirs.h"
 
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <fstream>
 
+using android::base::AsyncThreadWithLooper;
+using android::base::Looper;
 using android::base::Optional;
 using android::base::PathUtils;
 using android::base::System;
@@ -33,12 +38,28 @@ using android::emulation::AdbInterface;
 using android::emulation::FakeAdbDaemon;
 using android::emulation::StaticAdbLocator;
 
-TEST(AdbInterface, create) {
+class AdbInterfaceTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        if (!mAsyncThread) mAsyncThread.reset(new AsyncThreadWithLooper);
+        mLooper = mAsyncThread->getLooper();
+    }
+
+    void TearDown() override {
+        mAsyncThread.reset();
+        mLooper = nullptr;
+    }
+
+    std::unique_ptr<AsyncThreadWithLooper> mAsyncThread;
+    Looper* mLooper;
+};
+
+TEST_F(AdbInterfaceTest, create) {
     // Default creation still works..
     EXPECT_NE(nullptr, AdbInterface::create(nullptr).get());
 }
 
-TEST(AdbInterface, findAdbFromAndroidSdkRoot) {
+TEST_F(AdbInterfaceTest, findAdbFromAndroidSdkRoot) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
@@ -53,6 +74,7 @@ TEST(AdbInterface, findAdbFromAndroidSdkRoot) {
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
 
     auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
                        .setAdbDaemon(new FakeAdbDaemon())
                        .build();
     std::string expectedAdbPath = PathUtils::join(
@@ -60,7 +82,7 @@ TEST(AdbInterface, findAdbFromAndroidSdkRoot) {
     EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
 }
 
-TEST(AdbInterface, deriveAdbFromExecutable) {
+TEST_F(AdbInterfaceTest, deriveAdbFromExecutable) {
     TestSystem system("", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
@@ -78,6 +100,7 @@ TEST(AdbInterface, deriveAdbFromExecutable) {
     system.setLauncherDirectory(PathUtils::join(sdkRoot, "tools"));
     EXPECT_EQ(PathUtils::join(sdkRoot, "tools"), system.getLauncherDirectory());
     auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
                        .setAdbDaemon(new FakeAdbDaemon())
                        .build();
     std::string expectedAdbPath = PathUtils::join(
@@ -85,7 +108,7 @@ TEST(AdbInterface, deriveAdbFromExecutable) {
     EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
 }
 
-TEST(AdbInterface, findAdbOnPath) {
+TEST_F(AdbInterfaceTest, findAdbOnPath) {
     TestSystem system("", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
@@ -99,15 +122,17 @@ TEST(AdbInterface, findAdbOnPath) {
     std::string expectedAdbPath = PathUtils::join(execPath, PathUtils::toExecutableName("adb"));
     system.setWhich(expectedAdbPath);
     auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
                        .setAdbDaemon(new FakeAdbDaemon())
                        .build();
     EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
 }
 
-TEST(AdbInterface, staleAdbVersion) {
+TEST_F(AdbInterfaceTest, staleAdbVersion) {
     auto daemon = new FakeAdbDaemon();
     auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 40}});
     auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
                        .setAdbLocator(locator)
                        .setAdbDaemon(daemon)
                        .build();
@@ -116,10 +141,11 @@ TEST(AdbInterface, staleAdbVersion) {
     EXPECT_FALSE(adb->isAdbVersionCurrent());
 }
 
-TEST(AdbInterface, recentAdbVersion) {
+TEST_F(AdbInterfaceTest, recentAdbVersion) {
     auto daemon = new FakeAdbDaemon();
     auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 40}});
     auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
                        .setAdbLocator(locator)
                        .setAdbDaemon(daemon)
                        .build();
@@ -131,10 +157,11 @@ TEST(AdbInterface, recentAdbVersion) {
 }
 
 
-TEST(AdbInterface, selectMatchingAdb) {
+TEST_F(AdbInterfaceTest, selectMatchingAdb) {
     auto daemon = new FakeAdbDaemon();
     auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 3}});
     auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
                        .setAdbLocator(locator)
                        .setAdbDaemon(daemon)
                        .build();

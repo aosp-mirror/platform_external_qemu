@@ -381,7 +381,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                       1000)),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface([this] {
-          return android::emulation::AdbInterface::createGlobal(mLooper);
+          return android::emulation::AdbInterface::createGlobalOwnThread();
       }),
       mApkInstaller([this] { return (*mAdbInterface); }),
       mFilePusher([this] {

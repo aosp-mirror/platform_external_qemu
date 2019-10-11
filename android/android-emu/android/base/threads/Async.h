@@ -17,6 +17,8 @@
 #include "android/base/threads/Types.h"
 #include "android/base/TypeTraits.h"
 
+#include <memory>
+
 namespace android {
 namespace base {
 
@@ -30,6 +32,21 @@ template <class Callable, class = enable_if<is_callable_as<Callable, void()>>>
 bool async(Callable&& func, ThreadFlags flags = ThreadFlags::MaskSignals) {
     return async(ThreadFunctor([func]() { func(); return intptr_t(); }), flags);
 }
+
+class Looper;
+
+// Creates a new thread with its own looper.
+class AsyncThreadWithLooper {
+public:
+    AsyncThreadWithLooper();
+    ~AsyncThreadWithLooper();
+
+    Looper* getLooper();
+
+private:
+    class Impl;
+    std::unique_ptr<Impl> mImpl;
+};
 
 }  // namespace base
 }  // namespace android
