@@ -1,6 +1,6 @@
-// Copyright 2015 The Android Open Source Project
-//
-// This software is licensed under the terms of the GNU General Public
+// // Copyright 2015 The Android Open Source Project
+// //
+// // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
 // may be copied, distributed, and modified under those terms.
 //
@@ -778,10 +778,10 @@ static int startEmulatorWithMinConfig(
     hw->hw_lcd_height = lcdHeight;
     hw->hw_lcd_density = lcdDensity;
 
-    if (gQAndroidBatteryAgent &&
-        gQAndroidBatteryAgent->setHasBattery) {
-        gQAndroidBatteryAgent->setHasBattery(false);
-    }
+    // if (gQAndroidBatteryAgent &&
+        // gQAndroidBatteryAgent->setHasBattery) {
+        // gQAndroidBatteryAgent->setHasBattery(false);
+    // }
 
     gQAndroidLocationAgent->gpsSetPassiveUpdate(false);
 
@@ -1775,9 +1775,9 @@ extern "C" int main(int argc, char** argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
-    if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
-        gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
-    }
+    // if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
+    //     gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
+    // }
 
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 

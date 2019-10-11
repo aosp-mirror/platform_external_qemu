@@ -865,7 +865,6 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
 }
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
-    ToolWindow::earlyInitialization(agent);
 
     // Set more early init stuff here:
     // 1. Clipboard sharing
@@ -873,6 +872,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
     if (const auto window = EmulatorQtWindow::getInstance()) {
         window->runOnUiThread([agent, window] {
             QSettings settings;
+            ToolWindow::earlyInitialization(agent);
             window->toolWindow()->setClipboardCallbacks(agent);
 
             const auto disableMouseWheel =
