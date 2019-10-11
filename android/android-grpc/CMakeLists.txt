@@ -24,6 +24,7 @@ set(android-grpc_src
     android/emulation/control/interceptor/LoggingInterceptor.cpp
     android/emulation/control/interceptor/MetricsInterceptor.cpp
     android/emulation/control/logcat/RingStreambuf.cpp
+    android/emulation/control/logcat/LogcatParser.cpp
     android/emulation/control/waterfall/SocketController.cpp)
 
 # Let's add in the library
@@ -41,6 +42,7 @@ if(WEBRTC)
 endif()
 
 set(android-grpc_unittest_src
+    android/emulation/control/logcat/LogcatParser_unittest.cpp
     android/emulation/control/logcat/RingStreambuf_unittest.cpp
     android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
 )
