@@ -12,10 +12,41 @@
 
 #include "android-qemu2-glue/qemu-control-impl.h"
 
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/system/System.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/VmLock.h"
 
+#include <functional>
 #include <stdio.h>
+
+using android::base::System;
+using android::base::ThreadLooper;
+
+class BatteryAccessor {
+public:
+    using Call = std::function<int()>;
+    BatteryAccessor(int* returnPtr, Call func) :
+        mReturnPtr(returnPtr),
+        mCall(func) { run(mReturnPtr); }
+
+    void run(int* out) {
+        bool done = false;
+        fprintf(stderr, "BatteryAccessor::%s: run something. out? %p\n", __func__, out);
+        ThreadLooper::runOnMainLooper(
+            [this, out, &done] {
+            fprintf(stderr, "BatteryAccessor::%s: running.\n", __func__);
+            if (out) *out = mCall();
+            done = true;
+        });
+        while (!done) System::get()->sleepMs(50);
+        fprintf(stderr, "BatteryAccessor::%s: done.\n", __func__);
+    }
+
+private:
+    int* mReturnPtr;
+    Call mCall;
+};
 
 extern "C" {
 
@@ -23,33 +54,48 @@ extern "C" {
 #include "hw/misc/goldfish_battery.h"
 
 static void battery_setHasBattery(bool hasBattery) {
-    android::RecursiveScopedVmLockIfInstance lock;
-    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HAS_BATTERY, hasBattery);
+    BatteryAccessor accessor(0, [hasBattery] {
+        goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HAS_BATTERY, hasBattery);
+        return 0;
+    });
 }
 
 static bool battery_hasBattery() {
-    android::RecursiveScopedVmLockIfInstance lock;
-    return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_HAS_BATTERY);
+    int has = 0;
+    BatteryAccessor accessor(&has, [] {
+        return goldfish_battery_read_prop(POWER_SUPPLY_PROP_HAS_BATTERY);
+    });
+    return (bool)has;
 }
 
 static void battery_setIsBatteryPresent(bool isPresent) {
-    android::RecursiveScopedVmLockIfInstance lock;
-    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, isPresent);
+    BatteryAccessor accessor(0, [isPresent] {
+        goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, isPresent);
+        return 0;
+    });
 }
 
 static bool battery_present() {
-    android::RecursiveScopedVmLockIfInstance lock;
-    return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_PRESENT);
+    int res = 0;
+    BatteryAccessor accessor(&res, [] {
+        return goldfish_battery_read_prop(POWER_SUPPLY_PROP_PRESENT);
+    });
+    return (bool)res;
 }
 
 static void battery_setIsCharging(bool isCharging) {
-    android::RecursiveScopedVmLockIfInstance lock;
-    goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, isCharging);
+    BatteryAccessor accessor(0, [isCharging] {
+        goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, isCharging);
+        return 0;
+    });
 }
 
 static bool battery_charging() {
-    android::RecursiveScopedVmLockIfInstance lock;
-    return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_ONLINE);
+    int res = 0;
+    BatteryAccessor accessor(&res, [] {
+        return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_ONLINE);
+    });
+    return (bool)res;
 }
 
 static void battery_setCharger(enum BatteryCharger charger) {
@@ -64,13 +110,18 @@ static enum BatteryCharger battery_charger() {
 }
 
 static void battery_setChargeLevel(int percentFull) {
-    android::RecursiveScopedVmLockIfInstance lock;
-    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, percentFull);
+    BatteryAccessor accessor(0, [percentFull] {
+        goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, percentFull);
+        return 0;
+    });
 }
 
 static int battery_chargeLevel() {
-    android::RecursiveScopedVmLockIfInstance lock;
-    return goldfish_battery_read_prop(POWER_SUPPLY_PROP_CAPACITY);
+    int res = 0;
+    BatteryAccessor accessor(&res, [] {
+        return goldfish_battery_read_prop(POWER_SUPPLY_PROP_CAPACITY);
+    });
+    return res;
 }
 
 static void battery_setHealth(enum BatteryHealth health) {
@@ -87,22 +138,27 @@ static void battery_setHealth(enum BatteryHealth health) {
         default:                           value = POWER_SUPPLY_HEALTH_UNKNOWN;         break;
     }
 
-    android::RecursiveScopedVmLockIfInstance lock;
-    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, value);
+    BatteryAccessor accessor(0, [value] {
+        goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, value);
+        return 0;
+    });
 }
 
 static enum BatteryHealth battery_health() {
-    android::RecursiveScopedVmLockIfInstance lock;
-    switch ( goldfish_battery_read_prop(POWER_SUPPLY_PROP_HEALTH) ) {
-        case POWER_SUPPLY_HEALTH_GOOD:           return BATTERY_HEALTH_GOOD;
-        case POWER_SUPPLY_HEALTH_UNSPEC_FAILURE: return BATTERY_HEALTH_FAILED;
-        case POWER_SUPPLY_HEALTH_DEAD:           return BATTERY_HEALTH_DEAD;
-        case POWER_SUPPLY_HEALTH_OVERVOLTAGE:    return BATTERY_HEALTH_OVERVOLTAGE;
-        case POWER_SUPPLY_HEALTH_OVERHEAT:       return BATTERY_HEALTH_OVERHEATED;
-        case POWER_SUPPLY_HEALTH_UNKNOWN:        return BATTERY_HEALTH_UNKNOWN;
+    int res = 0;
+    BatteryAccessor accessor(&res, [] {
+        switch ( goldfish_battery_read_prop(POWER_SUPPLY_PROP_HEALTH) ) {
+            case POWER_SUPPLY_HEALTH_GOOD:           return BATTERY_HEALTH_GOOD;
+            case POWER_SUPPLY_HEALTH_UNSPEC_FAILURE: return BATTERY_HEALTH_FAILED;
+            case POWER_SUPPLY_HEALTH_DEAD:           return BATTERY_HEALTH_DEAD;
+            case POWER_SUPPLY_HEALTH_OVERVOLTAGE:    return BATTERY_HEALTH_OVERVOLTAGE;
+            case POWER_SUPPLY_HEALTH_OVERHEAT:       return BATTERY_HEALTH_OVERHEATED;
+            case POWER_SUPPLY_HEALTH_UNKNOWN:        return BATTERY_HEALTH_UNKNOWN;
 
-        default:                                 return BATTERY_HEALTH_UNKNOWN;
-    }
+            default:                                 return BATTERY_HEALTH_UNKNOWN;
+        }
+    });
+    return (BatteryHealth)res;
 }
 
 static void battery_setStatus(enum BatteryStatus status) {
@@ -118,21 +174,26 @@ static void battery_setStatus(enum BatteryStatus status) {
         default:                           value = POWER_SUPPLY_STATUS_UNKNOWN;       break;
     }
 
-    android::RecursiveScopedVmLockIfInstance lock;
-    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, value);
+    BatteryAccessor accessor(0, [value] {
+        goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, value);
+        return 0;
+    });
 }
 
 static enum BatteryStatus battery_status() {
-    android::RecursiveScopedVmLockIfInstance lock;
-    switch ( goldfish_battery_read_prop(POWER_SUPPLY_PROP_STATUS) ) {
-        case POWER_SUPPLY_STATUS_UNKNOWN:       return BATTERY_STATUS_UNKNOWN;
-        case POWER_SUPPLY_STATUS_CHARGING:      return BATTERY_STATUS_CHARGING;
-        case POWER_SUPPLY_STATUS_DISCHARGING:   return BATTERY_STATUS_DISCHARGING;
-        case POWER_SUPPLY_STATUS_NOT_CHARGING:  return BATTERY_STATUS_NOT_CHARGING;
-        case POWER_SUPPLY_STATUS_FULL:          return BATTERY_STATUS_FULL;
+    int res = 0;
+    BatteryAccessor accessor(&res, [] {
+        switch ( goldfish_battery_read_prop(POWER_SUPPLY_PROP_STATUS) ) {
+            case POWER_SUPPLY_STATUS_UNKNOWN:       return BATTERY_STATUS_UNKNOWN;
+            case POWER_SUPPLY_STATUS_CHARGING:      return BATTERY_STATUS_CHARGING;
+            case POWER_SUPPLY_STATUS_DISCHARGING:   return BATTERY_STATUS_DISCHARGING;
+            case POWER_SUPPLY_STATUS_NOT_CHARGING:  return BATTERY_STATUS_NOT_CHARGING;
+            case POWER_SUPPLY_STATUS_FULL:          return BATTERY_STATUS_FULL;
 
-        default:                                return BATTERY_STATUS_UNKNOWN;
-    }
+            default:                                return BATTERY_STATUS_UNKNOWN;
+        }
+    });
+    return (BatteryStatus)res;
 }
 
 typedef void (*BatteryDisplayCb)(void* opaque, LineConsumerCallback outputCallback);
