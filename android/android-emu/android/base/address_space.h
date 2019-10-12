@@ -18,9 +18,14 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 ANDROID_BEGIN_HEADER
+
+#ifdef ADDRESS_SPACE_NAMESPACE
+namespace ADDRESS_SPACE_NAMESPACE {
+#endif
 
 // This is ported from goldfish_address_space, allowing it to be used for
 // general sub-allocations of any buffer range.
@@ -56,16 +61,15 @@ struct address_space_allocator {
 #define ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET (~(uint64_t)0)
 #define ANDROID_EMU_ADDRESS_SPACE_DEFAULT_PAGE_SIZE 4096
 
-/* The assert function to abort if something goes wrong. */
-static void address_space_assert(bool condition) {
-#ifdef ANDROID_EMU_ADDRESS_SPACE_ASSERT_FUNC
-    ANDROID_EMU_ADDRESS_SPACE_ASSERT_FUNC(condition);
-#else
-    assert(condition);
-#endif
-}
+/* The assert macro to abort if something goes wrong. */
+#define address_space_assert(cond) do { \
+    if (!(cond)) { \
+        fprintf(stderr, "address_space_assert failure\n"); \
+        *(uint32_t*)(1232) = 4; \
+    } \
+} while(0) \
 
-void* address_space_malloc0(size_t size) {
+static void* address_space_malloc0(size_t size) {
 #ifdef ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC
     return ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC(size);
 #else
@@ -75,7 +79,7 @@ void* address_space_malloc0(size_t size) {
 #endif
 }
 
-void* address_space_realloc(void* ptr, size_t size) {
+static void* address_space_realloc(void* ptr, size_t size) {
 #ifdef ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC
     return ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC(ptr, size);
 #else
@@ -84,7 +88,7 @@ void* address_space_realloc(void* ptr, size_t size) {
 #endif
 }
 
-void address_space_free(void* ptr) {
+static void address_space_free(void* ptr) {
 #ifdef ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC
     return ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC(ptr);
 #else
@@ -306,7 +310,8 @@ static void address_space_allocator_init(
 
     allocator->blocks =
         (struct address_block*)
-        address_space_malloc0(sizeof(struct address_block) * initial_capacity);
+        malloc(sizeof(struct address_block) * initial_capacity);
+    memset(allocator->blocks, 0, sizeof(struct address_block) * initial_capacity);
     address_space_assert(allocator->blocks);
 
     struct address_block *block = allocator->blocks;
@@ -332,6 +337,15 @@ static void address_space_allocator_destroy(
     address_space_free(allocator->blocks);
 }
 
+/* Destroy function if we don't care what was previoulsy allocated.
+ * have been merged into one block.
+ */
+static void address_space_allocator_destroy_nocleanup(
+    struct address_space_allocator *allocator)
+{
+    address_space_free(allocator->blocks);
+}
+
 /* Resets the state of the allocator to the initial state without
  * performing any dynamic memory management. */
 static void address_space_allocator_reset(
@@ -346,5 +360,34 @@ static void address_space_allocator_reset(
     block->size = allocator->total_bytes;
     block->available = 1;
 }
+
+typedef void (*address_block_iter_func_t)(void* context, struct address_block*);
+typedef void (*address_space_allocator_iter_func_t)(void* context, struct address_space_allocator*);
+
+static void address_space_allocator_run(
+    struct address_space_allocator *allocator,
+    void* context,
+    address_space_allocator_iter_func_t allocator_func,
+    address_block_iter_func_t block_func)
+{
+    struct address_block *block = 0;
+    int size;
+    int i;
+
+    allocator_func(context, allocator);
+
+    block = allocator->blocks;
+    size = allocator->size;
+
+    address_space_assert(size >= 1);
+
+    for (i = 0; i < size; ++i, ++block) {
+        block_func(context, block);
+    }
+}
+
+#ifdef ADDRESS_SPACE_NAMESPACE
+}
+#endif
 
 ANDROID_END_HEADER
