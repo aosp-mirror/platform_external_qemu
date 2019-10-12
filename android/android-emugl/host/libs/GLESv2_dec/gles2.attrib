@@ -1460,3 +1460,95 @@ glDrawElementsDataNullAEMU
 glDrawElementsOffsetNullAEMU
     flag custom_decoder
     flag not_api
+
+# Async UnmapBuffer
+glUnmapBufferAsyncAEMU
+    dir guest_buffer in
+    len guest_buffer length
+    var_flag guest_buffer nullAllowed isLarge
+    dir out_res in
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
+    custom_host_api glUnmapBufferAEMU
+
+# Proper versions of some API calls that previously did not distinguish sending arbitrary
+# buffers
+
+glVertexAttribPointerData2
+    len data datalen
+    custom_write data std::vector<unsigned char> packed(datalen); glUtilsPackPointerData((unsigned char *)packed.data(), (unsigned char *)data, size, type, stride, datalen); stream->writeFully(packed.data(), packed.size()); if (useChecksum) { checksumCalculator->addBuffer(data, __size_data); }
+    var_flag data isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glVertexAttribPointerData
+
+glDrawElementsData2
+    len data datalen
+    var_flag data isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glDrawElementsData
+
+glShaderString2
+    len string len
+    var_flag string isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glShaderString
+
+glFlushMappedBufferRangeAEMU2
+    dir guest_buffer in
+    len guest_buffer length
+    var_flag guest_buffer nullAllowed isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glFlushMappedBufferRangeAEMU
+
+glVertexAttribIPointerDataAEMU2
+    len data datalen
+    custom_write data std::vector<unsigned char> packed(datalen); glUtilsPackPointerData((unsigned char *)packed.data(), (unsigned char *)data, size, type, stride, datalen); stream->writeFully(packed.data(), packed.size()); if (useChecksum) { checksumCalculator->addBuffer(data, __size_data); }
+    var_flag data isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glVertexAttribIPointerDataAEMU
+
+glDrawElementsInstancedDataAEMU2
+    len indices datalen
+    var_flag indices isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glDrawElementsInstancedDataAEMU
+
+glDrawRangeElementsDataAEMU2
+    len indices datalen
+    var_flag indices isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glDrawRangeElementsDataAEMU
+
+glProgramBinary2
+    len binary length
+    var_flag binary isLarge
+    custom_host_api glProgramBinary
+
+glDrawArraysIndirectDataAEMU2
+    len indirect datalen
+    var_flag indirect isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glDrawArraysIndirectDataAEMU
+
+glDrawElementsIndirectDataAEMU2
+    len indirect datalen
+    var_flag indirect isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glDrawElementsIndirectDataAEMU
+
+glDrawElementsDataNullAEMU2
+    len data datalen
+    var_flag data isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glDrawElementsDataNullAEMU

@@ -581,3 +581,20 @@ GL_ENTRY(void, glDrawArraysNullAEMU, GLenum mode, GLint first, GLsizei count);
 GL_ENTRY(void, glDrawElementsNullAEMU, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
 GL_ENTRY(void, glDrawElementsOffsetNullAEMU, GLenum mode, GLsizei count, GLenum type, GLuint offset);
 GL_ENTRY(void, glDrawElementsDataNullAEMU, GLenum mode, GLsizei count, GLenum type, void *data, GLuint datalen);
+
+# Async UnmapBuffer (also distinguishes sending arbitrary length buffer)
+GL_ENTRY(void, glUnmapBufferAsyncAEMU, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
+
+# New versions of some API calls that previously did not distinguish sending arbitrary
+# buffers
+GL_ENTRY(void, glVertexAttribPointerData2, GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride,  void * data, GLuint datalen)
+GL_ENTRY(void, glDrawElementsData2, GLenum mode, GLsizei count, GLenum type, void *data, GLuint datalen)
+GL_ENTRY(void, glShaderString2, GLuint shader, const GLchar* string, GLsizei len)
+GL_ENTRY(void, glFlushMappedBufferRangeAEMU2, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer)
+GL_ENTRY(void, glVertexAttribIPointerDataAEMU2, GLuint index, GLint size, GLenum type, GLsizei stride, void* data, GLuint datalen)
+GL_ENTRY(void, glDrawElementsInstancedDataAEMU2, GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount, GLsizei datalen)
+GL_ENTRY(void, glDrawRangeElementsDataAEMU2, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices, GLsizei datalen)
+GL_ENTRY(void, glProgramBinary2, GLuint program, GLenum binaryFormat, const void *binary, GLsizei length)
+GL_ENTRY(void, glDrawArraysIndirectDataAEMU2, GLenum mode, const void *indirect, GLuint datalen)
+GL_ENTRY(void, glDrawElementsIndirectDataAEMU2, GLenum mode, GLenum type, const void *indirect, GLuint datalen)
+GL_ENTRY(void, glDrawElementsDataNullAEMU2, GLenum mode, GLsizei count, GLenum type, void *data, GLuint datalen)
