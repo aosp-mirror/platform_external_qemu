@@ -23,6 +23,7 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengles-pipe.h"
 #include "android/opengles.h"
@@ -151,6 +152,12 @@ private:
                 android::featurecontrol::GLDirectMem, true);
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::Vulkan, true);
+
+        android_hw->hw_gltransport_asg_writeBufferSize = 262144;
+        android_hw->hw_gltransport_asg_writeStepSize = 8192;
+        android_hw->hw_gltransport_asg_dataRingSize = 131072;
+        android_hw->hw_gltransport_drawFlushInterval = 800;
+
         EmuglConfig config;
 
         emuglConfig_init(

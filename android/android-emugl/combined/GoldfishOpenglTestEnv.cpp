@@ -124,6 +124,11 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
 
+    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
+    android_hw->hw_gltransport_asg_writeStepSize = 8192;
+    android_hw->hw_gltransport_asg_dataRingSize = 131072;
+    android_hw->hw_gltransport_drawFlushInterval = 800;
+
     EmuglConfig config;
 
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
