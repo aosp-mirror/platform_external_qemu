@@ -194,6 +194,9 @@ static constexpr android::base::StringView kYUV420888toNV21 = "ANDROID_EMU_YUV42
 // Cache YUV frame
 static constexpr android::base::StringView kYUVCache = "ANDROID_EMU_YUV_Cache";
 
+// GL protocol v2
+static constexpr android::base::StringView kAsyncUnmapBuffer = "ANDROID_EMU_async_unmap_buffer";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -403,6 +406,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         emugl_feature_is_enabled(android::featurecontrol::YUV420888toNV21);
     bool YUVCacheEnabled =
         emugl_feature_is_enabled(android::featurecontrol::YUVCache);
+    bool AsyncUnmapBufferEnabled = true;
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -471,6 +475,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (YUVCacheEnabled && name == GL_EXTENSIONS) {
         glStr += kYUVCache;
+        glStr += " ";
+    }
+
+    if (AsyncUnmapBufferEnabled && name == GL_EXTENSIONS) {
+        glStr += kAsyncUnmapBuffer;
         glStr += " ";
     }
 

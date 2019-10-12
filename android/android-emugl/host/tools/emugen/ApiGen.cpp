@@ -1069,9 +1069,9 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
             if (pass == PASS_FunctionCall) {
                 if (e->customDecoder() && !e->notApi()) {
-                    fprintf(fp, "\t\t\tthis->%s_dec(", e->name().c_str());
+                    fprintf(fp, "\t\t\tthis->%s_dec(", e->hostApiName().c_str());
                 } else {
-                    fprintf(fp, "\t\t\tthis->%s(", e->name().c_str());
+                    fprintf(fp, "\t\t\tthis->%s(", e->hostApiName().c_str());
                 }
                 if (e->customDecoder()) {
                     fprintf(fp, "this"); // add a context to the call
