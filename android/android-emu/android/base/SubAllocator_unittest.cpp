@@ -14,6 +14,7 @@
 #include "android/base/SubAllocator.h"
 
 #include "android/base/ArraySize.h"
+#include "android/base/files/MemStream.h"
 #include "android/base/FunctionView.h"
 
 #include <gtest/gtest.h>
@@ -195,6 +196,90 @@ TEST(SubAllocator, Random) {
                 subAlloc.free(ptr);
             }
         }
+    }
+}
+
+// Test save/load of suballocator snapshot
+TEST(SubAllocator, Snapshot) {
+    MemStream snapshotStream;
+    std::vector<uint8_t*> storage(4096, 0);
+
+    SubAllocator subAlloc(
+        storage.data(), (uint64_t)storage.size(), 8);
+
+    const size_t numBufs = 6;
+
+    // Alloc/free a few things.
+
+    uint8_t* bufs[numBufs] = {
+        (uint8_t*)subAlloc.alloc(16),
+        (uint8_t*)subAlloc.alloc(8),
+        (uint8_t*)subAlloc.alloc(32),
+        (uint8_t*)subAlloc.alloc(64),
+        (uint8_t*)subAlloc.alloc(8),
+        (uint8_t*)subAlloc.alloc(128),
+    };
+
+    subAlloc.free(bufs[3]);
+    bufs[3] = (uint8_t*)subAlloc.alloc(24);
+    subAlloc.free(bufs[4]);
+    bufs[4] = (uint8_t*)subAlloc.alloc(64);
+    subAlloc.free(bufs[0]);
+    bufs[0] = (uint8_t*)subAlloc.alloc(8);
+
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        EXPECT_NE(nullptr, bufs[i]);
+    }
+
+    // Record offsets
+
+    uint64_t offs[numBufs];
+
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        offs[i] = subAlloc.getOffset(bufs[i]);
+    }
+
+    // Write special values
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        *(bufs[i]) = (uint8_t)i;
+    }
+
+    // Save/load the snapshot
+    subAlloc.save(&snapshotStream);
+    subAlloc.load(&snapshotStream);
+
+    // Set the post load buffer to our original one
+    EXPECT_TRUE(subAlloc.postLoad(storage.data()));
+
+    // Do some allocations. None should intersect with any
+    // previously allocated buffer.
+    for (uint32_t i = 0; i < 10; ++i) {
+        uint8_t* buf = (uint8_t*)subAlloc.alloc(8);
+        if (!buf) continue;
+        for (uint32_t j = 0; j < numBufs; ++j) {
+            EXPECT_NE(bufs[j], buf);
+        }
+    }
+
+    // Expect all data to remain unchanged
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        EXPECT_EQ((uint8_t)i, *(bufs[i]));
+    }
+
+    // Expect all offsets to be the same
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        EXPECT_EQ(offs[i], subAlloc.getOffset(bufs[i]));
+    }
+
+    // Freeing everything should still work
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        EXPECT_TRUE(subAlloc.free(bufs[i]));
+    }
+
+    // Allocate all buffers again
+    for (uint32_t i = 0; i < numBufs; ++i) {
+        bufs[i] = (uint8_t*)subAlloc.alloc(8);
+        EXPECT_NE(nullptr, bufs[i]);
     }
 }
 
