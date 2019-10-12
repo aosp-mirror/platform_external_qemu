@@ -42,6 +42,7 @@
 #include "GrallocDispatch.h"
 #include "VulkanDispatch.h"
 
+#include <cutils/properties.h>
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -134,6 +135,12 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
                      WINSYS_GLESBACKEND_PREFERENCE_AUTO);
 
     emuglConfig_setupEnv(&config);
+
+    // Set fake guest properties
+    property_set("ro.kernel.qemu.gles", "1");
+    property_set("qemu.sf.lcd_density", "420");
+    property_set("ro.kernel.qemu.gltransport", "pipe");
+    property_set("ro.kernel.qemu.gltransport.drawFlushInterval", "800");
 
     android_initOpenglesEmulation();
 
