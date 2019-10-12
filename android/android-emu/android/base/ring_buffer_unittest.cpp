@@ -560,5 +560,69 @@ TEST(ring_buffer, SpeedTest) {
     fprintf(stderr, "%s: avg mb per sec: %f\n", __func__, mbPerSec);
 }
 
+// Tests copying out the contents available for read
+// without incrementing the read index.
+TEST(ring_buffer, CopyContents) {
+    std::vector<uint8_t> elements = {
+        0x1, 0x2, 0x3, 0x4,
+        0x5, 0x6, 0x7, 0x8,
+    };
+
+    std::vector<uint8_t> buf(4, 0);
+
+    std::vector<uint8_t> recv(elements.size(), 0);
+
+    ring_buffer r;
+    ring_buffer_view v;
+    ring_buffer_view_init(&r, &v, buf.data(), buf.size());
+
+    EXPECT_EQ(true, ring_buffer_view_can_write(&r, &v, 3));
+    EXPECT_EQ(0, ring_buffer_available_read(&r, &v));
+
+    uint8_t* elementsPtr = elements.data();
+    uint8_t* recvPtr = recv.data();
+
+    EXPECT_EQ(1, ring_buffer_view_write(&r, &v, elementsPtr, 1, 1));
+    EXPECT_FALSE(ring_buffer_view_can_write(&r, &v, 3));
+    EXPECT_TRUE(ring_buffer_view_can_write(&r, &v, 2));
+    EXPECT_EQ(1, ring_buffer_available_read(&r, &v));
+    EXPECT_EQ(0, ring_buffer_copy_contents(&r, &v, 1, recvPtr));
+    EXPECT_EQ(0x1, *recvPtr);
+    EXPECT_EQ(1, ring_buffer_available_read(&r, &v));
+    EXPECT_EQ(1, ring_buffer_view_read(&r, &v, recvPtr, 1, 1));
+    EXPECT_EQ(0, ring_buffer_available_read(&r, &v));
+    EXPECT_TRUE(ring_buffer_view_can_write(&r, &v, 3));
+
+    ++elementsPtr;
+    ++recvPtr;
+
+    EXPECT_EQ(1, ring_buffer_view_write(&r, &v, elementsPtr, 3, 1));
+    EXPECT_FALSE(ring_buffer_view_can_write(&r, &v, 3));
+    EXPECT_EQ(3, ring_buffer_available_read(&r, &v));
+    EXPECT_EQ(0, ring_buffer_copy_contents(&r, &v, 3, recvPtr));
+    EXPECT_EQ(0x2, recvPtr[0]);
+    EXPECT_EQ(0x3, recvPtr[1]);
+    EXPECT_EQ(0x4, recvPtr[2]);
+    EXPECT_EQ(3, ring_buffer_available_read(&r, &v));
+    EXPECT_EQ(1, ring_buffer_view_read(&r, &v, recvPtr, 3, 1));
+    EXPECT_EQ(0, ring_buffer_available_read(&r, &v));
+    EXPECT_TRUE(ring_buffer_view_can_write(&r, &v, 3));
+
+    elementsPtr += 3;
+    recvPtr += 3;
+
+    EXPECT_EQ(1, ring_buffer_view_write(&r, &v, elementsPtr, 3, 1));
+    EXPECT_FALSE(ring_buffer_view_can_write(&r, &v, 3));
+    EXPECT_EQ(3, ring_buffer_available_read(&r, &v));
+    EXPECT_EQ(0, ring_buffer_copy_contents(&r, &v, 3, recvPtr));
+    EXPECT_EQ(0x5, recvPtr[0]);
+    EXPECT_EQ(0x6, recvPtr[1]);
+    EXPECT_EQ(0x7, recvPtr[2]);
+    EXPECT_EQ(3, ring_buffer_available_read(&r, &v));
+    EXPECT_EQ(1, ring_buffer_view_read(&r, &v, recvPtr, 3, 1));
+    EXPECT_EQ(0, ring_buffer_available_read(&r, &v));
+    EXPECT_TRUE(ring_buffer_view_can_write(&r, &v, 3));
+}
+
 } // namespace android
 } // namespace base
