@@ -15,27 +15,63 @@
 
 #include "AndroidHostCommon.h"
 
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+
+#include <unordered_map>
 #include <string.h>
+
+using android::base::AutoLock;
+using android::base::LazyInstance;
+using android::base::Lock;
+
+class AndroidSystemProperties {
+public:
+    AndroidSystemProperties() = default;
+    ~AndroidSystemProperties() = default;
+
+    int get(const char* key, char* value, const char* default_value) {
+        AutoLock lock(mLock);
+        auto it = mProps.find(key);
+        if (it == mProps.end()) {
+            if (!default_value) return 0;
+            return getPropertyWithValueLimit(value, default_value);
+        }
+        const char* storedValue = it->second.data();
+        return getPropertyWithValueLimit(value, storedValue);
+    }
+
+    int set(const char *key, const char *value) {
+        AutoLock lock(mLock);
+        mProps[key] = value;
+        return 0;
+    }
+
+private:
+    int getPropertyWithValueLimit(char* dst, const char* src) {
+        size_t totalStrlen = strlen(src);
+        size_t maxPropStrlen = PROPERTY_VALUE_MAX - 1;
+        size_t copyStrlen =
+            maxPropStrlen < totalStrlen ? maxPropStrlen : totalStrlen;
+        memcpy(dst, src, copyStrlen);
+        dst[copyStrlen] = '\0';
+        return (int)copyStrlen;
+    }
+
+    Lock mLock;
+    std::unordered_map<std::string, std::string> mProps;
+};
+
+static LazyInstance<AndroidSystemProperties> sProps = LAZY_INSTANCE_INIT;
 
 extern "C" {
 
 EXPORT int property_get(const char* key, char* value, const char* default_value) {
-    const char ro_kernel_qemu_gles_prop[] = "1";
-    const char qemu_sf_lcd_density[] = "420";
-    int len = 0;
+    return sProps->get(key, value, default_value);
+}
 
-    if (!strcmp(key, "ro.kernel.qemu.gles")) {
-        len = strlen(ro_kernel_qemu_gles_prop);
-        memcpy(value, ro_kernel_qemu_gles_prop, len + 1);
-    } else if (!strcmp(key, "qemu.sf.lcd_density")) {
-        len = strlen(qemu_sf_lcd_density);
-        memcpy(value, qemu_sf_lcd_density, len + 1);
-    } else if (default_value) {
-        len = strlen(qemu_sf_lcd_density);
-        memcpy(value, default_value, len + 1);
-    }
-
-    return len;
+EXPORT int property_set(const char *key, const char *value) {
+    return sProps->set(key, value);
 }
 
 } // extern "C"
