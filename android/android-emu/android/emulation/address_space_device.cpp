@@ -107,6 +107,14 @@ public:
         }
     }
 
+    AddressSpaceDeviceContext* handleToContext(uint32_t handle) {
+        AutoLock lock(mContextsLock);
+        if (mContexts.find(handle) == mContexts.end()) return nullptr;
+
+        auto& contextDesc = mContexts[handle];
+        return contextDesc.device_context.get();
+    }
+
     void save(Stream* stream) const {
         stream->putBe32(mHandleIndex);
         stream->putBe32(mContexts.size());
@@ -130,12 +138,9 @@ public:
     }
 
     bool load(Stream* stream) {
-        {
-            // First destroy all contexts, because
-            // this can be done while an emulator is running
-            AutoLock lock(mContextsLock);
-            mContexts.clear();
-        }
+        // First destroy all contexts, because
+        // this can be done while an emulator is running
+        clear();
 
         const uint32_t handleIndex = stream->getBe32();
         const size_t size = stream->getBe32();
@@ -180,14 +185,30 @@ public:
         return true;
     }
 
+    void clear() {
+        AutoLock lock(mContextsLock);
+        mContexts.clear();
+        auto it = mMemoryMappings.begin();
+        std::vector<std::pair<uint64_t, uint64_t>> gpasSizesToErase;
+        for (auto it: mMemoryMappings) {
+            auto gpa = it.first;
+            auto size = it.second.second;
+            gpasSizesToErase.push_back({gpa, size});
+        }
+        for (const auto& gpaSize : gpasSizesToErase) {
+            removeMemoryMappingLocked(gpaSize.first, gpaSize.second);
+        }
+        mMemoryMappings.clear();
+    }
+
     bool addMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
         AutoLock lock(mMemoryMappingsLock);
         return addMemoryMappingLocked(gpa, ptr, size);
     }
 
-    bool removeMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
+    bool removeMemoryMapping(uint64_t gpa, uint64_t size) {
         AutoLock lock(mMemoryMappingsLock);
-        return removeMemoryMappingLocked(gpa, ptr, size);
+        return removeMemoryMappingLocked(gpa, size);
     }
 
     void *getHostPtr(uint64_t gpa) const {
@@ -230,15 +251,23 @@ private:
             sVmOps->mapUserBackedRam(gpa, ptr, size);
             return true;
         } else {
+            fprintf(stderr, "%s: failed: hva %p -> gpa [0x%llx 0x%llx]\n", __func__,
+                    ptr,
+                    (unsigned long long)gpa,
+                    (unsigned long long)size);
             return false;
         }
     }
 
-    bool removeMemoryMappingLocked(uint64_t gpa, void *ptr, uint64_t size) {
+    bool removeMemoryMappingLocked(uint64_t gpa, uint64_t size) {
         if (mMemoryMappings.erase(gpa) > 0) {
             sVmOps->unmapUserBackedRam(gpa, size);
             return true;
         } else {
+            fprintf(stderr, "%s: failed: gpa [0x%llx 0x%llx]\n", __func__,
+                    (unsigned long long)gpa,
+                    (unsigned long long)size);
+            *(uint32_t*)(123) = 12;
             return false;
         }
     }
@@ -295,11 +324,20 @@ int sAddressSpaceDeviceAddMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) 
 }
 
 int sAddressSpaceDeviceRemoveMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
-    return sAddressSpaceDeviceState->removeMemoryMapping(gpa, ptr, size) ? 1 : 0;
+    (void)ptr; // TODO(lfy): remove arg
+    return sAddressSpaceDeviceState->removeMemoryMapping(gpa, size) ? 1 : 0;
 }
 
 void* sAddressSpaceDeviceGetHostPtr(uint64_t gpa) {
     return sAddressSpaceDeviceState->getHostPtr(gpa);
+}
+
+static void* sAddressSpaceHandleToContext(uint32_t handle) {
+    return (void*)(sAddressSpaceDeviceState->handleToContext(handle));
+}
+
+static void sAddressSpaceDeviceClear() {
+    sAddressSpaceDeviceState->clear();
 }
 
 } // namespace
@@ -313,7 +351,9 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDevicePing,                // ping
     &sAddressSpaceDeviceAddMemoryMapping,    // add_memory_mapping
     &sAddressSpaceDeviceRemoveMemoryMapping, // remove_memory_mapping
-    &sAddressSpaceDeviceGetHostPtr           // get_host_ptr
+    &sAddressSpaceDeviceGetHostPtr,          // get_host_ptr
+    &sAddressSpaceHandleToContext,           // handle_to_context
+    &sAddressSpaceDeviceClear,               // clear
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
