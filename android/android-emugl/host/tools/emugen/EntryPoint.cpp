@@ -386,6 +386,10 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
         } else {
             fprintf(stderr, "WARNING: %u: unknown flag %s\n", (unsigned int)lc, flag.c_str());
         }
+    } else if (token == "custom_host_api") {
+        pos = last;
+        std::string apiname = getNextToken(line, pos, &last, WHITESPACE);
+        setCustomHostApi(apiname);
     } else {
         fprintf(stderr, "WARNING: %u: unknown attribute %s\n", (unsigned int)lc, token.c_str());
     }

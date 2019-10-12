@@ -37,6 +37,10 @@ public:
                const std::string & name_prefix = std::string(""),
                const std::string & ctx_param = std::string("")) const;
     const std::string & name() const { return m_name; }
+    const std::string & hostApiName() const {
+        if (m_customHostApi.empty()) return m_name;
+        return m_customHostApi;
+    }
     VarsArray & vars() { return m_vars; }
     Var & retval() { return m_retval; }
     Var * var(const std::string & name);
@@ -50,6 +54,7 @@ public:
     void setNotApi(bool state) { m_notApi = state; }
     bool flushOnEncode() const { return m_flushOnEncode; }
     void setFlushOnEncode(bool state) { m_flushOnEncode = state; }
+    void setCustomHostApi(const std::string& apiname) { m_customHostApi = apiname; }
     int validateVarAttr(const std::string& varname, size_t lc) const;
     int setAttribute(const std::string &line, size_t lc);
 
@@ -61,6 +66,7 @@ private:
     bool m_customDecoder;
     bool m_notApi;
     bool m_flushOnEncode;
+    std::string m_customHostApi;
 
     void err(unsigned int lc, const char *msg) {
         fprintf(stderr, "line %d: %s\n", lc, msg);
