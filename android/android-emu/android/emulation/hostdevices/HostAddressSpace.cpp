@@ -53,6 +53,7 @@ public:
         }
         mSharedRegions.clear();
         mPhysicalOffsetAllocator.freeAll();
+        mControlOps->clear();
     }
 
     uint32_t open() {
