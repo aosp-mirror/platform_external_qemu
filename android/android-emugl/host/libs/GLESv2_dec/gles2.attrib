@@ -1460,3 +1460,22 @@ glDrawElementsDataNullAEMU
 glDrawElementsOffsetNullAEMU
     flag custom_decoder
     flag not_api
+
+# Async UnmapBuffer
+glUnmapBufferAsyncAEMU
+    dir guest_buffer in
+    len guest_buffer length
+    var_flag guest_buffer nullAllowed isLarge
+    dir out_res in
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
+    custom_host_api glUnmapBufferAEMU
+
+glFlushMappedBufferRangeAEMU2
+    dir guest_buffer in
+    len guest_buffer length
+    var_flag guest_buffer nullAllowed isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glFlushMappedBufferRangeAEMU
