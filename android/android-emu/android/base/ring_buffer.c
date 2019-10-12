@@ -180,7 +180,7 @@ void ring_buffer_init_view_only(
     v->mask = (1 << shift) - 1;
 }
 
-static uint32_t ring_buffer_view_get_ring_pos(
+uint32_t ring_buffer_view_get_ring_pos(
     const struct ring_buffer_view* v,
     uint32_t index) {
     return index & v->mask;
@@ -218,6 +218,39 @@ uint32_t ring_buffer_available_read(
         return get_ring_pos(write_view - r->read_pos);
     }
 }
+
+int ring_buffer_copy_contents(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v,
+    uint32_t wanted_bytes,
+    uint8_t* res) {
+
+    uint32_t total_available =
+        ring_buffer_available_read(r, v);
+    uint32_t available_at_end =
+        v->size - ring_buffer_view_get_ring_pos(v, r->read_pos);
+
+    if (total_available < wanted_bytes) {
+        return -1;
+    }
+
+    if (wanted_bytes > available_at_end) {
+        uint32_t remaining = wanted_bytes - available_at_end;
+        memcpy(res,
+               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+               available_at_end);
+        memcpy(res + available_at_end,
+               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos + available_at_end)],
+               remaining);
+    } else {
+        memcpy(res,
+               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+               wanted_bytes);
+    }
+
+    return 0;
+}
+
 
 long ring_buffer_view_write(
     struct ring_buffer* r,
@@ -303,9 +336,7 @@ long ring_buffer_view_read(
 
 void ring_buffer_yield() {
 #ifdef _WIN32
-    if (!SwitchToThread()) {
-        Sleep(0);
-    }
+    _mm_pause();
 #else
     sched_yield();
 #endif
