@@ -402,10 +402,23 @@ TEST_F(CombinedGoldfishOpenglTest, MappedMemory) {
     uint8_t* mapped =
         (uint8_t*)
             glMapBufferRange(
-                GL_ARRAY_BUFFER, 0, kBufferSize, GL_MAP_WRITE_BIT);
+                GL_ARRAY_BUFFER, 0, kBufferSize, GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
 
     for (uint8_t i = 0; i < kBufferSize; ++i) {
         mapped[i] = data[i];
+    }
+
+    glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, kBufferSize);
+
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    mapped =
+        (uint8_t*)
+            glMapBufferRange(
+                GL_ARRAY_BUFFER, 0, kBufferSize, GL_MAP_READ_BIT);
+
+    for (uint8_t i = 0; i < kBufferSize; ++i) {
+        EXPECT_EQ(data[i], mapped[i]);
     }
 
     glUnmapBuffer(GL_ARRAY_BUFFER);
