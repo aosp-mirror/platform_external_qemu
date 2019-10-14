@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88e6e738_9419da68",
+        "filename": "android/android-emu/android/base/ring_buffer.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-14T19:05:29Z",
+      "side": 1,
+      "message": "Is it used?",
+      "range": {
+        "startLine": 43,
+        "startChar": 13,
+        "endLine": 43,
+        "endChar": 19
+      },
+      "revId": "ca610cef2d297c66ec24b4ba5877f18d19be7782",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
