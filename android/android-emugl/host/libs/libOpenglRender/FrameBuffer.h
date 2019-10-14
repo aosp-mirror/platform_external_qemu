@@ -18,6 +18,7 @@
 
 #include "android/base/files/Stream.h"
 #include "android/base/threads/WorkerThread.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
 
 #include "ColorBuffer.h"
@@ -557,6 +558,7 @@ private:
                                        FrameworkFormat p_frameworkFormat);
     void recomputeLayout();
     void setDisplayPoseInSkinUI(int totalHeight);
+    void sweepColorBuffersLocked();
 
 private:
     static FrameBuffer *s_theFrameBuffer;
@@ -704,5 +706,8 @@ private:
     bool m_vulkanInteropSupported = false;
     emugl::Mutex m_multiDisplayOnLoadLock;
     bool m_multiDisplayOnLoadDone = false;
+
+    android::base::MessageChannel<HandleType, 1024>
+        mOutstandingColorBufferDestroys;
 };
 #endif
