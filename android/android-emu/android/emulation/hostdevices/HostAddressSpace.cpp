@@ -57,8 +57,9 @@ public:
     }
 
     uint32_t open() {
-        AutoLock lock(mLock);
         uint32_t handle = mControlOps->gen_handle();
+
+        AutoLock lock(mLock);
         auto& entry = mEntries[handle];
 
         entry.pingInfo = new AddressSpaceDevicePingInfo;
@@ -70,8 +71,9 @@ public:
     }
 
     void close(uint32_t handle) {
-        AutoLock lock(mLock);
         mControlOps->destroy_handle(handle);
+
+        AutoLock lock(mLock);
         auto& entry = mEntries[handle];
         delete entry.pingInfo;
         mEntries.erase(handle);
@@ -182,7 +184,6 @@ public:
 
     void ping(uint32_t handle, AddressSpaceDevicePingInfo* pingInfo) {
         AutoLock lock(mLock);
-
         auto& entry = mEntries[handle];
         memcpy(entry.pingInfo, pingInfo, sizeof(AddressSpaceDevicePingInfo));
 
