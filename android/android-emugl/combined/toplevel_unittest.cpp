@@ -97,6 +97,9 @@ TEST(Toplevel, Basic) {
                                        EGL_NO_CONTEXT));
     EXPECT_EQ(EGL_TRUE, eglDestroyContext(d, c));
     EXPECT_EQ(EGL_TRUE, eglDestroySurface(d, s));
+    // Note: only necessary to ensure color buffers swept
+    EXPECT_EQ(EGL_TRUE, eglMakeCurrent(d, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                                       EGL_NO_CONTEXT));
     eglReleaseThread();
 
     t.reset();
