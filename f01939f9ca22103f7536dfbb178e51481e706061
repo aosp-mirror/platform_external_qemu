@@ -22,6 +22,30 @@
       "revId": "f01939f9ca22103f7536dfbb178e51481e706061",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c37ddc6_53b2e35e",
+        "filename": "android/android-emugl/guest/androidImpl/Properties.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-14T17:30:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a5bb264_8a55ab75",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 67,
+        "endChar": 29
+      },
+      "revId": "f01939f9ca22103f7536dfbb178e51481e706061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
