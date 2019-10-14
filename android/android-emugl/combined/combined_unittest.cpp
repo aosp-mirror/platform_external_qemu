@@ -86,6 +86,9 @@ protected:
             glFinish(); // sync the pipe
         }
 
+        // Only to force a sweep of color buffers
+        EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
+                                           EGL_NO_SURFACE, EGL_NO_CONTEXT));
         if (!mDisableLeakCheck) {
             mAfterTest = android::base::GLObjectCounter::get()->getCounts();
             for (int i = 0; i < mBeforeTest.size(); i++) {
@@ -173,8 +176,8 @@ protected:
         if (mEGL.display != EGL_NO_DISPLAY) {
             EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
                                                EGL_NO_SURFACE, EGL_NO_CONTEXT));
-            EXPECT_EQ(EGL_TRUE, eglDestroyContext(mEGL.display, mEGL.context));
             EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, mEGL.surface));
+            EXPECT_EQ(EGL_TRUE, eglDestroyContext(mEGL.display, mEGL.context));
             EXPECT_EQ(EGL_TRUE, eglTerminate(mEGL.display));
             EXPECT_EQ(EGL_TRUE, eglReleaseThread());
         }
