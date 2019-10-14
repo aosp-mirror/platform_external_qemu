@@ -60,15 +60,7 @@ else()
   add_subdirectory(breakpad)
 endif()
 
-# Only use boringssl for msvc, due to   b/129081460
-if(WINDOWS_MSVC_X86_64)
-  add_subdirectory(boringssl)
-else()
-  # Use prebuilt due to b/129076232
-  message(STATUS "Using prebuilt openssl..")
-  prebuilt(OpenSSL)
-endif()
-
+add_subdirectory(boringssl)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
 

@@ -75,7 +75,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             MY_FLAGS="--target=arm64-linux-gcc"
             ;;
         windows-x86_64)
-            MY_FLAGS="--target=x86_64-win64-gcc"
+            # We cannot strip symbols in x86_64
+            MY_FLAGS="--target=x86_64-win64-gcc --enable-debug"
             ;;
         darwin-*)
             # Use host compiler.
