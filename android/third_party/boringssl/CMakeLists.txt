@@ -11,9 +11,9 @@ android_target_compile_options(ssl windows PRIVATE  "-UNDEBUG")
 
 # Setup the crypto libraries:
 if(LINUX_X86_64)
-  set(crypto_src ${crypto_sources} ${crypto_sources_linux_x86_64)
+  set(crypto_src ${crypto_sources} ${crypto_sources_linux_x86_64})
   android_add_library(crypto)
-elif(DARWIN_X86_64)
+elseif(DARWIN_X86_64)
   set(crypto_src ${crypto_sources} ${crypto_sources_mac_x86_64)
   android_add_library(crypto)
 else()
@@ -22,9 +22,10 @@ else()
   android_target_compile_options(crypto windows PRIVATE "-std=c99" "-UNDEBUG")
 
   android_yasm_compile(TARGET crypto_asm_lib SOURCES ${crypto_sources_win_x86_64})
-  target_link_libraries(crypto PRIVATE crypto_asm_lib)
+  target_link_libraries(crypto PRIVATE crypto_asm_lib ws2_32::ws2_32)
 endif()
 target_include_directories(crypto PUBLIC ${BORINGSSL_ROOT}/src/include)
+target_link_libraries(ssl PUBLIC crypto)
 
 # Tests
 set(boringssl_test_support_src ${test_support_sources})
