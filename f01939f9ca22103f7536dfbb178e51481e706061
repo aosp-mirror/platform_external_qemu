@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a5bb264_8a55ab75",
+        "filename": "android/android-emugl/guest/androidImpl/Properties.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-14T17:07:16Z",
+      "side": 1,
+      "message": "Maybe this should be moved into the AndroidSystemProperties\u0027s member functions?\n\nint property_get(x, y, z) { return sProps.ptr-\u003eget(x, y, z); }",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 67,
+        "endChar": 29
+      },
+      "revId": "f01939f9ca22103f7536dfbb178e51481e706061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
