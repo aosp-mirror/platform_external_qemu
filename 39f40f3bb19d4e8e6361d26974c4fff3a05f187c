@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "e178372d_05963ab5",
+        "filename": "android/android-emu/android/base/SubAllocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-14T18:37:14Z",
+      "side": 1,
+      "message": "Why do we write in the \u0027save\u0027 function?",
+      "range": {
+        "startLine": 64,
+        "startChar": 34,
+        "endLine": 64,
+        "endChar": 35
+      },
+      "revId": "39f40f3bb19d4e8e6361d26974c4fff3a05f187c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "189740b4_6e54be58",
+        "filename": "android/android-emu/android/base/SubAllocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-14T18:37:14Z",
+      "side": 1,
+      "message": "Should we allocate blocks here?",
+      "range": {
+        "startLine": 87,
+        "startChar": 44,
+        "endLine": 87,
+        "endChar": 59
+      },
+      "revId": "39f40f3bb19d4e8e6361d26974c4fff3a05f187c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "87ea3ce0_58f258ca",
         "filename": "android/android-emu/android/base/SubAllocator.h",
         "patchSetId": 5
