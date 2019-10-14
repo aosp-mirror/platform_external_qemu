@@ -183,6 +183,20 @@ def emit_call_log(api, cgen):
     cgen.stmt("fprintf(stderr, \"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
     cgen.endIf()
 
+def emit_call_log_post(api, cgen):
+    decodingParams = DecodingParameters(api)
+    paramsToRead = decodingParams.toRead
+
+    cgen.beginIf("m_logCalls")
+    paramLogFormat = ""
+    paramLogArgs = []
+    for p in paramsToRead:
+        paramLogFormat += "0x%llx "
+    for p in paramsToRead:
+        paramLogArgs.append("(unsigned long long)%s" % (p.paramName))
+    cgen.stmt("fprintf(stderr, \"stream %%p: done calling %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
+    cgen.endIf()
+
 def emit_decode_parameters(typeInfo, api, cgen):
 
     decodingParams = DecodingParameters(api)
@@ -333,6 +347,7 @@ def emit_snapshot(typeInfo, api, cgen):
 def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
+    emit_call_log_post(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
@@ -342,6 +357,7 @@ def emit_default_decoding(typeInfo, api, cgen):
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_global_state_wrapped_call(api, cgen)
+    emit_call_log_post(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
@@ -369,6 +385,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     cgen.endIf()
 
     emit_dispatch_call(api, cgen)
+    emit_call_log_post(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
@@ -378,6 +395,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
+    emit_call_log_post(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
 
