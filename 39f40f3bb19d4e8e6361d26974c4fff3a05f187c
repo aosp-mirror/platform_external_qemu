@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "87ea3ce0_58f258ca",
+        "filename": "android/android-emu/android/base/SubAllocator.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-14T16:59:10Z",
+      "side": 1,
+      "message": "Do we have support for __attribute__ ((warn_unused_result))?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 8
+      },
+      "revId": "39f40f3bb19d4e8e6361d26974c4fff3a05f187c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "07e1d454_208977c4",
         "filename": "android/android-emu/android/base/address_space.h",
         "patchSetId": 5
