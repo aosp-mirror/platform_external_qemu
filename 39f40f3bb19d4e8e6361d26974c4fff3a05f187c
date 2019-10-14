@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07e1d454_208977c4",
+        "filename": "android/android-emu/android/base/address_space.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-14T16:57:20Z",
+      "side": 1,
+      "message": "Should we add one ANDROID_EMU_ASSERT and use everywhere?",
+      "range": {
+        "startLine": 65,
+        "startChar": 22,
+        "endLine": 65,
+        "endChar": 28
+      },
+      "revId": "39f40f3bb19d4e8e6361d26974c4fff3a05f187c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
