@@ -562,7 +562,7 @@ prepare_build_for_linux_aarch64() {
 }
 
 prepare_build_for_windows () {
-    local GCC_LINK_FLAGS="-Wno-missing-braces -Wno-aggressive-loop-optimizations"
+    local GCC_LINK_FLAGS="-Wno-missing-braces -Wno-aggressive-loop-optimizations -w"
 
     case $CURRENT_HOST in
       windows-x86_64)

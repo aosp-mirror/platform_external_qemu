@@ -285,6 +285,7 @@ do_dtc_package () {
 build_qemu_android_deps () {
     builder_prepare_for_host "$1" "$AOSP_DIR"
 
+
     if [ -z "$OPT_FORCE" ]; then
         if timestamp_check \
                 "$INSTALL_DIR/$(builder_host)" qemu-android-deps; then

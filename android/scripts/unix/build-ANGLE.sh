@@ -135,7 +135,7 @@ mingw_build_angle_package() {
         windows-x86_64)
             MINGW_PREFIX=x86_64
             GYP_TARGET=win64
-            $AOSP_DIR/external/qemu/android/scripts/gen-android-sdk-toolchain.sh \
+            $AOSP_DIR/external/qemu/android/scripts/unix/gen-android-sdk-toolchain.sh \
                 --host=windows-x86_64 \
                 ./mingw-toolchain
             ;;
@@ -231,6 +231,7 @@ build_angle_libraries () {
         case $SYSTEM in
             win*)
                 PKG_LIB_DIR=$PKG_BUILD_DIR/out/Debug/obj.target/src/
+
                 ;;
             linux*)
                 PKG_LIB_DIR=$PKG_BUILD_DIR/out/Debug/obj/src/
