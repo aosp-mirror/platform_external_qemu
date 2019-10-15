@@ -95,11 +95,10 @@ public:
     }
 
     void setHostAddrByPhysAddr(uint64_t physAddr, void* hva) {
-        AutoLock lock(mLock);
         if (!physAddr) return;
+        const uint64_t off = physAddr - kPciStart;
 
-        uint64_t off = physAddr - mPciStart;
-
+        AutoLock lock(mLock);
         for (auto &it : mEntries) {
             for (auto &it2 : it.second.blocks) {
                 if (it2.first == off) {
@@ -116,11 +115,10 @@ public:
     }
 
     void unsetHostAddrByPhysAddr(uint64_t physAddr) {
-        AutoLock lock(mLock);
         if (!physAddr) return;
+        const uint64_t off = physAddr - kPciStart;
 
-        uint64_t off = physAddr - mPciStart;
-
+        AutoLock lock(mLock);
         for (auto &it : mEntries) {
             for (auto &it2 : it.second.blocks) {
                 if (it2.first == off) {
@@ -137,11 +135,12 @@ public:
     }
 
     void* getHostAddr(uint64_t physAddr) {
-        AutoLock lock(mLock);
         HASD_LOG("get hva of 0x%llx", (unsigned long long)physAddr);
-        if (!physAddr) return nullptr;
 
-        uint64_t off = physAddr - mPciStart;
+        if (!physAddr) return nullptr;
+        const uint64_t off = physAddr - kPciStart;
+
+        AutoLock lock(mLock);
         HASD_LOG("get hva of off 0x%llx", (unsigned long long)off);
         void* res = 0;
 
@@ -177,8 +176,8 @@ public:
         return res;
     }
 
-    uint64_t offsetToPhysAddr(uint64_t offset) const {
-        return mPciStart + offset;
+    static uint64_t offsetToPhysAddr(uint64_t offset) {
+        return kPciStart + offset;
     }
 
     void ping(uint32_t handle, AddressSpaceDevicePingInfo* pingInfo) {
@@ -291,13 +290,8 @@ public:
         return 0;
     }
 
-    uint64_t getPhysAddrStart() {
-        AutoLock lock(mLock);
-        return getPhysAddrStartLocked();
-    }
-
-    uint64_t getPhysAddrStartLocked() {
-        return mPciStart;
+    static uint64_t getPhysAddrStart() {
+        return kPciStart;
     }
 
 private:
@@ -314,7 +308,7 @@ private:
         auto& block = entry.blocks[off];
         block.size = size;
         (void)block;
-        *physAddr = mPciStart + off;
+        *physAddr = kPciStart + off;
         return off;
     }
 
@@ -358,9 +352,10 @@ private:
 
     bool mInitialized = false;
 
+    static const uint64_t kPciStart = 0x0101010100000000;
+
     Lock mLock;
     address_space_device_control_ops* mControlOps = nullptr;
-    uint64_t mPciStart = 0x0101010100000000;
     android::base::SubAllocator mPhysicalOffsetAllocator;
 
     struct Entry {
@@ -466,17 +461,13 @@ uint64_t HostAddressSpaceDevice::getPhysAddrStart() {
     return HostAddressSpaceDevice::getImpl()->getPhysAddrStart();
 }
 
-uint64_t HostAddressSpaceDevice::getPhysAddrStartLocked() {
-    return HostAddressSpaceDevice::getImpl()->getPhysAddrStartLocked();
-}
-
 static const AddressSpaceHwFuncs sAddressSpaceHwFuncs = {
     &HostAddressSpaceDevice::allocSharedHostRegion,
     &HostAddressSpaceDevice::freeSharedHostRegion,
     &HostAddressSpaceDevice::allocSharedHostRegionLocked,
     &HostAddressSpaceDevice::freeSharedHostRegionLocked,
     &HostAddressSpaceDevice::getPhysAddrStart,
-    &HostAddressSpaceDevice::getPhysAddrStartLocked,
+    &HostAddressSpaceDevice::getPhysAddrStart,
 };
 
 void HostAddressSpaceDevice::initialize() {
