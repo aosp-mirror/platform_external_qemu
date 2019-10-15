@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "910448bf_dd44d409",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-15T18:00:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3cc7f332_e293b30c",
+      "range": {
+        "startLine": 526,
+        "startChar": 0,
+        "endLine": 526,
+        "endChar": 6
+      },
+      "revId": "545632d8edf805741e5289752686468a6fe3ae63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16cf4a76_013a7cc1",
         "filename": "android/android-grpc/docs/grpc-samples/README.md",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "545632d8edf805741e5289752686468a6fe3ae63",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8eee1ed_03ab87a9",
+        "filename": "android/android-grpc/docs/grpc-samples/README.md",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-15T18:00:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "16cf4a76_013a7cc1",
+      "range": {
+        "startLine": 62,
+        "startChar": 107,
+        "endLine": 62,
+        "endChar": 108
+      },
+      "revId": "545632d8edf805741e5289752686468a6fe3ae63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
