@@ -7,6 +7,13 @@ set(WINDOWS_ICON ../images/emulator_icon.rc)
 set(emulator_src main-emulator.cpp ${WINDOWS_ICON})
 android_add_executable(emulator)
 target_link_libraries(emulator PRIVATE android-emu)
+# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though
+# we are not using them..
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  android_target_link_libraries(emulator windows-x86_64 PRIVATE android-mock-vm-operations android-emu)
+endif ()
+
+
 target_compile_definitions(emulator
                            PRIVATE
                            "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
@@ -18,6 +25,14 @@ set(emulator-headless_src
     ${WINDOWS_ICON})
 android_add_executable(emulator-headless)
 target_link_libraries(emulator-headless PRIVATE android-emu)
+
+# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though
+# we are not using them..
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  android_target_link_libraries(emulator-headless windows-x86_64 PRIVATE android-mock-vm-operations android-emu)
+endif ()
+
+
 target_compile_definitions(emulator-headless
                            PRIVATE
                            -DCONFIG_HEADLESS
