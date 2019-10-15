@@ -238,9 +238,16 @@ private:
             int height = kWindowSize) {
         buffer_handle_t buffer;
         int stride;
+        int ret;
 
-        mGralloc.alloc(width, height, format, usage, &buffer, &stride);
-        mGralloc.registerBuffer(buffer);
+        ret = mGralloc.alloc(width, height, format, usage, &buffer, &stride);
+        if (ret) {
+            return nullptr;
+        }
+        ret = mGralloc.registerBuffer(buffer);
+        if (ret) {
+            return nullptr;
+        }
 
         (void)stride;
 
@@ -248,8 +255,13 @@ private:
     }
 
     void destroyGrallocBuffer(buffer_handle_t buffer) {
-        mGralloc.unregisterBuffer(buffer);
-        mGralloc.free(buffer);
+        int ret;
+        ret = mGralloc.unregisterBuffer(buffer);
+        if (ret) {
+        }
+        ret = mGralloc.free(buffer);
+        if (ret) {
+        }
     }
 
     std::vector<AndroidWindowBuffer> allocBuffersForQueue(int usage = GRALLOC_USAGE_HW_RENDER) {

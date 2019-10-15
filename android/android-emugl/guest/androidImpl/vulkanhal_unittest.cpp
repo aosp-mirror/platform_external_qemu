@@ -113,16 +113,37 @@ protected:
             int usage, int format,
             int width, int height, int* stride_out) {
         buffer_handle_t buffer;
+        int res;
 
-        mGralloc.alloc(width, height, format, usage, &buffer, stride_out);
-        mGralloc.registerBuffer(buffer);
+        res = mGralloc.alloc(width, height, format, usage, &buffer, stride_out);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
+
+        res = mGralloc.registerBuffer(buffer);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
 
         return buffer;
     }
 
     void destroyTestGrallocBuffer(buffer_handle_t buffer) {
-        mGralloc.unregisterBuffer(buffer);
-        mGralloc.free(buffer);
+        int res;
+
+        res = mGralloc.unregisterBuffer(buffer);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
+
+        res = mGralloc.free(buffer);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
     }
 
     void setupVulkan() {
