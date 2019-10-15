@@ -236,6 +236,8 @@ void FrameBuffer::finalize() {
         return;
     }
 
+    sweepColorBuffersLocked();
+
     m_colorbuffers.clear();
     m_colorBufferDelayedCloseList.clear();
     if (m_useSubWindow) {
@@ -1027,6 +1029,8 @@ HandleType FrameBuffer::createColorBufferLocked(int p_width,
                                                 int p_height,
                                                 GLenum p_internalFormat,
                                                 FrameworkFormat p_frameworkFormat) {
+    sweepColorBuffersLocked();
+
     HandleType ret = 0;
 
     ret = genHandle_locked();
@@ -1199,6 +1203,8 @@ void FrameBuffer::drainWindowSurface() {
 
 void FrameBuffer::DestroyRenderContext(HandleType p_context) {
     AutoLock mutex(m_lock);
+    sweepColorBuffersLocked();
+
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     m_contexts.erase(p_context);
     RenderThreadInfo* tinfo = RenderThreadInfo::get();
@@ -1716,6 +1722,9 @@ bool FrameBuffer::bindContext(HandleType p_context,
         } else {
             read = draw;
         }
+    } else {
+        // if unbind operation, sweep color buffers
+        sweepColorBuffersLocked();
     }
 
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
@@ -2194,10 +2203,13 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
-    AutoLock mutex(m_lock);
-    bool needCleanup = decColorBufferRefCountLocked((HandleType)handle);
-    mutex.unlock();
-    if (needCleanup) goldfish_vk::teardownVkColorBuffer(handle);
+    if (!mOutstandingColorBufferDestroys.trySend((HandleType)handle)) {
+        fprintf(
+            stderr,
+            "%s: warning: too many outstanding "
+            "color buffer destroys. leaking handle 0x%x\n",
+            __func__, handle);
+    }
 }
 
 bool FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
@@ -2366,6 +2378,8 @@ bool FrameBuffer::onLoad(Stream* stream,
     AutoLock lock(m_lock);
     // cleanups
     {
+        sweepColorBuffersLocked();
+
         ScopedBind scopedBind(m_colorBufferHelper);
         if (m_procOwnedWindowSurfaces.empty() &&
             m_procOwnedColorBuffers.empty() && m_procOwnedEGLImages.empty() &&
@@ -2832,6 +2846,19 @@ void FrameBuffer::setDisplayPoseInSkinUI(int totalHeight) {
         }
     }
 }
+
+void FrameBuffer::sweepColorBuffersLocked() {
+    HandleType handleToDestroy;
+    while (mOutstandingColorBufferDestroys.tryReceive(&handleToDestroy)) {
+        bool needCleanup = decColorBufferRefCountLocked(handleToDestroy);
+        if (needCleanup) {
+            m_lock.unlock();
+            goldfish_vk::teardownVkColorBuffer(handleToDestroy);
+            m_lock.lock();
+        }
+    }
+}
+
 void FrameBuffer::getCombinedDisplaySize(int* w, int* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
