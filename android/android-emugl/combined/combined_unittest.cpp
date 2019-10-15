@@ -196,18 +196,38 @@ protected:
             int height = kWindowSize) {
         buffer_handle_t buffer;
         int stride;
+        int res;
 
-        mGralloc.alloc(width, height, format, usage, &buffer, &stride);
-        mGralloc.registerBuffer(buffer);
+        res = mGralloc.alloc(width, height, format, usage, &buffer, &stride);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
 
+        res = mGralloc.registerBuffer(buffer);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
         (void)stride;
 
         return buffer;
     }
 
     void destroyTestGrallocBuffer(buffer_handle_t buffer) {
-        mGralloc.unregisterBuffer(buffer);
-        mGralloc.free(buffer);
+        int res;
+
+        res = mGralloc.unregisterBuffer(buffer);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
+
+        res = mGralloc.free(buffer);
+        if (res) {
+            fprintf(stderr, "%s:%d res=%d buffer=%p\n", __func__, __LINE__, res, buffer);
+            ::abort();
+        }
     }
 
     std::vector<AndroidWindowBuffer> primeWindowBufferQueue(AndroidWindow& window) {
