@@ -20,6 +20,8 @@
 namespace android {
 namespace base {
 
+class Stream;
+
 // Class to create sub-allocations in an existing buffer. Similar interface to
 // Pool, but underlying mechanism is different as it's difficult to combine
 // same-size heaps in Pool with a preallocated buffer.
@@ -36,9 +38,15 @@ public:
     // SubAllocator, but the prealloced buffer is not freed.
     ~SubAllocator();
 
+    // Snapshotting
+    bool save(Stream* stream);
+    bool load(Stream* stream);
+    bool postLoad(void* postLoadBuffer);
+
     // returns null if the allocation cannot be satisfied.
     void* alloc(size_t wantedSize);
-    void free(void* ptr);
+    // returns true if |ptr| came from alloc(), false otherwise
+    bool free(void* ptr);
     void freeAll();
     uint64_t getOffset(void* ptr);
 
