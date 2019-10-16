@@ -446,11 +446,13 @@ function(android_generate_hw_config)
                      COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
                              ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
                              ${ANDROID_HW_CONFIG_H}
+                     DEPENDS ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
                      VERBATIM)
   add_library(android-hw-config ${ANDROID_HW_CONFIG_H} dummy.c)
-  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES GENERATED TRUE)
-  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES SKIP_AUTOGEN ON)
-  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES HEADER_FILE_ONLY TRUE)
+  set_source_files_properties(${ANDROID_HW_CONFIG_H} PROPERTIES
+                      GENERATED TRUE
+                      SKIP_AUTOGEN ON
+                      HEADER_FILE_ONLY TRUE)
   target_include_directories(android-hw-config PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/avd_config)
 endfunction()
 
