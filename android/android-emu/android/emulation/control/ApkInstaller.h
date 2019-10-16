@@ -41,7 +41,7 @@ public:
 
     using ResultCallback =
             std::function<void(Result result,
-                               android::base::StringView errorString)>;
+                               std::string errorString)>;
 
     explicit ApkInstaller(AdbInterface* adb);
     ~ApkInstaller();

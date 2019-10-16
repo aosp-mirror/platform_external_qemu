@@ -388,10 +388,14 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
           return std::make_tuple(
                   (*mAdbInterface),
                   [this](StringView filePath, FilePusher::Result result) {
-                      adbPushDone(filePath, result);
+                      runOnUiThread([this, filePath, result] {
+                        adbPushDone(filePath, result);
+                      });
                   },
                   [this](double progress, bool done) {
-                      adbPushProgress(progress, done);
+                      runOnUiThread([this, progress, done] {
+                        adbPushProgress(progress, done);
+                      });
                   });
       }),
       mInstallDialog(this,
@@ -1875,8 +1879,10 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
 
     mApkInstallCommand = mApkInstaller->install(
             path.toStdString(),
-            [this](ApkInstaller::Result result, StringView errorString) {
-                installDone(result, errorString);
+            [this](ApkInstaller::Result result, std::string errorString) {
+                runOnUiThread([this, result, errorString] {
+                    installDone(result, errorString);
+                });
             });
 }
 
