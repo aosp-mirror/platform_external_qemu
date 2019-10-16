@@ -128,14 +128,28 @@ else()
   endif()
 endif()
 
-# We are slowly removing all the warnings, or at least pushing them to the targets
-# that truely need them.
+# Target specific configurations that we do not want to do in the toolchain.cmake
+# Toolchain variables seem to be overwritten pending your cmake version.
 if(LINUX_X86_64)
   add_c_flag("-Werror")
+  # And the asm type if we are compiling with yasm
+  set(ANDROID_YASM_TYPE elf64)
 elseif(WINDOWS_X86_64)
   add_c_flag("-Wno-all")
-else()
+  # And the asm type if we are compiling with yasm
+  set(ANDROID_YASM_TYPE win64)
+elseif(WINDOWS_MSVC_X86_64)
+  # And the asm type if we are compiling with yasm
+  set(ANDROID_YASM_TYPE win64)
+  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+elseif(DARWIN_X86_64)
+  # And the asm type if we are compiling with yasm
+  set(ANDROID_YASM_TYPE macho64)
+  # Always consider the source to be darwin.
+  add_definitions(-D_DARWIN_C_SOURCE=1)
   add_c_flag("-Wno-everything")
+else()
+  message(FATAL_ERROR "Unknown target!")
 endif()
 
 # Note that clang in windows act as a drop in replacement for cl

@@ -275,7 +275,7 @@ function(android_add_shared_library name)
   if(ANDROID_TARGET_TAG MATCHES "windows.*")
     set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
   endif()
-  if(CMAKE_SYSTEM_NAME MATCHES "WinMSVCCrossCompile")
+  if(CROSSCOMPILE AND WINDOWS_MSVC_X86_64)
     # For windows-msvc build (on linux), this generates a dll and a lib (import library) file. The files are being
     # placed at ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} which is correct for the dll, but the lib file needs to be in the
     # ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} or we can't link to it. Most windows compilers, including clang, don't allow you
@@ -283,18 +283,14 @@ function(android_add_shared_library name)
     #
     # Another headache: it seems we attach a prefix to some of our shared libraries, which make cmake unable to locate
     # the import library later on to whoever tries to link to it (e.g. OpenglRender -> lib64OpenglRender), as it will
-    # look for an import library by <target_library_name>.lib. So let's just move the import library to the archive
-    # directory and rename it back to the library name without the prefix.
+    # look for an import library by <target_library_name>.lib. We just symlink things to make it work.
     add_custom_command(
       TARGET ${name} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
+      COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${name}>/${CMAKE_SHARED_LIBRARY_PREFIX}$<TARGET_LINKER_FILE_NAME:${name}>
               ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>
       COMMENT
-        "Copying $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}> to ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>"
+        "ln -sf $<TARGET_FILE_DIR:${name}>/${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}> ${CMAKE_SHARED_LIBRARY_PREFIX}$<TARGET_LINKER_FILE_NAME:${name}>"
       )
-    add_custom_command(TARGET ${name} POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E remove $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
-                       COMMENT "Removing $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>")
   endif()
   if (WINDOWS_MSVC_X86_64)
     target_link_libraries(${name} PRIVATE msvc-posix-compat)
