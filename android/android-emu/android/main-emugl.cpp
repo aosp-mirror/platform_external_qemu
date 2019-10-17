@@ -34,6 +34,17 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             enum WinsysPreferredGlesBackend uiPreferredBackend,
                             bool* hostGpuVulkanBlacklisted) {
     bool gpuEnabled = false;
+
+    bool avdManagerHasWrongSetting = apiLevel < 16;
+
+    if (avdManagerHasWrongSetting &&
+        (*hwGpuModePtr) &&
+        !gpuOption &&
+        (!strcmp(*hwGpuModePtr, "off") ||
+         !strcmp(*hwGpuModePtr, "guest"))) {
+        str_reset(hwGpuModePtr, "auto");
+    }
+
     if (avdName) {
         gpuEnabled = hwGpuModePtr && (*hwGpuModePtr);
         // If the user has hw config set to mesa, not-so-silently overrule that.
@@ -43,7 +54,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                     "which is deprecated. This AVD is being auto-switched to "
                     "the current and better-supported \'swiftshader\' renderer. "
                     "Please update your AVD config.ini's hw.gpu.mode to match.\n");
-            str_reset(hwGpuModePtr, "swiftshader");
+            str_reset(hwGpuModePtr, "swiftshader_indirect");
         }
     } else if (!gpuOption) {
         // In the case of a platform build, use the 'auto' mode by default.
