@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -86,7 +87,11 @@ namespace control {
 
 class EmulatorControllerServiceImpl : public EmulatorControllerService {
 public:
-    void stop() override { mServer->Shutdown(); }
+    void stop() override {
+        auto deadline = std::chrono::system_clock::now() +
+                        std::chrono::milliseconds(500);
+        mServer->Shutdown(deadline);
+    }
 
     EmulatorControllerServiceImpl(int port,
                                   EmulatorController::Service* service,
