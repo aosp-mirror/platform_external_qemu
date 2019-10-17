@@ -52,6 +52,7 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/opengles.h"
 #include "android/skin/rect.h"
+#include "android/snapshot/Snapshot.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "grpcpp/server.h"
@@ -430,6 +431,23 @@ public:
         return Status::OK;
     }
 
+    Status listSnapshots(ServerContext* context,
+                         const ::google::protobuf::Empty* request,
+                         SnapshotList* reply) override {
+        for (auto snapshot :
+             android::snapshot::Snapshot::getExistingSnapshots()) {
+            auto protobuf = snapshot.getGeneralInfo();
+
+            if (protobuf && snapshot.checkValid(false)) {
+                auto details = reply->add_snapshots();
+                details->set_snapshot_id(snapshot.name());
+                *details->mutable_details() = *protobuf;
+            }
+        }
+
+        return Status::OK;
+    }
+
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
@@ -441,7 +459,7 @@ private:
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
     const uint16_t kNoWait = 0;
-};
+};  // namespace control
 
 using Builder = EmulatorControllerService::Builder;
 
@@ -489,7 +507,6 @@ Builder& Builder::withCertAndKey(std::string certfile,
     mBindAddress = "0.0.0.0";
     return *this;
 }
-
 
 Builder& Builder::withPort(int port) {
     mPort = port;
