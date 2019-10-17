@@ -11,7 +11,6 @@
 
 #include "android/qt/qt_setup.h"
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/Log.h"
 #include "android/qt/qt_path.h"
@@ -19,8 +18,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-using android::base::pj;
 
 bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.
@@ -52,13 +49,6 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     system->envSet("QT_AUTO_SCREEN_SCALE_FACTOR", "none");
     system->envSet("QT_SCALE_FACTOR", "none");
     system->envSet("QT_SCREEN_SCALE_FACTORS", "none");
-
-#ifdef __linux__
-    // Some systems will not use the right libfreetype.
-    // LD_PRELOAD that stuff.
-    auto freetypePath = pj(qtLibSubDir, "libfreetype.so.6");
-    system->envSet("LD_PRELOAD", freetypePath);
-#endif
 
     return true;
 }
