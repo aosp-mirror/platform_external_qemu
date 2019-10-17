@@ -137,6 +137,7 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
     // We need to explicitly check the list because when booted with -wipe-data
     // the emulator will add a line (disk.dataPartition.initPath) which should
     // not affect snapshot.
+    std::unordered_set<std::string> ignore{"android.sdk.root", "android.avd.home"};
     int numPathExpected = 0;
     int numPathActual = 0;
     for (auto&& key : expected) {
@@ -146,6 +147,9 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             }
             continue;  // these contain absolute paths and will be checked
                        // separately.
+        }
+        if (ignore.count(key) > 0) {
+            continue; // The set of properties we feel that we can safely ignore.
         }
 
         if (iniFileKeyMismatches(expected, actual, key) &&
@@ -160,6 +164,11 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
+
+        if (ignore.count(key) > 0) {
+            continue; // The set of properties we feel that we can safely ignore.
+        }
+
         if (iniFileKeyMismatches(actual, expected, key) &&
             isKeySnapshotSensitive(key)) return false;
     }
@@ -329,7 +338,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 43;
+static constexpr int kVersion = 44;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
