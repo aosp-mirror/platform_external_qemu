@@ -4,6 +4,8 @@ add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../grpc/emulator grpc)
 set(grpc_proto_src automation.proto)
 protobuf_generate_grpc_cpp(SOURCE_DIR
                            ${CMAKE_CURRENT_LIST_DIR}
+                           INCLUDES
+                           ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
                            SOURCES
                            emulator_controller.proto
                            waterfall.proto
@@ -47,7 +49,7 @@ android_add_test(android-grpc_unittest)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++ gmock_main)
 
 # Lets distribute the proto file
-install(FILES emulator_controller.proto waterfall.proto DESTINATION lib)
+install(FILES emulator_controller.proto waterfall.proto ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto DESTINATION lib)
 
 # Add the benchmark
 set(grpc_benchmark_src android/emulation/control/keyboard/KeytranslatePerf.cpp
