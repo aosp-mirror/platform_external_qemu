@@ -13,17 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
-from . import emulator_controller_pb2
-from . import emulator_controller_pb2_grpc
+from google.protobuf import empty_pb2
+
+import proto.emulator_controller_pb2
+import proto.emulator_controller_pb2_grpc
+from channel_provider import getEmulatorChannel
 
 # Open a grpc channel
-channel = grpc.insecure_channel('localhost:5556')
+channel = getEmulatorChannel()
 
 # Create a client
-stub = emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
 # Let's dump the latest logcat data..
-logcat = emulator_controller_pb2.LogMessage(start=0)
+logcat = proto.emulator_controller_pb2.LogMessage(start=0)
 for response in stub.streamLogcat(logcat):
     print(response.contents.strip())

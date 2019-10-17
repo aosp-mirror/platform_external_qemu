@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# -*- coding: utf-8 -*-
-import time
-
 from google.protobuf import empty_pb2
 
+# -*- coding: utf-8 -*-
 import proto.emulator_controller_pb2
 import proto.emulator_controller_pb2_grpc
 from channel_provider import getEmulatorChannel
@@ -28,13 +26,6 @@ channel = getEmulatorChannel()
 # Create a client
 stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
-# Let's ask about the hypervisor.
-response = stub.getVmConfiguration(_EMPTY_)
-print(response)
-
-# Let's type some text..
-for l in "Hello World":
-    textEvent = proto.emulator_controller_pb2.KeyboardEvent(text=l)
-    print("Typing: {}".format(l))
-    response = stub.sendKey(textEvent)
-    time.sleep(0.2)
+response = stub.listSnapshots(_EMPTY_)
+ids = [f.snapshot_id for f in response.snapshots]
+print(ids)
