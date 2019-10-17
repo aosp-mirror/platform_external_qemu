@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a1b67fd_edacb3eb",
+        "filename": "android/android-emu/android/base/SubAllocator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-17T22:44:41Z",
+      "side": 1,
+      "message": "Update the snapshot version?",
+      "range": {
+        "startLine": 79,
+        "startChar": 16,
+        "endLine": 79,
+        "endChar": 23
+      },
+      "revId": "5df3938b81aad432d4629111eaf056756d66a958",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
