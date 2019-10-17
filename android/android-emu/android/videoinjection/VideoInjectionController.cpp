@@ -268,6 +268,7 @@ void VideoInjectionControllerImpl::sendFollowUpAsyncResponse(
         android::videoinjection::VideoInjectionResult result,
         bool isCompleted,
         const std::string& errorDetails) {
+    AutoLock lock(mLock);
     // Retrives the original RequestContext.
     auto itr = mAsyncRequestContextMap.find(async_id);
 
