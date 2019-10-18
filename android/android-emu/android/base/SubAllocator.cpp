@@ -43,7 +43,7 @@ public:
     }
 
     ~Impl() {
-        clear();
+        address_space_allocator_destroy_nocleanup(&addr_alloc);
     }
 
     void clear() {

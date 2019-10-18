@@ -227,30 +227,51 @@ int ring_buffer_copy_contents(
 
     uint32_t total_available =
         ring_buffer_available_read(r, v);
-    uint32_t available_at_end =
-        v->size - ring_buffer_view_get_ring_pos(v, r->read_pos);
+    uint32_t available_at_end = 0;
+
+    if (v) {
+        available_at_end =
+            v->size - ring_buffer_view_get_ring_pos(v, r->read_pos);
+    } else {
+        available_at_end =
+            RING_BUFFER_SIZE - get_ring_pos(r->write_pos);
+    }
 
     if (total_available < wanted_bytes) {
         return -1;
     }
 
-    if (wanted_bytes > available_at_end) {
-        uint32_t remaining = wanted_bytes - available_at_end;
-        memcpy(res,
-               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
-               available_at_end);
-        memcpy(res + available_at_end,
-               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos + available_at_end)],
-               remaining);
+    if (v) {
+        if (wanted_bytes > available_at_end) {
+            uint32_t remaining = wanted_bytes - available_at_end;
+            memcpy(res,
+                   &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+                   available_at_end);
+            memcpy(res + available_at_end,
+                   &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos + available_at_end)],
+                   remaining);
+        } else {
+            memcpy(res,
+                   &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
+                   wanted_bytes);
+        }
     } else {
-        memcpy(res,
-               &v->buf[ring_buffer_view_get_ring_pos(v, r->read_pos)],
-               wanted_bytes);
+        if (wanted_bytes > available_at_end) {
+            uint32_t remaining = wanted_bytes - available_at_end;
+            memcpy(res,
+                   &r->buf[get_ring_pos(r->read_pos)],
+                   available_at_end);
+            memcpy(res + available_at_end,
+                   &r->buf[get_ring_pos(r->read_pos + available_at_end)],
+                   remaining);
+        } else {
+            memcpy(res,
+                   &r->buf[get_ring_pos(r->read_pos)],
+                   wanted_bytes);
+        }
     }
-
     return 0;
 }
-
 
 long ring_buffer_view_write(
     struct ring_buffer* r,
@@ -455,6 +476,24 @@ void ring_buffer_write_fully(
     struct ring_buffer_view* v,
     const void* data,
     uint32_t bytes) {
+    ring_buffer_write_fully_with_abort(r, v, data, bytes, 0, 0);
+}
+
+void ring_buffer_read_fully(
+    struct ring_buffer* r,
+    struct ring_buffer_view* v,
+    void* data,
+    uint32_t bytes) {
+    ring_buffer_read_fully_with_abort(r, v, data, bytes, 0, 0);
+}
+
+uint32_t ring_buffer_write_fully_with_abort(
+    struct ring_buffer* r,
+    struct ring_buffer_view* v,
+    const void* data,
+    uint32_t bytes,
+    uint32_t abort_value,
+    const volatile uint32_t* abort_ptr) {
 
     uint32_t candidate_step = get_step_size(r, v, bytes);
     uint32_t processed = 0;
@@ -476,14 +515,22 @@ void ring_buffer_write_fully(
         }
 
         processed += processed_here ? candidate_step : 0;
+
+        if (abort_ptr && (abort_value == *abort_ptr)) {
+            return processed;
+        }
     }
+
+    return processed;
 }
 
-void ring_buffer_read_fully(
+uint32_t ring_buffer_read_fully_with_abort(
     struct ring_buffer* r,
     struct ring_buffer_view* v,
     void* data,
-    uint32_t bytes) {
+    uint32_t bytes,
+    uint32_t abort_value,
+    const volatile uint32_t* abort_ptr) {
 
     uint32_t candidate_step = get_step_size(r, v, bytes);
     uint32_t processed = 0;
@@ -506,7 +553,13 @@ void ring_buffer_read_fully(
         }
 
         processed += processed_here ? candidate_step : 0;
+
+        if (abort_ptr && (abort_value == *abort_ptr)) {
+            return processed;
+        }
     }
+
+    return processed;
 }
 
 void ring_buffer_sync_init(struct ring_buffer* r) {

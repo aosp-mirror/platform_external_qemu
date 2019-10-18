@@ -128,6 +128,25 @@ void ring_buffer_read_fully(
     void* data,
     uint32_t bytes);
 
+// Like read/write fully, but with an abort value. The value is read from
+// |abortPtr| each time. If |abortPtr| is null, then behaves the same
+// as ring_buffer_(read|write)_fully.
+// Returns the actual number of bytes sent or received.
+uint32_t ring_buffer_write_fully_with_abort(
+    struct ring_buffer* r,
+    struct ring_buffer_view* v,
+    const void* data,
+    uint32_t bytes,
+    uint32_t abort_value,
+    const volatile uint32_t* abort_ptr);
+uint32_t ring_buffer_read_fully_with_abort(
+    struct ring_buffer* r,
+    struct ring_buffer_view* v,
+    void* data,
+    uint32_t bytes,
+    uint32_t abort_value,
+    const volatile uint32_t* abort_ptr);
+
 uint32_t ring_buffer_view_get_ring_pos(
     const struct ring_buffer_view* v,
     uint32_t index);
