@@ -1783,6 +1783,18 @@ static void help_use_keycode_forwarding(stralloc_t* out) {
 
     );
 }
+
+static void
+help_record_session(stralloc_t* out)
+{
+    PRINTF(
+    "  Screen record the emulator session. Format:\n"
+    "  -record-session <file>,<delay>[,<duration>]\n"
+    "  Examples:\n"
+    "  -record-session /tmp/tmp.webm,20 will start recording after 20 second delay until shutdown.\n"
+    "  -record-session /tmp/tmp.webm,0,20 will start recording immediately for 20 seconds.\n\n"
+    );
+}
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
