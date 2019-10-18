@@ -76,6 +76,7 @@ public:
 
         stream->putBe64(pageSize);
         stream->putBe64(totalSize);
+        stream->putBe32(allocCount);
 
         return true;
     }
@@ -103,6 +104,7 @@ public:
 
         pageSize = stream->getBe64();
         totalSize = stream->getBe64();
+        allocCount = stream->getBe32();
 
         return true;
     }
@@ -143,11 +145,13 @@ public:
             return false;
         }
 
+        --allocCount;
         return true;
     }
 
     void freeAll() {
         address_space_allocator_reset(&addr_alloc);
+        allocCount = 0;
     }
 
     void* alloc(size_t wantedSize) {
@@ -168,7 +172,12 @@ public:
             return nullptr;
         }
 
+        ++allocCount;
         return (void*)(uintptr_t)(startAddr + offset);
+    }
+
+    bool empty() const {
+        return allocCount == 0;
     }
 
     void* buffer;
@@ -177,6 +186,7 @@ public:
     uint64_t startAddr;
     uint64_t endAddr;
     struct address_space_allocator addr_alloc;
+    uint32_t allocCount = 0;
 };
 
 SubAllocator::SubAllocator(
@@ -217,6 +227,10 @@ void SubAllocator::freeAll() {
 
 uint64_t SubAllocator::getOffset(void* ptr) {
     return mImpl->getOffset(ptr);
+}
+
+bool SubAllocator::empty() const {
+    return mImpl->empty();
 }
 
 } // namespace base
