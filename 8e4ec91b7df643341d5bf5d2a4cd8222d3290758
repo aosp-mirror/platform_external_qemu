@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "229e6069_c1980857",
+        "filename": "android/android-emu/android/emulation/address_space_graphics.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-18T07:54:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "144bb105_c45d411f",
+      "range": {
+        "startLine": 384,
+        "startChar": 8,
+        "endLine": 384,
+        "endChar": 14
+      },
+      "revId": "8e4ec91b7df643341d5bf5d2a4cd8222d3290758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64b124ae_ef6dde81",
         "filename": "android/android-emu/android/emulation/address_space_graphics_types.h",
         "patchSetId": 16
@@ -45,6 +69,30 @@
       "revId": "8e4ec91b7df643341d5bf5d2a4cd8222d3290758",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "91455245_be3534c5",
+        "filename": "android/android-emu/android/emulation/address_space_graphics_types.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-18T07:54:43Z",
+      "side": 1,
+      "message": "The C parts are more for ABI portability (this will be consumed by things that are only C++)",
+      "parentUuid": "64b124ae_ef6dde81",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 10
+      },
+      "revId": "8e4ec91b7df643341d5bf5d2a4cd8222d3290758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
