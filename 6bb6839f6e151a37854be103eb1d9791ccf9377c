@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30fa652d_a727ce54",
+        "filename": "android/android-emu/android/base/ring_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-18T00:51:08Z",
+      "side": 1,
+      "message": "Sounds like this should be \"const volatile\" to say that this values could change anytime.",
+      "range": {
+        "startLine": 141,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 9
+      },
+      "revId": "6bb6839f6e151a37854be103eb1d9791ccf9377c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
