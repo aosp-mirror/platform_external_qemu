@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "144bb105_c45d411f",
+        "filename": "android/android-emu/android/emulation/address_space_graphics.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-18T06:32:59Z",
+      "side": 1,
+      "message": "Could you please add \"default:\"?",
+      "range": {
+        "startLine": 384,
+        "startChar": 8,
+        "endLine": 384,
+        "endChar": 14
+      },
+      "revId": "8e4ec91b7df643341d5bf5d2a4cd8222d3290758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64b124ae_ef6dde81",
+        "filename": "android/android-emu/android/emulation/address_space_graphics_types.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-18T06:32:59Z",
+      "side": 1,
+      "message": "Maybe c-stuff should be in a separate file? This file cannot be consumed by a c-compiler.",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 10
+      },
+      "revId": "8e4ec91b7df643341d5bf5d2a4cd8222d3290758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
