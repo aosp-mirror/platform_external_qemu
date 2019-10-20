@@ -155,6 +155,7 @@ public:
             }
 
             ensureType3Finished();
+            mContext.ring_config->transfer_mode = 1;
             return 0;
         }
 
@@ -240,11 +241,12 @@ public:
             size_t sent = 0;
             size_t sizeForRing = 8;
 
-            uint64_t sizePart = ((uint64_t)(size) << 32);
-            uint64_t offPart = ((uint64_t)(bufferOffset));
-            uint64_t data = sizePart | offPart;
+            struct asg_type1_xfer xfer {
+                bufferOffset,
+                (uint32_t)size,
+            };
 
-            uint8_t* writeBufferBytes = (uint8_t*)(&data);
+            uint8_t* writeBufferBytes = (uint8_t*)(&xfer);
 
             while (sent < sizeForRing) {
 
@@ -450,26 +452,18 @@ public:
             }
         }
 
-        void type1GetPtrSize(uint64_t item, char** ptr, size_t* sizeOut) {
-            uint32_t offset = (uint32_t)item;
-            uint32_t size = (uint32_t)(item >> 32);
-
-            *ptr = mContext.buffer + offset;
-            *sizeOut = (size_t)size;
-        }
-
         void type1Read(uint32_t avail) {
             uint32_t xferTotal = avail / 8;
             for (uint32_t i = 0; i < xferTotal; ++i) {
-                uint64_t currentXfer;
+                struct asg_type1_xfer currentXfer;
                 uint8_t* currentXferPtr = (uint8_t*)(&currentXfer);
 
-                char* ptr;
-                size_t size;
                 EXPECT_EQ(0, ring_buffer_copy_contents(
-                    mContext.to_host, 0, 8, currentXferPtr));
+                    mContext.to_host, 0, 
+                    sizeof(currentXfer), currentXferPtr));
 
-                type1GetPtrSize(currentXfer, &ptr, &size);
+                char* ptr = mContext.buffer + currentXfer.offset;
+                size_t size = currentXfer.size;
 
                 ensureReadBuffer(size);
 
@@ -485,30 +479,30 @@ public:
                 mContext.ring_config->host_consumed_pos =
                     ptr - mContext.buffer;
 
-                EXPECT_EQ(1, ring_buffer_read(
-                    mContext.to_host, currentXferPtr, 8, 1));
+                EXPECT_EQ(1, ring_buffer_advance_read(
+                    mContext.to_host, sizeof(asg_type1_xfer), 1));
             }
         }
 
         void type2Read(uint32_t avail) {
             uint32_t xferTotal = avail / 16;
             for (uint32_t i = 0; i < xferTotal; ++i) {
-                uint64_t physAddrAndSize[2];
-                uint8_t* addrSizePtr = (uint8_t*)(physAddrAndSize);
+                struct asg_type2_xfer currentXfer;
+                uint8_t* xferPtr = (uint8_t*)(&currentXfer);
 
                 EXPECT_EQ(0, ring_buffer_copy_contents(
-                    mContext.to_host, 0, 16, addrSizePtr));
+                    mContext.to_host, 0, sizeof(currentXfer),
+                    xferPtr));
 
-                char* ptr = mCallbacks.getPtr(physAddrAndSize[0]);
-
-                ensureReadBuffer(physAddrAndSize[1]);
+                char* ptr = mCallbacks.getPtr(currentXfer.physAddr);
+                ensureReadBuffer(currentXfer.size);
 
                 memcpy(mReadBuffer.data() + mReadPos, ptr,
-                       physAddrAndSize[1]);
-                mReadPos += physAddrAndSize[1];
+                       currentXfer.size);
+                mReadPos += currentXfer.size;
 
-                EXPECT_EQ(1, ring_buffer_read(
-                    mContext.to_host, addrSizePtr, 16, 1));
+                EXPECT_EQ(1, ring_buffer_advance_read(
+                    mContext.to_host, sizeof(currentXfer), 1));
             }
         }
 
