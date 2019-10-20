@@ -77,6 +77,8 @@ public:
             EXPECT_LE(hostVersion, mVersion);
             EXPECT_EQ(android_hw->hw_gltransport_asg_writeStepSize,
                       mContext.ring_config->flush_interval);
+            EXPECT_EQ(android_hw->hw_gltransport_asg_writeBufferSize,
+                      mBufferSize);
 
             mContext.ring_config->transfer_mode = 1;
             mContext.ring_config->host_consumed_pos = 0;
@@ -153,6 +155,7 @@ public:
             }
 
             ensureType3Finished();
+            mContext.ring_config->transfer_mode = 1;
             return 0;
         }
 
@@ -238,11 +241,12 @@ public:
             size_t sent = 0;
             size_t sizeForRing = 8;
 
-            uint64_t sizePart = ((uint64_t)(size) << 32);
-            uint64_t offPart = ((uint64_t)(bufferOffset));
-            uint64_t data = sizePart | offPart;
+            struct asg_type1_xfer xfer {
+                bufferOffset,
+                (uint32_t)size,
+            };
 
-            uint8_t* writeBufferBytes = (uint8_t*)(&data);
+            uint8_t* writeBufferBytes = (uint8_t*)(&xfer);
 
             while (sent < sizeForRing) {
 
@@ -318,6 +322,8 @@ public:
             }
         }
 
+        char* getBufferPtr() { return mBuffer; }
+
     private:
 
         AddressSpaceDevicePingInfo ping(uint64_t metadata, uint64_t size = 0) {
@@ -373,6 +379,7 @@ public:
 
             if (mReadPos == mToHostBytes) {
                 std::vector<char> reply(mFromHostBytes, ASG_TEST_READ_PATTERN);
+                uint32_t origBytes = mFromHostBytes;
                 auto res = ring_buffer_write_fully_with_abort(
                     mContext.from_host_large_xfer.ring,
                     &mContext.from_host_large_xfer.view,
@@ -380,11 +387,18 @@ public:
                     mFromHostBytes,
                     1, &mContext.ring_config->in_error);
                 if (res < mFromHostBytes) {
-                    printf("%s: aborted write. in error? %u\n", __func__,
+                    printf("%s: aborted write (%u vs %u %u). in error? %u\n", __func__,
+                            res, mFromHostBytes, origBytes,
                            mContext.ring_config->in_error);
                     EXPECT_EQ(1, mContext.ring_config->in_error);
                 }
                 mReadPos = 0;
+            }
+        }
+
+        void ensureWritebackDone() {
+            while (mReadPos) {
+                ring_buffer_yield();
             }
         }
 
@@ -438,26 +452,18 @@ public:
             }
         }
 
-        void type1GetPtrSize(uint64_t item, char** ptr, size_t* sizeOut) {
-            uint32_t offset = (uint32_t)item;
-            uint32_t size = (uint32_t)(item >> 32);
-
-            *ptr = mContext.buffer + offset;
-            *sizeOut = (size_t)size;
-        }
-
         void type1Read(uint32_t avail) {
             uint32_t xferTotal = avail / 8;
             for (uint32_t i = 0; i < xferTotal; ++i) {
-                uint64_t currentXfer;
+                struct asg_type1_xfer currentXfer;
                 uint8_t* currentXferPtr = (uint8_t*)(&currentXfer);
 
-                char* ptr;
-                size_t size;
                 EXPECT_EQ(0, ring_buffer_copy_contents(
-                    mContext.to_host, 0, 8, currentXferPtr));
+                    mContext.to_host, 0, 
+                    sizeof(currentXfer), currentXferPtr));
 
-                type1GetPtrSize(currentXfer, &ptr, &size);
+                char* ptr = mContext.buffer + currentXfer.offset;
+                size_t size = currentXfer.size;
 
                 ensureReadBuffer(size);
 
@@ -473,30 +479,30 @@ public:
                 mContext.ring_config->host_consumed_pos =
                     ptr - mContext.buffer;
 
-                EXPECT_EQ(1, ring_buffer_read(
-                    mContext.to_host, currentXferPtr, 8, 1));
+                EXPECT_EQ(1, ring_buffer_advance_read(
+                    mContext.to_host, sizeof(asg_type1_xfer), 1));
             }
         }
 
         void type2Read(uint32_t avail) {
             uint32_t xferTotal = avail / 16;
             for (uint32_t i = 0; i < xferTotal; ++i) {
-                uint64_t physAddrAndSize[2];
-                uint8_t* addrSizePtr = (uint8_t*)(physAddrAndSize);
+                struct asg_type2_xfer currentXfer;
+                uint8_t* xferPtr = (uint8_t*)(&currentXfer);
 
                 EXPECT_EQ(0, ring_buffer_copy_contents(
-                    mContext.to_host, 0, 16, addrSizePtr));
+                    mContext.to_host, 0, sizeof(currentXfer),
+                    xferPtr));
 
-                char* ptr = mCallbacks.getPtr(physAddrAndSize[0]);
-
-                ensureReadBuffer(physAddrAndSize[1]);
+                char* ptr = mCallbacks.getPtr(currentXfer.physAddr);
+                ensureReadBuffer(currentXfer.size);
 
                 memcpy(mReadBuffer.data() + mReadPos, ptr,
-                       physAddrAndSize[1]);
-                mReadPos += physAddrAndSize[1];
+                       currentXfer.size);
+                mReadPos += currentXfer.size;
 
-                EXPECT_EQ(1, ring_buffer_read(
-                    mContext.to_host, addrSizePtr, 16, 1));
+                EXPECT_EQ(1, ring_buffer_advance_read(
+                    mContext.to_host, sizeof(currentXfer), 1));
             }
         }
 
@@ -539,7 +545,7 @@ protected:
     static void TearDownTestCase() { }
 
     void SetUp() override {
-        android_hw->hw_gltransport_asg_writeBufferSize = 16384;
+        android_hw->hw_gltransport_asg_writeBufferSize = 524288;
         android_hw->hw_gltransport_asg_writeStepSize = 1024;
 
         mDevice = HostAddressSpaceDevice::get();
@@ -568,7 +574,7 @@ protected:
     void TearDown() override {
         AddressSpaceGraphicsContext::clear();
         mDevice->clear();
-        android_hw->hw_gltransport_asg_writeBufferSize = 16384;
+        android_hw->hw_gltransport_asg_writeBufferSize = 524288;
         android_hw->hw_gltransport_asg_writeStepSize = 1024;
         EXPECT_EQ(nullptr, mCurrentConsumer);
     }
@@ -617,6 +623,10 @@ protected:
             }
 
             EXPECT_EQ(expectedRead, toRead);
+
+            // make sure the consumer is hung up here or this will
+            // race with setRoundTrip
+            mCurrentConsumer->ensureWritebackDone();
         }
 
         mCurrentConsumer->setRoundTrip(false);
@@ -732,6 +742,107 @@ TEST_F(AddressSpaceGraphicsTest, Abort) {
     *buf = send;
     client.flush();
     client.abort();
+}
+
+// Test having to create more than one block, and
+// ensure traffic works each time.
+TEST_F(AddressSpaceGraphicsTest, BlockCreateDestroy) {
+
+    std::vector<Client*> clients;
+
+    std::default_random_engine generator;
+    generator.seed(0);
+    std::uniform_int_distribution<int>
+        sizeDist(1, 47);
+    std::vector<RoundTrip> trips;
+    for (uint32_t i = 0; i < 100; ++i) {
+        trips.push_back({
+            (size_t)sizeDist(generator),
+            (size_t)sizeDist(generator),
+        });
+    };
+
+    int numBlocksMax = 3;
+    int numBlocksDetected = 0;
+    char* bufLow = (char*)(uintptr_t)(-1);
+    char* bufHigh = 0;
+
+    while (true) {
+        Client* c = new Client(mDevice);
+        runRoundTrips(*c, trips);
+
+        clients.push_back(c);
+
+        char* bufPtr = c->getBufferPtr();
+        bufLow = bufPtr < bufLow ? bufPtr : bufLow;
+        bufHigh = bufPtr > bufHigh ? bufPtr : bufHigh;
+
+        size_t gap = bufHigh - bufLow;
+
+        numBlocksDetected =
+            gap / ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE;
+
+        if (numBlocksDetected > numBlocksMax) break;
+    }
+
+    for (auto c: clients) {
+        delete c;
+    }
+}
+
+// Test having to create more than one block, and
+// ensure traffic works each time, but also randomly
+// delete previous allocs to cause fragmentation.
+TEST_F(AddressSpaceGraphicsTest, BlockCreateDestroyRandom) {
+    std::vector<Client*> clients;
+
+    std::default_random_engine generator;
+    generator.seed(0);
+
+    std::uniform_int_distribution<int>
+        sizeDist(1, 89);
+    std::bernoulli_distribution
+        deleteDist(0.2);
+
+    std::vector<RoundTrip> trips;
+    for (uint32_t i = 0; i < 100; ++i) {
+        trips.push_back({
+            (size_t)sizeDist(generator),
+            (size_t)sizeDist(generator),
+        });
+    };
+
+    int numBlocksMax = 3;
+    int numBlocksDetected = 0;
+    char* bufLow = (char*)(uintptr_t)(-1);
+    char* bufHigh = 0;
+
+    while (true) {
+        Client* c = new Client(mDevice);
+        runRoundTrips(*c, trips);
+
+        clients.push_back(c);
+
+        char* bufPtr = c->getBufferPtr();
+        bufLow = bufPtr < bufLow ? bufPtr : bufLow;
+        bufHigh = bufPtr > bufHigh ? bufPtr : bufHigh;
+
+        size_t gap = bufHigh - bufLow;
+
+        numBlocksDetected =
+            gap / ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE;
+
+        if (numBlocksDetected > numBlocksMax) break;
+
+        if (deleteDist(generator)) {
+            delete c;
+            clients[clients.size() - 1] = 0;
+        }
+    }
+
+    for (auto c: clients) {
+        delete c;
+    }
 }
 
 } // namespace asg
