@@ -520,7 +520,7 @@ TEST(ring_buffer, SpeedTest) {
     ring_buffer_view_init(&r, &v, buf.data(), buf.size());
 
     size_t bytesSent = 0;
-    size_t totalCycles = 100;
+    size_t totalCycles = 5;
 
     float mbPerSec = 0.0f;
 
