@@ -247,6 +247,8 @@ OPT_FLAG(no_location_ui, "Disable the location UI in the extended window.")
 OPT_FLAG(use_keycode_forwarding,
          "Use keycode forwarding instead of host charmap translation.")
 
+OPT_PARAM(record_session, "<file>,<delay>[,<duration>]", "Screen record the emulator session.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
