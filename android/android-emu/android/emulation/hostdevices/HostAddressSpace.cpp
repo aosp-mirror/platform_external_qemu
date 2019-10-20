@@ -22,7 +22,7 @@
 
 #include <unordered_map>
 
-#define HASD_DEBUG 1
+#define HASD_DEBUG 0
 
 #if HASD_DEBUG
 #define HASD_LOG(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
