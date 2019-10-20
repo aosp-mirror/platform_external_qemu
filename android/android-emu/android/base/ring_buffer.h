@@ -51,6 +51,13 @@ long ring_buffer_write(
     struct ring_buffer* r, const void* data, uint32_t step_size, uint32_t steps);
 long ring_buffer_read(
     struct ring_buffer* r, void* data, uint32_t step_size, uint32_t steps);
+// Like ring_buffer_write / ring_buffer_read, but merely advances the counters
+// without reading or writing anything. Returns the number of step_size steps
+// advanced.
+long ring_buffer_advance_write(
+    struct ring_buffer* r, uint32_t step_size, uint32_t steps);
+long ring_buffer_advance_read(
+    struct ring_buffer* r, uint32_t step_size, uint32_t steps);
 
 // If we want to work with dynamically allocated buffers, a separate struct is
 // needed; the host and guest are in different address spaces and thus have
