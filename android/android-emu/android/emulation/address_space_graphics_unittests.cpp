@@ -318,6 +318,8 @@ public:
             }
         }
 
+        char* getBufferPtr() { return mBuffer; }
+
     private:
 
         AddressSpaceDevicePingInfo ping(uint64_t metadata, uint64_t size = 0) {
@@ -373,6 +375,7 @@ public:
 
             if (mReadPos == mToHostBytes) {
                 std::vector<char> reply(mFromHostBytes, ASG_TEST_READ_PATTERN);
+                uint32_t origBytes = mFromHostBytes;
                 auto res = ring_buffer_write_fully_with_abort(
                     mContext.from_host_large_xfer.ring,
                     &mContext.from_host_large_xfer.view,
@@ -380,11 +383,18 @@ public:
                     mFromHostBytes,
                     1, &mContext.ring_config->in_error);
                 if (res < mFromHostBytes) {
-                    printf("%s: aborted write. in error? %u\n", __func__,
+                    printf("%s: aborted write (%u vs %u %u). in error? %u\n", __func__,
+                            res, mFromHostBytes, origBytes,
                            mContext.ring_config->in_error);
                     EXPECT_EQ(1, mContext.ring_config->in_error);
                 }
                 mReadPos = 0;
+            }
+        }
+
+        void ensureWritebackDone() {
+            while (mReadPos) {
+                ring_buffer_yield();
             }
         }
 
@@ -617,6 +627,10 @@ protected:
             }
 
             EXPECT_EQ(expectedRead, toRead);
+
+            // make sure the consumer is hung up here or this will
+            // race with setRoundTrip
+            mCurrentConsumer->ensureWritebackDone();
         }
 
         mCurrentConsumer->setRoundTrip(false);
@@ -732,6 +746,106 @@ TEST_F(AddressSpaceGraphicsTest, Abort) {
     *buf = send;
     client.flush();
     client.abort();
+}
+
+// Test having to create more than one block, and
+// ensure traffic works each time.
+TEST_F(AddressSpaceGraphicsTest, BlockCreateDestroy) {
+    std::vector<Client*> clients;
+
+    std::default_random_engine generator;
+    generator.seed(0);
+    std::uniform_int_distribution<int>
+        sizeDist(1, 513);
+    std::vector<RoundTrip> trips;
+    for (uint32_t i = 0; i < 10; ++i) {
+        trips.push_back({
+            (size_t)sizeDist(generator),
+            (size_t)sizeDist(generator),
+        });
+    };
+
+    int numBlocksMax = 5;
+    int numBlocksDetected = 0;
+    char* bufLow = (char*)(uintptr_t)(-1);
+    char* bufHigh = 0;
+
+    while (true) {
+        Client* c = new Client(mDevice);
+        runRoundTrips(*c, trips);
+
+        clients.push_back(c);
+
+        char* bufPtr = c->getBufferPtr();
+        bufLow = bufPtr < bufLow ? bufPtr : bufLow;
+        bufHigh = bufPtr > bufHigh ? bufPtr : bufHigh;
+
+        size_t gap = bufHigh - bufLow;
+
+        numBlocksDetected =
+            gap / ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE;
+
+        if (numBlocksDetected > numBlocksMax) break;
+    }
+
+    for (auto c: clients) {
+        delete c;
+    }
+}
+
+// Test having to create more than one block, and
+// ensure traffic works each time, but also randomly
+// delete previous allocs to cause fragmentation.
+TEST_F(AddressSpaceGraphicsTest, BlockCreateDestroyRandom) {
+    std::vector<Client*> clients;
+
+    std::default_random_engine generator;
+    generator.seed(0);
+
+    std::uniform_int_distribution<int>
+        sizeDist(1, 513);
+    std::bernoulli_distribution
+        deleteDist(0.2);
+
+    std::vector<RoundTrip> trips;
+    for (uint32_t i = 0; i < 10; ++i) {
+        trips.push_back({
+            (size_t)sizeDist(generator),
+            (size_t)sizeDist(generator),
+        });
+    };
+
+    int numBlocksMax = 4;
+    int numBlocksDetected = 0;
+    char* bufLow = (char*)(uintptr_t)(-1);
+    char* bufHigh = 0;
+
+    while (true) {
+        Client* c = new Client(mDevice);
+        runRoundTrips(*c, trips);
+
+        clients.push_back(c);
+
+        char* bufPtr = c->getBufferPtr();
+        bufLow = bufPtr < bufLow ? bufPtr : bufLow;
+        bufHigh = bufPtr > bufHigh ? bufPtr : bufHigh;
+
+        size_t gap = bufHigh - bufLow;
+
+        numBlocksDetected =
+            gap / ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE;
+
+        if (numBlocksDetected > numBlocksMax) break;
+
+        if (deleteDist(generator)) {
+            delete c;
+            clients[clients.size() - 1] = 0;
+        }
+    }
+
+    for (auto c: clients) {
+        delete c;
+    }
 }
 
 } // namespace asg
