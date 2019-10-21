@@ -20,11 +20,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * Loads a native library by searching a series of locations.
  */
 final class NativeLibLoader {
+    private static final Logger LOGGER = Logger.getLogger(NativeLibLoader.class.getName());
+
     private NativeLibLoader() {}
 
     private static String getSharedExt() {
@@ -75,6 +78,9 @@ final class NativeLibLoader {
      * - The ${cwd}/lib64 directory
      * - The $ANDROID_HOME/emulator/lib64 directory
      * - The $ANDROID_SDK_ROOT/emulator/lib64 directory.
+     *
+     * Note that it will only log UnsatisfiedLinkErrors that can arise due to loading
+     * the same shared library twice from different classloaders.
      */
     public static void load(String name) {
         String lib = name + getSharedExt();
@@ -83,7 +89,11 @@ final class NativeLibLoader {
         for (Path option : paths) {
             Path resolved = option.resolve(lib).normalize().toAbsolutePath();
             if (Files.exists(option.resolve(lib))) {
-                System.load(resolved.toString());
+                try {
+                   System.load(resolved.toString());
+                } catch(UnsatisfiedLinkError ule) {
+                    LOGGER.warning("Error while loading " + lib + ", things might not work as expected. " + ule.getMessage());
+                }
                 return;
             }
         }
