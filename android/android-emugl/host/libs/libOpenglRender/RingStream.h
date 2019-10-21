@@ -57,7 +57,7 @@ protected:
     void onSave(android::base::Stream* stream) override;
     unsigned char* onLoad(android::base::Stream* stream) override;
 
-    void type1Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
+    void type1Read(uint32_t available, char* begin, size_t* count, char** current, const char* ptrEnd);
     void type2Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
     void type3Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
 
