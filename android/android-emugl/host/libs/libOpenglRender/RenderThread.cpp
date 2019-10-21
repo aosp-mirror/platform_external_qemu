@@ -151,6 +151,10 @@ void RenderThread::save(android::base::Stream* stream) {
     }
 }
 
+void RenderThread::waitFinished() {
+    while (!mFinished.load(std::memory_order_relaxed));
+}
+
 void RenderThread::waitForSnapshotCompletion(AutoLock* lock) {
     while (mState != SnapshotState::Finished &&
            !mFinished.load(std::memory_order_relaxed)) {

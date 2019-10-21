@@ -57,6 +57,8 @@ public:
     void resume();
     void save(android::base::Stream* stream);
 
+    void waitFinished();
+
 private:
     virtual intptr_t main();
     void setFinished();
