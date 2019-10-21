@@ -135,10 +135,17 @@ public class InteractiveEmulatorView extends JPanel implements EmulatorListener 
   @Override
   public void stateChange(ConnectionState state) {
     if (state == ConnectionState.Disconnected) {
-      add(mLabel);
-      remove(mView);
-      revalidate();
-      repaint();
+      try {
+        add(mLabel);
+        if (mView != null) {
+          remove(mView);
+        }
+
+        revalidate();
+        repaint();
+      } catch(Exception e) {
+        LOGGER.severe("Failed to update views due to: " + e);
+      }
 
       // Attempt to reconnect a second from now.
       mExecutorService.schedule(() -> {
