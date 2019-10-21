@@ -47,6 +47,7 @@
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/globals.h"                           // for android_avdInfo
 #include "android/skin/qt/error-dialog.h"              // for showErrorDialog
+#include "android/skin/qt/emulator-qt-window.h"        // for runOnUiThread
 #include "android/skin/qt/extended-pages/common.h"     // for getSelectedTheme
 #include "android/skin/qt/raised-material-button.h"    // for RaisedMaterial...
 #include "android/skin/qt/stylesheet.h"                // for stylesheetValues
@@ -331,27 +332,30 @@ void BugreportPage::loadAdbBugreport() {
                     success = saveToFile(filePath, s.c_str(), s.length());
                 }
 
-                enableInput(true);
-                mUi->bug_circularSpinner->hide();
-                mUi->bug_collectingLabel->hide();
-                if (System::get()->pathIsFile(
-                            mSavingStates.adbBugreportFilePath)) {
-                    System::get()->deleteFile(
-                            mSavingStates.adbBugreportFilePath);
-                    mSavingStates.adbBugreportFilePath.clear();
-                }
-                if (success) {
-                    mSavingStates.adbBugreportSucceed = true;
-                    mSavingStates.adbBugreportFilePath = filePath;
-                } else {
-                    // TODO(wdu) Better error handling for failed adb bugreport
-                    // generation
-                    showErrorDialog(
-                            tr("Bug report interrupted by snapshot load? "
-                               "There was an error while generating "
-                               "adb bugreport"),
-                            tr("Bug Report"));
-                }
+
+                EmulatorQtWindow::getInstance()->runOnUiThread([this, success, filePath] {
+                    enableInput(true);
+                    mUi->bug_circularSpinner->hide();
+                    mUi->bug_collectingLabel->hide();
+                    if (System::get()->pathIsFile(
+                                mSavingStates.adbBugreportFilePath)) {
+                        System::get()->deleteFile(
+                                mSavingStates.adbBugreportFilePath);
+                        mSavingStates.adbBugreportFilePath.clear();
+                    }
+                    if (success) {
+                        mSavingStates.adbBugreportSucceed = true;
+                        mSavingStates.adbBugreportFilePath = filePath;
+                    } else {
+                        // TODO(wdu) Better error handling for failed adb bugreport
+                        // generation
+                        showErrorDialog(
+                                tr("Bug report interrupted by snapshot load? "
+                                   "There was an error while generating "
+                                   "adb bugreport"),
+                                tr("Bug Report"));
+                    }
+                });
             },
             kAdbCommandTimeoutMs, wantOutput);
 }
@@ -372,14 +376,18 @@ void BugreportPage::loadAdbLogcat() {
             [this](const OptionalAdbCommandResult& result) {
                 mAdbLogcat.reset();
                 if (!result || result->exit_code || !result->output) {
-                    mUi->bug_bugReportTextEdit->setPlainText(
-                            tr("There was an error while loading adb logcat"));
+                    EmulatorQtWindow::getInstance()->runOnUiThread([this] {
+                        mUi->bug_bugReportTextEdit->setPlainText(
+                                tr("There was an error while loading adb logcat"));
+                    });
                 } else {
                     std::string s(
                             std::istreambuf_iterator<char>(*result->output),
                             {});
-                    mUi->bug_bugReportTextEdit->setPlainText(
-                            QString::fromStdString(s));
+                    EmulatorQtWindow::getInstance()->runOnUiThread([this, s] {
+                        mUi->bug_bugReportTextEdit->setPlainText(
+                                QString::fromStdString(s));
+                    });
                 }
             },
             kAdbCommandTimeoutMs, true);
