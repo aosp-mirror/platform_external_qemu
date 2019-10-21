@@ -87,7 +87,7 @@ public:
         return -1;
     }
 
-    ::webrtc::VideoCaptureCapability capability() { return mCapability; }
+    ::webrtc::VideoCaptureCapability capability() const { return mCapability; }
 
 private:
     ::webrtc::VideoCaptureCapability mCapability;
