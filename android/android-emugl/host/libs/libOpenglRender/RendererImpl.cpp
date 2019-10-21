@@ -14,6 +14,7 @@
 #include "RendererImpl.h"
 
 #include "RenderChannelImpl.h"
+#include "RenderThread.h"
 
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
@@ -231,6 +232,20 @@ RenderChannelPtr RendererImpl::createRenderChannel(
     }
 
     return channel;
+}
+
+void* RendererImpl::addressSpaceGraphicsConsumerCreate(
+    struct asg_context context,
+    android::emulation::asg::ConsumerCallbacks callbacks) {
+    auto thread = new RenderThread(context, callbacks);
+    thread->start();
+    return (void*)thread;
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerDestroy(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->wait();
+    delete thread;
 }
 
 void RendererImpl::pauseAllPreSave() {

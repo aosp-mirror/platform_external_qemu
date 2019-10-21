@@ -30,6 +30,7 @@
 #include "GrallocDispatch.h"
 
 #include <android/hardware_buffer.h>
+#include <cutils/properties.h>
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -54,7 +55,9 @@ using android::TestDmaMap;
 
 static constexpr int kWindowSize = 256;
 
-class CombinedGoldfishOpenglTest : public ::testing::Test {
+class CombinedGoldfishOpenglTest :
+    public ::testing::Test,
+    public ::testing::WithParamInterface<const char*> {
 protected:
 
     static GoldfishOpenglTestEnv* testEnv;
@@ -68,6 +71,15 @@ protected:
         testEnv = nullptr;
     }
 
+    bool usingAddressSpaceGraphics() {
+        char value[PROPERTY_VALUE_MAX];
+        if (property_get(
+            "ro.kernel.qemu.gltransport", value, "pipe") > 0) {
+            return !strcmp("asg", value);
+        }
+        return false;
+    }
+
     struct EGLState {
         EGLDisplay display = EGL_NO_DISPLAY;
         EGLConfig config;
@@ -76,6 +88,9 @@ protected:
     };
 
     void SetUp() override {
+        property_set("ro.kernel.qemu.gltransport", GetParam());
+        printf("%s: using transport: %s\n", __func__, GetParam());
+
         setupGralloc();
         setupEGLAndMakeCurrent();
         mBeforeTest = android::base::GLObjectCounter::get()->getCounts();
@@ -283,16 +298,16 @@ GoldfishOpenglTestEnv* CombinedGoldfishOpenglTest::testEnv = nullptr;
 // Tests that the pipe connection can be made and that
 // gralloc/EGL can be set up.
 
-TEST_F(CombinedGoldfishOpenglTest, Basic) { }
+TEST_P(CombinedGoldfishOpenglTest, Basic) { }
 
 // Tests allocation and deletion of a gralloc buffer.
-TEST_F(CombinedGoldfishOpenglTest, GrallocBuffer) {
+TEST_P(CombinedGoldfishOpenglTest, GrallocBuffer) {
     buffer_handle_t buffer = createTestGrallocBuffer();
     destroyTestGrallocBuffer(buffer);
 }
 
 // Tests basic GLES usage.
-TEST_F(CombinedGoldfishOpenglTest, ViewportQuery) {
+TEST_P(CombinedGoldfishOpenglTest, ViewportQuery) {
     GLint viewport[4] = {};
     glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -303,7 +318,7 @@ TEST_F(CombinedGoldfishOpenglTest, ViewportQuery) {
 }
 
 // Tests eglCreateWindowSurface.
-TEST_F(CombinedGoldfishOpenglTest, CreateWindowSurface) {
+TEST_P(CombinedGoldfishOpenglTest, CreateWindowSurface) {
     AndroidWindow testWindow(kWindowSize, kWindowSize);
 
     AndroidBufferQueue toWindow;
@@ -328,7 +343,7 @@ TEST_F(CombinedGoldfishOpenglTest, CreateWindowSurface) {
 }
 
 // Starts a client composer, but doesn't do anything with it.
-TEST_F(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
+TEST_P(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
 
     WindowWithBacking composeWindow(this);
     WindowWithBacking appWindow(this);
@@ -338,7 +353,7 @@ TEST_F(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
 }
 
 // Client composition, but also advances a frame.
-TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
+TEST_P(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
     WindowWithBacking composeWindow(this);
     WindowWithBacking appWindow(this);
 
@@ -354,7 +369,7 @@ TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
     composer.join();
 }
 
-TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
+TEST_P(CombinedGoldfishOpenglTest, ShowWindow) {
     bool useWindow =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
     aemu::Display disp(useWindow, kWindowSize, kWindowSize);
@@ -374,7 +389,7 @@ TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
     if (useWindow) android_hideOpenglesWindow();
 }
 
-TEST_F(CombinedGoldfishOpenglTest, DISABLED_ThreadCleanup) {
+TEST_P(CombinedGoldfishOpenglTest, DISABLED_ThreadCleanup) {
     // initial clean up.
     eglRelease();
     mBeforeTest = android::base::GLObjectCounter::get()->getCounts();
@@ -390,7 +405,7 @@ TEST_F(CombinedGoldfishOpenglTest, DISABLED_ThreadCleanup) {
 }
 
 // Test case adapted from https://buganizer.corp.google.com/issues/111228391
-TEST_F(CombinedGoldfishOpenglTest, SwitchContext) {
+TEST_P(CombinedGoldfishOpenglTest, SwitchContext) {
     EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
                                        EGL_NO_SURFACE, EGL_NO_CONTEXT));
     for (int i = 0; i < 100; i++) {
@@ -406,7 +421,7 @@ TEST_F(CombinedGoldfishOpenglTest, SwitchContext) {
 }
 
 // Test that direct mapped memory works.
-TEST_F(CombinedGoldfishOpenglTest, MappedMemory) {
+TEST_P(CombinedGoldfishOpenglTest, MappedMemory) {
     constexpr GLsizei kBufferSize = 64;
 
     GLuint buffer;
@@ -459,7 +474,7 @@ TEST_F(CombinedGoldfishOpenglTest, MappedMemory) {
 }
 
 // Test big buffer transfer
-TEST_F(CombinedGoldfishOpenglTest, BigBuffer) {
+TEST_P(CombinedGoldfishOpenglTest, BigBuffer) {
     constexpr GLsizei kBufferSize = 4096;
 
     std::vector<uint8_t> buf(kBufferSize);
@@ -525,7 +540,7 @@ static GLint compileAndLinkShaderProgram(const char* vshaderSrc,
 }
 
 // Test draw call rate. This is a perfgate benchmark
-TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
+TEST_P(CombinedGoldfishOpenglTest, DrawCallRate) {
         constexpr char vshaderSrc[] = R"(#version 300 es
     precision highp float;
 
@@ -648,7 +663,7 @@ extern "C" void glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
 
 // Test draw call rate without drawing on the host driver, which gives numbers
 // closer to pure emulator overhead. This is a perfgate benchmark
-TEST_F(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
+TEST_P(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
         constexpr char vshaderSrc[] = R"(#version 300 es
     precision highp float;
 
@@ -768,7 +783,7 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
 }
 
 // Test uniform upload rate. This is a perfgate benchmark
-TEST_F(CombinedGoldfishOpenglTest, UniformUploadRate) {
+TEST_P(CombinedGoldfishOpenglTest, UniformUploadRate) {
         constexpr char vshaderSrc[] = R"(#version 300 es
     precision highp float;
 
@@ -885,7 +900,7 @@ TEST_F(CombinedGoldfishOpenglTest, UniformUploadRate) {
         duration_cpu_us);
 }
 
-TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
+TEST_P(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
     uint64_t usage =
         AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
         AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
@@ -924,21 +939,36 @@ TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
     AHardwareBuffer_release(buf);
 }
 
-TEST_F(CombinedGoldfishOpenglTest, GenericSnapshot) {
+TEST_P(CombinedGoldfishOpenglTest, GenericSnapshot) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
     androidSnapshot_save("test_snapshot");
     androidSnapshot_load("test_snapshot");
 }
 
-TEST_F(CombinedGoldfishOpenglTest, QuickbootSnapshot) {
+TEST_P(CombinedGoldfishOpenglTest, QuickbootSnapshot) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
     androidSnapshot_quickbootSave("test_snapshot");
     androidSnapshot_quickbootLoad("test_snapshot");
 }
 
-TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotLoadMulti) {
+TEST_P(CombinedGoldfishOpenglTest, GenericSnapshotLoadMulti) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
     androidSnapshot_save("test_snapshot");
@@ -948,7 +978,12 @@ TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotLoadMulti) {
 }
 
 // TODO: Test wtih hostmem device and goldfish address space device snapshot.
-TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotGralloc) {
+TEST_P(CombinedGoldfishOpenglTest, GenericSnapshotGralloc) {
+    // TODO: Skip if using address space graphics
+    if (usingAddressSpaceGraphics()) {
+        printf("%s: skipping, ASG does not yet support snapshots\n", __func__);
+        return;
+    }
     // TODO: Find out why we leak some textures when loading snapshot
     mDisableLeakCheck = true;
 
@@ -960,7 +995,7 @@ TEST_F(CombinedGoldfishOpenglTest, GenericSnapshotGralloc) {
     destroyTestGrallocBuffer(buffer);
 }
 
-TEST_F(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
+TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
     GLuint tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
@@ -979,3 +1014,8 @@ TEST_F(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &tex);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    MultipleTransports,
+    CombinedGoldfishOpenglTest,
+    testing::ValuesIn(GoldfishOpenglTestEnv::getTransportsToTest()));

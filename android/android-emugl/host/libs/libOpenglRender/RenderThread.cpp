@@ -16,6 +16,7 @@
 #include "RenderThread.h"
 
 #include "ChannelStream.h"
+#include "RingStream.h"
 #include "ErrorLog.h"
 #include "FrameBuffer.h"
 #include "ReadBuffer.h"
@@ -48,8 +49,23 @@ struct RenderThread::SnapshotObjects {
     RenderThreadInfo* threadInfo;
     ChecksumCalculator* checksumCalc;
     ChannelStream* channelStream;
+    RingStream* ringStream;
     ReadBuffer* readBuffer;
 };
+
+static bool getBenchmarkEnabledFromEnv() {
+    auto threadEnabled = android::base::System::getEnvironmentVariable("ANDROID_EMUGL_RENDERTHREAD_STATS");
+    if (threadEnabled == "1") return true;
+    return false;
+}
+
+static uint64_t currTimeUs(bool enable) {
+    if (enable) {
+        return android::base::System::get()->getHighResTimeUs();
+    } else {
+        return 0;
+    }
+}
 
 // Start with a smaller buffer to not waste memory on a low-used render threads.
 static constexpr int kStreamBufferSize = 128 * 1024;
@@ -70,6 +86,26 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
     }
 }
 
+RenderThread::RenderThread(
+        struct asg_context context,
+        android::emulation::asg::ConsumerCallbacks callbacks,
+        android::base::Stream* loadStream)
+    : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
+      mRingStream(
+          new RingStream(context, callbacks, kStreamBufferSize)) {
+    if (loadStream) {
+        const bool success = loadStream->getByte();
+        if (success) {
+            mStream.emplace(0);
+            android::base::loadStream(loadStream, &*mStream);
+            mState = SnapshotState::StartLoading;
+        } else {
+            mFinished.store(true, std::memory_order_relaxed);
+        }
+    }
+}
+
+
 RenderThread::~RenderThread() = default;
 
 void RenderThread::pausePreSnapshot() {
@@ -77,7 +113,7 @@ void RenderThread::pausePreSnapshot() {
     assert(mState == SnapshotState::Empty);
     mStream.emplace();
     mState = SnapshotState::StartSaving;
-    mChannel->pausePreSnapshot();
+    if (mChannel) mChannel->pausePreSnapshot();
     mCondVar.broadcastAndUnlock(&lock);
 }
 
@@ -91,7 +127,7 @@ void RenderThread::resume() {
     waitForSnapshotCompletion(&lock);
     mStream.clear();
     mState = SnapshotState::Empty;
-    mChannel->resume();
+    if (mChannel) mChannel->resume();
     mCondVar.broadcastAndUnlock(&lock);
 }
 
@@ -144,7 +180,8 @@ void RenderThread::snapshotOperation(AutoLock* lock, OpImpl&& implFunc) {
 void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
     snapshotOperation(lock, [this, &objects] {
         objects.readBuffer->onLoad(&*mStream);
-        objects.channelStream->load(&*mStream);
+        if (objects.channelStream) objects.channelStream->load(&*mStream);
+        if (objects.ringStream) objects.ringStream->load(&*mStream);
         objects.checksumCalc->load(&*mStream);
         objects.threadInfo->onLoad(&*mStream);
     });
@@ -153,7 +190,8 @@ void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
 void RenderThread::saveImpl(AutoLock* lock, const SnapshotObjects& objects) {
     snapshotOperation(lock, [this, &objects] {
         objects.readBuffer->onSave(&*mStream);
-        objects.channelStream->save(&*mStream);
+        if (objects.channelStream) objects.channelStream->save(&*mStream);
+        if (objects.ringStream) objects.ringStream->save(&*mStream);
         objects.checksumCalc->save(&*mStream);
         objects.threadInfo->onSave(&*mStream);
     });
@@ -209,17 +247,24 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
     initRenderControlContext(&tInfo.m_rcDec);
 
-    if (!mChannel) {
+    if (!mChannel && !mRingStream) {
         DBG("Exited a loader RenderThread @%p\n", this);
         mFinished.store(true, std::memory_order_relaxed);
         return 0;
     }
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+    IOStream* ioStream =
+        mChannel ? (IOStream*)&stream : (IOStream*)mRingStream.get();
+
     ReadBuffer readBuf(kStreamBufferSize);
+    if (mRingStream) {
+        readBuf.setNeededFreeTailSize(
+            mRingStream->getNeededFreeTailSize());
+    }
 
     const SnapshotObjects snapshotObjects = {
-        &tInfo, &checksumCalc, &stream, &readBuf
+        &tInfo, &checksumCalc, &stream, mRingStream.get(), &readBuf,
     };
 
     // Framebuffer initialization is asynchronous, so we need to make sure
@@ -236,7 +281,7 @@ intptr_t RenderThread::main() {
         // Not loading from a snapshot: continue regular startup, read
         // the |flags|.
         uint32_t flags = 0;
-        while (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
+        while (ioStream->read(&flags, sizeof(flags)) != sizeof(flags)) {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
@@ -250,7 +295,9 @@ intptr_t RenderThread::main() {
     }
 
     int stats_totalBytes = 0;
+    uint64_t stats_progressTimeUs = 0;
     auto stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
+    bool benchmarkEnabled = getBenchmarkEnabledFromEnv();
 
     //
     // open dump file if RENDER_DUMP_DIR is defined
@@ -283,7 +330,7 @@ intptr_t RenderThread::main() {
 
         int stat = 0;
         if (packetSize > (int)readBuf.validData()) {
-            stat = readBuf.getData(&stream, packetSize);
+            stat = readBuf.getData(ioStream, packetSize);
             if (stat <= 0) {
                 if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                     continue;
@@ -312,14 +359,19 @@ intptr_t RenderThread::main() {
         //
         // log received bandwidth statistics
         //
-        stats_totalBytes += readBuf.validData();
-        auto dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
-        if (dt > 1000) {
-            // float dts = (float)dt / 1000.0f;
-            // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes /
-            // dts) / (1024.0f*1024.0f));
-            stats_totalBytes = 0;
-            stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
+        if (benchmarkEnabled) {
+            stats_totalBytes += readBuf.validData();
+            auto dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
+            if (dt > 1000) {
+                float dts = (float)dt / 1000.0f;
+                printf("Used Bandwidth %5.3f MB/s, time in progress %f ms total %f ms\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f),
+                        stats_progressTimeUs / 1000.0f,
+                        (float)dt);
+                readBuf.printStats();
+                stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
+                stats_progressTimeUs = 0;
+                stats_totalBytes = 0;
+            }
         }
 
         //
@@ -331,6 +383,7 @@ intptr_t RenderThread::main() {
             fflush(dumpFP);
         }
 
+        auto progressStart = currTimeUs(benchmarkEnabled);
         bool progress;
         do {
             progress = false;
@@ -358,7 +411,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("glDec.decode");
                 last = tInfo.m_glDec.decode(
-                        readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
+                        readBuf.buf(), readBuf.validData(), ioStream, &checksumCalc);
                 if (last > 0) {
                     progress = true;
                     readBuf.consume(last);
@@ -372,7 +425,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("gl2Dec.decode");
                 last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                             &stream, &checksumCalc);
+                                             ioStream, &checksumCalc);
 
                 if (last > 0) {
                     progress = true;
@@ -388,7 +441,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("rcDec.decode");
                 last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                            &stream, &checksumCalc);
+                                            ioStream, &checksumCalc);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
@@ -402,7 +455,7 @@ intptr_t RenderThread::main() {
             {
                 AEMU_SCOPED_THRESHOLD_TRACE("vkDec.decode");
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            &stream);
+                                            ioStream);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
@@ -430,8 +483,8 @@ intptr_t RenderThread::main() {
     }
 
     setFinished();
-    DBG("Exited a RenderThread @%p\n", this);
 
+    DBG("Exited a RenderThread @%p\n", this);
     return 0;
 }
 
