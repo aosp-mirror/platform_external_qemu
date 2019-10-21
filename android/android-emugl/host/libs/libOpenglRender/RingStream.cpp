@@ -77,13 +77,22 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
     while (count < wanted) {
 
+        if (mReadBufferLeft) {
+            size_t avail = std::min<size_t>(wanted - count, mReadBufferLeft);
+            memcpy(dst + count,
+                    mReadBuffer.data() + (mReadBuffer.size() - mReadBufferLeft),
+                    avail);
+            count += avail;
+            mReadBufferLeft -= avail;
+            continue;
+        }
+
         // no read buffer left...
         if (count > 0) {  // There is some data to return.
             break;
         }
 
         if (shouldExit) {
-            fprintf(stderr, "%s: xmits: %zu totalRecv: %zu\n", __func__, mXmits, mTotalRecv);
             return nullptr;
         }
 
@@ -102,7 +111,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                 mContext.ring_config->transfer_mode;
             switch (transferMode) {
                 case 1:
-                    type1Read(ringAvailable, &count, &current, ptrEnd);
+                    type1Read(ringAvailable, dst, &count, &current, ptrEnd);
                     break;
                 case 2:
                     type2Read(ringAvailable, &count, &current, ptrEnd);
@@ -122,7 +131,6 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                       &count, &current, ptrEnd);
         } else {
             if (shouldExit) {
-                fprintf(stderr, "%s: exit. xmits: %zu totalRecv: %zu\n", __func__, mXmits, mTotalRecv);
                 return nullptr;
             }
             if (-1 == mCallbacks.onUnavailableRead()) {
@@ -141,6 +149,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
 void RingStream::type1Read(
     uint32_t available,
+    char* begin,
     size_t* count, char** current, const char* ptrEnd) {
 
     uint32_t xferTotal = available / sizeof(struct asg_type1_xfer);
@@ -152,24 +161,29 @@ void RingStream::type1Read(
     auto xfersPtr = mType1Xfers.data();
 
     ring_buffer_copy_contents(
-        mContext.to_host, 0, available, (uint8_t*)xfersPtr);
-
-    struct asg_type1_xfer forRead;
-    (void)forRead;
+        mContext.to_host, 0, xferTotal * sizeof(struct asg_type1_xfer), (uint8_t*)xfersPtr);
 
     for (uint32_t i = 0; i < xferTotal; ++i) {
-
-        if (*current + xfersPtr[i].size > ptrEnd) return;
-
+        if (*current + xfersPtr[i].size > ptrEnd) {
+            // Save in a temp buffer or we'll get stuck
+            if (begin == *current && i == 0) {
+                const char* src = mContext.buffer + xfersPtr[i].offset;
+                mReadBuffer.resize_noinit(xfersPtr[i].size);
+                memcpy(mReadBuffer.data(), src, xfersPtr[i].size);
+                mReadBufferLeft = xfersPtr[i].size;
+                mContext.ring_config->host_consumed_pos =
+                    (src) - mContext.buffer;
+                ring_buffer_advance_read(
+                        mContext.to_host, sizeof(struct asg_type1_xfer), 1);
+            }
+            return;
+        }
         const char* src = mContext.buffer + xfersPtr[i].offset;
         memcpy(*current, src, xfersPtr[i].size);
-
         mContext.ring_config->host_consumed_pos =
             (src) - mContext.buffer;
-
         ring_buffer_advance_read(
-            mContext.to_host, sizeof(struct asg_type1_xfer), 1);
-
+                mContext.to_host, sizeof(struct asg_type1_xfer), 1);
         *current += xfersPtr[i].size;
         *count += xfersPtr[i].size;
     }
@@ -211,7 +225,10 @@ void RingStream::type3Read(
     uint32_t available,
     size_t* count, char** current, const char* ptrEnd) {
 
-    uint32_t xferTotal = mContext.ring_config->transfer_size;
+    // TODO: using the total transfer size is vulnerable to
+    // the guest client getting aborted and then the host gets stuck
+    // uint32_t xferTotal = mContext.ring_config->transfer_size;
+    uint32_t xferTotal = available;
     uint32_t maxCanRead = ptrEnd - *current;
     uint32_t actuallyRead = std::min(xferTotal, maxCanRead);
 
