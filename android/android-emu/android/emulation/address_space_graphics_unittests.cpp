@@ -508,15 +508,14 @@ public:
 
         int type3Read(uint32_t avail) {
             (void)avail;
-            uint32_t xferTotal = mContext.ring_config->transfer_size;
-            ensureReadBuffer(xferTotal);
+            ensureReadBuffer(avail);
             ring_buffer_read_fully_with_abort(
                 mContext.to_host_large_xfer.ring,
                 &mContext.to_host_large_xfer.view,
                 mReadBuffer.data() + mReadPos,
-                xferTotal,
+                avail,
                 1, &mContext.ring_config->in_error);
-            mReadPos += xferTotal;
+            mReadPos += avail;
             return 0;
         }
 
