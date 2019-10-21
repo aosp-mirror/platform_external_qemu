@@ -211,7 +211,10 @@ void RingStream::type3Read(
     uint32_t available,
     size_t* count, char** current, const char* ptrEnd) {
 
-    uint32_t xferTotal = mContext.ring_config->transfer_size;
+    // TODO: using the total transfer size is vulnerable to
+    // the guest client getting aborted and then the host gets stuck
+    // uint32_t xferTotal = mContext.ring_config->transfer_size;
+    uint32_t xferTotal = available;
     uint32_t maxCanRead = ptrEnd - *current;
     uint32_t actuallyRead = std::min(xferTotal, maxCanRead);
 
