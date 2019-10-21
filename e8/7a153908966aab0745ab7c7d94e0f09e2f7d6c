@@ -1,0 +1,10 @@
+Verified+1: Erwin Jansen <jansene@google.com>
+Code-Review+1: Erwin Jansen <jansene@google.com>
+Code-Review+2: Yahan Zhou <yahan@google.com>
+Autosubmit+1: Erwin Jansen <jansene@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 21 Oct 2019 18:57:51 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1147978
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
