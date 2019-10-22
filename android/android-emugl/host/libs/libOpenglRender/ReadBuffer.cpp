@@ -95,8 +95,10 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
 
         if (!readNow) {
             if (readTotal > 0) {
+                fprintf(stderr, "%s: exit with some read\n", __func__);
                 return readTotal;
             } else {
+                fprintf(stderr, "%s: exit completely\n", __func__);
                 return -1;
             }
         }

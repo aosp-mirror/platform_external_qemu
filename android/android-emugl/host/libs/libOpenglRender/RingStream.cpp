@@ -68,7 +68,6 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     size_t wanted = *inout_len;
     size_t count = 0U;
     auto dst = static_cast<char*>(buf);
-    bool shouldExit = false;
 
     size_t guestTx = 0;
     size_t hostTx = 0;
@@ -97,7 +96,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             break;
         }
 
-        if (shouldExit) {
+        if (mShouldExit) {
             return nullptr;
         }
 
@@ -142,11 +141,11 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                 spins = 0;
             }
 
-            if (shouldExit) {
+            if (mShouldExit) {
                 return nullptr;
             }
             if (-1 == mCallbacks.onUnavailableRead()) {
-                shouldExit = true;
+                mShouldExit = true;
             }
             continue;
         }

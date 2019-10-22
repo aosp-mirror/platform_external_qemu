@@ -338,10 +338,12 @@ intptr_t RenderThread::main() {
         if (packetSize > (int)readBuf.validData()) {
             stat = readBuf.getData(ioStream, packetSize);
             if (stat <= 0) {
+                fprintf(stderr, "%s: break? %d\n", __func__, stat);
                 if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                     continue;
                 } else {
                     D("Warning: render thread could not read data from stream");
+                fprintf(stderr, "%s: break. %d\n", __func__, stat);
                     break;
                 }
             } else if (needRestoreFromSnapshot) {
