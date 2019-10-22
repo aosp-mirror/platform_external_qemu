@@ -37,6 +37,7 @@
 #include "android/utils/file_io.h"
 
 #define EMUGL_DEBUG_LEVEL 0
+#include "emugl/common/crash_reporter.h"
 #include "emugl/common/debug.h"
 
 #include <assert.h>
@@ -259,8 +260,7 @@ intptr_t RenderThread::main() {
 
     ReadBuffer readBuf(kStreamBufferSize);
     if (mRingStream) {
-        readBuf.setNeededFreeTailSize(
-            mRingStream->getNeededFreeTailSize());
+        readBuf.setNeededFreeTailSize(0);
     }
 
     const SnapshotObjects snapshotObjects = {
@@ -322,6 +322,12 @@ intptr_t RenderThread::main() {
         if (readBuf.validData() >= 8) {
             // We know that packet size is the second int32_t from the start.
             packetSize = *(const int32_t*)(readBuf.buf() + 4);
+            if (!packetSize) {
+                // Emulator will get live-stuck here if packet size is read to be zero;
+                // crash right away so we can see these events.
+                emugl::emugl_crash_reporter(
+                    "Guest should never send a size-0 GL packet\n");
+            }
         } else {
             // Read enough data to at least be able to get the packet size next
             // time.
