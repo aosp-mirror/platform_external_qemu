@@ -75,6 +75,11 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     uint32_t ringAvailable = 0;
     uint32_t ringLargeXferAvailable = 0;
 
+    const uint32_t maxSpins = 100;
+    const uint32_t maxSleeps = 0;
+    uint32_t spins = 0;
+    uint32_t sleeps = 0;
+
     while (count < wanted) {
 
         if (mReadBufferLeft) {
@@ -130,6 +135,16 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             type3Read(ringLargeXferAvailable,
                       &count, &current, ptrEnd);
         } else {
+            if (++spins < maxSpins) {
+                ring_buffer_yield();
+                continue;
+            } else if (++sleeps < maxSleeps) {
+                usleep(1);
+                continue;
+            } else {
+                spins = 0;
+                sleeps = 0;
+            }
             if (shouldExit) {
                 return nullptr;
             }
@@ -171,8 +186,10 @@ void RingStream::type1Read(
                 mReadBuffer.resize_noinit(xfersPtr[i].size);
                 memcpy(mReadBuffer.data(), src, xfersPtr[i].size);
                 mReadBufferLeft = xfersPtr[i].size;
-                mContext.ring_config->host_consumed_pos =
-                    (src) - mContext.buffer;
+                __atomic_add_fetch(
+                    &mContext.ring_config->host_consumed_pos,
+                    mContext.ring_config->flush_interval,
+                    __ATOMIC_SEQ_CST);
                 ring_buffer_advance_read(
                         mContext.to_host, sizeof(struct asg_type1_xfer), 1);
             }
@@ -180,8 +197,10 @@ void RingStream::type1Read(
         }
         const char* src = mContext.buffer + xfersPtr[i].offset;
         memcpy(*current, src, xfersPtr[i].size);
-        mContext.ring_config->host_consumed_pos =
-            (src) - mContext.buffer;
+        __atomic_add_fetch(
+            &mContext.ring_config->host_consumed_pos,
+            mContext.ring_config->flush_interval,
+            __ATOMIC_SEQ_CST);
         ring_buffer_advance_read(
                 mContext.to_host, sizeof(struct asg_type1_xfer), 1);
         *current += xfersPtr[i].size;
