@@ -363,7 +363,7 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
 }
 
 int AddressSpaceGraphicsContext::onUnavailableRead() {
-    static const uint32_t kMaxUnavailableReads = 800;
+    static const uint32_t kMaxUnavailableReads = 8;
 
     ++mUnavailableReadCount;
     ring_buffer_yield();
