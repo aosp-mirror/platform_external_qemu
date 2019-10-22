@@ -75,6 +75,9 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     uint32_t ringAvailable = 0;
     uint32_t ringLargeXferAvailable = 0;
 
+    const uint32_t maxSpins = 30;
+    uint32_t spins = 0;
+
     while (count < wanted) {
 
         if (mReadBufferLeft) {
@@ -86,6 +89,8 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             mReadBufferLeft -= avail;
             continue;
         }
+
+        mReadBuffer.clear();
 
         // no read buffer left...
         if (count > 0) {  // There is some data to return.
@@ -130,6 +135,13 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             type3Read(ringLargeXferAvailable,
                       &count, &current, ptrEnd);
         } else {
+            if (++spins < maxSpins) {
+                ring_buffer_yield();
+                continue;
+            } else {
+                spins = 0;
+            }
+
             if (shouldExit) {
                 return nullptr;
             }
@@ -171,8 +183,6 @@ void RingStream::type1Read(
                 mReadBuffer.resize_noinit(xfersPtr[i].size);
                 memcpy(mReadBuffer.data(), src, xfersPtr[i].size);
                 mReadBufferLeft = xfersPtr[i].size;
-                mContext.ring_config->host_consumed_pos =
-                    (src) - mContext.buffer;
                 ring_buffer_advance_read(
                         mContext.to_host, sizeof(struct asg_type1_xfer), 1);
             }
@@ -180,18 +190,23 @@ void RingStream::type1Read(
         }
         const char* src = mContext.buffer + xfersPtr[i].offset;
         memcpy(*current, src, xfersPtr[i].size);
-        mContext.ring_config->host_consumed_pos =
-            (src) - mContext.buffer;
         ring_buffer_advance_read(
                 mContext.to_host, sizeof(struct asg_type1_xfer), 1);
         *current += xfersPtr[i].size;
         *count += xfersPtr[i].size;
+
+        // TODO: Figure out why running multiple xfers here can result in data
+        // corruption.
+        return;
     }
 }
 
 void RingStream::type2Read(
     uint32_t available,
     size_t* count, char** current,const char* ptrEnd) {
+
+    fprintf(stderr, "%s: nyi. abort\n", __func__);
+    abort();
 
     uint32_t xferTotal = available / sizeof(struct asg_type2_xfer);
 
