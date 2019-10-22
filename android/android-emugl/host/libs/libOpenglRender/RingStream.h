@@ -74,6 +74,7 @@ protected:
     size_t mXmits = 0;
     size_t mTotalRecv = 0;
     bool mBenchmarkEnabled = false;
+    bool mShouldExit = false;
 };
 
 }  // namespace emugl
