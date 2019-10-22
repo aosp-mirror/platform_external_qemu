@@ -259,8 +259,7 @@ intptr_t RenderThread::main() {
 
     ReadBuffer readBuf(kStreamBufferSize);
     if (mRingStream) {
-        readBuf.setNeededFreeTailSize(
-            mRingStream->getNeededFreeTailSize());
+        readBuf.setNeededFreeTailSize(0);
     }
 
     const SnapshotObjects snapshotObjects = {
