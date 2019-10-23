@@ -11,13 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# -*- coding: utf-8 -*-
+import sys
 
 from google.protobuf import empty_pb2
 
-# -*- coding: utf-8 -*-
 import proto.emulator_controller_pb2
 import proto.emulator_controller_pb2_grpc
 from channel_provider import getEmulatorChannel
+
+if len(sys.argv) != 2:
+    print("You need to provide the id of the snapshot to pull")
+    sys.exit(1);
+
 
 _EMPTY_ = empty_pb2.Empty()
 
@@ -25,7 +31,11 @@ channel = getEmulatorChannel()
 
 # Create a client
 stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
-
-response = stub.listSnapshots(_EMPTY_)
-ids = [f.snapshot_id for f in response.snapshots]
-print(ids)
+snaphot = proto.emulator_controller_pb2.Snapshot(snapshot_id=sys.argv[1])
+it = stub.getSnapshot(snaphot)
+try:
+    with open(sys.argv[1] +'.tar.gz', 'wb') as fn:
+        for msg in it:
+            fn.write(msg.payload)
+except grpc._channel._Rendezvous as err:
+    print(err)
