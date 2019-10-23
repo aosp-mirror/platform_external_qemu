@@ -12,6 +12,8 @@
 
 #include <stdio.h>
 
+#include "android/base/Tracing.h"
+
 namespace {
 
 void enc_unsupported()
@@ -21,6 +23,7 @@ void enc_unsupported()
 
 void fooAlphaFunc_enc(void *self , FooInt func, FooFloat ref)
 {
+	AEMU_SCOPED_TRACE("fooAlphaFunc encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
@@ -47,6 +50,7 @@ void fooAlphaFunc_enc(void *self , FooInt func, FooFloat ref)
 
 FooBoolean fooIsBuffer_enc(void *self , void* stuff)
 {
+	AEMU_SCOPED_TRACE("fooIsBuffer encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
@@ -89,6 +93,7 @@ FooBoolean fooIsBuffer_enc(void *self , void* stuff)
 
 void fooDoEncoderFlush_enc(void *self , FooInt param)
 {
+	AEMU_SCOPED_TRACE("fooDoEncoderFlush encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
@@ -115,6 +120,7 @@ void fooDoEncoderFlush_enc(void *self , FooInt param)
 
 void fooTakeConstVoidPtrConstPtr_enc(void *self , const void* const* param)
 {
+	AEMU_SCOPED_TRACE("fooTakeConstVoidPtrConstPtr encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
@@ -142,6 +148,7 @@ void fooTakeConstVoidPtrConstPtr_enc(void *self , const void* const* param)
 
 void fooSetComplexStruct_enc(void *self , const FooStruct* obj)
 {
+	AEMU_SCOPED_TRACE("fooSetComplexStruct encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
@@ -169,6 +176,7 @@ void fooSetComplexStruct_enc(void *self , const FooStruct* obj)
 
 void fooGetComplexStruct_enc(void *self , FooStruct* obj)
 {
+	AEMU_SCOPED_TRACE("fooGetComplexStruct encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
@@ -207,6 +215,7 @@ void fooGetComplexStruct_enc(void *self , FooStruct* obj)
 
 void fooInout_enc(void *self , uint32_t* count)
 {
+	AEMU_SCOPED_TRACE("fooInout encode");
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
