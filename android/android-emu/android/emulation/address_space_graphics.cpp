@@ -330,6 +330,7 @@ AddressSpaceGraphicsContext::AddressSpaceGraphicsContext() :
 AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
     if (mCurrentConsumer) {
         mExiting = 1;
+        *(mHostContext.host_state) = ASG_HOST_STATE_EXIT;
         mConsumerMessages.send(ConsumerCommand::Exit);
         mConsumerInterface.destroy(mCurrentConsumer);
     }

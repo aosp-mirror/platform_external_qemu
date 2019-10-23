@@ -173,6 +173,9 @@ bool ring_buffer_view_can_read(
 uint32_t ring_buffer_available_read(
     const struct ring_buffer* r,
     const struct ring_buffer_view* v);
+uint32_t ring_buffer_available_write(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v);
 // Copies out contents from the consumer side of
 // ring buffer/view |r,v|.
 // If there is less available read than |wanted_bytes|,

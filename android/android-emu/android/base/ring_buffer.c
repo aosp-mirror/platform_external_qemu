@@ -253,6 +253,19 @@ uint32_t ring_buffer_available_read(
     }
 }
 
+uint32_t ring_buffer_available_write(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v) {
+    uint32_t read_view;
+    __atomic_load(&r->read_pos, &read_view, __ATOMIC_SEQ_CST);
+    if (v) {
+        return ring_buffer_view_get_ring_pos(
+                v, read_view - r->write_pos - 1);
+    } else {
+        return get_ring_pos(read_view - r->write_pos - 1);
+    }
+}
+
 int ring_buffer_copy_contents(
     const struct ring_buffer* r,
     const struct ring_buffer_view* v,
