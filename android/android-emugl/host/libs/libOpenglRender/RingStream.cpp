@@ -56,12 +56,36 @@ void* RingStream::allocBuffer(size_t minSize) {
 }
 
 int RingStream::commitBuffer(size_t size) {
-    return static_cast<int>(
-        ring_buffer_write_fully_with_abort(
+    size_t sent = 0;
+    auto data = mWriteBuffer.data();
+
+    while (sent < size) {
+        auto avail = ring_buffer_available_write(
+            mContext.from_host_large_xfer.ring,
+            &mContext.from_host_large_xfer.view);
+
+        // Check if the guest process crashed.
+        if (!avail) {
+            if (*(mContext.host_state) == ASG_HOST_STATE_EXIT) {
+                return sent;
+            } else {
+                ring_buffer_yield();
+            }
+            continue;
+        }
+
+        auto remaining = size - sent;
+        auto todo = remaining < avail ? remaining : avail;
+
+        ring_buffer_view_write(
             mContext.from_host_large_xfer.ring,
             &mContext.from_host_large_xfer.view,
-            mWriteBuffer.data(), size,
-            1, &mContext.ring_config->in_error));
+            data + sent, todo, 1);
+
+        sent += todo;
+    }
+
+    return sent;
 }
 
 const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
