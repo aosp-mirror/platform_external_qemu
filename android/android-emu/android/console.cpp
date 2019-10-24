@@ -44,6 +44,7 @@
 #include "android/network/wifi.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
+#include "android/snapshot/Postmortem.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"
@@ -3476,6 +3477,42 @@ static const CommandDefRec screenrecord_commands[] = {
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                    P O S T M O R T E M   C O M M A N D S                        ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_postmortem_track(ControlClient client, char* args) {
+    int pid = -1;
+    if (!args || strlen(args) == 0) {
+        control_write(client, "KO: pid required\r\n");
+        return -1;
+    }
+    sscanf(args, "%d", &pid);
+    if (pid < 0) {
+        control_write(client, "KO: Bad process ID %s\r\n", args);
+        return -1;
+    }
+    if (android::postmortem::track_async(pid, "tmp_snapshot")) {
+        control_write(client, "OK: Start tracking PID %d\r\n", pid);
+        return 0;
+    } else {
+        control_write(client, "KO: Failed to track PID %d\r\n", pid);
+        return -1;
+    }
+}
+
+static const CommandDefRec postmortem_commands[] = {
+        {"track", "track exceptions in <pid>",
+         "'postmortem track <pid>'\r\n",
+         NULL, do_postmortem_track, NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -3837,6 +3874,11 @@ extern const CommandDefRec main_commands[] = {
          " dpi 240 and the default flag\r\n"
          "'multidisplay del 1' will delete the display 1\r\n",
          NULL, NULL, multi_display_commands},
+
+        {"postmortem", "auto-snapshot on uncaught exceptions",
+         "allows emulator to automatically take snapshot on uncaught exceptions, "
+         "for test and debug purpose.",
+         NULL, NULL, postmortem_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
