@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a49f5f8e_52355b9f",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1557,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-24T18:10:24Z",
+      "side": 1,
+      "message": "It leaves *value unchanged if \u0027attribute\u0027 does not match any case here. Should it return EGL_FALSE in this case?",
+      "range": {
+        "startLine": 1557,
+        "startChar": 8,
+        "endLine": 1557,
+        "endChar": 14
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7599d8d2_ee7c4d77",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1572,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-24T18:10:24Z",
+      "side": 1,
+      "message": "Same as above here.",
+      "range": {
+        "startLine": 1572,
+        "startChar": 4,
+        "endLine": 1572,
+        "endChar": 10
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3bb3435e_3c6fb0b8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv30Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-24T18:10:24Z",
+      "side": 1,
+      "message": "*values stays unchanged here. Will this lead it to be uninitialized if the caller assumed internal_glGetSynciv initializes it?",
+      "range": {
+        "startLine": 516,
+        "startChar": 16,
+        "endLine": 516,
+        "endChar": 32
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0f6f032_a2b19b29",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-24T18:10:24Z",
+      "side": 1,
+      "message": "Do we want to ignore the return value?",
+      "range": {
+        "startLine": 130,
+        "startChar": 10,
+        "endLine": 130,
+        "endChar": 29
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
