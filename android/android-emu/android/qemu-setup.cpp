@@ -44,6 +44,7 @@
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
 #include "android/refcount-pipe.h"
+#include "android/snapshot/Postmortem.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
@@ -391,6 +392,7 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* Save base port and ADB port. */
     android_base_port = base_port;
     android_adb_port = adb_port;
+    android::postmortem::setAdbPort(adb_port);
     android_serial_number_port = adb_port - 1;
     return true;
 }
