@@ -11,10 +11,12 @@
 
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <stdlib.h>
-#include "waterfall.pb.h"
+#include <gmock/gmock.h>   // for GMOCK_PP_INTERNAL_IF_0, GMOCK_PP_INTERNAL_...
+#include <gtest/gtest.h>   // for Test, AssertionResult, Message, TestPartRe...
+#include <map>             // for multimap
+#include <memory>          // for unique_ptr, make_unique
+
+#include "waterfall.pb.h"  // for Transfer
 
 namespace android {
 namespace control {

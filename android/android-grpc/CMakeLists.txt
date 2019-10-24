@@ -10,6 +10,7 @@ protobuf_generate_grpc_cpp(SOURCE_DIR
                            emulator_controller.proto
                            waterfall.proto
                            control_socket.proto
+                           snapshot-service.proto
                            OUTPUT_DIR
                            ${CMAKE_CURRENT_BINARY_DIR}
                            GENERATED
@@ -24,9 +25,12 @@ set(android-grpc_src
     android/emulation/control/interceptor/LoggingInterceptor.cpp
     android/emulation/control/interceptor/MetricsInterceptor.cpp
     android/emulation/control/logcat/RingStreambuf.cpp
+    android/emulation/control/snapshot/SnapshotService.cpp
     android/emulation/control/snapshot/TarStream.cpp
     android/emulation/control/snapshot/GzipStreambuf.cpp
-    android/emulation/control/waterfall/SocketController.cpp)
+    android/emulation/control/waterfall/SocketController.cpp
+    android/emulation/control/waterfall/WaterfallService.cpp
+    )
 
 # Let's add in the library
 android_add_library(android-grpc)
@@ -53,7 +57,7 @@ android_add_test(android-grpc_unittest)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++ gmock_main)
 
 # Lets distribute the proto file
-install(FILES emulator_controller.proto waterfall.proto ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto DESTINATION lib)
+install(FILES emulator_controller.proto snapshot-service.proto waterfall.proto ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto DESTINATION lib)
 
 # Add the benchmark
 set(grpc_benchmark_src android/emulation/control/keyboard/KeytranslatePerf.cpp

@@ -11,12 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+# -*- coding: utf-8 -*-
 from google.protobuf import empty_pb2
 
-# -*- coding: utf-8 -*-
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
+import proto.snapshot_service_pb2
+import proto.snapshot_service_pb2_grpc
 from channel_provider import getEmulatorChannel
 
 _EMPTY_ = empty_pb2.Empty()
@@ -24,7 +23,7 @@ _EMPTY_ = empty_pb2.Empty()
 channel = getEmulatorChannel()
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
 
 response = stub.listSnapshots(_EMPTY_)
 ids = [f.snapshot_id for f in response.snapshots]

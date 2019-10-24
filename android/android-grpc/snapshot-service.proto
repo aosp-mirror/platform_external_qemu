@@ -1,0 +1,64 @@
+// Copyright (C) 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "android.emulation.control";
+option java_outer_classname = "";
+option objc_class_prefix = "AEC";
+
+package android.emulation.control;
+
+import "google/protobuf/empty.proto";
+import "snapshot.proto";
+
+// An EmulatorController service lets you control the emulator.
+service SnapshotService {
+    // Lists all the valid snapshots that are stored locally for the currently
+    // running avd.
+    rpc listSnapshots(google.protobuf.Empty) returns (SnapshotList) {}
+
+    // Gets the snapshot with the given id.
+    rpc getSnapshot(Snapshot) returns (stream Snapshot) {}
+
+    // Stores the given snapshot.
+    rpc putSnapshot(stream Snapshot) returns (Snapshot) {}
+
+    // Starts the given snapshot
+    rpc startSnapshot(Snapshot) returns (google.protobuf.Empty) {}
+
+    // Create as a snapshot of the current state of the emulator
+    rpc takeSnapshot(Snapshot) returns (google.protobuf.Empty) {}
+}
+
+message Snapshot {
+    // The identifier to the snapshot.
+    string snapshot_id = 1;
+
+    // A stream of bytes. Encoded as a zip file.
+    bytes payload = 2;
+
+    // status fields.
+    bool success = 3;
+    bytes err = 4;
+}
+
+message SnapshotDetails {
+    string snapshot_id = 1;
+    emulator_snapshot.Snapshot details = 2;
+}
+
+message SnapshotList {
+    repeated SnapshotDetails snapshots = 1;
+}
