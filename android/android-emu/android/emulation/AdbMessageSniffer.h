@@ -41,10 +41,11 @@ struct apacket
     uint8_t data[1024];
 };
 
-    AdbMessageSniffer(const char* name);
-    ~AdbMessageSniffer();
+AdbMessageSniffer(const char* name);
+~AdbMessageSniffer();
 
-    void read(const AndroidPipeBuffer*, int numBuffers, int count);
+void read(const AndroidPipeBuffer*, int numBuffers, int count);
+
 private:
     apacket mPacket;
     int mState;

@@ -294,8 +294,10 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            Service* service,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
-    : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
-    mReceivedMesg("HOST==>GUEST"), mSendingMesg("HOST<==GUEST"){
+    : AndroidPipe(mHwPipe, service),
+      mHostAgent(hostAgent),
+      mReceivedMesg("HOST==>GUEST"),
+      mSendingMesg("HOST<==GUEST") {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {

@@ -38,7 +38,7 @@ namespace emulation {
 // 1 MB
 #define MAX_ADB_MESSAGE_PAYLOAD 1048576
 
-AdbMessageSniffer::AdbMessageSniffer(const char* name):mName(name) {
+AdbMessageSniffer::AdbMessageSniffer(const char* name) : mName(name) {
     memset(&mPacket, 0, sizeof(apacket));
     mBufferVec.resize(MAX_ADB_MESSAGE_PAYLOAD);
     startNewMessage();
@@ -112,7 +112,8 @@ void AdbMessageSniffer::updateCtsHeartBeatCount() {
         if (!checkForDummyShellCommand()) {
             host_cts_heart_beat_count += 1;
             if (android_hw->test_monitorAdb >= 2 ) {
-                printf("emulator: cts heartbeat %d\n", host_cts_heart_beat_count.load());
+                printf("emulator: cts heartbeat %d\n",
+                       host_cts_heart_beat_count.load());
                 fflush(stdout);
             }
         }
@@ -207,9 +208,10 @@ void AdbMessageSniffer::printPayload() {
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
     int length = msg.data_length;
     length = getAllowedBytesToPrint(length);
-    if (length <= 0 ) return;
+    if (length <= 0)
+        return;
     uint8_t* data = mPacket.data;
-    for (int i=0; i < length; ++i) {
+    for (int i = 0; i < length; ++i) {
         if (i % 1024 == 0) {
             printf("%s:", mName);
         }
@@ -217,9 +219,9 @@ void AdbMessageSniffer::printPayload() {
         if (isprint(ch)) {
             printf("%c", ch);
         } else if (isspace(ch)) {
-            //printf("%c", ch);
+            // printf("%c", ch);
         } else {
-            //printf(" ");
+            // printf(" ");
         }
     }
     printf("\n");
@@ -252,7 +254,8 @@ void AdbMessageSniffer::printMessage() {
     }
 
     amessage & msg = mPacket.mesg;
-    if (msg.command == ADB_OKAY) return;
+    if (msg.command == ADB_OKAY)
+        return;
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
 
     printf("%s:command: %s ", mName, getCommandName(msg.command));
