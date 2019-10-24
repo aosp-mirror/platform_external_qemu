@@ -62,6 +62,7 @@ else()
 endif()
 
 add_subdirectory(boringssl)
+add_subdirectory(hostapd)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
 
