@@ -22,6 +22,30 @@
       "revId": "875f8aa149c208342a2ff1e553a4ace32a942cf4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f898470_5b8bd1d6",
+        "filename": "android/android-emu/android/opengles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-10-24T20:21:39Z",
+      "side": 1,
+      "message": "It is prepared for new camera service.",
+      "parentUuid": "0bfd74ae_897b3357",
+      "range": {
+        "startLine": 120,
+        "startChar": 6,
+        "endLine": 120,
+        "endChar": 28
+      },
+      "revId": "875f8aa149c208342a2ff1e553a4ace32a942cf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
