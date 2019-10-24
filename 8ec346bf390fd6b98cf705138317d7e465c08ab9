@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cd039536_ad48e3b4",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1557,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-24T21:29:10Z",
+      "side": 1,
+      "message": "Spec says to leave value unchanged if attribute is invalid.  Added egl false return for both cases. thanks for the catch!",
+      "parentUuid": "a49f5f8e_52355b9f",
+      "range": {
+        "startLine": 1557,
+        "startChar": 8,
+        "endLine": 1557,
+        "endChar": 14
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7599d8d2_ee7c4d77",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33006d7a_98824ab0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1572,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-24T21:29:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7599d8d2_ee7c4d77",
+      "range": {
+        "startLine": 1572,
+        "startChar": 4,
+        "endLine": 1572,
+        "endChar": 10
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "71bbf6e1_1df18b84",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv30Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-24T21:29:10Z",
+      "side": 1,
+      "message": "Spec says not to change *values if the call is invalid.",
+      "parentUuid": "3bb3435e_3c6fb0b8",
+      "range": {
+        "startLine": 516,
+        "startChar": 16,
+        "endLine": 516,
+        "endChar": 32
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0f6f032_a2b19b29",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
         "patchSetId": 3
@@ -91,6 +163,30 @@
       "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb43a8e7_93b16944",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-24T21:29:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a0f6f032_a2b19b29",
+      "range": {
+        "startLine": 130,
+        "startChar": 10,
+        "endLine": 130,
+        "endChar": 29
+      },
+      "revId": "8ec346bf390fd6b98cf705138317d7e465c08ab9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
