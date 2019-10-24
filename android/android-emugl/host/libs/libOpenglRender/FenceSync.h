@@ -73,6 +73,9 @@ public:
     // waitAsync wraps eglWaitSyncKHR.
     void waitAsync();
 
+    // isSignaled wraps eglGetSyncAttribKHR.
+    bool isSignaled();
+
     bool shouldDestroyWhenSignaled() const {
         return mDestroyWhenSignaled;
     }

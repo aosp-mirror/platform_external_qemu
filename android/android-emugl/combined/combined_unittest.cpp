@@ -33,7 +33,9 @@
 #include <cutils/properties.h>
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
+#define EGL_EGLEXT_PROTOTYPES
 #include <EGL/eglext.h>
+#undef EGL_EGLEXT_PROTOTYPES
 #include <GLES3/gl3.h>
 
 #include <sstream>
@@ -1013,6 +1015,39 @@ TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
 
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &tex);
+}
+
+TEST_P(CombinedGoldfishOpenglTest, DISABLED_GetSyncAttrib) {
+    EGLSyncKHR sync = eglCreateSyncKHR(mEGL.display, EGL_SYNC_FENCE_KHR, nullptr);
+    EXPECT_NE(nullptr, sync);
+
+    EGLint value;
+
+    EXPECT_EQ(
+        EGL_TRUE,
+        eglGetSyncAttribKHR(
+            mEGL.display, sync, EGL_SYNC_STATUS_KHR, &value));
+
+    EXPECT_TRUE(
+        EGL_SIGNALED_KHR == value ||
+        EGL_UNSIGNALED_KHR == value
+    );
+
+    if (EGL_UNSIGNALED_KHR == value) {
+        printf("%s: Note: Nontrivial case; not signaled in the beginning\n", __func__);
+    }
+
+    glFinish();
+
+    EXPECT_EQ(
+        EGL_TRUE,
+        eglGetSyncAttribKHR(
+            mEGL.display, sync, EGL_SYNC_STATUS_KHR, &value));
+
+    EXPECT_TRUE(
+        EGL_SIGNALED_KHR == value);
+
+    eglDestroySyncKHR(mEGL.display, sync);
 }
 
 INSTANTIATE_TEST_SUITE_P(

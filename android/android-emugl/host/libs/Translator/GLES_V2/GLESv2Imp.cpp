@@ -87,6 +87,7 @@ static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
 static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glDeleteSync(GLsync to_delete);
+static void internal_glGetSynciv(GLsync sync, GLenum pname, GLsizei bufsize, GLsizei *length, GLint *values);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -119,6 +120,7 @@ static GLESiface s_glesIface = {
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
     .fillGLESUsages = fillGLESUsages,
     .vulkanInteropSupported = vulkanInteropSupported,
+    .getSynciv = (FUNCPTR_GET_SYNC_IV)internal_glGetSynciv,
 };
 
 #include <GLcommon/GLESmacros.h>
