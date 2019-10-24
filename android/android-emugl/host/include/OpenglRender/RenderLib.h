@@ -99,6 +99,7 @@ public:
                                      bool useSubWindow, bool egl2egl) = 0;
 
     virtual OnLastColorBufferRef getOnLastColorBufferRef() = 0;
+    virtual void* getDMAHostAddr(uint64_t guestAddr) = 0;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;

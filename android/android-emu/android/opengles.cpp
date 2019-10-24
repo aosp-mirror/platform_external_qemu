@@ -526,6 +526,13 @@ void android_unlockMultiDisplayOnLoad(void) {
     }
 }
 
+void* android_getDMAHostAddr(uint64_t guestAddr) {
+    if (sRenderLib) {
+        return sRenderLib->getDMAHostAddr(guestAddr);
+    }
+    return nullptr;
+}
+
 static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 
