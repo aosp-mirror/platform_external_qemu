@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65656a26_2bf0ff79",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/GzipStreambuf_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-10-24T21:53:44Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 4
+      },
+      "revId": "a1325cd15ed13fedac0161ffe7ee5185e8a7a180",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "103354c7_fa466c64",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/GzipStreambuf_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-10-24T21:53:44Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 4
+      },
+      "revId": "a1325cd15ed13fedac0161ffe7ee5185e8a7a180",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
