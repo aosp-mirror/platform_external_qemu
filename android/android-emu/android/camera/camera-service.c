@@ -35,6 +35,7 @@
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
 #include "android/avd/hw-config.h"
+#include "android/opengles.h"
 
 #include <stdio.h>
 
@@ -51,6 +52,9 @@
 #else
 #define  T(...)    ((void)0)
 #endif
+
+/* Camera service version 1 */
+#define V1 feature_is_enabled(kFeature_CameraV1)
 
 /* Defines name of the camera service. */
 #define SERVICE_NAME    "camera"
@@ -1178,6 +1182,125 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
     }
 }
 
+static int _camera_client_get_max_resolution(const CameraInfo* info,
+                                             int* width, int* height) {
+    CameraFrameDim *dim, *chosen;
+    int maxArea = 0, area;
+
+    if (!info || !width || !height) {
+        return -1;
+    }
+    dim = info->frame_sizes;
+    if (!dim) {
+        return -1;
+    }
+    for (int i = 0; i < info->frame_sizes_num; i++) {
+        area = dim->width * dim->height;
+        if (area > maxArea) {
+            maxArea = area;
+            chosen = dim;
+        }
+        dim++;
+    }
+    *width = chosen->width;
+    *height = chosen->height;
+    return 0;
+}
+
+static void
+_camera_client_query_start_v1(CameraClient* cc, QemudClient* qc,
+                              const char* param)
+{
+    char* w;
+    char dim[64];
+    int width, height, pix_format;
+
+    /* Sanity check. */
+    if (cc->camera == NULL) {
+        /* Not connected. */
+        E("%s: Camera '%s' is not connected", __FUNCTION__, cc->device_name);
+        _qemu_client_reply_ko(qc, "Camera is not connected");
+        return;
+    }
+
+    /*
+     * Parse parameters.
+     */
+    if (param == NULL) {
+        if (_camera_client_get_max_resolution(cc->camera_info, &width, &height)) {
+            E("%s: Failed to get default resolution", __FUNCTION__);
+            _qemu_client_reply_ko(qc, "Failed to get default resolution");
+            return;
+        }
+        pix_format = cc->camera_info->pixel_format;
+    } else {
+        if (get_token_value(param, "dim", dim, sizeof(dim))) {
+            if (_camera_client_get_max_resolution(cc->camera_info, &width, &height)) {
+                E("%s: Failed to get default resolution", __FUNCTION__);
+                _qemu_client_reply_ko(qc, "Failed to get default resolution");
+              return;
+            }
+        } else {
+            /* Parse 'dim' parameter, and get requested frame width and height. */
+            w = strchr(dim, 'x');
+            if (w == NULL || w[1] == '\0') {
+                E("%s: Invalid 'dim' parameter in '%s'", __FUNCTION__, param);
+                _qemu_client_reply_ko(qc, "Invalid 'dim' parameter");
+                return;
+            }
+            *w = '\0'; w++;
+            errno = 0;
+            width = strtoi(dim, NULL, 10);
+            height = strtoi(w, NULL, 10);
+            if (errno) {
+                E("%s: Invalid 'dim' parameter in '%s'", __FUNCTION__, param);
+                _qemu_client_reply_ko(qc, "Invalid 'dim' parameter");
+                return;
+            }
+        }
+        /* Pull required 'pix' parameter. */
+        if (get_token_value_int(param, "pix", &pix_format)) {
+            pix_format = cc->camera_info->pixel_format;
+        }
+    }
+
+
+    ClientStartResult result =
+            _camera_client_start(cc, width, height, pix_format);
+    camera_metrics_report_start_result(result);
+
+    if (result < 0) {
+        camera_metrics_report_stop_session(0);
+    }
+
+    switch (result) {
+        case CLIENT_START_RESULT_SUCCESS:
+            _qemu_client_reply_ok(qc, NULL);
+            break;
+        case CLIENT_START_RESULT_ALREADY_STARTED:
+            _qemu_client_reply_ok(qc, "Camera is already started");
+            break;
+        case CLIENT_START_RESULT_PARAMETER_MISMATCH:
+            _qemu_client_reply_ko(qc, "Camera is already started with different capturing parameters");
+            break;
+        case CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT:
+            _qemu_client_reply_ko(qc, "Pixel format is unknown");
+            break;
+        case CLIENT_START_RESULT_NO_PIXEL_CONVERSION:
+            _qemu_client_reply_ko(qc, "No conversion exist for the requested pixel format");
+            break;
+        case CLIENT_START_RESULT_OUT_OF_MEMORY:
+            _qemu_client_reply_ko(qc, "Out of memory");
+            break;
+        default:
+            E("%s: Unexpected capture result '%d'", __FUNCTION__, result);
+            // Intentional fallthrough.
+        case CLIENT_START_RESULT_FAILED:
+            _qemu_client_reply_ko(qc, "Cannot start the camera");
+            break;
+    }
+}
+
 /* Client has queried the client to stop capturing video.
  * Param:
  *  cc - Queried camera client descriptor.
@@ -1253,7 +1376,6 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
         return;
     }
 
-    /* Pull required parameters. */
     if (get_token_value_int(param, "video", &video_size) ||
         get_token_value_int(param, "preview", &preview_size)) {
         E("%s: Invalid or missing 'video', or 'preview' parameter in '%s'",
@@ -1416,6 +1538,207 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     }
 }
 
+#if 0
+static void
+_camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* param)
+{
+    int preview_size = 0;
+    int repeat;
+    char dim[64];
+    int format;
+    ClientFrameBuffer fbs;
+    int fbs_num = 0;
+    size_t payload_size;
+    uint64_t tick;
+    float r_scale = 1.0f, g_scale = 1.0f, b_scale = 1.0f, exp_comp = 1.0f;
+    char tmp[256];
+    int send_frame_time = 0;
+    ClientFrame frame = {};
+
+    /* Sanity check. */
+    if (cc->video_frame == NULL) {
+        /* Not started. */
+        E("%s: Camera '%s' is not started", __FUNCTION__, cc->device_name);
+        _qemu_client_reply_ko(qc, "Camera is not started");
+        return;
+    }
+
+        /* Pull required parameters. */
+    if (get_token_value(param, "dim", dim, sizeof(dim))) {
+        E("%s: Invalid or missing 'dim'", __FUNCTION__);
+        _qemu_client_reply_ko(qc, "Invalid or missing 'dim' parameter");
+        return;
+    }
+
+    if (get_token_value_int(param, "pix", &format)) {
+        E("%s: Invalid or missing 'pix'", __FUNCTION__);
+        _qemu_client_reply_ko(qc, "Invalid or missing 'pix' parameter");
+        return;
+    }
+
+    if (get_token_value_int(param, "video", &video_size) ||
+        get_token_value_int(param, "preview", &preview_size)) {
+        E("%s: Invalid or missing 'video', or 'preview' parameter in '%s'",
+          __FUNCTION__, param);
+        _qemu_client_reply_ko(qc,
+            "Invalid or missing 'video', or 'preview' parameter");
+        return;
+    }
+
+    /* Pull white balance values. */
+    if (!get_token_value(param, "whiteb", tmp, sizeof(tmp))) {
+        if (sscanf(tmp, "%g,%g,%g", &r_scale, &g_scale, &b_scale) != 3) {
+            D("Invalid value '%s' for parameter 'whiteb'", tmp);
+            r_scale = g_scale = b_scale = 1.0f;
+        }
+    }
+
+    /* Pull exposure compensation. */
+    if (!get_token_value(param, "expcomp", tmp, sizeof(tmp))) {
+        if (sscanf(tmp, "%g", &exp_comp) != 1) {
+            D("Invalid value '%s' for parameter 'whiteb'", tmp);
+            exp_comp = 1.0f;
+        }
+    }
+
+    if (get_token_value_int(param, "time", &send_frame_time) < 0) {
+        send_frame_time = 0;
+    }
+
+    /* Verify that framebuffer sizes match the ones that the started camera
+     * operates with. */
+    if ((video_size != 0 && cc->video_frame_size != (size_t)video_size) ||
+        (preview_size != 0 && cc->preview_frame_size != (size_t)preview_size)) {
+        E("%s: Frame sizes don't match for camera '%s':\n"
+          "Expected %d for video, and %d for preview. Requested %d, and %d",
+          __FUNCTION__, cc->device_name, cc->video_frame_size,
+          cc->preview_frame_size, video_size, preview_size);
+        _qemu_client_reply_ko(qc, "Frame size mismatch");
+        return;
+    }
+
+    /*
+     * Initialize framebuffer array for frame read.
+     */
+
+    if (video_size) {
+        fbs[fbs_num].pixel_format = cc->pixel_format;
+        fbs[fbs_num].framebuffer = cc->video_frame;
+        fbs_num++;
+    }
+    if (preview_size) {
+        /* TODO: Watch out for preview format changes! */
+        fbs[fbs_num].pixel_format = V4L2_PIX_FMT_RGB32;
+        fbs[fbs_num].framebuffer = cc->preview_frame;
+        fbs_num++;
+    }
+
+    /* Capture new frame. */
+    tick = _get_timestamp();
+
+    frame.framebuffers_count = fbs_num;
+    frame.framebuffers = fbs;
+    frame.staging_framebuffer = &cc->staging_framebuffer;
+    frame.staging_framebuffer_size = &cc->staging_framebuffer_size;
+    frame.frame_time =
+            looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+
+    repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
+                            exp_comp);
+
+    /* Note that there is no (known) way how to wait on next frame being
+     * available, so we could dequeue frame buffer from the device only when we
+     * know it's available. Instead we're shooting in the dark, and quite often
+     * device will response with EAGAIN, indicating that it doesn't have frame
+     * ready. In turn, it means that the last frame we have obtained from the
+     * device is still good, and we can reply with the cached frames. The only
+     * case when we need to keep trying to obtain a new frame is when frame cache
+     * is empty. To prevent ourselves from an indefinite loop in case device got
+     * stuck on something (observed with some Microsoft devices) we will limit
+     * the loop by 2 second time period (which is more than enough to obtain
+     * something from the device) */
+    while (repeat == 1 && !cc->frames_cached &&
+           (_get_timestamp() - tick) < 2000000LL) {
+        /* Sleep for 10 millisec before repeating the attempt. */
+        _camera_sleep(10);
+        repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
+                                exp_comp);
+    }
+    if (repeat == 1 && !cc->frames_cached) {
+        /* Waited too long for the first frame. */
+        E("%s: Unable to obtain first video frame from the camera '%s' in %d milliseconds: %s.",
+          __FUNCTION__, cc->device_name,
+          (uint32_t)(_get_timestamp() - tick) / 1000, strerror(errno));
+        _qemu_client_reply_ko(qc, "Unable to obtain video frame from the camera");
+        return;
+    } else if (repeat < 0) {
+        /* An I/O error. */
+        E("%s: Unable to obtain video frame from the camera '%s': %s.",
+          __FUNCTION__, cc->device_name, strerror(errno));
+        _qemu_client_reply_ko(qc, strerror(errno));
+        return;
+    }
+
+    if (video_size && repeat == 1 && cc->frames_cached) {
+        // Device has no frame update reported. Use cached preview frame.
+        // Convert preview frame format to video frame format.
+        if (convert_frame(cc->preview_frame, V4L2_PIX_FMT_RGB32,
+                      cc->preview_frame_size,
+                      cc->width, cc->height,
+                      &frame, 1.0f, 1.0f, 1.0f, 1.0f)) {
+            E("%s: Unable to obtain first video frame from the camera '%s'",
+                __FUNCTION__, cc->device_name);
+            _qemu_client_reply_ko(qc, "Unable to obtain video frame from the camera");
+            return;
+        }
+    }
+
+    /* We have cached something... */
+    if (preview_size) {
+        cc->frames_cached = 1;
+    }
+    ++cc->frame_count;
+
+    /*
+     * Build the reply.
+     */
+
+    /* Payload includes "ok:" + requested video and preview frames + an int64
+     * frame timestamp if requested. */
+    payload_size = 3 + (send_frame_time ? 8 : 0) + video_size + preview_size;
+
+    /* Send payload size first. */
+    _qemu_client_reply_payload(qc, payload_size);
+
+    /* After that send the 'ok:'. Note that if there is no frames sent, we should
+     * use prefix "ok" instead of "ok:" */
+    if (video_size || preview_size) {
+        qemud_client_send(qc, (const uint8_t*)"ok:", 3);
+    } else {
+        /* Still 3 bytes: zero terminator is required in this case. */
+        qemud_client_send(qc, (const uint8_t*)"ok", 3);
+    }
+
+    /* After that send video frame (if requested). */
+    if (video_size) {
+        qemud_client_send(qc, cc->video_frame, video_size);
+    }
+
+    /* After that send preview frame (if requested). */
+    if (preview_size) {
+        qemud_client_send(qc, cc->preview_frame, preview_size);
+    }
+
+    // after that send the frame time (if requested). */
+    if (send_frame_time) {
+        int64_t adjusted_time = frame.frame_time +
+                android_sensors_get_time_offset();
+
+        qemud_client_send(qc, (const uint8_t*) &adjusted_time, 8);
+    }
+}
+#endif
+
 /* Handles a message received from the emulated camera client.
  * Queries received here are represented as strings:
  * - 'connect' - Connects to the camera device (opens it).
@@ -1502,7 +1825,11 @@ _camera_client_recv(void*         opaque,
         _camera_client_query_disconnect(cc, client, query_param);
     } else if (!strcmp(query_name, _query_start)) {
         /* Start capturing is queried. */
-        _camera_client_query_start(cc, client, query_param);
+        if (V1) {
+            _camera_client_query_start_v1(cc, client, query_param);
+        } else {
+            _camera_client_query_start(cc, client, query_param);
+        }
     } else if (!strcmp(query_name, _query_stop)) {
         /* Stop capturing is queried. */
         _camera_client_query_stop(cc, client, query_param);

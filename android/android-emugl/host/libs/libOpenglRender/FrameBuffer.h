@@ -529,6 +529,7 @@ public:
     static uint32_t s_invalidIdMultiDisplay;
     bool tryLockMultiDisplayOnLoad(void);
     void unlockMultiDisplayOnLoad(void);
+    void* getDMAHostAddr(uint64_t guestAddr);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);

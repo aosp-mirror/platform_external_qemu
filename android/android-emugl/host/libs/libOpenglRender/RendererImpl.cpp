@@ -489,4 +489,12 @@ void RendererImpl::snapshotOperationCallback(
     }
 }
 
+void* RendererImpl::getDMAHostAddr(uint64_t guestAddr) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        return fb->getDMAHostAddr(guestAddr);
+    }
+    return nullptr;
+}
+
 }  // namespace emugl

@@ -215,6 +215,7 @@ public:
     virtual void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) = 0;
+    virtual void* getDMAHostAddr(uint64_t guestAddr) = 0;
 
 protected:
     ~Renderer() = default;
