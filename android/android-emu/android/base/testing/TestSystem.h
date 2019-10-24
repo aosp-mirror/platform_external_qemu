@@ -441,6 +441,10 @@ public:
 
     virtual void configureHost() const override {   }
 
+    System* host() {
+        return hostSystem();
+    }
+
 private:
     std::string toTempRoot(StringView pathView) const {
         std::string path = pathView;

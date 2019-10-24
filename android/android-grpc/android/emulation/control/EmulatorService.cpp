@@ -43,6 +43,9 @@
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/emulation/control/snapshot/CallbackStreambuf.h"
+#include "android/emulation/control/snapshot/GzipStreambuf.h"
+#include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
@@ -52,7 +55,9 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/opengles.h"
 #include "android/skin/rect.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
+#include "android/utils/path.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "grpcpp/server.h"
@@ -428,6 +433,81 @@ public:
         mRtcBridge->nextMessage(id, &msg, k5SecondsWait);
         reply->mutable_id()->set_guid(request->guid());
         reply->set_message(msg);
+        return Status::OK;
+    }
+
+    Status getSnapshot(ServerContext* context,
+                       const Snapshot* request,
+                       ServerWriter<Snapshot>* writer) override {
+        Snapshot result;
+        result.set_success(true);
+
+        for (auto snapshot :
+             android::snapshot::Snapshot::getExistingSnapshots()) {
+            std::string datadir = snapshot.dataDir();
+
+            if (snapshot.name() == request->snapshot_id()) {
+                CallbackStreambufWriter csb(
+                        k128KB, [writer](char* bytes, std::size_t len) {
+                            Snapshot msg;
+                            msg.set_payload(std::string(bytes, len));
+                            return writer->Write(msg);
+                        });
+                GzipOutputStream gzout(&csb);
+                TarWriter tw(snapshot.dataDir(), gzout);
+                result.set_success(tw.addDirectory(".") && tw.close());
+            }
+        }
+        writer->Write(result);
+        return Status::OK;
+    }
+
+    Status putSnapshot(ServerContext* context,
+                       ::grpc::ServerReader<Snapshot>* reader,
+                       Snapshot* reply) override {
+        Snapshot msg;
+        std::string id = Uuid::generate().toString();
+        std::string tmpSnap = android::snapshot::getSnapshotDir(id.c_str());
+
+        reply->set_success(true);
+        auto cb = [reader, &msg, &id](char** new_eback, char** new_gptr,
+                                      char** new_egptr) {
+            // Drop messages without bytes.
+            bool incoming = reader->Read(&msg);
+
+            // First message likely only has snapshot id information and no
+            // bytes.
+            if (msg.snapshot_id().size() > 0) {
+                std::cout << msg.snapshot_id() << std::endl;
+                id = msg.snapshot_id();
+            }
+            while (msg.payload().size() == 0 && incoming) {
+                incoming = reader->Read(&msg);
+            }
+            if (incoming) {
+                *new_eback = (char*)msg.payload().data();
+                *new_gptr = *new_eback;
+                *new_egptr = *new_gptr + msg.payload().size();
+            }
+            return incoming;
+        };
+
+        CallbackStreambufReader csr(cb);
+        GzipInputStream gzin(&csr);
+        TarReader tr(tmpSnap, gzin);
+        auto entry = tr.first();
+        while (entry.valid) {
+            if (!tr.extract(entry)) {
+                reply->set_success(false);
+                reply->set_err("Failed to extract: " + entry.name);
+            }
+            entry = tr.next(entry);
+        }
+        reply->set_snapshot_id(id);
+        std::string finalDest = android::snapshot::getSnapshotDir(id.c_str());
+        LOG(INFO) << "Moving " << tmpSnap << " --> " << finalDest;
+        path_delete_dir(finalDest.c_str());
+        std::rename(tmpSnap.c_str(), finalDest.c_str());
         return Status::OK;
     }
 
