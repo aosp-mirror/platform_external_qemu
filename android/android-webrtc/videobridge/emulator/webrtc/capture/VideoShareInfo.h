@@ -43,7 +43,7 @@ public:
     };
 
     VideoShareInfo(std::string handle, int fps) : mHandle(handle), mFps(fps) {}
-    virtual ~VideoShareInfo() = default;
+    ~VideoShareInfo() override = default;
 
     int32_t Init();
     uint32_t NumberOfDevices() override { return 1; }

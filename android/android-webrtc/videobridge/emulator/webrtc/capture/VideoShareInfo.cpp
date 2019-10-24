@@ -41,7 +41,7 @@ int32_t VideoShareInfo::GetDeviceName(uint32_t deviceNumber,
     snprintf(deviceUniqueIdUTF8, deviceUniqueIdUTF8Length, "%s",
              mHandle.c_str());
     return 0;
-};
+}
 
 int32_t VideoShareInfo::Init() {
     SharedMemory shm(mHandle, sizeof(VideoInfo));
