@@ -94,6 +94,7 @@ static GLESiface  s_glesIface = {
     .blitFromCurrentReadBufferANDROID = NULL,
     .fillGLESUsages = fillGLESUsages,
     .vulkanInteropSupported = vulkanInteropSupported,
+    .getSynciv = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>

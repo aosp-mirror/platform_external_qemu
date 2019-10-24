@@ -110,6 +110,7 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void);
+EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint *value);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -137,6 +138,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglAddLibrarySearchPathANDROID },
         {"eglQueryVulkanInteropSupportANDROID",
                 (__eglMustCastToProperFunctionPointerType)eglQueryVulkanInteropSupportANDROID },
+        {"eglGetSyncAttribKHR",
+                (__eglMustCastToProperFunctionPointerType)eglGetSyncAttribKHR },
 };
 
 static const int s_eglExtensionsSize =
@@ -1542,6 +1545,62 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteSync((GLsync)sync);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(
+    EGLDisplay dpy, EGLSyncKHR sync,
+    EGLint attribute, EGLint *value) {
+    MEM_TRACE("EMUGL");
+
+    if (g_eglInfo->isEgl2Egl()) {
+        switch (attribute) {
+            case EGL_SYNC_TYPE_KHR:
+                *value = EGL_SYNC_FENCE_KHR;
+                break;
+            case EGL_SYNC_CONDITION_KHR:
+                *value = EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR;
+                break;
+            case EGL_SYNC_STATUS_KHR: {
+                *value = EGL_SIGNALED_KHR;
+                break;
+            default:
+                return EGL_FALSE;
+            }
+        }
+        return EGL_TRUE;
+    }
+
+    switch (attribute) {
+        // Guest doesn't care about sync type (handled in guest),
+        // but host side might care
+        case EGL_SYNC_TYPE_KHR:
+            *value = EGL_SYNC_FENCE_KHR;
+            break;
+        case EGL_SYNC_CONDITION_KHR:
+            *value = EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR;
+            break;
+        case EGL_SYNC_STATUS_KHR: {
+            const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+            GLint status = -1;
+            iface->getSynciv((GLsync)sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &status);
+            switch (status) {
+                case GL_UNSIGNALED:
+                    *value = EGL_UNSIGNALED_KHR;
+                    break;
+                case GL_SIGNALED:
+                    *value = EGL_SIGNALED_KHR;
+                    break;
+                default:
+                    // error, return EGL_FALSE
+                    return EGL_FALSE;
+            }
+            break;
+        }
+        default:
+            return EGL_FALSE;
+    }
+
     return EGL_TRUE;
 }
 
