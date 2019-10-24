@@ -14,11 +14,13 @@
 
 #include "android/emulation/control/snapshot/GzipStreambuf.h"
 
-#include <gtest/gtest.h>  // for Test, Message, TestP...
-#include <cstdlib>
-#include <ctime>
-#include <functional>  // for __base
-#include <istream>     // for operator<<, operator>>
+#include <gtest/gtest.h>  // for Test, SuiteApiResolver, TestInfo (ptr only)
+#include <cstdlib>        // for srand, rand
+#include <ctime>          // for time
+#include <istream>        // for stringstream, operator>>, basic_istream
+#include <ostream>        // for operator<<, char_traits, basic_ostream, endl
+#include <string>         // for basic_string, string
+#include <vector>         // for vector
 
 namespace android {
 namespace emulation {
@@ -52,7 +54,7 @@ TEST(Gzip, identity_random) {
     int write_bytes = 1024 * 128;
     std::vector<char> data(write_bytes);
     std::vector<char> decoded(write_bytes);
-    
+
     // Create a checker board of 16 blocks of 16 chars..
     // This should result in some compression..
     const int BLOCK_SIZE = 256;
@@ -69,7 +71,7 @@ TEST(Gzip, identity_random) {
     GzipInputStream gis(ss);
     gis.read(decoded.data(), decoded.size());
     auto rd = gis.gcount();
-    
+
     EXPECT_EQ(rd, write_bytes);
 
     // We expect some deflation from our gzip stream..

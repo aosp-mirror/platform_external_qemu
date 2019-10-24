@@ -1,21 +1,13 @@
 #include "android/emulation/control/GrpcServices.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/emulation/ConfigDirs.h"
+#include "android/base/files/PathUtils.h"               // for PathUtils
+#include "android/emulation/ConfigDirs.h"               // for ConfigDirs
 #include "android/emulation/control/EmulatorService.h"  // for EmulatorContr...
-#include "android/emulation/control/RtcBridge.h"
+#include "android/emulation/control/RtcBridge.h"        // for RtcBridge
 
 #ifdef ANDROID_WEBRTC
-#include "android/emulation/control/WebRtcBridge.h"
+#include "android/emulation/control/WebRtcBridge.h"     // for WebRtcBridge
 #endif
-
-namespace android {
-namespace emulation {
-namespace control {
-class RtcBridge;
-}  // namespace control
-}  // namespace emulation
-}  // namespace android
 
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::GrpcServices;

@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>                                // for shared_ptr, unique_ptr
+#include <memory>                                // for unique_ptr, shared_ptr
+#include <string>                                // for string
 
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials

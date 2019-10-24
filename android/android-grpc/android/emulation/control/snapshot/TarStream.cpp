@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/emulation/control/snapshot/TarStream.h"
-#include <fstream>
-#include <iostream>
-#include <regex>
-#include <sstream>
-#include <unordered_map>
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/utils/file_io.h"
-#include "android/utils/path.h"
+
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for sprintf
+#include <string.h>                        // for memcpy, strncmp, strncpy
+#include <sys/stat.h>                      // for stat, st_mtime
+#include <__string>                        // for char_traits<>::pos_type
+#include <algorithm>                       // for min
+#include <fstream>                         // for basic_istream, getline
+#include <sstream>                         // for stringstream
+#include <regex>                           // for regex_match, match_results
+#include <unordered_map>                   // for unordered_map, unordered_m...
+#include <vector>                          // for vector<>::iterator, vector
+
+#include "android/base/Log.h"              // for LOG, LogMessage
+#include "android/base/files/PathUtils.h"  // for PathUtils
+#include "android/base/system/System.h"    // for System
+#include "android/utils/file_io.h"         // for android_mkdir, android_stat
+#include "android/utils/path.h"            // for path_mkdir_if_needed
 
 
 /* set to 1 for very verbose debugging */

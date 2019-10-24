@@ -16,8 +16,8 @@ import sys
 
 from google.protobuf import empty_pb2
 
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
+import proto.snapshot_service_pb2
+import proto.snapshot_service_pb2_grpc
 from channel_provider import getEmulatorChannel
 
 if len(sys.argv) != 2:
@@ -30,8 +30,8 @@ _EMPTY_ = empty_pb2.Empty()
 channel = getEmulatorChannel()
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
-snaphot = proto.emulator_controller_pb2.Snapshot(snapshot_id=sys.argv[1])
+stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
+snaphot = proto.snapshot_service_pb2.Snapshot(snapshot_id=sys.argv[1])
 it = stub.getSnapshot(snaphot)
 try:
     with open(sys.argv[1] +'.tar.gz', 'wb') as fn:

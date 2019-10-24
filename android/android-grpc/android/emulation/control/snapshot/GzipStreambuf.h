@@ -11,11 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#include <zlib.h>
-#include <istream>
-#include <ostream>
-#include <streambuf>  // for streambuf
+#pragma once
+#include <stddef.h>  // for size_t
+#include <zlib.h>    // for Z_OK, z_stream, Z_DEFAULT_COMPRESSION
+#include <istream>   // for streambuf, istream, ostream, basic_streambuf<>::...
+#include <memory>    // for unique_ptr
 
 namespace android {
 namespace emulation {

@@ -22,6 +22,7 @@
 #include <chrono>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
@@ -43,27 +44,21 @@
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
-#include "android/emulation/control/snapshot/CallbackStreambuf.h"
-#include "android/emulation/control/snapshot/GzipStreambuf.h"
-#include "android/emulation/control/snapshot/TarStream.h"
+#include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
-#include "android/emulation/control/waterfall/SocketController.h"
-#include "android/emulation/control/waterfall/WaterfallForwarder.h"
-#include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
+#include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/opengles.h"
 #include "android/skin/rect.h"
-#include "android/snapshot/PathUtils.h"
-#include "android/snapshot/Snapshot.h"
-#include "android/utils/path.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "grpcpp/server.h"
 #include "grpcpp/server_builder.h"
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
+#include "snapshot-service.grpc.pb.h"
 #include "waterfall.grpc.pb.h"
 
 namespace google {
@@ -71,13 +66,6 @@ namespace protobuf {
 class Empty;
 }  // namespace protobuf
 }  // namespace google
-namespace waterfall {
-class CmdProgress;
-class ForwardMessage;
-class Message;
-class Transfer;
-class VersionMessage;
-}  // namespace waterfall
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -116,71 +104,6 @@ private:
 
     std::unique_ptr<grpc::Server> mServer;
     int mPort;
-};
-
-class WaterfallImpl final : public waterfall::Waterfall::Service {
-public:
-    WaterfallImpl() : mWaterfall(new ControlSocketLibrary()) {}
-
-    Status Forward(ServerContext* context,
-                   ::grpc::ServerReaderWriter<::waterfall::ForwardMessage,
-                                              ::waterfall::ForwardMessage>*
-                           stream) override {
-        return StreamingToStreaming<::waterfall::ForwardMessage>(
-                mWaterfall.get(), stream,
-                [](auto stub, auto ctx) { return stub->Forward(ctx); });
-    }
-
-    Status Echo(
-            ServerContext* context,
-            ::grpc::ServerReaderWriter<::waterfall::Message,
-                                       ::waterfall::Message>* stream) override {
-        return StreamingToStreaming<::waterfall::Message>(
-                mWaterfall.get(), stream,
-                [](auto stub, auto ctx) { return stub->Echo(ctx); });
-    }
-
-    Status Exec(ServerContext* context,
-                ::grpc::ServerReaderWriter<::waterfall::CmdProgress,
-                                           ::waterfall::CmdProgress>* stream)
-            override {
-        return StreamingToStreaming<::waterfall::CmdProgress>(
-                mWaterfall.get(), stream,
-                [](auto stub, auto ctx) { return stub->Exec(ctx); });
-    }
-
-    Status Pull(ServerContext* context,
-                const ::waterfall::Transfer* request,
-                ServerWriter<::waterfall::Transfer>* writer) override {
-        return UnaryToStreaming<::waterfall::Transfer>(
-                mWaterfall.get(), writer, [&request](auto stub, auto ctx) {
-                    return stub->Pull(ctx, *request);
-                });
-    }
-
-    Status Push(ServerContext* context,
-                grpc::ServerReader<::waterfall::Transfer>* reader,
-                ::waterfall::Transfer* reply) override {
-        return StreamingToUnary<::waterfall::Transfer>(
-                mWaterfall.get(), reader, [&reply](auto stub, auto ctx) {
-                    return stub->Push(ctx, reply);
-                });
-    }
-
-    Status Version(ServerContext* context,
-                   const ::google::protobuf::Empty* request,
-                   ::waterfall::VersionMessage* reply) override {
-        ScopedWaterfallStub fwd(mWaterfall.get());
-        if (!fwd.get())
-            return Status(grpc::StatusCode::UNAVAILABLE,
-                          "Unable to reach waterfall");
-
-        ::grpc::ClientContext defaultCtx;
-        return fwd->Version(&defaultCtx, *request, reply);
-    }
-
-private:
-    std::unique_ptr<WaterfallServiceLibrary> mWaterfall;
 };
 
 // Logic and data behind the server's behavior.
@@ -436,98 +359,6 @@ public:
         return Status::OK;
     }
 
-    Status getSnapshot(ServerContext* context,
-                       const Snapshot* request,
-                       ServerWriter<Snapshot>* writer) override {
-        Snapshot result;
-        result.set_success(true);
-
-        for (auto snapshot :
-             android::snapshot::Snapshot::getExistingSnapshots()) {
-            std::string datadir = snapshot.dataDir();
-
-            if (snapshot.name() == request->snapshot_id()) {
-                CallbackStreambufWriter csb(
-                        k128KB, [writer](char* bytes, std::size_t len) {
-                            Snapshot msg;
-                            msg.set_payload(std::string(bytes, len));
-                            return writer->Write(msg);
-                        });
-                GzipOutputStream gzout(&csb);
-                TarWriter tw(snapshot.dataDir(), gzout);
-                result.set_success(tw.addDirectory(".") && tw.close());
-            }
-        }
-        writer->Write(result);
-        return Status::OK;
-    }
-
-    Status putSnapshot(ServerContext* context,
-                       ::grpc::ServerReader<Snapshot>* reader,
-                       Snapshot* reply) override {
-        Snapshot msg;
-        std::string id = Uuid::generate().toString();
-        std::string tmpSnap = android::snapshot::getSnapshotDir(id.c_str());
-
-        reply->set_success(true);
-        auto cb = [reader, &msg, &id](char** new_eback, char** new_gptr,
-                                      char** new_egptr) {
-            // Drop messages without bytes.
-            bool incoming = reader->Read(&msg);
-
-            // First message likely only has snapshot id information and no
-            // bytes.
-            if (msg.snapshot_id().size() > 0) {
-                std::cout << msg.snapshot_id() << std::endl;
-                id = msg.snapshot_id();
-            }
-            while (msg.payload().size() == 0 && incoming) {
-                incoming = reader->Read(&msg);
-            }
-            if (incoming) {
-                *new_eback = (char*)msg.payload().data();
-                *new_gptr = *new_eback;
-                *new_egptr = *new_gptr + msg.payload().size();
-            }
-            return incoming;
-        };
-
-        CallbackStreambufReader csr(cb);
-        GzipInputStream gzin(&csr);
-        TarReader tr(tmpSnap, gzin);
-        auto entry = tr.first();
-        while (entry.valid) {
-            if (!tr.extract(entry)) {
-                reply->set_success(false);
-                reply->set_err("Failed to extract: " + entry.name);
-            }
-            entry = tr.next(entry);
-        }
-        reply->set_snapshot_id(id);
-        std::string finalDest = android::snapshot::getSnapshotDir(id.c_str());
-        LOG(INFO) << "Moving " << tmpSnap << " --> " << finalDest;
-        path_delete_dir(finalDest.c_str());
-        std::rename(tmpSnap.c_str(), finalDest.c_str());
-        return Status::OK;
-    }
-
-    Status listSnapshots(ServerContext* context,
-                         const ::google::protobuf::Empty* request,
-                         SnapshotList* reply) override {
-        for (auto snapshot :
-             android::snapshot::Snapshot::getExistingSnapshots()) {
-            auto protobuf = snapshot.getGeneralInfo();
-
-            if (protobuf && snapshot.checkValid(false)) {
-                auto details = reply->add_snapshots();
-                details->set_snapshot_id(snapshot.name());
-                *details->mutable_details() = *protobuf;
-            }
-        }
-
-        return Status::OK;
-    }
-
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
@@ -603,12 +434,15 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     std::unique_ptr<EmulatorController::Service> controller(
             new EmulatorControllerImpl(mAgents, mBridge));
     std::unique_ptr<waterfall::Waterfall::Service> wfallforwarder(
-            new WaterfallImpl());
+            getWaterfallService());
+    std::unique_ptr<SnapshotService::Service> snapshotService(
+            getSnapshotService());
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
     builder.RegisterService(wfallforwarder.release());
+    builder.RegisterService(snapshotService.release());
 
     // Register logging & metrics interceptor.
     std::vector<std::unique_ptr<

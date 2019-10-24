@@ -14,7 +14,10 @@
 
 #include "android/emulation/control/snapshot/GzipStreambuf.h"
 
-#include <iostream>
+#include <streambuf>  // for basic_streambuf<>::traits_type, basic_streambuf
+
+#include "zconf.h"    // for Bytef
+#include "zlib.h"     // for z_stream, Z_OK, Z_STREAM_END, deflate, deflateEnd
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0

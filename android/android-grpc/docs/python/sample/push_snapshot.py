@@ -16,8 +16,8 @@ import os
 import sys
 
 
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
+import proto.snapshot_service_pb2
+import proto.snapshot_service_pb2_grpc
 from channel_provider import getEmulatorChannel
 
 if len(sys.argv) != 2:
@@ -34,15 +34,15 @@ def read_in_chunks(file_object, chunk_size=(128*1024)):
 
 def push_snapshot(fname):
     snap_id  = os.path.basename(fname).replace('.tar.gz', '')
-    yield proto.emulator_controller_pb2.Snapshot(snapshot_id=snap_id)
+    yield proto.snapshot_service_pb2.Snapshot(snapshot_id=snap_id)
     with open(fname, 'rb') as snap:
         for chunk in read_in_chunks(snap):
-            yield proto.emulator_controller_pb2.Snapshot(payload=chunk)
+            yield proto.snapshot_service_pb2.Snapshot(payload=chunk)
 
 
 channel = getEmulatorChannel()
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
 msg = stub.putSnapshot(push_snapshot(sys.argv[1]))
 print(msg)

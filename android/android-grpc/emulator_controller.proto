@@ -21,7 +21,6 @@ option objc_class_prefix = "AEC";
 package android.emulation.control;
 
 import "google/protobuf/empty.proto";
-import "snapshot.proto";
 
 // An EmulatorController service lets you control the emulator.
 service EmulatorController {
@@ -76,40 +75,6 @@ service EmulatorController {
     // The ice candidates for example will trickle in on this callback,
     // as will the SDP negotation.
     rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
-
-    // Lists all the valid snapshots that are stored locally for the currently
-    // running avd.
-    rpc listSnapshots(google.protobuf.Empty) returns (SnapshotList) {}
-
-    // Gets the snapshot with the given id.
-    rpc getSnapshot(Snapshot) returns (stream Snapshot) {}
-
-    // Stores the given snapshot.
-    rpc putSnapshot(stream Snapshot) returns (Snapshot) {}
-
-    // Starts the given snapshot
-    rpc startSnapshot(Snapshot) returns (google.protobuf.Empty) {}
-}
-
-message Snapshot {
-    // The identifier to the snapshot.
-    string snapshot_id = 1;
-
-    // A stream of bytes. Encoded as a zip file.
-    bytes payload = 2;
-
-    // status fields.
-    bool success = 3;
-    bytes err = 4;
-}
-
-message SnapshotDetails {
-    string snapshot_id = 1;
-    emulator_snapshot.Snapshot details = 2;
-}
-
-message SnapshotList {
-    repeated SnapshotDetails snapshots = 1;
 }
 
 message RtcId {
