@@ -499,6 +499,34 @@ static void internal_glDeleteSync(GLsync to_delete) {
     ctx->dispatcher().glDeleteSync(to_delete);
 }
 
+static void internal_glGetSynciv(GLsync sync, GLenum pname, GLsizei bufsize, GLsizei *length, GLint *values) {
+    GET_CTX_V2();
+    if (!ctx->dispatcher().glGetSynciv) {
+        if (bufsize < sizeof(GLint)) return;
+        switch (pname) {
+            case GL_OBJECT_TYPE:
+                if (length) *length = sizeof(GLint);
+                *values = GL_SYNC_FENCE;
+                break;
+            case GL_SYNC_CONDITION:
+                if (length) *length = sizeof(GLint);
+                *values = GL_SYNC_GPU_COMMANDS_COMPLETE;
+                break;
+            case GL_SYNC_FLAGS:
+                // Not supported
+                break;
+            case GL_SYNC_STATUS:
+                if (length) *length = sizeof(GLint);
+                *values = GL_SIGNALED;
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+    ctx->dispatcher().glGetSynciv(sync, pname, bufsize, length, values);
+}
+
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
     GET_CTX_V2_RET(0);
     gles30usages->set_is_used(true);

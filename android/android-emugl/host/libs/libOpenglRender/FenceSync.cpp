@@ -125,6 +125,16 @@ void FenceSync::waitAsync() {
     s_egl.eglWaitSyncKHR(mDisplay, mSync, 0);
 }
 
+bool FenceSync::isSignaled() {
+    EGLint val;
+    if (EGL_TRUE ==
+            s_egl.eglGetSyncAttribKHR(
+                mDisplay, mSync, EGL_SYNC_STATUS_KHR, &val))
+        return val == EGL_SIGNALED_KHR;
+
+    return true; // if invalid, treat as signaled
+}
+
 void FenceSync::destroy() {
     s_egl.eglDestroySyncKHR(mDisplay, mSync);
 }

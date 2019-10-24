@@ -1015,6 +1015,40 @@ TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
     glDeleteTextures(1, &tex);
 }
 
+// TODO: Enable this test once we have a host-side sync device impl (also, causes compile error currently)
+// TEST_P(CombinedGoldfishOpenglTest, GetSyncAttrib) {
+//     EGLSyncKHR sync = eglCreateSyncKHR(mEGL.display, EGL_SYNC_FENCE_KHR, nullptr);
+//     EXPECT_NE(nullptr, sync);
+// 
+//     EGLint value;
+// 
+//     EXPECT_EQ(
+//         EGL_TRUE,
+//         eglGetSyncAttribKHR(
+//             mEGL.display, sync, EGL_SYNC_STATUS_KHR, &value));
+// 
+//     EXPECT_TRUE(
+//         EGL_SIGNALED_KHR == value ||
+//         EGL_UNSIGNALED_KHR == value
+//     );
+// 
+//     if (EGL_UNSIGNALED_KHR == value) {
+//         printf("%s: Note: Nontrivial case; not signaled in the beginning\n", __func__);
+//     }
+// 
+//     glFinish();
+// 
+//     EXPECT_EQ(
+//         EGL_TRUE,
+//         eglGetSyncAttribKHR(
+//             mEGL.display, sync, EGL_SYNC_STATUS_KHR, &value));
+// 
+//     EXPECT_TRUE(
+//         EGL_SIGNALED_KHR == value);
+// 
+//     eglDestroySyncKHR(mEGL.display, sync);
+// }
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     CombinedGoldfishOpenglTest,

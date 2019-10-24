@@ -158,10 +158,12 @@ static const GLint rendererVersion = 1;
 // "ANDROID_EMU_NATIVE_SYNC": original version
 // "ANDROIDEMU_native_sync_v2": +cleanup of sync objects
 // "ANDROIDEMU_native_sync_v3": EGL_KHR_wait_sync
+// "ANDROIDEMU_native_sync_v4": Correct eglGetSyncAttrib via rcIsSyncSignaled
 // (We need all the different strings to not be prefixes of any other
 // due to how they are checked for in the GL extensions on the guest)
 static constexpr android::base::StringView kAsyncSwapStrV2 = "ANDROID_EMU_native_sync_v2";
 static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native_sync_v3";
+static constexpr android::base::StringView kAsyncSwapStrV4 = "ANDROID_EMU_native_sync_v4";
 
 // DMA version history:
 // "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
@@ -416,9 +418,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     if (asyncSwapEnabled && name == GL_EXTENSIONS) {
         glStr += kAsyncSwapStrV2;
         glStr += " "; // for compatibility with older system images
-        // Only enable EGL_KHR_wait_sync for host gpu.
+        // Only enable EGL_KHR_wait_sync (and above) for host gpu.
         if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
             glStr += kAsyncSwapStrV3;
+            glStr += " ";
+            glStr += kAsyncSwapStrV4;
             glStr += " ";
         }
     }
@@ -1236,6 +1240,12 @@ static void rcReadColorBufferYUV(uint32_t colorBuffer,
     fb->readColorBufferYUV(colorBuffer, x, y, width, height, pixels, pixels_size);
 }
 
+static int rcIsSyncSignaled(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return 1; // assume destroyed => signaled
+    return fenceSync->isSignaled() ? 1 : 0;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1285,4 +1295,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetDisplayPose = rcSetDisplayPose;
     dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
     dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
+    dec->rcIsSyncSignaled = rcIsSyncSignaled;
 }
