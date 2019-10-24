@@ -1236,6 +1236,12 @@ static void rcReadColorBufferYUV(uint32_t colorBuffer,
     fb->readColorBufferYUV(colorBuffer, x, y, width, height, pixels, pixels_size);
 }
 
+static int rcIsSyncSignaled(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return 1; // assume destroyed => signaled
+    return fenceSync->isSignaled() ? 1 : 0;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1285,4 +1291,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetDisplayPose = rcSetDisplayPose;
     dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
     dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
+    dec->rcIsSyncSignaled = rcIsSyncSignaled;
 }
