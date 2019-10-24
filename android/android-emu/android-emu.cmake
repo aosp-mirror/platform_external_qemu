@@ -266,6 +266,7 @@ set(android_emu_dependent_src
     android/qemu-setup.cpp
     android/sensors-port.c
     android/snapshot/SnapshotAPI.cpp
+    android/snapshot/Postmortem.cpp
     android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
     android/videoplayback/VideoplaybackRenderTarget.cpp

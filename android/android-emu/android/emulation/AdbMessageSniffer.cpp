@@ -38,7 +38,9 @@ namespace emulation {
 // 1 MB
 #define MAX_ADB_MESSAGE_PAYLOAD 1048576
 
-AdbMessageSniffer::AdbMessageSniffer(const char* name):mName(name) {
+AdbMessageSniffer::AdbMessageSniffer(const char* name, void* pipe)
+    : mName(name)
+    , mPipe(pipe) {
     memset(&mPacket, 0, sizeof(apacket));
     mBufferVec.resize(MAX_ADB_MESSAGE_PAYLOAD);
     startNewMessage();
@@ -211,7 +213,7 @@ void AdbMessageSniffer::printPayload() {
     uint8_t* data = mPacket.data;
     for (int i=0; i < length; ++i) {
         if (i % 1024 == 0) {
-            printf("%s:", mName);
+            printf("%s(%p):", mName, mPipe);
         }
         int ch = data[i];
         if (isprint(ch)) {
@@ -255,7 +257,7 @@ void AdbMessageSniffer::printMessage() {
     if (msg.command == ADB_OKAY) return;
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
 
-    printf("%s:command: %s ", mName, getCommandName(msg.command));
+    printf("%s(%p):command: %s ", mName, mPipe, getCommandName(msg.command));
     printf("arg0: %d ", msg.arg0);
     printf("arg1: %d ", msg.arg1);
     printf("data length: %d\n", msg.data_length);
