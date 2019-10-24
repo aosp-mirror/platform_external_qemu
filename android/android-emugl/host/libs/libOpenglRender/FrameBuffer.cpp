@@ -36,6 +36,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
+#include "emugl/common/dma_device.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
