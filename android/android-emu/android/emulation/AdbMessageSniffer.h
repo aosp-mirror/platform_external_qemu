@@ -38,13 +38,13 @@ struct amessage {
 struct apacket
 {
     amessage mesg;
-    uint8_t data[1024];
+    uint8_t data[1024 * 1024];
 };
 
-    AdbMessageSniffer(const char* name);
-    ~AdbMessageSniffer();
+AdbMessageSniffer(const char* name, void* pipe);
+~AdbMessageSniffer();
 
-    void read(const AndroidPipeBuffer*, int numBuffers, int count);
+void read(const AndroidPipeBuffer*, int numBuffers, int count);
 private:
     apacket mPacket;
     int mState;
@@ -53,6 +53,7 @@ private:
     uint8_t* mBuffer;
     uint8_t* mBufferP;
     const char* mName;
+    const void* mPipe;
     std::set<unsigned> mDummyShellArg0;
 
     void grow_buffer_if_needed(int count);
