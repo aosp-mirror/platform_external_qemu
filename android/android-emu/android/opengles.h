@@ -117,6 +117,8 @@ extern int  android_gles_fast_pipes;
 
 void android_cleanupProcGLObjects(uint64_t puid);
 
+void* android_getDMAHostAddr(uint64_t guestAddr);
+
 #ifdef __cplusplus
 const emugl::RendererPtr& android_getOpenglesRenderer();
 #endif

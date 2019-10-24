@@ -101,6 +101,7 @@ public:
     void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) final;
+    void* getDMAHostAddr(uint64_t guestAddr) final;
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);

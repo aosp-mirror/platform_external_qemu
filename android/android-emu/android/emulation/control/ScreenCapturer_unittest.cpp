@@ -215,6 +215,7 @@ public:
     void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) {}
+    void* getDMAHostAddr(uint64_t guestAddr) { return nullptr; }
 private:
     bool mHasValidScreenshot = false;
     bool mGuestPostedAFrame = false;
