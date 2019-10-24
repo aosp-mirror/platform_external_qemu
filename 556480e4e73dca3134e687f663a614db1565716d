@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ed89699_1f6c9da5",
+        "filename": "android/android-emu/android/opengles.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-10-24T21:07:19Z",
+      "side": 1,
+      "message": "gQAndroidVmOperations already exists for this purpose.\n\n#include \"android/emulation/control/vm_operations.h\"\n\n    // Get the host address of a guest physical address, if any.\n    void* (*physicalMemoryGetAddr)(uint64_t gpa);",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 120,
+        "endChar": 53
+      },
+      "revId": "556480e4e73dca3134e687f663a614db1565716d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
