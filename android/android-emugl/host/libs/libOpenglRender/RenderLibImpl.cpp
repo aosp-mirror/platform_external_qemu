@@ -139,4 +139,8 @@ OnLastColorBufferRef RenderLibImpl::getOnLastColorBufferRef() {
     return (OnLastColorBufferRef)impl_onLastCbRef;
 }
 
+void* RenderLibImpl::getDMAHostAddr(uint64_t guestPhysAddr) {
+    return g_emugl_dma_get_host_addr(guestPhysAddr);
+}
+
 }  // namespace emugl

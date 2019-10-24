@@ -64,6 +64,8 @@ public:
 
     OnLastColorBufferRef getOnLastColorBufferRef() override;
 
+    virtual void* getDMAHostAddr(uint64_t guestPhysAddr) override;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderLibImpl);
 
