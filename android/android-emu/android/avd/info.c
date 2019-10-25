@@ -1715,7 +1715,10 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
     *pSkinName = NULL;
     *pSkinDir  = NULL;
 
-    if (!i->contentPath) return;
+    if (!i->contentPath) {
+        *pSkinName = ASTRDUP(SKIN_DEFAULT);
+        return;
+    }
 
     /* First, see if the config.ini contains a SKIN_PATH entry that
      * names the full directory path for the skin.
@@ -1824,6 +1827,7 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
         }
 
         /* We didn't find anything ! */
+        skinName = ASTRDUP(SKIN_DEFAULT);
         *pSkinName = skinName;
         return;
 

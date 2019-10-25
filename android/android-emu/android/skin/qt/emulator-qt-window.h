@@ -302,6 +302,8 @@ public:
                                    uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
 
+    static bool sClosed;
+
 public slots:
     void rotateSkin(SkinRotation rot);
     bool switchMultiDisplay(bool enabled,
@@ -401,7 +403,6 @@ public slots:
 private:
     static const android::base::StringView kRemoteDownloadsDir;
     static const android::base::StringView kRemoteDownloadsDirApi10;
-    static bool sMultiDisplaySet;
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
     void showEvent(QShowEvent* event) override;

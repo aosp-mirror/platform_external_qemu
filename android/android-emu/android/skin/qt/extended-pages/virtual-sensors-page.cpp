@@ -541,6 +541,8 @@ void VirtualSensorsPage::updateModelFromSliders(PhysicalInterpolation mode) {
  * Update the UI to reflect the underlying model state.
  */
 void VirtualSensorsPage::updateUIFromModelCurrentState() {
+    if (EmulatorQtWindow::sClosed) return;
+
     if (sSensorsAgent != nullptr) {
         glm::vec3 position;
         sSensorsAgent->getPhysicalParameter(
@@ -598,6 +600,8 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
  * inertial model.
  */
 void VirtualSensorsPage::updateSensorValuesInUI() {
+    if (EmulatorQtWindow::sClosed) return;
+
     updateUIFromModelCurrentState();
 
     if (sSensorsAgent != nullptr) {
