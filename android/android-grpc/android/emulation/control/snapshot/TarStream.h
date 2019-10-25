@@ -11,9 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <cstdint>
-#include <ostream>
-#include <string>
+#pragma once
+#include <sys/types.h>  // for gid_t, mode_t, uid_t
+#include <cstdint>      // for uint64_t, uint8_t
+#include <ostream>      // for istream, ostream
+#include <string>       // for string
 
 namespace android {
 namespace emulation {

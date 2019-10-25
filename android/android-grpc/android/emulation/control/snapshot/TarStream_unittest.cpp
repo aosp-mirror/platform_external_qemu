@@ -13,14 +13,18 @@
 // limitations under the License.
 
 #include "android/emulation/control/snapshot/TarStream.h"
-#include <fstream>
-#include <sstream>
 
-#include <gtest/gtest.h>  // for Test, Message, TestP...
-#include "android/base/files/PathUtils.h"
-#include "android/base/testing/TestSystem.h"
+#include <gtest/gtest.h>                                       // for Assert...
+#include <string.h>                                            // for memcmp
+#include <fstream>                                             // for ostream
 
-#include "android/emulation/control/snapshot/GzipStreambuf.h"
+#include "android/base/Optional.h"                             // for Optional
+#include "android/base/StringView.h"                           // for String...
+#include "android/base/files/PathUtils.h"                      // for pj
+#include "android/base/system/System.h"                        // for System
+#include "android/base/testing/TestSystem.h"                   // for TestSy...
+#include "android/base/testing/TestTempDir.h"                  // for TestTe...
+#include "android/emulation/control/snapshot/GzipStreambuf.h"  // for GzipIn...
 
 using android::base::PathUtils;
 using android::base::pj;
