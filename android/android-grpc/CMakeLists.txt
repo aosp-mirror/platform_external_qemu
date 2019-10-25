@@ -55,6 +55,7 @@ set(android-grpc_unittest_src
 
 android_add_test(android-grpc_unittest)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++ gmock_main)
+android_target_dependency(android-grpc_unittest linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
 
 # Lets distribute the proto file
 install(FILES emulator_controller.proto snapshot-service.proto waterfall.proto ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto DESTINATION lib)

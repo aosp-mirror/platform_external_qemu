@@ -395,6 +395,18 @@ void Snapshot::saveEnabledFeatures() {
     }
 }
 
+base::Optional<Snapshot> Snapshot::getSnapshotById(std::string id) {
+    std::vector<Snapshot> snapshots = getExistingSnapshots();
+    auto snapshot =
+            std::find_if(snapshots.begin(), snapshots.end(),
+                         [&id](const Snapshot& s) { return s.name() == id; });
+    if (snapshot != std::end(snapshots)) {
+        return base::makeOptional<Snapshot>(*snapshot);
+    }
+    return {};
+}
+
+
 bool Snapshot::save() {
     // In saving, we assume the state is different,
     // so we reset the invalid/successful counters.
