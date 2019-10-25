@@ -14,9 +14,9 @@
 
 #include "android/emulation/control/snapshot/TarStream.h"
 
-#include <gtest/gtest.h>                                       // for Assert...
-#include <string.h>                                            // for memcmp
-#include <fstream>                                             // for ostream
+#include <gtest/gtest.h>  // for Assert...
+#include <string.h>       // for memcmp
+#include <fstream>        // for ostream
 
 #include "android/base/Optional.h"                             // for Optional
 #include "android/base/StringView.h"                           // for String...
@@ -77,6 +77,79 @@ protected:
     TestSystem mTestSystem;
     std::string indir;
     std::string outdir;
+};
+
+TEST_F(TarStreamTest, bad_header_no_ustar) {
+    std::stringstream ss;
+    TarWriter tw(mTestSystem.getTempRoot()->path(), ss);
+    EXPECT_TRUE(tw.addDirectoryEntry("in"));
+    EXPECT_TRUE(tw.close());
+
+    // Wrong offset will cause bad headers.
+    ss.ignore(100);
+    TarReader tr(outdir, ss);
+    auto fst = tr.first();
+
+    EXPECT_FALSE(fst.valid);
+    EXPECT_STREQ(tr.error_msg().c_str(),
+                 "Incorrect tar header. Expected ustar format not: ");
+
+    EXPECT_TRUE(tr.fail());
+};
+
+TEST_F(TarStreamTest, bad_header_chksum) {
+    std::stringstream ss;
+    TarWriter tw(mTestSystem.getTempRoot()->path(), ss);
+    EXPECT_TRUE(tw.addDirectoryEntry("in"));
+    EXPECT_TRUE(tw.close());
+
+    // Let's mess up the header..
+    auto hacked = ss.str();
+    hacked[1] = 'B';
+    std::stringstream bad(hacked);
+    TarReader tr(outdir, bad);
+    auto fst = tr.first();
+
+    EXPECT_TRUE(tr.fail());
+    EXPECT_FALSE(fst.valid);
+    // Note header is checksum not constant, so just check for the start msg.
+    EXPECT_NE(tr.error_msg().find("Incorrect tar header."),
+                std::string::npos);
+};
+
+TEST_F(TarStreamTest, incomplete_archive) {
+    std::stringstream ss;
+    TarWriter tw(indir, ss);
+    EXPECT_TRUE(tw.addFileEntry("hello.txt"));
+
+    // Let's remove some bytes from the end.
+    const int sz = TARBLOCK + 5;
+    auto hacked = std::make_unique<char[]>(sz);
+    printf("%d\n", sz);
+    ss.read(hacked.get(), sz);
+    std::stringstream bad;
+    bad.write(hacked.get(), sz);
+    TarReader tr(outdir, bad);
+
+    EXPECT_TRUE(tr.good());
+    auto fst = tr.first();
+
+
+    EXPECT_TRUE(fst.valid);
+    EXPECT_FALSE(tr.extract(fst));
+    EXPECT_FALSE(tr.good());
+    EXPECT_EQ(tr.error_msg(), "Unexpected EOF during extraction of hello.txt at offset 517");
+};
+
+TEST_F(TarStreamTest, handle_unclosed_tar_properly) {
+    std::stringstream ss;
+    TarWriter tw(mTestSystem.getTempRoot()->path(), ss);
+    EXPECT_TRUE(tw.addDirectoryEntry("in"));
+
+    TarReader tr(outdir, ss);
+    auto fst = tr.first();
+
+    EXPECT_TRUE(fst.valid);
 };
 
 TEST_F(TarStreamTest, read_write_dir) {
