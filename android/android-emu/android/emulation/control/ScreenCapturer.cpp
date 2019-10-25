@@ -159,6 +159,7 @@ bool captureScreenshot(
 
     // If the given directory path is actually a filename with a protobuf
     // extension, write a serialized Observation instead.
+    std::string outputFilePath;
     if (str_ends_with(outputDirectoryPath.data(), ".pb")) {
         std::ofstream file(outputDirectoryPath.data(), std::ios_base::binary);
         if (!file) {
@@ -178,16 +179,21 @@ bool captureScreenshot(
         return true;
     }
 
-    // the file name is ~25 characters
-    char fileName[100];
-    int fileNameSize = snprintf(
-            fileName, sizeof(fileName), "Screenshot_%lld.png",
-            (long long int)android::base::System::get()->getUnixTime());
-    assert(fileNameSize < sizeof(fileName));
-    (void)fileNameSize;
+    // Custom filename
+    if (str_ends_with(outputDirectoryPath.data(), ".png")) {
+        outputFilePath = outputDirectoryPath;
+    } else {
+        char fileName[100];
+        // the file name is ~25 characters
+        int fileNameSize = snprintf(
+                fileName, sizeof(fileName), "Screenshot_%lld.png",
+                (long long int)android::base::System::get()->getUnixTime());
+        assert(fileNameSize < sizeof(fileName));
+        (void)fileNameSize;
 
-    std::string outputFilePath =
-            android::base::PathUtils::join(outputDirectoryPath, fileName);
+        outputFilePath =
+                android::base::PathUtils::join(outputDirectoryPath, fileName);
+    }
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;
     }
