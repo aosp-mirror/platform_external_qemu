@@ -1813,7 +1813,6 @@ void EmulatorQtWindow::onScreenConfigChanged() {
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
     mStartupTimer.stop();
     mStartupDialog->hide();
-    mStartupDialog.clear();
     mStartupDone = true;
 
     if (mClosed) {
