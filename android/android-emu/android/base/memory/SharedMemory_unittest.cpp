@@ -41,7 +41,7 @@ TEST(SharedMemory, ShareVisibileWithinSameProc) {
     ASSERT_TRUE(mReader.isOpen());
 
     memcpy(*mWriter, message.c_str(), message.size());
-    std::string read((const char*) *mReader);
+    std::string read(static_cast<const char*>(*mReader));
     ASSERT_TRUE(message == read);
 
     mWriter.close();
@@ -64,7 +64,7 @@ TEST(SharedMemory, CannotOpenTwice) {
     // Second create should fail..
     err = mWriter.create(user_read_only);
     ASSERT_NE(0, err);
-    
+
     // Second open should fail..
     err = mReader.open(SharedMemory::AccessMode::READ_ONLY);
     ASSERT_NE(0, err);
