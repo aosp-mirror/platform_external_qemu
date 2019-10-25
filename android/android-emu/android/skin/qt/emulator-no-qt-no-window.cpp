@@ -257,8 +257,10 @@ void EmulatorNoQtNoWindow::requestClose() {
         android::featurecontrol::isEnabled(android::featurecontrol::FastSnapshotV1);
     if (fastSnapshotV1) {
         // Tell the system that we are in saving; create a file lock.
-        if (!filelock_create(
-                    avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
+        auto snapshotFileLock =
+            avdInfo_getSnapshotLockFilePath(android_avdInfo);
+        if (snapshotFileLock &&
+            !filelock_create(snapshotFileLock)) {
             derror("unable to lock snapshot save on exit!\n");
         }
     }

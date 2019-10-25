@@ -140,6 +140,11 @@ constexpr Qt::WindowFlags EmulatorQtWindow::FRAME_WINDOW_FLAGS_MASK;
 const StringView EmulatorQtWindow::kRemoteDownloadsDirApi10 =
         "/sdcard/download/";
 
+// Place to tell everyone we're exiting
+//
+// Isn't a member of the window object, so no issues with racing to delete
+bool EmulatorQtWindow::sClosed = false;
+
 SkinSurfaceBitmap::SkinSurfaceBitmap(int w, int h) : cachedSize(w, h) {}
 
 SkinSurfaceBitmap::SkinSurfaceBitmap(const char* path) : reader(path) {
@@ -905,6 +910,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
 
     const bool alreadyClosed = mClosed;
     mClosed = true;
+    sClosed = true;
     crashhandler_exitmode(__FUNCTION__);
 
     // Make sure we cancel everything related to startup dialog here, otherwise
@@ -928,8 +934,11 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
                     emuglConfig_current_renderer_supports_snapshot();
             if (fastSnapshotV1) {
                 // Tell the system that we are in saving; create a file lock.
-                if (!filelock_create(
-                            avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
+                auto snapshotLockFilePath =
+                    avdInfo_getSnapshotLockFilePath(android_avdInfo);
+                if (snapshotLockFilePath &&
+                    !filelock_create(
+                        snapshotLockFilePath)) {
                     derror("unable to lock snapshot save on exit!\n");
                 }
             }

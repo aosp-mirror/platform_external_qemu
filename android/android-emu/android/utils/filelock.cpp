@@ -494,6 +494,8 @@ filelock_create( const char*  file) {
 FileLock*
 filelock_create_timeout( const char*  file, int timeout)
 {
+    if (!file) return NULL;
+
     int    file_len = strlen(file);
     int    lock_len = file_len + sizeof(LOCK_NAME);
 #ifdef _WIN32
