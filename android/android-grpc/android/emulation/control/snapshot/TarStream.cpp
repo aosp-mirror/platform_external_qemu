@@ -13,24 +13,22 @@
 // limitations under the License.
 #include "android/emulation/control/snapshot/TarStream.h"
 
-#include <assert.h>                        // for assert
-#include <stdio.h>                         // for sprintf
-#include <string.h>                        // for memcpy, strncmp, strncpy
-#include <sys/stat.h>                      // for stat, st_mtime
-#include <__string>                        // for char_traits<>::pos_type
-#include <algorithm>                       // for min
-#include <fstream>                         // for basic_istream, getline
-#include <sstream>                         // for stringstream
-#include <regex>                           // for regex_match, match_results
-#include <unordered_map>                   // for unordered_map, unordered_m...
-#include <vector>                          // for vector<>::iterator, vector
+#include <assert.h>       // for assert
+#include <stdio.h>        // for sprintf
+#include <string.h>       // for memcpy, strncmp, strncpy
+#include <algorithm>      // for min
+#include <fstream>        // for basic_istream, getline
+#include <regex>          // for regex_match, match_results
+#include <sstream>        // for stringstream
+#include <string>         // for char_traits<>::pos_type
+#include <unordered_map>  // for unordered_map, unordered_m...
+#include <vector>         // for vector<>::iterator, vector
 
 #include "android/base/Log.h"              // for LOG, LogMessage
 #include "android/base/files/PathUtils.h"  // for PathUtils
 #include "android/base/system/System.h"    // for System
 #include "android/utils/file_io.h"         // for android_mkdir, android_stat
 #include "android/utils/path.h"            // for path_mkdir_if_needed
-
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0
@@ -40,7 +38,7 @@
     printf("TarStream: %s:%d| " fmt "\n", __func__, __LINE__, ##__VA_ARGS__)
 #define DD_BUF(fd, buf, len)                            \
     do {                                                \
-        printf("TarStream (%d):", fd);                 \
+        printf("TarStream (%d):", fd);                  \
         for (int x = 0; x < len; x++) {                 \
             if (isprint((int)buf[x]))                   \
                 printf("%c", buf[x]);                   \
@@ -67,7 +65,7 @@ namespace control {
 // zero, the precision of which shall be no less than seventeen bits. When
 // calculating the checksum, the chksum field is treated as if it were all
 // blanks.
-unsigned tar_cksum(void* data) {
+static unsigned tar_cksum(void* data) {
     uint32_t i, cksum = 8 * ' ';
 
     // Mind the gap at the chksum offset!
@@ -76,6 +74,14 @@ unsigned tar_cksum(void* data) {
 
     return cksum;
 };
+
+static bool is_eof(void* data) {
+    for (int i = 0; i < TARBLOCK; i++) {
+        if (((char*)data)[i] != 0)
+            return false;
+    }
+    return true;
+}
 
 // Convert from octal to int.
 static uint64_t OTOI(octalnr* in, uint8_t len) {
@@ -97,19 +103,37 @@ static void itoo(char* str, uint8_t len, unsigned long long val) {
 #define ITOO(x, y) itoo(x, sizeof(x), y)
 #define OTOI(x) OTOI(x, sizeof(x))
 
+bool TarWriter::error(std::string msg) {
+    setstate(std::ios_base::failbit);
+    mErrMsg = msg;
+    DD("msg: %s", msg.c_str());
+    assert(fail());
+    return false;
+}
+
 bool TarWriter::writeTarHeader(std::string name) {
     posix_header header = {0};
     if (name.size() > sizeof(header.name) - 1)
         return false;
     std::string fname = base::PathUtils::join(mCwd, name);
     struct stat sb;
-    int err = android_stat(fname.c_str(), &sb);
+    if (android_stat(fname.c_str(), &sb) != 0) {
+        return error("Unable to stat " + fname);
+    }
+
     memcpy(header.name, name.data(), name.size());
     ITOO(header.mode, sb.st_mode);
     ITOO(header.mtime, sb.st_mtime);
-    ITOO(header.size, sb.st_size);
     ITOO(header.uid, sb.st_uid);
     ITOO(header.gid, sb.st_gid);
+
+    if (System::get()->pathIsDir(fname)) {
+        header.typeflag = TarType::DIRTYPE;
+        ITOO(header.size, 0);
+    } else {
+        header.typeflag = TarType::REGTYPE;
+        ITOO(header.size, sb.st_size);
+    }
     header.typeflag = System::get()->pathIsDir(fname) ? TarType::DIRTYPE
                                                       : TarType::REGTYPE;
     strncpy(header.magic, USTAR, sizeof(header.magic));
@@ -118,14 +142,28 @@ bool TarWriter::writeTarHeader(std::string name) {
     ITOO(header.chksum, tar_cksum(&header));
 
     mDest.write(reinterpret_cast<char*>(&header), sizeof(header));
+    if (mDest.bad()) {
+        return error("Failed to write header for " + name +
+                     ", internal stream error..");
+    }
     return true;
+}
+
+TarWriter::TarWriter(std::string cwd, std::ostream& dest)
+    : mDest(dest), mCwd(cwd) {
+    init(dest.rdbuf());
+    assert(good());
 }
 
 bool TarWriter::addFileEntry(std::string name) {
     std::string fname = base::PathUtils::join(mCwd, name);
-    if (!System::get()->pathIsFile(fname) || !writeTarHeader(name)) {
-        return false;
+    if (!System::get()->pathIsFile(fname)) {
+        return error("Refusing to add: " + fname + ", it is not a file.");
     };
+
+    if (!writeTarHeader(name)) {
+        return false;
+    }
 
     std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
     char buf[TARBLOCK];
@@ -133,21 +171,33 @@ bool TarWriter::addFileEntry(std::string name) {
     do {
         ifs.read(&buf[0], TARBLOCK);
         mDest.write(&buf[0], ifs.gcount());
+        if (mDest.bad()) {
+            return error("Failed to write " + name + " to stream");
+        }
 
         // A tar file conists of chunks of 512 bytes, so we need to
         // add some padding if we didn't write a full block..
         if (ifs.gcount() != 0 && ifs.gcount() < TARBLOCK) {
             int left = TARBLOCK - ifs.gcount();
-            for (int i = 0; i < left; i++)
+            for (int i = 0; i < left; i++) {
                 mDest.write(&zero, sizeof(zero));
+                if (mDest.bad()) {
+                    return error("Failed to write padding for " + name +
+                                 " to stream");
+                }
+            }
         }
     } while (ifs.gcount() > 0);
     return true;
-}
+}  // namespace control
 
 bool TarWriter::addDirectoryEntry(std::string name) {
     std::string fname = base::PathUtils::join(mCwd, name);
-    return System::get()->pathIsDir(fname) && writeTarHeader(name);
+    if (!System::get()->pathIsDir(fname)) {
+        return error("Refusing to add " + fname + " is not a directory.");
+    }
+
+    return writeTarHeader(name);
 }
 
 bool TarWriter::addDirectory(std::string path) {
@@ -168,8 +218,8 @@ bool TarWriter::addDirectory(std::string path) {
 }
 
 bool TarWriter::close() {
-    if (mClosed)
-        return false;
+    if (eof())
+        return true;
     char empty[TARBLOCK] = {0};
 
     // At the end of the archive file there are two 512-byte blocks filled
@@ -178,6 +228,10 @@ bool TarWriter::close() {
     mDest.write(empty, sizeof(empty));
     mDest.write(empty, sizeof(empty));
     mDest.flush();
+    if (mDest.bad()) {
+        return error("Failed to write closing headers to destination");
+    }
+    setstate(std::ios_base::eofbit);
     return true;
 }
 
@@ -190,16 +244,20 @@ static int roundUp(int numToRound, int multiple = TARBLOCK) {
 static PaxMap parsePaxHeader(std::istream& istream, int headerSize) {
     PaxMap paxHeaders;
     std::vector<char> data(headerSize);
-    if (istream.read(data.data(), headerSize)) {
-        static std::regex paxRegex("(\\d+) ([^=]+)=([^=]+)");
-        std::stringstream ss(std::string(data.begin(), data.end()));
-        std::string header;
-        std::smatch m;
-        std::string path;
-        while (std::getline(ss, header, '\n')) {
-            if (std::regex_match(header, m, paxRegex)) {
-                paxHeaders[m[2]] = m[3];
-            }
+    istream.read(data.data(), headerSize);
+    // Errors will be caught later on..
+    if (!istream.good() || istream.gcount() != headerSize) {
+        return paxHeaders;
+    }
+
+    static std::regex paxRegex("(\\d+) ([^=]+)=([^=]+)");
+    std::stringstream ss(std::string(data.begin(), data.end()));
+    std::string header;
+    std::smatch m;
+    std::string path;
+    while (std::getline(ss, header, '\n')) {
+        if (std::regex_match(header, m, paxRegex)) {
+            paxHeaders[m[2]] = m[3];
         }
     }
 
@@ -209,33 +267,84 @@ static PaxMap parsePaxHeader(std::istream& istream, int headerSize) {
     return paxHeaders;
 }
 
+TarReader::TarReader(std::string cwd, std::istream& src, bool has_seek)
+    : mSrc(src), mCwd(cwd), mSeek(has_seek) {
+    init(src.rdbuf());
+    setstate(std::ios_base::goodbit);
+    if (path_mkdir_if_needed(mCwd.c_str(), 0700) != 0) {
+        error("Failed to create: " + mCwd);
+    }
+    assert(good());
+}
+
+bool TarReader::error(std::string msg) {
+    setstate(std::ios_base::failbit);
+    mErrMsg = msg;
+    DD("msg: %s", msg.c_str());
+    assert(fail());
+    return false;
+}
+
+// seekg to the position, if the underlying stream supports it..
+void TarReader::seekg(std::streampos pos) {
+    if (!mSeek)
+        return;
+    auto currOffset = mSrc.tellg();
+    if (currOffset != pos) {
+        mSrc.seekg(pos);
+        if (!mSrc.good()) {
+            error("Failed to seek to " + std::to_string(pos));
+        }
+    }
+}
+
 TarInfo TarReader::next(TarInfo from) {
     posix_header header;
     TarInfo next;
 
     auto nextOffset = from.offset + roundUp(from.size);
-    auto currOffset = mSrc.tellg();
-    if (currOffset != nextOffset) {
-        if (currOffset != -1) {
-            mSrc.seekg(nextOffset);
-            if (mSrc.fail()) {
-                next.error = TAR_STREAM_NO_SEEK;
-                return next;
-            }
-        }
-    }
-    if (!mSrc.read((char*)&header, sizeof(header))) {
-        next.error = TAR_INVALID_HEADER;
-        return next;
-    }
-    if (strncmp(header.magic, USTAR, 5) != 0 ||
-        (tar_cksum(&header) != OTOI(header.chksum))) {
-        next.error = TAR_INVALID_HEADER;
+    seekg(nextOffset);
+    mSrc.read((char*)&header, sizeof(header));
+
+    if (mSrc.good() && mSrc.gcount() != sizeof(header)) {
+        error("Failed to read the next tar header, only read: " +
+              std::to_string(mSrc.gcount()) + " bytes");
         return next;
     }
 
+    // At the end of the archive file there are two 512-byte blocks filled with
+    // binary zeros as an end-of-file marker. A reasonable system should write
+    // such end-of-file marker at the end of an archive, but must not assume
+    // that such a block exists when reading an archive
+    if (mSrc.eof()) {
+        setstate(std::ios_base::eofbit);
+        DD("eof");
+        return next;
+    }
+
+    if (is_eof(&header)) {
+        setstate(std::ios_base::eofbit);
+        DD("eof due to empty header");
+        return next;
+    }
+
+    // Do some sanity checking..
+    if (strncmp(header.magic, USTAR, 5)) {
+        error("Incorrect tar header. Expected ustar format not: " +
+              std::string(header.magic, sizeof(header.magic)));
+        return next;
+    }
+
+    if (tar_cksum(&header) != OTOI(header.chksum)) {
+        error("Incorrect tar header. Invalid checksum: " +
+              std::to_string(OTOI(header.chksum)) +
+              " != " + std::to_string(tar_cksum(&header)));
+        return next;
+    }
+
+    // Guess we are looking good..
     next.size = OTOI(header.size);
-    next.name = std::string(header.name, sizeof(header.name));
+    next.name = std::string(header.name);
 
     next.mode = OTOI(header.mode);
     next.uid = OTOI(header.uid);
@@ -245,16 +354,18 @@ TarInfo TarReader::next(TarInfo from) {
     next.offset = mSrc.tellg();
 
     // Mainly here to appease those who are using a mac to
-    // tar up their things..  (i.e. unittests.)
+    // tar up their things..  (i.e. unittests on mac.)
     if (header.typeflag == XHDTYPE) {
         // So for compatibility reasons these end up as "files"
-        // we don't want that. So let's pull out the header..
+        // we don't want that. So let's pull out the pax header..
         auto pax = parsePaxHeader(mSrc, next.size);
         next = TarReader::next(next);
         if (!next.valid) {
+            error("Failed to extract extended pax header, due to: " + mErrMsg);
             return next;
         }
 
+        // We only use the "path" extension.
         if (pax.count("path")) {
             next.name = pax["path"];
         }
@@ -268,45 +379,51 @@ bool TarReader::extract(TarInfo src) {
         return false;
 
     // Seek if the underlying stream supports it..
-    auto currOffset = mSrc.tellg();
-    if (currOffset != src.offset) {
-        if (currOffset != -1) {
-            mSrc.seekg(src.offset);
-            if (mSrc.fail()) {
-                return false;
-            }
-        }
-    }
-
-    path_mkdir_if_needed(mCwd.c_str(), 0700);
+    seekg(src.offset);
     std::string fname = base::PathUtils::join(mCwd, src.name);
     DD("Size: %lu, name:%s", src.size, fname.c_str());
     if (src.type == DIRTYPE) {
-        return ::android_mkdir(fname.c_str(), src.mode) == 0;
-    } else {
-        std::ofstream ofs(fname, std::ios_base::out | std::ios_base::binary);
-
-        char buf[TARBLOCK];
-        int left = src.size, rd = 0;
-        if (left > 0)
-            // Note, we (technically) can always read a tar block.
-            do {
-                mSrc.read(buf, sizeof(buf));
-                rd = mSrc.gcount();
-                ofs.write(buf, std::min<int>(left, rd));
-                left -= rd;
-                DD("Left: %d, rd: %d", left, rd);
-                if (rd == 0) {
-                    LOG(WARNING) << "Unexpexted eof!";
-                    return false;
-                }
-            } while (left > 0 && rd > 0);
+        if (android_mkdir(fname.c_str(), src.mode) != 0) {
+            return error("Failed to create: " + src.name + " in " + mCwd);
+        };
     }
+
+    int left = src.size, rd = 0;
+
+    // Okay, let's create and extract a regular file..
+    std::ofstream ofs(fname, std::ios_base::out | std::ios_base::binary |
+                                     std::ios_base::trunc);
+
+    // File of 0 length.. we are done!
+    if (left == 0) {
+        return true;
+    }
+
+    char buf[TARBLOCK];
+
+    // Note, we (technically) can always read a tar block.
+    // And it is expected that a file will always end at a
+    // 512 bit boundary.. A file of 10 bytes for example would
+    // be padded by 502 bytes of zeroes.
+    do {
+        mSrc.read(buf, sizeof(buf));
+        rd = mSrc.gcount();
+        if (rd == 0) {
+            return error("Unexpected EOF during extraction of " + src.name +
+                         " at offset " +
+                         std::to_string(src.offset + (src.size - left)));
+        }
+
+        // Make sure we don't write out the padding 0 bytes.
+        ofs.write(buf, std::min<int>(left, rd));
+        left -= rd;
+    } while (left > 0 && rd > 0);
 
     // We currently don't care about the stats.. so we ignore it..
     // TODO(jansene): If you implement this keep in mind that this can
     // can have unexpected side effects for the snapshot api!
-    // as someone could upload an unknown gid for example.
+    // as someone could upload an unknown gid for example, or a gid/ mode
+    // we are not allowed to read, etc, etc..
     // chown(...)
     // utime(...)
     // chmod(...)
