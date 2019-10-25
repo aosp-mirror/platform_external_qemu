@@ -31,6 +31,7 @@ public:
     explicit Snapshot(const char* name, const char* dataDir);
 
     static std::vector<Snapshot> getExistingSnapshots();
+    static base::Optional<Snapshot> getSnapshotById(std::string id);
 
     base::StringView name() const { return mName; }
     base::StringView dataDir() const { return mDataDir; }

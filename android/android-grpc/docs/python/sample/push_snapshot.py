@@ -42,7 +42,10 @@ def push_snapshot(fname):
 
 channel = getEmulatorChannel()
 
-# Create a client
+if not os.path.exists(sys.argv[1]):
+    raise Exception("File " + sys.argv[1] + " does not exist.")
+
+ # Create a client
 stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
 msg = stub.putSnapshot(push_snapshot(sys.argv[1]))
 print(msg)
