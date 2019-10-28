@@ -991,8 +991,8 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
      * started, and if so, lets see if parameters match. */
     if (cc->video_frame != NULL) {
         /* Already started. Match capture parameters. */
-        if (cc->pixel_format != (uint32_t)pix_format ||cc->width != width ||
-            cc->height != height) {
+        if (cc->pixel_format == (uint32_t)pix_format && cc->width == width &&
+            cc->height == height) {
             W("%s: Camera '%s' is already started", __FUNCTION__, cc->device_name);
             return CLIENT_START_RESULT_ALREADY_STARTED;
         } else {
