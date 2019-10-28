@@ -98,7 +98,8 @@ static char* getClassicEmulatorPath(const char* progDir,
 static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    bool force64bitTarget,
-                                   int wantedBitness);
+                                   int wantedBitness,
+                                   bool isHeadless);
 
 static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir);
 
@@ -248,6 +249,7 @@ int main(int argc, char** argv)
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool force32bit = false;
+    bool isHeadless = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
     bool queryVersion = false;
@@ -441,6 +443,7 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-no-window")) {
+            isHeadless = true;
             continue;
         }
 
@@ -748,7 +751,8 @@ int main(int argc, char** argv)
         progDir = candidates[i];
         if (ranchu == RANCHU_ON) {
             emulatorPath = getQemuExecutablePath(
-                    progDir.data(), avdArch, force64bitTarget, wantedBitness);
+                    progDir.data(), avdArch, force64bitTarget,
+                    wantedBitness, isHeadless);
         } else {
             emulatorPath = getClassicEmulatorPath(progDir.data(), avdArch,
                                                   &wantedBitness);
@@ -788,10 +792,10 @@ int main(int argc, char** argv)
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
 
-#ifndef CONFIG_HEADLESS
-    /* Add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(wantedBitness, progDir.data());
-#endif
+    if (!isHeadless) {
+        /* Add <lib>/qt/ to the library search path. */
+        androidQtSetupEnv(wantedBitness, progDir.data());
+    }
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -957,7 +961,8 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
 static char* getQemuExecutablePath(const char* progDir,
                                    const char* avdArch,
                                    bool force64bitTarget,
-                                   int wantedBitness) {
+                                   int wantedBitness,
+                                   bool isHeadless) {
 // The host operating system name.
 #ifdef __linux__
     static const char kHostOs[] = "linux";
@@ -972,17 +977,19 @@ static char* getQemuExecutablePath(const char* progDir,
         APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
     }
 
-#ifdef CONFIG_HEADLESS
-#define QEMU_BINARY_PATTERN "qemu-system-%s-headless%s"
-#else
+#define QEMU_BINARY_PATTERN_HEADLESS "qemu-system-%s-headless%s"
 #define QEMU_BINARY_PATTERN "qemu-system-%s%s"
-#endif
 
     char fullPath[PATH_MAX];
     char* fullPathEnd = fullPath + sizeof(fullPath);
+    const char* qemuStandardPath =
+        "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN;
+    const char* qemuHeadlessPath =
+        "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN_HEADLESS;
+
     char* tail = bufprint(fullPath,
                           fullPathEnd,
-                          "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN,
+                          isHeadless ? qemuHeadlessPath : qemuStandardPath,
                           progDir,
                           kHostOs,
                           hostArch,

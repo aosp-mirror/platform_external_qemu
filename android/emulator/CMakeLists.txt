@@ -20,34 +20,16 @@ target_compile_definitions(emulator
                            "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
                            "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
-set(emulator-headless_src
-    main-emulator.cpp
-    ${WINDOWS_ICON})
-android_add_executable(emulator-headless)
-target_link_libraries(emulator-headless PRIVATE android-emu)
-
-# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though
-# we are not using them..
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  android_target_link_libraries(emulator-headless windows-x86_64 PRIVATE android-mock-vm-operations android-emu)
-endif ()
-
-
-target_compile_definitions(emulator-headless
-                           PRIVATE
-                           -DCONFIG_HEADLESS
-                           "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
-
 # Make sure we have the qemu dependencies available
 add_dependencies(emulator
                  qemu-system-i386
                  qemu-system-x86_64
                  qemu-system-armel
                  qemu-system-aarch64
+                 qemu-system-armel-headless
+                 qemu-system-x86_64-headless
+                 qemu-system-aarch64-headless
                  emulator-crash-service)
-add_dependencies(emulator-headless qemu-system-x86_64-headless qemu-system-aarch64-headless emulator-crash-service)
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
@@ -121,7 +103,6 @@ android_copy_shared_lib(emulator OpenglRender OpenglRender)
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 
 android_install_exe(emulator .)
-android_install_exe(emulator-headless .)
 
 # Install files we need.
 install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
