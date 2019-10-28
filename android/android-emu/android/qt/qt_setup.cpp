@@ -65,7 +65,14 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     // Some systems will not use the right libfreetype.
     // LD_PRELOAD that stuff.
     auto freetypePath = pj(qtLibSubDir, "libfreetype.so.6");
-    system->envSet("LD_PRELOAD", freetypePath);
+    std::string existing = system->envGet("LD_PRELOAD");
+    if (!existing.empty()) {
+        existing = std::string(freetypePath) + " " + existing;
+    } else {
+        existing = std::string(freetypePath);
+    }
+    VERBOSE_PRINT(init, "Setting LD_PRELOAD to %s", existing.c_str());
+    system->envSet("LD_PRELOAD", existing.c_str());
 #endif
 
     return true;
