@@ -29,6 +29,7 @@
 #include <functional>                                // for __base
 #include <tuple>                                     // for tuple
 #include <utility>                                   // for move
+#include <QTimer>
 
 #include "android/skin/qt/ModalOverlay.h"            // for ModalOverlay
 #include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageCe...
