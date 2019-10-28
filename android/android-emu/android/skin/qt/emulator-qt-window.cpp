@@ -84,6 +84,9 @@
 #include <QToolTip>
 #include <QWindow>
 #include <QtCore>
+#include <QDebug>
+#include <QMessageBox>
+#include <QShortcut>
 
 #ifdef _WIN32
 #include <io.h>
@@ -544,6 +547,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      SIGNAL(rangeChanged(int, int)), this,
                      SLOT(slot_scrollRangeChanged(int, int)));
 
+    QShortcut *shortCut = new QShortcut(this);
+    shortCut->setKey(Qt::ALT + Qt::Key_E);
+    QObject::connect(shortCut, SIGNAL(activated()), this, SLOT(close()));
+    mOverlay.setWindowState(mOverlay.windowState() | Qt::WindowFullScreen);
+
+
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
 
@@ -705,6 +714,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                     });
                 }
             });
+    //window()->setWindowState(window()->windowState() | Qt::WindowFullScreen);
+    //mContainer.setWindowState(mContainer.windowState() | Qt::WindowFullScreen);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -2115,6 +2126,9 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 
 void EmulatorQtWindow::doResize(const QSize& size,
                                 bool isKbdShortcut) {
+  if(true) {
+    return;
+  }
     if (mClosed) {
         return;
     }
@@ -2223,7 +2237,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
     setDisplayRegionAndUpdate(x, y, w, h);
-    simulateSetScale(std::max(.2, (double)scale));
+    //simulateSetScale(std::max(.2, (double)scale));
 }
 
 bool EmulatorQtWindow::isFolded() const { return ToolWindow::isFolded(); }

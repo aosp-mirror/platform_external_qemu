@@ -24,7 +24,9 @@
 #endif
 
 #include <QAction>
+#include <QScreen>
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QByteArray>
 #include <QCoreApplication>
 #include <QMenu>
@@ -873,7 +875,20 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
     if (const auto window = EmulatorQtWindow::getInstance()) {
         window->runOnUiThread([agent, window] {
             QSettings settings;
+            window->setWindowState(window->windowState() | Qt::WindowFullScreen);
+            window->containerWindow()->setWindowState(window->containerWindow()->windowState() | Qt::WindowFullScreen);
+            //window->window()->setWindowState(window->window()->windowState() | Qt::WindowFullScreen);
             window->toolWindow()->setClipboardCallbacks(agent);
+            SkinRect monitor;
+          skin_winsys_get_monitor_rect(&monitor);
+          const int width = QApplication::desktop()->width();
+  const int height = QApplication::desktop()->height();
+  printf("monitor size: %d, %d", monitor.size.w, monitor.size.h);
+  printf("application desktop size: %d, %d", width, height);
+
+  window->resizeAndChangeAspectRatio(
+          0, 0, android_hw->hw_lcd_width,
+          android_hw->hw_lcd_height);
 
             const auto disableMouseWheel =
                 settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
