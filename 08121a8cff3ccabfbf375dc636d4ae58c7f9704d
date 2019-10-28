@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "513f6c87_1aa9b1dd",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/TarStream.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-10-28T22:36:21Z",
+      "side": 1,
+      "message": "nit: brackets. sometimes clang-format will mess it up for you.",
+      "range": {
+        "startLine": 398,
+        "startChar": 0,
+        "endLine": 399,
+        "endChar": 20
+      },
+      "revId": "08121a8cff3ccabfbf375dc636d4ae58c7f9704d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fe77958_15e7f0d2",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/TarStream.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-10-28T22:36:21Z",
+      "side": 1,
+      "message": "do you really want to inherit std::ios?",
+      "range": {
+        "startLine": 90,
+        "startChar": 16,
+        "endLine": 90,
+        "endChar": 33
+      },
+      "revId": "08121a8cff3ccabfbf375dc636d4ae58c7f9704d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
