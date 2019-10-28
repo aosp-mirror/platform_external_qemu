@@ -397,7 +397,7 @@ Builder& Builder::withCertAndKey(std::string certfile,
 
     if (!!System::get()->pathExists(privateKeyFile)) {
         LOG(WARNING) << "Cannot find private key file: " << privateKeyFile
-                     << " security will be disabled.";
+                     << " security will be disabled, the emulator might be publicly accessible!";
         return *this;
     }
 
@@ -415,7 +415,6 @@ Builder& Builder::withCertAndKey(std::string certfile,
     mCredentials = grpc::SslServerCredentials(ssl_opts);
 
     // We installed tls, so we are going public with this!
-    mBindAddress = "0.0.0.0";
     return *this;
 }
 

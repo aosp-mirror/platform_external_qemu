@@ -49,7 +49,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     int mPort{5556};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
-    std::string mBindAddress{"127.0.0.1"};
+    std::string mBindAddress{"0.0.0.0"};
 
     RtcBridge* mBridge{nullptr};
 };
