@@ -58,16 +58,7 @@ static char* s_skinPath = NULL;
 static int s_deviceLcdWidth = 0;
 static int s_deviceLcdHeight = 0;
 
-// TODO (wdu) Fix the QT libxcb, then remove the ifdef.
-// After QT upgrades to 5.12.1, X11 doesn't produce the correct key symbol when
-// keyboard layout is set to Non-English. The workaround is to always use
-// keycode forwarding on Linux platform.
-// Bug: 141318682
-#if defined(_WIN32) || defined(__APPLE__)
 int use_keycode_forwarding = 0;
-#else
-int use_keycode_forwarding = 1;
-#endif
 
 bool emulator_initMinimalSkinConfig(
     int lcd_width, int lcd_height,

@@ -345,6 +345,15 @@ elseif(LINUX_X86_64)
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0;
+        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0.0.0;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
         ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)

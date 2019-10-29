@@ -261,7 +261,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         -qt-xcb \
                         -no-use-gold-linker \
                         -platform linux-clang \
-
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
                 ;;
@@ -410,7 +409,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # libraries.
         copy_directory_files \
                 "$(builder_install_prefix)" \
-                "$INSTALL_DIR/$SYSTEM" \
+                "$INSTALL_DIR/$SYSTEM-nowebengine" \
                 bin/moc \
                 bin/rcc \
                 bin/uic \
@@ -426,14 +425,14 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 ;;
             linux*)
                 # Copy over libc++.so, so we can use it during build.
-                cp $(aosp_clang_libcplusplus) "$INSTALL_DIR/$SYSTEM/lib"
-                (cd "$INSTALL_DIR/$SYSTEM/lib" && ln -sf libc++.so libc++.so.1)
+                cp $(aosp_clang_libcplusplus) "$INSTALL_DIR/$SYSTEM-nowebengine/lib"
+                (cd "$INSTALL_DIR/$SYSTEM-nowebengine/lib" && ln -sf libc++.so libc++.so.1)
                 ;;
         esac
 
         build_debug_info \
                 "$(builder_install_prefix)" \
-                "$INSTALL_DIR/$SYSTEM" \
+                "$INSTALL_DIR/$SYSTEM-nowebengine" \
                 $QT_SHARED_LIBS
 
         # Copy headers into common directory and add symlink
@@ -445,13 +444,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 "$INSTALL_DIR"/common/include \
                 "$INSTALL_DIR"/common/include.new
 
-        (cd "$INSTALL_DIR/$SYSTEM" && rm -f include && ln -sf ../common/include include)
+        (cd "$INSTALL_DIR/$SYSTEM-nowebengine" && rm -f include && ln -sf ../common/include include)
 
         # Move qconfig.h into its platform-specific directory now
-        run mkdir -p "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/
+        run mkdir -p "$INSTALL_DIR/$SYSTEM-nowebengine"/include.system/QtCore/
         run mv -f \
             "$INSTALL_DIR"/common/include/QtCore/qconfig.h \
-            "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/ \
+            "$INSTALL_DIR/$SYSTEM-nowebengine"/include.system/QtCore/ \
             || panic "[$SYSTEM] Failed to move the platform-specific config file 'include/QtCore/qconfig.h'"
     ) || panic "[$SYSTEM] Could not build Qt!"
 
