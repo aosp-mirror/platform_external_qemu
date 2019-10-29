@@ -29,7 +29,6 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketWaiter.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
@@ -117,14 +116,13 @@ private:
     bool mAdbVersionCurrent = false;
 };
 
-// static
+// static 
 std::unique_ptr<AdbInterface> AdbInterface::create(Looper* looper) {
     auto res = AdbInterface::Builder().setLooper(looper).build();
     return res;
 }
 
 static AdbInterface* sAdbInterface = nullptr;
-static android::base::AsyncThreadWithLooper* sAdbInterfaceThread = nullptr;
 
 // static
 AdbInterface* AdbInterface::createGlobal(Looper* looper) {
@@ -136,15 +134,6 @@ AdbInterface* AdbInterface::createGlobal(Looper* looper) {
     res.release();
 
     return sAdbInterface;
-}
-
-// static
-AdbInterface* AdbInterface::createGlobalOwnThread() {
-    if (sAdbInterface) return sAdbInterface;
-
-    sAdbInterfaceThread = new android::base::AsyncThreadWithLooper();
-
-    return createGlobal(sAdbInterfaceThread->getLooper());
 }
 
 // static
