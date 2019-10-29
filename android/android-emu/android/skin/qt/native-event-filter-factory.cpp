@@ -97,17 +97,6 @@ public:
             int evType = (ev->response_type & ~0x80);
             if (evType == XCB_KEY_PRESS) {
                 xcb_key_press_event_t* keyEv = (xcb_key_press_event_t*)ev;
-                // Since being upgraded to 5.12.1, the prebuilt QT library
-                // cannot handle numpad keys when number lock is on. To
-                // workaround, we map numpad keys to its corresponding alpha
-                // numerical keys when numlock is on.
-                // TODO (wdu@) Find the root cause in prebuilt QT library.
-                // Bug: 135141621
-                if ((keyEv->state & mNumLockMask) &&
-                    skin_keycode_native_is_keypad(keyEv->detail)) {
-                    keyEv->detail =
-                            skin_keycode_native_map_keypad(keyEv->detail);
-                }
                 if (use_keycode_forwarding) {
                     if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
                         NativeKeyboardEventHandler::KeyEvent inputEv;

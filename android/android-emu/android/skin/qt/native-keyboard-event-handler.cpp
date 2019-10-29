@@ -128,22 +128,11 @@ public:
         if (modifiers & mAltMask) {
             result |= kKeyModLAlt;
         }
-        // TODO (wdu@) Uncomment the next code block after bug has been fixed in
-        // prebuilt QT 5.12.1
 
-        // when keyboard layout is non-English,
-        // AltGr bit mask is always set. This is due to mysterious bug in
-        // prebuilt libXKB.
-        // if (modifiers & mAltGrMask) {
-        //    result |= kKeyModRAlt;
-        //}
+        if (modifiers & mAltGrMask) {
+            result |= kKeyModRAlt;
+        }
 
-        // TODO (wdu@) Remove the next code block after bug has been fixed in
-        // prebuilt QT 5.12.1
-
-        // Since QT upgraded to 5.12.1, on Linux, when host OS keyboard layout
-        // is non English. QKeyEvent doesn't generate correct key symbols. Thus,
-        // we use keycode forwarding even if the feature flag is not turned on.
         // For older system image that doesn't accept CAPS_LOCK, we need to
         // simulate the CAPS_LOCK by using shift when the key is alphabetical.
         // BUG: 141318682
