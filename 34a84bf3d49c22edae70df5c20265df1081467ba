@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "74e60ba4_58a0cedb",
+        "filename": "android-qemu2-glue/emulation/virtio-input-multi-touch.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-10-30T23:17:13Z",
+      "side": 1,
+      "message": "You moved this line from #52 to #54. I don\u0027t think it matters where it exactly defined.",
+      "parentUuid": "00e4ac98_0f8f0a55",
+      "range": {
+        "startLine": 54,
+        "startChar": 7,
+        "endLine": 54,
+        "endChar": 18
+      },
+      "revId": "34a84bf3d49c22edae70df5c20265df1081467ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6705c9db_426578bf",
         "filename": "android-qemu2-glue/emulation/virtio-input-multi-touch.c",
         "patchSetId": 1
