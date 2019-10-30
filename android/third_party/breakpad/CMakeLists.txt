@@ -102,7 +102,7 @@ android_target_compile_options(breakpad_disasm windows PRIVATE -Wno-int-to-void-
 #
 # breakpad_common
 set(breakpad_common_src
-    ${BREAKPAD_SRC}/common/convert_UTF.c
+    ${BREAKPAD_SRC}/common/convert_UTF.cc
     ${BREAKPAD_SRC}/common/long_string_dictionary.cc
     ${BREAKPAD_SRC}/common/md5.cc
     ${BREAKPAD_SRC}/common/module.cc
@@ -316,7 +316,7 @@ set(breakpad_processor_unittests basic_source_line_resolver_unittest cfi_frame_i
     microdump_processor_unittest
     minidump_processor_unittest
     minidump_unittest
-    range_map_shrink_down_unittest
+    range_map_truncate_upper_unittest
     # absl update broke test build
     # stackwalker_address_list_unittest
     # stackwalker_amd64_unittest
