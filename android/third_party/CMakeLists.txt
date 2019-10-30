@@ -54,7 +54,7 @@ add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
 
 # Old windows & linux version will use old breakpad version, until we track down crash detection bugs under linux.
-if(WINDOWS_X86_64 OR LINUX_X86_64)
+if(WINDOWS_X86_64)
   prebuilt(BREAKPAD)
 else()
   add_subdirectory(breakpad)

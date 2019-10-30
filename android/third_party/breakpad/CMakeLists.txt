@@ -13,7 +13,7 @@ if(NOT TARGET gmock_main)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest googletest)
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Configure the compiler for breakpad:
@@ -33,7 +33,7 @@ elseif(LINUX_X86_64)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
 elseif(WINDOWS_MSVC_X86_64)
-  add_c_flag("-Wno-c++11-narrowing")
+  add_c_flag("-Wno-c++17-narrowing")
 else()
   message(FATAL_ERROR "Only darwin, linux or windows using clang msvc are supported, not ${ANDROID_TARGET_TAG}.")
 endif()
@@ -52,7 +52,7 @@ set(ANDROID_BREAKPAD_WINDOWS_DEFS
     -D_CRT_SECURE_NO_DEPRECATE
     -D_CRT_NONSTDC_NO_WARNINGS
     -D_CRT_NONSTDC_NO_DEPRECATE
-    -D_USING_V110_SDK71_
+    -D_USING_V170_SDK71_
     -DNDEBUG
     -DNVALGRIND
     -DOFFICIAL_BUILD
@@ -95,14 +95,14 @@ set(breakpad_disasm_src
     ${BREAKPAD_SRC}/third_party/libdisasm/x86_misc.c
     ${BREAKPAD_SRC}/third_party/libdisasm/x86_operand_list.c)
 android_add_library(breakpad_disasm)
-set_property(TARGET breakpad_disasm PROPERTY CXX_STANDARD 11)
+set_property(TARGET breakpad_disasm PROPERTY CXX_STANDARD 17)
 android_target_compile_definitions(breakpad_disasm windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 
 android_target_compile_options(breakpad_disasm windows PRIVATE -Wno-int-to-void-pointer-cast)
 #
 # breakpad_common
 set(breakpad_common_src
-    ${BREAKPAD_SRC}/common/convert_UTF.c
+    ${BREAKPAD_SRC}/common/convert_UTF.cc
     ${BREAKPAD_SRC}/common/long_string_dictionary.cc
     ${BREAKPAD_SRC}/common/md5.cc
     ${BREAKPAD_SRC}/common/module.cc
@@ -111,13 +111,15 @@ set(breakpad_common_src
     ${BREAKPAD_SRC}/common/test_assembler.cc)
 
 set(breakpad_common_windows_src
-    ${BREAKPAD_SRC}/common/windows/common_windows.gyp
     ${BREAKPAD_SRC}/common/windows/dia_util.cc
     ${BREAKPAD_SRC}/common/windows/guid_string.cc
     ${BREAKPAD_SRC}/common/windows/http_upload.cc
     ${BREAKPAD_SRC}/common/windows/omap.cc
-    ${BREAKPAD_SRC}/common/windows/pdb_source_line_writer.cc # This requires Dbg
-    ${BREAKPAD_SRC}/common/windows/string_utils.cc)
+    ${BREAKPAD_SRC}/common/windows/pdb_source_line_writer.cc
+    ${BREAKPAD_SRC}/common/windows/pe_source_line_writer.cc
+    ${BREAKPAD_SRC}/common/windows/pe_util.cc
+    ${BREAKPAD_SRC}/common/windows/string_utils.cc
+    ${BREAKPAD_SRC}/common/windows/symbol_collector_client.cc)
 
 set(breakpad_common_linux-x86_64_src
     ${BREAKPAD_SRC}/common/path_helper.cc
@@ -178,7 +180,7 @@ set(breakpad_common_darwin-x86_64_src
     ${BREAKPAD_SRC}/common/mac/string_utilities.cc)
 
 android_add_library(breakpad_common)
-set_property(TARGET breakpad_common PROPERTY CXX_STANDARD 11)
+set_property(TARGET breakpad_common PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_common PUBLIC ${BREAKPAD_SRC})
 android_target_include_directories(breakpad_common linux-x86_64 PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
 android_target_compile_definitions(breakpad_common linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -292,7 +294,7 @@ set(breakpad_processor_src
 set(breakpad_processor_linux-x86_64_src ${BREAKPAD_SRC}/processor/minidump.cc)
 
 android_add_library(breakpad_processor)
-set_property(TARGET breakpad_processor PROPERTY CXX_STANDARD 11)
+set_property(TARGET breakpad_processor PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_processor PUBLIC ${BREAKPAD_SRC})
 target_link_libraries(breakpad_processor PRIVATE breakpad_disasm breakpad_common)
 android_target_compile_definitions(breakpad_processor linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -316,7 +318,7 @@ set(breakpad_processor_unittests basic_source_line_resolver_unittest cfi_frame_i
     microdump_processor_unittest
     minidump_processor_unittest
     minidump_unittest
-    range_map_shrink_down_unittest
+    range_map_truncate_upper_unittest
     # absl update broke test build
     # stackwalker_address_list_unittest
     # stackwalker_amd64_unittest
@@ -336,12 +338,12 @@ endforeach()
 
 set(minidump_dump_src ${BREAKPAD_SRC}/processor/minidump_dump.cc)
 android_add_executable(minidump_dump)
-set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 11)
+set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 17)
 target_link_libraries(minidump_dump PRIVATE breakpad_processor)
 
 set(minidump_stackwalk_src ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
 android_add_executable(minidump_stackwalk)
-set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 11)
+set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 17)
 target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor breakpad_common)
 
 #
@@ -353,7 +355,7 @@ set(breakpad_server_linux-x86_64_src ${BREAKPAD_SRC}/client/linux/crash_generati
 set(breakpad_server_darwin-x86_64_src ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_server.cc)
 
 android_add_library(breakpad_server)
-set_property(TARGET breakpad_server PROPERTY CXX_STANDARD 11)
+set_property(TARGET breakpad_server PROPERTY CXX_STANDARD 17)
 android_target_include_directories(breakpad_server linux-x86_64 PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
 android_target_compile_definitions(breakpad_server windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 android_target_compile_definitions(breakpad_server linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -398,7 +400,7 @@ set(breakpad_client_darwin-x86_64_src
     ${BREAKPAD_SRC}/client/mac/handler/protected_memory_allocator.cc)
 
 android_add_library(breakpad_client)
-set_property(TARGET breakpad_client PROPERTY CXX_STANDARD 11)
+set_property(TARGET breakpad_client PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_client PUBLIC ${BREAKPAD_SRC})
 android_target_include_directories(breakpad_client darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
                                    ${BREAKPAD_SRC}/common/mac)
@@ -417,7 +419,7 @@ set(dump_syms_linux-x86_64_src ${BREAKPAD_SRC}/tools/linux/dump_syms/dump_syms.c
 set(dump_syms_darwin-x86_64_src ${BREAKPAD_SRC}/common/mac/dump_syms.cc
     ${BREAKPAD_SRC}/tools/mac/dump_syms/dump_syms_tool.cc)
 android_add_executable(dump_syms)
-set_property(TARGET dump_syms PROPERTY CXX_STANDARD 11)
+set_property(TARGET dump_syms PROPERTY CXX_STANDARD 17)
 target_link_libraries(dump_syms PRIVATE breakpad_common)
 android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids)
 if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
@@ -432,7 +434,7 @@ set(sym_upload_linux-x86_64_src ${BREAKPAD_SRC}/common/linux/http_upload.cc
 set(sym_upload_darwin-x86_64_src ${BREAKPAD_SRC}/tools/mac/symupload/symupload.m)
 set(sym_upload_windows_src ${BREAKPAD_SRC}/tools/windows/symupload/symupload.cc)
 android_add_executable(sym_upload)
-set_property(TARGET sym_upload PROPERTY CXX_STANDARD 20)
+set_property(TARGET sym_upload PROPERTY CXX_STANDARD 17)
 android_target_include_directories(sym_upload darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/common/mac/)
 target_link_libraries(sym_upload PRIVATE breakpad_common)
 # Note, sym_upload.exe will likely only work on the machine you are building it on due to the mincore dependency. the
@@ -447,10 +449,11 @@ android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE -D_UNICO
 if(LINUX_X86_64)
   set(linux_dumper_unittest_helper_src ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_dumper_unittest_helper.cc)
   android_add_executable(linux_dumper_unittest_helper)
-  set_property(TARGET linux_dumper_unittest_helper PROPERTY CXX_STANDARD 11)
+  target_compile_options(linux_dumper_unittest_helper PRIVATE "-Wno-error")
+  set_property(TARGET linux_dumper_unittest_helper PROPERTY CXX_STANDARD 17)
   target_link_libraries(linux_dumper_unittest_helper
                         PRIVATE breakpad_common Threads::Threads "-Wl,-rpath,'${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'"
-                                "-Wl,--build-id=0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+                                "-Wl,--build-id=0x000102030405060708090a0b0c0d0e0f101712131415161718191a1b1c1d1e1f")
 
   set(linux_client_unittests_src
       ${BREAKPAD_SRC}/client/linux/handler/exception_handler_unittest.cc
