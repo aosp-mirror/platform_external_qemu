@@ -371,7 +371,7 @@ void ColorBuffer::readPixelsYUVCached(int x,
     return;
 }
 
-void ColorBuffer::reformat(GLint internalformat) {
+void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     GLint sizedInternalFormat = GL_RGBA8;
@@ -380,6 +380,25 @@ void ColorBuffer::reformat(GLint internalformat) {
     if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp, &sizedInternalFormat, &isBlob)) {
         fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
                 __func__, internalformat);
+    }
+
+    // BUG: 143607546
+    //
+    // During reformatting, sGetFormatParameters can be too
+    // opinionated and override the guest's intended choice for the
+    // pixel type.  If the guest wanted GL_UNSIGNED_SHORT_5_6_5 as
+    // the pixel type, and the incoming internal format is not
+    // explicitly sized, sGetFormatParameters will pick a default of
+    // GL_UNSIGNED BYTE, which goes against guest expectations.
+    //
+    // This happens only on older API levels where gralloc.cpp in
+    // goldfish-opengl communicated HAL_PIXEL_FORMAT_RGB_565 as GL
+    // format GL_RGB, pixel type GL_UNSIGNED_SHORT_5_6_5.  Newer
+    // system images communicate HAL_PIXEL_FORMAT_RGB_565 as GL
+    // format GL_RGB565, which allows sGetFormatParameters to work
+    // correctly.
+    if (pixelType != type) {
+        pixelType = type;
     }
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
@@ -431,7 +450,7 @@ void ColorBuffer::subUpdate(int x,
 
     if (m_needFormatCheck) {
         if (p_type != m_type || p_format != m_format) {
-            reformat((GLint)p_format);
+            reformat((GLint)p_format, p_type);
         }
         m_needFormatCheck = false;
     }

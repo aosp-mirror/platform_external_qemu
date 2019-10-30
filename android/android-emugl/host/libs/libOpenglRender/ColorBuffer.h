@@ -142,7 +142,7 @@ public:
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
     // with the internalformat specified.
-    void reformat(GLint internalformat);
+    void reformat(GLint internalformat, GLenum type);
 
     // Destructor.
     ~ColorBuffer();
