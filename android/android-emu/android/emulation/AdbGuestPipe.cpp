@@ -294,8 +294,10 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            Service* service,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
-    : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
-    mReceivedMesg("HOST==>GUEST"), mSendingMesg("HOST<==GUEST"){
+    : AndroidPipe(mHwPipe, service),
+      mHostAgent(hostAgent),
+      mReceivedMesg("HOST==>GUEST", this),
+      mSendingMesg("HOST<==GUEST", this) {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {
@@ -465,7 +467,11 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common-case, proxy-ing the data from the guest to the host.
-        return onGuestSendData(buffers, numBuffers);
+        int count = onGuestSendData(buffers, numBuffers);
+        if (android_hw->test_monitorAdb > 0) {
+            mSendingMesg.read(buffers, numBuffers, count);
+        }
+        return count;
     } else if (mState == State::WaitingForGuestAcceptCommand ||
                mState == State::WaitingForGuestStartCommand) {
         // Waiting command bytes from the guest.
