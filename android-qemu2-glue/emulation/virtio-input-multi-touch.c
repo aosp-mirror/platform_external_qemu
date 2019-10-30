@@ -49,9 +49,9 @@
     OBJECT_CHECK(VirtIOInputMultiTouchPCI##num, (obj), \
                  TYPE_VIRTIO_INPUT_MULTI_TOUCH_PCI(num))
 
-static VirtIOInput* s_current_virtio_input = NULL;
-
 static VirtIOInput* s_virtio_input_multi_touch[VIRTIO_INPUT_MAX_NUM];
+
+static VirtIOInput* s_current_virtio_input = NULL;
 
 static void translate_mouse_event(int x, int y, int buttons_state) {
     int pressure = multitouch_is_touch_down(buttons_state) ? 0x81 : 0;
@@ -320,7 +320,9 @@ int android_virtio_input_send(int type, int code, int value) {
     if (type != EV_ABS && type != EV_SYN && type != EV_SW) {
         return 0;
     }
-
+    if (!s_current_virtio_input) {
+        s_current_virtio_input = s_virtio_input_multi_touch[0];
+    }
     VirtIOInput* vinput = VIRTIO_INPUT(s_current_virtio_input);
     if (vinput == NULL) {
         return 1;
