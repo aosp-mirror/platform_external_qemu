@@ -60,7 +60,8 @@ def get_system_env():
 
     local_env = os.environ.copy()
     if platform.system() == 'Windows':
-        env_lines = subprocess.check_output(["cmd", "/c", get_visual_studio(), "&&",  "set"]).splitlines()
+        vs = get_visual_studio()
+        env_lines = subprocess.check_output([vs, "&&",  "set"]).splitlines()
         for env_line in env_lines:
             if '=' in env_line:
                 env = env_line.split('=')
