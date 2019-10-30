@@ -77,6 +77,13 @@ class VulkanFuncTable(VulkanWrapperGenerator):
         self.feature = None
 
     def onBegin(self,):
+        cgen = self.cgen
+        cgen.line("static void sOnInvalidDynamicallyCheckedCall(const char* apiname, const char* neededFeature)")
+        cgen.beginBlock()
+        cgen.stmt("ALOGE(\"invalid call to %s: %s not supported\", apiname, neededFeature)")
+        cgen.stmt("abort()")
+        cgen.endBlock()
+        self.module.appendImpl(cgen.swapCode())
         pass
 
     def onBeginFeature(self, featureName):
@@ -89,39 +96,62 @@ class VulkanFuncTable(VulkanWrapperGenerator):
         self.entries.append(api)
         self.entryFeatures.append(self.feature)
 
+        def genEncoderOrResourceTrackerCall(cgen, api, declareResources=True):
+            cgen.stmt("AEMU_SCOPED_TRACE(\"%s\")" % api.name)
+
+            cgen.stmt("auto vkEnc = HostConnection::get()->vkEncoder()")
+
+            if is_cmdbuf_dispatch(api):
+                cgen.stmt("ResourceTracker::get()->syncEncodersForCommandBuffer(commandBuffer, vkEnc)")
+
+            callLhs = None
+            retTypeName = api.getRetTypeExpr()
+            if retTypeName != "void":
+                retVar = api.getRetVarExpr()
+                cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
+                callLhs = retVar
+
+            if name in RESOURCE_TRACKER_ENTRIES:
+                if declareResources:
+                    cgen.stmt("auto resources = ResourceTracker::get()")
+                cgen.funcCall(
+                    callLhs, "resources->" + "on_" + api.name,
+                    ["vkEnc"] + SUCCESS_VAL.get(retTypeName, []) + \
+                    [p.paramName for p in api.parameters])
+            else:
+                cgen.funcCall(
+                    callLhs, "vkEnc->" + api.name, [p.paramName for p in api.parameters])
+
+            if retTypeName != "void":
+                cgen.stmt("return %s" % retVar)
+
+
         api_entry = api.withModifiedName("entry_" + api.name)
 
         cgen.line("static " + self.cgen.makeFuncProto(api_entry))
         cgen.beginBlock()
-
-        cgen.stmt("AEMU_SCOPED_TRACE(\"%s\")" % api.name)
-
-        cgen.stmt("auto vkEnc = HostConnection::get()->vkEncoder()")
-
-        if is_cmdbuf_dispatch(api):
-            cgen.stmt("ResourceTracker::get()->syncEncodersForCommandBuffer(commandBuffer, vkEnc)")
-
-        callLhs = None
-        retTypeName = api.getRetTypeExpr()
-        if retTypeName != "void":
-            retVar = api.getRetVarExpr()
-            cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
-            callLhs = retVar
-
-        if name in RESOURCE_TRACKER_ENTRIES:
-            cgen.stmt("auto resources = ResourceTracker::get()")
-            cgen.funcCall(
-                callLhs, "resources->" + "on_" + api.name,
-                ["vkEnc"] + SUCCESS_VAL.get(retTypeName, []) + \
-                [p.paramName for p in api.parameters])
-        else:
-            cgen.funcCall(
-                callLhs, "vkEnc->" + api.name, [p.paramName for p in api.parameters])
-
-        if retTypeName != "void":
-            cgen.stmt("return %s" % retVar)
-
+        genEncoderOrResourceTrackerCall(cgen, api)
         cgen.endBlock()
+
+        if self.isDeviceDispatch(api) and self.feature != "VK_VERSION_1_0":
+            api_entry_dyn_check = api.withModifiedName("dynCheck_entry_" + api.name)
+            cgen.line("static " + self.cgen.makeFuncProto(api_entry_dyn_check))
+            cgen.beginBlock()
+            if self.feature == "VK_VERSION_1_1":
+                cgen.stmt("auto resources = ResourceTracker::get()")
+                cgen.beginIf("resources->getApiVersionFromDevice(device) < VK_API_VERSION_1_1")
+                cgen.stmt("sOnInvalidDynamicallyCheckedCall(\"%s\", \"%s\")" % (api.name, self.feature))
+                cgen.endIf()
+            elif self.feature != "VK_VERSION_1_0":
+                cgen.stmt("auto resources = ResourceTracker::get()")
+                cgen.beginIf("!resources->hasDeviceExtension(device, \"%s\")" % self.feature)
+                cgen.stmt("sOnInvalidDynamicallyCheckedCall(\"%s\", \"%s\")" % (api.name, self.feature))
+                cgen.endIf()
+            else:
+                print("About to generate a frivolous api!: dynCheck entry: %s" % api.name)
+                raise
+            genEncoderOrResourceTrackerCall(cgen, api, declareResources = False)
+            cgen.endBlock()
 
         self.module.appendImpl(cgen.swapCode())
 
@@ -139,7 +169,7 @@ class VulkanFuncTable(VulkanWrapperGenerator):
             if featureEndif:
                 self.cgen.leftline("#endif")
                 self.cgen.leftline("#ifdef %s" % f)
-            
+
             if featureif:
                 self.cgen.leftline("#ifdef %s" % f)
 
@@ -190,13 +220,19 @@ class VulkanFuncTable(VulkanWrapperGenerator):
             if e.name in EXCLUDED_APIS:
                 self.cgen.stmt("return nullptr")
             elif f == "VK_VERSION_1_1":
-                self.cgen.stmt( \
-                    "return has1_1OrHigher ? %s : nullptr" % \
-                    entryPointExpr)
+                if self.isDeviceDispatch(e):
+                    self.cgen.stmt("return (void*)dynCheck_entry_%s" % e.name)
+                else:
+                    self.cgen.stmt( \
+                        "return has1_1OrHigher ? %s : nullptr" % \
+                        entryPointExpr)
             elif f != "VK_VERSION_1_0":
-                self.cgen.stmt( \
-                    "bool hasExt = resources->hasInstanceExtension(instance, \"%s\")"  % f)
-                self.cgen.stmt("return hasExt ? %s : nullptr" % entryPointExpr)
+                if self.isDeviceDispatch(e):
+                    self.cgen.stmt("return (void*)dynCheck_entry_%s" % e.name)
+                else:
+                    self.cgen.stmt( \
+                        "bool hasExt = resources->hasInstanceExtension(instance, \"%s\")"  % f)
+                    self.cgen.stmt("return hasExt ? %s : nullptr" % entryPointExpr)
             else:
                 self.cgen.stmt("return %s" % entryPointExpr)
             self.cgen.endIf()
@@ -255,3 +291,6 @@ class VulkanFuncTable(VulkanWrapperGenerator):
         self.cgen.endBlock()
 
         self.module.appendImpl(self.cgen.swapCode())
+
+    def isDeviceDispatch(self, api):
+        return len(api.parameters) > 0 and "VkDevice" == api.parameters[0].typeName
