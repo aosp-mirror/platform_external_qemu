@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a2e4951_b4a21c3a",
+        "filename": "android/android-emu/android/jdwp/Jdwp.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-30T22:33:10Z",
+      "side": 1,
+      "message": "Maybe add some documentation around what this does.I\u0027m not sure why we are shifting things around.",
+      "revId": "159369b84a1d8699adf2da81812033347535bb0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bc4fc00_b668770f",
+        "filename": "android/android-emu/android/snapshot/Postmortem.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-30T22:33:10Z",
+      "side": 1,
+      "message": "recvOkay?",
+      "revId": "159369b84a1d8699adf2da81812033347535bb0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8849687_298a1245",
+        "filename": "android/android-emu/android/snapshot/Postmortem.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-30T22:33:10Z",
+      "side": 1,
+      "message": "What do these magic numbers mean?",
+      "revId": "159369b84a1d8699adf2da81812033347535bb0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f81e84e_75678909",
+        "filename": "android/android-emu/android/snapshot/Postmortem.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-30T22:33:10Z",
+      "side": 1,
+      "message": "Can we extract these as enums?",
+      "revId": "159369b84a1d8699adf2da81812033347535bb0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "134e504b_7311030c",
+        "filename": "android/android-emu/android/snapshot/Postmortem.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-10-30T22:33:10Z",
+      "side": 1,
+      "message": "You could use jdwp_command \u003d { .length \u003d11, .id\u003djdwp_id++, .flags\u003d, ...}",
+      "revId": "159369b84a1d8699adf2da81812033347535bb0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
