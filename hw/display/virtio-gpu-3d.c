@@ -402,6 +402,7 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
 void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
                                       struct virtio_gpu_ctrl_command *cmd)
 {
+    fprintf(stderr, "%s: sup\n", __func__);
     VIRTIO_GPU_FILL_CMD(cmd->cmd_hdr);
 
     cmd->waiting = g->renderer_blocked;

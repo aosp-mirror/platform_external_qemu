@@ -2968,7 +2968,11 @@ public:
                 executePreprocessRecursive(0, submit.pCommandBuffers[c]);
             }
         }
-        return vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+        auto res = vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+        if (res != VK_SUCCESS) {
+            fprintf(stderr, "%s: fail\n", __func__);
+        }
+        return res;
     }
 
     VkResult on_vkQueueWaitIdle(

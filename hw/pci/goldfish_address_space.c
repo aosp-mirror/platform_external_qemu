@@ -512,6 +512,8 @@ static uint32_t address_space_run_command(struct address_space_state *state,
         AS_DPRINT("gen handle");
         state->registers.handle =
             qemu_get_address_space_device_control_ops()->gen_handle();
+        fprintf(stderr, "%s: gen handle: %u\n", __func__, 
+        state->registers.handle);
         break;
     case ADDRESS_SPACE_COMMAND_DESTROY_HANDLE:
         AS_DPRINT("destroy handle");

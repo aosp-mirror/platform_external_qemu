@@ -84,6 +84,7 @@ virtio_gpu_t2d_bswap(struct virtio_gpu_transfer_to_host_2d *t2d)
     } while (0)
 #else
 #define VIRGL(_g, _virgl, _simple, ...)                 \
+    fprintf(stderr, "%s:%d virgl exec\n", __func__, __LINE__); \
     do {                                                \
         _simple(__VA_ARGS__);                           \
     } while (0)
@@ -164,8 +165,8 @@ static void update_cursor(VirtIOGPU *g, struct virtio_gpu_update_cursor *cursor)
         s->current_cursor->hot_y = cursor->hot_y;
 
         if (cursor->resource_id > 0) {
-            VIRGL(g, update_cursor_data_virgl, update_cursor_data_simple,
-                  g, s, cursor->resource_id);
+            // VIRGL(g, update_cursor_data_virgl, update_cursor_data_simple,
+                  // g, s, cursor->resource_id);
         }
         dpy_cursor_define(s->con, s->current_cursor);
 
@@ -796,6 +797,7 @@ virtio_gpu_resource_detach_backing(VirtIOGPU *g,
 static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
                                           struct virtio_gpu_ctrl_command *cmd)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     VIRTIO_GPU_FILL_CMD(cmd->cmd_hdr);
     virtio_gpu_ctrl_hdr_bswap(&cmd->cmd_hdr);
 
@@ -890,7 +892,7 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
 
 #ifdef CONFIG_VIRGL
     if (!g->renderer_inited && g->use_virgl_renderer) {
-        virtio_gpu_virgl_init(g);
+        // virtio_gpu_virgl_init(g);
         g->renderer_inited = true;
     }
 #endif
@@ -1166,9 +1168,9 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
 
 static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     VirtIODevice *vdev = VIRTIO_DEVICE(qdev);
     VirtIOGPU *g = VIRTIO_GPU(qdev);
-    bool have_virgl;
     Error *local_err = NULL;
     int i;
 
@@ -1182,15 +1184,10 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
         return;
     }
 
-    g->use_virgl_renderer = false;
-#if !defined(CONFIG_VIRGL) || defined(HOST_WORDS_BIGENDIAN)
-    have_virgl = false;
-#else
-    have_virgl = display_opengl;
-#endif
-    if (!have_virgl) {
-        g->conf.flags &= ~(1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
-    }
+    g->use_virgl_renderer = true;
+        g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
+
+        fprintf(stderr, "%s: Faking virgl\n", __func__);
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
         error_setg(&g->migration_blocker, "virgl is not yet migratable");
@@ -1278,7 +1275,7 @@ static void virtio_gpu_reset(VirtIODevice *vdev)
 
 #ifdef CONFIG_VIRGL
     if (g->use_virgl_renderer) {
-        virtio_gpu_virgl_reset(g);
+        // virtio_gpu_virgl_reset(g);
         g->use_virgl_renderer = 0;
     }
 #endif
