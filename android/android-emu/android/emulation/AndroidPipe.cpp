@@ -34,7 +34,7 @@
 
 #include <assert.h>
 
-#define DEBUG 0
+#define DEBUG 4
 
 #if DEBUG >= 1
 #include <stdio.h>
