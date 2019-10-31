@@ -156,6 +156,10 @@ typedef struct {
 extern void goldfish_pipe_set_service_ops(
         const GoldfishPipeServiceOps* ops);
 
+/* Query the service ops struct from other places. For use with
+ * virtio. */
+extern const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops(void);
+
 /* Function to look up id of hwpipe and vice versa. */
 extern int goldfish_pipe_get_id(GoldfishHwPipe* hw_pipe);
 extern GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id);
