@@ -1745,6 +1745,8 @@ extern "C" int main(int argc, char** argv) {
 #endif
     args.add("-show-cursor");
 
+    args.add("-device");
+    args.add("virtio-gpu-pci");
     initialize_virtio_input_devs(args, hw);
 
     if (opts->tcpdump) {
