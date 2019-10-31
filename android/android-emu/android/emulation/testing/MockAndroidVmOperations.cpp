@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "android/emulation/testing/MockAndroidVmOperations.h"
-#include "android/emulation/hostdevices/HostAddressSpace.h"
 #include "android/base/Log.h"
+#include "android/emulation/hostdevices/HostAddressSpace.h"
 
 using android::HostAddressSpaceDevice;
 
@@ -57,32 +57,43 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
             return android::MockAndroidVmOperations::mock->snapshotRemap(
                     shared, opaque, errConsumer);
         },
+        .snapshotExport = [](const char* snapshot,
+                             const char* dest,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) -> bool {
+            CHECK(android::MockAndroidVmOperations::mock);
+            return android::MockAndroidVmOperations::mock->snapshotExport(
+                    snapshot, dest, opaque, errConsumer);
+        },
         .setSnapshotCallbacks =
                 [](void* opaque, const SnapshotCallbacks* callbacks) {
                     CHECK(android::MockAndroidVmOperations::mock);
                     return android::MockAndroidVmOperations::mock
                             ->setSnapshotCallbacks(opaque, callbacks);
                 },
-        .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {
-            HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa, hva);
-        },
-        .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {
-            HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
-        },
-        .getVmConfiguration = nullptr,       // Not currently mocked.
-        .setFailureReason = nullptr,         // Not currently mocked.
-        .setExiting = nullptr,               // Not currently mocked.
-        .allowRealAudio = nullptr,           // Not currently mocked.
-        .physicalMemoryGetAddr = [](uint64_t gpa) {
-            void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
-            if (!res) return (void*)(uintptr_t)gpa;
-            return res;
-         },
-        .isRealAudioAllowed = nullptr,       // Not currently mocked.
-        .setSkipSnapshotSave =
-            [](bool skip) { sSkipSnapshotSave = skip; },
-        .isSnapshotSaveSkipped =
-            []() -> bool { return sSkipSnapshotSave; },
+        .mapUserBackedRam =
+                [](uint64_t gpa, void* hva, uint64_t size) {
+                    HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa,
+                                                                         hva);
+                },
+        .unmapUserBackedRam =
+                [](uint64_t gpa, uint64_t size) {
+                    HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
+                },
+        .getVmConfiguration = nullptr,  // Not currently mocked.
+        .setFailureReason = nullptr,    // Not currently mocked.
+        .setExiting = nullptr,          // Not currently mocked.
+        .allowRealAudio = nullptr,      // Not currently mocked.
+        .physicalMemoryGetAddr =
+                [](uint64_t gpa) {
+                    void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
+                    if (!res)
+                        return (void*)(uintptr_t)gpa;
+                    return res;
+                },
+        .isRealAudioAllowed = nullptr,  // Not currently mocked.
+        .setSkipSnapshotSave = [](bool skip) { sSkipSnapshotSave = skip; },
+        .isSnapshotSaveSkipped = []() -> bool { return sSkipSnapshotSave; },
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
