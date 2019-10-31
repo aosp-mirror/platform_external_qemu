@@ -283,6 +283,13 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         fprintf(stderr, "goldfish-opengl vm ops: snapshot delete\n");
         return true;
     },
+    .snapshotExport = [](const char* snapshot,
+                             const char* dest,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) -> bool {
+        fprintf(stderr, "goldfish-opengl vm ops: snapshot export image\n");
+        return true;
+    },
     .snapshotRemap = [](bool shared, void* opaque, LineConsumerCallback errConsumer) -> bool {
         fprintf(stderr, "goldfish-opengl vm ops: snapshot remap\n");
         return true;

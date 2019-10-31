@@ -138,6 +138,12 @@ typedef struct QAndroidVmOperations {
                           void* opaque,
                           LineConsumerCallback errConsumer);
 
+    // Export the qcow2s associated with the given snapshot to the given destination.
+    bool (*snapshotExport)(const char* snapshot,
+                           const char* dest,
+                           void* opaque,
+                           LineConsumerCallback errConsumer);
+
     // Sets a set of callback to listen for snapshot operations.
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);

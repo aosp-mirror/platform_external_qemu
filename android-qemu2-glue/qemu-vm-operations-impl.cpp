@@ -14,39 +14,49 @@
 
 #include "android-qemu2-glue/qemu-control-impl.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
-#include "android/emulation/control/callbacks.h"
-#include "android/emulation/control/vm_operations.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
-#include "android/snapshot/common.h"
-#include "android/snapshot/interface.h"
+#include "android/emulation/control/callbacks.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/snapshot/common.h"
+#include "android/snapshot/interface.h"
+#include "android/utils/path.h"
 
 extern "C" {
 #include "qemu/osdep.h"
 
+#include "block/block.h"
 #include "exec/cpu-common.h"
 #include "migration/qemu-file.h"
 #include "qapi/error.h"
 #include "qapi/qapi-commands-misc.h"
+#include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qobject.h"
 #include "qapi/qmp/qstring.h"
-#include "sysemu/hvf.h"
-#include "sysemu/kvm.h"
-#include "sysemu/hax.h"
-#include "sysemu/whpx.h"
-#include "sysemu/gvm.h"
-#include "sysemu/sysemu.h"
-#include "sysemu/cpus.h"
+
 #include "exec/cpu-common.h"
 #include "exec/memory-remap.h"
+#include "sysemu/block-backend.h"
+#include "sysemu/cpus.h"
+#include "sysemu/gvm.h"
+#include "sysemu/hax.h"
+#include "sysemu/hvf.h"
+#include "sysemu/kvm.h"
+#include "sysemu/sysemu.h"
+#include "sysemu/whpx.h"
 }
+
+// Qemu includes can redefine some windows behavior..
+// clang-format off
+#include "android/snapshot/Snapshot.h"
+// clang-format on
 
 #include <string>
 
@@ -54,10 +64,23 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+/* set to 1 for very verbose debugging */
+#define DEBUG 0
+
+#if DEBUG >= 1
+#define DD(fmt, ...) \
+    printf("%s:%s:%d| " fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+#else
+#define DD(...) (void)0
+#endif
+
 using android::base::PathUtils;
+using android::base::pj;
 using android::base::StringAppendFormatWithArgs;
 using android::base::StringFormatWithArgs;
 using android::base::StringView;
+using android::base::System;
+using android::snapshot::Snapshot;
 
 static bool qemu_vm_stop() {
     vm_stop(RUN_STATE_PAUSED);
@@ -142,7 +165,7 @@ private:
 }  // namespace
 
 static android::snapshot::FailureReason sFailureReason =
-    android::snapshot::FailureReason::Empty;
+        android::snapshot::FailureReason::Empty;
 static bool sExiting = false;
 
 static bool qemu_snapshot_list(void* opaque,
@@ -162,12 +185,149 @@ static bool qemu_snapshot_save(const char* name,
 
     int res = qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer));
 
-    if (wasVmRunning &&
-        !sExiting) {
+    if (wasVmRunning && !sExiting) {
         vm_start();
     }
 
     return res == 0;
+}
+
+// TODO(jansene): Remove qemu-img dependency and use direct calls instead.
+// See static int img_rebase(int argc, char **argv) in qemu-img.c
+// |src| should live in the avd dir and must not be an absolute path
+// |baseimg| should  live in the avd dir  and must not be an absolute path
+static bool rebase_on_top_of(std::string src,
+                             std::string baseimg,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) {
+    assert(!qemu_vm_is_running());
+    DD("Rebase %s -> %s", src.c_str(), baseimg.c_str());
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    auto dst_img = pj(android::snapshot::getAvdDir(), baseimg);
+    if (!System::get()->pathExists(dst_img)) {
+        // TODO(jansene): replace with internal functions, vs calling qemu-img.
+        // See qemu-img.c: static int img_create(int argc, char **argv)
+        auto res = android::base::System::get()->runCommandWithResult(
+                {qemu_img, "create", "-f", "qcow2", dst_img, "0"});
+        if (!res) {
+            std::string msg = "Could not create empty qcow2: " + dst_img;
+            errConsumer(opaque, msg.c_str(), msg.size());
+            return false;
+        }
+    }
+
+    // TODO(jansene): replace with internal functions, vs calling qemu-img.
+    // See qemu-img.c: static int img_rebase(int argc, char **argv)
+    auto res = System::get()->runCommandWithResult(
+            {qemu_img, "rebase", "-f", "qcow2", "-b", dst_img, src});
+
+    return res;
+}
+
+// Swaps out the given blockdriver with a new blockdriver
+// backed by the provided qcow2 file.
+// |device| Device to be swapped out
+// |qcow2| The new image we are going to insert.
+static bool qemu_swap_blockdriver(const char* device,
+                                  const char* qcow2,
+                                  void* opaque,
+                                  LineConsumerCallback errConsumer) {
+    assert(!qemu_vm_is_running());
+    bool res = false;
+    BlockBackend* blk = blk_by_name(device);
+    if (blk == nullptr)
+        return res;
+
+    Error* errp = nullptr;
+    BlockDriverState* bs = blk_bs(blk);
+    auto oldflags = bdrv_get_flags(bs);
+
+    // Eject
+    DD("Ejecting %s", device);
+    AioContext* aioCtx = bdrv_get_aio_context(bs);
+    aio_context_acquire(aioCtx);
+    blk_flush(blk);
+    blk_remove_bs(blk);
+    aio_context_release(aioCtx);
+
+    // Inject.
+    DD("Injecting %s", qcow2);
+    auto dict = qdict_new();
+    qdict_put_str(dict, "overlap-check", "none");
+    qdict_put_int(dict, "l2-cache-size", 1048576);
+    qdict_set_default_str(dict, BDRV_OPT_CACHE_DIRECT, "off");
+    qdict_set_default_str(dict, BDRV_OPT_CACHE_NO_FLUSH, "off");
+    qdict_set_default_str(dict, BDRV_OPT_READ_ONLY, "off");
+
+    auto replacement = bdrv_open(qcow2, nullptr, dict, oldflags, &errp);
+    if (replacement) {
+        blk_insert_bs(blk, replacement, &errp);
+        bdrv_unref(replacement);
+    }
+
+    if (errp) {
+        const char* msg = error_get_pretty(errp);
+        errConsumer(opaque, msg, strlen(msg));
+        return false;
+    }
+
+    return true;
+}
+
+static bool import_snapshot(const char* name,
+                            void* opaque,
+                            LineConsumerCallback errConsumer) {
+    assert(!qemu_vm_is_running());
+    auto snapshot = Snapshot::getSnapshotById(name);
+    if (!snapshot || !snapshot->isImported()) {
+        // Ready to roll, this is not an imported snapshot..
+        return true;
+    }
+
+    bool success = true;
+    // TODO(jansene): Generalize this by looking up mounted point in block
+    // backends. The blockbackend will have a file backed matching this.
+    std::unordered_map<std::string, std::string> deviceMap{
+            {"cache.img.qcow2", "cache"},
+            {"encryptionkey.img.qcow2", "encrypt"},
+            {"sdcard.img.qcow2", "sdcard"},
+            {"userdata-qemu.img.qcow2", "userdata"}};
+
+    // Copy and replace the avds from the snapshot directory..
+    auto avd = android::snapshot::getAvdDir();
+    auto datadir = snapshot->dataDir();
+    const std::string qcow2ext = ".qcow2";
+    for (auto qcow2 : android::snapshot::getQcow2Files(datadir)) {
+        DD("Copying %s", qcow2.c_str());
+        auto dest = pj(avd, qcow2) + "_import.qcow2";
+        auto src = pj(datadir, qcow2);
+
+        // We do not symlink as we do not want to modify the existing snapshot.
+        path_delete_file(dest.c_str());
+        if (path_copy_file(dest.c_str(), src.c_str()) != 0) {
+            std::string msg = "Failed to copy " + qcow2 + " to: " + dest +
+                              " due to " + std::to_string(errno);
+            errConsumer(opaque, msg.c_str(), msg.size());
+            success = false;
+        };
+
+        // We assume that the base image does not have the .qcow2 ext.
+        // TODO(jansene): Generalize and retrieve this from the block device.
+        auto baseimg = qcow2.substr(
+                0, std::max<int>(0, qcow2.size() - qcow2ext.size()));
+
+        rebase_on_top_of(dest, baseimg, opaque, errConsumer);
+
+        if (deviceMap.count(qcow2) != 0) {
+            // Now we are going to replace the block driver associated with it.
+            success =
+                    qemu_swap_blockdriver(deviceMap[qcow2].c_str(),
+                                          dest.c_str(), opaque, errConsumer) &&
+                    success;
+        }
+    }
+
+    return success;
 }
 
 static bool qemu_snapshot_load(const char* name,
@@ -179,8 +339,19 @@ static bool qemu_snapshot_load(const char* name,
 
     vm_stop(RUN_STATE_RESTORE_VM);
 
+    // Okay, so it could be that this is an imported snapshot..
+    // An imported snapshot has the qcow2s stored in its own directory.
+    // in that case we need to swap out our current qcow2s, and use them
+    // for a reload.
+
+    // TODO(jansen): We should make it possible to swap back, as swapping in
+    // an imported snapshots invalidates all the existing snapshots, and we
+    // cannot load local snapshots anymore as they live in the swapped out
+    // snapshot.
+    import_snapshot(name, opaque, errConsumer);
+
     int loadVmRes =
-        qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer));
+            qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer));
 
     bool failed = loadVmRes != 0;
 
@@ -190,11 +361,9 @@ static bool qemu_snapshot_load(const char* name,
 
     if (wasVmRunning) {
         if (failed) {
-
             std::string failureStr("Snapshot load failure: ");
 
-            failureStr +=
-                android::snapshot::failureReasonToString(
+            failureStr += android::snapshot::failureReasonToString(
                     sFailureReason, SNAPSHOT_LOAD);
 
             failureStr += "\n";
@@ -203,7 +372,8 @@ static bool qemu_snapshot_load(const char* name,
                 errConsumer(opaque, failureStr.data(), failureStr.length());
             }
 
-            if (sFailureReason < android::snapshot::FailureReason::ValidationErrorLimit) {
+            if (sFailureReason <
+                android::snapshot::FailureReason::ValidationErrorLimit) {
                 // load failed, but it is OK to resume VM
                 vm_start();
             } else {
@@ -232,7 +402,6 @@ static bool qemu_snapshot_delete(const char* name,
 static bool qemu_snapshot_remap(bool shared,
                                 void* opaque,
                                 LineConsumerCallback errConsumer) {
-
     android::RecursiveScopedVmLock vmlock;
 
     // We currently only support remap of the Quickboot snapshot,
@@ -262,13 +431,15 @@ static bool qemu_snapshot_remap(bool shared,
     if (currentRamFileStatus != SNAPSHOT_RAM_FILE_PRIVATE && !shared) {
         vm_stop(RUN_STATE_SAVE_VM);
         android::snapshot::Snapshotter::get().setRemapping(true);
-        qemu_savevm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
+        qemu_savevm("default_boot",
+                    MessageCallback(opaque, nullptr, errConsumer));
         android::snapshot::Snapshotter::get().setRemapping(false);
         ram_blocks_remap_shared(shared);
     } else {
         vm_stop(RUN_STATE_RESTORE_VM);
         ram_blocks_remap_shared(shared);
-        qemu_loadvm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
+        qemu_loadvm("default_boot",
+                    MessageCallback(opaque, nullptr, errConsumer));
     }
 
     android::snapshot::Snapshotter::get().setRamFileShared(shared);
@@ -360,19 +531,22 @@ static const QEMUFileHooks sSaveHooks = {
                 // Register all blocks for saving.
                 qemu_ram_foreach_migrate_block_with_file_info(
                         [](const char* block_name, void* host_addr,
-                           ram_addr_t offset, ram_addr_t length,
-                           uint32_t flags, const char* path,
-                           bool readonly, void* opaque) {
-                            auto relativePath =
-                                PathUtils::relativeTo(android::snapshot::getSnapshotBaseDir(), path);
+                           ram_addr_t offset, ram_addr_t length, uint32_t flags,
+                           const char* path, bool readonly, void* opaque) {
+                            auto relativePath = PathUtils::relativeTo(
+                                    android::snapshot::getSnapshotBaseDir(),
+                                    path);
 
                             SnapshotRamBlock block = {
-                                block_name, (int64_t)offset,
-                                (uint8_t*)host_addr, (int64_t)length,
-                                0 /* page size to fill in later */,
-                                flags,
-                                relativePath,
-                                readonly, false /* init need restore to false */
+                                    block_name,
+                                    (int64_t)offset,
+                                    (uint8_t*)host_addr,
+                                    (int64_t)length,
+                                    0 /* page size to fill in later */,
+                                    flags,
+                                    relativePath,
+                                    readonly,
+                                    false /* init need restore to false */
                             };
 
                             block.pageSize = (int32_t)qemu_ram_pagesize(
@@ -427,9 +601,8 @@ static const QEMUFileHooks sLoadHooks = {
                     qemu_ram_foreach_migrate_block_with_file_info(
                             [](const char* block_name, void* host_addr,
                                ram_addr_t offset, ram_addr_t length,
-                               uint32_t flags, const char* path,
-                               bool readonly, void* opaque) {
-
+                               uint32_t flags, const char* path, bool readonly,
+                               void* opaque) {
                                 auto block =
                                         static_cast<SnapshotRamBlock*>(opaque);
                                 if (strcmp(block->id, block_name) != 0) {
@@ -437,8 +610,9 @@ static const QEMUFileHooks sLoadHooks = {
                                 }
 
                                 // Rebase path as relative to support migration
-                                auto relativePath =
-                                    PathUtils::relativeTo(android::snapshot::getSnapshotBaseDir(), path);
+                                auto relativePath = PathUtils::relativeTo(
+                                        android::snapshot::getSnapshotBaseDir(),
+                                        path);
 
                                 block->startOffset = offset;
                                 block->hostPtr = (uint8_t*)host_addr;
@@ -484,30 +658,32 @@ static void set_snapshot_callbacks(void* opaque,
         });
 
         switch (android::GetCurrentCpuAccelerator()) {
-        case android::CPU_ACCELERATOR_HVF:
-            set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
-            set_memory_mapping_funcs(hvf_map_safe, hvf_unmap_safe,
-                                     hvf_protect_safe, hvf_remap_safe, NULL);
-            break;
-        case android::CPU_ACCELERATOR_HAX:
-            set_address_translation_funcs(hax_hva2gpa, hax_gpa2hva);
-            set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
-                                     hax_gpa_protection_supported);
-            break;
-        case android::CPU_ACCELERATOR_WHPX:
-            set_address_translation_funcs(0, whpx_gpa2hva);
-            // Skip snapshot save on WHPX
-            set_skip_snapshot_save(true);
-            break;
-        case android::CPU_ACCELERATOR_GVM:
-            set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
-            set_memory_mapping_funcs(NULL, NULL, gvm_gpa_protect, NULL, NULL);
-            break;
-        default: // KVM
+            case android::CPU_ACCELERATOR_HVF:
+                set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
+                set_memory_mapping_funcs(hvf_map_safe, hvf_unmap_safe,
+                                         hvf_protect_safe, hvf_remap_safe,
+                                         NULL);
+                break;
+            case android::CPU_ACCELERATOR_HAX:
+                set_address_translation_funcs(hax_hva2gpa, hax_gpa2hva);
+                set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
+                                         hax_gpa_protection_supported);
+                break;
+            case android::CPU_ACCELERATOR_WHPX:
+                set_address_translation_funcs(0, whpx_gpa2hva);
+                // Skip snapshot save on WHPX
+                set_skip_snapshot_save(true);
+                break;
+            case android::CPU_ACCELERATOR_GVM:
+                set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
+                set_memory_mapping_funcs(NULL, NULL, gvm_gpa_protect, NULL,
+                                         NULL);
+                break;
+            default:  // KVM
 #ifdef __linux__
-            set_address_translation_funcs(0, kvm_gpa2hva);
+                set_address_translation_funcs(0, kvm_gpa2hva);
 #endif
-            break;
+                break;
         }
 
         migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
@@ -516,7 +692,9 @@ static void set_snapshot_callbacks(void* opaque,
 
 static void map_user_backed_ram(uint64_t gpa, void* hva, uint64_t size) {
     android::RecursiveScopedVmLock vmlock;
-    qemu_user_backed_ram_map(gpa, hva, size, USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
+    qemu_user_backed_ram_map(
+            gpa, hva, size,
+            USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
 }
 
 static void unmap_user_backed_ram(uint64_t gpa, uint64_t size) {
@@ -543,7 +721,7 @@ static void get_vm_config(VmConfiguration* out) {
 }
 
 static void set_failure_reason(const char* name, int failure_reason) {
-    (void)name; // TODO
+    (void)name;  // TODO
     sFailureReason = (android::snapshot::FailureReason)failure_reason;
 }
 
@@ -583,9 +761,10 @@ static bool vm_pause() {
 }
 
 static bool vm_resume() {
-    Error *err = nullptr;
+    Error* err = nullptr;
     qmp_cont(&err);
-    return err == nullptr;;
+    return err == nullptr;
+    ;
 }
 
 static void* physical_memory_get_addr(uint64_t gpa) {
@@ -596,6 +775,96 @@ static void* physical_memory_get_addr(uint64_t gpa) {
     bool found;
     void* res = gpa2hva_call(gpa, &found);
     return found ? res : nullptr;
+}
+
+static bool flush_all_drives() {
+    bool success = true;
+    BlockBackend* blk = NULL;
+
+    while ((blk = blk_all_next(blk)) != NULL) {
+        AioContext* aio_context = blk_get_aio_context(blk);
+        int ret;
+        aio_context_acquire(aio_context);
+        if (blk_is_inserted(blk)) {
+            ret = blk_flush(blk);
+            if (ret < 0) {
+                success = false;
+                LOG(WARNING) << "Failed to flush: " << blk_name(blk);
+            }
+        }
+        aio_context_release(aio_context);
+    }
+
+    return success;
+}
+
+bool qemu_snapshot_export_qcow(const char* snapshot,
+                               const char* dest,
+                               void* opaque,
+                               LineConsumerCallback errConsumer) {
+    // Exporting works like this:
+    // 1. Pause the emulator, we don't want any writes to happen
+    // 2. Flush all the drives, so we don't have a messed up qcow2 state
+    // 3. Copy all the qcow2 to a temporary
+    // 4. Rebase on top of an empty image, forcing us to pull all relevant
+    //    data from the read only sections of the base image (likely nop)
+    // 5. Move the standalone qcows out of the way..
+    // 6. Wake up the emulator.
+    //
+    // TODO(jansene) Qemu supports live migration, so this should be possible
+    // without pausing the emulator.
+
+    android::RecursiveScopedVmLock vmlock;
+    bool wasVmRunning = runstate_is_running() != 0;
+    bool success = true;
+    vm_stop(RUN_STATE_SAVE_VM);
+
+    // Next we flush all the drives, this guarantees that the qcow2's are in a
+    // consistent state, and we can safely copy them.
+    flush_all_drives();
+
+    // Now we copy over the qcow2 overlays..
+    // TODO(jansene): Iterate over block devices, so we select what we really use.
+    auto qcows =
+            android::snapshot::getQcow2Files(android::snapshot::getAvdDir());
+    for (auto qcow : qcows) {
+        auto overlay = pj(android::snapshot::getAvdDir(), qcow);
+        auto tmp_overlay = pj(android::snapshot::getAvdDir(), "tmp_" + qcow);
+        auto final_overlay = pj(dest, qcow);
+
+        // Copy and rebase on an empty image...
+        if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
+            success = false;
+            std::string err = std::string("Failed to copy ") + overlay +
+                              " to " + tmp_overlay + " due to " +
+                              std::to_string(errno);
+
+            errConsumer(opaque, err.c_str(), err.size());
+        }
+        // TODO(jansene): remove unused snapshots from the temporary overlay.
+        // (i.e. those with a different name/id than snapshot) See qemu-img.c
+        // static int img_snapshot(int argc, char **argv) on how to list &
+        // remove.
+        success = rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
+                                   errConsumer) &&
+                  success;
+
+        // And move it to the export destination..
+        if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
+            std::string err = "Failed to rename " + tmp_overlay + " to " +
+                              final_overlay +
+                              ", errno: " + std::to_string(errno);
+            path_delete_file(tmp_overlay.c_str());
+            errConsumer(opaque, err.c_str(), err.size());
+            success = false;
+        }
+    }
+
+    if (wasVmRunning && !sExiting) {
+        vm_start();
+    }
+
+    return success;
 }
 
 static const QAndroidVmOperations sQAndroidVmOperations = {
@@ -611,6 +880,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotLoad = qemu_snapshot_load,
         .snapshotDelete = qemu_snapshot_delete,
         .snapshotRemap = qemu_snapshot_remap,
+        .snapshotExport = qemu_snapshot_export_qcow,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .mapUserBackedRam = map_user_backed_ram,
         .unmapUserBackedRam = unmap_user_backed_ram,

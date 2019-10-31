@@ -23,7 +23,12 @@ package android.emulation.control;
 import "google/protobuf/empty.proto";
 import "snapshot.proto";
 
-// An EmulatorController service lets you control the emulator.
+// The SnapshotService enables you to list, store, and retrieve snapshots.
+// Currently the snapshot service is very limited, in the sense that you can:
+//
+// 1. Store only one snapshot. All existing snapshots will be deleted.
+// 2. Cannot rename the snapshots.
+// 3. There are no guarantees that you will be able to load the snapshot
 service SnapshotService {
     // Lists all the valid snapshots that are stored locally for the currently
     // running avd.
