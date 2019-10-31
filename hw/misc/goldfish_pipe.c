@@ -201,6 +201,10 @@ void goldfish_pipe_set_service_ops(const GoldfishPipeServiceOps* ops) {
     service_ops = ops ? ops : &s_null_service_ops;
 }
 
+const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops() {
+    return service_ops;
+}
+
 /* from AOSP version include/hw/android/goldfish/device.h
  * FIXME?: needs to use proper qemu abstractions
  */
