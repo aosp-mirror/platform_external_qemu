@@ -1827,7 +1827,6 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
         }
 
         /* We didn't find anything ! */
-        skinName = ASTRDUP(SKIN_DEFAULT);
         *pSkinName = skinName;
         return;
 
