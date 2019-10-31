@@ -78,6 +78,7 @@ typedef struct {
     // and its |host_pipe| value, which can be reset by calling
     // goldfish_pipe_reset().
     GoldfishHostPipe* (*guest_open)(GoldfishHwPipe *hw_pipe);
+    GoldfishHostPipe* (*guest_open_with_flags)(GoldfishHwPipe *hw_pipe, uint32_t flags);
 
     // Close and free a pipe. |host_pipe| must be the result of a previous
     // guest_open() or guest_load() call, or the second parameter to
@@ -155,6 +156,10 @@ typedef struct {
  * an error when |guest_open| or |guest_load| are called. */
 extern void goldfish_pipe_set_service_ops(
         const GoldfishPipeServiceOps* ops);
+
+/* Query the service ops struct from other places. For use with
+ * virtio. */
+extern const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops(void);
 
 /* Function to look up id of hwpipe and vice versa. */
 extern int goldfish_pipe_get_id(GoldfishHwPipe* hw_pipe);

@@ -26,6 +26,7 @@
 
 extern "C" {
 #include "hw/misc/goldfish_pipe.h"
+#include "hw/virtio/virtio-goldfish-pipe.h"
 }  // extern "C"
 
 // Technical note: This file contains the glue code used between the
@@ -56,6 +57,11 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         [](GoldfishHwPipe* hwPipe) -> GoldfishHostPipe* {
             return static_cast<GoldfishHostPipe*>(
                     android_pipe_guest_open(hwPipe));
+        },
+        // guest_open_with_flags()
+        [](GoldfishHwPipe* hwPipe, uint32_t flags) -> GoldfishHostPipe* {
+            return static_cast<GoldfishHostPipe*>(
+                    android_pipe_guest_open_with_flags(hwPipe, flags));
         },
         // guest_close()
         [](GoldfishHostPipe* hostPipe, GoldfishPipeCloseReason reason) {
@@ -218,9 +224,36 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
         }
 };
 
+// android_pipe_hw_funcs but for virtio-gpu
+static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
+        // resetPipe()
+        [](void* hwPipe, void* hostPipe) {
+            virtio_goldfish_pipe_reset(hwPipe, hostPipe);
+        },
+        // closeFromHost()
+        [](void* hwPipe) {
+            fprintf(stderr, "%s: closeFromHost not supported!\n", __func__);
+        },
+        // signalWake()
+        [](void* hwPipe, unsigned flags) {
+            fprintf(stderr, "%s: signalWake not supported!\n", __func__);
+        },
+        // getPipeId()
+        [](void* hwPipe) {
+            fprintf(stderr, "%s: getPipeId not supported!\n", __func__);
+            return 0;
+        },
+        // lookupPipeById()
+        [](int id) -> void* {
+            fprintf(stderr, "%s: lookupPipeById not supported!\n", __func__);
+            return nullptr;
+        }
+};
+
 bool qemu_android_pipe_init(android::VmLock* vmLock) {
     goldfish_pipe_set_service_ops(&goldfish_pipe_service_ops);
     android_pipe_set_hw_funcs(&android_pipe_hw_funcs);
+    android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
     android::AndroidPipe::initThreading(vmLock);
     return true;
 }

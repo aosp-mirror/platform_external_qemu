@@ -227,6 +227,10 @@ public:
                                              unsigned char* pClosed,
                                              char* pForceClose);
 
+    // Flags accessor
+    void setFlags(AndroidPipeFlags flags) { mFlags = flags; }
+    AndroidPipeFlags getFlags() const { return mFlags; }
+
 protected:
     // No default constructor.
     AndroidPipe() = delete;
@@ -238,6 +242,7 @@ protected:
     void* const mHwPipe = nullptr;
     Service* mService = nullptr;
     std::string mArgs;
+    AndroidPipeFlags mFlags = ANDROID_PIPE_DEFAULT;
 };
 
 }  // namespace android
