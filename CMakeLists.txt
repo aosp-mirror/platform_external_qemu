@@ -279,9 +279,7 @@ prebuilt(GLIB2)
 prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
-if(NOT WINDOWS_MSVC_X86_64)
-  prebuilt(VIRGLRENDERER)
-endif()
+prebuilt(VIRGLRENDERER)
 prebuilt(TCMALLOC)
 
 # Make sure the standard set of windows libraries are available as targets
