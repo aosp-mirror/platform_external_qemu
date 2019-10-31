@@ -19,6 +19,7 @@ set(libqemu2-glue_src
     emulation/goldfish_sync.cpp
     emulation/serial_line.cpp
     emulation/VmLock.cpp
+    emulation/virtio-goldfish-pipe.cpp
     emulation/virtio-input-multi-touch.c
     looper-qemu.cpp
     net-android.cpp
@@ -55,6 +56,7 @@ android_target_include_directories(libqemu2-glue
                                    ../include
                                    ../qemu2-auto-generated
                                    ../slirp
+                                   ${VIRGLRENDERER_INCLUDE_DIR}
                                    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 if(GRPC)
   target_link_libraries(libqemu2-glue PRIVATE android-grpc)
@@ -65,6 +67,7 @@ target_link_libraries(libqemu2-glue
                               PIXMAN::PIXMAN
                               emulator-libdtb
                               ssl)
+target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 
 set(libqemu2-glue-vm-operations_src
     ${ANDROID_HW_CONFIG_H}

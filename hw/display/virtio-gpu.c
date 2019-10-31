@@ -17,6 +17,7 @@
 #include "ui/console.h"
 #include "trace.h"
 #include "hw/virtio/virtio.h"
+#include "hw/virtio/virtio-goldfish-pipe.h"
 #include "hw/virtio/virtio-gpu.h"
 #include "hw/virtio/virtio-bus.h"
 #include "migration/blocker.h"
@@ -121,7 +122,7 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     uint32_t width, height;
     uint32_t pixels, *data;
 
-    data = virgl_renderer_get_cursor_data(resource_id, &width, &height);
+    data = g->virgl->virgl_renderer_get_cursor_data(resource_id, &width, &height);
     if (!data) {
         return;
     }
@@ -1182,15 +1183,11 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
         return;
     }
 
-    g->use_virgl_renderer = false;
-#if !defined(CONFIG_VIRGL) || defined(HOST_WORDS_BIGENDIAN)
-    have_virgl = false;
-#else
-    have_virgl = display_opengl;
-#endif
-    if (!have_virgl) {
-        g->conf.flags &= ~(1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
-    }
+    g->use_virgl_renderer = true;
+    g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
+    g->virgl_as_proxy = true;
+    g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
+    g->gpu_3d_cbs = get_goldfish_pipe_virgl_renderer_callbacks();
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
         error_setg(&g->migration_blocker, "virgl is not yet migratable");
@@ -1278,7 +1275,7 @@ static void virtio_gpu_reset(VirtIODevice *vdev)
 
 #ifdef CONFIG_VIRGL
     if (g->use_virgl_renderer) {
-        virtio_gpu_virgl_reset(g);
+        // virtio_gpu_virgl_reset(g);
         g->use_virgl_renderer = 0;
     }
 #endif
