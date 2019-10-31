@@ -28,6 +28,10 @@
 
 #define VIRTIO_ID_GPU 16
 
+#ifdef CONFIG_VIRGL
+#include <virglrenderer.h>
+#endif
+
 struct virtio_gpu_simple_resource {
     uint32_t resource_id;
     uint32_t width;
@@ -126,6 +130,12 @@ typedef struct VirtIOGPU {
     } stats;
 
     Error *migration_blocker;
+
+#ifdef CONFIG_VIRGL
+    bool virgl_as_proxy;
+    struct virgl_renderer_virtio_interface* virgl;
+    struct virgl_renderer_callbacks* gpu_3d_cbs;
+#endif
 } VirtIOGPU;
 
 extern const GraphicHwOps virtio_gpu_ops;

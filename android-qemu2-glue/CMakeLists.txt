@@ -19,6 +19,7 @@ set(libqemu2-glue_src
     emulation/goldfish_sync.cpp
     emulation/serial_line.cpp
     emulation/VmLock.cpp
+    emulation/virtio-goldfish-pipe.cpp
     emulation/virtio-input-multi-touch.c
     looper-qemu.cpp
     net-android.cpp
@@ -65,6 +66,7 @@ target_link_libraries(libqemu2-glue
                               PIXMAN::PIXMAN
                               emulator-libdtb
                               ssl)
+target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 
 set(libqemu2-glue-vm-operations_src
     ${ANDROID_HW_CONFIG_H}
