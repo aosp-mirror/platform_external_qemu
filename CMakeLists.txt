@@ -279,9 +279,7 @@ prebuilt(GLIB2)
 prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
-if(NOT WINDOWS_MSVC_X86_64)
-  prebuilt(VIRGLRENDERER)
-endif()
+prebuilt(VIRGLRENDERER)
 prebuilt(TCMALLOC)
 
 # Make sure the standard set of windows libraries are available as targets
@@ -330,11 +328,9 @@ target_include_directories(
 target_compile_definitions(android-qemu-deps INTERFACE
                            # Enable faster migration code when saving RAM to a snapshot
                            "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION")
-if(NOT WINDOWS_MSVC_X86_64)
-  target_compile_definitions(android-qemu-deps INTERFACE
-                             # Enable VIRGL
-                             "-DCONFIG_VIRGL")
-endif()
+target_compile_definitions(android-qemu-deps INTERFACE
+                           # Enable VIRGL
+                           "-DCONFIG_VIRGL")
 
 target_compile_options(android-qemu-deps
                        INTERFACE "-Werror=implicit-function-declaration" "-Wno-unused-function"
@@ -414,10 +410,7 @@ target_compile_options(
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN zlib)
 
-if(NOT WINDOWS_MSVC_X86_64)
-  # no virglrenderer available for windows_msvc
-  target_link_libraries(android-qemu-deps INTERFACE VIRGL::VIRGL)
-endif()
+target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
 
 # We only support usb on mac/lin
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE USB::USB)
