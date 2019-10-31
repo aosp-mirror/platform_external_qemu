@@ -109,6 +109,10 @@ ANDROID_BEGIN_HEADER
 // only used by the virtual device to call android_pipe_xxx() functions below.
 extern void* android_pipe_guest_open(void* hwpipe);
 
+// Similar to android_pipe_guest_open(), but has a flags parameter that is used
+// to communicate unique transport properties about the pipe.
+extern void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags);
+
 // Close and free an Android pipe. |pipe| must be the result of a previous
 // android_pipe_guest_open() call or the second parameter to
 // android_pipe_reset().
@@ -191,6 +195,10 @@ extern void* android_pipe_lookup_by_id(int id);
 // device, return the old value. This must be called from the virtual device
 // when it is realized / initialized.
 extern const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
+        const AndroidPipeHwFuncs* hw_funcs);
+
+// Similar to android_pipe_set_hw_funcs, but if in virtio mode.
+extern const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
         const AndroidPipeHwFuncs* hw_funcs);
 
 ANDROID_END_HEADER
