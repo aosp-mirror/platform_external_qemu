@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "defc1b1e_98bbba2e",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-11-01T21:59:32Z",
+      "side": 0,
+      "message": "This is no longer needed because we have fixed the QT 5.12.1 bug.",
+      "revId": "69178cd369c8639fe4b8b78c5deedf883e3528bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
