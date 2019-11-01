@@ -407,8 +407,8 @@ AddressSpaceDeviceType AddressSpaceGraphicsContext::getDeviceType() const {
     return AddressSpaceDeviceType::Graphics;
 }
 
-void AddressSpaceGraphicsContext::save(base::Stream* stream) const { }
-bool AddressSpaceGraphicsContext::load(base::Stream* stream) { return true; }
+void AddressSpaceGraphicsContext::save(base::Stream*) const { }
+bool AddressSpaceGraphicsContext::load(base::Stream*) { return true; }
 
 }  // namespace asg
 }  // namespace emulation
