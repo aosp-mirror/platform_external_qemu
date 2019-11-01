@@ -52,6 +52,10 @@ void nsWindowAdopt(void *ns_parent, void *ns_child) {
     [parent addChildWindow:child ordered:NSWindowAbove];
 }
 
+bool isOptionKeyHeld() {
+    return (NSEventModifierFlagOption & [NSEvent modifierFlags]) != 0;
+}
+
 const char* keyboard_host_layout_name_macImpl() {
     TISInputSourceRef inputSource = TISCopyCurrentKeyboardLayoutInputSource();
     NSString* inputSourceID = (NSString*)TISGetInputSourceProperty(
