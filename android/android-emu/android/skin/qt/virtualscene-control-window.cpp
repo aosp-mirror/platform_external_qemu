@@ -209,31 +209,20 @@ void VirtualSceneControlWindow::dockMainWindow() {
 bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
                                                  QtKeyEventSource source) {
     const bool down = event->type() == QEvent::KeyPress;
-
-    // Since QT upgraded to 5.12.1, on Linux, when host OS keyboard layout
-    // is non English. GroupSwitchModifier bit in modifiers is alwys set.
-    // To workaround this bug, we don't check if GroupSwitchModifier is set.
-    // BUG: 142010944
-#ifdef __linux__
-    Qt::KeyboardModifiers modifiers =
-            event->modifiers() & ~Qt::GroupSwitchModifier;
-#else
-    Qt::KeyboardModifiers modifiers = event->modifiers();
-#endif
     // Trigger when the Alt key but no other modifiers is held.
+
     if (event->key() == Qt::Key_Alt &&
         source != QtKeyEventSource::ExtendedWindow) {
-        if (down && !mCaptureMouse && modifiers == Qt::AltModifier) {
+        if (down && !mCaptureMouse && event->modifiers() == Qt::AltModifier) {
             setCaptureMouse(true);
         } else if (!down && mCaptureMouse) {
             setCaptureMouse(false);
         }
-
         return true;
     }
 
     // Look out for other modifier presses and cancel the capture.
-    if (mCaptureMouse && down && modifiers != Qt::AltModifier) {
+    if (mCaptureMouse && down && event->modifiers() != Qt::AltModifier) {
         setCaptureMouse(false);
     }
 
@@ -377,7 +366,15 @@ void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
 
 bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
     if (mCaptureMouse) {
-        if (event->type() == QEvent::MouseMove) {
+        if ((event->type() == QEvent::WindowDeactivate &&
+                       target == parentWidget())
+#ifdef __APPLE__
+            || !isOptionKeyHeld()
+#endif
+        ) {
+            setCaptureMouse(false);
+        }
+        else if (event->type() == QEvent::MouseMove) {
             updateMouselook();
             return true;
         } else if (event->type() == QEvent::Wheel) {
@@ -388,9 +385,6 @@ bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
             if (handleKeyEvent(keyEvent)) {
                 return true;
             }
-        } else if (event->type() == QEvent::WindowDeactivate &&
-                   target == parentWidget()) {
-            setCaptureMouse(false);
         }
     }
 

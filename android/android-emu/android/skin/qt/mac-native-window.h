@@ -19,6 +19,7 @@ void* getNSWindow(void* ns_view);
 void nsWindowHideWindowButtons(void* ns_window);
 int numHeldMouseButtons();
 void nsWindowAdopt(void *parent, void *child);
+bool isOptionKeyHeld();
 const char* keyboard_host_layout_name_macImpl();
 
 ANDROID_END_HEADER
