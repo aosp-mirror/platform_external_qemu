@@ -380,6 +380,7 @@ public:
         return android::base::findOrDefault(m_hints, target, GL_DONT_CARE);
     }
 
+    static GLDispatch     s_glDispatch;
     static GLDispatch& dispatcher(){return s_glDispatch;};
     static EGLiface* eglIface();
     static void initEglIface(EGLiface* iface);
@@ -493,7 +494,6 @@ protected:
 
     bool                  m_needRestoreFromSnapshot = false;
     static emugl::Mutex   s_lock;
-    static GLDispatch     s_glDispatch;
     bool                  m_initialized = false;
     unsigned int          m_activeTexture = 0;
 

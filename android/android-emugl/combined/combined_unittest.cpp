@@ -739,7 +739,7 @@ TEST_P(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     uint32_t drawCount = 0;
-    static constexpr uint32_t kDrawCallLimit = 2000000;
+    static constexpr uint32_t kDrawCallLimit = 200000;
 
     auto cpuTimeStart = System::cpuTime();
 
@@ -790,13 +790,14 @@ TEST_P(CombinedGoldfishOpenglTest, UniformUploadRate) {
     layout (location = 0) in vec2 pos;
     layout (location = 1) in vec3 color;
 
-    uniform mat4 transform;
+    uniform mat3 transform;
+    uniform mat3 transform2;
 
     out vec3 color_varying;
 
     void main() {
-        gl_Position = transform * vec4(pos, 0.0, 1.0);
-        color_varying = (transform * vec4(color, 1.0)).xyz;
+        gl_Position = vec4(transform * transform2 * vec3(pos, 0.0), 1.0);
+        color_varying = transform * transform2 * color;
     }
     )";
     constexpr char fshaderSrc[] = R"(#version 300 es
@@ -864,7 +865,8 @@ TEST_P(CombinedGoldfishOpenglTest, UniformUploadRate) {
     auto cpuTimeStart = System::cpuTime();
 
     while (uploadCount < kUploadLimit) {
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        glUniformMatrix3fv(transformLoc, 1, GL_FALSE, matrix);
         ++uploadCount;
     }
 

@@ -48,13 +48,8 @@
         return;
 
 #define GET_CTX_V2()                                                   \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
-    if (!s_eglIface)                                                   \
-        return;                                                        \
     GLESv2Context* ctx =                                               \
             static_cast<GLESv2Context*>(s_eglIface->getGLESContext()); \
-    if (!ctx)                                                          \
-        return;
 
 #define GET_CTX_RET(failure_ret)                               \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL") \

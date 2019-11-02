@@ -685,8 +685,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
                 // encode packet header if needed.
                 if (nvars == 0) {
-                    fprintf(fp, "\tint tmp = OP_%s;memcpy(ptr, &tmp, 4); ptr += 4;\n",  e->name().c_str());
-                    fprintf(fp, "\tmemcpy(ptr, &totalSize, 4);  ptr += 4;\n\n");
+                    fprintf(fp, "\t*(uint32_t*)ptr = OP_%s; ptr += 4;\n",  e->name().c_str());
+                    fprintf(fp, "\t*(uint32_t*)ptr = totalSize; ptr += 4;\n\n");
                 }
 
                 if (maxvars == 0) {
@@ -970,8 +970,10 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
     // helper macro for debug print
+    // fprintf(fp,
+    //         "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n");
     fprintf(fp,
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n");
+            "#  define DEBUG(...)\n");
 
     fprintf(fp,
 #if DECODER_CHECK_GL_ERRORS
@@ -1055,6 +1057,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
         }
 
         for (int pass = PASS_FIRST; pass < PASS_LAST; pass++) {
+            if (pass == PASS_DebugPrint) continue;
 #if INSTRUMENT_TIMING_HOST
             if (pass == PASS_FunctionCall) {
                 fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts2);\n");

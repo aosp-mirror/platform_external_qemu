@@ -378,7 +378,7 @@ GL_APICALL void  GL_APIENTRY glActiveTexture(GLenum texture){
     GET_CTX_V2();
     SET_ERROR_IF (!GLESv2Validate::textureEnum(texture,ctx->getMaxCombinedTexUnits()),GL_INVALID_ENUM);
     ctx->setActiveTexture(texture);
-    ctx->dispatcher().glActiveTexture(texture);
+    GLEScontext::s_glDispatch.glActiveTexture(texture);
 }
 
 GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
@@ -404,7 +404,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
         pData->attachShader(shader, (ShaderParser*)shaderData, shaderType);
         s_attachShader(ctx, program, shader, (ShaderParser*)shaderData);
-        ctx->dispatcher().glAttachShader(globalProgramName,globalShaderName);
+        GLEScontext::s_glDispatch.glAttachShader(globalProgramName,globalShaderName);
     }
 }
 
@@ -422,7 +422,7 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
 
         ProgramData* pData = (ProgramData*)objData;
 
-        ctx->dispatcher().glBindAttribLocation(
+        GLEScontext::s_glDispatch.glBindAttribLocation(
                 globalProgramName, index,
                 c_str(pData->getTranslatedName(name)));
 
@@ -447,9 +447,9 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
                         ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->dispatcher().glBindBuffer(target, globalBufferName);
+        GLEScontext::s_glDispatch.glBindBuffer(target, globalBufferName);
     } else {
-        ctx->dispatcher().glBindBuffer(target, 0);
+        GLEScontext::s_glDispatch.glBindBuffer(target, 0);
     }
 }
 
@@ -513,9 +513,9 @@ static bool sHasAttachmentWithFormat(const GLESv2Context* ctx,
 
 static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum cap) {
     if (enable)
-        ctx->dispatcher().glEnable(cap);
+        GLEScontext::s_glDispatch.glEnable(cap);
     else
-        ctx->dispatcher().glDisable(cap);
+        GLEScontext::s_glDispatch.glDisable(cap);
 }
 
 // Framebuffer format workarounds:
@@ -572,7 +572,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     bool isDefaultFBO = !framebuffer;
     if (isDefaultFBO) {
        globalFrameBufferName = ctx->getDefaultFBOGlobalName();
-       ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
+       GLEScontext::s_glDispatch.glBindFramebuffer(target, globalFrameBufferName);
        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
@@ -590,7 +590,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             auto fbObj = ctx->getFBOData(framebuffer);
             fbObj->setBoundAtLeastOnce();
         }
-        ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
+        GLEScontext::s_glDispatch.glBindFramebuffer(target,globalFrameBufferName);
         ctx->setFramebufferBinding(target, framebuffer);
     }
 
@@ -622,7 +622,7 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
             if (rboData) rboData->everBound = true;
         }
     }
-    ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
+    GLEScontext::s_glDispatch.glBindRenderbuffer(target,globalRenderBufferName);
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
@@ -663,7 +663,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     }
 
     ctx->setBindedTexture(target,texture);
-    ctx->dispatcher().glBindTexture(target,globalTextureName);
+    GLEScontext::s_glDispatch.glBindTexture(target,globalTextureName);
 
     if (ctx->getMajorVersion() < 3) return;
 
@@ -673,20 +673,20 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
     if (!ctx->isCoreProfile() && !isGles2Gles()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
-        ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
+        GLEScontext::s_glDispatch.glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
     }
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
     GET_CTX();
-    ctx->dispatcher().glBlendColor(red,green,blue,alpha);
+    GLEScontext::s_glDispatch.glBlendColor(red,green,blue,alpha);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendEquation( GLenum mode ){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::blendEquationMode(ctx, mode), GL_INVALID_ENUM);
     ctx->setBlendEquationSeparate(mode, mode);
-    ctx->dispatcher().glBlendEquation(mode);
+    GLEScontext::s_glDispatch.glBlendEquation(mode);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha){
@@ -694,14 +694,14 @@ GL_APICALL void  GL_APIENTRY glBlendEquationSeparate(GLenum modeRGB, GLenum mode
     SET_ERROR_IF(!(GLESv2Validate::blendEquationMode(ctx, modeRGB) &&
                    GLESv2Validate::blendEquationMode(ctx, modeAlpha)), GL_INVALID_ENUM);
     ctx->setBlendEquationSeparate(modeRGB, modeAlpha);
-    ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
+    GLEScontext::s_glDispatch.glBlendEquationSeparate(modeRGB,modeAlpha);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendFunc(GLenum sfactor, GLenum dfactor){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::blendSrc(sfactor) || !GLESv2Validate::blendDst(dfactor),GL_INVALID_ENUM)
     ctx->setBlendFuncSeparate(sfactor, dfactor, sfactor, dfactor);
-    ctx->dispatcher().glBlendFunc(sfactor,dfactor);
+    GLEScontext::s_glDispatch.glBlendFunc(sfactor,dfactor);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha){
@@ -709,7 +709,7 @@ GL_APICALL void  GL_APIENTRY glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, G
     SET_ERROR_IF(
 !(GLESv2Validate::blendSrc(srcRGB) && GLESv2Validate::blendDst(dstRGB) && GLESv2Validate::blendSrc(srcAlpha) && GLESv2Validate::blendDst(dstAlpha)),GL_INVALID_ENUM);
     ctx->setBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
-    ctx->dispatcher().glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    GLEScontext::s_glDispatch.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage){
@@ -718,7 +718,7 @@ GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const 
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLESv2Validate::bufferUsage(ctx, usage), GL_INVALID_ENUM);
     ctx->setBufferData(target,size,data,usage);
-    ctx->dispatcher().glBufferData(target, size, data, usage);
+    GLEScontext::s_glDispatch.glBufferData(target, size, data, usage);
 }
 
 GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data){
@@ -726,7 +726,7 @@ GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLs
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
-    ctx->dispatcher().glBufferSubData(target, offset, size, data);
+    GLEScontext::s_glDispatch.glBufferSubData(target, offset, size, data);
 }
 
 
@@ -735,7 +735,7 @@ GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
     RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
     // We used to issue ctx->drawValidate() here, but it can corrupt the status of
     // separately bound draw/read framebuffer objects. So we just don't call it now.
-    return ctx->dispatcher().glCheckFramebufferStatus(target);
+    return GLEScontext::s_glDispatch.glCheckFramebufferStatus(target);
 }
 
 GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
@@ -747,31 +747,31 @@ GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
-    ctx->dispatcher().glClear(mask);
+    GLEScontext::s_glDispatch.glClear(mask);
 }
 GL_APICALL void  GL_APIENTRY glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
     GET_CTX();
     ctx->setClearColor(red,green, blue, alpha);
-    ctx->dispatcher().glClearColor(red,green,blue,alpha);
+    GLEScontext::s_glDispatch.glClearColor(red,green,blue,alpha);
 }
 GL_APICALL void  GL_APIENTRY glClearDepthf(GLclampf depth){
     GET_CTX();
     ctx->setClearDepth(depth);
     if (isGles2Gles()) {
-        ctx->dispatcher().glClearDepthf(depth);
+        GLEScontext::s_glDispatch.glClearDepthf(depth);
     } else {
-        ctx->dispatcher().glClearDepth(depth);
+        GLEScontext::s_glDispatch.glClearDepth(depth);
     }
 }
 GL_APICALL void  GL_APIENTRY glClearStencil(GLint s){
     GET_CTX();
     ctx->setClearStencil(s);
-    ctx->dispatcher().glClearStencil(s);
+    GLEScontext::s_glDispatch.glClearStencil(s);
 }
 GL_APICALL void  GL_APIENTRY glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha){
     GET_CTX();
     ctx->setColorMask(red, green, blue, alpha);
-    ctx->dispatcher().glColorMask(red,green,blue,alpha);
+    GLEScontext::s_glDispatch.glColorMask(red,green,blue,alpha);
 }
 
 GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
@@ -787,24 +787,24 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         GLint compileStatus;
         if (sp->validShader()) {
-            ctx->dispatcher().glCompileShader(globalShaderName);
+            GLEScontext::s_glDispatch.glCompileShader(globalShaderName);
 
             GLsizei infoLogLength=0;
             GLchar* infoLog;
-            ctx->dispatcher().glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
+            GLEScontext::s_glDispatch.glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
             infoLog = new GLchar[infoLogLength+1];
-            ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
+            GLEScontext::s_glDispatch.glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
             if (infoLogLength == 0) {
                 infoLog[0] = 0;
             }
             sp->setInfoLog(infoLog);
 
-            ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
+            GLEScontext::s_glDispatch.glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
         } else {
-            ctx->dispatcher().glCompileShader(globalShaderName);
+            GLEScontext::s_glDispatch.glCompileShader(globalShaderName);
             sp->setCompileStatus(false);
-            ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
+            GLEScontext::s_glDispatch.glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             if (compileStatus != GL_FALSE) {
                 fprintf(stderr, "%s: Warning: underlying GL compiled invalid shader!\n", __func__);
             }
@@ -913,7 +913,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 unsigned int globalTextureName =
                     ctx->shareGroup()->getGlobalName(
                             NamedObjectType::TEXTURE, tex);
-                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
+                GLEScontext::s_glDispatch.glBindTexture(GL_TEXTURE_2D,
                         globalTextureName);
                 texData->sourceEGLImage = 0;
                 texData->setGlobalName(globalTextureName);
@@ -978,7 +978,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
             texData, false, target, level, internalformat,
             0, 0, x, y, width, height, border);
     } else {
-        ctx->dispatcher().glCopyTexImage2D(
+        GLEScontext::s_glDispatch.glCopyTexImage2D(
             target, level, internalformat,
             x, y, width, height, border);
     }
@@ -997,7 +997,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLi
         ctx->copyTexImageWithEmulation(
             texData, true, target, level, 0, xoffset, yoffset, x, y, width, height, 0);
     } else {
-        ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
+        GLEScontext::s_glDispatch.glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
     }
 }
 
@@ -1025,24 +1025,24 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
     if (!shaderParserInitialized) {
         shaderParserInitialized = true;
 
-        GLint maxVertexAttribs; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
-        GLint maxVertexUniformVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertexUniformVectors);
-        GLint maxVaryingVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VARYING_VECTORS, &maxVaryingVectors);
-        GLint maxVertexTextureImageUnits; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
-        GLint maxCombinedTexImageUnits; ctx->dispatcher().glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTexImageUnits);
-        GLint maxTextureImageUnits; ctx->dispatcher().glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
-        GLint maxFragmentUniformVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &maxFragmentUniformVectors);
-        GLint maxDrawBuffers; ctx->dispatcher().glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+        GLint maxVertexAttribs; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+        GLint maxVertexUniformVectors; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertexUniformVectors);
+        GLint maxVaryingVectors; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_VARYING_VECTORS, &maxVaryingVectors);
+        GLint maxVertexTextureImageUnits; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
+        GLint maxCombinedTexImageUnits; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTexImageUnits);
+        GLint maxTextureImageUnits; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
+        GLint maxFragmentUniformVectors; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &maxFragmentUniformVectors);
+        GLint maxDrawBuffers; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
 
         GLint fragmentPrecisionHigh = 1;
 
-        GLint maxVertexOutputVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &maxVertexOutputVectors);
-        GLint maxFragmentInputVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &maxFragmentInputVectors);
-        GLint minProgramTexelOffset; ctx->dispatcher().glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, &minProgramTexelOffset);
-        GLint maxProgramTexelOffset; ctx->dispatcher().glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, &maxProgramTexelOffset);
+        GLint maxVertexOutputVectors; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &maxVertexOutputVectors);
+        GLint maxFragmentInputVectors; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &maxFragmentInputVectors);
+        GLint minProgramTexelOffset; GLEScontext::s_glDispatch.glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, &minProgramTexelOffset);
+        GLint maxProgramTexelOffset; GLEScontext::s_glDispatch.glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, &maxProgramTexelOffset);
 
         // Clear GL errors if the underlying GL doesn't have those enums.
-        ctx->dispatcher().glGetError();
+        GLEScontext::s_glDispatch.glGetError();
 
         GLint maxDualSourceDrawBuffers = 1;
 
@@ -1092,7 +1092,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
 GL_APICALL void  GL_APIENTRY glCullFace(GLenum mode){
     GET_CTX();
     ctx->setCullFace(mode);
-    ctx->dispatcher().glCullFace(mode);
+    GLEScontext::s_glDispatch.glCullFace(mode);
 }
 
 GL_APICALL void  GL_APIENTRY glDeleteBuffers(GLsizei n, const GLuint* buffers){
@@ -1254,21 +1254,21 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
 GL_APICALL void  GL_APIENTRY glDepthFunc(GLenum func){
     GET_CTX();
     ctx->setDepthFunc(func);
-    ctx->dispatcher().glDepthFunc(func);
+    GLEScontext::s_glDispatch.glDepthFunc(func);
 }
 GL_APICALL void  GL_APIENTRY glDepthMask(GLboolean flag){
     GET_CTX();
     ctx->setDepthMask(flag);
-    ctx->dispatcher().glDepthMask(flag);
+    GLEScontext::s_glDispatch.glDepthMask(flag);
 }
 
 GL_APICALL void  GL_APIENTRY glDepthRangef(GLclampf zNear, GLclampf zFar){
     GET_CTX();
     ctx->setDepthRangef(zNear, zFar);
     if (isGles2Gles()) {
-        ctx->dispatcher().glDepthRangef(zNear,zFar);
+        GLEScontext::s_glDispatch.glDepthRangef(zNear,zFar);
     } else {
-        ctx->dispatcher().glDepthRange(zNear,zFar);
+        GLEScontext::s_glDispatch.glDepthRange(zNear,zFar);
     }
 }
 
@@ -1293,7 +1293,7 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
 
         s_detachShader(ctx, program, shader);
 
-        ctx->dispatcher().glDetachShader(globalProgramName,globalShaderName);
+        GLEScontext::s_glDispatch.glDetachShader(globalProgramName,globalShaderName);
     }
 }
 
@@ -1316,14 +1316,14 @@ GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
     }
 #endif
     ctx->setEnable(cap, false);
-    ctx->dispatcher().glDisable(cap);
+    GLEScontext::s_glDispatch.glDisable(cap);
 }
 
 GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
     GET_CTX();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->enableArr(index,false);
-    ctx->dispatcher().glDisableVertexAttribArray(index);
+    GLEScontext::s_glDispatch.glDisableVertexAttribArray(index);
 }
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
@@ -1337,9 +1337,9 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
     //Enable texture generation for GL_POINTS and gl_PointSize shader variable
     //GLES2 assumes this is enabled by default, we need to set this state for GL
     if (mode==GL_POINTS) {
-        ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        GLEScontext::s_glDispatch.glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         if (!isCoreProfile()) {
-            ctx->dispatcher().glEnable(GL_POINT_SPRITE);
+            GLEScontext::s_glDispatch.glEnable(GL_POINT_SPRITE);
         }
     }
 
@@ -1355,9 +1355,9 @@ static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
         return;
     }
     if (mode == GL_POINTS) {
-        ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        GLEScontext::s_glDispatch.glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         if (!isCoreProfile()) {
-            ctx->dispatcher().glDisable(GL_POINT_SPRITE);
+            GLEScontext::s_glDispatch.glDisable(GL_POINT_SPRITE);
         }
     }
 }
@@ -1369,7 +1369,7 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
 
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
-        ctx->dispatcher().glDrawArrays(mode,first,count);
+        GLEScontext::s_glDispatch.glDrawArrays(mode,first,count);
         s_glDrawPost(ctx, mode);
     } else {
         ctx->drawWithEmulations(
@@ -1405,7 +1405,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode, type);
-        ctx->dispatcher().glDrawElements(mode, count, type, indices);
+        GLEScontext::s_glDispatch.glDrawElements(mode, count, type, indices);
         s_glDrawPost(ctx, mode);
     } else {
         ctx->drawWithEmulations(
@@ -1451,23 +1451,23 @@ GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
     }
 #endif
     ctx->setEnable(cap, true);
-    ctx->dispatcher().glEnable(cap);
+    GLEScontext::s_glDispatch.glEnable(cap);
 }
 
 GL_APICALL void  GL_APIENTRY glEnableVertexAttribArray(GLuint index){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->enableArr(index,true);
-    ctx->dispatcher().glEnableVertexAttribArray(index);
+    GLEScontext::s_glDispatch.glEnableVertexAttribArray(index);
 }
 
 GL_APICALL void  GL_APIENTRY glFinish(void){
     GET_CTX();
-    ctx->dispatcher().glFinish();
+    GLEScontext::s_glDispatch.glFinish();
 }
 GL_APICALL void  GL_APIENTRY glFlush(void){
     GET_CTX();
-    ctx->dispatcher().glFlush();
+    GLEScontext::s_glDispatch.glFlush();
 }
 
 
@@ -1518,7 +1518,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
             //
-            ctx->dispatcher().glFramebufferTexture2D(target,
+            GLEScontext::s_glDispatch.glFramebufferTexture2D(target,
                                     attachment,
                                     GL_TEXTURE_2D,
                                     rbData->eglImageGlobalTexObject->getGlobalName(),
@@ -1527,7 +1527,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
         }
     }
 
-    ctx->dispatcher().glFramebufferRenderbuffer(target,attachment,renderbuffertarget,globalRenderbufferName);
+    GLEScontext::s_glDispatch.glFramebufferRenderbuffer(target,attachment,renderbuffertarget,globalRenderbufferName);
 
     sUpdateFboEmulation(ctx);
 }
@@ -1556,7 +1556,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
         }
     }
 
-    ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
+    GLEScontext::s_glDispatch.glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
@@ -1573,7 +1573,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
 GL_APICALL void  GL_APIENTRY glFrontFace(GLenum mode){
     GET_CTX();
     ctx->setFrontFace(mode);
-    ctx->dispatcher().glFrontFace(mode);
+    GLEScontext::s_glDispatch.glFrontFace(mode);
 }
 
 GL_APICALL void  GL_APIENTRY glGenBuffers(GLsizei n, GLuint* buffers){
@@ -1607,7 +1607,7 @@ GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
                     texData->height));
         }
     }
-    ctx->dispatcher().glGenerateMipmap(target);
+    GLEScontext::s_glDispatch.glGenerateMipmap(target);
 }
 
 GL_APICALL void  GL_APIENTRY glGenFramebuffers(GLsizei n, GLuint* framebuffers){
@@ -1656,7 +1656,7 @@ static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
                                        GLsizei bufsize, GLsizei* length,
                                        GLint* size, GLenum* type,
                                        GLchar* name) {
-    auto& gl = ctx->dispatcher();
+    auto& gl = GLEScontext::s_glDispatch;
 
     GLsizei hostBufSize = 256;
     GLsizei hostLen = 0;
@@ -1715,7 +1715,7 @@ GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLs
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
 
         GLint numActiveAttributes = 0;
-        ctx->dispatcher().glGetProgramiv(
+        GLEScontext::s_glDispatch.glGetProgramiv(
             globalProgramName, GL_ACTIVE_ATTRIBUTES, &numActiveAttributes);
         SET_ERROR_IF(index >= numActiveAttributes, GL_INVALID_VALUE);
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
@@ -1738,7 +1738,7 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
 
         GLint numActiveUniforms = 0;
-        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_ACTIVE_UNIFORMS,
+        GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName, GL_ACTIVE_UNIFORMS,
                                          &numActiveUniforms);
         SET_ERROR_IF(index >= numActiveUniforms, GL_INVALID_VALUE);
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
@@ -1756,12 +1756,12 @@ GL_APICALL void  GL_APIENTRY glGetAttachedShaders(GLuint program, GLsizei maxcou
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ctx->dispatcher().glGetAttachedShaders(globalProgramName,maxcount,count,shaders);
+        GLEScontext::s_glDispatch.glGetAttachedShaders(globalProgramName,maxcount,count,shaders);
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         GLint numShaders=0;
-        ctx->dispatcher().glGetProgramiv(globalProgramName,GL_ATTACHED_SHADERS,&numShaders);
+        GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName,GL_ATTACHED_SHADERS,&numShaders);
         for(int i=0 ; i < maxcount && i<numShaders ;i++){
             shaders[i] = ctx->shareGroup()->getLocalName(
                     NamedObjectType::SHADER_OR_PROGRAM, shaders[i]);
@@ -1784,7 +1784,7 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION,
                               -1);
 #endif
-         int ret = ctx->dispatcher().glGetAttribLocation(
+         int ret = GLEScontext::s_glDispatch.glGetAttribLocation(
                  globalProgramName, c_str(pData->getTranslatedName(name)));
          if (ret != -1) {
              pData->linkedAttribLocation(name, ret);
@@ -1802,32 +1802,32 @@ using GLStateQueryFuncIndexed = void (*)(GLenum pname, GLuint index, T* params);
 
 static void s_glGetBooleanv_wrapper(GLenum pname, GLboolean* params) {
     GET_CTX();
-    ctx->dispatcher().glGetBooleanv(pname, params);
+    GLEScontext::s_glDispatch.glGetBooleanv(pname, params);
 }
 
 static void s_glGetIntegerv_wrapper(GLenum pname, GLint* params) {
     GET_CTX();
-    ctx->dispatcher().glGetIntegerv(pname, params);
+    GLEScontext::s_glDispatch.glGetIntegerv(pname, params);
 }
 
 static void s_glGetInteger64v_wrapper(GLenum pname, GLint64* params) {
     GET_CTX();
-    ctx->dispatcher().glGetInteger64v(pname, params);
+    GLEScontext::s_glDispatch.glGetInteger64v(pname, params);
 }
 
 static void s_glGetFloatv_wrapper(GLenum pname, GLfloat* params) {
     GET_CTX();
-    ctx->dispatcher().glGetFloatv(pname, params);
+    GLEScontext::s_glDispatch.glGetFloatv(pname, params);
 }
 
 static void s_glGetIntegeri_v_wrapper(GLenum pname, GLuint index, GLint* data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetIntegeri_v(pname, index, data);
+    GLEScontext::s_glDispatch.glGetIntegeri_v(pname, index, data);
 }
 
 static void s_glGetInteger64i_v_wrapper(GLenum pname, GLuint index, GLint64* data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetInteger64i_v(pname, index, data);
+    GLEScontext::s_glDispatch.glGetInteger64i_v(pname, index, data);
 }
 
 template <class T>
@@ -2201,7 +2201,7 @@ GL_APICALL GLenum GL_APIENTRY glGetError(void){
         ctx->setGLerror(GL_NO_ERROR);
         return err;
     }
-    return ctx->dispatcher().glGetError();
+    return GLEScontext::s_glDispatch.glGetError();
 }
 
 GL_APICALL void  GL_APIENTRY glGetFloatv(GLenum pname, GLfloat* params){
@@ -2233,7 +2233,7 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
     case GL_BLEND_COLOR:
     case GL_COLOR_CLEAR_VALUE:
     case GL_DEPTH_CLEAR_VALUE:
-        ctx->dispatcher().glGetFloatv(pname, floatVals);
+        GLEScontext::s_glDispatch.glGetFloatv(pname, floatVals);
     default:
         break;
     }
@@ -2321,7 +2321,7 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
             attachment = GL_STENCIL_ATTACHMENT;
     }
 
-    ctx->dispatcher().glGetFramebufferAttachmentParameteriv(target,attachment,pname,params);
+    GLEScontext::s_glDispatch.glGetFramebufferAttachmentParameteriv(target,attachment,pname,params);
 
     if (ctx->isDefaultFBOBound(target) && *params == GL_RENDERBUFFER) {
         *params = GL_FRAMEBUFFER_DEFAULT;
@@ -2377,18 +2377,18 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
             }
 
             GLint prevTex;
-            ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
-            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
+            GLEScontext::s_glDispatch.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+            GLEScontext::s_glDispatch.glBindTexture(GL_TEXTURE_2D,
                                             rbData->eglImageGlobalTexObject->getGlobalName());
-            ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0,
+            GLEScontext::s_glDispatch.glGetTexLevelParameteriv(GL_TEXTURE_2D, 0,
                                                        texPname,
                                                        params);
-            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prevTex);
+            GLEScontext::s_glDispatch.glBindTexture(GL_TEXTURE_2D, prevTex);
             return;
         }
     }
 
-    ctx->dispatcher().glGetRenderbufferParameteriv(target,pname,params);
+    GLEScontext::s_glDispatch.glGetRenderbufferParameteriv(target,pname,params);
 
     // An uninitialized renderbuffer storage may give a format of GL_RGBA on
     // some drivers; GLES2 default is GL_RGBA4.
@@ -2453,7 +2453,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             }
             break;
         default:
-            ctx->dispatcher().glGetProgramiv(globalProgramName,pname,params);
+            GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName,pname,params);
         }
     }
 }
@@ -2523,7 +2523,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
             }
             break;
         default:
-            ctx->dispatcher().glGetShaderiv(globalShaderName,pname,params);
+            GLEScontext::s_glDispatch.glGetShaderiv(globalShaderName,pname,params);
         }
     }
 }
@@ -2583,8 +2583,8 @@ GL_APICALL void  GL_APIENTRY glGetShaderPrecisionFormat(GLenum shadertype, GLenu
     case GL_LOW_FLOAT:
     case GL_MEDIUM_FLOAT:
     case GL_HIGH_FLOAT:
-        if(ctx->dispatcher().glGetShaderPrecisionFormat != NULL) {
-            ctx->dispatcher().glGetShaderPrecisionFormat(shadertype,precisiontype,range,precision);
+        if(GLEScontext::s_glDispatch.glGetShaderPrecisionFormat != NULL) {
+            GLEScontext::s_glDispatch.glGetShaderPrecisionFormat(shadertype,precisiontype,range,precision);
         } else {
             range[0] = range[1] = 127;
             *precision = 24;
@@ -2672,7 +2672,7 @@ GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GL
         *params = (GLfloat)(texData->getSwizzle(pname));
         return;
     }
-    ctx->dispatcher().glGetTexParameterfv(target, pname, params);
+    GLEScontext::s_glDispatch.glGetTexParameterfv(target, pname, params);
 }
 
 GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GLint* params){
@@ -2686,7 +2686,7 @@ GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GL
         *params = texData->getSwizzle(pname);
         return;
     }
-    ctx->dispatcher().glGetTexParameteriv(target, pname, params);
+    GLEScontext::s_glDispatch.glGetTexParameteriv(target, pname, params);
 }
 
 GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfloat* params){
@@ -2703,7 +2703,7 @@ GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfl
 #if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
 #endif
-        ctx->dispatcher().glGetUniformfv(globalProgramName,
+        GLEScontext::s_glDispatch.glGetUniformfv(globalProgramName,
             pData->getHostUniformLocation(location), params);
     }
 }
@@ -2722,7 +2722,7 @@ GL_APICALL void  GL_APIENTRY glGetUniformiv(GLuint program, GLint location, GLin
 #if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
 #endif
-        ctx->dispatcher().glGetUniformiv(globalProgramName,
+        GLEScontext::s_glDispatch.glGetUniformiv(globalProgramName,
             pData->getHostUniformLocation(location), params);
     }
 }
@@ -2783,7 +2783,7 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribfv(GLuint index, GLenum pname, GLf
                     params[i] = att0[i];
             }
             else
-                ctx->dispatcher().glGetVertexAttribfv(index,pname,params);
+                GLEScontext::s_glDispatch.glGetVertexAttribfv(index,pname,params);
             break;
         default:
             ctx->setGLerror(GL_INVALID_ENUM);
@@ -2823,7 +2823,7 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribiv(GLuint index, GLenum pname, GLi
                     for (int i = 0; i < 4; i++)
                         params[i] = (GLint)att0[i];
                 } else
-                    ctx->dispatcher().glGetVertexAttribiv(index, pname, params);
+                    GLEScontext::s_glDispatch.glGetVertexAttribiv(index, pname, params);
                 break;
             default:
                 ctx->setGLerror(GL_INVALID_ENUM);
@@ -2860,13 +2860,13 @@ GL_APICALL void  GL_APIENTRY glHint(GLenum target, GLenum mode){
         target == GL_GENERATE_MIPMAP_HINT) {
         ctx->setHint(target, mode);
     } else {
-        ctx->dispatcher().glHint(target,mode);
+        GLEScontext::s_glDispatch.glHint(target,mode);
     }
 }
 
 GL_APICALL GLboolean    GL_APIENTRY glIsEnabled(GLenum cap){
     GET_CTX_RET(GL_FALSE);
-    return ctx->dispatcher().glIsEnabled(cap);
+    return GLEScontext::s_glDispatch.glIsEnabled(cap);
 }
 
 GL_APICALL GLboolean    GL_APIENTRY glIsBuffer(GLuint buffer){
@@ -2919,7 +2919,7 @@ GL_APICALL GLboolean    GL_APIENTRY glIsProgram(GLuint program){
         ctx->shareGroup()->isObject(NamedObjectType::SHADER_OR_PROGRAM, program)) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        return ctx->dispatcher().glIsProgram(globalProgramName);
+        return GLEScontext::s_glDispatch.glIsProgram(globalProgramName);
     }
     return GL_FALSE;
 }
@@ -2930,7 +2930,7 @@ GL_APICALL GLboolean    GL_APIENTRY glIsShader(GLuint shader){
         ctx->shareGroup()->isObject(NamedObjectType::SHADER_OR_PROGRAM, shader)) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        return ctx->dispatcher().glIsShader(globalShaderName);
+        return GLEScontext::s_glDispatch.glIsShader(globalShaderName);
     }
     return GL_FALSE;
 }
@@ -2944,10 +2944,10 @@ GL_APICALL void  GL_APIENTRY glLineWidth(GLfloat width){
     // vertex buffer with thick triangles of our own),
     // but just have thin lines on Mac for now.
     if (!ctx->isCoreProfile()) {
-        ctx->dispatcher().glLineWidth(width);
+        GLEScontext::s_glDispatch.glLineWidth(width);
     }
 #else
-    ctx->dispatcher().glLineWidth(width);
+    GLEScontext::s_glDispatch.glLineWidth(width);
 #endif
 }
 
@@ -2969,8 +2969,8 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
         GLint vertexShader =  programData->getAttachedVertexShader();
 
         if (ctx->getMajorVersion() >= 3 && ctx->getMinorVersion() >= 1) {
-            ctx->dispatcher().glLinkProgram(globalProgramName);
-            ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+            GLEScontext::s_glDispatch.glLinkProgram(globalProgramName);
+            GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
             programData->setHostLinkStatus(linkStatus);
         } else {
             if (vertexShader != 0 && fragmentShader!=0) {
@@ -2982,8 +2982,8 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 ShaderParser* vertSp = (ShaderParser*)vertObjData;
 
                 if(fragSp->getCompileStatus() && vertSp->getCompileStatus()) {
-                    ctx->dispatcher().glLinkProgram(globalProgramName);
-                    ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                    GLEScontext::s_glDispatch.glLinkProgram(globalProgramName);
+                    GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
                     programData->setHostLinkStatus(linkStatus);
                     if (!programData->validateLink(fragSp, vertSp)) {
                         programData->setLinkStatus(GL_FALSE);
@@ -2997,10 +2997,10 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
         programData->setLinkStatus(linkStatus);
 
         GLsizei infoLogLength = 0, cLog = 0;
-        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_INFO_LOG_LENGTH,
+        GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName, GL_INFO_LOG_LENGTH,
                                          &infoLogLength);
         std::unique_ptr<GLchar[]> log(new GLchar[infoLogLength + 1]);
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+        GLEScontext::s_glDispatch.glGetProgramInfoLog(globalProgramName, infoLogLength,
                                               &cLog, log.get());
 
         // Only update when there actually is something to update.
@@ -3023,13 +3023,13 @@ GL_APICALL void  GL_APIENTRY glPixelStorei(GLenum pname, GLint param){
         break;
     }
     ctx->setPixelStorei(pname, param);
-    ctx->dispatcher().glPixelStorei(pname,param);
+    GLEScontext::s_glDispatch.glPixelStorei(pname,param);
 }
 
 GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
     GET_CTX();
     ctx->setPolygonOffset(factor, units);
-    ctx->dispatcher().glPolygonOffset(factor,units);
+    GLEScontext::s_glDispatch.glPolygonOffset(factor,units);
 }
 
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
@@ -3072,7 +3072,7 @@ GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsiz
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, resolve_fbo);
 
-        ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
+        GLEScontext::s_glDispatch.glReadPixels(x,y,width,height,format,type,pixels);
 
         glDeleteRenderbuffers(1, &resolve_rbo);
         glDeleteFramebuffers(1, &resolve_fbo);
@@ -3082,7 +3082,7 @@ GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsiz
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prev_bound_draw_fbo);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     } else {
-        ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
+        GLEScontext::s_glDispatch.glReadPixels(x,y,width,height,format,type,pixels);
     }
 }
 
@@ -3103,9 +3103,9 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 
     GET_CTX();
 
-    if(ctx->dispatcher().glReleaseShaderCompiler != NULL)
+    if(GLEScontext::s_glDispatch.glReleaseShaderCompiler != NULL)
     {
-        ctx->dispatcher().glReleaseShaderCompiler();
+        GLEScontext::s_glDispatch.glReleaseShaderCompiler();
     }
 #endif // !__APPLE__
 }
@@ -3162,32 +3162,32 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     GLint err = GL_NO_ERROR;
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height, 0, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
-    ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
+    GLEScontext::s_glDispatch.glRenderbufferStorage(target,internalformat,width,height);
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
     GET_CTX();
     ctx->setSampleCoverage(value, invert);
-    ctx->dispatcher().glSampleCoverage(value,invert);
+    GLEScontext::s_glDispatch.glSampleCoverage(value,invert);
 }
 
 GL_APICALL void  GL_APIENTRY glScissor(GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX();
     ctx->setScissor(x, y, width, height);
-    ctx->dispatcher().glScissor(x,y,width,height);
+    GLEScontext::s_glDispatch.glScissor(x,y,width,height);
 }
 
 GL_APICALL void  GL_APIENTRY glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length){
     GET_CTX();
 
-    SET_ERROR_IF( (ctx->dispatcher().glShaderBinary == NULL), GL_INVALID_OPERATION);
+    SET_ERROR_IF( (GLEScontext::s_glDispatch.glShaderBinary == NULL), GL_INVALID_OPERATION);
 
     if(ctx->shareGroup().get()){
         for(int i=0; i < n ; i++){
             const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::SHADER_OR_PROGRAM, shaders[i]);
             SET_ERROR_IF(globalShaderName == 0,GL_INVALID_VALUE);
-            ctx->dispatcher().glShaderBinary(1,&globalShaderName,binaryformat,binary,length);
+            GLEScontext::s_glDispatch.glShaderBinary(1,&globalShaderName,binaryformat,binary,length);
         }
     }
 }
@@ -3207,10 +3207,10 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
         if (isGles2Gles()) {
-            ctx->dispatcher().glShaderSource(globalShaderName, count, string,
+            GLEScontext::s_glDispatch.glShaderSource(globalShaderName, count, string,
                                          length);
         } else {
-            ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
+            GLEScontext::s_glDispatch.glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
         }
     }
@@ -3219,29 +3219,29 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
 GL_APICALL void  GL_APIENTRY glStencilFunc(GLenum func, GLint ref, GLuint mask){
     GET_CTX();
     ctx->setStencilFuncSeparate(GL_FRONT_AND_BACK, func, ref, mask);
-    ctx->dispatcher().glStencilFunc(func,ref,mask);
+    GLEScontext::s_glDispatch.glStencilFunc(func,ref,mask);
 }
 GL_APICALL void  GL_APIENTRY glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask){
     GET_CTX();
     ctx->setStencilFuncSeparate(face, func, ref, mask);
-    ctx->dispatcher().glStencilFuncSeparate(face,func,ref,mask);
+    GLEScontext::s_glDispatch.glStencilFuncSeparate(face,func,ref,mask);
 }
 GL_APICALL void  GL_APIENTRY glStencilMask(GLuint mask){
     GET_CTX();
     ctx->setStencilMaskSeparate(GL_FRONT_AND_BACK, mask);
-    ctx->dispatcher().glStencilMask(mask);
+    GLEScontext::s_glDispatch.glStencilMask(mask);
 }
 
 GL_APICALL void  GL_APIENTRY glStencilMaskSeparate(GLenum face, GLuint mask){
     GET_CTX();
     ctx->setStencilMaskSeparate(face, mask);
-    ctx->dispatcher().glStencilMaskSeparate(face,mask);
+    GLEScontext::s_glDispatch.glStencilMaskSeparate(face,mask);
 }
 
 GL_APICALL void  GL_APIENTRY glStencilOp(GLenum fail, GLenum zfail, GLenum zpass){
     GET_CTX();
     ctx->setStencilOpSeparate(GL_FRONT_AND_BACK, fail, zfail, zpass);
-    ctx->dispatcher().glStencilOp(fail,zfail,zpass);
+    GLEScontext::s_glDispatch.glStencilOp(fail,zfail,zpass);
 }
 
 GL_APICALL void  GL_APIENTRY glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass){
@@ -3255,7 +3255,7 @@ GL_APICALL void  GL_APIENTRY glStencilOpSeparate(GLenum face, GLenum fail, GLenu
             SET_ERROR_IF(1, GL_INVALID_ENUM);
     }
     ctx->setStencilOpSeparate(face, fail, zfail, zpass);
-    ctx->dispatcher().glStencilOpSeparate(face, fail,zfail,zpass);
+    GLEScontext::s_glDispatch.glStencilOpSeparate(face, fail,zfail,zpass);
 }
 
 #define GL_RGBA32F                        0x8814
@@ -3323,7 +3323,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX_V2();
     // clear previous error
-    GLint err = ctx->dispatcher().glGetError();
+    GLint err = GLEScontext::s_glDispatch.glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
@@ -3338,9 +3338,9 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
             &internalformat, &format);
     }
 
-    ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
+    GLEScontext::s_glDispatch.glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
 
-    err = ctx->dispatcher().glGetError();
+    err = GLEScontext::s_glDispatch.glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
         ctx->setGLerror(err);                                    \
@@ -3356,7 +3356,7 @@ static void sEmulateUserTextureSwizzle(TextureData* texData,
         texData->getSwizzle(pname);
     GLenum hostEquivalentSwizzle =
         swizzleComponentOf(emulatedBaseSwizzle, userSwz);
-    ctx->dispatcher().glTexParameteri(target, pname, hostEquivalentSwizzle);
+    GLEScontext::s_glDispatch.glTexParameteri(target, pname, hostEquivalentSwizzle);
 }
 
 GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloat param){
@@ -3373,7 +3373,7 @@ GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloa
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, (GLint)param);
     } else {
-        ctx->dispatcher().glTexParameterf(target,pname,param);
+        GLEScontext::s_glDispatch.glTexParameterf(target,pname,param);
     }
 }
 
@@ -3391,7 +3391,7 @@ GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, (GLint)params[0]);
     } else {
-        ctx->dispatcher().glTexParameterfv(target,pname,params);
+        GLEScontext::s_glDispatch.glTexParameterfv(target,pname,params);
     }
 }
 
@@ -3409,7 +3409,7 @@ GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint 
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, param);
     } else {
-        ctx->dispatcher().glTexParameteri(target,pname,param);
+        GLEScontext::s_glDispatch.glTexParameteri(target,pname,param);
     }
 }
 
@@ -3427,7 +3427,7 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, params[0]);
     } else {
-        ctx->dispatcher().glTexParameteriv(target,pname,params);
+        GLEScontext::s_glDispatch.glTexParameteriv(target,pname,params);
     }
 }
 
@@ -3460,7 +3460,7 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     }
     texData->setMipmapLevelAtLeast(level);
     texData->makeDirty();
-    ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
+    GLEScontext::s_glDispatch.glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
 static int s_getHostLocOrSetError(GLESv2Context* ctx, GLint location) {
@@ -3483,112 +3483,112 @@ GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform1f(hostLoc,x);
+    GLEScontext::s_glDispatch.glUniform1f(hostLoc,x);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform1fv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform1fv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1i(GLint location, GLint x){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform1i(hostLoc, x);
+    GLEScontext::s_glDispatch.glUniform1i(hostLoc, x);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform1iv(hostLoc, count,v);
+    GLEScontext::s_glDispatch.glUniform1iv(hostLoc, count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2f(GLint location, GLfloat x, GLfloat y){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform2f(hostLoc, x, y);
+    GLEScontext::s_glDispatch.glUniform2f(hostLoc, x, y);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform2fv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform2fv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2i(GLint location, GLint x, GLint y){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform2i(hostLoc, x, y);
+    GLEScontext::s_glDispatch.glUniform2i(hostLoc, x, y);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform2iv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform2iv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform3f(hostLoc,x,y,z);
+    GLEScontext::s_glDispatch.glUniform3f(hostLoc,x,y,z);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform3fv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform3fv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3i(GLint location, GLint x, GLint y, GLint z){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform3i(hostLoc,x,y,z);
+    GLEScontext::s_glDispatch.glUniform3i(hostLoc,x,y,z);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform3iv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform3iv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform4f(hostLoc,x,y,z,w);
+    GLEScontext::s_glDispatch.glUniform4f(hostLoc,x,y,z,w);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform4fv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform4fv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform4i(hostLoc,x,y,z,w);
+    GLEScontext::s_glDispatch.glUniform4i(hostLoc,x,y,z,w);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniform4iv(hostLoc,count,v);
+    GLEScontext::s_glDispatch.glUniform4iv(hostLoc,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
@@ -3597,7 +3597,7 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix2fv(GLint location, GLsizei count, G
                  transpose != GL_FALSE,GL_INVALID_VALUE);
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniformMatrix2fv(hostLoc,count,transpose,value);
+    GLEScontext::s_glDispatch.glUniformMatrix2fv(hostLoc,count,transpose,value);
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
@@ -3606,7 +3606,7 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix3fv(GLint location, GLsizei count, G
                  transpose != GL_FALSE,GL_INVALID_VALUE);
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniformMatrix3fv(hostLoc,count,transpose,value);
+    GLEScontext::s_glDispatch.glUniformMatrix3fv(hostLoc,count,transpose,value);
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
@@ -3615,7 +3615,7 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix4fv(GLint location, GLsizei count, G
                  transpose != GL_FALSE,GL_INVALID_VALUE);
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
-    ctx->dispatcher().glUniformMatrix4fv(hostLoc,count,transpose,value);
+    GLEScontext::s_glDispatch.glUniformMatrix4fv(hostLoc,count,transpose,value);
 }
 
 static void s_unUseCurrentProgram() {
@@ -3657,7 +3657,7 @@ GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
         if (programData) programData->setInUse(true);
 
         ctx->setUseProgram(program, objData);
-        ctx->dispatcher().glUseProgram(globalProgramName);
+        GLEScontext::s_glDispatch.glUseProgram(globalProgramName);
     }
 }
 
@@ -3671,17 +3671,17 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* programData = (ProgramData*)objData;
-        ctx->dispatcher().glValidateProgram(globalProgramName);
+        GLEScontext::s_glDispatch.glValidateProgram(globalProgramName);
 
         GLint validateStatus;
-        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_VALIDATE_STATUS,
+        GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName, GL_VALIDATE_STATUS,
                                          &validateStatus);
         programData->setValidateStatus(static_cast<bool>(validateStatus));
 
         GLsizei infoLogLength = 0, cLength = 0;
-        ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
+        GLEScontext::s_glDispatch.glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
         std::unique_ptr<GLchar[]> infoLog(new GLchar[infoLogLength + 1]);
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+        GLEScontext::s_glDispatch.glGetProgramInfoLog(globalProgramName, infoLogLength,
                                               &cLength, infoLog.get());
         if (cLength > 0) {
             programData->setInfoLog(infoLog.release());
@@ -3692,7 +3692,7 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
 GL_APICALL void  GL_APIENTRY glVertexAttrib1f(GLuint index, GLfloat x){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib1f(index,x);
+    GLEScontext::s_glDispatch.glVertexAttrib1f(index,x);
     ctx->setAttribValue(index, 1, &x);
     if(index == 0)
         ctx->setAttribute0value(x, 0.0, 0.0, 1.0);
@@ -3701,7 +3701,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib1f(GLuint index, GLfloat x){
 GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib1fv(index,values);
+    GLEScontext::s_glDispatch.glVertexAttrib1fv(index,values);
     ctx->setAttribValue(index, 1, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], 0.0, 0.0, 1.0);
@@ -3710,7 +3710,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* valu
 GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib2f(index,x,y);
+    GLEScontext::s_glDispatch.glVertexAttrib2f(index,x,y);
     GLfloat values[] = {x, y};
     ctx->setAttribValue(index, 2, values);
     if(index == 0)
@@ -3720,7 +3720,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y
 GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib2fv(index,values);
+    GLEScontext::s_glDispatch.glVertexAttrib2fv(index,values);
     ctx->setAttribValue(index, 2, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], 0.0, 1.0);
@@ -3729,7 +3729,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* valu
 GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib3f(index,x,y,z);
+    GLEScontext::s_glDispatch.glVertexAttrib3f(index,x,y,z);
     GLfloat values[3] = {x, y, z};
     ctx->setAttribValue(index, 3, values);
     if(index == 0)
@@ -3739,7 +3739,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y
 GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib3fv(index,values);
+    GLEScontext::s_glDispatch.glVertexAttrib3fv(index,values);
     ctx->setAttribValue(index, 3, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], values[2], 1.0);
@@ -3748,7 +3748,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* valu
 GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib4f(index,x,y,z,w);
+    GLEScontext::s_glDispatch.glVertexAttrib4f(index,x,y,z,w);
     GLfloat values[4] = {x, y, z, z};
     ctx->setAttribValue(index, 4, values);
     if(index == 0)
@@ -3758,7 +3758,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y
 GL_APICALL void  GL_APIENTRY glVertexAttrib4fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->dispatcher().glVertexAttrib4fv(index,values);
+    GLEScontext::s_glDispatch.glVertexAttrib4fv(index,values);
     ctx->setAttribValue(index, 4, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], values[2], values[3]);
@@ -3791,7 +3791,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 
     s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, 0, false);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
-        ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
+        GLEScontext::s_glDispatch.glVertexAttribPointer(index, size, type, normalized, stride, ptr);
     }
 }
 
@@ -3802,14 +3802,14 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLi
 
     s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, dataSize, false);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
-        ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
+        GLEScontext::s_glDispatch.glVertexAttribPointer(index, size, type, normalized, stride, ptr);
     }
 }
 
 GL_APICALL void  GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX();
     ctx->setViewport(x, y, width, height);
-    ctx->dispatcher().glViewport(x,y,width,height);
+    GLEScontext::s_glDispatch.glViewport(x,y,width,height);
 }
 
 GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
@@ -3833,7 +3833,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             // with |img|'s global GL texture id
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
-            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
+            GLEScontext::s_glDispatch.glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
             TextureData *texData = getTextureTargetData(target);
             SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
             texData->width = img->width;
@@ -3849,7 +3849,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
                     SaveableTexturePtr(img->saveableTexture));
             if (img->sync) {
                 // insert gpu side fence to make sure we are done with any blit ops.
-                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+                GLEScontext::s_glDispatch.glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
             }
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
@@ -3893,16 +3893,16 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
         // underlying texture of the img
         GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
+            GLEScontext::s_glDispatch.glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    rbData->attachedFB);
         }
-        ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
+        GLEScontext::s_glDispatch.glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
                                                     rbData->attachedPoint,
                                                     GL_TEXTURE_2D,
                                                     img->globalTexObj->getGlobalName(),
                                                     0);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
+            GLEScontext::s_glDispatch.glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    prevFB);
         }
     }
@@ -3928,7 +3928,7 @@ GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
         // directly.
         ctx->setVAOEverBound();
     }
-    ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
+    GLEScontext::s_glDispatch.glBindVertexArray(ctx->getVAOGlobalName(array));
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {
@@ -3945,7 +3945,7 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     if (!array) return GL_FALSE;
     // TODO: Figure out how to answer this completely in software.
     // Currently, state gets weird so we need to ask the GPU directly.
-    return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
+    return GLEScontext::s_glDispatch.glIsVertexArray(ctx->getVAOGlobalName(array));
 }
 
 #include "GLESv30Imp.cpp"
@@ -4013,7 +4013,7 @@ glTestHostDriverPerformance(GLuint count,
                             uint64_t* duration_us,
                             uint64_t* duration_cpu_us) {
     GET_CTX_V2();
-    auto gl = &(ctx->dispatcher());
+    auto gl = &(GLEScontext::s_glDispatch);
 
     constexpr char vshaderSrcEs[] = R"(#version 300 es
     precision highp float;
@@ -4159,48 +4159,48 @@ fprintf(stderr, "%s: begin count %d\n", __func__, count);
 // Common between GL_EXT_memory_object and GL_EXT_semaphore
 GL_APICALL void GL_APIENTRY glGetUnsignedBytevEXT(GLenum pname, GLubyte* data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetUnsignedBytevEXT(pname, data);
+    GLEScontext::s_glDispatch.glGetUnsignedBytevEXT(pname, data);
 }
 
 GL_APICALL void GL_APIENTRY glGetUnsignedBytei_vEXT(GLenum target, GLuint index, GLubyte* data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetUnsignedBytei_vEXT(target, index, data);
+    GLEScontext::s_glDispatch.glGetUnsignedBytei_vEXT(target, index, data);
 }
 
 // GL_EXT_memory_object
 GL_APICALL void GL_APIENTRY glImportMemoryFdEXT(GLuint memory, GLuint64 size, GLenum handleType, GLint fd) {
     GET_CTX_V2();
-    ctx->dispatcher().glImportMemoryFdEXT(memory, size, handleType, fd);
+    GLEScontext::s_glDispatch.glImportMemoryFdEXT(memory, size, handleType, fd);
 }
 
 GL_APICALL void GL_APIENTRY glImportMemoryWin32HandleEXT(GLuint memory, GLuint64 size, GLenum handleType, void* handle) {
     GET_CTX_V2();
-    ctx->dispatcher().glImportMemoryWin32HandleEXT(memory, size, handleType, handle);
+    GLEScontext::s_glDispatch.glImportMemoryWin32HandleEXT(memory, size, handleType, handle);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteMemoryObjectsEXT(GLsizei n, const GLuint *memoryObjects) {
     GET_CTX_V2();
-    ctx->dispatcher().glDeleteMemoryObjectsEXT(n, memoryObjects);
+    GLEScontext::s_glDispatch.glDeleteMemoryObjectsEXT(n, memoryObjects);
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsMemoryObjectEXT(GLuint memoryObject) {
     GET_CTX_V2_RET(GL_FALSE);
-    return ctx->dispatcher().glIsMemoryObjectEXT(memoryObject);
+    return GLEScontext::s_glDispatch.glIsMemoryObjectEXT(memoryObject);
 }
 
 GL_APICALL void GL_APIENTRY glCreateMemoryObjectsEXT(GLsizei n, GLuint *memoryObjects) {
     GET_CTX_V2();
-    ctx->dispatcher().glCreateMemoryObjectsEXT(n, memoryObjects);
+    GLEScontext::s_glDispatch.glCreateMemoryObjectsEXT(n, memoryObjects);
 }
 
 GL_APICALL void GL_APIENTRY glMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, const GLint *params) {
     GET_CTX_V2();
-    ctx->dispatcher().glMemoryObjectParameterivEXT(memoryObject, pname, params);
+    GLEScontext::s_glDispatch.glMemoryObjectParameterivEXT(memoryObject, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY glGetMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, GLint *params) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetMemoryObjectParameterivEXT(memoryObject, pname, params);
+    GLEScontext::s_glDispatch.glGetMemoryObjectParameterivEXT(memoryObject, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset) {
@@ -4213,32 +4213,32 @@ GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, 
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
-    ctx->dispatcher().glTexStorageMem2DEXT(target, levels, internalFormat, width, height, memory, offset);
+    GLEScontext::s_glDispatch.glTexStorageMem2DEXT(target, levels, internalFormat, width, height, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorageMem2DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
-    ctx->dispatcher().glTexStorageMem2DMultisampleEXT(target, samples, internalFormat, width, height, fixedSampleLocations, memory, offset);
+    GLEScontext::s_glDispatch.glTexStorageMem2DMultisampleEXT(target, samples, internalFormat, width, height, fixedSampleLocations, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorageMem3DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
-    ctx->dispatcher().glTexStorageMem3DEXT(target, levels, internalFormat, width, height, depth, memory, offset);
+    GLEScontext::s_glDispatch.glTexStorageMem3DEXT(target, levels, internalFormat, width, height, depth, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
-    ctx->dispatcher().glTexStorageMem3DMultisampleEXT(target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory, offset);
+    GLEScontext::s_glDispatch.glTexStorageMem3DMultisampleEXT(target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
-    ctx->dispatcher().glBufferStorageMemEXT(target, size, memory, offset);
+    GLEScontext::s_glDispatch.glBufferStorageMemEXT(target, size, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glTexParameteriHOST(GLenum target, GLenum pname, GLint param) {
     GET_CTX_V2();
-    ctx->dispatcher().glTexParameteri(target, pname, param);
+    GLEScontext::s_glDispatch.glTexParameteri(target, pname, param);
 }
 
 // Not included: direct-state-access, 1D function pointers
@@ -4246,45 +4246,45 @@ GL_APICALL void GL_APIENTRY glTexParameteriHOST(GLenum target, GLenum pname, GLi
 // GL_EXT_semaphore
 GL_APICALL void GL_APIENTRY glImportSemaphoreFdEXT(GLuint semaphore, GLenum handleType, GLint fd) {
     GET_CTX_V2();
-    ctx->dispatcher().glImportSemaphoreFdEXT(semaphore, handleType, fd);
+    GLEScontext::s_glDispatch.glImportSemaphoreFdEXT(semaphore, handleType, fd);
 }
 
 GL_APICALL void GL_APIENTRY glImportSemaphoreWin32HandleEXT(GLuint semaphore, GLenum handleType, void* handle) {
     GET_CTX_V2();
-    ctx->dispatcher().glImportSemaphoreWin32HandleEXT(semaphore, handleType, handle);
+    GLEScontext::s_glDispatch.glImportSemaphoreWin32HandleEXT(semaphore, handleType, handle);
 }
 
 GL_APICALL void GL_APIENTRY glGenSemaphoresEXT(GLsizei n, GLuint *semaphores) {
     GET_CTX_V2();
-    ctx->dispatcher().glGenSemaphoresEXT(n, semaphores);
+    GLEScontext::s_glDispatch.glGenSemaphoresEXT(n, semaphores);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteSemaphoresEXT(GLsizei n, const GLuint *semaphores) {
     GET_CTX_V2();
-    ctx->dispatcher().glDeleteSemaphoresEXT(n, semaphores);
+    GLEScontext::s_glDispatch.glDeleteSemaphoresEXT(n, semaphores);
 }
 
 GL_APICALL GLboolean glIsSemaphoreEXT(GLuint semaphore) {
     GET_CTX_V2_RET(GL_FALSE);
-    return ctx->dispatcher().glIsSemaphoreEXT(semaphore);
+    return GLEScontext::s_glDispatch.glIsSemaphoreEXT(semaphore);
 }
 
 GL_APICALL void GL_APIENTRY glSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, const GLuint64 *params) {
     GET_CTX_V2();
-    ctx->dispatcher().glSemaphoreParameterui64vEXT(semaphore, pname, params);
+    GLEScontext::s_glDispatch.glSemaphoreParameterui64vEXT(semaphore, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY glGetSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, GLuint64 *params) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetSemaphoreParameterui64vEXT(semaphore, pname, params);
+    GLEScontext::s_glDispatch.glGetSemaphoreParameterui64vEXT(semaphore, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts) {
     GET_CTX_V2();
-    ctx->dispatcher().glWaitSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, srcLayouts);
+    GLEScontext::s_glDispatch.glWaitSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, srcLayouts);
 }
 
 GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts) {
     GET_CTX_V2();
-    ctx->dispatcher().glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts);
+    GLEScontext::s_glDispatch.glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts);
 }

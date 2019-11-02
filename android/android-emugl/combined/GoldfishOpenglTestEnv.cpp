@@ -85,7 +85,7 @@ static AndroidOptions sTestEnvCmdLineOptions;
 
 // static
 std::vector<const char*> GoldfishOpenglTestEnv::getTransportsToTest() {
-    return { "pipe", };
+    return { "asg", };
 }
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
@@ -122,9 +122,11 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::RefCountPipe, true);
     android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLPipeChecksum, false);
+    android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDirectMem, true);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::Vulkan, true);
+            android::featurecontrol::Vulkan, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanSnapshots, true);
     android::featurecontrol::setEnabledOverride(
@@ -138,7 +140,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android_hw->hw_gltransport_asg_writeBufferSize = 262144;
     android_hw->hw_gltransport_asg_writeStepSize = 8192;
     android_hw->hw_gltransport_asg_dataRingSize = 131072;
-    android_hw->hw_gltransport_drawFlushInterval = 800;
+    android_hw->hw_gltransport_drawFlushInterval = 800000;
 
     EmuglConfig config;
 
