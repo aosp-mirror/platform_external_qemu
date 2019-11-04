@@ -17,6 +17,7 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
+#include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
@@ -95,7 +96,8 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket) override;
+        virtual void onHostConnection(ScopedSocket&& socket,
+                                      AdbPortType portType) override;
 
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
@@ -146,7 +148,7 @@ public:
     // Called when a host connection occurs. Transfers ownership of
     // |socket| to the pipe. On success, return true, on error return
     // false and closes the socket.
-    void onHostConnection(ScopedSocket&& socket);
+    void onHostConnection(ScopedSocket&& socket, AdbPortType portType);
 
     bool isProxyingData() const {
         return mState == State::ProxyingData;
@@ -209,7 +211,9 @@ private:
     void waitForHostConnection();
 
     bool shouldUseRecvBuffer();
-
+    void stopSocketTraffic();
+    // Need to use adb hub to translate messages
+    bool needTranslate() const;
     // Command/reply buffer and cursor.
     char mBuffer[16];        // the command being accepted or reply being sent.
     size_t mBufferSize = 0;  // size of valid bytes in mBuffer.
@@ -223,6 +227,9 @@ private:
 
     android::emulation::AdbMessageSniffer mReceivedMesg;
     android::emulation::AdbMessageSniffer mSendingMesg;
+    AdbPortType mPortType = AdbPortType::Adb;
+    AdbHub mAdbHub;
+    bool mReuseFromSnapshot = false;
 };
 
 }  // namespace emulation
