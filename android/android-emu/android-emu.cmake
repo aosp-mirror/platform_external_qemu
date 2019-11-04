@@ -267,6 +267,7 @@ set(android_emu_dependent_src
     android/qemu-setup.cpp
     android/sensors-port.c
     android/snapshot/SnapshotAPI.cpp
+    android/snapshot/Icebox.cpp
     android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
     android/videoplayback/VideoplaybackRenderTarget.cpp
@@ -734,6 +735,7 @@ set(android-emu_unittests_src
     android/gps/GpxParser_unittest.cpp
     android/gps/KmlParser_unittest.cpp
     android/hw-lcd_unittest.cpp
+    android/jdwp/Jdwp_unittest.cpp
     android/kernel/kernel_utils_unittest.cpp
     android/location/MapsKey_unittest.cpp
     android/location/MapsKeyFileParser_unittest.cpp

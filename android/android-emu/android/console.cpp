@@ -25,15 +25,15 @@
 #include "android/console_internal.h"
 
 #include "android/android.h"
-#include "android/avd/BugreportInfo.h"
 #include "android/automation/AutomationController.h"
+#include "android/avd/BugreportInfo.h"
 #include "android/base/StringView.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/emulator-window.h"
 #include "android/emulation/QemuMiscPipe.h"
+#include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
@@ -44,6 +44,7 @@
 #include "android/network/wifi.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
+#include "android/snapshot/Icebox.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"
@@ -3476,6 +3477,40 @@ static const CommandDefRec screenrecord_commands[] = {
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                    I C E B O X   C O M M A N D S                                ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_icebox_track(ControlClient client, char* args) {
+    int pid = -1;
+    if (!args || strlen(args) == 0) {
+        control_write(client, "KO: pid required\r\n");
+        return -1;
+    }
+    sscanf(args, "%d", &pid);
+    if (pid < 0) {
+        control_write(client, "KO: Bad process ID %s\r\n", args);
+        return -1;
+    }
+    if (android::icebox::track_async(pid, "tmp_snapshot")) {
+        control_write(client, "OK: Start tracking PID %d\r\n", pid);
+        return 0;
+    } else {
+        control_write(client, "KO: Failed to track PID %d\r\n", pid);
+        return -1;
+    }
+}
+
+static const CommandDefRec icebox_commands[] = {
+        {"track", "(experimental) track exceptions in <pid>",
+         "'icebox track <pid>'\r\n", NULL, do_icebox_track, NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -3771,13 +3806,13 @@ extern const CommandDefRec main_commands[] = {
          "emulated device.\r\n",
          NULL, NULL, network_commands},
 
-         {"grpc", "enable the grpc endpoint",
-          "This allows you to start the grpc endpoint at the given port\n",
-          NULL, do_start_grpc, NULL},
+        {"grpc", "enable the grpc endpoint",
+         "This allows you to start the grpc endpoint at the given port\n", NULL,
+         do_start_grpc, NULL},
 
-         {"wifi", "manage wifi settings",
-          "allows you to manage wifi settings in the device\r\n",
-          NULL, NULL, wifi_commands},
+        {"wifi", "manage wifi settings",
+         "allows you to manage wifi settings in the device\r\n", NULL, NULL,
+         wifi_commands},
 
         {"power", "power related commands",
          "allows to change battery and AC power status\r\n", NULL, NULL,
@@ -3832,11 +3867,17 @@ extern const CommandDefRec main_commands[] = {
         {"multidisplay", "configure the multi-display",
          "allows you to create/modify/delete displays besides the default "
          "android display, as an example,\r\n"
-         "'multidisplay add 1 1200 800 240 0' will create/modify display 1 with "
+         "'multidisplay add 1 1200 800 240 0' will create/modify display 1 "
+         "with "
          "dimension 1200x800,\r\n"
          " dpi 240 and the default flag\r\n"
          "'multidisplay del 1' will delete the display 1\r\n",
          NULL, NULL, multi_display_commands},
+
+        {"icebox", "auto-snapshot on uncaught exceptions",
+         "allows emulator to automatically take snapshot on uncaught "
+         "exceptions, for test and debug purpose. (experimental)",
+         NULL, NULL, icebox_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

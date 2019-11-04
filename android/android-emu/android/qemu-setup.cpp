@@ -27,12 +27,12 @@
 #include "android/emulation/FakeRotatingCameraSensor.h"
 #include "android/emulation/HostMemoryService.h"
 #include "android/emulation/Keymaster3.h"
+#include "android/emulation/MultiDisplayPipe.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/android_pipe_pingpong.h"
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/android_pipe_zero.h"
-#include "android/emulation/MultiDisplayPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
@@ -44,6 +44,7 @@
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
 #include "android/refcount-pipe.h"
+#include "android/snapshot/Icebox.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
@@ -391,6 +392,7 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* Save base port and ADB port. */
     android_base_port = base_port;
     android_adb_port = adb_port;
+    android::icebox::set_adb_port(adb_port);
     android_serial_number_port = adb_port - 1;
     return true;
 }
