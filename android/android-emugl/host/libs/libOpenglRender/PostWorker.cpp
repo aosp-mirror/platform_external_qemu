@@ -138,7 +138,7 @@ void PostWorker::compose(ComposeDevice* p) {
                                    mFb->findColorBuffer(p->targetHandle)->getTexture(),
                                    0);
 
-    DD("worker compose %d layers\n", p->numLayers);
+    // DD("worker compose %d layers\n", p->numLayers);
     mFb->getTextureDraw()->prepareForDrawLayer();
     for (int i = 0; i < p->numLayers; i++, l++) {
         DD("\tcomposeMode %d color %d %d %d %d blendMode "

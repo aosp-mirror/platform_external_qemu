@@ -41,7 +41,7 @@
 #include <sys/socket.h>
 #endif
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -59,6 +59,8 @@
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
 #define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+
+static std::unordered_map<int, android::emulation::AdbGuestPipe*> sJdwpPipes;
 
 namespace android {
 namespace emulation {
@@ -180,10 +182,12 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
 }
 
 bool AdbGuestPipe::Service::canLoad() const {
-    bool ret = android::featurecontrol::isEnabled(
-            android::featurecontrol::Feature::SnapshotAdb);
+    /*bool ret = android::featurecontrol::isEnabled(
+                       android::featurecontrol::Feature::SnapshotAdb) ||
+               sJdwpPipes.size();
     D("%s: can load %d", __func__, ret);
-    return ret;
+    return ret;*/
+    return true;
 }
 
 AndroidPipe* AdbGuestPipe::Service::load(void* hwPipe,
@@ -193,6 +197,9 @@ AndroidPipe* AdbGuestPipe::Service::load(void* hwPipe,
     if (pipe->mState == State::ClosedByHost) {
         delete pipe;
         pipe = nullptr;
+    } else if (pipe->mReuseFromSnapshot) {
+        printf("loaded pending pipe\n");
+        mPipes.push_back(pipe);
     }
     D("%s: [%p] loaded", __func__, pipe);
 
@@ -203,7 +210,8 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
 }
 
-void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
+                                             AdbPortType portType) {
     D("%s", __func__);
     // There must be no active pipe yet, but at least one waiting
     // for activation in mPipes.
@@ -211,7 +219,7 @@ void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
     mHostAgent->stopListening();
     AdbGuestPipe* activePipe = searchForActivePipe();
     CHECK(activePipe != nullptr);
-    activePipe->onHostConnection(std::move(socket));
+    activePipe->onHostConnection(std::move(socket), portType);
 }
 
 void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
@@ -258,10 +266,16 @@ void AdbGuestPipe::Service::onPipeClose(AdbGuestPipe* pipe) {
 }
 
 AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
-    const auto pipeIt = std::find_if(
+    auto pipeIt = std::find_if(
             mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
-                return pipe->mState == State::WaitingForHostAdbConnection;
+                return pipe->mReuseFromSnapshot;
             });
+    if (pipeIt == mPipes.end()) {
+        pipeIt = std::find_if(
+                mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
+                    return pipe->mState == State::WaitingForHostAdbConnection;
+                });
+    }
     if (pipeIt != mPipes.end()) {
         AdbGuestPipe* activePipe = *pipeIt;
         removeAdbGuestPipe(activePipe);
@@ -290,12 +304,32 @@ void AdbGuestPipe::Service::hostCloseSocket(int fd) {
     mRecycledSockets.erase(fd);
 }
 
+void AdbGuestPipe::Service::registerJdwpProxy(int pid, AdbGuestPipe* pipe) {
+    // TODO: lock?
+    assert(!mJdwpPipes.count(pid));
+    mJdwpPipes.emplace(pid, pipe);
+}
+
+void AdbGuestPipe::Service::unregisterJdwpProxy(int pid) {
+    assert(mJdwpPipes.count(pid));
+    mJdwpPipes.erase(pid);
+}
+
+AdbGuestPipe* AdbGuestPipe::Service::tryGetJdwpProxy(int pid) {
+    auto ite = mJdwpPipes.find(pid);
+    if (ite == mJdwpPipes.end()) {
+        return nullptr;
+    }
+    return ite->second;
+}
+
 AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            Service* service,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
     : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
     mReceivedMesg("HOST==>GUEST"), mSendingMesg("HOST<==GUEST"){
+    printf("New adb guest pipe\n");
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {
@@ -340,13 +374,25 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                 if (mHostSocket.hasStaleData()) {
                     signalWake(PIPE_WAKE_READ);
                 }
-                return;
             }
         }
+    } else {
+        mReuseFromSnapshot = true;
+        mState = State::WaitingForHostAdbConnection;
     }
-    // Socket could be in a broken state.
-    // In that case we just close the pipe.
-    mState = State::ClosedByHost;
+    int numJdwpPipes = stream->getBe32();
+    D("Loading %d jdwp proxies", numJdwpPipes);
+    if (!socket && !numJdwpPipes) {
+        mReuseFromSnapshot = false;
+        mState = State::ClosedByHost;
+    }
+    mAdbHub.onLoad(stream);
+    for (int i = 0; i < numJdwpPipes; i++) {
+        jdwp::JdwpProxy* proxy = new jdwp::JdwpProxy(stream);
+        mAdbHub.insertProxy(proxy);
+        mJdwpProxies.emplace(proxy->mGuestPid, proxy);
+    }
+    mAdbHub.doneInsertProxy();
 }
 
 void AdbGuestPipe::onSave(android::base::Stream* stream) {
@@ -358,9 +404,11 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
     stream->putBe32(mBufferSize);
     stream->putBe32(mBufferPos);
     stream->putBe32(static_cast<uint32_t>(mState));
-    stream->putBe32(mHostSocket.valid() ? mHostSocket.fd()
-                                        : 0);
-    if (mHostSocket.valid()) {
+    bool saveHostSocket = android::featurecontrol::isEnabled(
+                       android::featurecontrol::Feature::SnapshotAdb)
+                       && mHostSocket.valid();
+    if (saveHostSocket) {
+        stream->putBe32(mHostSocket.fd());
         bool needSaveBuffer = shouldUseRecvBuffer();
         DD("%s: [%p] save socket %d needSaveBuffer %d\n", __func__, this,
            mHostSocket.fd(), needSaveBuffer);
@@ -377,14 +425,26 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
             signalWake(PIPE_WAKE_READ);
         }
         DD("%s: [%p] poll %d", __func__, this, mFdWatcher->poll());
+    } else {
+        stream->putBe32(0);
+    }
+    D("Saving %d jdwp proxies", (int)mJdwpProxies.size());
+    stream->putBe32(mJdwpProxies.size());
+    if (!mHostSocket.valid() && !mJdwpProxies.size()) {
+        return;
+    }
+    mAdbHub.onSave(stream);
+    for (const auto& proxy: mJdwpProxies) {
+        proxy.second->onSave(stream);
     }
 }
 
 AdbGuestPipe::~AdbGuestPipe() {
+    mAdbHub.setSocket(nullptr);
     CrossSessionSocket::recycleSocket(std::move(mHostSocket));
     DD("%s: [%p] destroyed", __func__, this);
-    CHECK(mState == State::ClosedByGuest ||
-          mState == State::ClosedByHost);
+    //CHECK(mState == State::ClosedByGuest ||
+    //      mState == State::ClosedByHost);
     service()->unregisterActivePipe(this);
 }
 
@@ -392,6 +452,7 @@ void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
     DD("%s: [%p]", __func__, this);
     mState = State::ClosedByGuest;
     DINIT("%s: [%p] Adb closed by guest",__func__, this);
+    mAdbHub.setSocket(nullptr);
     CrossSessionSocket::recycleSocket(std::move(mHostSocket));
     service()->onPipeClose(this);  // This deletes the instance.
 }
@@ -434,9 +495,25 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
+        //if (mJdwp.shouldBlockGuest()) {
+        //    return PIPE_ERROR_AGAIN;
+        //}
         int count = onGuestRecvData(buffers, numBuffers);
         if (android_hw->test_monitorAdb> 0) {
             mReceivedMesg.read(buffers, numBuffers, count);
+        }
+        if (count > 0) {
+            //mJdwp.onGuestRecvData(buffers, numBuffers, count);
+            mAdbHub.onGuestRecvData(buffers, numBuffers, count,
+                [this](const apacket& packet, int guestId) {
+                    //return onAdbOpen(packet);
+                    return nullptr;
+                });
+            bool shouldClose = false;
+            updateJdwpRegistration(&shouldClose);
+            if (shouldClose) {
+                return PIPE_ERROR_IO;
+            }
         }
         return count;
     } else if (guest_boot_completed == 0 && android_hw->test_delayAdbTillBootComplete == 1) {
@@ -461,15 +538,46 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                               int numBuffers) {
-    D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
-      toString(mState));
+    //D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
+    //  toString(mState));
     if (mState == State::ProxyingData) {
+        //if (mJdwp.shouldBlockGuest()) {
+        //    return PIPE_ERROR_AGAIN;
+        //}
         // Common-case, proxy-ing the data from the guest to the host.
-        return onGuestSendData(buffers, numBuffers);
+        int count = mAdbHub.onGuestSendData(buffers, numBuffers,
+                [this](const apacket& packet, int guestId) {
+                    return onAdbConnectOkay(packet, guestId);
+                });
+        if (android_hw->test_monitorAdb> 0) {
+            mSendingMesg.read(buffers, numBuffers, count);
+        }
+        if (count == PIPE_ERROR_IO) {
+            D("PIPE_ERROR_IO");
+            mState = State::ClosedByHost;
+            mAdbHub.setSocket(nullptr);
+            mHostSocket.reset();
+        }
+        if (count == PIPE_ERROR_AGAIN) {
+            //mFdWatcher->dontWantWrite();
+        }
+        if (android_hw->test_monitorAdb > 0) {
+            mSendingMesg.read(buffers, numBuffers, count);
+        }
+        if (count > 0) {
+            bool shouldClose = false;
+            updateJdwpRegistration(&shouldClose);
+            if (shouldClose) {
+                return PIPE_ERROR_IO;
+            }
+        }
+        return count;
     } else if (mState == State::WaitingForGuestAcceptCommand ||
                mState == State::WaitingForGuestStartCommand) {
         // Waiting command bytes from the guest.
         return onGuestSendCommand(buffers, numBuffers);
+    } else if (mReuseFromSnapshot && mState == State::WaitingForHostAdbConnection) {
+        return PIPE_ERROR_AGAIN;
     } else {
         if (mState != State::ClosedByHost) {
             // Invalid state !!!
@@ -493,7 +601,8 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     }
 }
 
-void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
+                                    AdbPortType portType) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
     android::base::socketSetNonBlocking(socket.get());
@@ -512,15 +621,25 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
             this));
     assert(mFdWatcher);
     mHostSocket = CrossSessionSocket(std::move(socket));
+    mAdbHub.setSocket(&mHostSocket);
+    mPortType = portType;
+    printf("set up pipe type %d\n", portType);
 
-    DD("%s: [%p] sending reply", __func__, this);
-    setReply("ok", State::SendingAcceptReplyOk);
-    signalWake(PIPE_WAKE_READ);
+    if (mReuseFromSnapshot) {
+        mState = State::ProxyingData;
+        mReuseFromSnapshot = false;
+        D("Reuse pipe %p from snapshot", this);
+    } else {
+        DD("%s: [%p] sending reply", __func__, this);
+        setReply("ok", State::SendingAcceptReplyOk);
+        signalWake(PIPE_WAKE_READ);
+    }
 }
 
 void AdbGuestPipe::resetConnection() {
     D("%s: [%p] reset connection\n", __func__, this);
     service()->hostCloseSocket(mHostSocket.fd());
+    mAdbHub.setSocket(nullptr);
     mHostSocket.reset();
     mState = State::ClosedByHost;
     signalWake(PIPE_WAKE_CLOSED);
@@ -610,6 +729,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                 // End of stream or i/o error means the guest has closed
                 // the connection.
                 if (result == 0) {
+                    mAdbHub.setSocket(nullptr);
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
                     DINIT("%s: [%p] Adb closed by host",__func__, this);
@@ -688,6 +808,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                 // End of stream or i/o error means the guest has closed
                 // the connection.
                 if (result == 0) {
+                    mAdbHub.setSocket(nullptr);
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
                     DINIT("%s: [%p] Adb closed by host",__func__, this);
@@ -753,6 +874,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                 // Mismatched, this is not what the pipe is expecting.
                 // Closing the connection now is easier than sending 'ko'.
                 DD("%s: [%p] mismatched command", __func__, this);
+                mAdbHub.setSocket(nullptr);
                 mHostSocket.reset();
                 return PIPE_ERROR_IO;
             }
@@ -818,6 +940,84 @@ void AdbGuestPipe::waitForHostConnection() {
 
 bool AdbGuestPipe::shouldUseRecvBuffer() {
     return isProxyingData();
+}
+
+AdbProxy* AdbGuestPipe::onAdbConnectOkay(const apacket &packet, int guestId) {
+    int jdwpId = 0;
+    int jdwpConnect = sscanf((const char*)packet.data.data(),
+            "jdwp:%d", &jdwpId);
+    if (jdwpConnect == 0) {
+        return nullptr;
+    }
+    jdwp::JdwpProxy* proxy = new jdwp::JdwpProxy(
+        packet.mesg.arg0, guestId, jdwpId
+    );
+    mJdwpProxies[jdwpId].reset(proxy);
+    return proxy;
+}
+
+void AdbGuestPipe::updateJdwpRegistration(bool* shouldClose) {
+    *shouldClose = false;
+    /*if (mJdwp.shouldCheckRegistration()) {
+        AdbGuestPipe* existingPipe =
+                service()->tryGetJdwpProxy(mJdwp.mGuestPid);
+        if (existingPipe) {
+            if (mPortType == Jdwp) {
+                // Should replace the original pipe
+                // The ordering of the commands might be important.
+                // TODO(yahan@) fix synchronization issues
+                D("Replay existing Jdwp %d", mJdwp.mGuestPid);
+                assert(mState == State::ProxyingData);
+                assert(existingPipe->mState == State::ProxyingData);
+                service()->hostCloseSocket(existingPipe->mFdWatcher->fd());
+                existingPipe->mHostAgent = mHostAgent;
+                // Stop the fd watcher
+                mFdWatcher->dontWantWrite();
+                mFdWatcher->dontWantRead();
+                // Overwrite host fd
+                existingPipe->mFdWatcher.reset(
+                    android::base::ThreadLooper::get()->createFdWatch(
+                    mHostSocket.fd(),
+                    [](void* opaque, int fd, unsigned events) {
+                        static_cast<AdbGuestPipe*>(opaque)->onHostSocketEvent(events);
+                    },
+                    existingPipe)
+                );
+                existingPipe->mHostSocket = std::move(mHostSocket);
+                existingPipe->mPortType = mPortType;
+                existingPipe->mJdwp.resetServerThread();
+                // TODO: swap out the host ID
+                //existingPipe->mJdwp.mHostId = mJdwp.mHostId;
+                // TODO: remove this when we have the adb proxy
+                existingPipe->mJdwp.mProxyState = jdwp::JdwpProxy::Proxying;
+                existingPipe->mJdwp.mIsJdwp = jdwp::JdwpProxy::Yes; // Remove this when we fix the host id issue
+                existingPipe->mJdwp.mClientState = mJdwp.mClientState;
+                existingPipe->mJdwp.fakeServerAsync(existingPipe->mHostSocket.fd(),
+                    [existingPipe]() {
+                        existingPipe->signalWake(PIPE_WAKE_READ | PIPE_WAKE_WRITE);
+                    });
+                // onPipeClose will delete this
+                //service()->onPipeClose(this);
+                *shouldClose = true;
+                return;
+            } else {
+                // Don't proxy it
+                fprintf(stderr, "WARNING: unexpected jdwp connection\n");
+                //mJdwp.mIsJdwp = jdwp::JdwpProxy::No;
+                mJdwp.setRegistered(true);
+                return;
+            }
+        }
+    }
+    if (mJdwp.shouldRegister()) {
+        D("Register new Jdwp %d", mJdwp.mGuestPid);
+        service()->registerJdwpProxy(mJdwp.mGuestPid, this);
+        mJdwp.setRegistered(true);
+    } else if (mJdwp.shouldUnregister()) {
+        D("Unregister new Jdwp %d", mJdwp.mGuestPid);
+        //service()->unregisterJdwpProxy(mJdwp.mGuestPid);
+        mJdwp.setRegistered(false);
+    }*/
 }
 
 }  // namespace emulation
