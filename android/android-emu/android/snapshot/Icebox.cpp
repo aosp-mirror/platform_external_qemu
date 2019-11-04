@@ -30,11 +30,12 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 #include "android/emulation/AdbMessageSniffer.h"
+#include "android/emulation/apacket_utils.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -48,69 +49,12 @@
 #define DD(...) (void)0
 #endif
 
-#define ADB_SYNC 0x434e5953
-#define ADB_CNXN 0x4e584e43
-#define ADB_OPEN 0x4e45504f
-#define ADB_OKAY 0x59414b4f
-#define ADB_CLSE 0x45534c43
-#define ADB_WRTE 0x45545257
-#define ADB_AUTH 0x48545541
-
-#define ADB_AUTH_TOKEN 1
-#define ADB_AUTH_SIGNATURE 2
-#define ADB_AUTH_RSAPUBLICKEY 3
-#define A_VERSION 0x01000000
-
 using amessage = android::emulation::AdbMessageSniffer::amessage;
-
+using namespace android::emulation;
 using namespace android::jdwp;
-
-namespace {
-struct apacket {
-    amessage mesg;
-    std::vector<uint8_t> data;
-};
-}  // namespace
 
 static int s_adb_port = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
-
-static bool sendPacket(int s, const apacket* packet) {
-    using android::base::socketSendAll;
-    assert(packet->mesg.data_length == packet->data.size());
-    if (!socketSendAll(s, &packet->mesg, sizeof(packet->mesg))) {
-        return false;
-    }
-    if (packet->mesg.data_length &&
-        !socketSendAll(s, packet->data.data(), packet->mesg.data_length)) {
-        return false;
-    }
-    return true;
-}
-
-static bool recvPacket(int s, apacket* packet) {
-    using android::base::socketRecvAll;
-    if (!socketRecvAll(s, &packet->mesg, sizeof(packet->mesg))) {
-        return false;
-    }
-    packet->data.resize(packet->mesg.data_length);
-    if (packet->mesg.data_length &&
-        !socketRecvAll(s, packet->data.data(), packet->mesg.data_length)) {
-        return false;
-    }
-    return true;
-}
-
-static bool recvOkay(int s) {
-    apacket connect_ok;
-    if (!recvPacket(s, &connect_ok)) {
-        return false;
-    }
-    if (connect_ok.mesg.command != ADB_OKAY) {
-        return false;
-    }
-    return true;
-}
 
 // Adb authentication
 #define TOKEN_SIZE 20
@@ -178,7 +122,7 @@ static bool sign_auth_token(const char* token,
 namespace android {
 namespace icebox {
 
-void set_adb_port(int adb_port) {
+void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
 }
 

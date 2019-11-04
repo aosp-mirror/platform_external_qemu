@@ -60,6 +60,8 @@
 
 #define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+static std::unordered_map<int, android::emulation::AdbGuestPipe*> sJdwpPipes;
+
 namespace android {
 namespace emulation {
 
@@ -181,7 +183,8 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
 
 bool AdbGuestPipe::Service::canLoad() const {
     bool ret = android::featurecontrol::isEnabled(
-            android::featurecontrol::Feature::SnapshotAdb);
+                       android::featurecontrol::Feature::SnapshotAdb) ||
+               sJdwpPipes.size();
     D("%s: can load %d", __func__, ret);
     return ret;
 }
@@ -203,7 +206,8 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
 }
 
-void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
+                                             AdbPortType portType) {
     D("%s", __func__);
     // There must be no active pipe yet, but at least one waiting
     // for activation in mPipes.
@@ -211,7 +215,7 @@ void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
     mHostAgent->stopListening();
     AdbGuestPipe* activePipe = searchForActivePipe();
     CHECK(activePipe != nullptr);
-    activePipe->onHostConnection(std::move(socket));
+    activePipe->onHostConnection(std::move(socket), portType);
 }
 
 void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
@@ -288,6 +292,25 @@ void AdbGuestPipe::Service::hostCloseSocket(int fd) {
     DD("%s: [%p]", __func__, this);
     assert(!mRecycledSockets.count(fd) || !mRecycledSockets[fd].valid());
     mRecycledSockets.erase(fd);
+}
+
+void AdbGuestPipe::Service::registerJdwpProxy(int pid, AdbGuestPipe* pipe) {
+    // TODO: lock?
+    assert(!mJdwpPipes.count(pid));
+    mJdwpPipes.emplace(pid, pipe);
+}
+
+void AdbGuestPipe::Service::unregisterJdwpProxy(int pid) {
+    assert(mJdwpPipes.count(pid));
+    mJdwpPipes.erase(pid);
+}
+
+AdbGuestPipe* AdbGuestPipe::Service::tryGetJdwpProxy(int pid) {
+    auto ite = mJdwpPipes.find(pid);
+    if (ite == mJdwpPipes.end()) {
+        return nullptr;
+    }
+    return ite->second;
 }
 
 AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
@@ -434,9 +457,20 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
+        if (mJdwp.shouldBlockGuest()) {
+            return PIPE_ERROR_AGAIN;
+        }
         int count = onGuestRecvData(buffers, numBuffers);
         if (android_hw->test_monitorAdb> 0) {
             mReceivedMesg.read(buffers, numBuffers, count);
+        }
+        if (count > 0) {
+            mJdwp.onGuestRecvData(buffers, numBuffers, count);
+            bool shouldClose = false;
+            updateJdwpRegistration(&shouldClose);
+            if (shouldClose) {
+                return PIPE_ERROR_IO;
+            }
         }
         return count;
     } else if (guest_boot_completed == 0 && android_hw->test_delayAdbTillBootComplete == 1) {
@@ -464,8 +498,23 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
       toString(mState));
     if (mState == State::ProxyingData) {
+        if (mJdwp.shouldBlockGuest()) {
+            return PIPE_ERROR_AGAIN;
+        }
         // Common-case, proxy-ing the data from the guest to the host.
-        return onGuestSendData(buffers, numBuffers);
+        int count = onGuestSendData(buffers, numBuffers);
+        if (android_hw->test_monitorAdb > 0) {
+            mSendingMesg.read(buffers, numBuffers, count);
+        }
+        if (count > 0) {
+            mJdwp.onGuestSendData(buffers, numBuffers, count);
+            bool shouldClose = false;
+            updateJdwpRegistration(&shouldClose);
+            if (shouldClose) {
+                return PIPE_ERROR_IO;
+            }
+        }
+        return count;
     } else if (mState == State::WaitingForGuestAcceptCommand ||
                mState == State::WaitingForGuestStartCommand) {
         // Waiting command bytes from the guest.
@@ -493,7 +542,8 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     }
 }
 
-void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
+                                    AdbPortType portType) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
     android::base::socketSetNonBlocking(socket.get());
@@ -512,6 +562,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
             this));
     assert(mFdWatcher);
     mHostSocket = CrossSessionSocket(std::move(socket));
+    mPortType = portType;
 
     DD("%s: [%p] sending reply", __func__, this);
     setReply("ok", State::SendingAcceptReplyOk);
@@ -818,6 +869,46 @@ void AdbGuestPipe::waitForHostConnection() {
 
 bool AdbGuestPipe::shouldUseRecvBuffer() {
     return isProxyingData();
+}
+
+void AdbGuestPipe::updateJdwpRegistration(bool* shouldClose) {
+    *shouldClose = false;
+    if (mJdwp.shouldCheckRegistration()) {
+        AdbGuestPipe* existingPipe =
+                service()->tryGetJdwpProxy(mJdwp.mGuestPid);
+        if (existingPipe) {
+            if (mPortType == Jdwp) {
+                // Should replace the original pipe
+                // The ordering of the commands might be important.
+                // TODO(yahan@) fix synchronization issues
+                assert(mState == State::ProxyingData);
+                assert(existingPipe->mState == State::ProxyingData);
+                existingPipe->mHostAgent = mHostAgent;
+                existingPipe->mFdWatcher = std::move(mFdWatcher);
+                existingPipe->mHostSocket = std::move(mHostSocket);
+                existingPipe->mPortType = mPortType;
+                existingPipe->mJdwp.resetServerThread();
+                existingPipe->mJdwp.mHostId = mJdwp.mHostId;
+                existingPipe->mJdwp.mClientState = mJdwp.mClientState;
+                // onPipeClose will delete this
+                service()->onPipeClose(this);
+                *shouldClose = true;
+                return;
+            } else {
+                // Don't proxy it
+                fprintf(stderr, "WARNING: unexpected jdwp connection\n");
+                mJdwp.mIsJdwp = jdwp::JdwpProxy::No;
+                return;
+            }
+        }
+    }
+    if (mJdwp.shouldRegister()) {
+        service()->registerJdwpProxy(mJdwp.mGuestPid, this);
+        mJdwp.setRegistered(true);
+    } else if (mJdwp.shouldUnregister()) {
+        service()->unregisterJdwpProxy(mJdwp.mGuestPid);
+        mJdwp.setRegistered(false);
+    }
 }
 
 }  // namespace emulation
