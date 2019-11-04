@@ -33,4 +33,7 @@ extern void android_adb_service_init(void);
 // Closes all active ADB guest pipes and allows new connections to be made.
 extern void android_adb_reset_connection(void);
 
+// Get the jdwp port. Callable after init.
+extern int android_jdwp_get_port();
+
 ANDROID_END_HEADER
