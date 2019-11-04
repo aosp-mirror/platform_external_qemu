@@ -20,6 +20,6 @@ namespace icebox {
 // snapshot_name if unexpected error happens.
 extern bool track(int pid, const char* snapshot_name);
 extern bool track_async(int pid, const char* snapshot_name);
-extern void set_adb_port(int adb_port);
+extern void set_jdwp_port(int adb_port);
 }  // namespace icebox
 }  // namespace android
