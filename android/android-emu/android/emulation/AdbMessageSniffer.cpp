@@ -13,8 +13,14 @@
 
 #include "android/base/ArraySize.h"
 #include "android/globals.h"
+#include "android/jdwp/Jdwp.h"
 
+#include <algorithm>
 #include <atomic>
+#include <numeric>
+#include <set>
+
+#define LOG_JDWP
 
 static std::atomic<int> host_cts_heart_beat_count {};
 
@@ -37,6 +43,13 @@ namespace emulation {
 #define ADB_VERSION 0x01000000
 // 1 MB
 #define MAX_ADB_MESSAGE_PAYLOAD 1048576
+
+#ifdef LOG_JDWP
+
+using android::jdwp::JdwpCommandHeader;
+
+std::set<std::pair<int, int> > s_jdwp;
+#endif
 
 AdbMessageSniffer::AdbMessageSniffer(const char* name):mName(name) {
     memset(&mPacket, 0, sizeof(apacket));
@@ -165,6 +178,11 @@ int AdbMessageSniffer::readPayload(int dataSize) {
         copyFromBuffer(need);
         updateCtsHeartBeatCount();
         printPayload();
+#ifdef LOG_JDWP
+        if (memcmp(mPacket.data, "JDWP-Handshake", 14) == 0) {
+            s_jdwp.insert(std::make_pair(mPacket.mesg.arg0, mPacket.mesg.arg1));
+        }
+#endif
         startNewMessage();
         return need;
     }
@@ -205,24 +223,59 @@ void AdbMessageSniffer::printPayload() {
     amessage & msg = mPacket.mesg;
     if (msg.command == ADB_OKAY) return;
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
-    int length = msg.data_length;
-    length = getAllowedBytesToPrint(length);
-    if (length <= 0 ) return;
-    uint8_t* data = mPacket.data;
-    for (int i=0; i < length; ++i) {
-        if (i % 1024 == 0) {
-            printf("%s:", mName);
+#ifdef LOG_JDWP
+    if (msg.command == ADB_WRTE &&
+        s_jdwp.count(std::make_pair(msg.arg0, msg.arg1))) {
+        printf("%s:", mName);
+        JdwpCommandHeader command_header;
+        command_header.parseFrom((const unsigned char*)mPacket.data);
+        printf("jdwp length: %d id: %d flags: 0x%x command set: 0x%x command: "
+               "0x%x\n",
+               command_header.length, command_header.id, command_header.flags,
+               command_header.command_set, command_header.command);
+        printf("%s jdwp data:", mName);
+        for (int i = 11; i < std::min(command_header.length, (uint32_t)50);
+             i++) {
+            printf("%02x", mPacket.data[i]);
         }
-        int ch = data[i];
-        if (isprint(ch)) {
-            printf("%c", ch);
-        } else if (isspace(ch)) {
-            //printf("%c", ch);
-        } else {
-            //printf(" ");
+        printf("\n");
+        if (command_header.length > 11) {
+            printf("%s jdwp str:", mName);
+            for (int i = 11; i < std::min(command_header.length, (uint32_t)50);
+                i++) {
+                printf("%c", mPacket.data[i]);
+            }
+            printf("\n");
+            // if (mPacket.data[11] == 0) {
+            //printf("%s jdwp str:%.80s\n", mName, (const char*)mPacket.data + 11);
+            //} else {
+            //    printf("%s(%p) jdwp str:%.50s\n", mName, mPipe, (const
+            //    char*)mPacket.data + 11);
+            //}
         }
+        // printf("%s\n", mPacket.data + sizeof(JdwpCommandHeader));
+    } else
+#endif
+    {
+        int length = msg.data_length;
+        length = getAllowedBytesToPrint(length);
+        if (length <= 0 ) return;
+        uint8_t* data = mPacket.data;
+        for (int i=0; i < length; ++i) {
+            if (i % 1024 == 0) {
+                printf("%s:", mName);
+            }
+            int ch = data[i];
+            if (isprint(ch)) {
+                printf("%c", ch);
+            } else if (isspace(ch)) {
+                //printf("%c", ch);
+            } else {
+                //printf(" ");
+            }
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
 const char* AdbMessageSniffer::getCommandName(unsigned code) {
@@ -252,7 +305,7 @@ void AdbMessageSniffer::printMessage() {
     }
 
     amessage & msg = mPacket.mesg;
-    if (msg.command == ADB_OKAY) return;
+    // if (msg.command == ADB_OKAY) return;
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
 
     printf("%s:command: %s ", mName, getCommandName(msg.command));
