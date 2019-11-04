@@ -34,7 +34,7 @@
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -178,7 +178,7 @@ static bool sign_auth_token(const char* token,
 namespace android {
 namespace icebox {
 
-void set_adb_port(int adb_port) {
+void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
 }
 
