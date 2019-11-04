@@ -95,7 +95,7 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket) override;
+        virtual void onHostConnection(ScopedSocket&& socket, AdbPortType portType) override;
 
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
