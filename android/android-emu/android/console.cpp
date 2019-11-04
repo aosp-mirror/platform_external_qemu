@@ -3666,12 +3666,23 @@ do_crash_on_exit( ControlClient  client, char*  args )
     crash();
 }
 
+// do a save first
 static int
 do_kill( ControlClient  client, char*  args )
 {
     control_write( client, "OK: killing emulator, bye bye\r\n" );
     DINIT("Emulator killed by console kill command.\n");
     fflush(stdout);
+    if (!android_cmdLineOptions->read_only && !android_cmdLineOptions->no_snapshot_save) {
+        bool success = false;
+        for (int i=0; i < 3; ++i) {
+            success = vmopers(client)->snapshotSave("default_boot", client, control_write_err_cb);
+            if (success) break;
+        }
+        if (!success) {
+            control_write( client, "KO: save failed\r\n" );
+        }
+    }
     client->global->libui_agent->requestExit(0, "Killed by console command");
     return 0;
 }
