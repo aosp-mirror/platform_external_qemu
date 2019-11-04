@@ -60,6 +60,8 @@
 
 #define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+static std::unordered_map<int, android::emulation::AdbGuestPipe*> sJdwpPipes;
+
 namespace android {
 namespace emulation {
 
@@ -181,7 +183,8 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
 
 bool AdbGuestPipe::Service::canLoad() const {
     bool ret = android::featurecontrol::isEnabled(
-            android::featurecontrol::Feature::SnapshotAdb);
+                       android::featurecontrol::Feature::SnapshotAdb) ||
+               sJdwpPipes.size();
     D("%s: can load %d", __func__, ret);
     return ret;
 }
@@ -203,7 +206,8 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
 }
 
-void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
+                                             AdbPortType portType) {
     D("%s", __func__);
     // There must be no active pipe yet, but at least one waiting
     // for activation in mPipes.
@@ -624,6 +628,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
         buffers++;
         numBuffers--;
     }
+    mJdwp.onGuestRecvData(buffers, numBuffers);
     DD("%s: [%p] done %d", __func__, this, result);
     return result;
 }
@@ -640,6 +645,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                                   int numBuffers) {
     D("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
     CHECK(mState == State::ProxyingData);
+    mJdwp.onGuestSendData(buffers, numBuffers);
     int result = 0;
 #ifdef _DEBUG
     int msgSize = 0;
