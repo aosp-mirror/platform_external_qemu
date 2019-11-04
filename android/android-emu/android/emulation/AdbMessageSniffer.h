@@ -27,12 +27,12 @@ public:
 
 
 struct amessage {
-    unsigned command;       /* command identifier constant      */
-    unsigned arg0;          /* first argument                   */
-    unsigned arg1;          /* second argument                  */
-    unsigned data_length;   /* length of payload (0 is allowed) */
-    unsigned data_check;    /* checksum of data payload         */
-    unsigned magic;         /* command ^ 0xffffffff             */
+    unsigned command = 0;       /* command identifier constant      */
+    unsigned arg0 = 0;          /* first argument                   */
+    unsigned arg1 = 0;          /* second argument                  */
+    unsigned data_length = 0;   /* length of payload (0 is allowed) */
+    unsigned data_check = 0;    /* checksum of data payload         */
+    unsigned magic = 0;         /* command ^ 0xffffffff             */
 };
 
 struct apacket
