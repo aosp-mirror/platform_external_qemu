@@ -66,6 +66,14 @@ public:
 
     // Return the ADB client port used by this listener.
     int clientPort() const { return mAdbClientPort; }
+    // Return the JDWP port
+    int jdwpPort() const {
+        if (mJdwpServer) {
+            return mJdwpServer->port();
+        } else {
+            return -1;
+        }
+    }
 
     // Set the AdbGuestAgent to use at runtime. Its onHostConnection()
     // method will be called when the ADB server connects after a call
@@ -89,11 +97,12 @@ public:
 private:
     // Called from the AsyncSocketServer when a new connection from the
     // ADB host server happens. Return true on success, false otherwise.
-    bool onHostServerConnection(int port);
+    bool onHostServerConnection(int port, AdbPortType portType);
 
     AdbGuestAgent* mGuestAgent = nullptr;
     int mAdbClientPort = -1;
     std::unique_ptr<android::base::AsyncSocketServer> mServer;
+    std::unique_ptr<android::base::AsyncSocketServer> mJdwpServer;
 };
 
 }  // namespace emulation
