@@ -21,6 +21,7 @@
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/CrossSessionSocket.h"
+#include "android/jdwp/JdwpProxy.h"
 
 #include <unordered_map>
 #include <utility>
@@ -95,7 +96,8 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket) override;
+        virtual void onHostConnection(ScopedSocket&& socket,
+                                      AdbPortType portType) override;
 
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
@@ -223,6 +225,8 @@ private:
 
     android::emulation::AdbMessageSniffer mReceivedMesg;
     android::emulation::AdbMessageSniffer mSendingMesg;
+    AdbPortType mPortType = AdbPortType::Adb;
+    jdwp::JdwpProxy mJdwp;
 };
 
 }  // namespace emulation
