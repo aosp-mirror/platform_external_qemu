@@ -60,6 +60,8 @@
 
 #define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+static std::unordered_map<int, android::emulation::AdbGuestPipe*> sJdwpPipes;
+
 namespace android {
 namespace emulation {
 
@@ -181,7 +183,8 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
 
 bool AdbGuestPipe::Service::canLoad() const {
     bool ret = android::featurecontrol::isEnabled(
-            android::featurecontrol::Feature::SnapshotAdb);
+                       android::featurecontrol::Feature::SnapshotAdb) ||
+               sJdwpPipes.size();
     D("%s: can load %d", __func__, ret);
     return ret;
 }
@@ -203,7 +206,8 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
 }
 
-void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
+                                             AdbPortType portType) {
     D("%s", __func__);
     // There must be no active pipe yet, but at least one waiting
     // for activation in mPipes.
@@ -624,6 +628,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
         buffers++;
         numBuffers--;
     }
+    mJdwp.onGuestRecvData(buffers, numBuffers);
     DD("%s: [%p] done %d", __func__, this, result);
     return result;
 }
@@ -640,6 +645,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                                   int numBuffers) {
     D("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
     CHECK(mState == State::ProxyingData);
+    mJdwp.onGuestSendData(buffers, numBuffers);
     int result = 0;
 #ifdef _DEBUG
     int msgSize = 0;
@@ -818,6 +824,151 @@ void AdbGuestPipe::waitForHostConnection() {
 
 bool AdbGuestPipe::shouldUseRecvBuffer() {
     return isProxyingData();
+}
+
+void AdbGuestPipe::Jdwp::Buffer::readBytes(const AndroidPipeBuffer* buffers,
+                                           int numBuffers,
+                                           int* bufferIdx,
+                                           size_t* bufferPst,
+                                           size_t bytesToRead,
+                                           bool skipData) {
+    while (bytesToRead > 0 && *bufferIdx < numBuffers) {
+        size_t remainBufferSize = buffers[*bufferIdx].size - *bufferPst;
+        size_t currentReadSize = std::min(bytesToRead, remainBufferSize);
+        if (skipData) {
+            mBytesToSkip -= currentReadSize;
+        } else {
+            memcpy(mBuffer + mBufferTail, buffers[*bufferIdx].data + *bufferPst,
+                   currentReadSize);
+            mBufferTail += currentReadSize;
+        }
+        *bufferPst += currentReadSize;
+        bytesToRead -= currentReadSize;
+        if (*bufferPst == buffers[*bufferIdx].size) {
+            *bufferIdx++;
+            *bufferPst = 0;
+        }
+    }
+}
+
+#define ADB_SYNC 0x434e5953
+#define ADB_CNXN 0x4e584e43
+#define ADB_OPEN 0x4e45504f
+#define ADB_OKAY 0x59414b4f
+#define ADB_CLSE 0x45534c43
+#define ADB_WRTE 0x45545257
+#define ADB_AUTH 0x48545541
+
+void AdbGuestPipe::Jdwp::onGuestSendData(const AndroidPipeBuffer* buffers,
+                                         int numBuffers) {
+    if (mIsJdwp == IsJdwp::No) {
+        return;
+    }
+    const size_t kHeaderSize = sizeof(AdbMessageSniffer::amessage);
+}
+
+// This function track whether a connection is jdwp or not. It tracks all
+// packages until it found a connection package.
+void AdbGuestPipe::Jdwp::onGuestRecvData(const AndroidPipeBuffer* buffers,
+                                         int numBuffers) {
+    if (mIsJdwp == IsJdwp::No) {
+        return;
+    }
+    const size_t kHeaderSize = sizeof(AdbMessageSniffer::amessage);
+    int readBuffer = 0;
+    int currentBuffer = 0;
+    size_t currentPst = 0;
+    uint32_t command = 0;
+    bool skipOtherCommand = false;
+    switch (mProxyStatus) {
+        case Uninitialized:
+            command = ADB_OPEN;
+            skipOtherCommand = true;
+            break;
+        case ConnectOk:
+            command = ADB_WRTE;
+            break;
+        case HandshakeReplied:
+            command = ADB_OKAY;
+            break;
+        default:
+            mIsJdwp = IsJdwp::No;
+            return;
+    }
+    while (currentBuffer < numBuffers) {
+        if (mGuestRecvBuffer.mBytesToSkip) {
+            mGuestRecvBuffer.readBytes(buffers, numBuffers, &currentBuffer,
+                                       &currentPst,
+                                       mGuestRecvBuffer.mBytesToSkip, true);
+        } else if (mGuestRecvBuffer.mBufferTail < kHeaderSize) {
+            size_t bytesActualRead = 0;
+            mGuestRecvBuffer.readBytes(
+                    buffers, numBuffers, &currentBuffer, &currentPst,
+                    kHeaderSize - mGuestRecvBuffer.mBufferTail, false);
+            if (mGuestRecvBuffer.mBufferTail == kHeaderSize) {
+                // check header
+                AdbMessageSniffer::amessage* msg;
+                msg = (AdbMessageSniffer::amessage*)mGuestRecvBuffer.mBuffer;
+                if (msg->command != command) {
+                    if (skipOtherCommand) {
+                        // Skip payload if not ADB_OPEN
+                        mGuestRecvBuffer.mBytesToSkip = msg->data_length;
+                        mGuestRecvBuffer.mBufferTail = 0;
+                    } else {
+                        // Bad protocol
+                        mIsJdwp = IsJdwp::No;
+                        return;
+                    }
+                } else if (msg->data_length == 0) {
+                    if (mProxyStatus == HandshakeReplied) {
+                        mProxyStatus = HandshakeRepliedOk;
+                    } else {
+                        mIsJdwp = IsJdwp::No;
+                        return;
+                    }
+                }
+            }
+        } else {
+            AdbMessageSniffer::amessage* msg;
+            msg = (AdbMessageSniffer::amessage*)mGuestRecvBuffer.mBuffer;
+            mGuestRecvBuffer.readBytes(buffers, numBuffers, &currentBuffer,
+                                       &currentPst,
+                                       kHeaderSize + msg->data_length -
+                                               mGuestRecvBuffer.mBufferTail,
+                                       false);
+            if (kHeaderSize + msg->data_length ==
+                mGuestRecvBuffer.mBufferTail) {
+                switch (mProxyStatus) {
+                    case Uninitialized: {
+                        int jdwpConnect =
+                                sscanf(mGuestRecvBuffer.mBuffer + kHeaderSize,
+                                       "jdwp:%d", &mGuestPid);
+                        if (jdwpConnect == 0) {
+                            mIsJdwp = IsJdwp::No;
+                            return;
+                        }
+                        mIsJdwp = IsJdwp::Yes;
+                        mProxyStatus = Status::Connect;
+                        break;
+                    }
+                    case ConnectOk: {
+                        if (msg->data_length != 14 ||
+                            0 != memcmp("JDWP-Handshake",
+                                        mGuestRecvBuffer.mBuffer + kHeaderSize,
+                                        14)) {
+                            mIsJdwp = IsJdwp::No;
+                            return;
+                        }
+                        mProxyStatus = HandshakeSent;
+                        break;
+                    }
+                    default:
+                        mIsJdwp = IsJdwp::No;
+                        return;
+                }
+            }
+        }
+    }
 }
 
 }  // namespace emulation
