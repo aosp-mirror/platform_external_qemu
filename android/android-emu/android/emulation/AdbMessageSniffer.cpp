@@ -252,7 +252,7 @@ void AdbMessageSniffer::printMessage() {
     }
 
     amessage & msg = mPacket.mesg;
-    if (msg.command == ADB_OKAY) return;
+    //if (msg.command == ADB_OKAY) return;
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
 
     printf("%s:command: %s ", mName, getCommandName(msg.command));

@@ -178,7 +178,7 @@ static bool sign_auth_token(const char* token,
 namespace android {
 namespace icebox {
 
-void set_adb_port(int adb_port) {
+void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
 }
 
