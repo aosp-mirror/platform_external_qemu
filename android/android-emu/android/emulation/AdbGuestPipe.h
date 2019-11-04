@@ -95,7 +95,8 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket) override;
+        virtual void onHostConnection(ScopedSocket&& socket,
+                                      AdbPortType portType) override;
 
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
@@ -131,6 +132,49 @@ public:
         std::vector<AdbGuestPipe*> mPipes;
         AdbGuestPipe* mCurrentActivePipe = nullptr;
         std::unordered_map<int, android::base::ScopedSocket> mRecycledSockets;
+    };
+
+    struct Jdwp {
+        enum Status {
+            Uninitialized,
+            Connect,
+            ConnectOk,
+            HandshakeSent,
+            HandshakeSentOk,
+            HandshakeReplied,
+            HandshakeRepliedOk,
+            Proxying = HandshakeRepliedOk,
+        };
+        enum IsJdwp {
+            Unknown,
+            Yes,
+            No,
+        };
+        struct Buffer {
+            static const size_t kBufferSize = 50;
+            char mBuffer[kBufferSize];
+            size_t mBufferTail = 0;
+            size_t mBytesToSkip = 0;
+            void readBytes(const AndroidPipeBuffer* buffers,
+                           int numBuffers,
+                           int* bufferIdx,     // input / output
+                           size_t* bufferPst,  // input / output
+                           size_t bytesToRead,
+                           bool skipData);
+        };
+        static Status nextStatus(Status status);
+        Status mProxyStatus = Status::Uninitialized;
+        Status mClientStatus = Status::Uninitialized;
+        int mHostId = 0;
+        int mGuestId = 0;
+        int mGuestPid = 0;
+        Buffer mGuestSendBuffer;
+        Buffer mGuestRecvBuffer;
+        IsJdwp mIsJdwp = IsJdwp::Unknown;
+        void onSave(android::base::Stream* stream);
+        void onLoad(android::base::Stream* stream);
+        void onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers);
+        void onGuestRecvData(const AndroidPipeBuffer* buffers, int numBuffers);
     };
 
     virtual ~AdbGuestPipe();
@@ -223,6 +267,8 @@ private:
 
     android::emulation::AdbMessageSniffer mReceivedMesg;
     android::emulation::AdbMessageSniffer mSendingMesg;
+    AdbPortType mPortType = AdbPortType::Adb;
+    Jdwp mJdwp;
 };
 
 }  // namespace emulation
