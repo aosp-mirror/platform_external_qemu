@@ -49,6 +49,7 @@ set(android-emu-common
     android/emulation/AdbMessageSniffer.cpp
     android/emulation/AdbHostListener.cpp
     android/emulation/AdbHostServer.cpp
+    android/emulation/AdbHub.cpp
     android/emulation/AndroidAsyncMessagePipe.cpp
     android/emulation/AndroidMessagePipe.cpp
     android/emulation/AndroidPipe.cpp
@@ -121,6 +122,7 @@ set(android-emu-common
     android/hw-kmsg.c
     android/hw-lcd.c
     android/hw-qemud.cpp
+    android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
