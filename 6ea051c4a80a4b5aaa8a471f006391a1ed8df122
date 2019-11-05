@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60cdfad7_d4f8a2cf",
+        "filename": "android/android-studio/android/emulation/studio/SampleWindow.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-11-05T22:13:54Z",
+      "side": 1,
+      "message": "geometry",
+      "range": {
+        "startLine": 43,
+        "startChar": 35,
+        "endLine": 43,
+        "endChar": 43
+      },
+      "revId": "6ea051c4a80a4b5aaa8a471f006391a1ed8df122",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
