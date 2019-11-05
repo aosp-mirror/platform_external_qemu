@@ -10,25 +10,54 @@
 // GNU General Public License for more details.
 package android.emulation.studio;
 
+import java.util.Arrays;
 import java.awt.*;
-
 import javax.swing.*;
 
 public class SampleWindow {
-    public static void main(String[] args) {
-        int port = 5554;
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
-        }
-        InteractiveEmulatorView emuView = new InteractiveEmulatorView(port);
-        JButton rotate = new JButton("Rotate The Emulator");
-        rotate.addActionListener(e->{ emuView.rotate(); });
 
+       public static Dimension parseDimension(String[] args) {
+        for(int idx=0; idx < args.length; idx++) {
+            if (args[idx].equalsIgnoreCase("-geometry") && idx+1 < args.length) {
+                String[] dim = args[idx+1].split("[x|X]");
+                return new Dimension(Integer.parseInt(dim[0]), Integer.parseInt(dim[1]));
+            }
+        }
+        return new Dimension(360,640);
+    }
+
+    public static int parsePort(String[] args) {
+         for(int idx=0; idx < args.length; idx++) {
+            if (args[idx].equalsIgnoreCase("-port") && idx+1 < args.length) {
+                return Integer.parseInt(args[idx+1]);
+            }
+        }
+        return 5554;
+    }
+
+    public static void main(String[] args) {
+        if (Arrays.asList(args).contains("-h")) {
+            System.out.println("Usage: ");
+            System.out.println("  -h                          This help message");
+            System.out.println("  -noborder                   Show an undecorated window (default false)");
+            System.out.println("  -geometry <int>x<int>       Initial window size (default 360x640)");
+            System.out.println("  -port     <port>            Emulator telnet port (default 5554)");
+            return;
+        }
+
+        int port = parsePort(args);
+        Dimension size = parseDimension(args);
+        boolean borderLess = Arrays.asList(args).contains("-noborder");
+
+        InteractiveEmulatorView emuView = new InteractiveEmulatorView(port);
+        EmulatorLayoutManager layoutManager = new EmulatorLayoutManager(emuView);
+        JButton rotate = new JButton("Rotate The Emulator");
         JFrame frame = new JFrame("DefaultEmulatorDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(emuView, BorderLayout.CENTER);
-        frame.getContentPane().add(rotate, BorderLayout.SOUTH);
-        frame.setPreferredSize(new Dimension(360, 640));
+        frame.setLayout(layoutManager);
+        frame.setPreferredSize(size);
+        frame.setUndecorated(borderLess);
         frame.setTitle("Interactive Emulator Demo.");
         frame.pack();
         frame.setLocationRelativeTo(null);

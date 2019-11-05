@@ -6,6 +6,7 @@ set(CMAKE_JNI_TARGET TRUE)
 set(CMAKE_JAVA_COMPILE_FLAGS "-source" "1.8" "-target" "1.8")
 
 add_jar(emulator-studio-view
+        android/emulation/studio/EmulatorLayoutManager.java
         android/emulation/studio/EmulatorView.java
         android/emulation/studio/InteractiveEmulatorView.java
         android/emulation/studio/KeyMapper.java
