@@ -1645,6 +1645,14 @@ help_stdouterr_file(stralloc_t*  out)
     "  use '-stdouterr-file' to redirect stdout and stderr to it.\n\n"
     );
 }
+
+static void
+help_no_qt(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-no-qt' to disable qt windowing system.\n\n"
+    );
+}
 #endif  // __linux__
 
 static void
