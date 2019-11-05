@@ -836,6 +836,20 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    {
+        std::vector<std::string> myJavaCommands;
+        myJavaCommands.push_back("java");
+        myJavaCommands.push_back("-jar");
+        char mybuf[1024];
+//#snprintf(mybuf, sizeof(mybuf), "java -jar %s/./objs/android/android-studio/emulator-studio-view.jarlib64/emulator-studio-view.jar", progDirSystem.c_str());
+        snprintf(mybuf, sizeof(mybuf), "%s/android/android-studio/emulator-studio-view.jar", progDirSystem.c_str());
+        myJavaCommands.push_back(mybuf);
+        RunOptions run_flags = RunOptions::TerminateOnTimeout | RunOptions::HideAllOutput;
+        System::Pid pid;
+        System::ProcessExitCode exit_code;
+        fprintf(stderr, "running %s\n", mybuf);
+        System::get()->runCommand(myJavaCommands);
+    }
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
