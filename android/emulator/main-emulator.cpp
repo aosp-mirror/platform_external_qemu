@@ -245,11 +245,16 @@ int main(int argc, char** argv)
     const char* avdName = NULL;
     const char* avdArch = NULL;
     const char* engine = NULL;
+    const char* javaSkin= NULL;
+    const char* javaPorts= NULL;
+    const char* javaPath= NULL;
     const char* sysDir = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool force32bit = false;
     bool isHeadless = false;
+    bool isNoQt = false;
+    bool isNoWindow = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
     bool queryVersion = false;
@@ -431,6 +436,16 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt, "-skin") && nn + 1 < argc) {
+            javaSkin = argv[nn + 1];
+            nn++;
+        }
+
+        if (!strcmp(opt, "-ports") && nn + 1 < argc) {
+            javaPorts = argv[nn + 1];
+            nn++;
+        }
+
         if (!strcmp(opt, "-engine") && nn + 1 < argc) {
             engine = argv[nn + 1];
             nn++;
@@ -442,13 +457,20 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt,"-java")) {
+            javaPath = argv[nn + 1];
+            nn++;
+        }
+
         if (!strcmp(opt,"-no-qt")) {
             isHeadless = true;
+            isNoQt = true;
             continue;
         }
 
         if (!strcmp(opt,"-no-window")) {
             isHeadless = true;
+            isNoWindow = true;
             continue;
         }
 
@@ -836,6 +858,41 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    if (isNoQt && !isNoWindow && javaPath) {
+        std::vector<std::string> myJavaCommands;
+        myJavaCommands.push_back(javaPath);
+        myJavaCommands.push_back("-jar");
+        char mybuf[1024];
+        snprintf(mybuf, sizeof(mybuf), "%s/android/android-studio/emulator-studio-view.jar", progDirSystem.c_str());
+        if (System::get()->pathExists(mybuf)) {
+            myJavaCommands.push_back(mybuf);
+        } else {
+            snprintf(mybuf, sizeof(mybuf), "%s/lib64/emulator-studio-view.jar", progDirSystem.c_str());
+            if (System::get()->pathExists(mybuf)) {
+                myJavaCommands.push_back(mybuf);
+            }
+        }
+        if (javaSkin) {
+            myJavaCommands.push_back("-geometry");
+            myJavaCommands.push_back(javaSkin);
+        }
+        if (javaPorts) {
+            myJavaCommands.push_back("-port");
+            snprintf(mybuf, sizeof(mybuf), "%s", javaPorts);
+            char *pcomma = strchr(mybuf, ',');
+            *pcomma='\0';
+            myJavaCommands.push_back(mybuf);
+        }
+        RunOptions run_flags = RunOptions::TerminateOnTimeout | RunOptions::HideAllOutput;
+        System::Pid pid;
+        System::ProcessExitCode exit_code;
+        fprintf(stderr, "running %s\n", mybuf);
+        bool success = System::get()->runCommand(myJavaCommands, RunOptions::WaitForCompletion);
+        if (!success) {
+            fprintf(stderr, "cannot run emulator-studio-view.jar PATH is %s\n", System::get()->getEnvironmentVariable("PATH").c_str());
+            exit(1);
+        }
+    }
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.

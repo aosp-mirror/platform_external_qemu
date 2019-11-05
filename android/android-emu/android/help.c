@@ -1647,6 +1647,14 @@ help_stdouterr_file(stralloc_t*  out)
 }
 
 static void
+help_java(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-java <path-to-java>' to specify the path of java program.\n\n"
+    );
+}
+
+static void
 help_no_qt(stralloc_t*  out)
 {
     PRINTF(
