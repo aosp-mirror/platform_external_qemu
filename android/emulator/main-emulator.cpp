@@ -442,6 +442,11 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt,"-no-qt")) {
+            isHeadless = true;
+            continue;
+        }
+
         if (!strcmp(opt,"-no-window")) {
             isHeadless = true;
             continue;

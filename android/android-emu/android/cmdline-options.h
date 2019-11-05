@@ -124,6 +124,7 @@ OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
 OPT_PARAM( bluetooth, "<vendorid:productid>", "forward bluetooth to vendorid:productid" )
 CFG_PARAM( stdouterr_file, "<file-name>", "redirect stdout/stderr to a specific file" )
+OPT_FLAG ( no_qt, "disable qt windowing system" )
 #endif  // __linux__
 
 OPT_FLAG ( no_audio, "disable audio support" )
