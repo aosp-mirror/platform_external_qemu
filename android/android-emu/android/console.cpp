@@ -3735,7 +3735,10 @@ static int do_debug(ControlClient client, char* args) {
 }
 
 static int do_rotate_90_clockwise(ControlClient client, char* args) {
-    return (int)client->global->emu_agent->rotate90Clockwise();
+    if (client->global->emu_agent->rotate90Clockwise()) {
+        return 0;
+    }
+    return -1;
 }
 
 static int do_fold(ControlClient client, char* args) {
