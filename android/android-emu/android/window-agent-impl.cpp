@@ -31,7 +31,15 @@ static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
-        .rotate90Clockwise = [] { return emulator_window_rotate_90(true); },
+        .rotate90Clockwise =
+                [] {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        if (win->isMultiDisplayEnabled() == false) {
+                            return emulator_window_rotate_90(true);
+                        }
+                    }
+                    return false;
+                },
         .rotate = emulator_window_rotate,
         .getRotation =
                 [] {
