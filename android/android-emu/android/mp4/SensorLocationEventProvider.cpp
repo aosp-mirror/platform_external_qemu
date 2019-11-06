@@ -20,9 +20,10 @@
 #include <utility>                               // for move
 #include <vector>                                // for vector
 
-#include "android/automation/EventSource.h"      // for DurationNs
 #include "android/automation/AutomationController.h"
+#include "android/automation/EventSource.h"      // for DurationNs
 #include "android/base/Log.h"                    // for LogMessage, LOG, CHECK
+#include "android/base/synchronization/Lock.h"   // for Lock
 #include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
 #include "android/mp4/FieldDecodeInfo.h"         // for FieldDecodeInfo
 #include "android/offworld/proto/offworld.pb.h"  // for SensorDataPacketInfo
@@ -34,11 +35,14 @@ extern "C" {
 namespace android {
 namespace mp4 {
 
+typedef base::AutoLock AutoLock;
+typedef base::Lock Lock;
 typedef emulator_automation::RecordedEvent RecordedEvent;
 typedef emulator_automation::SensorOverrideEvent SensorOverrideEvent;
 typedef ::offworld::DatasetInfo DatasetInfo;
 typedef ::offworld::FieldInfo::Type Type;
 typedef automation::DurationNs DurationNs;
+typedef automation::NextCommandStatus NextCommandStatus;
 
 struct SensorDecodeInfo {
     int streamIndex = -1;
@@ -70,10 +74,11 @@ public:
     int init(const DatasetInfo& datasetInfo);
     void start() override { mStarted = true; }
     void stop() override { mStarted = false; }
-    void startFromTimestamp(uint64_t startTimestamp) override;
+    void startFromTimestamp(uint64_t startingTimestamp) override;
+    void setEndingTimestamp(uint64_t endingTimestamp) override;
     int createEvent(const AVPacket* packet) override;
     RecordedEvent consumeNextCommand() override;
-    bool getNextCommandDelay(DurationNs* outDelay) override;
+    NextCommandStatus getNextCommandDelay(DurationNs* outDelay) override;
 
 private:
     int createSensorEvent(AndroidSensor sensor, uint8_t* data);
@@ -83,7 +88,9 @@ private:
     // of timestamps when requested by AutomationController
     // because their creation are not necessarily in that order.
     std::unique_ptr<RecordedEventQueue> mEventQueue;
-    uint64_t mPreviousTimestamp = 0;
+    Lock mLock;
+    uint64_t mMinTimestamp = 0;
+    uint64_t mMaxTimestamp = std::numeric_limits<uint64_t>::max();
     SensorDecodeInfo mSensorDecodeInfo[MAX_SENSORS];
     bool mStarted = false;
 };
@@ -165,9 +172,16 @@ int SensorLocationEventProviderImpl::init(const DatasetInfo& datasetInfo) {
 }
 
 void SensorLocationEventProviderImpl::startFromTimestamp(
-        uint64_t startTimestamp) {
-    mPreviousTimestamp = startTimestamp;
+        uint64_t startingTimestamp) {
+    AutoLock lock(mLock);
+    mMinTimestamp = startingTimestamp;
     mStarted = true;
+}
+
+void SensorLocationEventProviderImpl::setEndingTimestamp(
+        uint64_t endingTimestamp) {
+    AutoLock lock(mLock);
+    mMaxTimestamp = endingTimestamp;
 }
 
 int SensorLocationEventProviderImpl::createEvent(const AVPacket* packet) {
@@ -282,30 +296,37 @@ int SensorLocationEventProviderImpl::createSensorEvent(AndroidSensor sensor,
         }
     }
 
+    AutoLock lock(mLock);
     mEventQueue->push(recordedEvent);
 
     return 0;
 }
 
 RecordedEvent SensorLocationEventProviderImpl::consumeNextCommand() {
+    AutoLock lock(mLock);
     CHECK(mEventQueue->size() != 0);
     RecordedEvent event = std::move(mEventQueue->top());
     mEventQueue->pop();
     return event;
 }
 
-bool SensorLocationEventProviderImpl::getNextCommandDelay(
+NextCommandStatus SensorLocationEventProviderImpl::getNextCommandDelay(
         DurationNs* outDelay) {
+    AutoLock lock(mLock);
     if (!mStarted || mEventQueue->size() == 0) {
-        return false;
+        return NextCommandStatus::NONE;
     }
 
     auto currentTimestamp = mEventQueue->top().delay();
-    *outDelay = (currentTimestamp < mPreviousTimestamp)
+    *outDelay = (currentTimestamp < mMinTimestamp)
                         ? 0
-                        : currentTimestamp - mPreviousTimestamp;
-    mPreviousTimestamp = std::max(currentTimestamp, mPreviousTimestamp);
-    return true;
+                        : currentTimestamp - mMinTimestamp;
+    mMinTimestamp = std::max(currentTimestamp, mMinTimestamp);
+    if (currentTimestamp <= mMaxTimestamp) {
+        return NextCommandStatus::OK;
+    } else {
+        return NextCommandStatus::PAUSED;
+    }
 }
 
 }  // namespace mp4
