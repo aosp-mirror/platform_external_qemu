@@ -41,6 +41,7 @@ public:
     virtual int createVideoMetadata(const AVPacket* packet) = 0;
     virtual bool hasNextFrameMetadata() = 0;
     virtual VideoMetadata getNextFrameMetadata() = 0;
+    virtual VideoMetadata peekNextFrameMetadata() = 0;
 
 protected:
     VideoMetadataProvider() = default;

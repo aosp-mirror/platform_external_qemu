@@ -145,6 +145,12 @@ public:
     virtual std::pair<uint64_t, uint64_t> getMetadata(
             android::base::StringView filename) = 0;
 
+    // Get the current timestamp of the looper used by the controller
+    virtual uint64_t getLooperNowTimestamp() = 0;
+
+    // Set the timestamp at which the next playback command should be executed
+    virtual void setNextPlaybackCommandTime(DurationNs nextTimestamp) = 0;
+
     //
     // Offworld API
     //

@@ -24,6 +24,13 @@ namespace automation {
 
 typedef android::base::Looper::DurationNs DurationNs;
 
+// The status when requesting the next command
+enum class NextCommandStatus {
+    NONE,
+    OK,
+    PAUSED,
+};
+
 // An EventSource provides a series of RecordedEvent's to AutomationController
 class EventSource {
 public:
@@ -32,9 +39,11 @@ public:
     // Return the next command from the source.
     virtual emulator_automation::RecordedEvent consumeNextCommand() = 0;
 
-    // Get the next command delay from the event source.  Returns false if there
-    // are no events remaining.
-    virtual bool getNextCommandDelay(DurationNs* outDelay) = 0;
+    // Get the next command delay from the event source. Returns:
+    // - OK if the next event is ready to be consumed
+    // - PAUSED if the next event exists but is not ready to be consumed
+    // - NONE if there are no events remaining.
+    virtual NextCommandStatus getNextCommandDelay(DurationNs* outDelay) = 0;
 };
 
 }  // namespace automation

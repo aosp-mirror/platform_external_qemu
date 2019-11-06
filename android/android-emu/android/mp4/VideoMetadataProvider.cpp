@@ -45,9 +45,10 @@ public:
     int init(const DatasetInfo& datasetInfo);
     int createVideoMetadata(const AVPacket* packet) override;
     bool hasNextFrameMetadata() override {
-        return mVideoMetadataQueue->size() != 0;
+        return mVideoMetadataQueue->size() > 0;
     }
     VideoMetadata getNextFrameMetadata() override;
+    VideoMetadata peekNextFrameMetadata() override;
 
 private:
     std::unique_ptr<VideoMetadataQueue> mVideoMetadataQueue;
@@ -160,6 +161,11 @@ VideoMetadata VideoMetadataProviderImpl::getNextFrameMetadata() {
     VideoMetadata metadata = std::move(mVideoMetadataQueue->front());
     mVideoMetadataQueue->pop();
     return metadata;
+}
+
+VideoMetadata VideoMetadataProviderImpl::peekNextFrameMetadata() {
+    CHECK(mVideoMetadataQueue->size() > 0);
+    return mVideoMetadataQueue->front();
 }
 
 }  // namespace mp4

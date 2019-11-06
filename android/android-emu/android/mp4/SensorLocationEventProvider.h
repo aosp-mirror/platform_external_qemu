@@ -30,6 +30,8 @@ namespace mp4 {
 
 typedef ::offworld::DatasetInfo DatasetInfo;
 typedef automation::DurationNs DurationNs;
+typedef automation::NextCommandStatus NextCommandStatus;
+typedef emulator_automation::RecordedEvent RecordedEvent;
 
 // SensorLocationEventProvider turns AVPackets containing sensor/location event
 // information into actual event objects that could be consumed by
@@ -43,9 +45,13 @@ public:
     virtual int createEvent(const AVPacket* packet) = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
+    // Set the timestamp from which the playback event should start
     virtual void startFromTimestamp(uint64_t startingTimestamp) = 0;
-    virtual emulator_automation::RecordedEvent consumeNextCommand() = 0;
-    virtual bool getNextCommandDelay(DurationNs* outDelay) = 0;
+    // Set the event playback's ending timestamp, a.k.a. the max timestamp of
+    // replayable events
+    virtual void setEndingTimestamp(uint64_t endingTimestamp) = 0;
+    virtual RecordedEvent consumeNextCommand() = 0;
+    virtual NextCommandStatus getNextCommandDelay(DurationNs* outDelay) = 0;
 
 protected:
     SensorLocationEventProvider() = default;
