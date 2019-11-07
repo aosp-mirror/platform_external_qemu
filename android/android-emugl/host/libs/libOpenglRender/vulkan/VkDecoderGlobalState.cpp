@@ -4276,7 +4276,7 @@ private:
             VkImage image,
             VkMemoryRequirements* pMemoryRequirements) {
         auto deviceInfoIt = mDeviceInfo.find(device);
-        if (!deviceInfoIt->second.emulateTextureEtc2 ||
+        if (!deviceInfoIt->second.emulateTextureEtc2 &&
             !deviceInfoIt->second.emulateTextureAstc) {
             return;
         }
