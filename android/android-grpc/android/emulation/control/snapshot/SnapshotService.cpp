@@ -36,6 +36,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/utils/path.h"
 #include "grpcpp/server.h"
 #include "grpcpp/server_builder.h"
@@ -61,11 +62,29 @@ namespace android {
 namespace emulation {
 namespace control {
 
+class SnapshotLineConsumer : public LineConsumer {
+public:
+    SnapshotLineConsumer(Snapshot* status) : mStatus(status) {}
+
+    Snapshot* error() {
+        mStatus->set_success(false);
+        std::string errMsg;
+        for (const auto& line : lines()) {
+            errMsg += line + "\n";
+        }
+        mStatus->set_err("Operation failed due to: " + errMsg);
+        return mStatus;
+    }
+
+private:
+    Snapshot* mStatus;
+};
+
 class SnapshotServiceImpl final : public SnapshotService::Service {
 public:
-    Status getSnapshot(ServerContext* context,
-                       const Snapshot* request,
-                       ServerWriter<Snapshot>* writer) override {
+    Status pullSnapshot(ServerContext* context,
+                        const Snapshot* request,
+                        ServerWriter<Snapshot>* writer) override {
         Snapshot result;
         auto snapshot =
                 snapshot::Snapshot::getSnapshotById(request->snapshot_id());
@@ -98,20 +117,13 @@ public:
         // directory, so they are already in a good state.
         if (!snapshot->isImported()) {
             // Exports all qcow2 images..
-            LineConsumer lineConsumer;
+            SnapshotLineConsumer slc(&result);
             auto exp = gQAndroidVmOperations->snapshotExport(
-                    snapshot->name().data(), tmpdir.data(),
-                    lineConsumer.opaque(), LineConsumer::Callback);
+                    snapshot->name().data(), tmpdir.data(), slc.opaque(),
+                    LineConsumer::Callback);
 
             if (!exp) {
-                result.set_success(false);
-                std::string errMsg;
-                for (const auto& line : lineConsumer.lines()) {
-                    errMsg += line + "\n";
-                }
-                result.set_err("Could not export " + request->snapshot_id() +
-                               " due to: " + errMsg);
-                writer->Write(result);
+                writer->Write(*slc.error());
                 return Status::OK;
             }
         }
@@ -135,9 +147,9 @@ public:
         return Status::OK;
     }
 
-    Status putSnapshot(ServerContext* context,
-                       ::grpc::ServerReader<Snapshot>* reader,
-                       Snapshot* reply) override {
+    Status pushSnapshot(ServerContext* context,
+                        ::grpc::ServerReader<Snapshot>* reader,
+                        Snapshot* reply) override {
         Snapshot msg;
 
         // Create a temporary directory for the snapshot..
@@ -243,9 +255,74 @@ public:
         return Status::OK;
     }
 
+    Status loadSnapshot(ServerContext* context,
+                        const Snapshot* request,
+                        Snapshot* reply) override {
+        reply->set_snapshot_id(request->snapshot_id());
+
+        auto snapshot =
+                snapshot::Snapshot::getSnapshotById(request->snapshot_id());
+
+        if (!snapshot) {
+            // Nope, the snapshot doesn't exist.
+            reply->set_success(false);
+            reply->set_err("Could not find " + request->snapshot_id());
+            return Status::OK;
+        }
+
+        SnapshotLineConsumer slc(reply);
+        if (!gQAndroidVmOperations->snapshotLoad(snapshot->name().data(),
+                                                 slc.opaque(),
+                                                 LineConsumer::Callback)) {
+            slc.error();
+            return Status::OK;
+        }
+
+        reply->set_success(true);
+        return Status::OK;
+    }
+
+    Status saveSnapshot(ServerContext* context,
+                        const Snapshot* request,
+                        Snapshot* reply) override {
+        reply->set_snapshot_id(request->snapshot_id());
+
+        auto snapshot =
+                snapshot::Snapshot::getSnapshotById(request->snapshot_id());
+        if (snapshot) {
+            // Nope, the snapshot already exists.
+            reply->set_success(false);
+            reply->set_err("Snapshot with " + request->snapshot_id() +
+                           " already exists!");
+            return Status::OK;
+        }
+
+        SnapshotLineConsumer slc(reply);
+        if (!gQAndroidVmOperations->snapshotSave(request->snapshot_id().c_str(),
+                                                 slc.opaque(),
+                                                 LineConsumer::Callback)) {
+            slc.error();
+            return Status::OK;
+        }
+
+        reply->set_success(true);
+        return Status::OK;
+    }
+
+    Status deleteSnapshot(ServerContext* context,
+                          const Snapshot* request,
+                          Snapshot* reply) override {
+        reply->set_snapshot_id(request->snapshot_id());
+        reply->set_success(true);
+
+        // This is really best effor here. We will not discover errors etc.
+        snapshot::Snapshotter::get().deleteSnapshot(request->snapshot_id().c_str());
+        return Status::OK;
+    }
+
 private:
     static constexpr uint32_t k256KB = 256 * 1024;
-};
+};  // namespace control
 
 SnapshotService::Service* getSnapshotService() {
     return new SnapshotServiceImpl();

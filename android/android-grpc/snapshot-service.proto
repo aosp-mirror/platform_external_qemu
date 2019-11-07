@@ -34,17 +34,20 @@ service SnapshotService {
     // running avd.
     rpc listSnapshots(google.protobuf.Empty) returns (SnapshotList) {}
 
-    // Gets the snapshot with the given id.
-    rpc getSnapshot(Snapshot) returns (stream Snapshot) {}
+    // Pulls down the snapshot stored inside the AVD as a tar.gz stream
+    rpc pullSnapshot(Snapshot) returns (stream Snapshot) {}
 
-    // Stores the given snapshot.
-    rpc putSnapshot(stream Snapshot) returns (Snapshot) {}
+    // Push a tar.gz stream contain the snapshot.
+    rpc pushSnapshot(stream Snapshot) returns (Snapshot) {}
 
-    // Starts the given snapshot
-    rpc startSnapshot(Snapshot) returns (google.protobuf.Empty) {}
+    // Loads the given snapshot inside the emulator.
+    rpc loadSnapshot(Snapshot) returns (Snapshot) {}
 
-    // Create as a snapshot of the current state of the emulator
-    rpc takeSnapshot(Snapshot) returns (google.protobuf.Empty) {}
+    // Create as a snapshot of the current state of the emulator.
+    rpc saveSnapshot(Snapshot) returns (Snapshot) {}
+
+    // Deletes the given snapshot from the avd.
+    rpc deleteSnapshot(Snapshot) returns (Snapshot) {}
 }
 
 message Snapshot {
