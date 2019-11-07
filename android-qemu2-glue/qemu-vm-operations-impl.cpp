@@ -29,6 +29,8 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/path.h"
 
+#include <nlohmann/json.hpp>
+
 extern "C" {
 #include "qemu/osdep.h"
 
@@ -51,6 +53,9 @@ extern "C" {
 #include "sysemu/kvm.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/whpx.h"
+
+#include "qapi/qapi-commands-block-core.h"
+#include "qapi/qapi-types-block-core.h"
 }
 
 // Qemu includes can redefine some windows behavior..
@@ -58,6 +63,10 @@ extern "C" {
 #include "android/snapshot/Snapshot.h"
 // clang-format on
 
+// As well as introduce some workarounds we don't want..
+#ifdef accept
+#undef accept
+#endif
 #include <string>
 
 #include <stdarg.h>
@@ -81,6 +90,7 @@ using android::base::StringFormatWithArgs;
 using android::base::StringView;
 using android::base::System;
 using android::snapshot::Snapshot;
+using json = nlohmann::json;
 
 static bool qemu_vm_stop() {
     vm_stop(RUN_STATE_PAUSED);
@@ -226,15 +236,16 @@ static bool rebase_on_top_of(std::string src,
 
 // Swaps out the given blockdriver with a new blockdriver
 // backed by the provided qcow2 file.
-// |device| Device to be swapped out
+// |drive| Device to be swapped out
 // |qcow2| The new image we are going to insert.
-static bool qemu_swap_blockdriver(const char* device,
+static bool qemu_swap_blockdriver(const json drive,
                                   const char* qcow2,
                                   void* opaque,
                                   LineConsumerCallback errConsumer) {
     assert(!qemu_vm_is_running());
     bool res = false;
-    BlockBackend* blk = blk_by_name(device);
+    auto device = drive["device"].get<std::string>();
+    BlockBackend* blk = blk_by_name(device.c_str());
     if (blk == nullptr)
         return res;
 
@@ -243,7 +254,7 @@ static bool qemu_swap_blockdriver(const char* device,
     auto oldflags = bdrv_get_flags(bs);
 
     // Eject
-    DD("Ejecting %s", device);
+    DD("Ejecting %s", device.c_str());
     AioContext* aioCtx = bdrv_get_aio_context(bs);
     aio_context_acquire(aioCtx);
     blk_flush(blk);
@@ -253,8 +264,10 @@ static bool qemu_swap_blockdriver(const char* device,
     // Inject.
     DD("Injecting %s", qcow2);
     auto dict = qdict_new();
-    qdict_put_str(dict, "overlap-check", "none");
-    qdict_put_int(dict, "l2-cache-size", 1048576);
+    qdict_put_str(dict, "overlap-check",
+                  drive["overlap-check"].get<std::string>().c_str());
+    qdict_put_str(dict, "l2-cache-size",
+                  drive["l2-cache-size"].get<std::string>().c_str());
     qdict_set_default_str(dict, BDRV_OPT_CACHE_DIRECT, "off");
     qdict_set_default_str(dict, BDRV_OPT_CACHE_NO_FLUSH, "off");
     qdict_set_default_str(dict, BDRV_OPT_READ_ONLY, "off");
@@ -274,6 +287,37 @@ static bool qemu_swap_blockdriver(const char* device,
     return true;
 }
 
+// Returns a json description of all the mounted qcow2 drives. This is partial
+// representation that you would retrieve from using the query_block command
+// on the qemuy qmp-shell.
+// Notably you will find: {'device' : 'name-of-device', 'backing' :
+// 'backing-file' }
+static std::vector<json> qcow2_drives() {
+    Error* errp = nullptr;
+    const char json_str[6] = "json:";
+    std::vector<json> drives;
+    BlockInfoList* info = qmp_query_block(&errp);
+    while (info) {
+        if (info->value->has_inserted) {
+            char* js = strstr(info->value->inserted->file, json_str);
+            if (js && json::accept(js + sizeof(json_str) - 1)) {
+                json drive = json::parse(js + sizeof(json_str) - 1);
+                if (drive.count("driver") > 0 && drive["driver"] == "qcow2" &&
+                    drive.count("file") > 0 &&
+                    drive["file"].count("filename") > 0) {
+                    drive["device"] = info->value->device;
+                    drive["backing"] = info->value->inserted->backing_file;
+                    DD("Found %s", drive.dump().c_str());
+                    drives.push_back(drive);
+                }
+            }
+        }
+        info = info->next;
+    }
+    DD("Found %d drives", drives.size());
+    return drives;
+}
+
 static bool import_snapshot(const char* name,
                             void* opaque,
                             LineConsumerCallback errConsumer) {
@@ -285,19 +329,25 @@ static bool import_snapshot(const char* name,
     }
 
     bool success = true;
-    // TODO(jansene): Generalize this by looking up mounted point in block
-    // backends. The blockbackend will have a file backed matching this.
-    std::unordered_map<std::string, std::string> deviceMap{
-            {"cache.img.qcow2", "cache"},
-            {"encryptionkey.img.qcow2", "encrypt"},
-            {"sdcard.img.qcow2", "sdcard"},
-            {"userdata-qemu.img.qcow2", "userdata"}};
+    auto drives = qcow2_drives();
 
     // Copy and replace the avds from the snapshot directory..
     auto avd = android::snapshot::getAvdDir();
     auto datadir = snapshot->dataDir();
-    const std::string qcow2ext = ".qcow2";
     for (auto qcow2 : android::snapshot::getQcow2Files(datadir)) {
+        // Check if we have a device mapping this qcow.
+        auto it = std::find_if(
+                drives.begin(), drives.end(), [qcow2](const json object) {
+                    return object["file"]["filename"].get<std::string>().find(
+                                   qcow2) != std::string::npos;
+                });
+
+        if (it == drives.end()) {
+            DD("%s is not mounted, ignoring", qcow2.c_str());
+            continue;
+        }
+        auto drive = *it;
+
         DD("Copying %s", qcow2.c_str());
         auto dest = pj(avd, qcow2) + "_import.qcow2";
         auto src = pj(datadir, qcow2);
@@ -311,20 +361,13 @@ static bool import_snapshot(const char* name,
             success = false;
         };
 
-        // We assume that the base image does not have the .qcow2 ext.
-        // TODO(jansene): Generalize and retrieve this from the block device.
-        auto baseimg = qcow2.substr(
-                0, std::max<int>(0, qcow2.size() - qcow2ext.size()));
-
+        auto baseimg = drive["backing"];
         rebase_on_top_of(dest, baseimg, opaque, errConsumer);
 
-        if (deviceMap.count(qcow2) != 0) {
-            // Now we are going to replace the block driver associated with it.
-            success =
-                    qemu_swap_blockdriver(deviceMap[qcow2].c_str(),
-                                          dest.c_str(), opaque, errConsumer) &&
-                    success;
-        }
+        // Now we are going to replace the block driver associated with it.
+        success = qemu_swap_blockdriver(drive, dest.c_str(), opaque,
+                                        errConsumer) &&
+                  success;
     }
 
     return success;
@@ -339,15 +382,17 @@ static bool qemu_snapshot_load(const char* name,
 
     vm_stop(RUN_STATE_RESTORE_VM);
 
+    Error* errp = nullptr;
+
     // Okay, so it could be that this is an imported snapshot..
     // An imported snapshot has the qcow2s stored in its own directory.
     // in that case we need to swap out our current qcow2s, and use them
     // for a reload.
 
-    // TODO(jansen): We should make it possible to swap back, as swapping in
-    // an imported snapshots invalidates all the existing snapshots, and we
-    // cannot load local snapshots anymore as they live in the swapped out
-    // snapshot.
+    // TODO(jansen): We should make it possible to swap back, as
+    // swapping in an imported snapshots invalidates all the existing
+    // snapshots, and we cannot load local snapshots anymore as they
+    // live in the swapped out snapshot.
     import_snapshot(name, opaque, errConsumer);
 
     int loadVmRes =
@@ -824,12 +869,18 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
     flush_all_drives();
 
     // Now we copy over the qcow2 overlays..
-    // TODO(jansene): Iterate over block devices, so we select what we really use.
-    auto qcows =
-            android::snapshot::getQcow2Files(android::snapshot::getAvdDir());
-    for (auto qcow : qcows) {
-        auto overlay = pj(android::snapshot::getAvdDir(), qcow);
-        auto tmp_overlay = pj(android::snapshot::getAvdDir(), "tmp_" + qcow);
+    auto drives = qcow2_drives();
+    for (auto drive : drives) {
+        auto overlay = drive["file"]["filename"].get<std::string>();
+        StringView qcow;
+        if (!PathUtils::split(overlay, nullptr, &qcow)) {
+            success = false;
+            std::string err = "Failed to extract basename from " + overlay;
+            errConsumer(opaque, err.c_str(), err.size());
+            continue;
+        }
+        auto tmp_overlay =
+                pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
         auto final_overlay = pj(dest, qcow);
 
         // Copy and rebase on an empty image...
