@@ -643,18 +643,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     ScreenMask::loadMask((*mAdbInterface));
 
-    // bug: API 21, 22 images (and possibly other older APIs)
-    // get constant segfaults in art when enqueueing adb commands early
-    // that are related to settings.
-    if (avdInfo_getApiLevel(android_avdInfo) >= 26) {
-        (*mAdbInterface)->enqueueCommand(
-         { "shell", "settings", "put", "system",
-           "screen_off_timeout", "2147483647" });
-    }
-
-    (*mAdbInterface)->enqueueCommand(
-        { "shell", "logcat", "-G", "2M" });
-
     using android::snapshot::Snapshotter;
     Snapshotter::get().addOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
