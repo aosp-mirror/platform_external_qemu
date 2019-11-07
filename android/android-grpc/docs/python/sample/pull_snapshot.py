@@ -36,6 +36,9 @@ it = stub.getSnapshot(snaphot)
 try:
     with open(sys.argv[1] +'.tar.gz', 'wb') as fn:
         for msg in it:
+            if not msg.success:
+                print("Failed to pull snapshot: " + msg.err)
+
             fn.write(msg.payload)
 except grpc._channel._Rendezvous as err:
     print(err)

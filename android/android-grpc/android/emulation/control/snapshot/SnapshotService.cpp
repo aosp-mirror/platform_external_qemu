@@ -15,18 +15,25 @@
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
 #include <cstdio>
+#include <fstream>
 #include <functional>
 #include <iostream>
+#include <regex>
 #include <string>
 #include <vector>
+
+#include "android/base/memory/ScopedPtr.h"
 
 #include "android/base/Log.h"
 #include "android/base/StringView.h"
 #include "android/base/Uuid.h"
+#include "android/base/files/PathUtils.h"
+#include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
 #include "android/emulation/control/snapshot/GzipStreambuf.h"
 #include "android/emulation/control/snapshot/TarStream.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 #include "android/utils/path.h"
@@ -48,7 +55,7 @@ using grpc::ServerContext;
 using grpc::ServerWriter;
 using grpc::Status;
 using namespace android::base;
-using namespace android::control::interceptor;
+using android::emulation::LineConsumer;
 
 namespace android {
 namespace emulation {
@@ -56,29 +63,74 @@ namespace control {
 
 class SnapshotServiceImpl final : public SnapshotService::Service {
 public:
-
     Status getSnapshot(ServerContext* context,
                        const Snapshot* request,
                        ServerWriter<Snapshot>* writer) override {
         Snapshot result;
-        result.set_success(true);
+        auto snapshot =
+                snapshot::Snapshot::getSnapshotById(request->snapshot_id());
 
-        for (auto snapshot :
-             android::snapshot::Snapshot::getExistingSnapshots()) {
-            std::string datadir = snapshot.dataDir();
+        if (!snapshot) {
+            // Nope, the snapshot doesn't exist.
+            result.set_success(false);
+            result.set_err("Could not find " + request->snapshot_id());
+            writer->Write(result);
+            return Status::OK;
+        }
 
-            if (snapshot.name() == request->snapshot_id()) {
-                CallbackStreambufWriter csb(
-                        k128KB, [writer](char* bytes, std::size_t len) {
-                            Snapshot msg;
-                            msg.set_payload(std::string(bytes, len));
-                            return writer->Write(msg);
-                        });
-                GzipOutputStream gzout(&csb);
-                TarWriter tw(snapshot.dataDir(), gzout);
-                result.set_success(tw.addDirectory(".") && tw.close());
+        auto tmpdir = pj(System::get()->getTempDir(), snapshot->name());
+        const auto tmpdir_deleter =
+                base::makeCustomScopedPtr(&tmpdir, [](std::string* tmpdir) {
+                    // Best effort to cleanup the mess.
+                    path_delete_dir(tmpdir->c_str());
+                });
+
+        // Copy over the meta data etc..
+        if (path_copy_dir(tmpdir.data(), snapshot->dataDir().data()) != 0) {
+            result.set_success(false);
+            result.set_err("Could not copy: " + snapshot->dataDir().str() +
+                           " to " + tmpdir);
+            writer->Write(result);
+            return Status::OK;
+        }
+
+        // An imported snapshot already has the qcow2 images inside its snapshot
+        // directory, so they are already in a good state.
+        if (!snapshot->isImported()) {
+            // Exports all qcow2 images..
+            LineConsumer lineConsumer;
+            auto exp = gQAndroidVmOperations->snapshotExport(
+                    snapshot->name().data(), tmpdir.data(),
+                    lineConsumer.opaque(), LineConsumer::Callback);
+
+            if (!exp) {
+                result.set_success(false);
+                std::string errMsg;
+                for (const auto& line : lineConsumer.lines()) {
+                    errMsg += line + "\n";
+                }
+                result.set_err("Could not export " + request->snapshot_id() +
+                               " due to: " + errMsg);
+                writer->Write(result);
+                return Status::OK;
             }
         }
+
+        // Stream the tmpdir out as a tar.gz..
+        CallbackStreambufWriter csb(
+                k256KB, [writer](char* bytes, std::size_t len) {
+                    Snapshot msg;
+                    msg.set_payload(std::string(bytes, len));
+                    msg.set_success(true);
+                    return writer->Write(msg);
+                });
+        GzipOutputStream gzout(&csb);
+        TarWriter tw(tmpdir, gzout);
+        result.set_success(tw.addDirectory(".") && tw.close());
+        if (tw.fail()) {
+            result.set_err(tw.error_msg());
+        }
+
         writer->Write(result);
         return Status::OK;
     }
@@ -87,56 +139,98 @@ public:
                        ::grpc::ServerReader<Snapshot>* reader,
                        Snapshot* reply) override {
         Snapshot msg;
+
+        // Create a temporary directory for the snapshot..
         std::string id = Uuid::generate().toString();
-        std::string tmpSnap = android::snapshot::getSnapshotDir(id.c_str());
+        std::string tmpSnap = snapshot::getSnapshotDir(id.c_str());
+
+        const auto tmpdir_deleter = base::makeCustomScopedPtr(
+                &tmpSnap,
+                [](std::string* tmpSnap) {  // Best effort to cleanup the mess.
+                    path_delete_dir(tmpSnap->c_str());
+                });
 
         reply->set_success(true);
         auto cb = [reader, &msg, &id](char** new_eback, char** new_gptr,
                                       char** new_egptr) {
-            // Drop messages without bytes.
-            bool incoming = reader->Read(&msg);
+            bool incoming = true;
 
-            // First message likely only has snapshot id information and no
-            // bytes.
-            if (msg.snapshot_id().size() > 0) {
-                std::cout << msg.snapshot_id() << std::endl;
-                id = msg.snapshot_id();
-            }
-            while (msg.payload().size() == 0 && incoming) {
+            do {
                 incoming = reader->Read(&msg);
-            }
-            if (incoming) {
-                *new_eback = (char*)msg.payload().data();
-                *new_gptr = *new_eback;
-                *new_egptr = *new_gptr + msg.payload().size();
-            }
+
+                // First message likely only has snapshot id information and no
+                // bytes, but anyone can set the snapshot id at any time.. so...
+                if (msg.snapshot_id().size() > 0) {
+                    id = msg.snapshot_id();
+                }
+
+                // Skip empty packets, (note we also ignore success messages
+                // from the client..)
+            } while (incoming && msg.payload().size() == 0);
+
+            // Setup the buffer pointers.
+            *new_eback = (char*)msg.payload().data();
+            *new_gptr = *new_eback;
+            *new_egptr = *new_gptr + msg.payload().size();
+
             return incoming;
         };
 
         CallbackStreambufReader csr(cb);
         GzipInputStream gzin(&csr);
         TarReader tr(tmpSnap, gzin);
-        auto entry = tr.first();
-        while (entry.valid) {
-            if (!tr.extract(entry)) {
-                reply->set_success(false);
-                reply->set_err("Failed to extract: " + entry.name);
-            }
-            entry = tr.next(entry);
+        for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
+            tr.extract(entry);
         }
+
+        if (tr.fail()) {
+            reply->set_success(false);
+            reply->set_err(tr.error_msg());
+            return Status::OK;
+        }
+
         reply->set_snapshot_id(id);
-        std::string finalDest = android::snapshot::getSnapshotDir(id.c_str());
-        LOG(INFO) << "Moving " << tmpSnap << " --> " << finalDest;
-        path_delete_dir(finalDest.c_str());
-        std::rename(tmpSnap.c_str(), finalDest.c_str());
+        std::string finalDest = snapshot::getSnapshotDir(id.c_str());
+        if (System::get()->pathExists(finalDest) &&
+            path_delete_dir(finalDest.c_str()) != 0) {
+            reply->set_success(false);
+            reply->set_err("Failed to delete: " + finalDest);
+            LOG(INFO) << "Failed to delete: " + finalDest;
+            return Status::OK;
+        }
+
+        if (std::rename(tmpSnap.c_str(), finalDest.c_str()) != 0) {
+            reply->set_success(false);
+            reply->set_err("Failed to rename: " + tmpSnap + " --> " +
+                           finalDest);
+            LOG(INFO) << "Failed to rename: " + tmpSnap + " --> " + finalDest;
+        }
+
+        // Okay, now we have to fix up (i.e. import) the snapshot
+        auto snapshot = android::snapshot::Snapshot::getSnapshotById(id);
+        if (!snapshot) {
+            // Que what?, we just created you..
+            reply->set_success(false);
+            reply->set_err("Cannot find created snapshot");
+            // Best effort to cleanup mess.
+            path_delete_dir(finalDest.c_str());
+            return Status::OK;
+        }
+
+        if (!snapshot->fixImport()) {
+            reply->set_success(false);
+            reply->set_err("Failed to import snapshot.");
+            // Best effort to cleanup mess.
+            path_delete_dir(finalDest.c_str());
+        }
+
         return Status::OK;
     }
 
     Status listSnapshots(ServerContext* context,
                          const ::google::protobuf::Empty* request,
                          SnapshotList* reply) override {
-        for (auto snapshot :
-             android::snapshot::Snapshot::getExistingSnapshots()) {
+        for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
             auto protobuf = snapshot.getGeneralInfo();
 
             if (protobuf && snapshot.checkValid(false)) {
@@ -149,10 +243,9 @@ public:
         return Status::OK;
     }
 
-
-    static constexpr uint32_t k128KB = 128 * 1024;
+private:
+    static constexpr uint32_t k256KB = 256 * 1024;
 };
-
 
 SnapshotService::Service* getSnapshotService() {
     return new SnapshotServiceImpl();

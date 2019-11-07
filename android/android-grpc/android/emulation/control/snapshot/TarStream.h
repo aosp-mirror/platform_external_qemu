@@ -14,6 +14,7 @@
 #pragma once
 #include <sys/types.h>  // for gid_t, mode_t, uid_t
 #include <cstdint>      // for uint64_t, uint8_t
+#include <iosfwd>       // for basic_ios
 #include <ostream>      // for istream, ostream
 #include <string>       // for string
 
@@ -45,13 +46,6 @@ enum class TarFormat {
     USTAR_FORMAT = 0,  // POSIX.1-1988 (ustar) format
     GNU_FORMAT = 1,    // GNU tar format
     PAX_FORMAT = 2     // POSIX.1-2001 (pax) format
-};
-
-enum TarError {
-    TAR_OK = 0,
-    TAR_INVALID_INFO,
-    TAR_STREAM_NO_SEEK,
-    TAR_INVALID_HEADER,
 };
 
 // MAGIC USTAR HEADER
@@ -93,48 +87,55 @@ static_assert(sizeof(posix_header) == TARBLOCK,
 // And filenames up to 99 characters in length.
 //
 // Make sure to call close when you are finished adding files.
-class TarWriter {
+class TarWriter : public std::ios {
 public:
-    TarWriter(std::string cwd, std::ostream& dest) : mDest(dest), mCwd(cwd) {}
+    TarWriter(std::string cwd, std::ostream& dest);
     bool addFileEntry(std::string fname);
     bool addDirectoryEntry(std::string dname);
     bool addDirectory(std::string dname);
 
     // Closes the tar archive and flushes the underlying stream.
     bool close();
+    std::string error_msg() { return mErrMsg; };
 
 private:
+    bool error(std::string msg);
     bool writeTarHeader(std::string name);
     std::ostream& mDest;
-    std::string mCwd;
+    std::string mCwd{};
+    std::string mErrMsg{};
     bool mClosed = false;
 };
 
 struct TarInfo {
-    std::string name;        // member name
-    mode_t mode = 0644;      // file permissions
-    uid_t uid = 0;           // user id
-    gid_t gid = 0;           // group id
-    uint64_t size = 0;       // file size
-    uint64_t mtime = 0;      // modification time
-    TarType type = REGTYPE;  // member type
-    std::string uname = "";  // user name
-    std::string gname = "";  // group name
-    uint64_t offset = 0;     // offset in stream
-    bool valid = false;      // True if this is a valid entry.
-    TarError error = TAR_OK; // Error code (if valid == false).
+    std::string name;         // member name
+    mode_t mode = 0644;       // file permissions
+    uid_t uid = 0;            // user id
+    gid_t gid = 0;            // group id
+    uint64_t size = 0;        // file size
+    uint64_t mtime = 0;       // modification time
+    TarType type = REGTYPE;   // member type
+    std::string uname = "";   // user name
+    std::string gname = "";   // group name
+    uint64_t offset = 0;      // offset in stream
+    bool valid = false;       // True if this is a valid entry.
 };
 
-class TarReader {
+class TarReader : public std::ios {
 public:
-    TarReader(std::string cwd, std::istream& src) : mSrc(src), mCwd(cwd) {}
+    TarReader(std::string cwd, std::istream& src, bool has_seek=false);
     TarInfo next(TarInfo from);
     TarInfo first() { return next({}); }
     bool extract(TarInfo src);
+    std::string error_msg() { return mErrMsg; };
 
 private:
+    void seekg(std::streampos pos);
+    bool error(std::string msg);
     std::istream& mSrc;
-    std::string mCwd;
+    std::string mCwd{};
+    std::string mErrMsg{};
+    bool mSeek = false;
 };
 
 }  // namespace control

@@ -45,6 +45,12 @@ public:
     //                    errConsumer)
     VM_OPERATION_MOCK(MOCK_METHOD3, snapshotRemap);
 
+    // bool (*snapshotExport)(const char* snapshot,
+    //                        const char* dest,
+    //                        void* opaque,
+    //                        LineConsumerCallback errConsumer);
+    VM_OPERATION_MOCK(MOCK_METHOD4, snapshotExport);
+
     // void setSnapshotCallbacks(void* opaque,
     //                            const SnapshotCallbacks* callbacks);
     VM_OPERATION_MOCK(MOCK_METHOD2, setSnapshotCallbacks);

@@ -20,6 +20,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/featurecontrol/Features.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
@@ -36,6 +37,7 @@
 #include <sys/mman.h>
 
 #include <algorithm>
+#include <fstream>
 #include <functional>
 #include <unordered_set>
 
@@ -57,8 +59,8 @@ using android::featurecontrol::Feature;
 
 using android::protobuf::loadProtobuf;
 using android::protobuf::ProtobufLoadResult;
-using android::protobuf::saveProtobuf;
 using android::protobuf::ProtobufSaveResult;
+using android::protobuf::saveProtobuf;
 
 namespace fc = android::featurecontrol;
 namespace pb = emulator_snapshot;
@@ -114,21 +116,21 @@ static bool verifyImageInfo(pb::Image::Type type,
 }
 
 const char* const sHwConfigSnapshotInsensitiveKeys[] = {
-    "hw.gpu.mode",
-    "avd.id",
+        "hw.gpu.mode",
+        "avd.id",
 };
 
-static bool iniFileKeyMismatches(
-    const IniFile& expected,
-    const IniFile& actual,
-    const std::string& key) {
+static bool iniFileKeyMismatches(const IniFile& expected,
+                                 const IniFile& actual,
+                                 const std::string& key) {
     return !actual.hasKey(key) ||
            (actual.getString(key, "$$$") != expected.getString(key, "$$$"));
 }
 
 static bool isKeySnapshotSensitive(const std::string& key) {
     for (auto insensitiveKey : sHwConfigSnapshotInsensitiveKeys) {
-        if (!strcmp(key.c_str(), insensitiveKey)) return false;
+        if (!strcmp(key.c_str(), insensitiveKey))
+            return false;
     }
     return true;
 }
@@ -137,7 +139,8 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
     // We need to explicitly check the list because when booted with -wipe-data
     // the emulator will add a line (disk.dataPartition.initPath) which should
     // not affect snapshot.
-    std::unordered_set<std::string> ignore{"android.sdk.root", "android.avd.home"};
+    std::unordered_set<std::string> ignore{"android.sdk.root",
+                                           "android.avd.home"};
     int numPathExpected = 0;
     int numPathActual = 0;
     for (auto&& key : expected) {
@@ -149,11 +152,13 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
                        // separately.
         }
         if (ignore.count(key) > 0) {
-            continue; // The set of properties we feel that we can safely ignore.
+            continue;  // The set of properties we feel that we can safely
+                       // ignore.
         }
 
         if (iniFileKeyMismatches(expected, actual, key) &&
-            isKeySnapshotSensitive(key)) return false;
+            isKeySnapshotSensitive(key))
+            return false;
     }
 
     for (auto&& key : actual) {
@@ -166,11 +171,13 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
         }
 
         if (ignore.count(key) > 0) {
-            continue; // The set of properties we feel that we can safely ignore.
+            continue;  // The set of properties we feel that we can safely
+                       // ignore.
         }
 
         if (iniFileKeyMismatches(actual, expected, key) &&
-            isKeySnapshotSensitive(key)) return false;
+            isKeySnapshotSensitive(key))
+            return false;
     }
 
     return numPathActual == numPathExpected;
@@ -198,38 +205,42 @@ bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
     if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchHostHypervisor);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchHostHypervisor);
         return false;
     }
     // Do not worry about backend if in swiftshader_indirect
-    if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+    if (emuglConfig_get_current_renderer() ==
+        SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
         return true;
     }
     if (auto gpuString = currentGpuDriverString()) {
         if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
-            if (writeFailure) saveFailure(FailureReason::ConfigMismatchHostGpu);
+            if (writeFailure)
+                saveFailure(FailureReason::ConfigMismatchHostGpu);
             return false;
         }
     } else if (host.has_gpu_driver()) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchHostGpu);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchHostGpu);
         return false;
     }
     return true;
 }
 
-static const std::unordered_set<Feature, std::hash<size_t>> sInsensitiveFeatures({
+static const std::unordered_set<Feature, std::hash<size_t>>
+        sInsensitiveFeatures({
 #undef FEATURE_CONTROL_ITEM
-#define FEATURE_CONTROL_ITEM(feature) \
-    fc::feature,
+#define FEATURE_CONTROL_ITEM(feature) fc::feature,
 
 #include "android/featurecontrol/FeatureControlDefSnapshotInsensitive.h"
 
 #undef FEATURE_CONTROL_ITEM
-});
+        });
 
 const std::vector<Feature> Snapshot::getSnapshotInsensitiveFeatures() {
     return std::vector<Feature>(sInsensitiveFeatures.begin(),
-        sInsensitiveFeatures.end());
+                                sInsensitiveFeatures.end());
 }
 
 // static
@@ -242,38 +253,30 @@ bool Snapshot::isCompatibleWithCurrentFeatures() {
 }
 
 bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
-
     auto enabledFeatures = fc::getEnabled();
 
     enabledFeatures.erase(
-        std::remove_if(
-            enabledFeatures.begin(),
-            enabledFeatures.end(),
-            isFeatureSnapshotInsensitive),
-        enabledFeatures.end());
+            std::remove_if(enabledFeatures.begin(), enabledFeatures.end(),
+                           isFeatureSnapshotInsensitive),
+            enabledFeatures.end());
 
     // need a conversion from int to Feature here
     std::vector<Feature> configFeatures;
 
     for (auto it = config.enabled_features().begin();
-         it != config.enabled_features().end();
-         ++it) {
+         it != config.enabled_features().end(); ++it) {
         configFeatures.push_back((Feature)(*it));
     }
 
     configFeatures.erase(
-        std::remove_if(
-            configFeatures.begin(),
-            configFeatures.end(),
-            isFeatureSnapshotInsensitive),
-        configFeatures.end());
+            std::remove_if(configFeatures.begin(), configFeatures.end(),
+                           isFeatureSnapshotInsensitive),
+            configFeatures.end());
 
     if (int(enabledFeatures.size()) != configFeatures.size() ||
-        !std::equal(configFeatures.begin(),
-                    configFeatures.end(), enabledFeatures.begin(),
-                    [](int l, Feature r) {
-                        return int(l) == r;
-                    })) {
+        !std::equal(configFeatures.begin(), configFeatures.end(),
+                    enabledFeatures.begin(),
+                    [](int l, Feature r) { return int(l) == r; })) {
         return false;
     }
 
@@ -285,26 +288,30 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
     if (config.has_cpu_core_count() &&
         config.cpu_core_count() != vmConfig.numberOfCpuCores) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
     if (config.has_ram_size_bytes() &&
         config.ram_size_bytes() != vmConfig.ramSizeBytes) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
 #ifdef ALLOW_CHANGE_RENDERER
         fprintf(stderr, "WARNING: change of renderer detected.\n");
-#else // ALLOW_CHANGE_RENDERER
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchRenderer);
+#else   // ALLOW_CHANGE_RENDERER
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchRenderer);
         return false;
-#endif // ALLOW_CHANGE_RENDERER
+#endif  // ALLOW_CHANGE_RENDERER
     }
 
     if (!verifyFeatureFlags(config)) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchFeatures);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchFeatures);
         return false;
     }
 
@@ -312,11 +319,8 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
-    auto res =
-        saveProtobuf(
-            PathUtils::join(mDataDir, "snapshot.pb"),
-            mSnapshotPb,
-            &mSize);
+    auto res = saveProtobuf(PathUtils::join(mDataDir, "snapshot.pb"),
+                            mSnapshotPb, &mSize);
     return res == ProtobufSaveResult::Success;
 }
 
@@ -347,19 +351,19 @@ base::StringView Snapshot::dataDir(const char* name) {
 
 base::Optional<std::string> Snapshot::parent() {
     auto info = getGeneralInfo();
-    if (!info || !info->has_parent()) return base::kNullopt;
+    if (!info || !info->has_parent())
+        return base::kNullopt;
     auto parentName = info->parent();
-    if (parentName == "") return base::kNullopt;
+    if (parentName == "")
+        return base::kNullopt;
     return parentName;
 }
 
-
 Snapshot::Snapshot(const char* name)
-    : Snapshot(name, getSnapshotDir(name).c_str()) { }
+    : Snapshot(name, getSnapshotDir(name).c_str()) {}
 
 Snapshot::Snapshot(const char* name, const char* dataDir)
     : mName(name), mDataDir(dataDir), mSaveStats(kMaxSaveStatsHistory) {
-
     // All persisted snapshot protobuf fields across
     // saves / loads go here.
     if (preload()) {
@@ -390,9 +394,21 @@ void Snapshot::initProto() {
 
 void Snapshot::saveEnabledFeatures() {
     for (auto f : fc::getEnabled()) {
-        if (isFeatureSnapshotInsensitive(f)) continue;
+        if (isFeatureSnapshotInsensitive(f))
+            continue;
         mSnapshotPb.mutable_config()->add_enabled_features(int(f));
     }
+}
+
+base::Optional<Snapshot> Snapshot::getSnapshotById(std::string id) {
+    std::vector<Snapshot> snapshots = getExistingSnapshots();
+    auto snapshot =
+            std::find_if(snapshots.begin(), snapshots.end(),
+                         [&id](const Snapshot& s) { return s.name() == id; });
+    if (snapshot != std::end(snapshots)) {
+        return base::makeOptional<Snapshot>(*snapshot);
+    }
+    return {};
 }
 
 bool Snapshot::save() {
@@ -428,8 +444,7 @@ bool Snapshot::save() {
     mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
-    mSnapshotPb.set_folded(
-            int(Snapshotter::get().windowAgent().isFolded()));
+    mSnapshotPb.set_folded(int(Snapshotter::get().windowAgent().isFolded()));
 
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
@@ -443,8 +458,7 @@ bool Snapshot::save() {
     // We want to maintain the default_boot snapshot as outside
     // the hierarchy. For that reason, don't set parent if default
     // boot is involved either as the current snapshot or the parent snapshot.
-    if (mName != kDefaultBootSnapshot &&
-        parentSnapshot != "" &&
+    if (mName != kDefaultBootSnapshot && parentSnapshot != "" &&
         parentSnapshot != kDefaultBootSnapshot) {
         if (mName != parentSnapshot) {
             mSnapshotPb.set_parent(parentSnapshot);
@@ -538,7 +552,7 @@ const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
     loadProtobufOnce();
 
     if (isUnrecoverableReason(
-            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+                FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
         saveFailure(FailureReason(mSnapshotPb.failed_to_load_reason_code()));
     }
 
@@ -554,14 +568,17 @@ const bool Snapshot::checkValid(bool writeFailure) {
         return true;
     }
 
-    if (mSnapshotPb.has_host() && !verifyHost(mSnapshotPb.host(), writeFailure)) {
+    if (mSnapshotPb.has_host() &&
+        !verifyHost(mSnapshotPb.host(), writeFailure)) {
         return false;
     }
-    if (mSnapshotPb.has_config() && !verifyConfig(mSnapshotPb.config(), writeFailure)) {
+    if (mSnapshotPb.has_config() &&
+        !verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
     if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
 
@@ -576,7 +593,6 @@ const bool Snapshot::checkValid(bool writeFailure) {
                 });
         if (it != mSnapshotPb.images().end()) {
             if (!verifyImageInfo(image.type, path.get(), *it)) {
-
                 // If in build env, nuke the qcow2 as well.
                 if (avdInfo_inAndroidBuild(android_avdInfo)) {
                     std::string qcow2Path(path.get());
@@ -584,14 +600,14 @@ const bool Snapshot::checkValid(bool writeFailure) {
                     path_delete_file(qcow2Path.c_str());
                 }
 
-                if (writeFailure) saveFailure(FailureReason::SystemImageChanged);
+                if (writeFailure)
+                    saveFailure(FailureReason::SystemImageChanged);
                 return false;
             }
             ++matchedImages;
         } else {
             // Should match an empty image info
             if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
-
                 // If in build env, nuke the qcow2 as well.
                 if (avdInfo_inAndroidBuild(android_avdInfo)) {
                     std::string qcow2Path(path.get());
@@ -599,24 +615,28 @@ const bool Snapshot::checkValid(bool writeFailure) {
                     path_delete_file(qcow2Path.c_str());
                 }
 
-                if (writeFailure) saveFailure(FailureReason::NoSnapshotInImage);
+                if (writeFailure)
+                    saveFailure(FailureReason::NoSnapshotInImage);
                 return false;
             }
         }
     }
     if (matchedImages != mSnapshotPb.images_size()) {
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
 
     IniFile expectedConfig(PathUtils::join(mDataDir, "hardware.ini"));
     if (!expectedConfig.read(false)) {
-        if (writeFailure) saveFailure(FailureReason::CorruptedData);
+        if (writeFailure)
+            saveFailure(FailureReason::CorruptedData);
         return false;
     }
     IniFile actualConfig(avdInfo_getCoreHwIniPath(android_avdInfo));
     if (!actualConfig.read(false)) {
-        if (writeFailure) saveFailure(FailureReason::InternalError);
+        if (writeFailure)
+            saveFailure(FailureReason::InternalError);
         return false;
     }
     IniFile expectedStripped;
@@ -628,7 +648,8 @@ const bool Snapshot::checkValid(bool writeFailure) {
                                   reinterpret_cast<CIniFile*>(&actualStripped));
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
         fprintf(stderr, "%s: hw configs not eq\n", __func__);
-        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
 
@@ -645,9 +666,10 @@ const bool Snapshot::checkValid(bool writeFailure) {
     }
 
     if (isUnrecoverableReason(
-            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+                FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
         if (writeFailure) {
-            saveFailure(FailureReason(mSnapshotPb.failed_to_load_reason_code()));
+            saveFailure(
+                    FailureReason(mSnapshotPb.failed_to_load_reason_code()));
         }
         return false;
     }
@@ -658,7 +680,6 @@ const bool Snapshot::checkValid(bool writeFailure) {
 // load(): Loads all snapshot metadata and checks it against other files
 // for integrity.
 bool Snapshot::load() {
-
     if (!checkValid(true /* save the failure reason */)) {
         return false;
     }
@@ -676,8 +697,7 @@ bool Snapshot::load() {
     }
 
     if (mSnapshotPb.has_folded() &&
-        Snapshotter::get().windowAgent().isFolded() !=
-                mSnapshotPb.folded()) {
+        Snapshotter::get().windowAgent().isFolded() != mSnapshotPb.folded()) {
         Snapshotter::get().windowAgent().fold(mSnapshotPb.folded());
     }
 
@@ -693,6 +713,82 @@ void Snapshot::incrementInvalidLoads() {
     writeSnapshotToDisk();
 }
 
+bool Snapshot::isImported() {
+    return !getQcow2Files(dataDir()).empty();
+}
+static bool replace(std::string& src,
+                    const std::string& what,
+                    const std::string& replacement) {
+    auto what_pos = src.find(what);
+    if (what_pos != std::string::npos) {
+        src.replace(what_pos, what.size(), replacement);
+        return true;
+    }
+    return false;
+}
+
+bool Snapshot::fixImport() {
+    // We do 2 things, we fix up hw.ini, and update the protobuf
+    const std::string sdk = "android.sdk.root";
+    const std::string home = "android.avd.home";
+    const std::string curr_avd_dir = getAvdDir();
+    auto targetHwIni = PathUtils::join(mDataDir, "hardware.ini");
+    IniFile hwIni(targetHwIni);
+    hwIni.read();  // I wasted a lot of time discovering this...
+
+    if (!hwIni.hasKey(sdk) || !hwIni.hasKey(home)) {
+        LOG(ERROR) << "Snapshot import is missing android.sdk.root, "
+                      "android.avd.home";
+        return false;
+    }
+    auto old_sdk = hwIni.getString(sdk, "");
+    auto old_home = hwIni.getString(home, "");
+    std::string old_avd_dir =
+            PathUtils::join(old_home, hwIni.getString("avd.name", "")) + ".avd";
+    std::string curr_sdk = ConfigDirs::getSdkRootDirectory();
+    std::string curr_home = ConfigDirs::getAvdRootDirectory();
+
+    // Fixup hardware ini..
+    for (auto& entry : hwIni) {
+        auto val = hwIni.getString(entry, "");
+        if (replace(val, old_sdk, curr_sdk)) {
+            hwIni.setString(entry, val);
+        }
+        if (replace(val, old_home, curr_home)) {
+            hwIni.setString(entry, val);
+        }
+        if (replace(val, old_avd_dir, curr_avd_dir)) {
+            hwIni.setString(entry, val);
+        }
+    }
+    // Fixup names & ids..
+    hwIni.setString("avd.name", avdInfo_getName(android_avdInfo));
+    hwIni.setString("avd.id", avdInfo_getId(android_avdInfo));
+
+    // Fix up the protobuf paths..
+    for (int i = 0; i < mSnapshotPb.images_size(); i++) {
+        auto image = mSnapshotPb.mutable_images(i);
+        std::string path = image->path();
+        replace(path, old_sdk, curr_sdk);
+        replace(path, old_home, curr_home);
+        image->set_path(path);
+    }
+
+    // Reset stats
+    mSnapshotPb.set_failed_to_load_reason_code(0);
+    mSnapshotPb.set_invalid_loads(0);
+    mSnapshotPb.set_successful_loads(0);
+
+    if (!(writeSnapshotToDisk() && hwIni.writeIfChanged())) {
+        // Bad news, unable to write out hardware ini , or protobuf.
+        LOG(ERROR) << "Failed to write snapshot/hardware.ini, snapshot will "
+                      "not work.";
+        return false;
+    }
+
+    return true;
+}
+
 void Snapshot::incrementSuccessfulLoads() {
     ++mSuccessfulLoads;
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
@@ -705,7 +801,6 @@ void Snapshot::incrementSuccessfulLoads() {
 void Snapshot::addSaveStats(bool incremental,
                             const base::System::Duration duration,
                             uint64_t ramChangedBytes) {
-
     emulator_snapshot::SaveStats stats;
 
     stats.set_incremental(incremental ? 1 : 0);
@@ -716,8 +811,8 @@ void Snapshot::addSaveStats(bool incremental,
 }
 
 bool Snapshot::areSavesSlow() const {
-
-    if (mSaveStats.empty()) return false;
+    if (mSaveStats.empty())
+        return false;
 
     static constexpr float kSlowSaveThresholdMs = 20000.0;
     float maxSaveTimeMs = 0.0f;
@@ -727,15 +822,14 @@ bool Snapshot::areSavesSlow() const {
         maxSaveTimeMs = std::max(durationMs, maxSaveTimeMs);
     }
 
-   return maxSaveTimeMs >= kSlowSaveThresholdMs;
+    return maxSaveTimeMs >= kSlowSaveThresholdMs;
 }
 
 bool Snapshot::shouldInvalidate() const {
     // Either there wasn't any successful loads,
     // or there was more than one invalid load
     // of this snapshot.
-    return !mSuccessfulLoads ||
-           mInvalidLoads > 1;
+    return !mSuccessfulLoads || mInvalidLoads > 1;
 }
 
 base::Optional<FailureReason> Snapshot::failureReason() const {

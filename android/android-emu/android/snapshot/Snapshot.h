@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/containers/CircularBuffer.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
+#include "android/base/containers/CircularBuffer.h"
 #include "android/base/system/System.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/snapshot/common.h"
@@ -31,10 +31,17 @@ public:
     explicit Snapshot(const char* name, const char* dataDir);
 
     static std::vector<Snapshot> getExistingSnapshots();
+    static base::Optional<Snapshot> getSnapshotById(std::string id);
 
     base::StringView name() const { return mName; }
     base::StringView dataDir() const { return mDataDir; }
 
+
+    // An imported snapshot stores the qcow2's inside the snapshot directory.
+    bool isImported();
+    // The hardware.ini & protobuf contain hardcoded paths, this will try to
+    // fix them up.
+    bool fixImport();
     bool save();
     bool saveFailure(FailureReason reason);
     bool preload();
@@ -66,8 +73,10 @@ public:
     base::Optional<std::string> parent();
 
     // For dealing with snapshot-insensitive feature flags
-    static const std::vector<android::featurecontrol::Feature> getSnapshotInsensitiveFeatures();
-    static bool isFeatureSnapshotInsensitive(android::featurecontrol::Feature feature);
+    static const std::vector<android::featurecontrol::Feature>
+    getSnapshotInsensitiveFeatures();
+    static bool isFeatureSnapshotInsensitive(
+            android::featurecontrol::Feature feature);
     void initProto();
     void saveEnabledFeatures();
     bool writeSnapshotToDisk();
@@ -76,7 +85,8 @@ public:
 private:
     void loadProtobufOnce();
     bool verifyHost(const emulator_snapshot::Host& host, bool writeFailure);
-    bool verifyConfig(const emulator_snapshot::Config& config, bool writeFailure);
+    bool verifyConfig(const emulator_snapshot::Config& config,
+                      bool writeFailure);
     bool verifyFeatureFlags(const emulator_snapshot::Config& config);
 
     std::string mName;
