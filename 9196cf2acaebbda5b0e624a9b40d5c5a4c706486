@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "652a4720_911cb750",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-11-07T19:20:31Z",
+      "side": 1,
+      "message": "this is going to miss corner cases where people mark the system.img as writable. but it should be fine for now.",
+      "range": {
+        "startLine": 290,
+        "startChar": 4,
+        "endLine": 290,
+        "endChar": 59
+      },
+      "revId": "9196cf2acaebbda5b0e624a9b40d5c5a4c706486",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
