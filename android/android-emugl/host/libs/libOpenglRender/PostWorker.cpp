@@ -179,10 +179,10 @@ void PostWorker::compose(ComposeDevice_v2* p) {
                                    mFb->findColorBuffer(p->targetHandle)->getTexture(),
                                    0);
 
-    DBG("worker compose %d layers\n", p->numLayers);
+    DD("worker compose %d layers\n", p->numLayers);
     mFb->getTextureDraw()->prepareForDrawLayer();
     for (int i = 0; i < p->numLayers; i++, l++) {
-        DBG("\tcomposeMode %d color %d %d %d %d blendMode "
+        DD("\tcomposeMode %d color %d %d %d %d blendMode "
                "%d alpha %f transform %d %d %d %d %d "
                "%f %f %f %f\n",
                l->composeMode, l->color.r, l->color.g, l->color.b,
