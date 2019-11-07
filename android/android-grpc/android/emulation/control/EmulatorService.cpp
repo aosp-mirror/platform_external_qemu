@@ -43,6 +43,7 @@
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/logcat/LogcatParser.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/telephony_agent.h"
@@ -125,9 +126,18 @@ public:
                      const LogMessage* request,
                      LogMessage* reply) override {
         auto message = mLogcatBuffer.bufferAtOffset(request->start(), kNoWait);
-        reply->set_start(message.first);
-        reply->set_contents(message.second);
-        reply->set_next(message.first + message.second.size());
+        if (request->sort() == LogMessage::Parsed) {
+            auto parsed = LogcatParser::parseLines(message.second);
+            reply->set_start(message.first);
+            for (auto entry : parsed.second) {
+                *reply->add_entries() = entry;
+            }
+            reply->set_next(message.first + parsed.first);
+        } else {
+            reply->set_start(message.first);
+            reply->set_contents(message.second);
+            reply->set_next(message.first + message.second.size());
+        }
         return Status::OK;
     }
 
@@ -142,9 +152,20 @@ public:
             // least once every 5 seconds.
             auto message =
                     mLogcatBuffer.bufferAtOffset(log.next(), k5SecondsWait);
-            log.set_start(message.first);
-            log.set_contents(message.second);
-            log.set_next(message.first + message.second.size());
+            if (request->sort() == LogMessage::Parsed) {
+                auto parsed = LogcatParser::parseLines(message.second);
+                log.clear_entries();
+                log.set_start(message.first);
+                for (auto entry : parsed.second) {
+
+                    *log.add_entries() = entry;
+                }
+                log.set_next(message.first + parsed.first);
+            } else {
+                log.set_start(message.first);
+                log.set_contents(message.second);
+                log.set_next(message.first + message.second.size());
+            }
         } while (writer->Write(log));
         return Status::OK;
     }
