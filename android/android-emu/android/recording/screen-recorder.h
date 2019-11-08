@@ -56,6 +56,7 @@ typedef struct RecordingInfo {
     uint32_t height;
     uint32_t videoBitrate;
     uint32_t timeLimit;
+    uint32_t fps;
     RecordingCallback cb;
     void* opaque;
 } RecordingInfo;

@@ -17,6 +17,7 @@
 constexpr int kMinVideoBitrate = 100 * 1000;        // bps
 constexpr int kMaxVideoBitrate = 25 * 1000 * 1000;  // bps
 constexpr int kMaxTimeLimit = 3 * 60;               // seconds
+constexpr int kMaxFPS = 60;                         // fps
 
 // Spacing between intra frames
 constexpr int kIntraSpacing = 12;
