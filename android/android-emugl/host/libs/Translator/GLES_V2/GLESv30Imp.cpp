@@ -410,9 +410,10 @@ public:
 
     GLsync create(GLsync newHostSync) {
         GLsync res = (GLsync)(uintptr_t)mNameCounter;
+        fprintf(stderr, "%s: new host sync. %p\n", __func__, res);
         mSyncs[res] = newHostSync;
         mNameCounter++;
-        if (!mNameCounter) mNameCounter = 0x1000;
+        if (!mNameCounter) mNameCounter = 9000;
         return res;
     }
 
@@ -440,10 +441,12 @@ public:
 
         const auto& it = mSyncs.find(guestSyncToDelete);
         if (it == mSyncs.end()) {
+            fprintf(stderr, "%s: cannot find sync %p, return host %p\n", __func__, guestSyncToDelete, host);
             *err = GL_INVALID_VALUE;
             return host;
         } else {
             host = it->second;
+            fprintf(stderr, "%s: found sync %p, return host %p\n", __func__, guestSyncToDelete, host);
         }
 
         mSyncs.erase(it);
@@ -459,7 +462,7 @@ public:
 private:
     std::unordered_map<GLsync, GLsync> mSyncs;
     mutable emugl::Mutex mLock;
-    uint32_t mNameCounter = 0x1;
+    uint32_t mNameCounter = 9000;
 };
 
 static android::base::LazyInstance<GuestSyncs> sSyncs = LAZY_INSTANCE_INIT;
@@ -567,6 +570,7 @@ GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
 
     emugl::Mutex::AutoLock lock(sSyncs->lock());
     GLsync hostSync = sSyncs->removeWithError(to_delete, &err);
+    fprintf(stderr, "%s: delete sync: sync: %p error: 0x%x\n", __func__, to_delete, err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     internal_glDeleteSync(hostSync);
 }
