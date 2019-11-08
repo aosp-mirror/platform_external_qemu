@@ -32,7 +32,7 @@ from time import sleep
 def open_with_fallback(filename=None):
     # Open file with a fallback to stdout if filename is invalid.
     if filename and filename != '-':
-        fh = open(args.filename, 'w')
+        fh = open(filename, 'w')
     else:
         fh = sys.stdout
 
