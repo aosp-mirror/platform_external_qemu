@@ -468,8 +468,15 @@ void ProgramData::restore(ObjectLocalName localName,
         for (const auto& uniform : mUniNameToGuestLoc) {
             GLint hostLoc = dispatcher.glGetUniformLocation(
                     globalName, c_str(getTranslatedName(uniform.first)));
+
             if (hostLoc != -1) {
                 mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
+
+                if (uniform.second != -1) {
+                ensureGuestLocToHostLocMap(uniform.second);
+                mGuestLocToHostLoc2[uniform.second] = hostLoc;
+            mGuestLocToHostLoc2Valid[uniform.second] = 1;
+                }
             }
         }
         for (const auto& uniformEntry : uniforms) {
@@ -771,6 +778,7 @@ void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = (status == GL_FALSE) ? false : true;
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
+    mGuestLocToHostLoc2.clear();
     mGuestLocToHostLoc[-1] = -1;
 #if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
     status = 1;
@@ -1091,8 +1099,11 @@ void ProgramData::initGuestUniformLocForKey(StringView key) {
         std::string translatedName = getTranslatedName(key);
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
+        ensureGuestLocToHostLocMap(mCurrUniformBaseLoc);
         if (hostLoc != -1) {
             mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+            mGuestLocToHostLoc2[mCurrUniformBaseLoc] = hostLoc;
+            mGuestLocToHostLoc2Valid[mCurrUniformBaseLoc] = 1;
         }
 
         mCurrUniformBaseLoc++;
@@ -1117,8 +1128,11 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
         std::string translatedName = getTranslatedName(key);
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
+        ensureGuestLocToHostLocMap(mCurrUniformBaseLoc);
         if (hostLoc != -1) {
             mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+            mGuestLocToHostLoc2[mCurrUniformBaseLoc] = hostLoc;
+            mGuestLocToHostLoc2Valid[mCurrUniformBaseLoc] = 1;
         }
 
         mCurrUniformBaseLoc++;
@@ -1141,8 +1155,11 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 if (guestLoc == -1) {
                     return -1;
                 } else {
+                    ensureGuestLocToHostLocMap(guestLoc);
                     mUniNameToGuestLoc.emplace(uniName, guestLoc);
                     mGuestLocToHostLoc.emplace(guestLoc, guestLoc);
+                    mGuestLocToHostLoc2[guestLoc] = guestLoc;
+            mGuestLocToHostLoc2Valid[guestLoc] = 1;
                 }
             }
             return guestLoc;
@@ -1165,6 +1182,11 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
             }
 
             mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+            if (guestLoc != -1) {
+                ensureGuestLocToHostLocMap(guestLoc);
+                mGuestLocToHostLoc2[guestLoc] = hostLoc;
+            mGuestLocToHostLoc2Valid[guestLoc] = 1;
+            }
             return guestLoc;
         }
     } else {
@@ -1176,13 +1198,15 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
 int ProgramData::getHostUniformLocation(int guestLocation) {
     if (mUseUniformLocationVirtualization) {
         if (guestLocation == -1) return -1;
+        if (!mGuestLocToHostLoc2Valid[guestLocation]) return -2;
+        return mGuestLocToHostLoc2[guestLocation];
 
-        const auto& location = mGuestLocToHostLoc.find(guestLocation);
-        if (location != mGuestLocToHostLoc.end()) {
-            return location->second;
-        } else {
-            return -2;
-        }
+        // const auto& location = mGuestLocToHostLoc.find(guestLocation);
+        // if (location != mGuestLocToHostLoc.end()) {
+            // return location->second;
+        // } else {
+            // return -2;
+        // }
     } else {
         return guestLocation;
     }
