@@ -27,7 +27,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "android/version.h"
 
+#include "android/globals.h"
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
 #include "android/base/system/System.h"
@@ -48,6 +50,7 @@
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/utils/ServiceUtils.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
@@ -157,7 +160,6 @@ public:
                 log.clear_entries();
                 log.set_start(message.first);
                 for (auto entry : parsed.second) {
-
                     *log.add_entries() = entry;
                 }
                 log.set_next(message.first + parsed.first);
@@ -285,15 +287,31 @@ public:
         return Status::OK;
     }
 
-    Status getVmConfiguration(ServerContext* context,
-                              const ::google::protobuf::Empty* request,
-                              VmConfiguration* reply) override {
+    Status getStatus(ServerContext* context,
+                     const ::google::protobuf::Empty* request,
+                     EmulatorStatus* reply) override {
         ::VmConfiguration config;
         mAgents->vm->getVmConfiguration(&config);
-        reply->set_hypervisortype(
+        reply->mutable_vmconfig()->set_hypervisortype(
                 (VmConfiguration_VmHypervisorType)(config.hypervisorType));
-        reply->set_numberofcpucores(config.numberOfCpuCores);
-        reply->set_ramsizebytes(config.ramSizeBytes);
+        reply->mutable_vmconfig()->set_numberofcpucores(
+                config.numberOfCpuCores);
+        reply->mutable_vmconfig()->set_ramsizebytes(config.ramSizeBytes);
+
+
+        reply->set_booted(guest_boot_completed != 0);
+        reply->set_uptime(System::get()->getProcessTimes().wallClockMs);
+        reply->set_version(std::string(EMULATOR_VERSION_STRING) + " (" +
+                           std::string(EMULATOR_FULL_VERSION_STRING) + ")");
+
+        auto entries = reply->mutable_hardwareconfig();
+        auto cnf = getQemuConfig(android_hw);
+        for (auto const& entry : cnf) {
+            auto response_entry = entries->add_entry();
+            response_entry->set_key(entry.first);
+            response_entry->set_value(entry.second);
+        };
+
         return Status::OK;
     }
 
@@ -418,7 +436,8 @@ Builder& Builder::withCertAndKey(std::string certfile,
 
     if (!!System::get()->pathExists(privateKeyFile)) {
         LOG(WARNING) << "Cannot find private key file: " << privateKeyFile
-                     << " security will be disabled, the emulator might be publicly accessible!";
+                     << " security will be disabled, the emulator might be "
+                        "publicly accessible!";
         return *this;
     }
 

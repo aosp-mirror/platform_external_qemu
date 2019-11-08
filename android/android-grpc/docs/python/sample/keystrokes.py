@@ -28,10 +28,6 @@ channel = getEmulatorChannel()
 # Create a client
 stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
-# Let's ask about the hypervisor.
-response = stub.getVmConfiguration(_EMPTY_)
-print(response)
-
 # Let's type some text..
 for l in "Hello World":
     textEvent = proto.emulator_controller_pb2.KeyboardEvent(text=l)
