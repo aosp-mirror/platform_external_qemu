@@ -224,6 +224,11 @@ void GLESv2Context::enableArr(GLenum arrType, bool enable) {
     uint32_t index = (uint32_t)arrType;
     if (index > kMaxVertexAttributes) return;
     m_currVaoState.attribInfo()[index].enable(enable);
+            if (enable) {
+                m_currVaoState.isEnabledCache |= (1 << index);
+            } else {
+                m_currVaoState.isEnabledCache &= ~(1 << index);
+            }
 }
 
 const GLESpointer* GLESv2Context::getPointer(GLenum arrType) {
