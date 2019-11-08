@@ -35,15 +35,19 @@ private:
 EglThreadInfo::EglThreadInfo() :
         m_err(EGL_SUCCESS), m_api(EGL_OPENGL_ES_API) {}
 
-static emugl::LazyInstance<EglThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
+static EglThreadInfoStore* s_tls = 0;
+static thread_local EglThreadInfo* s_currInfo = 0;
+
+// static
+void EglThreadInfo::init() { if (!s_tls) s_tls = new EglThreadInfoStore; }
 
 EglThreadInfo* EglThreadInfo::get(void)
 {
-    EglThreadInfo *ti = static_cast<EglThreadInfo*>(s_tls->get());
-    if (!ti) {
+    if (!s_currInfo) {
+        EglThreadInfo *ti = static_cast<EglThreadInfo*>(s_tls->get());
         ti = new EglThreadInfo();
         s_tls->set(ti);
+        s_currInfo = ti;
     }
-    return ti;
+    return s_currInfo;
 }
-

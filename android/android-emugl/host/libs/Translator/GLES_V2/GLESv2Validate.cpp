@@ -443,7 +443,7 @@ bool GLESv2Validate::precisionType(GLenum type){
 }
 
 bool GLESv2Validate::arrayIndex(GLEScontext * ctx,GLuint index) {
-    return index < (GLuint)ctx->getCaps()->maxVertexAttribs;
+    return index < kMaxVertexAttributes;
 }
 
 #define GL_RED                              0x1903

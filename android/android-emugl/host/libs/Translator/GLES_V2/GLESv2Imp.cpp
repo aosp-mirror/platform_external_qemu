@@ -433,21 +433,29 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
 GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
-    //if buffer wasn't generated before,generate one
-    if (buffer && ctx->shareGroup().get() &&
-        !ctx->shareGroup()->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
-        ctx->shareGroup()->genName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->shareGroup()->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
-                                         ObjectDataPtr(new GLESbuffer()));
-    }
-    ctx->bindBuffer(target,buffer);
+    auto s = ctx->shareGroup().get();
+    GLESbuffer* vbo = 0;
+    GLuint globalName = 0;
+
     if (buffer) {
-        GLESbuffer* vbo =
-                (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
+        vbo = (GLESbuffer*)s->getObjectOrCreateIfNonexist(
+            [] { return new GLESbuffer(); },
+            NamedObjectType::VERTEXBUFFER, buffer, &globalName);
+    }
+
+    //if buffer wasn't generated before,generate one
+//     if (buffer && s &&
+//         !s->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
+//         s->genName(NamedObjectType::VERTEXBUFFER, buffer);
+//         s->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
+//                 ObjectDataPtr(new GLESbuffer()));
+//     }
+
+    ctx->bindBuffer2(target,buffer,vbo);
+
+    if (buffer) {
         vbo->setBinded();
-        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->dispatcher().glBindBuffer(target, globalBufferName);
+        ctx->dispatcher().glBindBuffer(target, globalName);
     } else {
         ctx->dispatcher().glBindBuffer(target, 0);
     }
@@ -588,6 +596,9 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             }
             // set that this framebuffer has been bound before
             auto fbObj = ctx->getFBOData(framebuffer);
+            if (globalFrameBufferName && !fbObj) {
+                fprintf(stderr, "%s: deleted fbo data for %u?\n", __func__, globalFrameBufferName);
+            }
             fbObj->setBoundAtLeastOnce();
         }
         ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
@@ -650,15 +661,20 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
             texData->setTarget(target);
         }
         //if texture was already bound to another target
+        auto prevTarget = ctx->GLTextureTargetToLocal(texData->target);
+        auto thisTarget = ctx->GLTextureTargetToLocal(target);
 
-        if (ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target)) {
+        if (prevTarget != thisTarget) {
             fprintf(stderr, "%s: Set invalid operation!\n", __func__);
+            SET_ERROR_IF(true, GL_INVALID_OPERATION);
         }
-        SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
+
         texData->setGlobalName(globalTextureName);
+
         if (!texData->wasBound) {
             texData->resetSaveableTexture();
         }
+
         texData->wasBound = true;
     }
 
@@ -1478,6 +1494,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
     SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
+    SET_ERROR_IF(renderbuffer &&
+                 !ctx->shareGroup()->isObject(
+                     NamedObjectType::RENDERBUFFER, renderbuffer), GL_INVALID_OPERATION);
 
     GLuint globalRenderbufferName = 0;
     ObjectDataPtr obj;
@@ -1486,6 +1505,8 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     if(renderbuffer) {
         if (!ctx->shareGroup()->isObject(NamedObjectType::RENDERBUFFER,
                                          renderbuffer)) {
+            fprintf(stderr, "%s: %d is not rbo\n", __func__,
+                    (int)renderbuffer);
             ctx->shareGroup()->genName(NamedObjectType::RENDERBUFFER,
                                        renderbuffer);
             RenderbufferData* rboData = new RenderbufferData();
@@ -3764,11 +3785,40 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib4fv(GLuint index, const GLfloat* valu
         ctx->setAttribute0value(values[0], values[1], values[2], values[3]);
 }
 
+static inline __attribute__((always_inline)) size_t
+sVertexAttribSizeof(GLenum type) {
+    switch (type) {
+        case GL_FLOAT:
+            return 4;
+        case GL_HALF_FLOAT:
+            return 2;
+        case GL_BYTE:
+        case GL_UNSIGNED_BYTE:
+            return 1;
+        case GL_SHORT:
+        case GL_UNSIGNED_SHORT:
+            return 2;
+        case GL_INT_2_10_10_10_REV:
+        case GL_UNSIGNED_INT_2_10_10_10_REV:
+        case GL_UNSIGNED_INT_10F_11F_11F_REV:
+            return 4;
+        case GL_INT:
+        case GL_UNSIGNED_INT:
+        case GL_FIXED:
+            return 4;
+#ifdef GL_DOUBLE
+        case GL_DOUBLE:
+            return 8;
+#endif
+    }
+    return 4;
+}
+
 static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize, bool isInt) {
     ctx->setVertexAttribBindingIndex(index, index);
     GLsizei effectiveStride = stride;
     if (stride == 0) {
-        effectiveStride = GLESv2Validate::sizeOfType(type) * size;
+        effectiveStride = sVertexAttribSizeof(type) * size;
         switch (type) {
             case GL_INT_2_10_10_10_REV:
             case GL_UNSIGNED_INT_2_10_10_10_REV:
@@ -3778,10 +3828,17 @@ static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLi
                 break;
         }
     }
-    ctx->bindIndexedBuffer(0, index, ctx->getBuffer(GL_ARRAY_BUFFER), (GLintptr)ptr, 0, effectiveStride);
+
+    auto currVbo = ctx->getBuffer(GL_ARRAY_BUFFER);
+
+    ctx->bindIndexedBuffer(0, index, currVbo, (GLintptr)ptr, 0, effectiveStride);
     ctx->setVertexAttribFormat(index, size, type, normalized, 0, isInt);
-    // Still needed to deal with client arrays
-    ctx->setPointer(index, size, type, stride, ptr, dataSize, normalized, isInt);
+    if (currVbo) {
+        ctx->setPointer2(index, size, type, stride, ptr, dataSize, normalized, isInt);
+    } else {
+        // Still needed to deal with client arrays
+        ctx->setPointer(index, size, type, stride, ptr, dataSize, normalized, isInt);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr){
@@ -3789,10 +3846,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
 
-    s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, 0, false);
-    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
-        ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
-    }
+    ctx->prepareVertexAttribPointer(index, size, type, normalized, stride, ptr, 0, false);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
@@ -3920,15 +3974,7 @@ GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
-    if (ctx->setVertexArrayObject(array)) {
-        // TODO: This could be useful for a glIsVertexArray
-        // that doesn't use the host GPU, but currently, it doesn't
-        // really work. VAOs need to be bound first if glIsVertexArray
-        // is to return true, and for now let's just ask the GPU
-        // directly.
-        ctx->setVAOEverBound();
-    }
-    ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
+    ctx->bindVertexArray(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {

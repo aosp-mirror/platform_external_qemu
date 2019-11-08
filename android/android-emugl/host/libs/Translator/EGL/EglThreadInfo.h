@@ -21,6 +21,9 @@
 // Model thread-specific EGL state.
 class EglThreadInfo {
 public:
+    // Constructs the global thread info.
+    static void init();
+
     // Return the thread-specific instance of EglThreadInfo to the caller.
     // The instance will be created on first call, and destroyed automatically
     // when the thread exits.

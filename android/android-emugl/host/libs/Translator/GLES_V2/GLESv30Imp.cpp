@@ -412,7 +412,7 @@ public:
         GLsync res = (GLsync)(uintptr_t)mNameCounter;
         mSyncs[res] = newHostSync;
         mNameCounter++;
-        if (!mNameCounter) mNameCounter = 0x1000;
+        if (!mNameCounter) mNameCounter = 9000;
         return res;
     }
 
@@ -459,7 +459,7 @@ public:
 private:
     std::unordered_map<GLsync, GLsync> mSyncs;
     mutable emugl::Mutex mLock;
-    uint32_t mNameCounter = 0x1;
+    uint32_t mNameCounter = 9000;
 };
 
 static android::base::LazyInstance<GuestSyncs> sSyncs = LAZY_INSTANCE_INIT;

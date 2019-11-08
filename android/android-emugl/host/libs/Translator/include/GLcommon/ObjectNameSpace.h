@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/base/containers/EntityManager.h"
 #include "android/snapshot/common.h"
 #include "emugl/common/mutex.h"
 #include "GLcommon/GLBackgroundLoader.h"
@@ -31,6 +32,21 @@
 typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
 typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
 typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
+
+struct LocalObjectExistence {
+    bool exists = false;
+    GLuint globalName = 0;
+};
+
+struct ObjectDataEntry {
+    ObjectData* objData = nullptr;
+};
+
+using LocalObjectExistenceMap =
+    android::base::EntityManager<32, 16, 16, LocalObjectExistence>;
+
+using ObjectDataCache =
+    android::base::EntityManager<32, 16, 16, ObjectDataEntry>;
 
 class GlobalNameSpace;
 
@@ -101,6 +117,7 @@ public:
     void replaceGlobalObject(ObjectLocalName p_localName, NamedObjectPtr p_namedObject);
 
     const ObjectDataPtr& getObjectDataPtr(ObjectLocalName p_localName);
+    ObjectData* getObjectDataRawPtr(ObjectLocalName p_localName);
     void setObjectData(ObjectLocalName p_localName, ObjectDataPtr data);
     // snapshot functions
     void postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr);
@@ -111,8 +128,9 @@ public:
     ObjectDataMap::const_iterator objDataMapEnd() const;
 private:
     ObjectLocalName m_nextName = 0;
-    NamesMap m_localToGlobalMap;
+    NamesMap m_localToGlobalMap; LocalObjectExistenceMap m_localNameExistsMap;
     ObjectDataMap m_objectDataMap;
+    ObjectDataCache m_objectDataCache;
     GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace = nullptr;
