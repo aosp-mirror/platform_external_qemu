@@ -224,6 +224,11 @@ void GLESv2Context::enableArr(GLenum arrType, bool enable) {
     uint32_t index = (uint32_t)arrType;
     if (index > kMaxVertexAttributes) return;
     m_currVaoState.attribInfo()[index].enable(enable);
+            if (enable) {
+                m_currVaoState.isEnabledCache |= (1 << index);
+            } else {
+                m_currVaoState.isEnabledCache &= ~(1 << index);
+            }
 }
 
 const GLESpointer* GLESv2Context::getPointer(GLenum arrType) {
@@ -827,6 +832,24 @@ GLuint GLESv2Context::getIndexedBuffer(GLenum target, GLuint index) {
     }
 }
 
+void GLESv2Context::bindIndexedBufferVbo(GLenum target,
+                                         GLuint index,
+                                         GLuint buffer,
+                                         GLintptr offset,
+                                         GLsizeiptr size,
+                                         GLintptr stride,
+                                         bool isBindBase) {
+    VertexAttribBindingVector* bindings =
+        &m_currVaoState.bufferBindings();
+
+    auto& bufferBinding = (*bindings)[index];
+    bufferBinding.buffer = buffer;
+    bufferBinding.offset = offset;
+    bufferBinding.size = size;
+    bufferBinding.stride = stride;
+    bufferBinding.isBindBase = isBindBase;
+}
+
 void GLESv2Context::bindIndexedBuffer(GLenum target,
                                       GLuint index,
                                       GLuint buffer,
@@ -839,7 +862,7 @@ void GLESv2Context::bindIndexedBuffer(GLenum target,
             TransformFeedbackData* tf = boundTransformFeedback();
             tf->bindIndexedBuffer(index, buffer, offset, size, stride,
                                   isBindBase);
-            break;
+            return;
         }
         default:
             GLEScontext::bindIndexedBuffer(target, index, buffer, offset, size,
@@ -859,3 +882,86 @@ void GLESv2Context::unbindBuffer(GLuint buffer) {
     }
     GLEScontext::unbindBuffer(buffer);
 }
+
+static inline __attribute__((always_inline)) size_t
+sVertexAttribSizeof(GLenum type) {
+    switch (type) {
+        case GL_FLOAT:
+            return 4;
+        case GL_HALF_FLOAT:
+            return 2;
+        case GL_BYTE:
+        case GL_UNSIGNED_BYTE:
+            return 1;
+        case GL_SHORT:
+        case GL_UNSIGNED_SHORT:
+            return 2;
+        case GL_INT_2_10_10_10_REV:
+        case GL_UNSIGNED_INT_2_10_10_10_REV:
+        case GL_UNSIGNED_INT_10F_11F_11F_REV:
+            return 4;
+        case GL_INT:
+        case GL_UNSIGNED_INT:
+        case GL_FIXED:
+            return 4;
+#ifdef GL_DOUBLE
+        case GL_DOUBLE:
+            return 8;
+#endif
+    }
+    return 4;
+}
+
+void GLESv2Context::prepareVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize, bool isInt) {
+    setVertexAttribBindingIndex(index, index);
+    GLsizei effectiveStride = stride;
+    if (stride == 0) {
+        effectiveStride = sVertexAttribSizeof(type) * size;
+        switch (type) {
+            case GL_INT_2_10_10_10_REV:
+            case GL_UNSIGNED_INT_2_10_10_10_REV:
+                effectiveStride /= 4;
+                break;
+            default:
+                break;
+        }
+    }
+
+    auto currVbo = getBuffer(GL_ARRAY_BUFFER);
+
+    bindIndexedBufferVbo(0, index, currVbo, (GLintptr)ptr, 0, effectiveStride);
+    setVertexAttribFormat(index, size, type, normalized, 0, isInt);
+    if (currVbo) {
+        setPointer2(index, size, type, stride, ptr, dataSize, normalized, isInt);
+        dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
+    } else {
+        // Still needed to deal with client arrays
+        setPointer(index, size, type, stride, ptr, dataSize, normalized, isInt);
+    }
+}
+
+void GLESv2Context::setPointer2(
+    GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize, bool isInt) {
+    GLuint bufferName = m_arrayBuffer;
+    GLESpointer* glesPointer = nullptr;
+
+    uint32_t attribIndex = (uint32_t)arrType;
+    glesPointer = m_currVaoState.attribInfo().data() + (uint32_t)arrType;
+
+    unsigned int offset = SafeUIntFromPointer(data);
+    GLESbuffer* vbo = m_arrayBufferObj;
+
+    if (!vbo) { vbo = static_cast<GLESbuffer*>(
+        m_shareGroup->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName)); }
+
+    if (offset >= vbo->getSize() || vbo->getSize() - offset < size) {
+#ifdef _DEBUG
+        fprintf(stderr, "Warning: Invalid pointer offset %u, arrType %d, type %d\n", offset, arrType, type);
+#endif
+        return;
+    }
+
+    glesPointer->setBuffer(size,type,stride,vbo,bufferName,offset,normalize,isInt);
+    m_currVaoState.isBufferBackedCache |= (1 << arrType);
+}
+

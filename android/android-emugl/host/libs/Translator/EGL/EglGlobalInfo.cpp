@@ -18,6 +18,7 @@
 #include "ClientAPIExts.h"
 #include "EglDisplay.h"
 #include "EglOsApi.h"
+#include "EglThreadInfo.h"
 
 #include "GLcommon/GLutils.h"
 #include "emugl/common/lazy_instance.h"

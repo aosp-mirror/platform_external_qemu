@@ -186,6 +186,9 @@ struct VAOStateRef {
         return it->second.everBound;
     }
     VAOStateMap::iterator it;
+
+    uint16_t isEnabledCache = 0;
+    uint16_t isBufferBackedCache = 0;
 };
 
 class FramebufferData;
@@ -250,6 +253,7 @@ public:
                                                   GLint* internalformat_out, GLenum* format_out);
 
     void bindBuffer(GLenum target,GLuint buffer);
+    void bindBuffer2(GLenum target,GLuint buffer,GLESbuffer* bufferObjData);
     virtual void bindIndexedBuffer(GLenum target,
                                    GLuint index,
                                    GLuint buffer,
@@ -623,13 +627,12 @@ protected:
 
     GLuint m_useProgram = 0;
 
-private:
-
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;
     unsigned int          m_maxUsedTexUnit = 0;
     textureUnitState*     m_texState = nullptr;
     unsigned int          m_arrayBuffer = 0;
+    GLESbuffer*           m_arrayBufferObj = nullptr;
     unsigned int          m_elementBuffer = 0;
     GLuint                m_renderbuffer = 0;
     GLuint                m_drawFramebuffer = 0;

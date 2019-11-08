@@ -348,16 +348,9 @@ GLuint GLEScontext::getVertexArrayObject() const {
 }
 
 bool GLEScontext::vertexAttributesBufferBacked() {
-    const auto& info = m_currVaoState.attribInfo_const();
-    for (uint32_t i = 0; i  < kMaxVertexAttributes; ++i) {
-        const auto& pointerInfo = info[i];
-        if (pointerInfo.isEnable() &&
-            !m_currVaoState.bufferBindings()[pointerInfo.getBindingIndex()].buffer) {
-            return false;
-        }
-    }
-
-    return true;
+    return m_currVaoState.isEnabledCache ==
+        (m_currVaoState.isBufferBackedCache &
+         m_currVaoState.isEnabledCache);
 }
 
 static EGLiface*      s_eglIface = nullptr;
@@ -934,8 +927,9 @@ ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize, bool isInt) {
     GLuint bufferName = m_arrayBuffer;
     GLESpointer* glesPointer = nullptr;
+    bool legacy = m_currVaoState.it->second.legacy;
 
-    if (m_currVaoState.it->second.legacy) {
+    if (legacy) {
         auto vertexAttrib = m_currVaoState.find(arrType);
         if (vertexAttrib == m_currVaoState.end()) {
             return nullptr;
@@ -961,10 +955,11 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
         }
 
         glesPointer->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
-
+        if (!legacy) m_currVaoState.isBufferBackedCache |= (1 << arrType);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
     glesPointer->setArray(size,type,stride,data,dataSize,normalize,isInt);
+    if (!legacy) m_currVaoState.isBufferBackedCache &= ~(1 << arrType);
     return data;
 }
 
@@ -974,9 +969,17 @@ GLint GLEScontext::getUnpackAlignment() {
 }
 
 void GLEScontext::enableArr(GLenum arr,bool enable) {
+    bool legacy = m_currVaoState.it->second.legacy;
     auto vertexAttrib = m_currVaoState.find(arr);
     if (vertexAttrib != m_currVaoState.end()) {
         vertexAttrib->second->enable(enable);
+        if (!legacy) {
+            if (enable) {
+                m_currVaoState.isEnabledCache |= (1 << arr);
+            } else {
+                m_currVaoState.isEnabledCache &= ~(1 << arr);
+            }
+        }
     }
 }
 
@@ -1229,12 +1232,60 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     }
 }
 
+void GLEScontext::bindBuffer2(GLenum target,GLuint buffer,GLESbuffer* objData) {
+    switch(target) {
+    case GL_ARRAY_BUFFER:
+        m_arrayBuffer = buffer;
+        m_arrayBufferObj = objData;
+        break;
+    case GL_ELEMENT_ARRAY_BUFFER:
+        m_currVaoState.iboId() = buffer;
+        break;
+    case GL_COPY_READ_BUFFER:
+        m_copyReadBuffer = buffer;
+        break;
+    case GL_COPY_WRITE_BUFFER:
+        m_copyWriteBuffer = buffer;
+        break;
+    case GL_PIXEL_PACK_BUFFER:
+        m_pixelPackBuffer = buffer;
+        break;
+    case GL_PIXEL_UNPACK_BUFFER:
+        m_pixelUnpackBuffer = buffer;
+        break;
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        m_transformFeedbackBuffer = buffer;
+        break;
+    case GL_UNIFORM_BUFFER:
+        m_uniformBuffer = buffer;
+        break;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        m_atomicCounterBuffer = buffer;
+        break;
+    case GL_DISPATCH_INDIRECT_BUFFER:
+        m_dispatchIndirectBuffer = buffer;
+        break;
+    case GL_DRAW_INDIRECT_BUFFER:
+        m_drawIndirectBuffer = buffer;
+        break;
+    case GL_SHADER_STORAGE_BUFFER:
+        m_shaderStorageBuffer = buffer;
+        break;
+    default:
+        m_arrayBuffer = buffer;
+        break;
+    }
+}
+
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
         GLintptr offset, GLsizeiptr size, GLintptr stride, bool isBindBase) {
     VertexAttribBindingVector* bindings = nullptr;
     switch (target) {
     case GL_UNIFORM_BUFFER:
         bindings = &m_indexedUniformBuffers;
+        break;
+    case 0:
+        bindings = &m_currVaoState.bufferBindings();
         break;
     case GL_ATOMIC_COUNTER_BUFFER:
         bindings = &m_indexedAtomicCounterBuffers;
@@ -1246,9 +1297,11 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
         bindings = &m_currVaoState.bufferBindings();
         break;
     }
+
     if (index >= bindings->size()) {
-            return;
+        return;
     }
+
     auto& bufferBinding = (*bindings)[index];
     bufferBinding.buffer = buffer;
     bufferBinding.offset = offset;
@@ -1276,8 +1329,10 @@ static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bi
 }
 
 void GLEScontext::unbindBuffer(GLuint buffer) {
-    if (m_arrayBuffer == buffer)
+    if (m_arrayBuffer == buffer) {
         m_arrayBuffer = 0;
+        m_arrayBufferObj = nullptr;
+    }
     if (m_currVaoState.iboId() == buffer)
         m_currVaoState.iboId() = 0;
     if (m_copyReadBuffer == buffer)
@@ -1389,7 +1444,6 @@ GLuint GLEScontext::getIndexedBuffer(GLenum target, GLuint index) {
         return m_currVaoState.bufferBindings()[index].buffer;
     }
 }
-
 
 GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
     GLuint bufferName = getBuffer(target);

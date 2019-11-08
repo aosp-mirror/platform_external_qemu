@@ -35,6 +35,89 @@ using android::snapshot::ITextureSaverPtr;
 using android::snapshot::ITextureLoaderPtr;
 using android::snapshot::ITextureLoaderWPtr;
 
+#define MAX_CACHE_SIZE 40000
+
+__attribute__((always_inline))
+static inline void sSetLocalNameCache(
+    LocalObjectExistenceMap& m,
+    ObjectLocalName p_localName, bool exists, unsigned int globalName) {
+
+    if (p_localName < 0 || p_localName > MAX_CACHE_SIZE) return;
+
+    LocalObjectExistence e = {
+        exists,
+        globalName,
+    };
+
+    m.addFixed(
+        LocalObjectExistenceMap::makeHandle(
+            p_localName, 1, 1),
+        e, 1);
+}
+
+__attribute__((always_inline))
+static inline unsigned int sGetGlobalNameFromCache(
+    LocalObjectExistenceMap& m,
+    ObjectLocalName p_localName) {
+
+    if (p_localName < 0 || p_localName > MAX_CACHE_SIZE) return 0;
+
+    auto res = m.get(
+        LocalObjectExistenceMap::makeHandle(
+            p_localName, 1, 1));
+
+    if (!res) return 0;
+    if (!res->exists) return 0;
+    return res->globalName;
+}
+
+__attribute__((always_inline))
+static inline bool sGetNameExistsFromCache(
+    LocalObjectExistenceMap& m,
+    ObjectLocalName p_localName) {
+
+    if (p_localName < 0 || p_localName > MAX_CACHE_SIZE) return 0;
+
+    auto res = m.get(
+        LocalObjectExistenceMap::makeHandle(
+            p_localName, 1, 1));
+
+    if (!res) return 0;
+    return res->exists;
+}
+
+__attribute__((always_inline))
+static inline void sSetObjectDataCache(
+    ObjectDataCache& c,
+    ObjectLocalName p_localName, ObjectData* objDataPtr) {
+
+    if (p_localName < 0 || p_localName > MAX_CACHE_SIZE) return;
+
+    ObjectDataEntry e = {
+        objDataPtr,
+    };
+
+    c.addFixed(
+        ObjectDataCache::makeHandle(
+            p_localName, 1, 1),
+        e, 1);
+}
+
+__attribute__((always_inline))
+static inline ObjectData* sGetObjectDataFromCache(
+    ObjectDataCache& c,
+    ObjectLocalName p_localName) {
+
+    if (p_localName < 0 || p_localName > MAX_CACHE_SIZE) return nullptr;
+
+    auto res = c.get(
+        ObjectDataCache::makeHandle(
+            p_localName, 1, 1));
+
+    if (!res) return nullptr;
+    return res->objData;
+}
+
 NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
         android::base::Stream* stream, const ObjectData::loadObject_t& loadObject) :
     m_type(p_type),
@@ -182,9 +265,10 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
                                          NamedObjectPtr(
                                             new NamedObject(genNameInfo,
                                                     m_globalNameSpace))).first;
+
     unsigned int globalName = it->second->getGlobalName();
     m_globalToLocalMap[globalName] = localName;
-
+    sSetLocalNameCache(m_localNameExistsMap, localName, true, globalName);
     return localName;
 }
 
@@ -192,13 +276,17 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
 unsigned int
 NameSpace::getGlobalName(ObjectLocalName p_localName)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
-    if (n != m_localToGlobalMap.end()) {
-        // object found - return its global name map
-        return (*n).second->getGlobalName();
-    }
+    unsigned int cacheRes =
+        sGetGlobalNameFromCache(
+            m_localNameExistsMap, p_localName);
 
-    // object does not exist;
+    if (cacheRes) return cacheRes;
+
+    NamesMap::iterator n (m_localToGlobalMap.find(p_localName));
+    if (n != m_localToGlobalMap.end()) {
+        auto mapRes = (*n).second->getGlobalName();
+        return mapRes;
+    }
     return 0;
 }
 
@@ -229,25 +317,37 @@ NameSpace::deleteName(ObjectLocalName p_localName)
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         m_localToGlobalMap.erase(n);
+        sSetLocalNameCache(m_localNameExistsMap, p_localName, false, 0);
     }
     m_objectDataMap.erase(p_localName);
+    sSetObjectDataCache(m_objectDataCache, p_localName, nullptr);
 }
 
 bool
 NameSpace::isObject(ObjectLocalName p_localName)
 {
-    return (m_localToGlobalMap.find(p_localName) != m_localToGlobalMap.end() );
+    bool cachedExists = sGetNameExistsFromCache(m_localNameExistsMap, p_localName);
+    if (cachedExists) return true;
+    return (m_localToGlobalMap.find(p_localName) != m_localToGlobalMap.end());
 }
 
 void
 NameSpace::setGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject) {
+    auto globalName = p_namedObject->getGlobalName();
     NamesMap::iterator n(m_localToGlobalMap.find(p_localName));
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;
+
+        // TODO: Real bug?
+        m_localToGlobalMap.erase(n);
+        m_localToGlobalMap.emplace(p_localName, p_namedObject);
+
+        sSetLocalNameCache(m_localNameExistsMap, p_localName, true, globalName);
     } else {
         m_localToGlobalMap.emplace(p_localName, p_namedObject);
+        sSetLocalNameCache(m_localNameExistsMap, p_localName, true, globalName);
     }
     m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
 }
@@ -256,11 +356,19 @@ void
 NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject)
 {
+    auto globalName = p_namedObject->getGlobalName();
+
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;
         m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
+
+        // TODO: Real bug?
+        m_localToGlobalMap.erase(n);
+        m_localToGlobalMap.emplace(p_localName, p_namedObject);
+
+        sSetLocalNameCache(m_localNameExistsMap, p_localName, true, globalName);
     }
 }
 
@@ -274,6 +382,11 @@ ObjectDataMap::const_iterator NameSpace::objDataMapEnd() const {
 
 static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
 
+ObjectData* NameSpace::getObjectDataRawPtr(
+        ObjectLocalName p_localName) {
+    return sGetObjectDataFromCache(m_objectDataCache, p_localName);
+}
+
 const ObjectDataPtr& NameSpace::getObjectDataPtr(
         ObjectLocalName p_localName) {
     const auto it = m_objectDataMap.find(p_localName);
@@ -285,6 +398,7 @@ const ObjectDataPtr& NameSpace::getObjectDataPtr(
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
+    sSetObjectDataCache(m_objectDataCache, p_localName, data.get());
     m_objectDataMap.emplace(p_localName, std::move(data));
 }
 

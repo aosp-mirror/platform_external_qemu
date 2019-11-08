@@ -294,6 +294,38 @@ const ObjectDataPtr& ShareGroup::getObjectDataPtrNoLock(
     return m_nameSpace[toIndex(p_type)]->getObjectDataPtr(p_localName);
 }
 
+ObjectData* ShareGroup::getObjectDataRawPtrNoLock(
+    NameSpace* nameSpace, ObjectLocalName p_localName) {
+    return nameSpace->getObjectDataRawPtr(p_localName);
+}
+
+ObjectData* ShareGroup::getObjectOrCreateIfNonexist(
+    std::function<ObjectData*()> createFunc,
+    NamedObjectType p_type, ObjectLocalName p_localName,
+    uint32_t* globalName) {
+
+    ObjectData* res = 0;
+
+    auto& nameSpace = m_nameSpace[toIndex(p_type)];
+
+    if (!nameSpace->isObject(p_localName)) {
+        nameSpace->genName(
+                GenNameInfo(p_type),
+                p_localName, false);
+        res = createFunc();
+        setObjectDataLocked(
+            p_type, p_localName,
+            std::move(ObjectDataPtr(res)));
+    } else {
+        res = getObjectDataRawPtrNoLock(nameSpace, p_localName);
+        // res = getObjectDataPtrNoLock(p_type, p_localName).get();
+    }
+
+    *globalName = nameSpace->getGlobalName(p_localName);
+    return res;
+}
+
+
 ObjectData* ShareGroup::getObjectData(NamedObjectType p_type,
                           ObjectLocalName p_localName) {
     if (toIndex(p_type) >=

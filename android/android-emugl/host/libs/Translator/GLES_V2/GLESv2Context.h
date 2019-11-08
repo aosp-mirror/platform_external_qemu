@@ -110,7 +110,16 @@ public:
                            GLintptr stride = 0,
                            bool isBindBase = false) override;
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) override;
+    void bindIndexedBufferVbo(GLenum target,
+                              GLuint index,
+                              GLuint buffer,
+                              GLintptr offset,
+                              GLsizeiptr size,
+                              GLintptr stride = 0,
+                              bool isBindBase = false);
     void unbindBuffer(GLuint buffer) override;
+    void prepareVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize, bool isInt);
+    void setPointer2(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize = false, bool isInt = false);
 
     static void setMaxGlesVersion(GLESVersion version);
 
