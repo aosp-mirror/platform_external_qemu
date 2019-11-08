@@ -247,6 +247,7 @@ void savepng(const char* fn,
     write_png_user_function(p, pi, nChannels, width, height, rotation, pixels);
     png_destroy_write_struct(&p, &pi);
 
+    fflush(fp);
     fclose(fp);
 }
 
