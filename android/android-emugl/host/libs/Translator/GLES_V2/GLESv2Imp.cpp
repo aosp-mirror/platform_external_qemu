@@ -433,21 +433,29 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
 GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
-    //if buffer wasn't generated before,generate one
-    if (buffer && ctx->shareGroup().get() &&
-        !ctx->shareGroup()->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
-        ctx->shareGroup()->genName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->shareGroup()->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
-                                         ObjectDataPtr(new GLESbuffer()));
-    }
-    ctx->bindBuffer(target,buffer);
+    auto s = ctx->shareGroup().get();
+    GLESbuffer* vbo = 0;
+    GLuint globalName = 0;
+
     if (buffer) {
-        GLESbuffer* vbo =
-                (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
+        vbo = (GLESbuffer*)s->getObjectOrCreateIfNonexist(
+            [] { return new GLESbuffer(); },
+            NamedObjectType::VERTEXBUFFER, buffer, &globalName);
+    }
+
+    //if buffer wasn't generated before,generate one
+//     if (buffer && s &&
+//         !s->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
+//         s->genName(NamedObjectType::VERTEXBUFFER, buffer);
+//         s->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
+//                 ObjectDataPtr(new GLESbuffer()));
+//     }
+
+    ctx->bindBuffer(target,buffer);
+
+    if (buffer) {
         vbo->setBinded();
-        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->dispatcher().glBindBuffer(target, globalBufferName);
+        ctx->dispatcher().glBindBuffer(target, globalName);
     } else {
         ctx->dispatcher().glBindBuffer(target, 0);
     }
