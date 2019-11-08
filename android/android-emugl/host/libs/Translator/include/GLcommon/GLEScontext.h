@@ -186,6 +186,9 @@ struct VAOStateRef {
         return it->second.everBound;
     }
     VAOStateMap::iterator it;
+
+    uint16_t isEnabledCache = 0;
+    uint16_t isBufferBackedCache = 0;
 };
 
 class FramebufferData;
