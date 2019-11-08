@@ -238,6 +238,7 @@ private:
                 buf, ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE,
                 ADDRESS_SPACE_GRAPHICS_PAGE_SIZE);
         block.offsetIntoPhys = offsetIntoPhys;
+
         block.isEmpty = false;
     }
 
