@@ -660,6 +660,7 @@ TEST_P(CombinedGoldfishOpenglTest, DrawCallRate) {
 }
 
 extern "C" void glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
+extern "C" void glDrawElementsNullAEMU(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
 
 // Test draw call rate without drawing on the host driver, which gives numbers
 // closer to pure emulator overhead. This is a perfgate benchmark
@@ -739,7 +740,7 @@ TEST_P(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     uint32_t drawCount = 0;
-    static constexpr uint32_t kDrawCallLimit = 2000000;
+    static constexpr uint32_t kDrawCallLimit = 200000;
 
     auto cpuTimeStart = System::cpuTime();
 
@@ -1013,6 +1014,154 @@ TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
 
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &tex);
+}
+
+// Test texture bind rate + drawElements
+TEST_P(CombinedGoldfishOpenglTest, TextureBindWithDrawElements) {
+        constexpr char vshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+    constexpr char fshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    uniform sampler2D textureSampler;
+
+    void main() {
+        fragColor = mix(texture(textureSampler, color_varying.xy), vec4(color_varying, 1.0), 0.5);
+    }
+    )";
+
+    GLuint program = compileAndLinkShaderProgram(vshaderSrc, fshaderSrc);
+
+    GLint transformLoc = glGetUniformLocation(program, "transform");
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    struct VertexAttributes {
+        float position[2];
+        float color[3];
+    };
+
+    const VertexAttributes vertexAttrs[] = {
+        { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
+        { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
+        { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
+    };
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0,
+        GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLuint ibo;
+    const unsigned int iboData[] = { 0, 1, 2 };
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(iboData), iboData, GL_STATIC_DRAW);
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(VertexAttributes), 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(VertexAttributes),
+                              (GLvoid*)offsetof(VertexAttributes, color));
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glUseProgram(program);
+
+    glClearColor(0.2f, 0.2f, 0.3f, 0.0f);
+    glViewport(0, 0, 1, 1);
+
+    float matrix[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t uploadCount = 0;
+    static constexpr uint32_t kUploadLimit = 200000;
+
+    auto cpuTimeStart = System::cpuTime();
+
+    while (uploadCount < kUploadLimit) {
+        glBindVertexArray(vao);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        glDrawElementsNullAEMU(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindVertexArray(0);
+        ++uploadCount;
+    }
+
+    // Need a round trip at the end to get an accurate measurement
+    glFinish();
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float drawCallHz = kUploadLimit / sec;
+
+    glBindVertexArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glDeleteTextures(1, &texture);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &buffer);
+    glDeleteBuffers(1, &ibo);
+    glUseProgram(0);
+    glDeleteProgram(program);
+
+    printf("DrawElements %u times in %f ms. Rate: %f Hz\n", kUploadLimit, ms,
+           drawCallHz);
+
+    android::perflogger::logDrawCallOverheadTest(
+        (const char*)glGetString(GL_VENDOR),
+        (const char*)glGetString(GL_RENDERER),
+        (const char*)glGetString(GL_VERSION),
+        "uniformUpload", "fullStack",
+        kUploadLimit,
+        (long)drawCallHz,
+        duration_us,
+        duration_cpu_us);
 }
 
 // TODO: Enable this test once we have a host-side sync device impl (also, causes compile error currently)
