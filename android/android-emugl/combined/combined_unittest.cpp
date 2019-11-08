@@ -739,7 +739,7 @@ TEST_P(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     uint32_t drawCount = 0;
-    static constexpr uint32_t kDrawCallLimit = 2000000;
+    static constexpr uint32_t kDrawCallLimit = 200000;
 
     auto cpuTimeStart = System::cpuTime();
 

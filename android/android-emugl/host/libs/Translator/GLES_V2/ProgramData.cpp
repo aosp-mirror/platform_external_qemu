@@ -468,8 +468,12 @@ void ProgramData::restore(ObjectLocalName localName,
         for (const auto& uniform : mUniNameToGuestLoc) {
             GLint hostLoc = dispatcher.glGetUniformLocation(
                     globalName, c_str(getTranslatedName(uniform.first)));
+            ensureGuestLocToHostLocMap(uniform.second);
+
             if (hostLoc != -1) {
                 mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
+
+                mGuestLocToHostLoc2[uniform.second] = hostLoc;
             }
         }
         for (const auto& uniformEntry : uniforms) {
@@ -771,6 +775,7 @@ void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = (status == GL_FALSE) ? false : true;
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
+    mGuestLocToHostLoc2.clear();
     mGuestLocToHostLoc[-1] = -1;
 #if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
     status = 1;
@@ -1091,8 +1096,10 @@ void ProgramData::initGuestUniformLocForKey(StringView key) {
         std::string translatedName = getTranslatedName(key);
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
+        ensureGuestLocToHostLocMap(mCurrUniformBaseLoc);
         if (hostLoc != -1) {
             mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+            mGuestLocToHostLoc2[mCurrUniformBaseLoc] = hostLoc;
         }
 
         mCurrUniformBaseLoc++;
@@ -1111,6 +1118,7 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
     }
 
     if (newUniform) {
+        ensureGuestLocToHostLocMap(mCurrUniformBaseLoc);
         // Emplace host location beforehand to workaround Unreal bug
         // BUG: 120548998
         GLDispatch& dispatcher = GLEScontext::dispatcher();
@@ -1141,8 +1149,10 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 if (guestLoc == -1) {
                     return -1;
                 } else {
+                    ensureGuestLocToHostLocMap(guestLoc);
                     mUniNameToGuestLoc.emplace(uniName, guestLoc);
                     mGuestLocToHostLoc.emplace(guestLoc, guestLoc);
+                    mGuestLocToHostLoc2[guestLoc] = guestLoc;
                 }
             }
             return guestLoc;
@@ -1165,6 +1175,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
             }
 
             mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+            mGuestLocToHostLoc2[guestLoc] = hostLoc;
             return guestLoc;
         }
     } else {
@@ -1177,12 +1188,14 @@ int ProgramData::getHostUniformLocation(int guestLocation) {
     if (mUseUniformLocationVirtualization) {
         if (guestLocation == -1) return -1;
 
-        const auto& location = mGuestLocToHostLoc.find(guestLocation);
-        if (location != mGuestLocToHostLoc.end()) {
-            return location->second;
-        } else {
-            return -2;
-        }
+        return mGuestLocToHostLoc2[guestLocation];
+
+        // const auto& location = mGuestLocToHostLoc.find(guestLocation);
+        // if (location != mGuestLocToHostLoc.end()) {
+            // return location->second;
+        // } else {
+            // return -2;
+        // }
     } else {
         return guestLocation;
     }

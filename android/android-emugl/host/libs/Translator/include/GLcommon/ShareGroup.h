@@ -24,6 +24,7 @@
 
 #include <atomic>
 #include <GLES/gl.h>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -99,6 +100,11 @@ public:
     //
     void setObjectData(NamedObjectType p_type, ObjectLocalName p_localName,
             ObjectDataPtr data);
+
+    // Create object with name if it doesn't exist already
+    ObjectData* getObjectOrCreateIfNonexist(
+        std::function<ObjectData*()> createFunc,
+        NamedObjectType p_type, ObjectLocalName p_localName, uint32_t* globalName);
 
     //
     // Retrieve object global data

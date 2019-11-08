@@ -122,6 +122,12 @@ public:
     int getGuestUniformLocation(const char* uniName);
     int getHostUniformLocation(int guestLocation);
 
+    void ensureGuestLocToHostLocMap(int i) {
+        if (mGuestLocToHostLoc2.size() < i + 1) {
+            mGuestLocToHostLoc2.resize((i + 1) * 2, -1);
+        }
+    }
+
 private:
     // linkedAttribLocs stores the attribute locations the guest might
     // know about. It includes all boundAttribLocs before the previous
@@ -149,6 +155,7 @@ private:
 
     std::unordered_map<std::string, int> mUniNameToGuestLoc;
     std::unordered_map<int, int> mGuestLocToHostLoc;
+    std::vector<int> mGuestLocToHostLoc2;
 
     int mCurrUniformBaseLoc = 0;
     bool mUseUniformLocationVirtualization = true;
