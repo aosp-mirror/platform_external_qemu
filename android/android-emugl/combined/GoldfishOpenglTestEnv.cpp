@@ -85,7 +85,7 @@ static AndroidOptions sTestEnvCmdLineOptions;
 
 // static
 std::vector<const char*> GoldfishOpenglTestEnv::getTransportsToTest() {
-    return { "pipe", };
+    return { "asg", };
 }
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
@@ -124,7 +124,9 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDirectMem, true);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::Vulkan, true);
+            android::featurecontrol::GLPipeChecksum, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::Vulkan, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanSnapshots, true);
     android::featurecontrol::setEnabledOverride(
