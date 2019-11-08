@@ -1055,6 +1055,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
         }
 
         for (int pass = PASS_FIRST; pass < PASS_LAST; pass++) {
+            if (pass == PASS_DebugPrint) continue;
 #if INSTRUMENT_TIMING_HOST
             if (pass == PASS_FunctionCall) {
                 fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts2);\n");

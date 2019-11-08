@@ -637,7 +637,6 @@ static void enableSignalTermination() {
     // The issue only occurs on Darwin so to be safe just do this on Darwin
     // to prevent potential issues. The function exists on all platforms to
     // make the calling code look cleaner.
-#ifdef __APPLE__
     sigset_t set;
     sigemptyset(&set);
     sigaddset(&set, SIGTERM);
@@ -647,7 +646,6 @@ static void enableSignalTermination() {
     if (result != 0) {
         D("Could not set thread sigmask: %d", result);
     }
-#endif
 }
 
 }  // namespace
@@ -1815,6 +1813,7 @@ extern "C" int main(int argc, char** argv) {
          * Thus, we explicitly remove signals SIGINT, SIGHUP and SIGTERM from the
          * blocking mask of the QT main loop thread.
          */
+
         enableSignalTermination();
 #if (SNAPSHOT_PROFILE > 1)
         printf("skin_winsys_init and UI starting at uptime %" PRIu64 " ms\n",
