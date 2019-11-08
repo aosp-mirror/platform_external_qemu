@@ -3231,11 +3231,12 @@ static bool parseValueWithUnit(const char* str, uint32_t* pValue) {
 static int do_screenrecord_start(ControlClient client, char* args) {
     // kMaxArgs is max number of arguments that we have to process (options +
     // parameters, if any, and the filename)
-    static constexpr int kMaxArgs = 3 * 2 + 1;
+    static constexpr int kMaxArgs = 4 * 2 + 1;
     static const struct option longOptions[] = {
             {"size", required_argument, NULL, 's'},
             {"bit-rate", required_argument, NULL, 'b'},
             {"time-limit", required_argument, NULL, 't'},
+            {"fps", required_argument, NULL, 'f'},
             {NULL, 0, NULL, 0}};
 
     switch (client->global->record_agent->getRecorderState()) {
@@ -3325,6 +3326,17 @@ static int do_screenrecord_start(ControlClient client, char* args) {
                             client,
                             "Time limit %ds outside acceptable range [1,%d]\n",
                             info.timeLimit, kMaxTimeLimit);
+                    return -1;
+                }
+                break;
+            case 'f':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                info.fps = atoi(optarg);
+                if (info.fps == 0 || info.fps > kMaxFPS) {
+                    control_write(
+                            client,
+                            "FPS %ds outside acceptable range [1,%d]\n",
+                            info.fps, kMaxFPS);
                     return -1;
                 }
                 break;
@@ -3447,6 +3459,9 @@ static const CommandDefRec screenrecord_commands[] = {
          "  --time-limit TIME\r\n"
          "    Set the maximum recording time, in seconds. Default/maximum is "
          "180.\r\n"
+         "  --fps FPS\r\n"
+         "    Set the frames per second for the video recording. Default is 24"
+         " fps, maximum is 60 fps.\r\n"
          "\r\nThe recording will stop with 'screenrecord stop' or when the "
          "time limit\r\n"
          "is reached\r\n",
