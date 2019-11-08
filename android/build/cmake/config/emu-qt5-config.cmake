@@ -148,7 +148,9 @@ if(DARWIN_X86_64)
         ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
         ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
         ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
-        ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
+        # BUG: 143948083
+        # WebEngine expects the locales directory to not be under translations
+        ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/qtwebengine_locales
         ${PREBUILT_ROOT}/lib/libQt5QmlAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5QmlAndroidEmu.${QT_LIB_VERSION}.dylib;
         ${PREBUILT_ROOT}/lib/libQt5QuickAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5QuickAndroidEmu.${QT_LIB_VERSION}.dylib;
         ${PREBUILT_ROOT}/lib/libQt5QuickWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5QuickWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
@@ -234,7 +236,9 @@ elseif(WINDOWS_MSVC_X86_64)
       ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/bin/qtwebengine_resources.pak
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/bin/qtwebengine_resources_100p.pak
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/bin/qtwebengine_resources_200p.pak
-      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/translations/qtwebengine_locales
+      # BUG: 143948083
+      # WebEngine expects the locales directory to not be under translations
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/qtwebengine_locales
     )
 
 elseif(WINDOWS_X86_64)
@@ -327,7 +331,9 @@ elseif(LINUX_X86_64)
         ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
         ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
         ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
-        ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
+        # BUG: 143948083
+        # WebEngine expects the locales directory to not be under translations
+        ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/qtwebengine_locales
         ${PREBUILT_ROOT}/lib/libQt5QmlAndroidEmu.so.5>lib64/qt/lib/libQt5QmlAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libQt5QuickAndroidEmu.so.5>lib64/qt/lib/libQt5QuickAndroidEmu.so.5;
         ${PREBUILT_ROOT}/lib/libQt5QuickWidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5QuickWidgetsAndroidEmu.so.5;
