@@ -41,7 +41,7 @@ service EmulatorController {
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
     rpc sendRotary(RotaryEvent) returns (google.protobuf.Empty) {}
 
-    rpc getVmConfiguration(google.protobuf.Empty) returns (VmConfiguration) {}
+    rpc getStatus(google.protobuf.Empty) returns (EmulatorStatus) {}
 
     rpc getScreenshot(ImageFormat) returns (Image) {}
 
@@ -134,11 +134,12 @@ message LogMessage {
     int64 next = 3;
 
     // Set the sort of response you are interested it in.
-    // It the type is "Parsed" the entries field will contain the parsed results.
-    // otherwise the contents field will be set.
+    // It the type is "Parsed" the entries field will contain the parsed
+    // results. otherwise the contents field will be set.
     LogType sort = 4;
 
-    // [Output Only] The parsed logcat entries so far. Only set if sort is set to Parsed
+    // [Output Only] The parsed logcat entries so far. Only set if sort is set
+    // to Parsed
     repeated LogcatEntry entries = 5;
 
     enum LogType {
@@ -148,7 +149,6 @@ message LogMessage {
 }
 
 message LogcatEntry {
-
     enum LogLevel {
         UNKNOWN = 0;
         DEFAULT = 1;
@@ -449,3 +449,20 @@ message TelephoneResponse {
     }
     Response response = 1;
 }
+
+message Entry {
+    string key = 1;
+    string value = 2;
+}
+
+message EntryList {
+    repeated Entry entry = 1;
+}
+
+message EmulatorStatus {
+    string version = 1;
+    uint64 uptime = 2;
+    bool booted = 3;
+    VmConfiguration vmConfig = 4;
+    EntryList hardwareConfig = 5;
+};

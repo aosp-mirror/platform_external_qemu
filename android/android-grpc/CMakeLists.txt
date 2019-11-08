@@ -28,6 +28,7 @@ set(android-grpc_src
     android/emulation/control/logcat/LogcatParser.cpp
     android/emulation/control/snapshot/SnapshotService.cpp
     android/emulation/control/snapshot/TarStream.cpp
+    android/emulation/control/utils/ServiceUtils.cpp
     android/emulation/control/snapshot/GzipStreambuf.cpp
     android/emulation/control/waterfall/SocketController.cpp
     android/emulation/control/waterfall/WaterfallService.cpp
