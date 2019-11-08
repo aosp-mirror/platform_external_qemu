@@ -182,8 +182,13 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
                                          NamedObjectPtr(
                                             new NamedObject(genNameInfo,
                                                     m_globalNameSpace))).first;
+
     unsigned int globalName = it->second->getGlobalName();
     m_globalToLocalMap[globalName] = localName;
+
+    auto handle = 
+            LocalObjectExistenceMap::makeHandle(localName, 1, 1);
+    m_localNameExistsMap.addFixed(handle, { true, globalName }, 1);
 
     return localName;
 }
@@ -192,14 +197,15 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
 unsigned int
 NameSpace::getGlobalName(ObjectLocalName p_localName)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
-    if (n != m_localToGlobalMap.end()) {
-        // object found - return its global name map
-        return (*n).second->getGlobalName();
-    }
+    unsigned int res = 0;
 
-    // object does not exist;
-    return 0;
+    auto existPtr = m_localNameExistsMap.get(
+        LocalObjectExistenceMap::makeHandle(p_localName, 1, 1));
+
+    if (!existPtr) return res;
+    if (!existPtr->exists) return res;
+
+    return existPtr->globalName;
 }
 
 ObjectLocalName
@@ -229,14 +235,24 @@ NameSpace::deleteName(ObjectLocalName p_localName)
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         m_localToGlobalMap.erase(n);
+        auto handle = LocalObjectExistenceMap::makeHandle(p_localName, 1, 1);
+        (m_localNameExistsMap.get(handle))->exists = false;
     }
     m_objectDataMap.erase(p_localName);
+    auto cachePtr =
+        m_objectDataCache.get(
+            ObjectDataCache::makeHandle(p_localName, 1, 1));
+    if (cachePtr) cachePtr->objData = nullptr;
 }
 
 bool
 NameSpace::isObject(ObjectLocalName p_localName)
 {
-    return (m_localToGlobalMap.find(p_localName) != m_localToGlobalMap.end() );
+    auto handle = 
+            LocalObjectExistenceMap::makeHandle(p_localName, 1, 1);
+    auto existsPtr = m_localNameExistsMap.get(handle);
+    if (!existsPtr) return false;
+    return existsPtr->exists;;
 }
 
 void
@@ -248,6 +264,10 @@ NameSpace::setGlobalObject(ObjectLocalName p_localName,
         (*n).second = p_namedObject;
     } else {
         m_localToGlobalMap.emplace(p_localName, p_namedObject);
+        auto globalName = p_namedObject->getGlobalName();
+        auto handle = 
+                LocalObjectExistenceMap::makeHandle(p_localName, 1, 1);
+        m_localNameExistsMap.addFixed(handle, { true, globalName } , 1);
     }
     m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
 }
@@ -274,6 +294,12 @@ ObjectDataMap::const_iterator NameSpace::objDataMapEnd() const {
 
 static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
 
+ObjectData* NameSpace::getObjectDataRawPtr(
+        ObjectLocalName p_localName) {
+    return m_objectDataCache.get(
+        ObjectDataCache::makeHandle(p_localName, 1, 1))->objData;
+}
+
 const ObjectDataPtr& NameSpace::getObjectDataPtr(
         ObjectLocalName p_localName) {
     const auto it = m_objectDataMap.find(p_localName);
@@ -285,6 +311,9 @@ const ObjectDataPtr& NameSpace::getObjectDataPtr(
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
+    m_objectDataCache.addFixed(
+            ObjectDataCache::makeHandle(p_localName, 1, 1),
+            { data.get() }, 1);
     m_objectDataMap.emplace(p_localName, std::move(data));
 }
 
