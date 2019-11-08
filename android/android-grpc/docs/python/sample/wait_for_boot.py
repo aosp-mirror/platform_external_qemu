@@ -11,35 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 # -*- coding: utf-8 -*-
-import grpc
-import sys
+import time
 
 from google.protobuf import empty_pb2
 
-import proto.snapshot_service_pb2
-import proto.snapshot_service_pb2_grpc
+import grpc
+import proto.emulator_controller_pb2
+import proto.emulator_controller_pb2_grpc
 from channel_provider import getEmulatorChannel
-
-if len(sys.argv) != 2:
-    print("You need to provide the id of the snapshot to pull")
-    sys.exit(1);
-
 
 _EMPTY_ = empty_pb2.Empty()
 
 channel = getEmulatorChannel()
 
 # Create a client
-stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
-snaphot = proto.snapshot_service_pb2.Snapshot(snapshot_id=sys.argv[1])
-it = stub.pullSnapshot(snaphot)
-try:
-    with open(sys.argv[1] +'.tar.gz', 'wb') as fn:
-        for msg in it:
-            if not msg.success:
-                print("Failed to pull snapshot: " + msg.err)
+stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
-            fn.write(msg.payload)
-except grpc._channel._Rendezvous as err:
-    print(err)
+# Poll for boot complete every sec..
+booted = False
+for i in range(0, 60):
+    time.sleep(1)
+    try:
+        response = stub.getStatus(_EMPTY_)
+        if response.booted:
+            print("Emulator ready")
+            break
+    except grpc._channel._Rendezvous as err:
+        # Assume grpc endpoint is not yet up..
+        pass
