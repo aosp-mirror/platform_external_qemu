@@ -207,13 +207,13 @@ bool ScreenRecorder::startRecordingWorker() {
 
     // Add the video track
     auto videoProducer = android::recording::createVideoProducer(
-            mFbWidth, mFbHeight, kFPS, mAgent);
+            mFbWidth, mFbHeight, mInfo.fps, mAgent);
     // Fill in the codec params for the audio and video
     CodecParams videoParams;
     videoParams.width = mInfo.width;
     videoParams.height = mInfo.height;
     videoParams.bitrate = mInfo.videoBitrate;
-    videoParams.fps = kFPS;
+    videoParams.fps = mInfo.fps;
     videoParams.intra_spacing = kIntraSpacing;
     VP9Codec videoCodec(
             std::move(videoParams), mFbWidth, mFbHeight,
@@ -319,6 +319,10 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
         info.timeLimit = kMaxTimeLimit;
     }
 
+    if (info.fps == 0) {
+        fprintf(stderr, "Defaulting fps to %u fps\n", kFPS);
+        info.fps = kFPS;
+    }
     return true;
 }
 
@@ -376,6 +380,9 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
         }
         info.fileName = filename.c_str();
         info.timeLimit = duration;
+        // Make the quality and fps low, so we don't have so much cpu usage.
+        info.fps = 3;
+        info.videoBitrate = 500000;
         screen_recorder_start(&info, true);
     }, tokens[0], delay, duration)).detach();
 }
