@@ -222,7 +222,7 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 
 GLEScontext* getGLESContext()
 {
-    ThreadInfo* thread  = getThreadInfo();
+    ThreadInfo* thread = getThreadInfo();
     return thread->glesContext;
 }
 
@@ -397,6 +397,8 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
 
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
     MEM_TRACE("EMUGL");
+
+    EglThreadInfo::init();
 
     initGlobalInfo();
 

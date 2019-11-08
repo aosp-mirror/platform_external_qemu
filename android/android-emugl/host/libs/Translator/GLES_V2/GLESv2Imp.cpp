@@ -433,21 +433,29 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
 GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
-    //if buffer wasn't generated before,generate one
-    if (buffer && ctx->shareGroup().get() &&
-        !ctx->shareGroup()->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
-        ctx->shareGroup()->genName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->shareGroup()->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
-                                         ObjectDataPtr(new GLESbuffer()));
-    }
-    ctx->bindBuffer(target,buffer);
+    auto s = ctx->shareGroup().get();
+    GLESbuffer* vbo = 0;
+    GLuint globalName = 0;
+
     if (buffer) {
-        GLESbuffer* vbo =
-                (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
+        vbo = (GLESbuffer*)s->getObjectOrCreateIfNonexist(
+            [] { return new GLESbuffer(); },
+            NamedObjectType::VERTEXBUFFER, buffer, &globalName);
+    }
+
+    //if buffer wasn't generated before,generate one
+//     if (buffer && s &&
+//         !s->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
+//         s->genName(NamedObjectType::VERTEXBUFFER, buffer);
+//         s->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
+//                 ObjectDataPtr(new GLESbuffer()));
+//     }
+
+    ctx->bindBuffer(target,buffer);
+
+    if (buffer) {
         vbo->setBinded();
-        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->dispatcher().glBindBuffer(target, globalBufferName);
+        ctx->dispatcher().glBindBuffer(target, globalName);
     } else {
         ctx->dispatcher().glBindBuffer(target, 0);
     }
@@ -588,6 +596,9 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             }
             // set that this framebuffer has been bound before
             auto fbObj = ctx->getFBOData(framebuffer);
+            if (globalFrameBufferName && !fbObj) {
+                fprintf(stderr, "%s: deleted fbo data for %u?\n", __func__, globalFrameBufferName);
+            }
             fbObj->setBoundAtLeastOnce();
         }
         ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
@@ -1478,6 +1489,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
     SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
+    SET_ERROR_IF(renderbuffer &&
+                 !ctx->shareGroup()->isObject(
+                     NamedObjectType::RENDERBUFFER, renderbuffer), GL_INVALID_OPERATION);
 
     GLuint globalRenderbufferName = 0;
     ObjectDataPtr obj;
@@ -1486,6 +1500,8 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     if(renderbuffer) {
         if (!ctx->shareGroup()->isObject(NamedObjectType::RENDERBUFFER,
                                          renderbuffer)) {
+            fprintf(stderr, "%s: %d is not rbo\n", __func__,
+                    (int)renderbuffer);
             ctx->shareGroup()->genName(NamedObjectType::RENDERBUFFER,
                                        renderbuffer);
             RenderbufferData* rboData = new RenderbufferData();
