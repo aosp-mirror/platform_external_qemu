@@ -2108,6 +2108,8 @@ void qemu_system_debug_request(void)
     qemu_notify_event();
 }
 
+#define SNAPSHOT_LOG(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+
 static bool main_loop_should_exit(void)
 {
     RunState r;
@@ -2121,12 +2123,17 @@ static bool main_loop_should_exit(void)
     }
     request = qemu_shutdown_requested();
     if (request) {
+    SNAPSHOT_LOG("start exiting");
+
 #ifdef CONFIG_ANDROID
         if (android_qemu_mode) {
             if (invalidate_exit_snapshot) {
+    SNAPSHOT_LOG("fail to snapshot save, invalidate quickboot");
                 androidSnapshot_quickbootInvalidate(NULL);
             } else {
+    SNAPSHOT_LOG("try to snapshot save on exit");
                 androidSnapshot_quickbootSave(NULL);
+    SNAPSHOT_LOG("try to snapshot save on exit (done)");
             }
         }
 #endif
@@ -5717,5 +5724,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         handle_emulator_restart();
     }
 #endif
+    SNAPSHOT_LOG("got to the end");
     return 0;
 }

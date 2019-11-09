@@ -49,6 +49,8 @@ static constexpr int kDefaultMessageTimeoutMs = 10000;
 
 extern bool userSettingIsDontSaveSnapshot();
 
+#define SNAPSHOT_LOG(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+
 namespace android {
 namespace snapshot {
 
@@ -365,55 +367,73 @@ void Quickboot::decideFailureReport(StringView name,
 }
 
 bool Quickboot::save(StringView name) {
+    SNAPSHOT_LOG("got to this line");
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving =
             mLoaded || isSnapshotAlive();
 
+    SNAPSHOT_LOG("got to this line");
     if (Snapshotter::get().hasRamFile() &&
         !Snapshotter::get().isRamFileShared()) {
         dwarning("Not saving state: RAM not mapped as shared");
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
     if (!shouldTrySaving) {
+    SNAPSHOT_LOG("got to this line");
         // Emulator hasn't booted yet or is otherwise not live,
         // and this isn't a quickboot-loaded session. Don't save.
         dwarning("Not saving state: emulator hasn't finished booting.");
+    SNAPSHOT_LOG("got to this line");
         reportFailedSave(
                 pb::EmulatorQuickbootSave::
                         EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
+    SNAPSHOT_LOG("got to this line");
     mLivenessTimer->stop();
 
+    SNAPSHOT_LOG("got to this line");
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
+    SNAPSHOT_LOG("got to this line");
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
     if (android_cmdLineOptions->no_snapshot_save) {
+    SNAPSHOT_LOG("got to this line");
         // Command line says not to save
         mWindow.showMessage("Discarding the changed state: command-line flag",
                             WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
 
+    SNAPSHOT_LOG("got to this line");
         dwarning("Discarding the changed state (command-line flag).");
+    SNAPSHOT_LOG("got to this line");
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
+    SNAPSHOT_LOG("got to this line");
     if (!Snapshotter::get().isRamFileShared() &&
         android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT) {
+    SNAPSHOT_LOG("got to this line");
         // UI says not to save, and there's no need to preserve
         // the current 'shared' session
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_UI);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
     if (name.empty()) {
+    SNAPSHOT_LOG("got to this line");
         name = kDefaultBootSnapshot;
     }
 
@@ -425,16 +445,19 @@ bool Quickboot::save(StringView name) {
         (Snapshotter::get().hasRamFile() &&
          Snapshotter::get().isRamFileShared()) ||
         sessionUptimeMs > kMinUptimeForSavingMs;
+    SNAPSHOT_LOG("got to this line");
 
     // TODO: when cleaning the current 'default_boot' snapshot, save the reason
     //  of its invalidation in it - this way emulator will be able to give a
     //  better idea on the next clean boot other than "no snapshot".
 
     if (!emuglConfig_current_renderer_supports_snapshot()) {
+    SNAPSHOT_LOG("got to this line");
         if (shouldTrySaving && ranLongEnoughForSaving) {
             // Preserve the state changes - we've ran for a while now
             // and the AVD state is different from what could be saved in
             // the default boot snapshot.
+    SNAPSHOT_LOG("got to this line");
             dwarning(
                     "Cleaning out the default snapshot to preserve the "
                     "current session (renderer type '%s' (%d) doesn't support "
@@ -444,19 +467,24 @@ bool Quickboot::save(StringView name) {
                     int(emuglConfig_get_current_renderer()));
             Snapshotter::get().deleteSnapshot(c_str(name));
         } else {
+    SNAPSHOT_LOG("got to this line");
             dwarning(
                     "Not saving snapshot (renderer type '%s' (%d) "
                     "doesn't support snapshotting).",
                     emuglConfig_renderer_to_string(
                             emuglConfig_get_current_renderer()),
                     int(emuglConfig_get_current_renderer()));
+    SNAPSHOT_LOG("got to this line");
         }
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
+    SNAPSHOT_LOG("got to this line");
     if (mShortRunCheck && !ranLongEnoughForSaving) {
+    SNAPSHOT_LOG("got to this line");
         dwarning(
                 "Not saving state: emulator ran for just %d "
                 "ms (<%d ms)",
@@ -464,23 +492,30 @@ bool Quickboot::save(StringView name) {
         reportFailedSave(
                 pb::EmulatorQuickbootSave::
                         EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
+    SNAPSHOT_LOG("got to this line");
     if (mVmOps.isSnapshotSaveSkipped()) {
+    SNAPSHOT_LOG("got to this line");
         dwarning("Not saving state: current state "
                  "does not support snapshotting");
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
+    SNAPSHOT_LOG("got to this line");
         return false;
     }
 
+    SNAPSHOT_LOG("got to this line");
     dprint("Saving state on exit with session uptime %d ms",
            int(sessionUptimeMs));
     Stopwatch sw;
     auto res = Snapshotter::get().save(
             true /* is on exit (so loader can be interrupted) */, c_str(name));
+    SNAPSHOT_LOG("got to this line");
     if (res != OperationStatus::Ok) {
+    SNAPSHOT_LOG("got to this line");
         mWindow.showMessage(
                 "State saving failed, cleaning out the snapshot",
                 WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
@@ -492,8 +527,10 @@ bool Quickboot::save(StringView name) {
         return false;
     }
 
+    SNAPSHOT_LOG("got to this line");
     reportSuccessfulSave(name, sw.elapsedUs() / 1000,
                          sessionUptimeMs);
+    SNAPSHOT_LOG("got to this line");
     return true;
 }
 
@@ -516,11 +553,13 @@ bool androidSnapshot_quickbootLoad(const char* name) {
 }
 
 bool androidSnapshot_quickbootSave(const char* _name) {
+    SNAPSHOT_LOG("got to this line");
     const char* name =
         _name ? _name : android::snapshot::kDefaultBootSnapshot;
 
     const bool saveResult = android::snapshot::Quickboot::get().save(name);
 
+    SNAPSHOT_LOG("got to this line");
     // If we fail a save with RAM map shared, the quickboot snapshot
     // needs to get deleted.
     const bool needsInvalidation =
@@ -528,21 +567,31 @@ bool androidSnapshot_quickbootSave(const char* _name) {
             (android::snapshot::Snapshotter::get().isRamFileShared() ||
              android_avdParams->flags & AVDINFO_SNAPSHOT_INVALIDATE);
 
+    SNAPSHOT_LOG("got to this line");
     if (needsInvalidation) {
+    SNAPSHOT_LOG("got to this line");
         androidSnapshot_quickbootInvalidate(name);
+    SNAPSHOT_LOG("got to this line");
     } else {
+    SNAPSHOT_LOG("got to this line");
         if (android::snapshot::Snapshotter::get().isRamFileShared()) {
+    SNAPSHOT_LOG("got to this line");
             androidSnapshot_setRamFileDirty(c_str(name), false);
+    SNAPSHOT_LOG("got to this line");
         }
     }
 
     // Write user choice to the ini file if we are using file-backed RAM.
+    SNAPSHOT_LOG("got to this line");
     if (android::snapshot::Snapshotter::get().hasRamFile()) {
+    SNAPSHOT_LOG("got to this line");
         bool wantedSaveOnExit =
             !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
         androidSnapshot_writeQuickbootChoice(wantedSaveOnExit);
+    SNAPSHOT_LOG("got to this line");
     }
 
+    SNAPSHOT_LOG("got to this line");
     return saveResult;
 }
 
