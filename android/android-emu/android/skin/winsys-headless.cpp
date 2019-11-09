@@ -276,6 +276,28 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel() {
 extern void skin_winsys_quit_request() {
     D(__FUNCTION__);
     sMainLoopShouldExit = true;
+    bool needRequestClose = false;
+
+    if (android_avdInfo) {
+        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+        if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
+        } else {
+            needRequestClose = true;
+        }
+    }
+
+    if (needRequestClose) {
+        fprintf(stderr, "saving arm snapshot.... !!!\n\n");
+        arm_snapshot_save_completed = 0;
+        EmulatorNoQtNoWindow* guiless_window = EmulatorNoQtNoWindow::getInstance();
+        guiless_window->requestClose();
+        for (int i=0; i < 30; ++i) {
+            usleep(1*1000000);
+            if (arm_snapshot_save_completed) break;
+        }
+        fprintf(stderr, "saving done.... !!!\n\n");
+        exit(0);
+    } else {
 #ifdef _WIN32
     if ( !SetEvent(sWakeEvent) ) {
         fprintf(stderr, "%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
@@ -285,6 +307,7 @@ extern void skin_winsys_quit_request() {
        fprintf(stderr, "%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
     }
 #endif
+    }
 }
 
 void skin_winsys_destroy() {
