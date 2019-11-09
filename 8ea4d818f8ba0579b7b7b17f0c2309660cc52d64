@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "529174fd_dfde4aab",
+        "filename": "android/android-emu/android/skin/winsys-headless.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-11-09T04:05:42Z",
+      "side": 1,
+      "message": "looks like this just hangs there, it does save locally, but does not kill emualtor\nit returns instantly, but saving is not done yet when it returns",
+      "range": {
+        "startLine": 291,
+        "startChar": 8,
+        "endLine": 291,
+        "endChar": 39
+      },
+      "revId": "8ea4d818f8ba0579b7b7b17f0c2309660cc52d64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
