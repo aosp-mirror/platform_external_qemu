@@ -14,6 +14,7 @@
 #include <functional>                                  // for __base
 #include <memory>                                      // for static_pointer...
 
+#include "android/cmdline-option.h"
 #include "android/globals.h"                           // for android_hw
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
 #include "android/skin/rect.h"                         // for SkinRect, SkinPos
@@ -276,6 +277,32 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel() {
 extern void skin_winsys_quit_request() {
     D(__FUNCTION__);
     sMainLoopShouldExit = true;
+    bool needRequestClose = false;
+
+    if (android_avdInfo) {
+        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+        if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
+        } else if (!android_cmdLineOptions->no_snapshot_save){
+            needRequestClose = true;
+        }
+    }
+
+#ifdef _WIN32
+    // TODO: check on windows
+    needRequestClose = false;
+#endif
+    if (needRequestClose) {
+        printf("saving arm snapshot.... !!!\n\n");
+        arm_snapshot_save_completed = 0;
+        EmulatorNoQtNoWindow* guiless_window = EmulatorNoQtNoWindow::getInstance();
+        guiless_window->requestClose();
+        for (int i=0; i < 10; ++i) {
+            System::get()->sleepMs(1*1000);
+            if (arm_snapshot_save_completed) break;
+        }
+        printf("saving done.... !!!\n\n");
+        exit(0);
+    } else {
 #ifdef _WIN32
     if ( !SetEvent(sWakeEvent) ) {
         fprintf(stderr, "%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
@@ -285,6 +312,7 @@ extern void skin_winsys_quit_request() {
        fprintf(stderr, "%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
     }
 #endif
+    }
 }
 
 void skin_winsys_destroy() {
