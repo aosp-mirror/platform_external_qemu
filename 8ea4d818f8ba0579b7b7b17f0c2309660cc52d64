@@ -22,6 +22,30 @@
       "revId": "8ea4d818f8ba0579b7b7b17f0c2309660cc52d64",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52d48e8e_3f93a710",
+        "filename": "android/android-emu/android/skin/winsys-headless.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-11-09T04:15:05Z",
+      "side": 1,
+      "message": "then it probably needs to feed into qemu shutdown request. in the logging cl: https://android-review.googlesource.com/c/platform/external/qemu/+/1163466 maybe we can trace through quickbootsave call and if that completes, force exit",
+      "parentUuid": "529174fd_dfde4aab",
+      "range": {
+        "startLine": 291,
+        "startChar": 8,
+        "endLine": 291,
+        "endChar": 39
+      },
+      "revId": "8ea4d818f8ba0579b7b7b17f0c2309660cc52d64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
