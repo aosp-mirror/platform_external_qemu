@@ -51,12 +51,14 @@ if(WEBRTC AND NOT GRPC)
   message(FATAL_ERROR "You need to enable GRPC if you wish to use WEBRTC")
 endif()
 
+set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
+
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 else()
   set(ANDROID_EXTRACT_SYMBOLS TRUE)
-  set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/debug_info)
+  set(ANDROID_SYMBOL_DIR ${DBG_INFO})
   file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
   message(STATUS "Uploading symbols to ${OPTION_CRASHUPLOAD}")
 endif()
@@ -87,7 +89,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
-set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/debug_info)
+set(CMAKE_PDB_OUTPUT_DIRECTORY ${DBG_INFO})
 
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
