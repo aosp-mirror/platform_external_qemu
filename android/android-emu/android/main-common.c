@@ -1519,6 +1519,16 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     android_cmdLineOptions = opts;
 
+    // BUG: 143949261
+    //
+    // We are deprecating the no_window boolean flag.  no_window is now an
+    // inherent property of the binary (qemu-system-***-headless)
+    //
+    // TODO: After this technique proves stable, go through the code and remove
+    // all paths that depend on no_window, then add back a different variable
+    // to track it based on the build being qemu-system-***-headless or not
+    opts->no_window = false;
+
     if (opts->fuchsia) {
         android_qemu_mode = 0;
         *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
