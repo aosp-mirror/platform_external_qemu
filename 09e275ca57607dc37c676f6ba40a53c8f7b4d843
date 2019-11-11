@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4c1689fd_fd2d5299",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 3730,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-11-11T17:57:27Z",
+      "side": 1,
+      "message": "put those in one \"if\"?",
+      "range": {
+        "startLine": 3729,
+        "startChar": 0,
+        "endLine": 3730,
+        "endChar": 62
+      },
+      "revId": "09e275ca57607dc37c676f6ba40a53c8f7b4d843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
