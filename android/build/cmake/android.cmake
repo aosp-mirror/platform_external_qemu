@@ -349,6 +349,7 @@ function(android_add_test name)
            COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml --gtest_catch_exceptions=0
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
 
+  android_install_as_debug_info(${name})
   # Let's not optimize our tests.
   if (WINDOWS_MSVC_X86_64)
       target_compile_options(${name} PRIVATE -Od)
@@ -357,6 +358,20 @@ function(android_add_test name)
   endif()
 
   android_add_default_test_properties(${name})
+endfunction()
+
+
+# Installs the given target into ${DBG_INFO}/tests/ directory..
+# This is mainly there so we can preserve it as part of our automated builds.
+function(android_install_as_debug_info name)
+  if (NOT DEFINED DBG_INFO)
+    # Ignore when cross-compiling withouth dbg_info available.
+    return()
+  endif()
+
+  # TODO(jansene): Would be nice if we could make this part of install.
+  add_custom_command(TARGET ${name} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${name}> ${DBG_INFO}/tests/$<TARGET_FILE_NAME:${name}>)
 endfunction()
 
 # Adds an executable target. The RUNTIME_OS_DEPENDENCIES and RUNTIME_OS_PROPERTIES will registed for the given target,
