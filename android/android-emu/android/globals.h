@@ -45,6 +45,8 @@ extern int guest_boot_completed;
 
 extern int arm_snapshot_save_completed;
 
+extern int host_emulator_is_headless;
+
 /* are we using the emulator in the android mode or plain qemu? */
 extern int android_qemu_mode;
 

@@ -3724,14 +3724,13 @@ do_kill( ControlClient  client, char*  args )
     fflush(stdout);
     bool needRequestClose = false;
 
-    if (android_avdInfo && android_cmdLineOptions->no_window) {
+    if (host_emulator_is_headless && android_avdInfo) {
         auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
         if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
         } else if (!android_cmdLineOptions->no_snapshot_save){
             needRequestClose = true;
         }
     }
-
     if (needRequestClose) {
 #ifdef _WIN32
         //TODO: figure out whether this work on windows
