@@ -3722,6 +3722,26 @@ do_kill( ControlClient  client, char*  args )
     control_write( client, "OK: killing emulator, bye bye\r\n" );
     DINIT("Emulator killed by console kill command.\n");
     fflush(stdout);
+    bool needRequestClose = false;
+
+    if (android_avdInfo && android_cmdLineOptions->no_window) {
+        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+        if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
+        } else if (!android_cmdLineOptions->no_snapshot_save){
+            needRequestClose = true;
+        }
+    }
+
+    if (needRequestClose) {
+#ifdef _WIN32
+        //TODO: figure out whether this work on windows
+        client->global->libui_agent->requestExit(0, "Killed by console command");
+#else
+        kill(getpid(), SIGINT);
+#endif
+        return 0;
+    }
+
     client->global->libui_agent->requestExit(0, "Killed by console command");
     return 0;
 }

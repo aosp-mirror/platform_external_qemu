@@ -2127,6 +2127,8 @@ static bool main_loop_should_exit(void)
                 androidSnapshot_quickbootInvalidate(NULL);
             } else {
                 androidSnapshot_quickbootSave(NULL);
+                extern int arm_snapshot_save_completed;
+                arm_snapshot_save_completed = 1;
             }
         }
 #endif
