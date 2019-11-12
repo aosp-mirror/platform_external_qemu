@@ -112,6 +112,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/multi-display-item.cpp
     android/skin/qt/extended-pages/multi-display-arrangement.cpp
     android/skin/qt/extended-pages/multi-display-page.cpp
+    android/skin/qt/extended-pages/network-connectivity-manager.cpp
     android/skin/qt/extended-pages/perfstats-page.cpp
     android/skin/qt/extended-pages/record-and-playback-page.cpp
     android/skin/qt/extended-pages/record-macro-edit-dialog.cpp
