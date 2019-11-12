@@ -331,11 +331,11 @@ double LocationPage::getDistanceMeters(double startLat, double startLng, double 
     return getDistanceNm(startLat, startLng, endLat, endLng) * METERS_PER_NM;
 }
 
-#else
+#else // USE_WEBENGINE
 void LocationPage::on_loc_playRouteButton_clicked() { }
 bool LocationPage::parsePointsFromJson() { return true; }
 void LocationPage::locationPlaybackStart_v2() { }
 double LocationPage::getDistanceNm(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
 double LocationPage::getDistanceMeters(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
 void LocationPage::playRouteStateChanged(bool stopped) { }
-#endif
+#endif // USE_WEBENGINE

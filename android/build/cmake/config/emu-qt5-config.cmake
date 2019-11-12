@@ -104,6 +104,7 @@ if(DARWIN_X86_64)
     ${PREBUILT_ROOT}/lib/libQt5PrintSupportAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5PrintSupportAndroidEmu.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5NetworkAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5NetworkAndroidEmu.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5DBusAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5DBusAndroidEmu.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/plugins/bearer/libqgenericbearer.dylib>lib64/qt/plugins/bearer/libqgenericbearer.dylib;
     ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib;
     ${PREBUILT_ROOT}/plugins/styles/libqmacstyle.dylib>lib64/qt/plugins/styles/libqmacstyle.dylib;
     ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib;
@@ -195,6 +196,7 @@ elseif(WINDOWS_MSVC_X86_64)
       ${PREBUILT_ROOT}/bin/Qt5WebEngineCoreAndroidEmu.dll>lib64/qt/lib/Qt5WebEngineCoreAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5WebEngineWidgetsAndroidEmu.dll>lib64/qt/lib/Qt5WebEngineWidgetsAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5WebSocketsAndroidEmu.dll>lib64/qt/lib/Qt5WebSocketsAndroidEmu.dll;
+      ${PREBUILT_ROOT}/plugins/bearer/qgenericbearer.dll>lib64/qt/plugins/bearer/qgenericbearer.dll;
       ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
       ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
@@ -252,6 +254,7 @@ elseif(WINDOWS_X86_64)
       ${PREBUILT_ROOT}/bin/Qt5CoreAndroidEmu.dll>lib64/qt/lib/Qt5CoreAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5GuiAndroidEmu.dll>lib64/qt/lib/Qt5GuiAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5WidgetsAndroidEmu.dll>lib64/qt/lib/Qt5WidgetsAndroidEmu.dll;
+      ${PREBUILT_ROOT}/plugins/bearer/qgenericbearer.dll>lib64/qt/plugins/bearer/qgenericbearer.dll;
       ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
       ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
@@ -280,6 +283,9 @@ elseif(LINUX_X86_64)
     ${PREBUILT_ROOT}/lib/libQt5DBusAndroidEmu.so.5>lib64/qt/lib/libQt5DBusAndroidEmu.so.5;
     ${PREBUILT_ROOT}/lib/libQt5NetworkAndroidEmu.so.5>lib64/qt/lib/libQt5NetworkAndroidEmu.so.5;
     ${PREBUILT_ROOT}/lib/libQt5XcbQpaAndroidEmu.so.5>lib64/qt/lib/libQt5XcbQpaAndroidEmu.so.5;
+    ${PREBUILT_ROOT}/plugins/bearer/libqgenericbearer.so>lib64/qt/plugins/bearer/libqgenericbearer.so;
+    ${PREBUILT_ROOT}/plugins/bearer/libqconnmanbearer.so>lib64/qt/plugins/bearer/libqconnmanbearer.so;
+    ${PREBUILT_ROOT}/plugins/bearer/libqnmbearer.so>lib64/qt/plugins/bearer/libqnmbearer.so;
     ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt/plugins/platforms/libqxcb.so;
     ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
     ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.so>lib64/qt/plugins/iconengines/libqsvgicon.so;
