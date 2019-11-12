@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0dbeec2c_39577be7",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1676e41_f4f2b343",
+      "range": {
+        "startLine": 115,
+        "startChar": 67,
+        "endLine": 115,
+        "endChar": 71
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd9ef58c_48cbf4dc",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3febee1_1631b5ee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd9ef58c_48cbf4dc",
+      "range": {
+        "startLine": 526,
+        "startChar": 8,
+        "endLine": 528,
+        "endChar": 80
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a1577138_f48b487b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "654b7503_7d8fbf43",
+      "range": {
+        "startLine": 182,
+        "startChar": 84,
+        "endLine": 182,
+        "endChar": 85
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4ceb382_449fb02d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9f7a6b5_96b53cf9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4ceb382_449fb02d",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "976e37b7_b839349e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98ac1ea6_f06c6a19",
+      "range": {
+        "startLine": 10,
+        "startChar": 66,
+        "endLine": 10,
+        "endChar": 68
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4d5881f_c4104f4b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
         "patchSetId": 1
@@ -137,6 +257,30 @@
       "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "126ba54b_d5404120",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4d5881f_c4104f4b",
+      "range": {
+        "startLine": 11,
+        "startChar": 60,
+        "endLine": 11,
+        "endChar": 61
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "7ca65c34_bbb2cc35",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c78c2f5_058e3998",
+      "range": {
+        "startLine": 15,
+        "startChar": 4,
+        "endLine": 15,
+        "endChar": 33
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2931b68b_23a4ef69",
         "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
         "patchSetId": 1
@@ -183,6 +351,30 @@
       "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "635db71b_7244254e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2931b68b_23a4ef69",
+      "range": {
+        "startLine": 89,
+        "startChar": 8,
+        "endLine": 89,
+        "endChar": 14
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "ed392009_b9d6fa27",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "23f645d8_d08a0508",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 0
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0646d2a8_96252c2d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.h",
         "patchSetId": 1
@@ -229,6 +445,30 @@
       "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc393f0e_a9ad9433",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/network-connectivity-manager.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1536078
+      },
+      "writtenOn": "2019-11-12T23:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0646d2a8_96252c2d",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 37
+      },
+      "revId": "6347690bd8231b304869795e4500d0d5f6c135eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
