@@ -460,9 +460,21 @@ message EntryList {
 }
 
 message EmulatorStatus {
+    // The emulator version string.
     string version = 1;
+
+    // The time the emulator has been active in .ms
     uint64 uptime = 2;
-    bool booted = 3;
+
+    // True if the device has completed booting.
+    // For P and later this information will accurate,
+    // for older images we rely on adb.
+    bool booted = 3; 
+
+    // The current vm configuration
     VmConfiguration vmConfig = 4;
+
+    // The hardware configuration of the running emulator as
+    // key valure pairs.
     EntryList hardwareConfig = 5;
 };

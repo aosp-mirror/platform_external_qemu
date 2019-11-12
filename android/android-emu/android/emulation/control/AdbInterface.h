@@ -121,7 +121,7 @@ public:
     // The caller can provide a callback that will receive
     // the results of the final attempt.
     virtual void enqueueCommand(const std::vector<std::string>& args,
-                                void(*resultCallback)(const OptionalAdbCommandResult&) = nullptr
+                                ResultCallback&& result_callback = [](const OptionalAdbCommandResult&){}
                                ) = 0;
 
     // Creates a new instance of the AdbInterface.
