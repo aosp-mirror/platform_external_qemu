@@ -1,0 +1,8 @@
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Code-Review+1: Haipeng Wu <haipengwu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Haipeng Wu <haipengwu@google.com>
+Submitted-at: Tue, 12 Nov 2019 06:47:26 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1159567
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
