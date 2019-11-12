@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "175330f2_7a3332c8",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-11-12T18:25:04Z",
+      "side": 1,
+      "message": "remove?",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 75,
+        "endChar": 73
+      },
+      "revId": "334b4cc9682a2262dafc8185b999435cabffcc6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b2a7fcd_728a029c",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-11-12T18:25:04Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 471,
+        "startChar": 39,
+        "endLine": 471,
+        "endChar": 40
+      },
+      "revId": "334b4cc9682a2262dafc8185b999435cabffcc6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
