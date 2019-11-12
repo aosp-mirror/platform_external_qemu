@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e6e61ec_cd1fcd67",
+        "filename": "android/android-emu/android/skin/winsys-headless.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-11-12T04:31:41Z",
+      "side": 1,
+      "message": "what if we just make this hang until arm_sanpshot_save_completed \u003d\u003d 1",
+      "range": {
+        "startLine": 299,
+        "startChar": 1,
+        "endLine": 302,
+        "endChar": 9
+      },
+      "revId": "18157e067a2a4ea329fe6b478036714fa6876811",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
