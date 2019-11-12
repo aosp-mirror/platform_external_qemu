@@ -77,7 +77,7 @@ TEST_F(SensorLocationEventProviderTest, createConsumeEvents) {
 
     // Check event1 consumption
     DurationNs delay;
-    EXPECT_TRUE(mProvider->getNextCommandDelay(&delay));
+    EXPECT_EQ(mProvider->getNextCommandDelay(&delay), NextCommandStatus::OK);
     EXPECT_EQ(delay, 0);
     const emulator_automation::RecordedEvent event1 =
             mProvider->consumeNextCommand();
@@ -88,7 +88,7 @@ TEST_F(SensorLocationEventProviderTest, createConsumeEvents) {
               static_cast<float>(300));
 
     // Check event2 consumption
-    EXPECT_TRUE(mProvider->getNextCommandDelay(&delay));
+    EXPECT_EQ(mProvider->getNextCommandDelay(&delay), NextCommandStatus::OK);
     EXPECT_EQ(delay, 1);
     const emulator_automation::RecordedEvent event2 =
             mProvider->consumeNextCommand();
@@ -99,5 +99,5 @@ TEST_F(SensorLocationEventProviderTest, createConsumeEvents) {
               static_cast<float>(400));
 
     // Check that there is no more events
-    EXPECT_FALSE(mProvider->getNextCommandDelay(&delay));
+    EXPECT_EQ(mProvider->getNextCommandDelay(&delay), NextCommandStatus::NONE);
 }

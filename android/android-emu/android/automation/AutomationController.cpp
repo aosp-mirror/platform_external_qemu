@@ -209,18 +209,18 @@ public:
         return event;
     }
 
-    bool getNextCommandDelay(DurationNs* outDelay) override {
+    NextCommandStatus getNextCommandDelay(DurationNs* outDelay) override {
         if (!mNextCommand) {
             const std::string nextCommand = mStream->getString();
             if (nextCommand.empty()) {
                 VLOG(automation) << "Empty command";
-                return false;
+                return NextCommandStatus::NONE;
             }
 
             pb::RecordedEvent event;
             if (!event.ParseFromString(nextCommand)) {
                 VLOG(automation) << "Event parse failed";
-                return false;
+                return NextCommandStatus::NONE;
             }
 
             mNextCommand = event;
@@ -228,11 +228,11 @@ public:
 
         if (!mNextCommand->has_delay()) {
             VLOG(automation) << "Event missing delay";
-            return false;
+            return NextCommandStatus::NONE;
         }
 
         *outDelay = mNextCommand->delay();
-        return true;
+        return NextCommandStatus::OK;
     }
 
 private:
@@ -280,15 +280,15 @@ public:
         return event.event;
     }
 
-    bool getNextCommandDelay(DurationNs* outDelay) override {
+    NextCommandStatus getNextCommandDelay(DurationNs* outDelay) override {
         if (mEvents.empty()) {
             VLOG(automation) << "No more events";
-            return false;
+            return NextCommandStatus::NONE;
         }
 
         const Event& event = mEvents.front();
         *outDelay = event.event.delay();
-        return true;
+        return NextCommandStatus::OK;
     }
 
     bool addEvents(android::AsyncMessagePipeHandle pipe,
@@ -373,6 +373,9 @@ public:
 
     void reset() override;
     DurationNs advanceTime() override;
+    void setNextPlaybackCommandTime(DurationNs nextTimestamp) override;
+
+    uint64_t getLooperNowTimestamp() override;
 
     StartResult startRecording(StringView filename) override;
     StopResult stopRecording() override;
@@ -541,8 +544,8 @@ DurationNs AutomationControllerImpl::advanceTime() {
 
     const DurationNs nowNs = mLooper->nowNs(Looper::ClockType::kVirtual);
     DurationNs outDelay;
-    if (mPlaybackEventSource &&
-        mPlaybackEventSource->getNextCommandDelay(&outDelay)) {
+    if (mPlaybackEventSource && mPlaybackEventSource->getNextCommandDelay(
+                                        &outDelay) == NextCommandStatus::OK) {
         mPlayingFromFile = true;
         // If mNextPlaybackCommandTime was not initialized, initialize it here
         if (mNextPlaybackCommandTime == 0) {
@@ -556,6 +559,16 @@ DurationNs AutomationControllerImpl::advanceTime() {
 
     physicalModel_setCurrentTime(mPhysicalModel, nowNs);
     return nowNs;
+}
+
+uint64_t AutomationControllerImpl::getLooperNowTimestamp() {
+    return mLooper->nowNs(Looper::ClockType::kVirtual);
+}
+
+void AutomationControllerImpl::setNextPlaybackCommandTime(
+        DurationNs nextTimestamp) {
+    AutoLock lock(mLock);
+    mNextPlaybackCommandTime = nextTimestamp;
 }
 
 StartResult AutomationControllerImpl::startRecording(StringView filename) {
@@ -702,7 +715,8 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
             new BinaryStreamEventSource(std::move(playbackStream)));
 
     DurationNs nextCommandDelay;
-    if (source->getNextCommandDelay(&nextCommandDelay)) {
+    if (source->getNextCommandDelay(&nextCommandDelay) ==
+        NextCommandStatus::OK) {
         // Header parsed, initialize class state.
         mPlaybackEventSource = std::move(source);
         mNextPlaybackCommandTime =
@@ -732,7 +746,8 @@ StartResult AutomationControllerImpl::startPlaybackFromSource(
     mPlaybackEventSource = std::move(source);
 
     DurationNs nextCommandDelay;
-    if (mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay)) {
+    if (mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay) ==
+        NextCommandStatus::OK) {
         // Header parsed, initialize class state.
         mNextPlaybackCommandTime =
                 mLooper->nowNs(Looper::ClockType::kVirtual) + nextCommandDelay;
@@ -841,7 +856,8 @@ ReplayResult AutomationControllerImpl::replayEvent(
                 pipe, event, asyncId, mSendMessageCallback));
 
         DurationNs nextCommandDelay;
-        if (source->getNextCommandDelay(&nextCommandDelay)) {
+        if (source->getNextCommandDelay(&nextCommandDelay) ==
+            NextCommandStatus::OK) {
             // Header parsed, initialize class state.
             mOffworldEventSource = source.get();
             mPlaybackEventSource = std::move(source);
@@ -939,18 +955,22 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
     sendEvent(event);
 
     DurationNs nextCommandDelay;
-    if (mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay)) {
+    NextCommandStatus nextCommandStatus =
+            mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay);
+    if (nextCommandStatus == NextCommandStatus::OK) {
         mNextPlaybackCommandTime += nextCommandDelay;
     } else {
-        VLOG(automation) << "Playback hit EOF";
         mPlayingFromFile = false;
-        mPlaybackEventSource.reset();
-        mOffworldEventSource = nullptr;
-        mNextPlaybackCommandTime = 0;
+        if (nextCommandStatus == NextCommandStatus::NONE) {
+            VLOG(automation) << "Playback hit EOF";
+            mPlaybackEventSource.reset();
+            mOffworldEventSource = nullptr;
+            mNextPlaybackCommandTime = 0;
 
-        if (mOnStopCallback) {
-            mOnStopCallback();
-            mOnStopCallback = nullptr;
+            if (mOnStopCallback) {
+                mOnStopCallback();
+                mOnStopCallback = nullptr;
+            }
         }
     }
 }
@@ -1040,7 +1060,8 @@ void AutomationControllerImpl::copyStreamToStream(
             new BinaryStreamEventSource(std::move(originalStream)));
 
     DurationNs nextCommandDelay;
-    while (source->getNextCommandDelay(&nextCommandDelay)) {
+    while (source->getNextCommandDelay(&nextCommandDelay) ==
+           NextCommandStatus::OK) {
         pb::RecordedEvent modifiedEvent = source->consumeNextCommand();
         std::string binaryProto;
         if (!modifiedEvent.SerializeToString(&binaryProto)) {

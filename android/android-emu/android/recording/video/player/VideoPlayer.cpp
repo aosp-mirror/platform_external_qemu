@@ -1042,13 +1042,37 @@ retry:
 
         // display picture */
         displayVideoFrame(mVideoFrameQueue->peek());
-        // Realign the sensor stream to the current frame's timestamp at each
-        // frame rendering
-        if (mVideoMetadataProvider.get() != nullptr &&
-            mEventProvider.get() != nullptr) {
-            VideoMetadata curMetadata =
-                    mVideoMetadataProvider->getNextFrameMetadata();
-            mEventProvider->startFromTimestamp(curMetadata.timestamp);
+        // Realign the timestamps of the sensor playback to the video playback
+        // immediately after displaying each frame
+        if (mEventProvider.get() != nullptr) {
+            // If there is no video metadata stream, then there's no benchmarks
+            // to calibrate against. Simply start the sensor playback and let it
+            // run at its own pace
+            if (mVideoMetadataProvider.get() == nullptr) {
+                mEventProvider->start();
+            } else {
+                // Retrieve the timestamps of current and the next frame
+                // and use them as the min and max timestamps for the sensor
+                // playback event between the current and the next frame
+                VideoMetadata curMetadata =
+                        mVideoMetadataProvider->getNextFrameMetadata();
+                mEventProvider->startFromTimestamp(curMetadata.timestamp);
+                if (mVideoMetadataProvider->hasNextFrameMetadata()) {
+                    VideoMetadata nextMetadata =
+                            mVideoMetadataProvider->peekNextFrameMetadata();
+                    mEventProvider->setEndingTimestamp(nextMetadata.timestamp);
+                } else {
+                    mEventProvider->setEndingTimestamp(
+                            std::numeric_limits<uint64_t>::max());
+                }
+                // Force a clock sync between VideoPlayer and
+                // AutomationController
+                uint64_t nextDelay;
+                mEventProvider->getNextCommandDelay(&nextDelay);
+                AutomationController::get().setNextPlaybackCommandTime(
+                        AutomationController::get().getLooperNowTimestamp() +
+                        nextDelay);
+            }
         }
 
         mVideoFrameQueue->next();
@@ -1078,19 +1102,6 @@ void VideoPlayerImpl::videoRefresh() {
     double remaining_time = REFRESH_DURATION;
     if (mState != State::PAUSED || this->mForceRefresh) {
         refreshFrame(&remaining_time);
-    }
-
-    // If an event provider is present, then the video file also has sensor
-    // streams. Therefore, force a time advancement in AutomationController
-    // to potentially refresh sensor values
-    if (mEventProvider.get() != nullptr) {
-        // If video metadata provider is not populated, then the sensor streams
-        // do not need to be aligned with video metadata. Start refreshing
-        // sensor values immediately.
-        if (mVideoMetadataProvider.get() == nullptr) {
-            mEventProvider->start();
-        }
-        AutomationController::tryAdvanceTime();
     }
 
     scheduleRefresh(remaining_time * 1000);
