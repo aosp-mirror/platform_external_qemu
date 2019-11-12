@@ -25,9 +25,11 @@
 #include "android/skin/qt/common-controls/cc-list-item.h"
 #include "android/skin/qt/websockets/websocketclientwrapper.h"
 #include "android/skin/qt/websockets/websockettransport.h"
+#include "network-connectivity-manager.h"
 
 #include <QDateTime>
 #include <QListWidgetItem>
+#include <QtNetwork/QNetworkConfigurationManager>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTimer>
@@ -135,6 +137,7 @@ signals:
 private slots:
     void setUpWebEngine();
     void map_saveRoute();
+    void onWebPageLoadFinished(bool okay);
 
 #ifdef USE_WEBENGINE
     void on_loc_importGpxKmlButton_clicked() { handle_importGpxKmlButton_clicked(); }
@@ -148,6 +151,8 @@ private slots:
     void on_loc_modeSwitch_currentIndexChanged(int index);
     void on_loc_sendPointButton_clicked();
     void on_loc_playbackSpeed_currentIndexChanged(int index);
+
+    void onConnectivityStateChanged(NetworkConnectivityManager::State state);
 
     // Called when the thread that loads and parses
     // geo data from file is initiated.
@@ -214,6 +219,8 @@ private:
     void saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString);
     void setLoadingOverlayVisible(bool visible, QString text = QString(""));
     void stylePopupMenu(QMenu* popupMenu);
+    void onConnectivityOffline();
+    void onConnectivityOnline();
 
     void finishGeoDataLoading(
         const QString& file_name,
@@ -326,6 +333,8 @@ private:
     UiState mRouteState = UiState::Default;
     QListWidgetItem* mSavedRoutePlayingItem = nullptr;
     friend class RouteSenderThread;
+    bool mShouldRefreshPageOnReconnect;
+    NetworkConnectivityManager* mNetworkConnectivityManager;
 };
 
 class PointWidgetItem : public CCListItem {
