@@ -546,6 +546,8 @@ void LocationPage::setUpWebEngine() {
         QWebEnginePage* webEnginePage = isPoint ? mUi->loc_pointWebEngineView->page()
                                                 : mUi->loc_routeWebEngineView->page();
 
+        connect(webEnginePage, SIGNAL(loadFinished(bool)), this, SLOT(onWebPageLoadFinished(bool)));
+
         QString appendString;
 
         // Send the current location to each page

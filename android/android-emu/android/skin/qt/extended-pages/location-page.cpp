@@ -116,7 +116,9 @@ static void updateThreadLoop() {
 
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::LocationPage)
+    mUi(new Ui::LocationPage),
+    mShouldRefreshPageOnReconnect(false),
+    mNetworkConnectivityManager(nullptr)
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
@@ -175,6 +177,12 @@ LocationPage::LocationPage(QWidget *parent) :
 
     if (useLocationV2) {
 #ifdef USE_WEBENGINE
+        mNetworkConnectivityManager = new NetworkConnectivityManager(this);
+        connect(mNetworkConnectivityManager,
+                SIGNAL(connectivityStateChanged(NetworkConnectivityManager::State)), 
+                this,
+                SLOT(onConnectivityStateChanged(NetworkConnectivityManager::State)));
+
         mTimer.setSingleShot(true);
         QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
         scanForPoints();
@@ -379,6 +387,46 @@ void LocationPage::updateDisplayedLocation(double lat, double lon, double alt,
 
 void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
     writeLocationPlaybackSpeedToSettings(index);
+}
+
+void LocationPage::onWebPageLoadFinished(bool okay) {
+    // qDebug() << "Web page loaded" << (okay ? "successullfy" : "with errors");
+    if (mNetworkConnectivityManager == nullptr ) { return; }
+    mShouldRefreshPageOnReconnect = !mNetworkConnectivityManager->isOnline();
+}
+
+void LocationPage::onConnectivityStateChanged(NetworkConnectivityManager::State state) {
+    // QString str = "NetworkConnectivityManager state changed. ";
+
+    switch (state) {
+    case NetworkConnectivityManager::Unknown:
+        // str += "Unknown";
+        break;
+    case NetworkConnectivityManager::NotAvailable:
+        // str += "NotAvailable";
+        onConnectivityOffline();
+        break;
+    case NetworkConnectivityManager::Connected:
+        // str += "Connected";
+        onConnectivityOnline();
+        break;
+    }
+
+    // qCDebug(emu) << str;
+}
+
+void LocationPage::onConnectivityOffline() {
+    mUi->loc_importGpxKmlButton->setEnabled(false);
+    mUi->loc_importGpxKmlButton_route->setEnabled(false);
+}
+
+void LocationPage::onConnectivityOnline() {
+    if (mShouldRefreshPageOnReconnect) {
+        mUi->loc_pointWebEngineView->reload();
+        mUi->loc_routeWebEngineView->reload();
+    }
+    mUi->loc_importGpxKmlButton->setEnabled(true);
+    mUi->loc_importGpxKmlButton_route->setEnabled(true);
 }
 
 bool LocationPage::validateCell(QTableWidget* table,
