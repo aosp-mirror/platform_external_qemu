@@ -72,6 +72,7 @@ public:
     }
 };
 
+//static const ResultCallback nop =[](const OptionalAdbCommandResult&){};
 class AdbInterfaceImpl final : public AdbInterface {
 public:
     friend AdbInterface::Builder;
@@ -98,14 +99,14 @@ public:
                                 bool want_output = true) final;
 
     void enqueueCommand(const std::vector<std::string>& args,
-                        void(*resultCallback)(const OptionalAdbCommandResult&) = nullptr
-                        ) final;
+                        ResultCallback&& result) final;
 private:
     explicit AdbInterfaceImpl(Looper* looper,
                               AdbLocator* locator,
                               AdbDaemon* daemon);
     void discoverAdbInstalls();
     void selectAdbPath();
+
 
     Looper* mLooper;
     std::unique_ptr<AdbLocator> mLocator;
@@ -158,8 +159,7 @@ struct AdbCommandQueueStatics {
     bool                 didInitialCommand = false;
     android::base::Lock  adbLock;
 
-    std::queue<std::pair<std::vector<std::string>,
-                         void(*)(const OptionalAdbCommandResult&)>> commandQueue;
+    std::queue<std::pair<std::vector<std::string>, AdbInterface::ResultCallback>> commandQueue;
 };
 
 static base::LazyInstance<AdbCommandQueueStatics> sStatics = LAZY_INSTANCE_INIT;
@@ -185,7 +185,7 @@ static void adbResultHandler(const OptionalAdbCommandResult& result) {
         auto theCallback = sStatics->commandQueue.front().second;
         if (theCallback) {
             // Give this final result to the caller
-            (*theCallback)(result);
+            theCallback(result);
         }
         sStatics->commandQueue.pop();
         if (sStatics->commandQueue.size() == 0) {
@@ -348,7 +348,7 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
 }
 
 void AdbInterfaceImpl::enqueueCommand(const std::vector<std::string>& args,
-                                      void(*resultCallback)(const OptionalAdbCommandResult&))
+                                      ResultCallback&& resultCallback)
 {
     AutoLock lock(sStatics->adbLock);
 

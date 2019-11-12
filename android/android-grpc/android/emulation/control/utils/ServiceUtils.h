@@ -14,14 +14,16 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include "android/avd/hw-config.h"
 
 namespace android {
 namespace emulation {
 namespace control {
 
-std::unordered_map<std::string, std::string> getQemuConfig(
-        AndroidHwConfig* config);
+std::unordered_map<std::string, std::string> getQemuConfig();
+
+// Returns if the emulator has booted, either by checking the global var,
+// or calling adb.
+bool bootCompleted();
 
 }  // namespace control
 }  // namespace emulation
