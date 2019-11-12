@@ -296,7 +296,7 @@ extern void skin_winsys_quit_request() {
         arm_snapshot_save_completed = 0;
         EmulatorNoQtNoWindow* guiless_window = EmulatorNoQtNoWindow::getInstance();
         guiless_window->requestClose();
-        for (int i=0; i < 10; ++i) {
+        for (int i=0; i < 60; ++i) {
             System::get()->sleepMs(1*1000);
             if (arm_snapshot_save_completed) break;
         }
