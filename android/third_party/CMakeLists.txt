@@ -55,7 +55,7 @@ add_subdirectory(mksdcard)
 
 # Old windows & linux version will use old breakpad version
 # We are stuck when trying to generate crashes under linux
-if(WINDOWS_X86_64 OR LINUX_X86_64)
+if(WINDOWS_X86_64)
   prebuilt(BREAKPAD)
 else()
   add_subdirectory(breakpad)

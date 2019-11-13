@@ -338,11 +338,13 @@ endforeach()
 
 set(minidump_dump_src ${BREAKPAD_SRC}/processor/minidump_dump.cc)
 android_add_executable(minidump_dump)
+android_install_as_debug_info(minidump_dump)
 set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 17)
 target_link_libraries(minidump_dump PRIVATE breakpad_processor)
 
 set(minidump_stackwalk_src ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
 android_add_executable(minidump_stackwalk)
+android_install_as_debug_info(minidump_stackwalk)
 set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 17)
 target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor breakpad_common)
 
@@ -419,6 +421,7 @@ set(dump_syms_linux-x86_64_src ${BREAKPAD_SRC}/tools/linux/dump_syms/dump_syms.c
 set(dump_syms_darwin-x86_64_src ${BREAKPAD_SRC}/common/mac/dump_syms.cc
     ${BREAKPAD_SRC}/tools/mac/dump_syms/dump_syms_tool.cc)
 android_add_executable(dump_syms)
+android_install_as_debug_info(dump_syms)
 set_property(TARGET dump_syms PROPERTY CXX_STANDARD 17)
 target_link_libraries(dump_syms PRIVATE breakpad_common)
 android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids)
@@ -445,7 +448,7 @@ android_target_link_libraries(sym_upload darwin-x86_64 PRIVATE "-framework Found
 android_target_compile_definitions(sym_upload linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
 android_target_compile_definitions(sym_upload darwin-x86_64 PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0)
 android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE -D_UNICODE)
-
+android_install_as_debug_info(sym_upload)
 if(LINUX_X86_64)
   set(linux_dumper_unittest_helper_src ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_dumper_unittest_helper.cc)
   android_add_executable(linux_dumper_unittest_helper)
