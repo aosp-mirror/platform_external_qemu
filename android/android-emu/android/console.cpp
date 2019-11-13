@@ -2549,6 +2549,13 @@ do_avd_id( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_windowtype( ControlClient  client, char*  args )
+{
+    control_write( client, "windowtype=%s\r\n", host_emulator_is_headless == 1 ? "headless" : "qtwindow");
+    return 0;
+}
+
+static int
 do_avd_pause( ControlClient  client, char*  args )
 {
     bool success = vmopers(client)->vmPause();
@@ -2645,6 +2652,11 @@ static const CommandDefRec  vm_commands[] =
     { "id", "query virtual device ID",
     "'avd id' will return the ID of this virtual device (possibly separate from the name)\r\n",
     NULL, do_avd_id, NULL },
+
+    { "windowtype", "query virtual device headless or qtwindow",
+    "'avd windowtype' will return either windowtype=headless or windowtype=qtwindow.\r\n",
+    NULL, do_avd_windowtype, NULL },
+
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

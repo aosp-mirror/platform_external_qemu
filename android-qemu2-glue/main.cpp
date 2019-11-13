@@ -926,8 +926,13 @@ extern "C" int main(int argc, char** argv) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
     }
+#ifdef CONFIG_HEADLESS
     host_emulator_is_headless = 1;
     D("emulator running in headless mode");
+#else
+    host_emulator_is_headless = 0;
+    D("emulator running in qt mode");
+#endif
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 
