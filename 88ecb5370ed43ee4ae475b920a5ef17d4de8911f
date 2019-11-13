@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd07b996_337b1ee0",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-11-13T16:34:58Z",
+      "side": 1,
+      "message": "Yahan, the current code in ToT does not account for this (the m_globalToLocalMap and m_localToGlobalMap do not seem consistent with each other). Is this an actual issue?",
+      "range": {
+        "startLine": 366,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 63
+      },
+      "revId": "88ecb5370ed43ee4ae475b920a5ef17d4de8911f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
