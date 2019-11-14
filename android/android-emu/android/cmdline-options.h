@@ -250,6 +250,8 @@ OPT_FLAG(use_keycode_forwarding,
 
 OPT_PARAM(record_session, "<file>,<delay>[,<duration>]", "Screen record the emulator session.")
 
+OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

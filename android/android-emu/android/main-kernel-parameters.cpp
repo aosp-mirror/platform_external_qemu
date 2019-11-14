@@ -261,6 +261,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.dalvik.vm.heapsize=%s", temp);
     }
 
+    if (opts->legacy_fake_camera) {
+        params.addFormat("qemu.legacy_fake_camera=1");
+    }
+
     // User entered parameters are space separated. Passing false here to prevent
     // parameters from being surrounded by quotes.
     return params.toCStringCopy(false);
