@@ -263,6 +263,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (opts->legacy_fake_camera) {
         params.addFormat("qemu.legacy_fake_camera=1");
+    } else {
+        params.addFormat("qemu.legacy_fake_camera=0");
     }
 
     // User entered parameters are space separated. Passing false here to prevent
