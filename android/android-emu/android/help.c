@@ -1803,6 +1803,14 @@ help_record_session(stralloc_t* out)
     "  -record-session /tmp/tmp.webm,0,20 will start recording immediately for 20 seconds.\n\n"
     );
 }
+
+static void
+help_legacy_fake_camera(stralloc_t* out)
+{
+    PRINTF(
+    "  Emulates the fake camera by legacy camera HAL.\n\n"
+    );
+}
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
