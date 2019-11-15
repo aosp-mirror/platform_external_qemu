@@ -1650,6 +1650,11 @@ void EmulatorQtWindow::slot_requestUpdate(QRect rect,
     QSemaphoreReleaser semReleaser(semaphore);
     if (!mBackingSurface)
         return;
+    if (!mBackingSurface->bitmap)
+        return;
+    if (!mBackingSurface->bitmap->size().width() ||
+        !mBackingSurface->bitmap->size().height())
+        return;
 
     QRect r(rect.x() * mBackingSurface->w / mBackingSurface->bitmap->size().width(),
             rect.y() * mBackingSurface->h / mBackingSurface->bitmap->size().height(),
