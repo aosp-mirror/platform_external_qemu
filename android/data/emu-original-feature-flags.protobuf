@@ -47,6 +47,24 @@ pattern {
   }
 }
 
+# Enable GLES3 by default on Linux for 29.2.x stable candidates
+pattern {
+    hwconfig {
+        hostinfo {
+            os_platform: "Linux"
+        }
+    }
+    featureaction {
+        feature: GLESDynamicVersion
+        enable: true
+        min_version {
+            major: 29
+            minor: 2
+            patch: 8
+        }}
+    }
+}
+
 # List of fairly modern GPUs
 pattern {
   hwconfig { hostgpuinfo { make: "10de" device_id: "0ffa" } } # Quadro K600
