@@ -29,7 +29,6 @@
 #include <vector>
 #include "android/version.h"
 
-#include "android/globals.h"
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
 #include "android/base/system/System.h"
@@ -297,15 +296,13 @@ public:
         reply->mutable_vmconfig()->set_numberofcpucores(
                 config.numberOfCpuCores);
         reply->mutable_vmconfig()->set_ramsizebytes(config.ramSizeBytes);
-
-
-        reply->set_booted(guest_boot_completed != 0);
+        reply->set_booted(bootCompleted());
         reply->set_uptime(System::get()->getProcessTimes().wallClockMs);
         reply->set_version(std::string(EMULATOR_VERSION_STRING) + " (" +
                            std::string(EMULATOR_FULL_VERSION_STRING) + ")");
 
         auto entries = reply->mutable_hardwareconfig();
-        auto cnf = getQemuConfig(android_hw);
+        auto cnf = getQemuConfig();
         for (auto const& entry : cnf) {
             auto response_entry = entries->add_entry();
             response_entry->set_key(entry.first);

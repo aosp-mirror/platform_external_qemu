@@ -15,18 +15,27 @@
 // limitations under the License.
 #include "android/emulation/control/utils/ServiceUtils.h"
 
-#include <unordered_map>
+#include <istream>
 #include <string>
+#include <unordered_map>
 
+#include "android/avd/info.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/emulation/control/AdbInterface.h"
+#include "android/globals.h"
+
+using android::base::AutoLock;
+using android::base::ConditionVariable;
+using android::base::Lock;
 namespace android {
 namespace emulation {
 namespace control {
 
-std::unordered_map<std::string, std::string> getQemuConfig(
-        AndroidHwConfig* config) {
+std::unordered_map<std::string, std::string> getQemuConfig() {
     std::unordered_map<std::string, std::string> cfg;
 
     /* use the magic of macros to implement the hardware configuration loaded */
+    AndroidHwConfig* config = android_hw;
 
 #define HWCFG_BOOL(n, s, d, a, t) cfg[s] = config->n ? "true" : "false";
 #define HWCFG_INT(n, s, d, a, t) cfg[s] = std::to_string(config->n);
@@ -37,6 +46,48 @@ std::unordered_map<std::string, std::string> getQemuConfig(
 #include "android/avd/hw-config-defs.h"
 
     return cfg;
+}
+
+bool bootCompleted() {
+    Lock lock;
+    AutoLock aLock(lock);
+    ConditionVariable cv;
+    bool adbResults = false;
+
+    auto adbInterface = emulation::AdbInterface::getGlobal();
+    if (!adbInterface) {
+        return false;
+    }
+
+    // Older API levels do not have a qemu service reporting
+    // to us about boot completion, so we will resort to
+    // calling adb in those cases..
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    const int k2SecondsUs = 2 * 1000 * 1000;
+    if (!guest_boot_completed && apiLevel < 28) {
+        adbInterface->enqueueCommand(
+                {"shell", "getprop", "dev.bootcomplete"},
+                //[&cv](const OptionalAdbCommandResult& res) {});
+                [&cv, &adbResults,
+                 &lock](const OptionalAdbCommandResult& result) {
+                    AutoLock aLock(lock);
+                    if (result) {
+                        std::string output(
+                                std::istreambuf_iterator<char>(*result->output),
+                                {});
+                        guest_boot_completed =
+                                guest_boot_completed ||
+                                output.find("1") != std::string::npos;
+                    }
+                    adbResults = true;
+                    cv.signal();
+                });
+        if (!adbResults) {
+            cv.timedWait(&lock,
+                         base::System::get()->getUnixTimeUs() + k2SecondsUs);
+        }
+    }
+    return guest_boot_completed;
 }
 
 }  // namespace control
