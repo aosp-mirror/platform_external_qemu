@@ -4,6 +4,8 @@
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
+#define WHV_E_UNKNOWN_PROPERTY 0x80370302
+
 #ifndef WHP_DISPATCH_H
 #define WHP_DISPATCH_H
 
