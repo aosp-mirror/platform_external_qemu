@@ -716,8 +716,6 @@ static void set_snapshot_callbacks(void* opaque,
                 break;
             case android::CPU_ACCELERATOR_WHPX:
                 set_address_translation_funcs(0, whpx_gpa2hva);
-                // Skip snapshot save on WHPX
-                set_skip_snapshot_save(true);
                 break;
             case android::CPU_ACCELERATOR_GVM:
                 set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
