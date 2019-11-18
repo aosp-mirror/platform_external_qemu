@@ -32,6 +32,7 @@
 #include "migration/migration.h"
 #include "whp-dispatch.h"
 
+#include "./WinHvPlatformDefs.h"
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
