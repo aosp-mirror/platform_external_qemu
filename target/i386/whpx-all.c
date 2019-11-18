@@ -1685,6 +1685,28 @@ static void whpx_handle_interrupt(CPUState *cpu, int mask)
 /*
  * Partition support
  */
+static void whpx_disable_xsave(struct whpx_state *whpx)
+{
+    WHV_PROCESSOR_XSAVE_FEATURES xsave_cap;
+    HRESULT hr;
+
+    if (!whpx_has_xsave()) {
+        return;
+    }
+
+    xsave_cap.AsUINT64 = 0;
+    hr = whp_dispatch.WHvSetPartitionProperty(
+        whpx->partition,
+        WHvPartitionPropertyCodeProcessorXsaveFeatures,
+        &xsave_cap,
+        sizeof(xsave_cap));
+
+    if (FAILED(hr)) {
+        return;
+    }
+
+    whpx_xsave_cap.AsUINT64 = 0;
+}
 
 static int whpx_accel_init(MachineState *ms)
 {
@@ -1740,6 +1762,9 @@ static int whpx_accel_init(MachineState *ms)
         ret = -EINVAL;
         goto error;
     }
+
+    /* Disable xsave until the WHPX xsave API's have not been plumbed in */
+    whpx_disable_xsave(whpx);
 
     memset(&prop, 0, sizeof(WHV_PARTITION_PROPERTY));
     prop.ProcessorCount = smp_cpus;
