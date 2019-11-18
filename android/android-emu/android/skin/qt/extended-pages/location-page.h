@@ -89,6 +89,7 @@ public:
     typedef struct {
         double lat;
         double lng;
+        double elevation;
         double delayBefore; // Seconds
     } RoutePoint;
 

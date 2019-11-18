@@ -138,8 +138,9 @@ bool LocationPage::parseGoogleMapsJson(const QJsonDocument& jsonDoc) {
 
     double previousLat = firstLocationObject.value("lat").toDouble();
     double previousLng = firstLocationObject.value("lng").toDouble();
+    double elevation = 0.0; // TODO: Google maps provides elevation info?
 
-    mPlaybackElements.push_back({previousLat, previousLng, 0.0}); // Zero delay for the first point
+    mPlaybackElements.push_back({previousLat, previousLng, elevation, 0.0}); // Zero delay for the first point
 
     // We only care about legs[] within routes[0]
     QJsonArray legsArray = jsonDoc.object().value("routes").toArray().at(0)
@@ -212,9 +213,10 @@ bool LocationPage::parseGoogleMapsJson(const QJsonDocument& jsonDoc) {
                 QJsonObject thisLocationObject = pathArray.at(locationIdx).toObject();
                 double lat = thisLocationObject.value("lat").toDouble();
                 double lng = thisLocationObject.value("lng").toDouble();
+                double elevation = 0.0; // TODO: Google Maps API provides elevation?
                 double distFromPreviousPoint = getDistanceMeters(lat, lng, previousLat, previousLng);
 
-                mPlaybackElements.push_back({lat, lng, distFromPreviousPoint / stepSpeed});
+                mPlaybackElements.push_back({lat, lng, elevation, distFromPreviousPoint / stepSpeed});
 
                 previousLat = lat;
                 previousLng = lng;
@@ -249,8 +251,9 @@ bool LocationPage::parseGpxKmlJson(const QJsonDocument& jsonDoc,
         QJsonObject thisPoint = pathArray.at(i).toObject();
         double lat = thisPoint.value("lat").toDouble();
         double lng = thisPoint.value("lng").toDouble();
+        double elevation = thisPoint.value("elevation").toDouble();
         double delay_sec = thisPoint.value("delay_sec").toDouble();
-        mPlaybackElements.push_back({lat, lng, delay_sec}); // Zero delay for the first point
+        mPlaybackElements.push_back({lat, lng, elevation, delay_sec}); // Zero delay for the first point
 
         if (i == 0) {
             auto* startWaypointItem = new RoutePlaybackWaypointItem(

@@ -677,6 +677,7 @@ void LocationPage::timeout() {
 void LocationPage::timeout_v2() {
     double latNow = 0.0;
     double lngNow = 0.0;
+    double altNow = 0.0;
 
     if (mMsIntoSegment >= mSegmentDurationMs) {
         // Advance to the next segment in the route
@@ -700,9 +701,13 @@ void LocationPage::timeout_v2() {
 
         double prevLat = mPlaybackElements[mNextRoutePointIdx-1].lat;
         double prevLng = mPlaybackElements[mNextRoutePointIdx-1].lng;
+        double prevElevation = mPlaybackElements[mNextRoutePointIdx-1].elevation;
         double nextLat = mPlaybackElements[mNextRoutePointIdx  ].lat;
         double nextLng = mPlaybackElements[mNextRoutePointIdx  ].lng;
+        double nextElevation = mPlaybackElements[mNextRoutePointIdx  ].elevation;
 
+        // TODO: Account for altitude change in addition to sphere distance
+        (void)nextElevation;
         double distance = getDistanceNm(prevLat, prevLng, nextLat, nextLng);
         double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
 
@@ -711,6 +716,7 @@ void LocationPage::timeout_v2() {
         mHeadingOnRoute = getHeading(prevLat, prevLng, nextLat, nextLng);
         latNow = prevLat;
         lngNow = prevLng;
+        altNow = prevElevation;
         mMsIntoSegment = 0.0;
     } else {
         // We are within a segment, between point [mNextRoutePointIdx-1] and [mNextRoutePointIdx]
@@ -718,15 +724,16 @@ void LocationPage::timeout_v2() {
 
         double prevLat = mPlaybackElements[mNextRoutePointIdx-1].lat;
         double prevLng = mPlaybackElements[mNextRoutePointIdx-1].lng;
+        double prevElevation = mPlaybackElements[mNextRoutePointIdx-1].elevation;
         double nextLat = mPlaybackElements[mNextRoutePointIdx  ].lat;
         double nextLng = mPlaybackElements[mNextRoutePointIdx  ].lng;
+        double nextElevation = mPlaybackElements[mNextRoutePointIdx  ].elevation;
 
         double alpha = mMsIntoSegment / mSegmentDurationMs;
         latNow = (alpha * nextLat) + ((1.0 - alpha) * prevLat);
         lngNow = (alpha * nextLng) + ((1.0 - alpha) * prevLng);
+        altNow = (alpha * nextElevation) + ((1.0 - alpha) * prevElevation);
     }
-
-    double altNow = 0.0;
 
     // Send the current location
     AutoLock lock (sGlobals->updateThreadLock);
