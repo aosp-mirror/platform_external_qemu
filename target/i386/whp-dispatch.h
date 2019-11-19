@@ -1,8 +1,16 @@
 #include "windows.h"
 #include <stdbool.h>
 
+#ifdef _MSC_VER
+typedef int WINBOOL;
+#define __C89_NAMELESS
+#endif
+
+#include "./WinHvPlatformDefs.h"
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
+
+#define WHV_E_UNKNOWN_PROPERTY 0x80370302
 
 #ifndef WHP_DISPATCH_H
 #define WHP_DISPATCH_H
