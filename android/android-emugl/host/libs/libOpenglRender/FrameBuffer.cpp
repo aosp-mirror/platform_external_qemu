@@ -2220,10 +2220,6 @@ bool FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
             m_colorbuffers.erase(p_colorbuffer);
             return true;
         }
-    } else {
-        fprintf(stderr,
-                "Trying to erase a non-existent color buffer with handle %d \n",
-                p_colorbuffer);
     }
     return false;
 }
