@@ -726,6 +726,19 @@ _factory_client_close(void*  opaque)
 /********************************************************************************
  * Camera client API
  *******************************************************************************/
+
+enum CameraEventType {
+    OPERATION,
+    END
+};
+struct CameraEvent {
+    CameraEventType type;
+    std::vector<uint8_t> msg;
+    QemudClient* qClient;
+    CameraEvent(CameraEventType type, uint8_t* msg, int msglen, QemudClient* qClient)
+        : type(type), msg(msg, msg + msglen), qClient(qClient) {};
+};
+
 /* Describes an emulated camera client.
  */
 typedef struct CameraClient CameraClient;
@@ -796,6 +809,10 @@ struct CameraClient
     bool                need_frame_cache;
     size_t              frame_cache_size;
     std::vector<uint8_t>    frame_cache;
+    std::queue<CameraEvent> eventQ;
+    std::mutex mu;
+    std::condition_variable cond;
+    std::thread eventHandlerThread;
     CameraClient()
         : device_name(nullptr),
           inp_channel(0),
@@ -836,6 +853,17 @@ struct CameraClient
         if (device_name != NULL) {
             free(device_name);
         }
+        if (!eventHandlerThread.joinable()) {
+            return;
+        }
+        {
+            std::unique_lock<std::mutex> lock(mu);
+            eventQ.emplace(END, nullptr, 0, nullptr);
+            if (eventQ.size() == 1) {
+                cond.notify_one();
+            }
+        }
+        eventHandlerThread.join();
     };
 };
 
@@ -1116,6 +1144,7 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
               (char*)&cc->pixel_format);
             return CLIENT_START_RESULT_NO_PIXEL_CONVERSION;
         }
+
         /* Allocate buffer large enough to contain both, video and preview
          * framebuffers. */
         cc->video_frame =
@@ -1809,29 +1838,14 @@ _camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* par
     }
 }
 
-/* Handles a message received from the emulated camera client.
- * Queries received here are represented as strings:
- * - 'connect' - Connects to the camera device (opens it).
- * - 'disconnect' - Disconnexts from the camera device (closes it).
- * - 'start' - Starts capturing video from the connected camera device.
- * - 'stop' - Stop capturing video from the connected camera device.
- * - 'frame' - Queries video and preview frames captured from the camera.
- * Param:
- *  opaque - Camera service descriptor.
- *  msg, msglen - Message received from the camera factory client.
- *  client - Camera factory client pipe.
- */
 static void
-_camera_client_recv(void*         opaque,
-                    uint8_t*      msg,
-                    int           msglen,
-                    QemudClient*  client)
-{
+camera_client_handle_event(CameraClient*  cc,
+                            uint8_t*       msg,
+                            int            msglen,
+                            QemudClient*   client) {
     /*
      * Emulated camera client queries.
      */
-    CameraClient* cc = (CameraClient*)opaque;
-
     if (msglen <= 0) {
         D("%s: query message has invalid length %d", __func__, msglen);
         return;
@@ -1910,6 +1924,64 @@ _camera_client_recv(void*         opaque,
     } else {
         E("%s: Unknown query '%s'", __FUNCTION__, (char*)msg);
         _qemu_client_reply_ko(client, "Unknown query");
+    }
+}
+
+static void handleEvent(CameraClient* cc) {
+    D("start handleEvent thread");
+    while(1) {
+        std::vector<uint8_t> msg;
+        CameraEventType type;
+        QemudClient* qClient;
+        {
+            std::unique_lock<std::mutex> lock(cc->mu);
+            if (cc->eventQ.empty()) {
+                cc->cond.wait(lock, [cc](){return !cc->eventQ.empty();});
+            }
+            CameraEvent& event = cc->eventQ.front();
+            type = event.type;
+            qClient = event.qClient;
+            msg = std::move(event.msg);
+            cc->eventQ.pop();
+        }
+
+        switch(type) {
+            case OPERATION:
+                camera_client_handle_event(cc, msg.data(), msg.size(), qClient);
+                break;
+            case END:
+                D("exit handleEvent thread");
+                return;
+        }
+    }
+}
+
+/* Handles a message received from the emulated camera client.
+ * Queries received here are represented as strings:
+ * - 'connect' - Connects to the camera device (opens it).
+ * - 'disconnect' - Disconnexts from the camera device (closes it).
+ * - 'start' - Starts capturing video from the connected camera device.
+ * - 'stop' - Stop capturing video from the connected camera device.
+ * - 'frame' - Queries video and preview frames captured from the camera.
+ * Param:
+ *  opaque - Camera service descriptor.
+ *  msg, msglen - Message received from the camera factory client.
+ *  client - Camera factory client pipe.
+ */
+static void
+_camera_client_recv(void*         opaque,
+                    uint8_t*      msg,
+                    int           msglen,
+                    QemudClient*  client)
+{
+    CameraClient* cc = (CameraClient*)opaque;
+    if (!cc->eventHandlerThread.joinable()) {
+        cc->eventHandlerThread = std::thread(handleEvent, cc);
+    }
+    std::unique_lock<std::mutex> lock(cc->mu);
+    cc->eventQ.emplace(OPERATION, msg, msglen, client);
+    if (cc->eventQ.size() == 1) {
+        cc->cond.notify_one();
     }
 }
 
