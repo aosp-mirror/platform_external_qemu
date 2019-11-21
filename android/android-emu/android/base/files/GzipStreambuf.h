@@ -18,13 +18,11 @@
 #include <memory>    // for unique_ptr
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
 // An input stream buffer that inflates/decompresses a gzip stream.
 class GzipInputStreambuf : public std::streambuf {
 public:
-
     // |src| is the underlying buffer from which bytes will be retrieved.
     // |chunk| is simply the buffer size for feeding data to and pulling data
     // from the zlib routines. Larger buffer sizes would be more efficient. If
@@ -49,7 +47,6 @@ private:
 
     static constexpr std::size_t k16KB = 16 * 1024;
 };
-
 
 class GzipInputStream : public std::istream {
 public:
@@ -88,6 +85,5 @@ public:
     virtual ~GzipOutputStream();
 };
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android
