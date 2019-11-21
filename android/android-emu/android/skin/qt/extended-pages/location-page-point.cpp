@@ -523,9 +523,7 @@ void LocationPage::setUpWebEngine() {
     mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
                         QWebSocketServer::NonSecureMode));
     if (!mServer->listen(QHostAddress::LocalHost)) {
-        printf("Unable to open web socket port %d.\n", mServer->serverPort());
-    } else {
-        printf("WebSocketServer listening on port %d\n", mServer->serverPort());
+        // TODO: error handling needed
     }
 
     // wrap WebSocket clients in QWebChannelAbstractTransport objects
@@ -545,6 +543,8 @@ void LocationPage::setUpWebEngine() {
         bool isPoint = (webEnginePageIdx == 0);
         QWebEnginePage* webEnginePage = isPoint ? mUi->loc_pointWebEngineView->page()
                                                 : mUi->loc_routeWebEngineView->page();
+
+        connect(webEnginePage, SIGNAL(loadFinished(bool)), this, SLOT(onWebPageLoadFinished(bool)));
 
         QString appendString;
 

@@ -41,7 +41,7 @@
 #include <QSettings>
 #ifdef USE_WEBENGINE
 #include <QWebEngineProfile>
-#endif
+#endif // USE_WEBENGINE
 
 #include <algorithm>
 #include <fstream>
@@ -117,6 +117,11 @@ static void updateThreadLoop() {
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::LocationPage)
+#ifdef USE_WEBENGINE
+    ,
+    mShouldRefreshPageOnReconnect(false),
+    mNetworkConnectivityManager(nullptr)
+#endif // USE_WEBENGINE
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
@@ -155,7 +160,7 @@ LocationPage::LocationPage(QWidget *parent) :
             emit onMapsKeyUpdated();
         }
     }
-#endif
+#endif // USE_WEBENGINE
 
     if (useLocationV2) {
         // Hide the old tab on the Location page
@@ -175,6 +180,12 @@ LocationPage::LocationPage(QWidget *parent) :
 
     if (useLocationV2) {
 #ifdef USE_WEBENGINE
+        mNetworkConnectivityManager = new NetworkConnectivityManager(this);
+        connect(mNetworkConnectivityManager,
+                SIGNAL(connectivityStateChanged(NetworkConnectivityManager::State)),
+                this,
+                SLOT(onConnectivityStateChanged(NetworkConnectivityManager::State)));
+
         mTimer.setSingleShot(true);
         QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
         scanForPoints();
@@ -191,7 +202,7 @@ LocationPage::LocationPage(QWidget *parent) :
             movie->start();
             mUi->loc_overlaySpinner->setMovie(movie);
         }
-#endif
+#endif // USE_WEBENGINE
     } else { // !useLocationV2
         mUi->loc_latitudeInput->setMinValue(-90.0);
         mUi->loc_latitudeInput->setMaxValue(90.0);
@@ -380,6 +391,50 @@ void LocationPage::updateDisplayedLocation(double lat, double lon, double alt,
 void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
     writeLocationPlaybackSpeedToSettings(index);
 }
+
+void LocationPage::onWebPageLoadFinished(bool okay) {
+    // qDebug() << "Web page loaded" << (okay ? "successullfy" : "with errors");
+#ifdef USE_WEBENGINE
+    if (mNetworkConnectivityManager == nullptr ) { return; }
+    mShouldRefreshPageOnReconnect = !mNetworkConnectivityManager->isOnline();
+#endif // USE_WEBENGINE
+}
+
+#ifdef USE_WEBENGINE
+void LocationPage::onConnectivityStateChanged(NetworkConnectivityManager::State state) {
+    // QString str = "NetworkConnectivityManager state changed. ";
+
+    switch (state) {
+    case NetworkConnectivityManager::Unknown:
+        // str += "Unknown";
+        break;
+    case NetworkConnectivityManager::NotAvailable:
+        // str += "NotAvailable";
+        onConnectivityOffline();
+        break;
+    case NetworkConnectivityManager::Connected:
+        // str += "Connected";
+        onConnectivityOnline();
+        break;
+    }
+
+    // qCDebug(emu) << str;
+}
+
+void LocationPage::onConnectivityOffline() {    
+    mUi->loc_importGpxKmlButton->setEnabled(false);
+    mUi->loc_importGpxKmlButton_route->setEnabled(false);
+}
+
+void LocationPage::onConnectivityOnline() {
+    if (mShouldRefreshPageOnReconnect) {
+        mUi->loc_pointWebEngineView->reload();
+        mUi->loc_routeWebEngineView->reload();
+    }
+    mUi->loc_importGpxKmlButton->setEnabled(true);
+    mUi->loc_importGpxKmlButton_route->setEnabled(true);
+}
+#endif // USE_WEBENGINE
 
 bool LocationPage::validateCell(QTableWidget* table,
                                 int row,

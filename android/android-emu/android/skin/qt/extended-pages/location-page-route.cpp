@@ -665,4 +665,4 @@ void LocationPage::finishGeoDataLoading_v2(
     setButtonEnabled(mUi->loc_playRouteButton, theme, true);
 }
 
-#endif
+#endif // USE_WEBENGINE
