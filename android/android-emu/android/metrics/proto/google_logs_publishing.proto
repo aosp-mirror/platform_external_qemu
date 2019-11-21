@@ -44,4 +44,9 @@ message LogRequest {
   repeated LogEvent log_event = 3;
 }
 
+message LogResponse {
+  optional int64 next_request_wait_millis = 1 [default = -1];
+  extensions 1000 to 536870911;
+}
+
 
