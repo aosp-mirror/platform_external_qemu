@@ -208,6 +208,7 @@ OPT_FLAG(wait_for_debugger, "Pause on launch and wait for a debugger process to 
 OPT_FLAG(skip_adb_auth, "Skip adb authentication dialogue")
 
 OPT_FLAG(metrics_to_console, "Enable usage metrics and print the messages to stdout")
+OPT_FLAG(metrics_collection, "Enable usage metrics and send them to google play")
 OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the messages into specified file")
 OPT_FLAG(detect_image_hang, "Enable the detection of system image hangs.")
 

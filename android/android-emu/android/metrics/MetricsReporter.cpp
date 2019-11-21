@@ -8,30 +8,33 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include "android/metrics/MetricsReporter.h"
 
-#include <stdio.h>
+#include <assert.h>                                    // for assert
+#include <stdio.h>                                     // for FILE, stdout
+#include <type_traits>                                 // for swap, integral...
+#include <utility>                                     // for move
 
-#include <type_traits>
-
-#include "android/base/Uuid.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/threads/Async.h"
-#include "android/cmdline-option.h"
-#include "android/metrics/AsyncMetricsReporter.h"
-#include "android/metrics/CrashMetricsReporting.h"
-#include "android/metrics/FileMetricsWriter.h"
-#include "android/metrics/MetricsPaths.h"
-#include "android/metrics/NullMetricsReporter.h"
-#include "android/metrics/StudioConfig.h"
-#include "android/metrics/TextMetricsWriter.h"
-#include "android/metrics/proto/google_logs_publishing.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/utils/debug.h"
-#include "android/utils/file_io.h"
-#include "picosha2.h"
+#include "android/base/Optional.h"                     // for Optional
+#include "android/base/async/ThreadLooper.h"           // for ThreadLooper
+#include "android/base/files/PathUtils.h"              // for pj
+#include "android/base/files/StdioStream.h"            // for StdioStream
+#include "android/base/memory/LazyInstance.h"          // for LazyInstance
+#include "android/base/threads/Async.h"                // for async
+#include "android/cmdline-option.h"                    // for AndroidOptions
+#include "android/metrics/AsyncMetricsReporter.h"      // for AsyncMetricsRe...
+#include "android/metrics/CrashMetricsReporting.h"     // for reportCrashMet...
+#include "android/metrics/FileMetricsWriter.h"         // for FileMetricsWriter
+#include "android/metrics/MetricsPaths.h"              // for getSpoolDirectory
+#include "android/metrics/NullMetricsReporter.h"       // for NullMetricsRep...
+#include "android/metrics/PlaystoreMetricsWriter.h"    // for PlaystoreMetri...
+#include "android/metrics/StudioConfig.h"              // for getAnonymizati...
+#include "android/metrics/TextMetricsWriter.h"         // for TextMetricsWriter
+#include "android/metrics/proto/google_logs_publishing.pb.h"  // for LogEvent
+#include "android/metrics/proto/studio_stats.pb.h"     // for AndroidStudioE...
+#include "android/utils/debug.h"                       // for dwarning
+#include "android/utils/file_io.h"                     // for android_fopen
+#include "picosha2.h"                                  // for hash256_one_by...
 
 using android::base::System;
 
@@ -82,6 +85,9 @@ void MetricsReporter::start(const std::string& sessionId,
     MetricsWriter::Ptr writer;
     if (android_cmdLineOptions->metrics_to_console) {
         writer = TextMetricsWriter::create(base::StdioStream(stdout));
+    } else if (android_cmdLineOptions->metrics_collection) {
+        writer = PlaystoreMetricsWriter::create(sessionId,
+        base::pj(getSpoolDirectory(), "backoff_cookie.proto"));
     } else if (android_cmdLineOptions->metrics_to_file != nullptr) {
         if (FILE* out = ::android_fopen(android_cmdLineOptions->metrics_to_file,
                                         "w")) {

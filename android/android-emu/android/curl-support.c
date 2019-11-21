@@ -84,7 +84,7 @@ void* curl_easy_default_init(char** error) {
     curlRes = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     if (curlRes != CURLE_OK) {
         int err = asprintf(error, "Could not disable signals: %s",
-                 curl_easy_strerror(curlRes));
+                           curl_easy_strerror(curlRes));
         (void)err;
         curl_easy_cleanup(curl);
         return NULL;
@@ -94,7 +94,7 @@ void* curl_easy_default_init(char** error) {
         curlRes = curl_easy_setopt(curl, CURLOPT_CAINFO, cached_ca_info);
         if (curlRes != CURLE_OK) {
             int err = asprintf(error, "Could not set CURLOPT_CAINFO: %s",
-                     curl_easy_strerror(curlRes));
+                               curl_easy_strerror(curlRes));
             (void)err;
             curl_easy_cleanup(curl);
             return NULL;
@@ -116,12 +116,15 @@ static size_t null_write_callback(char* ptr,
 // curl_easy_perform. Since we disable signals, the DNS lookup timeout is ignore
 // by libcurl.
 // TODO: build using c-ares, and set timeout for curl_easy_perform.
-static bool curl_download_internal(const char* url,
-                                   const char* post_fields,
-                                   CurlWriteCallback callback_func,
-                                   void* callback_userdata,
-                                   bool allow_404,
-                                   char** error) {
+static bool curl_post_internal(const char* url,
+                               const char* data,
+                               const size_t cData,
+                               const char** httpHeaders,
+                               const size_t cHttpHeaders,
+                               CurlWriteCallback callback_func,
+                               void* callback_userdata,
+                               bool allow_404,
+                               char** error) {
     CURL* curl = curl_easy_default_init(error);
     if (!curl) {
         return false;
@@ -137,21 +140,35 @@ static bool curl_download_internal(const char* url,
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, null_write_callback);
     }
 
-    if (post_fields) {
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
+    if (data && cData) {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)cData);
     }
 
+
+    struct curl_slist* headers = NULL;
+    int i;
+    for (i = 0; i < cHttpHeaders; i++) {
+        headers = curl_slist_append(headers, httpHeaders[i]);
+    }
+
+    if (headers) {
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    }
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, VERBOSE_CHECK(curl));
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
 
     const CURLcode res = curl_easy_perform(curl);
+    curl_slist_free_all(headers);
     if (res != CURLE_OK) {
         int err = asprintf(error, "%s", curl_easy_strerror(res));
         (void)err;
     } else {
         // toolbar returns a 404 by design.
         long http_response = 0;
-        int curlRes = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
+        int curlRes =
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
         if (curlRes == CURLE_OK) {
             if (http_response == 200) {
                 result = true;
@@ -162,7 +179,8 @@ static bool curl_download_internal(const char* url,
                 (void)err;
             }
         } else {
-            int err = asprintf(error, "Unexpected error while checking http response: %s",
+            int err = asprintf(
+                    error, "Unexpected error while checking http response: %s",
                     curl_easy_strerror(curlRes));
             (void)err;
         }
@@ -173,17 +191,42 @@ static bool curl_download_internal(const char* url,
     return result;
 }
 
+static bool curl_download_internal(const char* url,
+                                   const char* post_fields,
+                                   CurlWriteCallback callback_func,
+                                   void* callback_userdata,
+                                   bool allow_404,
+                                   char** error) {
+    return curl_post_internal(
+            url, post_fields, post_fields ? strlen(post_fields) : 0, NULL, 0,
+            callback_func, callback_userdata, allow_404, error);
+}
+
 bool curl_download(const char* url,
                    const char* post_fields,
                    CurlWriteCallback callback_func,
                    void* callback_userdata,
                    char** error) {
-    return curl_download_internal(url, post_fields, callback_func, callback_userdata, false, error);
+    return curl_download_internal(url, post_fields, callback_func,
+                                  callback_userdata, false, error);
+}
+
+bool curl_post(const char* url,
+               const char* data,
+               const size_t cData,
+               const char** headers,
+               const size_t cHeaders,
+               CurlWriteCallback callback_func,
+               void* callback_userdata,
+               char** error) {
+    return curl_post_internal(url, data, cData, headers, cHeaders,
+                              callback_func, callback_userdata, false, error);
 }
 
 extern bool curl_download_null(const char* url,
                                const char* post_fields,
                                bool allow_404,
                                char** error) {
-    return curl_download_internal(url, post_fields, NULL, NULL, allow_404, error);
+    return curl_download_internal(url, post_fields, NULL, NULL, allow_404,
+                                  error);
 }

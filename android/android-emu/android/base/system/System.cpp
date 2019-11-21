@@ -103,6 +103,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <fstream>
 #include <string>
 #include <sys/resource.h>
+#include <sys/utsname.h>
 #include <sys/vfs.h>
 #endif
 
@@ -114,6 +115,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #ifdef __APPLE__
 #include <crt_externs.h>
 #define environ (*_NSGetEnviron())
+#include <sys/utsname.h>
 #else
 extern "C" char** environ;
 #endif
@@ -685,6 +687,26 @@ public:
 #else
         return getpid();
 #endif
+    }
+
+    std::string getMajorOsVersion() const override {
+        int majorVersion = 0, minorVersion = 0;
+#ifdef _WIN32
+        OSVERSIONINFOEXW ver;
+        ver.dwOSVersionInfoSize = sizeof(ver);
+        GetVersionExW((OSVERSIONINFOW*)&ver);
+        majorVersion = ver.dwMajorVersion;
+        minorVersion = ver.dwMinorVersion;
+#else
+        struct utsname name;
+        if (uname(&name) == 0) {
+            // Now parse out version numbers, as this will look something like:
+            // 4.19.67-xxx or 18.6.0 or so.
+            sscanf(name.release, "%d.%d", &majorVersion, &minorVersion);
+        }
+#endif
+        return std::to_string(majorVersion) + "." +
+               std::to_string(minorVersion);
     }
 
     WaitExitResult waitForProcessExit(int pid, Duration timeoutMs) const override {
@@ -2989,4 +3011,4 @@ bool System::queryFileVersionInfo(StringView, int*, int*, int*, int*) {
 #endif // _WIN32
 
 }  // namespace base
-}  // namespace android
+}  // namespaconExWs android

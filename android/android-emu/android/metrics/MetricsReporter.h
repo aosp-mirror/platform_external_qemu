@@ -11,18 +11,21 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/StringView.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
-#include "android/metrics/metrics.h"
-#include "android/metrics/MetricsWriter.h"
+#include <functional>                           // for function
+#include <memory>                               // for unique_ptr
+#include <string>                               // for string
+#include <vector>                               // for vector
 
-#include <functional>
-#include <memory>
-#include <string>
+#include "android/base/Compiler.h"              // for DISALLOW_COPY_ASSIGN_...
+#include "android/base/StringView.h"            // for StringView
+#include "android/base/synchronization/Lock.h"  // for Lock
+#include "android/base/system/System.h"         // for System, System::Duration
+#include "android/metrics/MetricsWriter.h"      // for MetricsWriter, Metric...
+#include "android/metrics/metrics.h"            // for MetricsStopReason
 
-namespace android_studio { class AndroidStudioEvent; }
+namespace android_studio {
+class AndroidStudioEvent;
+}  // namespace android_studio
 
 namespace android {
 namespace metrics {

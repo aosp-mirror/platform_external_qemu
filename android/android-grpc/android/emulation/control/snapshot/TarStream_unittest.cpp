@@ -18,19 +18,21 @@
 #include <string.h>       // for memcmp
 #include <fstream>        // for ostream
 
-#include "android/base/Optional.h"                             // for Optional
-#include "android/base/StringView.h"                           // for String...
-#include "android/base/files/PathUtils.h"                      // for pj
-#include "android/base/system/System.h"                        // for System
-#include "android/base/testing/TestSystem.h"                   // for TestSy...
-#include "android/base/testing/TestTempDir.h"                  // for TestTe...
-#include "android/emulation/control/snapshot/GzipStreambuf.h"  // for GzipIn...
+#include "android/base/Optional.h"             // for Optional
+#include "android/base/StringView.h"           // for String...
+#include "android/base/files/GzipStreambuf.h"  // for GzipIn...
+#include "android/base/files/PathUtils.h"      // for pj
+#include "android/base/system/System.h"        // for System
+#include "android/base/testing/TestSystem.h"   // for TestSy...
+#include "android/base/testing/TestTempDir.h"  // for TestTe...
 
 using android::base::PathUtils;
 using android::base::pj;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
+using android::base::GzipInputStream;
+using android::base::GzipOutputStream;
 
 namespace android {
 namespace emulation {
@@ -113,8 +115,7 @@ TEST_F(TarStreamTest, bad_header_chksum) {
     EXPECT_TRUE(tr.fail());
     EXPECT_FALSE(fst.valid);
     // Note header is checksum not constant, so just check for the start msg.
-    EXPECT_NE(tr.error_msg().find("Incorrect tar header."),
-                std::string::npos);
+    EXPECT_NE(tr.error_msg().find("Incorrect tar header."), std::string::npos);
 };
 
 TEST_F(TarStreamTest, incomplete_archive) {
@@ -134,11 +135,11 @@ TEST_F(TarStreamTest, incomplete_archive) {
     EXPECT_TRUE(tr.good());
     auto fst = tr.first();
 
-
     EXPECT_TRUE(fst.valid);
     EXPECT_FALSE(tr.extract(fst));
     EXPECT_FALSE(tr.good());
-    EXPECT_EQ(tr.error_msg(), "Unexpected EOF during extraction of hello.txt at offset 517");
+    EXPECT_EQ(tr.error_msg(),
+              "Unexpected EOF during extraction of hello.txt at offset 517");
 };
 
 TEST_F(TarStreamTest, handle_unclosed_tar_properly) {
