@@ -136,6 +136,8 @@ public:
 
     virtual std::string getOsName() override { return mOsName; }
 
+    virtual std::string getMajorOsVersion() const override { return "0.0"; }
+
     virtual bool isRunningUnderWine() const override { return mUnderWine; }
 
     void setRunningUnderWine(bool underWine) { mUnderWine = underWine; }
