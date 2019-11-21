@@ -129,6 +129,10 @@ public:
     // occurs.
     virtual std::string getOsName() = 0;
 
+    // The major os version that this code is running on in
+    // the form of '[0-9]+\.[0-9]+'
+    virtual std::string getMajorOsVersion() const = 0;
+
     // Check if we're running under Wine;
     // returns false for non-Windows builds
     virtual bool isRunningUnderWine() const = 0;
