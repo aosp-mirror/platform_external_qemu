@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/snapshot/GzipStreambuf.h"
+#include "android/base/files/GzipStreambuf.h"
 
 #include <gtest/gtest.h>  // for Test, SuiteApiResolver, TestInfo (ptr only)
 #include <cstdlib>        // for srand, rand
@@ -23,8 +23,7 @@
 #include <vector>         // for vector
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
 TEST(Gzip, output_writes_to_stream) {
     std::stringstream ss;
@@ -91,6 +90,5 @@ TEST(Gzip, handles_errors) {
     EXPECT_NE(msg, "Hello");
 }
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android

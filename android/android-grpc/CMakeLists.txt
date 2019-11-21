@@ -29,7 +29,6 @@ set(android-grpc_src
     android/emulation/control/snapshot/SnapshotService.cpp
     android/emulation/control/snapshot/TarStream.cpp
     android/emulation/control/utils/ServiceUtils.cpp
-    android/emulation/control/snapshot/GzipStreambuf.cpp
     android/emulation/control/waterfall/SocketController.cpp
     android/emulation/control/waterfall/WaterfallService.cpp
 )
@@ -51,7 +50,6 @@ endif()
 set(android-grpc_unittest_src
     android/emulation/control/logcat/LogcatParser_unittest.cpp
     android/emulation/control/logcat/RingStreambuf_unittest.cpp
-    android/emulation/control/snapshot/GzipStreambuf_unittest.cpp
     android/emulation/control/snapshot/TarStream_unittest.cpp
     android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
 )
