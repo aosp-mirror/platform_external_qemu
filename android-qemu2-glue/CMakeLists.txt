@@ -64,7 +64,8 @@ target_link_libraries(libqemu2-glue
                               GLIB2::GLIB2
                               PIXMAN::PIXMAN
                               emulator-libdtb
-                              ssl)
+                              ssl
+                              hostapd)
 
 set(libqemu2-glue-vm-operations_src
     ${ANDROID_HW_CONFIG_H}

@@ -652,6 +652,20 @@ static void enableSignalTermination() {
 
 }  // namespace
 
+extern "C" int run_hostapd_main(int argc,
+                                 const char** argv,
+                                 void (*on_main_loop_done)(void));
+
+static void enter_hostapd_main_loop(int argc, char** argv) {
+#ifndef _WIN32
+    sigset_t set;
+    sigemptyset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+    D("Starting hostapd main loop");
+    run_hostapd_main(argc, (const char**)argv, []{});
+}
+
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
                              void (*on_main_loop_done)(void));
@@ -906,7 +920,7 @@ static int startEmulatorWithMinConfig(
             printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
         }
     }
-
+    skin_winsys_start_function(enter_hostapd_main_loop, 0, nullptr);
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
@@ -2005,7 +2019,7 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
-
+    skin_winsys_start_function(enter_hostapd_main_loop, 0, nullptr);
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
