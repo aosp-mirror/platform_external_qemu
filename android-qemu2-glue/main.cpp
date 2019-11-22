@@ -652,6 +652,20 @@ static void enableSignalTermination() {
 
 }  // namespace
 
+extern "C" int run_hostapd_main(int argc,
+                                 const char** argv,
+                                 void (*on_main_loop_done)(void));
+
+static void enter_hostapd_main_loop(int argc, char** argv) {
+#ifndef _WIN32
+    sigset_t set;
+    sigemptyset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+    D("Starting hostapd main loop");
+    run_hostapd_main(argc, (const char**)argv, []{});
+}
+
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
                              void (*on_main_loop_done)(void));
@@ -907,6 +921,9 @@ static int startEmulatorWithMinConfig(
         }
     }
 
+    android::ParameterList args2{"hostapd"};
+    args2.add("/usr/local/google/home/wdu/emu-master-dev/external/qemu/android/data/hostapd.conf");
+    skin_winsys_start_function(enter_hostapd_main_loop, args2.size(), args2.array());
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
@@ -1747,6 +1764,9 @@ extern "C" int main(int argc, char** argv) {
 
     initialize_virtio_input_devs(args, hw);
 
+    args.add("-device");
+    args.add("virtio-wireless-pci");
+    
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
@@ -2006,6 +2026,9 @@ extern "C" int main(int argc, char** argv) {
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
 
+    android::ParameterList args2{"hostapd"};
+    args2.add("/usr/local/google/home/wdu/emu-master-dev/external/qemu/android/data/hostapd.conf");
+    skin_winsys_start_function(enter_hostapd_main_loop, args2.size(), args2.array());
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);

@@ -1,7 +1,6 @@
 set(WPA_SUPPLICANT_ROOT ${ANDROID_QEMU2_TOP_DIR}/../wpa_supplicant_8/)
 set(HOSTAPD_ROOT ${WPA_SUPPLICANT_ROOT}/hostapd/)
 
-
 set(hostapd_src
 		${HOSTAPD_ROOT}/main.c
 		${HOSTAPD_ROOT}/config_file.c
@@ -29,6 +28,8 @@ set(hostapd_src
 		${WPA_SUPPLICANT_ROOT}/src/ap/bss_load.c
 		${WPA_SUPPLICANT_ROOT}/src/ap/neighbor_db.c
 		${WPA_SUPPLICANT_ROOT}/src/ap/rrm.c
+		${WPA_SUPPLICANT_ROOT}/src/ap/eth_p_oui.c
+		${WPA_SUPPLICANT_ROOT}/src/ap/wpa_auth_ft.c
 		${WPA_SUPPLICANT_ROOT}/src/drivers/drivers.c
 		${WPA_SUPPLICANT_ROOT}/src/utils/eloop.c
 		${WPA_SUPPLICANT_ROOT}/src/utils/common.c
@@ -40,7 +41,6 @@ set(hostapd_src
 		${WPA_SUPPLICANT_ROOT}/src/common/hw_features_common.c
 		${WPA_SUPPLICANT_ROOT}/src/eapol_auth/eapol_auth_dump.c
 		${WPA_SUPPLICANT_ROOT}/src/eapol_auth/eapol_auth_sm.c
-		#${WPA_SUPPLICANT_ROOT}/src/ap/accounting.c
 		${WPA_SUPPLICANT_ROOT}/src/ap/vlan_init.c
 		${WPA_SUPPLICANT_ROOT}/src/ap/vlan_ifconfig.c
 		${WPA_SUPPLICANT_ROOT}/src/ap/vlan.c
@@ -48,14 +48,7 @@ set(hostapd_src
 		${WPA_SUPPLICANT_ROOT}/src/ap/ctrl_iface_ap.c
 		${WPA_SUPPLICANT_ROOT}/src/common/sae.c
 		${WPA_SUPPLICANT_ROOT}/src/ap/wnm_ap.c
-		${WPA_SUPPLICANT_ROOT}/src/drivers/driver_wired.c
-		${WPA_SUPPLICANT_ROOT}/src/drivers/driver_wired_common.c
-		#${WPA_SUPPLICANT_ROOT}/src/drivers/driver_nl80211.c
-		#${WPA_SUPPLICANT_ROOT}/src/drivers/driver_nl80211_android.c
-		#${WPA_SUPPLICANT_ROOT}/src/drivers/driver_nl80211_capa.c
-		#${WPA_SUPPLICANT_ROOT}/src/drivers/driver_nl80211_event.c
-		#${WPA_SUPPLICANT_ROOT}/src/drivers/driver_nl80211_monitor.c
-		#${WPA_SUPPLICANT_ROOT}/src/drivers/driver_nl80211_scan.c
+		${WPA_SUPPLICANT_ROOT}/src/drivers/driver_virtio_wifi.c
 		${WPA_SUPPLICANT_ROOT}/src/drivers/netlink.c
 		${WPA_SUPPLICANT_ROOT}/src/drivers/linux_ioctl.c
 		${WPA_SUPPLICANT_ROOT}/src/drivers/rfkill.c
@@ -139,7 +132,7 @@ set(hostapd_darwin-x86_64_src ${WPA_SUPPLICANT_ROOT}/src/utils/os_unix.c)
 
 android_add_library(hostapd)
 
-target_include_directories(hostapd PRIVATE ${HOSTAPD_ROOT}
+target_include_directories(hostapd PUBLIC ${HOSTAPD_ROOT}
 										   ${WPA_SUPPLICANT_ROOT}/src
                                            ${WPA_SUPPLICANT_ROOT}/src/utils)
 
