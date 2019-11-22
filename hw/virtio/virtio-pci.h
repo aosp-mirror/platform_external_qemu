@@ -18,6 +18,7 @@
 #include "hw/pci/msi.h"
 #include "hw/virtio/virtio-blk.h"
 #include "hw/virtio/virtio-net.h"
+#include "android-qemu2-glue/emulation/virtio-wireless.h"
 #include "hw/virtio/virtio-rng.h"
 #include "hw/virtio/virtio-serial.h"
 #include "hw/virtio/virtio-scsi.h"
@@ -57,7 +58,7 @@ typedef struct VirtIOInputHostPCI VirtIOInputHostPCI;
 typedef struct VirtIOGPUPCI VirtIOGPUPCI;
 typedef struct VHostVSockPCI VHostVSockPCI;
 typedef struct VirtIOCryptoPCI VirtIOCryptoPCI;
-
+typedef struct VirtIOWirelessPCI VirtIOWirelessPCI;
 /* virtio-pci-bus */
 
 typedef struct VirtioBusState VirtioPCIBusState;
@@ -308,6 +309,18 @@ struct VirtIOSerialPCI {
 struct VirtIONetPCI {
     VirtIOPCIProxy parent_obj;
     VirtIONet vdev;
+};
+
+/*
+ * virtio-wireless-pci: This extends VirtioPCIProxy.
+ */
+
+#define TYPE_VIRTIO_WIRELESS_PCI "virtio-wireless-pci"
+#define VIRTIO_WIRELESS_PCI(obj) \
+        OBJECT_CHECK(VirtIOWirelessPCI, (obj), TYPE_VIRTIO_WIRELESS_PCI)
+struct VirtIOWirelessPCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOWireless vdev;
 };
 
 /*
