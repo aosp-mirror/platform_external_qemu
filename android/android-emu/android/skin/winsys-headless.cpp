@@ -363,6 +363,12 @@ extern void skin_winsys_show_virtual_scene_controls(bool show) {
     (void)show;
 }
 
+extern void skin_winsys_start_function(StartFunction f,
+                                     int argc,
+                                     char** argv) {
+    return;
+}
+
 extern void skin_winsys_spawn_thread(bool no_window,
                                      StartFunction f,
                                      int argc,

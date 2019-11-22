@@ -137,6 +137,10 @@ void skin_winsys_destroy(void);
 
 typedef void (*StartFunction)(int argc, char** argv);
 
+void skin_winsys_start_function(StartFunction f,
+                              int argc,
+                              char** argv);
+
 // Spawn a thread and run the given function in it.
 void skin_winsys_spawn_thread(bool no_window,
                               StartFunction f,
