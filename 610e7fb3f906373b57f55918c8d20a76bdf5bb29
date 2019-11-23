@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b3529b6_e34ff31e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-11-23T01:32:11Z",
+      "side": 1,
+      "message": "does it only turn on when -metrics-collection is given ?",
+      "range": {
+        "startLine": 23,
+        "startChar": 22,
+        "endLine": 23,
+        "endChar": 58
+      },
+      "revId": "610e7fb3f906373b57f55918c8d20a76bdf5bb29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
