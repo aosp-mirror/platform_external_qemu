@@ -726,7 +726,7 @@ _avdInfo_getSearchPaths( AvdInfo*  i )
     if (i->configIni == NULL)
         return true;
 
-    if (android_cmdLineOptions->sysdir) {
+    if (android_cmdLineOptions && android_cmdLineOptions->sysdir) {
         // The user specified a path on the command line.
         // Use only that.
         i->numSearchPaths = 1;
