@@ -543,6 +543,14 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
         android::CommonReportedInfo::setHostInfo(&forCommonInfoHost);
         android::CommonReportedInfo::setDetails(&forCommonInfoDetails);
     }
+
+    // Whether we are running with standalone metrics
+    if (android_cmdLineOptions->metrics_collection) {
+        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_container_launch(true);
+    }
+
 }
 
 void android_metrics_report_common_info(bool openglAlive) {
