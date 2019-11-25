@@ -427,8 +427,6 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::YUV_Cache;
         case android::featurecontrol::KeycodeForwarding:
             return android_studio::EmulatorFeatureFlagState::KEYCODE_FORWARDING;
-        case android::featurecontrol::CameraV1:
-            return android_studio::EmulatorFeatureFlagState::CAMERA_V1;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
