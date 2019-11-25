@@ -119,16 +119,20 @@ BugreportInfo::BugreportInfo() {
                     &avdDetails, "Snapshot: %s",
                     avdInfo_getSnapshotPresent(android_avdInfo) ? "yes" : "no");
         }
-
-        for (const std::string& key : *configIni) {
-            const std::string& value = configIni->getString(key, "");
-            // check if the key is already displayed
-            if (std::find_if(std::begin(kAvdDetailsNoDisplayKeys),
-                             std::end(kAvdDetailsNoDisplayKeys),
-                             [&key](StringView noDisplayKey) {
-                                 return noDisplayKey == key;
-                             }) == std::end(kAvdDetailsNoDisplayKeys)) {
-                StringAppendFormat(&avdDetails, "%s: %s\n", key, value);
+        // Windows Edge browser has a URL limit of 2048 characters. To avoid
+        // this issue for users on Windows, we don't include some of the avd
+        // details.
+        if (System::getOsType != System::OsType::Windows) {
+            for (const std::string& key : *configIni) {
+                const std::string& value = configIni->getString(key, "");
+                // check if the key is already displayed
+                if (std::find_if(std::begin(kAvdDetailsNoDisplayKeys),
+                                 std::end(kAvdDetailsNoDisplayKeys),
+                                 [&key](StringView noDisplayKey) {
+                                     return noDisplayKey == key;
+                                 }) == std::end(kAvdDetailsNoDisplayKeys)) {
+                    StringAppendFormat(&avdDetails, "%s: %s\n", key, value);
+                }
             }
         }
     }
