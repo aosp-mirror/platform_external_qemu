@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f161499_6d961e79",
+        "filename": "android/android-emu/android/camera/camera-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 815,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-11-26T17:37:18Z",
+      "side": 1,
+      "message": "AFAIR this can be replaced with a single android::base::WorkerThread object",
+      "range": {
+        "startLine": 812,
+        "startChar": 0,
+        "endLine": 815,
+        "endChar": 35
+      },
+      "revId": "f1481a7c3deb9401ffc80f6464d1eca1517be324",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
