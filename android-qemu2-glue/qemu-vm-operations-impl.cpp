@@ -719,8 +719,6 @@ static void set_snapshot_callbacks(void* opaque,
                 break;
             case android::CPU_ACCELERATOR_GVM:
                 set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
-                set_memory_mapping_funcs(NULL, NULL, gvm_gpa_protect, NULL,
-                                         NULL);
                 break;
             default:  // KVM
 #ifdef __linux__
