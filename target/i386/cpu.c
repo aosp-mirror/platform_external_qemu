@@ -2339,8 +2339,8 @@ static void report_unavailable_features(FeatureWord w, uint32_t mask)
         if ((1UL << i) & mask) {
             const char *reg = get_register_name_32(f->cpuid_reg);
             assert(reg);
-            warn_report("%s doesn't support requested feature: "
-                        "CPUID.%02XH:%s%s%s [bit %d]",
+            fprintf(stdout, "%s doesn't support requested feature: "
+                        "CPUID.%02XH:%s%s%s [bit %d]\n",
                         kvm_enabled() || gvm_enabled() ? "host" : "TCG",
                         f->cpuid_eax, reg,
                         f->feat_names[i] ? "." : "",
