@@ -32,6 +32,7 @@
 #include <fstream>
 #include <streambuf>
 
+#include "android/avd/info.h"
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
@@ -745,6 +746,18 @@ int main(int argc, char** argv)
     std::string emuDirName = emulator_dirname(progDirSystem);
 
     D("emuDirName: '%s'", emuDirName.c_str());
+
+    if (avdName) {
+      AvdInfoParams myparams;
+      AvdInfo *myavdinfo = avdInfo_new(avdName, &myparams);
+      if (avdInfo_getAvdFlavor(myavdinfo) == AVD_ANDROID_AUTO) {
+        const char* forge = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
+        if (forge != NULL && *forge && *forge != '0') {
+          isHeadless = true;
+          D("force headless for auto on forge");
+        }
+      }
+    }
 
     bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch,
                                                             sysDir, androidOut);
