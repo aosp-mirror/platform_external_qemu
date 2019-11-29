@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <memory>             // for unique_ptr
+#include <memory>  // for unique_ptr
 #include <string>
 #include "android/console.h"  // for AndroidConsoleAgents
 
@@ -29,10 +29,12 @@ class GrpcServices {
 public:
     // Returns the port or -1 if the service didn't start.
     static int setup(int port,
-                    const AndroidConsoleAgents* const consoleAgents,
-                    const char* turnCfg);
+                     const AndroidConsoleAgents* const consoleAgents,
+                     const char* waterfall,
+                     const char* turnCfg);
 
     static void teardown();
+
 private:
     static std::unique_ptr<EmulatorControllerService> g_controler_service;
     static std::unique_ptr<RtcBridge> g_rtc_bridge;
