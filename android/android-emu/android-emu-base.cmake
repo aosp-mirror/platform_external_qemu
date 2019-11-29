@@ -25,6 +25,7 @@ set(android-emu-base_src
     android/base/files/InplaceStream.cpp
     android/base/files/MemStream.cpp
     android/base/files/PathUtils.cpp
+    android/base/files/QueueStreambuf.cpp
     android/base/files/StdioStream.cpp
     android/base/files/Stream.cpp
     android/base/files/StreamSerializing.cpp

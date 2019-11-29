@@ -1151,6 +1151,18 @@ help_grpc(stralloc_t*  out)
 }
 
 static void
+help_waterfall(stralloc_t*  out)
+{
+    PRINTF(
+    "  Mode in which to run the waterfall grpc endpoint..\n\n"
+    "    \n\n"
+    "    fwd:  Forward the waterfall commands to the waterfall service\n"
+    "          running inside the emulator.\n"
+    "    adb:  Translate the waterfall commands to ADB.\n\n"
+    );
+}
+
+static void
 help_share_vid(stralloc_t*  out)
 {
     PRINTF(
