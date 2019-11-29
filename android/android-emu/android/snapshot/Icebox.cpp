@@ -154,7 +154,7 @@ static bool sign_token(RSA* key_rsa,
     return true;
 }
 
-static bool sign_auth_token(const char* token,
+bool sign_auth_token(const char* token,
                             int token_size,
                             char* sig,
                             int& siglen) {

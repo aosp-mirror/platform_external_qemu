@@ -239,6 +239,7 @@ set(android-emu-common
 set(android_emu_dependent_src
     android/automation/AutomationController.cpp
     android/automation/AutomationEventSink.cpp
+    android/base/async/AsyncSocket.cpp
     android/camera/camera-common.cpp
     android/camera/camera-format-converters.c
     android/camera/camera-list.cpp
@@ -251,6 +252,7 @@ set(android_emu_dependent_src
     android/camera/camera-virtualscene.cpp
     android/camera/camera-virtualscene-utils.cpp
     android/emulation/control/ScreenCapturer.cpp
+    android/emulation/control/AdbConnection.cpp # Needs icebox for sign_token.
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
     android/emulation/Keymaster3.cpp
@@ -341,6 +343,7 @@ target_link_libraries(android-emu
                               automation
                               offworld
                               # Prebuilt libraries
+                              android-net
                               breakpad_client
                               curl
                               ssl
@@ -482,6 +485,7 @@ android_add_shared_library(android-emu-shared)
 target_link_libraries(android-emu-shared
                       PRIVATE emulator-libext4_utils
                               android-emu-base
+                              android-net
                               emulator-libsparse
                               emulator-libselinux
                               emulator-libjpeg
