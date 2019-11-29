@@ -7,11 +7,10 @@
 #include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
 
-namespace emulator {
-namespace net {
+namespace android {
+namespace base {
 using MessageQueue = android::base::BufferQueue<std::string>;
-using android::base::Lock;
-using android::base::Looper;
+using emulator::net::AsyncSocketAdapter;
 
 // An AsyncSocket is a socket that can connect to a local port on
 // the current machine.
@@ -51,5 +50,5 @@ private:
     // Write buffer used by the async writer.
     std::string mWriteBuffer;
 };
-}  // namespace net
-}  // namespace emulator
+}  // namespace base
+}  // namespace android

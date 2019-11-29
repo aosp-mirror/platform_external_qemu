@@ -75,6 +75,13 @@ service EmulatorController {
     // The ice candidates for example will trickle in on this callback,
     // as will the SDP negotation.
     rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
+
+    rpc sendShellCmd(Cmd) returns (stream Cmd) {}
+}
+
+message Cmd {
+    string path = 1;
+    bytes payload = 2;
 }
 
 message RtcId {
@@ -469,7 +476,7 @@ message EmulatorStatus {
     // True if the device has completed booting.
     // For P and later this information will accurate,
     // for older images we rely on adb.
-    bool booted = 3; 
+    bool booted = 3;
 
     // The current vm configuration
     VmConfiguration vmConfig = 4;

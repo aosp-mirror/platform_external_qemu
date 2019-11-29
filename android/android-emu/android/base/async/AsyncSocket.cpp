@@ -1,12 +1,11 @@
-#include "emulator/net/AsyncSocket.h"
+#include "android/base/async/AsyncSocket.h"
 
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 
-namespace emulator {
-namespace net {
+namespace android {
+namespace base {
 
-using namespace android::base;
 
 // This callback is called whenever an I/O event happens on the mSocket
 // connecting the mSocket to the host ADB server.
@@ -43,7 +42,7 @@ uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
         }
     }
     // It is still possible that the fd is no longer open
-    int read = socketRecv(fd, buffer, sizeof(buffer));
+    int read = socketRecv(fd, buffer, bufferSize);
     if (read == 0) {
         // A read of 0, means the socket was closed, so clean up
         // everything properly.

@@ -29,13 +29,15 @@ set(android-grpc_src
     android/emulation/control/snapshot/SnapshotService.cpp
     android/emulation/control/snapshot/TarStream.cpp
     android/emulation/control/utils/ServiceUtils.cpp
+    android/emulation/control/snapshot/GzipStreambuf.cpp
+    android/emulation/control/waterfall/AdbWaterfallService.cpp
     android/emulation/control/waterfall/SocketController.cpp
     android/emulation/control/waterfall/WaterfallService.cpp
 )
 
 # Let's add in the library
 android_add_library(android-grpc)
-target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu grpc++)
+target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu android-net grpc++)
 target_include_directories(android-grpc
                            PRIVATE # For Renderer.h ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
