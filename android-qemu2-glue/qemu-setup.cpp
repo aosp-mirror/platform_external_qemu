@@ -29,6 +29,7 @@
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/snapshot/interface.h"
 
+#include "android/emulation/control/AdbConnection.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
@@ -179,7 +180,6 @@ bool qemu_android_emulation_early_setup() {
 
     android::emulation::AudioOutputEngine::set(
                 new android::qemu::QemuAudioOutputEngine());
-
     return true;
 }
 
@@ -222,7 +222,8 @@ bool qemu_android_emulation_setup() {
         }
 #endif
         // Go bridge go!
-        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), turn);
+        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(),
+            android_cmdLineOptions->waterfall, turn);
     }
 #endif
 
@@ -272,6 +273,8 @@ bool qemu_android_emulation_setup() {
                         "The goldfish event queue is overflowing, the system "
                         "is no longer responding.");
     }
+
+
     return true;
 }
 
