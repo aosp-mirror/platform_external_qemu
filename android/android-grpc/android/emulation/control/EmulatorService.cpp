@@ -34,6 +34,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/control/AdbConnection.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/battery_agent.h"
@@ -118,7 +119,8 @@ public:
           mRtcBridge(rtcBridge),
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
-          mTouchEventSender(agents) {
+          mTouchEventSender(agents),
+          mAdb(AdbConnection::connection()) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -140,6 +142,23 @@ public:
             reply->set_contents(message.second);
             reply->set_next(message.first + message.second.size());
         }
+        return Status::OK;
+    }
+
+    Status sendShellCmd(ServerContext* context,
+                        const Cmd* request,
+                        ServerWriter<Cmd>* writer) override {
+        auto stream = mAdb->open("shell:" + request->path());
+        int offset = 0;
+        bool ok = stream->good();
+        while (ok) {
+            Cmd cmd;
+            char buffer[512];
+            stream->read(buffer, sizeof(buffer));
+            cmd.set_payload(std::string(buffer, stream->gcount()));
+            ok = writer->Write(cmd) && stream->good();
+        }
+        stream->close();
         return Status::OK;
     }
 
@@ -402,6 +421,7 @@ private:
     RtcBridge* mRtcBridge;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+    std::unique_ptr<AdbConnection> mAdb;
 
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
@@ -420,6 +440,15 @@ Builder& Builder::withConsoleAgents(
 
 Builder& Builder::withRtcBridge(RtcBridge* bridge) {
     mBridge = bridge;
+    return *this;
+}
+
+Builder& Builder::withWaterfall(const char* mode) {
+    if (mode != nullptr && strcmp("adb", mode) == 0)
+        mWaterfall = WaterfallProvider::adb;
+    else
+        mWaterfall = WaterfallProvider::forward;
+
     return *this;
 }
 
@@ -469,8 +498,11 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     std::string server_address = mBindAddress + ":" + std::to_string(mPort);
     std::unique_ptr<EmulatorController::Service> controller(
             new EmulatorControllerImpl(mAgents, mBridge));
+
+    waterfall::Waterfall::Service* waterfall;
+
     std::unique_ptr<waterfall::Waterfall::Service> wfallforwarder(
-            getWaterfallService());
+            getWaterfallService(mWaterfall));
     std::unique_ptr<SnapshotService::Service> snapshotService(
             getSnapshotService());
 
