@@ -152,7 +152,7 @@ struct JdwpEventRequestSet {
             *(buffer++) = 8;
             buffer = writeValToBuffer(buffer, exception_id,
                                       id_size->reference_typ_id_size);
-            *(buffer++) = 1;
+            *(buffer++) = 0;
             *(buffer++) = 1;
         }
         writeValToBuffer(request_num_pst, request_num);

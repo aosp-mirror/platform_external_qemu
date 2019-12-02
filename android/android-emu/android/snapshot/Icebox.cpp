@@ -409,7 +409,7 @@ bool track(int pid, const char* snapshot_name) {
     D("Handshake OK");
     uint32_t jdwp_id = 1;
     JdwpIdSize id_size;
-    const char* kExceptionClass = "Ljava/lang/AssertionError;";
+    const char* kExceptionClass = "Ljava/lang/Throwable;";
     std::vector<uint64_t> exception_reference_type_ids(0);
     {
         // ID size
