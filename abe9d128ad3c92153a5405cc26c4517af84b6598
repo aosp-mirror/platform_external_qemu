@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16613a3b_ae2f06d0",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-02T20:39:20Z",
+      "side": 1,
+      "message": "please use the xxxW versions of the structs and functions explicitly",
+      "range": {
+        "startLine": 695,
+        "startChar": 8,
+        "endLine": 695,
+        "endChar": 23
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "182f3391_013eed63",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-02T20:39:20Z",
+      "side": 1,
+      "message": "nit: StringPrintf is probably much more efficient",
+      "range": {
+        "startLine": 708,
+        "startChar": 7,
+        "endLine": 709,
+        "endChar": 44
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "073f1023_f646c630",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-02T20:39:20Z",
+      "side": 1,
+      "message": "nit: you can move it out if it\u0027s not const",
+      "range": {
+        "startLine": 38,
+        "startChar": 47,
+        "endLine": 38,
+        "endChar": 52
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73b25883_3fee6014",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-02T20:39:20Z",
+      "side": 1,
+      "message": "should this also check if the emulator is shutting down and send no matter what if it is?",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 62
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3261d622_992316db",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-02T20:39:20Z",
+      "side": 1,
+      "message": "this call returns a copy of the internal string, please cache it instead of calling twice",
+      "range": {
+        "startLine": 182,
+        "startChar": 43,
+        "endLine": 182,
+        "endChar": 55
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b5c64bc_d758e4fd",
+        "filename": "android/android-emu/android/metrics/proto/clientanalytics.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-02T20:39:20Z",
+      "side": 1,
+      "message": "I\u0027m not sure it is a good idea to try maintaining it manually, especially when Android Studio keeps adding new metric kinds",
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
