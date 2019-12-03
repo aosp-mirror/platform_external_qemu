@@ -142,8 +142,4 @@ int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
     return 0;
 }
 
-int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags)
-{
-    return -EFAULT;
-}
 #endif

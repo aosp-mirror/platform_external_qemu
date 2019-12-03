@@ -204,19 +204,6 @@ int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
     return count;
 }
 
-int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags) {
-    GVMState *s = gvm_state;
-
-    struct gvm_ram_protect info = {
-        .pa = gpa,
-        .size = size,
-        .flags = flags,
-        .reserved = 0,
-    };
-
-    return gvm_ioctl(s, GVM_RAM_PROTECT, &info, sizeof(info), NULL, 0);
-}
-
 /*
  * Calculate and align the start address and the size of the section.
  * Return the size. If the size is 0, the aligned section is empty.
@@ -1278,17 +1265,6 @@ static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
     return -1;
 }
 
-static int gvm_handle_ram_prot(uint64_t gpa, uint64_t size)
-{
-    bool found = false;
-    void* hva = gvm_gpa2hva(gpa, &found);
-    if (found) {
-        qemu_ram_load(hva, size);
-        return 0;
-    }
-    return -1;
-}
-
 void gvm_raise_event(CPUState *cpu)
 {
     GVMState *s = gvm_state;
@@ -1462,10 +1438,6 @@ int gvm_cpu_exec(CPUState *cpu)
                 ret = gvm_arch_handle_exit(cpu, run);
                 break;
             }
-            break;
-        case GVM_EXIT_RAM_PROT:
-            ret = gvm_handle_ram_prot(run->rp.gfn << TARGET_PAGE_BITS,
-                                     TARGET_PAGE_SIZE);
             break;
         default:
             DPRINTF("gvm_arch_handle_exit\n");

@@ -72,7 +72,6 @@ extern GVMState *gvm_state;
 void* gvm_gpa2hva(uint64_t gpa, bool* found);
 int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
                 uint64_t* gpa, uint64_t* size);
-int gvm_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags);
 bool gvm_has_free_slot(MachineState *ms);
 
 int gvm_init_vcpu(CPUState *cpu);
