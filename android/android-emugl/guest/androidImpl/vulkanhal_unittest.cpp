@@ -116,9 +116,7 @@ protected:
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
         set_global_gralloc_module(&mGralloc);
 
-        EXPECT_NE(nullptr, mGralloc.fb_dev);
         EXPECT_NE(nullptr, mGralloc.alloc_dev);
-        EXPECT_NE(nullptr, mGralloc.fb_module);
         EXPECT_NE(nullptr, mGralloc.alloc_module);
     }
 

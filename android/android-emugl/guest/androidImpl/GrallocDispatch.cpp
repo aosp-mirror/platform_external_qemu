@@ -41,14 +41,6 @@ EXPORT void load_gralloc_module(
     struct hw_module_t* hw_module = (struct hw_module_t*)dlsym(
             impl_out->lib, HAL_MODULE_INFO_SYM_AS_STR);
 
-    framebuffer_open(hw_module, &impl_out->fb_dev);
-
-    if (!impl_out->fb_dev) {
-        fprintf(stderr, "%s: Failed to load fb device from %p\n",
-                __func__, impl_out->lib);
-        return;
-    }
-
     gralloc_open(hw_module, &impl_out->alloc_dev);
 
     if (!impl_out->alloc_dev) {
@@ -57,8 +49,6 @@ EXPORT void load_gralloc_module(
         return;
     }
 
-    impl_out->fb_module = reinterpret_cast<gralloc_module_t*>(
-        impl_out->fb_dev->common.module);
     impl_out->alloc_module = reinterpret_cast<gralloc_module_t*>(
         impl_out->alloc_dev->common.module);
 }
@@ -69,7 +59,6 @@ EXPORT void unload_gralloc_module(
     if (!impl->lib) return;
 
     gralloc_close(impl->alloc_dev);
-    framebuffer_close(impl->fb_dev);
 
     dlclose(impl->lib);
 
