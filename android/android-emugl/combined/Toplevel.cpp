@@ -322,7 +322,7 @@ private:
         AndroidBufferQueue::Item item = {};
 
         mFromComposeWindow.dequeueBuffer(&item);
-        mGralloc.post(item.buffer->handle);
+        // ? mGralloc.post(item.buffer->handle);
         mToComposeWindow.queueBuffer(item);
     }
 
