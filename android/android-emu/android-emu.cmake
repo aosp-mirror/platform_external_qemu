@@ -68,6 +68,7 @@ set(android-emu-common
     android/emulation/control/AdbAuthentication.cpp
     android/emulation/control/AdbConnection.cpp
     android/emulation/control/AdbInterface.cpp
+    android/emulation/control/AdbShellStream.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
