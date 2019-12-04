@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc700413_de44aeba",
+        "filename": "android/android-emu/android/base/files/QueueStreambuf.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-04T16:34:12Z",
+      "side": 1,
+      "message": "Another way to do this but avoid repeated reclaims is to use a queue of buffers; each time we get a buffer (s, n) here we push it to a queue, and then in xsgetn we read from the top element and pop more elements if we run out of data there. This way, there\u0027s no stale data hanging around after it\u0027s been read.\n\nThis strategy is implemented in android/android-emu/android/base/containers/BufferQueue.h but it has a max bound on the number of buffers (which seems like a limitation that can be readily removed by adding a flag for unlimited capacity (which its mSnapshotMode partially does))",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 1
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
