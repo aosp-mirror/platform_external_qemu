@@ -3,6 +3,17 @@
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 
+
+
+#define DEBUG 0
+
+#if DEBUG >= 2
+#define DD(str) LOG(INFO) << str
+#else
+#define DD(...) (void)0
+#endif
+
+
 namespace android {
 namespace base {
 
@@ -24,11 +35,7 @@ static void socket_watcher(void* opaque, int fd, unsigned events) {
 AsyncSocket::AsyncSocket(Looper* looper, int port)
     : mLooper(looper),
       mPort(port),
-      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock),
-      mConnectThread([this]() {
-          connectToPort();
-          return 0;
-      }) {}
+      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock) {}
 
 uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
     int fd = -1;
@@ -117,23 +124,29 @@ bool AsyncSocket::connect() {
     }
 
     mConnecting = true;
-    return mConnectThread.start();
+    DD("Starting connect thread");
+     mConnectThread.reset(new FunctorThread([this]() {
+          connectToPort();
+          return 0;
+      }));
+    return mConnectThread->start();
 }
 
 void AsyncSocket::connectToPort() {
     int socket = 0;
+    DD("connecting to port " << mPort);
     while (socket < 1 && mConnecting) {
         socket = socketTcp4LoopbackClient(mPort);
         if (socket < 0) {
             socket = socketTcp6LoopbackClient(mPort);
         }
         if (socket < 0) {
-            LOG(INFO) << "Failed to connect to: " << mPort << ", sleeping..";
+            DD( << "Failed to connect to: " << mPort << ", sleeping..");
             android::base::Thread::sleepMs(1000);
         }
     }
     if (socket < 1) {
-        LOG(INFO) << "giving up..";
+        DD( << "giving up..");
         return;
     }
 
@@ -143,10 +156,11 @@ void AsyncSocket::connectToPort() {
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
             mLooper->createFdWatch(mSocket, socket_watcher, this));
     mFdWatch->wantRead();
-    LOG(INFO) << "Connected to: " << mPort;
+    DD( << "Connected to: " << mPort);
     if (mListener) {
         mListener->onConnected(this);
     }
+    mConnecting = false;
 }
 
 }  // namespace net

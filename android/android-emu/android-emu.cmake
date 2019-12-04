@@ -68,6 +68,7 @@ set(android-emu-common
     android/emulation/control/AdbAuthentication.cpp
     android/emulation/control/AdbConnection.cpp
     android/emulation/control/AdbInterface.cpp
+    android/emulation/control/AdbShellStream.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
@@ -713,7 +714,9 @@ set(android-emu_unittests_src
     android/emulation/ConfigDirs_unittest.cpp
     android/emulation/DeviceContextRunner_unittest.cpp
     android/emulation/DmaMap_unittest.cpp
+    android/emulation/control/AdbConnection_unittest.cpp
     android/emulation/control/AdbInterface_unittest.cpp
+    android/emulation/control/AdbShellStream_unittest.cpp
     android/emulation/control/ApkInstaller_unittest.cpp
     android/emulation/control/FilePusher_unittest.cpp
     android/emulation/control/GooglePlayServices_unittest.cpp
