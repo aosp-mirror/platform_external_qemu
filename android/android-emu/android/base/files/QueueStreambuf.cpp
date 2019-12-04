@@ -60,7 +60,6 @@ size_t QueueStreambuf::reclaim(size_t offset, CharVec& vect) {
     // of the capacity.
     if (offset > (vect.capacity() / 2)) {
         vect.erase(vect.begin(), vect.begin() + offset);
-
         return 0;
     }
     return offset;
