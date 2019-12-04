@@ -16,6 +16,24 @@
       "revId": "026947e1d96f6f4ea6a42d4abab40c87caa19c81",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e76dc29d_9c3ed3a5",
+        "filename": "android/android-emu/android/metrics/MetricsReporter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T21:32:34Z",
+      "side": 0,
+      "message": "Ack",
+      "parentUuid": "35e146f8_9437b2ac",
+      "revId": "026947e1d96f6f4ea6a42d4abab40c87caa19c81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
