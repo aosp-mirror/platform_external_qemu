@@ -27,7 +27,7 @@
 #include "android/metrics/NullMetricsReporter.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/metrics/TextMetricsWriter.h"
-#include "android/metrics/proto/clientanalytics.pb.h"
+#include "android/metrics/proto/google_logs_publishing.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
@@ -191,7 +191,6 @@ void MetricsReporter::sendToWriter(android_studio::AndroidStudioEvent* event) {
 
     const auto timeMs = System::get()->getUnixTimeUs() / 1000;
     logEvent.set_event_time_ms(timeMs);
-    logEvent.set_event_uptime_ms(timeMs - mStartTimeMs);
 
     if (!event->has_kind()) {
         event->set_kind(android_studio::AndroidStudioEvent::EMULATOR_PING);
