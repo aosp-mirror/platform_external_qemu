@@ -48,6 +48,12 @@ GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
                             GLenum shaderType,
                             const char* src) {
     GLuint shader = gl->glCreateShader(shaderType);
+
+    const char* kFailingShader = "#version 300 es\nprecision mediump float;\nin highp vec4 dEQP_Position;\nout vec2 out0;\n\n\nconst mat4x2 matA = mat4x2(2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0);\nconst mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0, 1.0/128.0, 1.0/256.0);\n\nvoid main()\n{\n\tmat4x2 result = matrixCompMult(matA, matB);\n\tout0 = result * vec4(1.0, 1.0, 1.0, 1.0);\n\tgl_Position = dEQP_Position;\n\n}\n";
+    for (int i = 0; i < 100; i++) {
+        gl->glShaderSource(shader, 1, (const GLchar* const*)&kFailingShader, nullptr);
+    }
+
     gl->glShaderSource(shader, 1, (const GLchar* const*)&src, nullptr);
     gl->glCompileShader(shader);
 
