@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "35e146f8_9437b2ac",
+        "filename": "android/android-emu/android/metrics/MetricsReporter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2019-12-04T19:20:36Z",
+      "side": 0,
+      "message": "You still want set_event_time_ms (set_event_uptime_ms is indeed removed)",
+      "revId": "026947e1d96f6f4ea6a42d4abab40c87caa19c81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
