@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
             "args": [
-                "@P_64",
+                "@P",
                 "-verbose",
                 "-show-kernel"
             ],
@@ -61,7 +61,9 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-               // "--verbose"
+                "--gtest_break_on_failure"
+                ,"--gtest_filter=AdbConnectionTest.writeWaitsForOkay"
+
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -80,7 +82,7 @@
                 "-grpc",
                 "5556",
                 "-wipe-data",
-                "-verbose", // With some additional parameters.
+                "-direct-adb", // With some additional parameters.
             ],
             "linux": {
                 "env": {
@@ -94,7 +96,7 @@
             },
             "osx": {
                 "args": [
-                    "@Q",
+                    "@P",
                     "-verbose",
                     "-grpc",
                     "5556",
