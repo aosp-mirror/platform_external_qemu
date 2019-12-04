@@ -13,7 +13,7 @@
 
 #include "android/metrics/MetricsLogging.h"
 
-#include "android/metrics/proto/clientanalytics.pb.h"
+#include "android/metrics/proto/google_logs_publishing.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 
 #include <utility>
