@@ -22,6 +22,30 @@
       "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68f9d1e6_2fbcda85",
+        "filename": "android/android-emu/android/base/files/QueueStreambuf.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:51:30Z",
+      "side": 1,
+      "message": "The main problem is this that writes to the stream will likely not match reads. Basically each time we get a write packet from adb it ends up in this buffer. The write packet can contain different types of data. For example it can contain shell protocol v1/v2 packets, or raw bytes (adb pull/push). We have no control/idea of how adb is sending us writes. For example in shell protocol v2, the reads will look like this: [uint8_t type, uint32_t length], [uint32_t * length]. Writes will likely contain both the header and data, but there is no guarantee on that front.\n\nSimilarly we don\u0027t know how reads will go. For shell v1 we try to get as much as we can out of the buffer, and for shell v2 we will always pull the header, followed by the data.\n\nThe queue above tries to minimize the number of vector erasing we are doing, as a vector erase results in a memmove of the remaining elements. This can be esp. bad for the shell v2 protocol for example.\n\nWe could add some microbenchmarks to see how the strategies perform and make the right choice based on the results. Let me know what you think.",
+      "parentUuid": "dc700413_de44aeba",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 1
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
