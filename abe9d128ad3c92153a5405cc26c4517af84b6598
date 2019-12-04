@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "626f7748_3345fcc0",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:59:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "16613a3b_ae2f06d0",
+      "range": {
+        "startLine": 695,
+        "startChar": 8,
+        "endLine": 695,
+        "endChar": 23
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "182f3391_013eed63",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 5
@@ -45,6 +69,30 @@
       "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b6f853c_4d474a8d",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:59:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "182f3391_013eed63",
+      "range": {
+        "startLine": 708,
+        "startChar": 7,
+        "endLine": 709,
+        "endChar": 44
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a818caac_3d95cb4d",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:59:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "073f1023_f646c630",
+      "range": {
+        "startLine": 38,
+        "startChar": 47,
+        "endLine": 38,
+        "endChar": 52
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "73b25883_3fee6014",
         "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
         "patchSetId": 5
@@ -91,6 +163,30 @@
       "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34288670_32b7a4a7",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:59:55Z",
+      "side": 1,
+      "message": "mSendAfterUs is only set if we ever received a backoff cookie from clearcut. We expect this to be 0 most of the time. We expect the metrics collection only to be enabled for ephemeral containers such as (docker/acloud).\n\nCommit is currently only called upon exit. I will set the internal cookie to make sure we can handle the multiple commit invocation properly w.r.t. clearcut cookie.",
+      "parentUuid": "73b25883_3fee6014",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 62
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "b58b7bdb_9e7a6ced",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:59:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3261d622_992316db",
+      "range": {
+        "startLine": 182,
+        "startChar": 43,
+        "endLine": 182,
+        "endChar": 55
+      },
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4b5c64bc_d758e4fd",
         "filename": "android/android-emu/android/metrics/proto/clientanalytics.proto",
         "patchSetId": 5
@@ -128,6 +248,24 @@
       "writtenOn": "2019-12-02T20:39:20Z",
       "side": 1,
       "message": "I\u0027m not sure it is a good idea to try maintaining it manually, especially when Android Studio keeps adding new metric kinds",
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17eae11f_bedf6fad",
+        "filename": "android/android-emu/android/metrics/proto/clientanalytics.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-04T17:59:55Z",
+      "side": 1,
+      "message": "We had an offline e-mail thread going with them + @jvg (the clearcut team has no aosp accts). They gave some feedback around open source requirements. Clearcut team would like us to minimize and manually maintain this file. The removal basically addresses this feedback.",
+      "parentUuid": "4b5c64bc_d758e4fd",
       "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
