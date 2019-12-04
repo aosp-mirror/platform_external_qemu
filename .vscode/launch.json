@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
             "args": [
-                "@P_64",
+                "@P",
                 "-verbose",
                 "-show-kernel"
             ],
@@ -94,7 +94,7 @@
             },
             "osx": {
                 "args": [
-                    "@Q",
+                    "@P",
                     "-verbose",
                     "-grpc",
                     "5556",
