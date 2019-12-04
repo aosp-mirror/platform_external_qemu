@@ -269,6 +269,24 @@
       "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b98c1127_f63db3e7",
+        "filename": "android/android-emu/android/metrics/proto/clientanalytics.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2019-12-04T18:21:12Z",
+      "side": 1,
+      "message": "this file is not being updated at all, it is the wrapper protos to interface with clearcut.\n\nPlease rename file to google_logs_publishing.proto and remove \"clearcut\" codename",
+      "parentUuid": "17eae11f_bedf6fad",
+      "revId": "abe9d128ad3c92153a5405cc26c4517af84b6598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
