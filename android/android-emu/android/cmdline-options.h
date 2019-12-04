@@ -254,6 +254,8 @@ OPT_PARAM(record_session, "<file>,<delay>[,<duration>]", "Screen record the emul
 
 OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera.")
 
+OPT_FLAG(direct_adb, "Use the experimental direct ADB bridge.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

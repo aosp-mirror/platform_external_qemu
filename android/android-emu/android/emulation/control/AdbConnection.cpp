@@ -13,8 +13,8 @@
 // limitations under the License.
 #include "android/emulation/control/AdbConnection.h"
 
+#include <atomic>
 #include <memory>
-#include <regex>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -34,30 +34,39 @@
 #include "android/emulation/control/AdbAuthentication.h"
 #include "android/emulation/control/AdbInterface.h"
 
-/* set to 1 for very verbose debugging */
+/* set >0 for very verbose debugging */
 #define DEBUG 0
 
-#if DEBUG >= 1
-#define DD(fmt, ...) \
-    printf("AdbConnection: %s:%d| " fmt "\n", __func__, __LINE__, ##__VA_ARGS__)
-#define DD_PACKET(pkt)                                                        \
-    do {                                                                      \
-        const char* buf = reinterpret_cast<const char*>(&pkt);                \
-        printf("AdbConnection: %s:%d %d, %d, %d = %lu\n", __func__, __LINE__, \
-               pkt.msg.arg0, pkt.msg.arg1, pkt.msg.data_length,               \
-               pkt.payload.size());                                           \
-        for (int x = 0; x < sizeof(apacket); x++) {                           \
-            if (isprint((int)buf[x]))                                         \
-                printf("%c", buf[x]);                                         \
-            else                                                              \
-                printf("[0x%02x]", 0xff & (int)buf[x]);                       \
-        }                                                                     \
-        printf("\n");                                                         \
-    } while (0)
-
-#else
+#define D(...) (void)0
 #define DD(...) (void)0
 #define DD_PACKET(...) (void)0
+#if DEBUG >= 1
+#undef D
+#define D(fmt, ...)                                                        \
+    fprintf(stderr, "AdbConnection: %s:%d| " fmt "\n", __func__, __LINE__, \
+            ##__VA_ARGS__)
+#endif
+#if DEBUG >= 2
+#undef DD
+#undef DD_PACKET
+#define DD(fmt, ...)                                                       \
+    fprintf(stderr, "AdbConnection: %s:%d| " fmt "\n", __func__, __LINE__, \
+            ##__VA_ARGS__)
+#define DD_PACKET(pkt)                                                       \
+    do {                                                                     \
+        const char* buf = reinterpret_cast<const char*>(&pkt);               \
+        fprintf(stderr, "AdbConnection: %s:%d %d, %d, %d = %lu\n", __func__, \
+                __LINE__, pkt.msg.arg0, pkt.msg.arg1, pkt.msg.data_length,   \
+                pkt.payload.size());                                         \
+        for (int x = 0; x < sizeof(apacket); x++) {                          \
+            if (isprint((int)buf[x]))                                        \
+                fprintf(stderr, "%c", buf[x]);                               \
+            else                                                             \
+                fprintf(stderr, "[0x%02x]", 0xff & (int)buf[x]);             \
+        }                                                                    \
+        fprintf(stderr, "\n");                                               \
+    } while (0)
+
 #endif
 
 namespace android {
@@ -66,6 +75,7 @@ namespace emulation {
 using android::base::AsyncSocket;
 using android::base::ConditionVariable;
 using android::base::Lock;
+using android::base::System;
 using emulator::net::AsyncSocketAdapter;
 
 constexpr size_t MAX_PAYLOAD_V1 = 4 * 1024;
@@ -118,6 +128,7 @@ tstream& operator<<(tstream& out, const AdbState value) {
         break;
     switch (value) {
         STATE(disconnected);
+        STATE(socket);
         STATE(connecting);
         STATE(authorizing);
         STATE(connected);
@@ -126,8 +137,6 @@ tstream& operator<<(tstream& out, const AdbState value) {
 #undef STATE
     return out << s;
 }
-
-static int s_adb_port = 0;
 
 //  Human readable logging.
 template <typename tstream>
@@ -164,6 +173,8 @@ public:
     AdbStreambuf(int clientId, AdbConnectionImpl* con);
     ~AdbStreambuf();
 
+    void setWriteTimeout(uint64_t timeoutMs) { mWriteTimeout = timeoutMs; }
+
     // Closes down the stream properly
     void close();
 
@@ -175,13 +186,22 @@ public:
     void open(const std::string& id);
 
     // True if the connection is not closed
-    bool isOpen() { return mOpen; }
+    bool isOpen() { return mRemoteId != -1; }
 
     // Used to set the remote id to which this stream is connected.
-    void setRemoteId(int id) { mRemoteId = id; };
+    void setRemoteId(int id) {
+        // Can be set only once.
+        assert(id == mRemoteId || mRemoteId == -1);
+        if (mRemoteId == -1)
+            mRemoteId = id;
+    };
 
     // Called when we received bytes from the remote id.
     void receive(const std::vector<char>& msg);
+
+    // Blocks and waits returning true when we unlock, or false for timeout.
+    bool waitForUnlock(
+            uint64_t timeoutMs = std::numeric_limits<uint64_t>::max());
 
 protected:
     // Overrides needed for working std::streambuf
@@ -197,13 +217,12 @@ protected:
     };
 
 private:
-    // Blocks and waits returning true when we can write.
+    // Blocks and waits returning true when we can write, and are connected.
     bool readyForWrite();
 
-    int mClientId;  // Stream ID our side.
-    int mRemoteId;  // Stream ID on the ADB side.
+    int32_t mClientId;      // Stream ID our side.
+    int64_t mRemoteId{-1};  // Stream ID on the ADB side.
     bool mReady = false;
-    bool mOpen = true;
     AdbConnectionImpl* mConnection;
 
     base::QueueStreambuf
@@ -213,40 +232,54 @@ private:
     // These locks help us waiting for receipt of such a message.
     Lock mWriterLock;
     ConditionVariable mWriterCV;
+    uint64_t mWriteTimeout{std::numeric_limits<uint64_t>::max()};
 };
 
 // This is basically a std::iostream with using the adbstream buffer
 class BasicAdbStream : public AdbStream {
 public:
-    BasicAdbStream(AdbStreambuf* buf) : AdbStream(buf) {}
+    BasicAdbStream(AdbStreambuf* buf) : AdbStream(buf) {
+        if (buf == nullptr) {
+            setstate(failbit);
+        }
+    }
 
     ~BasicAdbStream() {
         close();
         delete adbbuf();
     }
 
-    void close() override { adbbuf()->close(); };
+    void close() override {
+        if (adbbuf())
+            adbbuf()->close();
+    };
+
+    void setWriteTimeout(uint64_t timeoutMs) override {
+        if (adbbuf() != nullptr)
+            adbbuf()->setWriteTimeout(timeoutMs);
+    }
 
     AdbStreambuf* adbbuf() { return reinterpret_cast<AdbStreambuf*>(rdbuf()); }
 };
 
 // This class manages the stream multiplexing and auth to the adbd deamon.
 // This uses async i/o an ThreadLooper thread.
+// Note that ADBD can be very flaky during system image boot. The kernel
+// can decide to Kill ADBD whenever it sees fit for example.
 class AdbConnectionImpl : public AdbConnection,
                           public emulator::net::AsyncSocketEventListener {
 public:
-    AdbConnectionImpl() {
-        base::Looper* looper = android::base::ThreadLooper::get();
-        mSocket = std::unique_ptr<AsyncSocket>(
-                new AsyncSocket(looper, s_adb_port));
+    AdbConnectionImpl(AsyncSocketAdapter* socket) : mSocket(socket) {
         mSocket->setSocketEventListener(this);
-        mSocket->connect();
+        if (mSocket->connected()) {
+            mState = AdbState::socket;
+        }
     }
 
     ~AdbConnectionImpl() {
         DD("~AdbConnectionImpl");
         closeStreams();
-        mSocket->close();
+        mSocket->dispose();
     }
 
     // Maximum package size we can send to adbd
@@ -261,6 +294,45 @@ public:
             sum += static_cast<uint8_t>(p.payload[i]);
         }
         return sum;
+    }
+
+    // This will try to establish a connection to the emulator when none exists:
+    // it will:
+    // 1. Connect the socket if closed.
+    // 2. Do the handshake if needed.
+    // 3. Wait at most timeoutMs.
+    // Returns true if we are connected, or false otherwise.
+    bool connectToEmulator(int timeoutMs) {
+        base::AutoLock connectLock(mConnectLock);
+        if (!mSocket->connectSync(timeoutMs)) {
+            DD("Failed to connect to socket.");
+            return false;
+        }
+
+        bool sendConnect = false;
+        auto waitUntil = System::get()->getUnixTimeUs() + (timeoutMs * 1000);
+        {
+            base::AutoLock lock(mStateLock);
+            // Only send out a connect request if we are disconnected.
+            // We never want to send more than one on an open connection,
+            // otherwise things will go haywire
+            if (state() == AdbState::socket) {
+                mState = AdbState::connecting;
+                sendConnect = true;
+                sendCnxn();
+            }
+
+            while (state() != AdbState::connected &&
+                   System::get()->getUnixTimeUs() < waitUntil) {
+                auto why = mStateCv.timedWait(&mStateLock, waitUntil);
+            }
+        }
+        if (sendConnect && state() == AdbState::connecting) {
+            // Assume that our message went into the void..
+            DD("No timely response, closing socket.");
+            mSocket->close();
+        }
+        return state() == AdbState::connected;
     }
 
     // Finalizes and sends out the packet. Setting field information
@@ -282,15 +354,33 @@ public:
     }
 
     // Opens up an adb stream to the given service..
-    std::shared_ptr<AdbStream> open(const std::string& id) override {
-        android::base::AutoLock lock(mActiveStreamsLock);
-        mNextClientId++;
-
-        // TODO(jansene): Do we need push/pull support? I
+    std::shared_ptr<AdbStream> open(const std::string& id,
+                                    uint32_t timeoutMs) override {
+        D("Open %s, :%d", id.c_str(), timeoutMs);
+        // Hand out "bad" streams on closed connections that we are not yet
+        // establishing.
+        if (!connectToEmulator(timeoutMs)) {
+            D("Open %s, not yet connected", id.c_str());
+            return std::make_shared<BasicAdbStream>(nullptr);
+        }
         auto buf = new AdbStreambuf(mNextClientId, this);
-        auto stream = std::make_shared<BasicAdbStream>(buf);
-        mActiveStreams[mNextClientId] = stream;
-        buf->open(id);
+        auto myId = mNextClientId++;
+        std::shared_ptr<BasicAdbStream> stream;
+        {
+            android::base::AutoLock lock(mActiveStreamsLock);
+            // TODO(jansene): Do we need push/pull support?
+            stream = std::make_shared<BasicAdbStream>(buf);
+            mActiveStreams[myId] = stream;
+            buf->open(id);
+        }
+
+        if (!buf->waitForUnlock(timeoutMs)) {
+            // Okay, we failed.
+            D("Open %s, timeout", id.c_str());
+            return std::make_shared<BasicAdbStream>(nullptr);
+        }
+
+        D("Open %s, connected", id.c_str());
         return stream;
     }
 
@@ -325,7 +415,6 @@ public:
         LOG(INFO) << "Connected: version: " << msg.msg.arg0
                   << ", msg size: " << msg.msg.arg1 << ", banner: " << banner;
 
-        setState(AdbState::connected);
         mProtocolVersion = msg.msg.arg0;
         mMaxPayloadSize = msg.msg.arg1;
 
@@ -334,7 +423,7 @@ public:
         // we only care about the feature set, if any.
         mFeatures.clear();
         const std::string features = "features=";
-        size_t start = banner.find("features");
+        size_t start = banner.find(features);
         if (start != std::string::npos) {
             // Features are , separated..
             start += features.size();
@@ -351,11 +440,18 @@ public:
             endFeatureList = banner.find(';', start);
             mFeatures.emplace(banner.substr(start, endFeatureList));
         }
+
+        // Finally switch state, this will wake up sleepers, we are ready to go!
+        setState(AdbState::connected);
     }
 
     void setState(const AdbState newState) {
+        base::AutoLock lock(mStateLock);
         LOG(VERBOSE) << "Adb transition " << mState << " -> " << newState;
         mState = newState;
+
+        // Wake up everyone, as we might be in a fully connected state.
+        mStateCv.broadcast();
     }
 
     bool hasFeature(const std::string& feature) const override {
@@ -421,19 +517,21 @@ public:
     }
 
     void sendCnxn() {
-        setState(AdbState::connecting);
-        sendPacket(AdbWireMessage::A_CNXN, A_VERSION, MAX_PAYLOAD, {});
+        mAuthAttempts = 8;
+        const char* hdr =
+                "host::features=remount_shell,abb_exec,fixed_push_symlink_"
+                "timestamp,abb,stat_v2,apex,shell_v2,fixed_push_mkdir,cmd";
+        sendPacket(AdbWireMessage::A_CNXN, A_VERSION, MAX_PAYLOAD,
+                   {hdr, hdr + strlen(hdr)});
     }
 
     void sendAuth(const apacket& recv) {
         // Bail out if we tried a few times to auth and it failed..
         if (mAuthAttempts == 0) {
-            setState(AdbState::failed);
+            LOG(ERROR) << "Unable to authenticate at this time.";
             mSocket->close();
             return;
         }
-
-        setState(AdbState::authorizing);
         mAuthAttempts--;
         int sigLen = 256;
         std::vector<char> signed_token{};
@@ -446,6 +544,8 @@ public:
         signed_token.resize(sigLen);
         sendPacket(AdbWireMessage::A_AUTH, ADB_AUTH_SIGNATURE, 0,
                    std::move(signed_token));
+
+        setState(AdbState::authorizing);
     }
 
     void onRead(AsyncSocketAdapter* socket) override {
@@ -488,41 +588,30 @@ public:
     // available early on, but it might take a while before
     // adbd is ready in the emulator.
     void onConnected(AsyncSocketAdapter* socket) override {
-        DD("Sock open");
-        mAuthAttempts = 8;
-        mOpenerThread.reset(new base::FunctorThread([this] {
-            // Try until we reach the failure state..
-            // This relies on ADBD coming up inside the emulator.
-            while (mState == AdbState::disconnected) {
-                this->sendCnxn();
-                base::Thread::sleepMs(500);
-            }
-        }));
-        mOpenerThread->start();
+        setState(AdbState::socket);
     };
 
+    // Mark the connection as closed.
     void closeStreams() {
         base::AutoLock lock(mActiveStreamsLock);
         for (auto& entry : mActiveStreams) {
             entry.second->close();
         }
+        mFeatures.clear();
         mActiveStreams.clear();
+        setState(AdbState::disconnected);
     }
 
     // Called when this socket is closed.
     void onClose(AsyncSocketAdapter* socket, int err) override {
+        LOG(VERBOSE) << ("Disconnected");
         closeStreams();
-        setState(AdbState::disconnected);
     };
 
-    void close() override {
-        closeStreams();
-        mSocket->close();
-    }
+    void close() override { mSocket->close(); }
 
 private:
-    std::unique_ptr<AsyncSocket> mSocket;          // Socket to adbd in emulator
-    AdbState mState{AdbState::disconnected};       // Current connection state
+    std::unique_ptr<AsyncSocketAdapter> mSocket;   // Socket to adbd in emulator
     apacket mIncoming{.msg = {0}, .payload = {}};  // Incoming packet
     size_t mPacketOffset{0};  // Received bytes of packet so far
 
@@ -530,28 +619,39 @@ private:
             mOpenerThread;                      // Initial connector thread
     std::unordered_set<std::string> mFeatures;  // available features
 
+    Lock mStateLock;
+    Lock mConnectLock;
+    ConditionVariable mStateCv;
+    std::atomic<AdbState> mState{
+            AdbState::disconnected};  // Current connection state
+
     // Stream management
-    std::unordered_map<int32_t, std::shared_ptr<BasicAdbStream>> mActiveStreams;
     Lock mActiveStreamsLock;
+    std::unordered_map<int32_t, std::shared_ptr<BasicAdbStream>> mActiveStreams;
 
     uint32_t mNextClientId{1};  // Client id generator.
     uint32_t mAuthAttempts{8};
 
     uint32_t mMaxPayloadSize{MAX_PAYLOAD};
     uint32_t mProtocolVersion{A_VERSION_MIN};
-};
+};  // namespace emulation
 
-static base::LazyInstance<AdbConnectionImpl> gAdbConnection =
-        LAZY_INSTANCE_INIT;
+static std::shared_ptr<AdbConnectionImpl> gAdbConnection;
 
-AdbConnection* AdbConnection::connection() {
-    if (s_adb_port == 0)
-        return nullptr;
-    return gAdbConnection.ptr();
+std::shared_ptr<AdbConnection> AdbConnection::connection(int timeoutMs) {
+    if (timeoutMs > 0 && !gAdbConnection->connectToEmulator(timeoutMs)) {
+        LOG(VERBOSE) << "Timeout:" << timeoutMs
+                     << "Connection state: " << gAdbConnection->state();
+    }
+    return gAdbConnection;
 }
 
-void AdbConnection::setAdbPort(int port) {
-    s_adb_port = port;
+void AdbConnection::setAdbSocket(AsyncSocketAdapter* socket) {
+    if (socket == nullptr) {
+        gAdbConnection.reset();
+    } else {
+        gAdbConnection = std::make_shared<AdbConnectionImpl>(socket);
+    }
 }
 
 // AdbStreambuf...
@@ -565,7 +665,6 @@ AdbStreambuf::AdbStreambuf(int idx, AdbConnectionImpl* con)
     : mClientId(idx), mConnection(con) {}
 
 void AdbStreambuf::open(const std::string& id) {
-    LOG(INFO) << "Opening adb service: " << id;
     std::vector<char> service{id.begin(), id.end()};
     service.emplace_back(0);
     mConnection->sendPacket(AdbWireMessage::A_OPEN, mClientId, 0,
@@ -574,7 +673,7 @@ void AdbStreambuf::open(const std::string& id) {
 
 std::streamsize AdbStreambuf::xsputn(const char* s, std::streamsize n) {
     apacket packet{0};
-    if (!mOpen)
+    if (!isOpen())
         return 0;
 
     int written = 0;
@@ -582,11 +681,12 @@ std::streamsize AdbStreambuf::xsputn(const char* s, std::streamsize n) {
     auto maxPayload = mConnection->getMaxPayload();
 
     // Every write is followed by an A_OKAY, so we need to wait..
+    base::AutoLock lock(mWriterLock);
     while (n > 0 && readyForWrite()) {
         mReady = false;
         int write = std::min<std::streamsize>(maxPayload, n);
         mConnection->sendPacket(AdbWireMessage::A_WRTE, mClientId, mRemoteId,
-                                std::vector<char>(w, w + write));
+                                {w, w + write});
         w += write;
         n -= write;
     }
@@ -594,29 +694,42 @@ std::streamsize AdbStreambuf::xsputn(const char* s, std::streamsize n) {
 }
 
 AdbStreambuf::~AdbStreambuf() {
+    D("~AdbStreambuf");
     close();
 }
 
-// Returns true if the OKAY packet has been received.
-// and the connection is still alive.
-bool AdbStreambuf::readyForWrite() {
+bool AdbStreambuf::waitForUnlock(uint64_t timeoutms) {
     base::AutoLock lock(mWriterLock);
-    while (!mReady && mOpen) {
-        mWriterCV.wait(&mWriterLock);
+    auto waitUntil = base::System::get()->getUnixTimeUs() + timeoutms * 1000;
+    while (!mReady && System::get()->getUnixTimeUs() < waitUntil) {
+        mWriterCV.timedWait(&mWriterLock, waitUntil);
     }
-    return mReady && mOpen;
+    return mReady;
+}
+
+// Returns true if the OKAY packet has been received.
+// and the connection is still alive. Returns false in case
+// of timeout or closed stream..
+bool AdbStreambuf::readyForWrite() {
+    auto waitUntilUs = System::get()->getUnixTimeUs() + mWriteTimeout * 1000;
+    while (!mReady && isOpen() &&
+           System::get()->getUnixTimeUs() < waitUntilUs) {
+        mWriterCV.timedWait(&mWriterLock, waitUntilUs);
+    }
+    return mReady && isOpen();
 }
 
 void AdbStreambuf::unlock() {
+    base::AutoLock lock(mWriterLock);
     mReady = true;
     mWriterCV.signal();
 };
 
 void AdbStreambuf::close() {
-    if (mOpen) {
+    if (isOpen()) {
         mConnection->sendClose(mClientId, mRemoteId);
     }
-    mOpen = false;
+    mRemoteId = -1;
     mReceivingQueue.close();
     unlock();
 }

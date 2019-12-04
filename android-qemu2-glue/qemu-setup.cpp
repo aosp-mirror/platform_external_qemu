@@ -73,6 +73,8 @@ extern "C" {
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
 
+/* True if an external adb executable should be used for adb calls */
+bool android_use_external_adb = false;
 }  // extern "C"
 
 using android::VmLock;

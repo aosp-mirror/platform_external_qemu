@@ -75,14 +75,8 @@ service EmulatorController {
     // The ice candidates for example will trickle in on this callback,
     // as will the SDP negotation.
     rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
-
-    rpc sendShellCmd(Cmd) returns (stream Cmd) {}
 }
 
-message Cmd {
-    string path = 1;
-    bytes payload = 2;
-}
 
 message RtcId {
     // The unique identifier of this connection. You will have to use the same
