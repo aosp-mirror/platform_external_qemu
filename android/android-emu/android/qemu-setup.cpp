@@ -14,6 +14,7 @@
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
 #include "android/base/CpuUsage.h"
+#include "android/base/async/AsyncSocket.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/MemoryTracker.h"
 #include "android/boot-properties.h"
@@ -63,6 +64,7 @@
 namespace fc = android::featurecontrol;
 
 using android::network::WifiForwardMode;
+using namespace android::base;
 
 extern "C" {
     /* Contains arguments for -android-ports option. */
@@ -308,6 +310,9 @@ static bool setup_console_and_adb_ports(int console_port,
             return false;
         }
         android::icebox::set_jdwp_port(android_get_jdwp_port());
+        auto looper = ThreadLooper::get();
+        android::emulation::AdbConnection::setAdbSocket(new
+            AsyncSocket(looper, android_adb_port));
         register_adb_service = true;
     }
     if (qemu_android_console_start(console_port, agents) < 0) {
@@ -395,7 +400,6 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_base_port = base_port;
     android_adb_port = adb_port;
     android_serial_number_port = adb_port - 1;
-    android::emulation::AdbConnection::setAdbPort(adb_port);
     return true;
 }
 
@@ -521,7 +525,7 @@ void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
     android::videoinjection::VideoInjectionController::shutdown();
     android::base::CpuUsage::get()->stop();
-    android::emulation::AdbConnection::connection()->close();
+    android::emulation::AdbConnection::connection(0)->close();
     auto memTracker = android::base::MemoryTracker::get();
     if (memTracker)
         memTracker->stop();
