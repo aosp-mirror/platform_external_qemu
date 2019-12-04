@@ -46,6 +46,29 @@
       "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4001d52d_a2058164",
+        "filename": "android/android-emu/android/emulation/control/AdbConnection.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-04T19:02:31Z",
+      "side": 1,
+      "message": "I just found that I have another CL which declared the same structures. Let\u0027s merge our CLs first then try to de-duplicate them.",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 2
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
