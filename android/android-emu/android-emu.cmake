@@ -253,6 +253,7 @@ set(android_emu_dependent_src
     android/camera/camera-virtualscene-utils.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/control/AdbConnection.cpp # Needs icebox for sign_token.
+    android/emulation/control/AdbShellStream.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
     android/emulation/Keymaster3.cpp
