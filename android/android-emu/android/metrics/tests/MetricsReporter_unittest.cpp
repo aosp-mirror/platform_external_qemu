@@ -16,7 +16,7 @@
 
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
-#include "android/metrics/proto/clientanalytics.pb.h"
+#include "android/metrics/proto/google_logs_publishing.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/metrics/tests/MockMetricsReporter.h"
 #include "android/metrics/tests/MockMetricsWriter.h"
@@ -76,8 +76,6 @@ TEST_F(MetricsReporterTest, sendToWriter) {
     mWriter->mOnWrite = [&kind, &sessionId, &expectVersions](
                         const android_studio::AndroidStudioEvent& asEvent,
                         wireless_android_play_playlog::LogEvent* logEvent) {
-        EXPECT_TRUE(logEvent->has_event_time_ms());
-        EXPECT_TRUE(logEvent->has_event_uptime_ms());
         EXPECT_FALSE(logEvent->has_source_extension());
 
         // Verify the fields MetricsReporter is supposed to fill in.

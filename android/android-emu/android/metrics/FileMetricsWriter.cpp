@@ -20,7 +20,7 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
-#include "android/metrics/proto/clientanalytics.pb.h"
+#include "android/metrics/proto/google_logs_publishing.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 
 #include <assert.h>
@@ -314,7 +314,7 @@ bool FileMetricsWriter::runFileOperationWithRetries(int* filenameCounter,
 void FileMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,
         wireless_android_play_playlog::LogEvent* logEvent) {
-    D("writing a log event with uptime %ld ms", logEvent->event_uptime_ms());
+    D("writing a log event");
 
     asEvent.SerializeToString(logEvent->mutable_source_extension());
 
