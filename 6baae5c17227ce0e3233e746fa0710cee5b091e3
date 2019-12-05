@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6eb83acd_54386d0a",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "Is there a way we can get the private key from the image? That way we can guarantee that we can always connect.",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4402df48_2d4b7ea4",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "There are multiple local #defines with a slightly different definition. Can we generalize this to a single function that is defined in one place?",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bedae0bc_c7b0406b",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this contain supported min version of adb?",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c3da257_fd68e0ef",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "data_check needs to be set for older images. ADB will not respond and you will hang on line 187",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5af266a9_45794442",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "We could get another ADB_AUTH request, which can happen if adbd is not yet completely initialized.",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f578b74c_1cc0c03a",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "This can loop/lock is that ok?",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d769f20_0b8759d9",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "What if multiple async commands are running? Could we use a detached std::thread?",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35a57d83_882911c7",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "This can run into trouble if multiple threads are active as they can steal each others packets. I.e. thread 1 is waiting for packet 1, and thread 2 is waiting for 2. If thread 2 sees packet 1 they will both lock up.",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "801b8109_7efb3af1",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:16:48Z",
+      "side": 1,
+      "message": "Consider creating a function that constructs a packet, or use struct initializers.\napacket connect \u003d { mesg {.command \u003dx, .arg0\u003dy, ... }};\nInitialization logic is repeated a lot in this file.",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
