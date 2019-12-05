@@ -39,6 +39,7 @@ using android::base::ScopedSocket;
 bool AdbHostListener::reset(int adbPort) {
     if (adbPort < 0) {
         mServer.reset();
+        mJdwpServer.reset();
     } else if (!mServer || adbPort != mServer->port()) {
         CHECK(adbPort < 65536);
         AsyncSocketServer::LoopbackMode mode =
@@ -48,15 +49,29 @@ bool AdbHostListener::reset(int adbPort) {
         }
         mServer = AsyncSocketServer::createTcpLoopbackServer(
                 adbPort,
-                [this](int socket) { return onHostServerConnection(socket); },
-                mode,
-                android::base::ThreadLooper::get());
+                [this](int socket) {
+                    return onHostServerConnection(socket, AdbPortType::Adb);
+                },
+                mode, android::base::ThreadLooper::get());
+        if (!mJdwpServer) {
+            mJdwpServer = AsyncSocketServer::createTcpLoopbackServer(
+                    0,  // Get a random port
+                    [this](int socket) {
+                        return onHostServerConnection(socket, AdbPortType::Jdwp);
+                    },
+                    mode, android::base::ThreadLooper::get());
+            if (!mJdwpServer) {
+                fprintf(stderr,
+                        "WARNING: jdwp port creation fails,"
+                        " Icebox will not work.\n");
+            }
+        }
+        // Don't start listening until startListening() is called.
         if (!mServer) {
             // This can happen when the emulator is probing for a free port
             // at startup, so don't print a warning here.
             return false;
         }
-        // Don't start listening until startListening() is called.
     }
     return true;
 }
@@ -65,11 +80,17 @@ void AdbHostListener::startListening() {
     if (mServer) {
         mServer->startListening();
     }
+    if (mJdwpServer) {
+        mJdwpServer->startListening();
+    }
 }
 
 void AdbHostListener::stopListening() {
     if (mServer) {
         mServer->stopListening();
+    }
+    if (mJdwpServer) {
+        mJdwpServer->stopListening();
     }
 }
 
@@ -79,8 +100,8 @@ void AdbHostListener::notifyServer() {
     }
 }
 
-bool AdbHostListener::onHostServerConnection(int socket) {
-    mGuestAgent->onHostConnection(ScopedSocket(socket));
+bool AdbHostListener::onHostServerConnection(int socket, AdbPortType portType) {
+    mGuestAgent->onHostConnection(ScopedSocket(socket), portType);
     return true;
 }
 
