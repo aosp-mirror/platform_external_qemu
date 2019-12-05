@@ -1529,15 +1529,16 @@ static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
     int force_closed_pipes_count = 0;
     for (pipe_n = 0; pipe_n < pipe_count; pipe_n++) {
         HwPipe* pipe = hwpipe_new0(dev);
-        char force_close = 0;
+        char force_close = 1;
         pipe->channel = qemu_get_be64(file);
         pipe->closed = qemu_get_byte(file);
         pipe->wanted = qemu_get_byte(file);
         char has_host_pipe = qemu_get_byte(file);
         if (has_host_pipe) {
             pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
-        } else {
-            force_close = 1;
+            if (pipe->host_pipe) {
+              force_close = 0;
+            }
         }
         pipe->wanted_next = pipe->wanted_prev = NULL;
 
