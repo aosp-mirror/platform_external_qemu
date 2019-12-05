@@ -61,8 +61,8 @@
 #define ADB_AUTH_RSAPUBLICKEY 3
 #define A_VERSION 0x01000000
 
-using amessage = android::emulation::AdbMessageSniffer::amessage;
-
+using amessage = android::emulation::amessage;
+using namespace android::emulation;
 using namespace android::jdwp;
 
 namespace {
