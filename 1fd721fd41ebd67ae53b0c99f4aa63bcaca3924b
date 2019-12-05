@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b605df10_da0204ec",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:43:25Z",
+      "side": 1,
+      "message": "Set back to 0?",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3bae9ad_fe16fca5",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:43:25Z",
+      "side": 1,
+      "message": "Could you add a comment that this is a preference ordering? It took me we a while to understand what happens if there are multiple pipes waiting for an adbhost connection.",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b0d71f9_b1bab034",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:43:25Z",
+      "side": 1,
+      "message": "Would it make sense to create a subclass instead of using needHubTranslate everywhere?",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97b0c2f9_73c1ff25",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:43:25Z",
+      "side": 1,
+      "message": "nit: needsHubTranslation()",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "88cf6798_3bbd781f",
+        "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T21:43:25Z",
+      "side": 1,
+      "message": "consider using LOG(ERROR) \u003c\u003c",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
