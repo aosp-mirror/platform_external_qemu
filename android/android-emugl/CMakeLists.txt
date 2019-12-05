@@ -66,6 +66,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wno-unused-value")
   add_c_flag("-Wno-inconsistent-missing-override")
   add_c_flag("-Wno-deprecated-declarations")
+  add_c_flag("-Wno-reorder-init-list")
 endif()
 
 add_subdirectory(host/libs/libOpenglRender/vulkan/cereal)
