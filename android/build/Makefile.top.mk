@@ -135,6 +135,7 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
                       -Wswitch \
+                      -Wno-implicit-int-float-conversion \
 
 ifeq (windows_msvc,$(BUILD_TARGET_OS))
     CLANG_COMPILER_FLAGS_TARGET= \
