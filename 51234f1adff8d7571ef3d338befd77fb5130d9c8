@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fae5fcf7_67702916",
+        "filename": "android/android-emu/android/emulation/AdbHub.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "Set to 0 before checking in.",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf69cd2f_c942d2d0",
+        "filename": "android/android-emu/android/emulation/AdbHub.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "LOG(WARNING) \u003c\u003c",
+      "range": {
+        "startLine": 365,
+        "startChar": 8,
+        "endLine": 365,
+        "endChar": 15
+      },
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f234c4d8_1ba547bb",
+        "filename": "android/android-emu/android/emulation/AdbHub.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "check bounds?",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b3f5afc_15d5d9ad",
+        "filename": "android/android-emu/android/emulation/AdbHub.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "nit: whitespace",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1008d22d_4bade0d2",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "This thing only grows in size? Is it thread safe?",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "008373b8_34a38463",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "Move to separate function.",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42df6e57_770abe88",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:27:29Z",
+      "side": 1,
+      "message": "remove line.",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
