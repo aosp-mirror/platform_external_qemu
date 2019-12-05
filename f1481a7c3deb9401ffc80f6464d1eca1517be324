@@ -22,6 +22,30 @@
       "revId": "f1481a7c3deb9401ffc80f6464d1eca1517be324",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a17c20bb_c23a1b7c",
+        "filename": "android/android-emu/android/camera/camera-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 815,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-12-05T22:41:13Z",
+      "side": 1,
+      "message": "Done, Thanks!",
+      "parentUuid": "8f161499_6d961e79",
+      "range": {
+        "startLine": 812,
+        "startChar": 0,
+        "endLine": 815,
+        "endChar": 35
+      },
+      "revId": "f1481a7c3deb9401ffc80f6464d1eca1517be324",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
