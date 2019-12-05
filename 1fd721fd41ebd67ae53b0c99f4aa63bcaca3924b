@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9430eef6_29ee9695",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:03:31Z",
+      "side": 1,
+      "message": "will do when we are almost done with the review",
+      "parentUuid": "b605df10_da0204ec",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d3bae9ad_fe16fca5",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 68
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "55c92fdc_662fdc63",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:03:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d3bae9ad_fe16fca5",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b0d71f9_b1bab034",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 68
@@ -47,6 +83,24 @@
       "writtenOn": "2019-12-05T21:43:25Z",
       "side": 1,
       "message": "Would it make sense to create a subclass instead of using needHubTranslate everywhere?",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30ada7ae_4f0c0dca",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:03:31Z",
+      "side": 1,
+      "message": "Sounds like a good idea. Let me think about that.",
+      "parentUuid": "3b0d71f9_b1bab034",
       "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "650dcf34_51678f7b",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:03:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "97b0c2f9_73c1ff25",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88cf6798_3bbd781f",
         "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
         "patchSetId": 68
@@ -84,6 +156,24 @@
       "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d424cdbe_fa434a9e",
+        "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:03:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "88cf6798_3bbd781f",
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
