@@ -79,6 +79,8 @@ option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccac
 OPT_CXX11=
 option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
 
+OPT_NOSTRIP=
+option_register_var "--nostrip" OPT_NOSTRIP "Do not generate strip, needed for prebuilts only"
 
 OPT_FORCE_FETCH_WINTOOLCHAIN=
 option_register_var "--force-fetch-wintoolchain" OPT_FORCE_FETCH_WINTOOLCHAIN "Force fetch the Windows toolchain (google internal)"
@@ -368,14 +370,16 @@ gen_wrapper_toolchain () {
     done
 
     # Setup additional host specific things
-    case "$CURRENT_HOST" in
+    if [ -z "$OPT_NOSTRIP" ]; then
+      case "$CURRENT_HOST" in
         windows-x86_64|linux-x86_64)
-            gen_dbg_splitter "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
-            ;;
+          gen_dbg_splitter "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
+          ;;
         darwin-x86_64)
-            gen_dbg_splitter_darwin "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
-            ;;
-    esac
+          gen_dbg_splitter_darwin "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
+          ;;
+      esac
+    fi
 
     EXTRA_CFLAGS=
     EXTRA_CXXFLAGS=
