@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f899c9d4_d696cb52",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:00:16Z",
+      "side": 1,
+      "message": "it sounds like a security issue if we can do that.",
+      "parentUuid": "6eb83acd_54386d0a",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4402df48_2d4b7ea4",
         "filename": "android/android-emu/android/snapshot/Icebox.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2019-12-05T21:16:48Z",
       "side": 1,
       "message": "There are multiple local #defines with a slightly different definition. Can we generalize this to a single function that is defined in one place?",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b41ccc12_81b82358",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:00:16Z",
+      "side": 1,
+      "message": "We cannot. We can manually unpack the macro but it just makes the code longer.",
+      "parentUuid": "4402df48_2d4b7ea4",
       "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -104,6 +140,24 @@
     },
     {
       "key": {
+        "uuid": "db87858f_5a0c30fe",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:00:16Z",
+      "side": 1,
+      "message": "Yes. When it happens it means the guest hangs and the host thread should wait.",
+      "parentUuid": "f578b74c_1cc0c03a",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5d769f20_0b8759d9",
         "filename": "android/android-emu/android/snapshot/Icebox.cpp",
         "patchSetId": 2
@@ -115,6 +169,24 @@
       "writtenOn": "2019-12-05T21:16:48Z",
       "side": 1,
       "message": "What if multiple async commands are running? Could we use a detached std::thread?",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5799782_1d51e343",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:00:16Z",
+      "side": 1,
+      "message": "Running more than 1 thread makes synchronization non-trivial. It would require us to implement a server here. Let\u0027s not worry about it until we have a use case for it (especially when this function might be removed)",
+      "parentUuid": "5d769f20_0b8759d9",
       "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -138,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "e3c71a30_0e42e725",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:00:16Z",
+      "side": 1,
+      "message": "That is why multi thread is disabled.",
+      "parentUuid": "35a57d83_882911c7",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "801b8109_7efb3af1",
         "filename": "android/android-emu/android/snapshot/Icebox.cpp",
         "patchSetId": 2
@@ -152,6 +242,24 @@
       "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b033eb53_b79b3dd4",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T22:00:16Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "801b8109_7efb3af1",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
