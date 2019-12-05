@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e800716b_29597e77",
+        "filename": "android/android-emu/android/emulation/AdbHub.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T23:43:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "fae5fcf7_67702916",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf69cd2f_c942d2d0",
         "filename": "android/android-emu/android/emulation/AdbHub.cpp",
         "patchSetId": 2
@@ -59,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "375c2b44_f8f87da8",
+        "filename": "android/android-emu/android/emulation/AdbHub.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T23:43:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f234c4d8_1ba547bb",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b3f5afc_15d5d9ad",
         "filename": "android/android-emu/android/emulation/AdbHub.h",
         "patchSetId": 2
@@ -93,6 +129,24 @@
     },
     {
       "key": {
+        "uuid": "8ccc731a_a8560f6b",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T23:43:14Z",
+      "side": 1,
+      "message": "It is only used in one thread. And it is for debug print only.",
+      "parentUuid": "1008d22d_4bade0d2",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "008373b8_34a38463",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 2
@@ -110,6 +164,24 @@
     },
     {
       "key": {
+        "uuid": "4200c0a6_1d344381",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T23:43:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "008373b8_34a38463",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "42df6e57_770abe88",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 2
@@ -124,6 +196,24 @@
       "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9126287c_46ae58cd",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-05T23:43:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "42df6e57_770abe88",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
