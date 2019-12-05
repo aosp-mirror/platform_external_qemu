@@ -92,7 +92,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-static \
                 --disable-tools \
                 --disable-unit-tests \
-                --extra-cxxflags=-Doff_t=__off64_t
+                --extra-cxxflags="-Doff_t=__off64_t -fPIC"
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.

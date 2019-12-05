@@ -641,6 +641,7 @@ EOF
             --host=$_SHU_BUILDER_CURRENT_HOST \
             --verbosity=$(get_verbosity) \
             --binprefix=${_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX:--} \
+            --nostrip \
             $EXTRA_FLAGS \
             $TOOLCHAIN_WRAPPER_DIR ||
             panic "Cannot generate toolchain wrapper!"
