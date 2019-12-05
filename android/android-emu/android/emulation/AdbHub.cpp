@@ -17,7 +17,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/JdwpProxy.h"
 
-#define DEBUG 2
+#define DEBUG 0
 
 #if DEBUG >= 1
 #include <stdio.h>

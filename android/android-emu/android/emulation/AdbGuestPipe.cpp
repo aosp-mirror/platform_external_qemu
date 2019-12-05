@@ -41,7 +41,7 @@
 #include <sys/socket.h>
 #endif
 
-#define DEBUG 2
+#define DEBUG 0
 
 #if DEBUG >= 1
 #include <stdio.h>
