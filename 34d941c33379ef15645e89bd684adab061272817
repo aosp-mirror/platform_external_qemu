@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4bc1372_88e1f9d1",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:56:22Z",
+      "side": 1,
+      "message": "D \u003d DD?",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4212e3d0_9c01972e",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:56:22Z",
+      "side": 1,
+      "message": "Compiler can do better typechecking if this would be a reference. Can this be a reference vs pointer?",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "104640ea_1783b408",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:56:22Z",
+      "side": 1,
+      "message": "checksums need to be set for certain adb versions, otherwise packets will get dropped.",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4268cef1_12c616c3",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:56:22Z",
+      "side": 1,
+      "message": "make global constant for JDWP-Hanshake?",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92ac987b_0a381110",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-05T23:56:22Z",
+      "side": 1,
+      "message": "return {.arg0 \u003d mGuestId, .arg1 \u003d mCurrentHostId, .data_length \u003d 0, .data_check \u003d 0};",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
