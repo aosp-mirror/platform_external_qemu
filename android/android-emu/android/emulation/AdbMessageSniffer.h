@@ -19,6 +19,8 @@
 #include <vector>
 #include <set>
 
+#define LOG_JDWP
+
 namespace android {
 namespace emulation {
 
@@ -46,6 +48,10 @@ private:
     uint8_t* mBufferP;
     const char* mName;
     std::set<unsigned> mDummyShellArg0;
+#ifdef LOG_JDWP
+    std::set<std::pair<int, int> > mJdwp;
+    void printJdwp();
+#endif
 
     void grow_buffer_if_needed(int count);
     int getAllowedBytesToPrint(int bytes);

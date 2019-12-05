@@ -29,7 +29,7 @@ namespace android {
 namespace emulation {
 
 // AdbHub is a hub to parse all incoming adb traffic from one adb pipe,
-// and forward it to a proxy if the corresponding proxy is supported 
+// and forward it to a proxy if the corresponding proxy is supported
 // (currently only jdwp proxy is supported). On guest send message, the
 // proxy can choose to forward the message to the host, or compose its
 // own reply message to the guest. If no corresponding proxy implemnetaton

@@ -27,7 +27,7 @@
 #endif
 
 #if DEBUG >= 2
-#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define DD(...) D(__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
@@ -356,17 +356,15 @@ void AdbHub::pushToRecvQueue(apacket&& packet) {
 AdbProxy* AdbHub::onNewConnection(const apacket& requestPacket,
                                   const apacket& replyPacket) {
     if (requestPacket.mesg.command != ADB_OPEN ||
+        requestPacket.mesg.data_length == 0 ||
         replyPacket.mesg.command != ADB_OKAY) {
-        fprintf(stderr,
-                "WARNING: onNewConnection expect requestPacket command "
-                "ADB_OPEN (%d), "
-                "actual command %d\n",
-                ADB_OPEN, requestPacket.mesg.command);
-        fprintf(stderr,
-                "WARNING: onNewConnection expect replyPacket command ADB_OKAY "
-                "(%d), "
-                "actual command %d\n",
-                ADB_OKAY, replyPacket.mesg.command);
+        LOG(WARNING) << "WARNING: onNewConnection expect requestPacket command "
+                        "ADB_OPEN, actual command "
+                     << requestPacket.mesg.command;
+        LOG(WARNING) << "WARNING: onNewConnection expect replyPacket command "
+                        "ADB_OKAY "
+                        "actual command "
+                     << replyPacket.mesg.command;
         return nullptr;
     }
     CHECK(requestPacket.mesg.arg0 == replyPacket.mesg.arg1);
