@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "7df1c6b7_c508c3cd",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:39:02Z",
+      "side": 1,
+      "message": "do you happen to have the doc about how it should look like?",
+      "parentUuid": "bedae0bc_c7b0406b",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1c3da257_fd68e0ef",
         "filename": "android/android-emu/android/snapshot/Icebox.cpp",
         "patchSetId": 2
@@ -138,6 +156,24 @@
       "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "278b96d9_f380f346",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:39:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5af266a9_45794442",
+      "revId": "6baae5c17227ce0e3233e746fa0710cee5b091e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
