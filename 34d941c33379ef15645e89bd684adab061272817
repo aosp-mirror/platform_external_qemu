@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7dabdc1b_8cee23b2",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:06:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c4bc1372_88e1f9d1",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4212e3d0_9c01972e",
         "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2019-12-05T23:56:22Z",
       "side": 1,
       "message": "Compiler can do better typechecking if this would be a reference. Can this be a reference vs pointer?",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "646e52a5_b032956b",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:06:02Z",
+      "side": 1,
+      "message": "There is a c++ readability suggestion that output should be by pointer instead of reference. See this link:\nhttp://go/cstyle#Reference_Arguments",
+      "parentUuid": "4212e3d0_9c01972e",
       "revId": "34d941c33379ef15645e89bd684adab061272817",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1b91c78c_8490a71f",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:06:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "104640ea_1783b408",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4268cef1_12c616c3",
         "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "d988fe34_1fe92a87",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:06:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4268cef1_12c616c3",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "92ac987b_0a381110",
         "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
         "patchSetId": 2
@@ -84,6 +156,24 @@
       "revId": "34d941c33379ef15645e89bd684adab061272817",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a3f06de_98acc041",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:06:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "92ac987b_0a381110",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
