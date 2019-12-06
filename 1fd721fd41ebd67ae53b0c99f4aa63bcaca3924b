@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "4d401c92_87b3d6bd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 68
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:27:25Z",
+      "side": 1,
+      "message": "maybe make it clear on why there is icebox port, adb port and jwpd port ? is jwpd port the same as icebox port ?\n\nprobalby just stick to regular adb port and jwpd port ?",
+      "range": {
+        "startLine": 13,
+        "startChar": 4,
+        "endLine": 13,
+        "endChar": 36
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3cf64326_1de626cd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 68
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:27:25Z",
+      "side": 1,
+      "message": "also when the non-regular port will be activated from user point of view ?",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b605df10_da0204ec",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 68
@@ -142,6 +188,29 @@
     },
     {
       "key": {
+        "uuid": "57496ea6_fc602d27",
+        "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:27:25Z",
+      "side": 1,
+      "message": "this mServer should probably be better named to be mRegularAdbServer ?",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 15
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "88cf6798_3bbd781f",
         "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
         "patchSetId": 68
@@ -174,6 +243,29 @@
       "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2b10be8_98c8b843",
+        "filename": "android/android-emu/android/emulation/AdbTypes.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:27:25Z",
+      "side": 1,
+      "message": "a bit more explanation here please\nmaybe \nRegularAdb ?",
+      "range": {
+        "startLine": 22,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 2
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
