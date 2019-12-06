@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "34d859f5_dc610a4e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T18:23:50Z",
+      "side": 1,
+      "message": "Enabled if the connection is from icebox/jdwp port. Will put it in the commit message",
+      "parentUuid": "133e906f_9ce05f17",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 13
+      },
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "69e8be35_11b80b80",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7bb3e3f_f3d3b811",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T18:23:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69e8be35_11b80b80",
+      "range": {
+        "startLine": 14,
+        "startChar": 31,
+        "endLine": 14,
+        "endChar": 36
+      },
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -91,6 +139,54 @@
       "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48bbf9f8_d95184ce",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T18:23:50Z",
+      "side": 1,
+      "message": "The same in this context. Will make it more explicit in the text.",
+      "parentUuid": "72bd2798_dcbc3058",
+      "range": {
+        "startLine": 18,
+        "startChar": 58,
+        "endLine": 18,
+        "endChar": 64
+      },
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a6a0347_06208517",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T18:23:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ac7f2a84_a5d8994f",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 7
+      },
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -339,6 +435,24 @@
       "side": 1,
       "message": "are we printing too many OKAY here ?",
       "parentUuid": "9126287c_46ae58cd",
+      "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4cf52cca_8a183214",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T18:23:50Z",
+      "side": 1,
+      "message": "I would put this line back. It turns out pretty handy for my use case bu probably too noisy for other people :)",
+      "parentUuid": "32cb22ee_e845ba67",
       "revId": "51234f1adff8d7571ef3d338befd77fb5130d9c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
