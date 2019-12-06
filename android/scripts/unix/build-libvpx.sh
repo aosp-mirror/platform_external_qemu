@@ -89,6 +89,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_build_autotools_package_ffmpeg libvpx \
                 $MY_FLAGS \
+                --enable-pic \
                 --enable-static \
                 --disable-tools \
                 --disable-unit-tests \
