@@ -49,6 +49,29 @@
     },
     {
       "key": {
+        "uuid": "46726377_4057d49e",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:16:42Z",
+      "side": 1,
+      "message": "maybe add the available mode here ?",
+      "range": {
+        "startLine": 235,
+        "startChar": 23,
+        "endLine": 236,
+        "endChar": 6
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4001d52d_a2058164",
         "filename": "android/android-emu/android/emulation/control/AdbConnection.cpp",
         "patchSetId": 4
@@ -93,6 +116,75 @@
       "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9baeeb15_a7221282",
+        "filename": "android/android-emu/android/emulation/control/AdbConnection.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:16:42Z",
+      "side": 1,
+      "message": "when does the while loop break ? the disconnect or after getting results ?",
+      "range": {
+        "startLine": 34,
+        "startChar": 3,
+        "endLine": 37,
+        "endChar": 4
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50e8535e_48cfb2f6",
+        "filename": "android/android-emu/android/emulation/control/AdbConnection.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:16:42Z",
+      "side": 1,
+      "message": "add authorized ?",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 15
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30eeae5d_6061db83",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T04:16:42Z",
+      "side": 1,
+      "message": "this appears to be a confusing name",
+      "range": {
+        "startLine": 448,
+        "startChar": 8,
+        "endLine": 448,
+        "endChar": 18
+      },
+      "revId": "8f3be6e06b04179b31020ef74d3d288a6b753f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
