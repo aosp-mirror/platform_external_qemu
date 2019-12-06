@@ -22,6 +22,30 @@
       "revId": "5df1d39a96a2261aa9f211b09f375e55dddc3b8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55eb1da8_4aef8b44",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-06T19:33:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "cc765152_07e5dc37",
+      "range": {
+        "startLine": 38,
+        "startChar": 38,
+        "endLine": 38,
+        "endChar": 42
+      },
+      "revId": "5df1d39a96a2261aa9f211b09f375e55dddc3b8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
