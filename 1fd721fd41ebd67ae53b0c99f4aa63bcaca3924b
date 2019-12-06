@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "22b4d0d8_5a940176",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 68
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T19:45:06Z",
+      "side": 1,
+      "message": "Thanks, will stick with adb port and jdwp port",
+      "parentUuid": "4d401c92_87b3d6bd",
+      "range": {
+        "startLine": 13,
+        "startChar": 4,
+        "endLine": 13,
+        "endChar": 36
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3cf64326_1de626cd",
         "filename": "/COMMIT_MSG",
         "patchSetId": 68
@@ -45,6 +69,30 @@
       "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d29a640d_5d89b936",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 68
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T19:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3cf64326_1de626cd",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -211,6 +259,30 @@
     },
     {
       "key": {
+        "uuid": "721b7e6c_1d989793",
+        "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T19:45:06Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "57496ea6_fc602d27",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 15
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88cf6798_3bbd781f",
         "filename": "android/android-emu/android/emulation/AdbHostListener.cpp",
         "patchSetId": 68
@@ -266,6 +338,30 @@
       "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2eb6e759_917607a7",
+        "filename": "android/android-emu/android/emulation/AdbTypes.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T19:45:06Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c2b10be8_98c8b843",
+      "range": {
+        "startLine": 22,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 2
+      },
+      "revId": "1fd721fd41ebd67ae53b0c99f4aa63bcaca3924b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
