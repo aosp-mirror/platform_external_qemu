@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78aba459_93d99e91",
+        "filename": "android/android-emu/android/metrics/PlaystoreMetricsWriter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-06T18:25:51Z",
+      "side": 1,
+      "message": "getUnixTimeUs?",
+      "range": {
+        "startLine": 137,
+        "startChar": 44,
+        "endLine": 137,
+        "endChar": 55
+      },
+      "revId": "1231b90cc1eec77fe193d7e140cfbaaa0ccefed9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
