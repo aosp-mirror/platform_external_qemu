@@ -27,15 +27,6 @@
 namespace android {
 namespace emulation {
 
-namespace {
-
-void* getHostAddress(uint64_t guest_phys_addr) {
-    void* ptr = gQAndroidVmOperations->physicalMemoryGetAddr(guest_phys_addr);
-    return ptr;
-}
-
-};  // namespace
-
 AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops) : mControlOps(ops) {
     allocatePages(phys_addr, kNumPages);
 }
