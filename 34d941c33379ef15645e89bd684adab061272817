@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "a978098a_e95e0376",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-06T00:11:31Z",
+      "side": 1,
+      "message": "BTW, do you happen to have the doc to describe how the checksum should be set?",
+      "parentUuid": "1b91c78c_8490a71f",
+      "revId": "34d941c33379ef15645e89bd684adab061272817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4268cef1_12c616c3",
         "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
         "patchSetId": 2
