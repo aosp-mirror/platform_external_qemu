@@ -145,6 +145,7 @@ set(android-emu-common
     android/metrics/Percentiles.cpp
     android/metrics/PerfStatReporter.cpp
     android/metrics/PeriodicReporter.cpp
+    android/metrics/PlaystoreMetricsWriter.cpp
     android/metrics/SyncMetricsReporter.cpp
     android/metrics/StudioConfig.cpp
     android/metrics/TextMetricsWriter.cpp
@@ -626,6 +627,7 @@ set(android-emu_unittests_src
     android/base/containers/StaticMap_unittest.cpp
     android/base/EintrWrapper_unittest.cpp
     android/base/files/FileShareOpen_unittest.cpp
+    android/base/files/GzipStreambuf_unittest.cpp
     android/base/files/IniFile_unittest.cpp
     android/base/files/InplaceStream_unittest.cpp
     android/base/files/MemStream_unittest.cpp
@@ -880,6 +882,7 @@ set(android-emu-metrics_unittests_src
     android/metrics/tests/NullMetricsClasses_unittest.cpp
     android/metrics/tests/Percentiles_unittest.cpp
     android/metrics/tests/PeriodicReporter_unittest.cpp
+    android/metrics/tests/PlaystoreMetricsWriter_unittest.cpp
     android/metrics/tests/SyncMetricsReporter_unittest.cpp)
 android_add_test(android-emu-metrics_unittests)
 

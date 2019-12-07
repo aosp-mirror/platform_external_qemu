@@ -20,6 +20,7 @@ set(android-emu-base_src
     android/base/files/DecompressingStream.cpp
     android/base/files/Fd.cpp
     android/base/files/FileShareOpen.cpp
+    android/base/files/GzipStreambuf.cpp
     android/base/files/IniFile.cpp
     android/base/files/InplaceStream.cpp
     android/base/files/MemStream.cpp
@@ -137,7 +138,7 @@ android_target_link_libraries(android-emu-base windows_msvc-x86_64 PUBLIC dirent
 target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
-target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID)
+target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID)
 android_target_link_libraries(android-emu-base
                               linux-x86_64
                               PUBLIC

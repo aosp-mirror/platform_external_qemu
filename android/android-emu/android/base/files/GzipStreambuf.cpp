@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/snapshot/GzipStreambuf.h"
+#include "android/base/files/GzipStreambuf.h"
 
 #include <streambuf>  // for basic_streambuf<>::traits_type, basic_streambuf
 
-#include "zconf.h"    // for Bytef
-#include "zlib.h"     // for z_stream, Z_OK, Z_STREAM_END, deflate, deflateEnd
+#include "zconf.h"  // for Bytef
+#include "zlib.h"   // for z_stream, Z_OK, Z_STREAM_END, deflate, deflateEnd
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0
@@ -43,8 +43,7 @@
 #endif
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
 GzipInputStreambuf::GzipInputStreambuf(std::streambuf* src,
                                        std::size_t bufferCapcity)
@@ -52,8 +51,8 @@ GzipInputStreambuf::GzipInputStreambuf(std::streambuf* src,
     // magic number from gz_read
     const int GZIP_WINDOW_BITS = 15 + 16;
 
-    mIn = std::make_unique<char[]>(mCapacity);
-    mOut = std::make_unique<char[]>(mCapacity);
+    mIn = std::unique_ptr<char[]>(new char[mCapacity]);
+    mOut = std::unique_ptr<char[]>(new char[mCapacity]);
     mInStart = mIn.get();
     mInEnd = mIn.get();
     setg(mOut.get(), mOut.get(), mOut.get());
@@ -129,8 +128,8 @@ GzipOutputStreambuf::GzipOutputStreambuf(std::streambuf* dst,
     mErr = deflateInit2(&mZstream, level, Z_DEFLATED, GZIP_WINDOW_BITS, 8,
                         Z_DEFAULT_STRATEGY);
 
-    mIn = std::make_unique<char[]>(mCapacity);
-    mOut = std::make_unique<char[]>(mCapacity);
+    mIn = std::unique_ptr<char[]>(new char[mCapacity]);
+    mOut = std::unique_ptr<char[]>(new char[mCapacity]);
     setp(mIn.get(), mIn.get() + mCapacity);
 }
 
@@ -221,6 +220,5 @@ GzipInputStream::GzipInputStream(std::streambuf* sbuf)
 GzipInputStream::~GzipInputStream() {
     delete rdbuf();
 }
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android

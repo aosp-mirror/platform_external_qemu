@@ -31,7 +31,7 @@
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
-#include "android/emulation/control/snapshot/GzipStreambuf.h"
+#include "android/base/files/GzipStreambuf.h"
 #include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/PathUtils.h"
