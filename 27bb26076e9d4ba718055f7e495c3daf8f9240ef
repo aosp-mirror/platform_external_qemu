@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ffedc298_71c1d901",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 70
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-08T23:21:17Z",
+      "side": 1,
+      "message": "I left a comment in the design doc;\nthe tl;dr is that we should not change the current adb behavior\n(with or without snapshot saving/loading);\n\nwe only use adb hub to handle the jdwp port and jdwp OPEN/READ/WRITE;\n\nso 5555 should be handled as before; and any jdwp port will be handled by adb hub (and its proxies etc)",
+      "range": {
+        "startLine": 13,
+        "startChar": 4,
+        "endLine": 15,
+        "endChar": 0
+      },
+      "revId": "27bb26076e9d4ba718055f7e495c3daf8f9240ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
