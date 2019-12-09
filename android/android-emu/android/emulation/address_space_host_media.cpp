@@ -52,7 +52,7 @@ void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pag
     mHostBuffer = android::aligned_buf_alloc(kAlignment, num_pages * 4096);
     mControlOps->add_memory_mapping(
         phys_addr, mHostBuffer, num_pages * 4096);
-    AS_DEVICE_DPRINT("Allocating host memory for media context: guest_addr 0x%" PRIx64 ", 0x%" PRIx64,
+    fprintf(stderr, "Allocating host memory %d pages for media context: guest_addr 0x%" PRIx64 ", 0x%" PRIx64 "\n\n", num_pages,
                      (uint64_t)phys_addr, (uint64_t)mHostBuffer);
 }
 
@@ -97,15 +97,16 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
                                    mControlOps->get_host_ptr(info->phys_addr));
             break;
         case MediaCodecType::H264Codec:
-#ifdef __APPLE__
+#ifndef _WIN32
             if (!mH264Decoder) {
                 mH264Decoder.reset(MediaH264Decoder::create());
             }
             mH264Decoder->handlePing(codecType,
                                      op,
                                      mControlOps->get_host_ptr(info->phys_addr));
-#endif
+#else
             AS_DEVICE_DPRINT("codec type %d not implemented", (int)codecType);
+#endif
             break;
         default:
             AS_DEVICE_DPRINT("codec type %d not implemented", (int)codecType);
