@@ -97,7 +97,7 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
                                    mControlOps->get_host_ptr(info->phys_addr));
             break;
         case MediaCodecType::H264Codec:
-#ifdef __APPLE__
+#ifndef _WIN32
             if (!mH264Decoder) {
                 mH264Decoder.reset(MediaH264Decoder::create());
             }

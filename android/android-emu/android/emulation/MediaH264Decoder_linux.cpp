@@ -13,6 +13,14 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264Decoder.h"
+#include "android/emulation/H264NaluParser.h"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include <stdio.h>
+#include <string.h>
 
 #define MEDIA_H264_DEBUG 1
 
@@ -71,6 +79,10 @@ void MediaH264DecoderImpl::decodeFrame(void* ptr, const uint8_t* frame, size_t s
 }
 
 void MediaH264DecoderImpl::flush(void* ptr) {
+    H264_DPRINT("NOT IMPLEMENTED");
+}
+
+void MediaH264DecoderImpl::getImage(void* ptr) {
     H264_DPRINT("NOT IMPLEMENTED");
 }
  
