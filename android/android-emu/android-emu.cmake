@@ -1,5 +1,6 @@
 # This file defines android-emu library
 prebuilt(VPX)
+prebuilt(LIBNVIDIA)
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 
@@ -312,6 +313,7 @@ set(android-emu_darwin-x86_64_src
 
 # Linux specific sources.
 set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
+    android/emulation/MediaH264Decoder_linux.cpp
     android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
 
 android_add_library(android-emu)
@@ -376,7 +378,7 @@ android_target_link_libraries(android-emu
                               iphlpapi::iphlpapi)
 
 # These are the libs needed for android-emu on linux.
-android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lc++)
+android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lc++ PRIVATE LIBNVIDIA::LIBNVIDIA)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu. You should really only add things that are crucial for this library to link
@@ -483,6 +485,7 @@ set(android-emu-shared_darwin-x86_64_src
 
 # Linux specific sources.
 set(android-emu-shared_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
+    android/emulation/MediaH264Decoder_linux.cpp
     android/crashreport/CrashReporter_linux.cpp)
 
 android_add_shared_library(android-emu-shared)
@@ -540,7 +543,7 @@ android_target_link_libraries(android-emu-shared windows PRIVATE emulator-libmma
                               iphlpapi::iphlpapi)
 
 # These are the libs needed for android-emu-shared on linux.
-android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
+android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt LIBNVIDIA::LIBNVIDIA)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu-shared. You should really only add things that are crucial for this library to link If you don't you might
