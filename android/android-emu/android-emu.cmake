@@ -1,5 +1,6 @@
 # This file defines android-emu library
 prebuilt(VPX)
+prebuilt(LIBNVIDIA)
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 
@@ -83,6 +84,7 @@ set(android-emu-common
     android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
     android/emulation/MediaVpxDecoder.cpp
+    android/emulation/MediaH264Decoder_linux.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/MultiDisplayPipe.cpp
@@ -258,6 +260,7 @@ set(android_emu_dependent_src
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
     android/emulation/Keymaster3.cpp
+    android/emulation/MediaH264Decoder_linux.cpp
     android/emulation/QemuMiscPipe.cpp
     android/console.cpp
     android/http_proxy.c
@@ -312,6 +315,7 @@ set(android-emu_darwin-x86_64_src
 
 # Linux specific sources.
 set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
+    android/emulation/MediaH264Decoder_linux.cpp
     android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
 
 android_add_library(android-emu)
@@ -322,6 +326,7 @@ android_add_library(android-emu)
 target_link_libraries(android-emu
                               PUBLIC
                               VPX::VPX
+                              LIBNVIDIA::LIBNVIDIA
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
@@ -488,6 +493,7 @@ android_add_shared_library(android-emu-shared)
 target_link_libraries(android-emu-shared
                       PRIVATE emulator-libext4_utils
                               VPX::VPX
+                              LIBNVIDIA::LIBNVIDIA
                               android-emu-base
                               emulator-libsparse
                               emulator-libselinux
