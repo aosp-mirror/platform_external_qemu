@@ -13,6 +13,18 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264Decoder.h"
+#include "android/emulation/H264NaluParser.h"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include <stdio.h>
+#include <string.h>
+
+// cuda and nvidia decoder related headers
+#include <cuda.h>
+#include <nvcuvid.h>
 
 #define MEDIA_H264_DEBUG 1
 
@@ -45,6 +57,13 @@ private:
     virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
+
+public:
+    // cuda related methods
+    static bool initCudaDrivers();
+    static bool s_isCudaInitialized;
+
+    //
 }; // MediaH264DecoderImpl
 
 MediaH264DecoderImpl::~MediaH264DecoderImpl() {
@@ -73,11 +92,50 @@ void MediaH264DecoderImpl::decodeFrame(void* ptr, const uint8_t* frame, size_t s
 void MediaH264DecoderImpl::flush(void* ptr) {
     H264_DPRINT("NOT IMPLEMENTED");
 }
- 
+
+void MediaH264DecoderImpl::getImage(void* ptr) {
+    H264_DPRINT("NOT IMPLEMENTED");
+}
+
+bool MediaH264DecoderImpl::initCudaDrivers() {
+    if (s_isCudaInitialized) {
+      return true;
+    }
+
+    // this should be called at the very beginning, before we call anything else
+    CUresult initResult = cuInit(0);
+    if (initResult != CUDA_SUCCESS) {
+        H264_DPRINT("Failed to init cuda drivers error code %d", (int)initResult);
+        s_isCudaInitialized = false;
+        return false;
+    }
+
+    int numGpuCards = 0;
+    CUresult myres = cuDeviceGetCount(&numGpuCards);
+    if (myres != CUDA_SUCCESS) {
+        H264_DPRINT("Failed to get number of GPU cards installed on host; error code %d", (int)myres);
+        return false;
+    }
+
+    if (numGpuCards <= 0) {
+        H264_DPRINT("There are no nvidia GPU cards on this host.");
+        return false;
+    }
+
+    // lukily, we get cuda initialized.
+    s_isCudaInitialized = true;
+
+    return true;
+}
+
 };  // namespace
 
+bool MediaH264DecoderImpl::s_isCudaInitialized = false;
 // static
 MediaH264Decoder* MediaH264Decoder::create() {
+    if(!MediaH264DecoderImpl::initCudaDrivers()) {
+      return nullptr;
+    }
     return new MediaH264DecoderImpl();
 }
 
