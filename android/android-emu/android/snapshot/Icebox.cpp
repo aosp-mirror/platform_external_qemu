@@ -194,13 +194,12 @@ void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
 }
 
-bool run_async(const char* cmd) {
+bool run_async(std::string cmd_str) {
     if (s_workerThread) {
         if (!s_workerThread->tryWait(nullptr)) {
             return false;
         }
     }
-    std::string cmd_str(cmd);
     s_workerThread.reset(new android::base::FunctorThread([cmd_str] {
         int s = tryConnect();
         if (s < 0) {
@@ -248,7 +247,7 @@ bool run_async(const char* cmd) {
     return s_workerThread->start();
 }
 
-bool track_async(int pid, const char* snapshot_name) {
+bool track_async(int pid, const std::string snapshot_name) {
     if (s_workerThread) {
         if (!s_workerThread->tryWait(nullptr)) {
             return false;
@@ -260,7 +259,7 @@ bool track_async(int pid, const char* snapshot_name) {
     }));
     return s_workerThread->start();
 }
-bool track(int pid, const char* snapshot_name) {
+bool track(int pid, const std::string snapshot_name) {
     if (s_adb_port == -1) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
