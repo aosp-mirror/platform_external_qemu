@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3b377efc_679bd838",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-10T22:29:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88ae3632_26ba4bc8",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f97ba480_c2c97ca0",
         "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
         "patchSetId": 24
@@ -45,6 +69,30 @@
       "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e1fc168_068149df",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-10T22:29:38Z",
+      "side": 1,
+      "message": "Done (we need h - 1 here; clarified the intent with a comment).",
+      "parentUuid": "f97ba480_c2c97ca0",
+      "range": {
+        "startLine": 198,
+        "startChar": 20,
+        "endLine": 198,
+        "endChar": 37
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "5c39a8bf_6debc665",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-10T22:29:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ee1b487_687e44fe",
+      "range": {
+        "startLine": 202,
+        "startChar": 8,
+        "endLine": 202,
+        "endChar": 25
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47fb3d8d_a878e797",
         "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
         "patchSetId": 24
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "f41a5fec_a88f9d0f",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-10T22:29:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "47fb3d8d_a878e797",
+      "range": {
+        "startLine": 611,
+        "startChar": 0,
+        "endLine": 622,
+        "endChar": 9
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84331c9d_7987a044",
         "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
         "patchSetId": 24
@@ -114,6 +210,30 @@
       "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69a644e6_7ce765cd",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-10T22:29:38Z",
+      "side": 1,
+      "message": "Done (mistakenly used mContextResources when we needed t use mResourceContexts)",
+      "parentUuid": "84331c9d_7987a044",
+      "range": {
+        "startLine": 624,
+        "startChar": 0,
+        "endLine": 635,
+        "endChar": 9
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
