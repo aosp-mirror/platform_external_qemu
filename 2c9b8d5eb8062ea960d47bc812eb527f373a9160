@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "78a293a7_5a06b6ae",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-10T00:36:45Z",
+      "side": 1,
+      "message": "Yes, let me explicitly set the variable,",
+      "parentUuid": "6267d739_6eb4f519",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 31
+      },
+      "revId": "2c9b8d5eb8062ea960d47bc812eb527f373a9160",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "295765a7_ac80abf5",
         "filename": "android/android-emu/android/cmdline-options.h",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2019-12-05T01:02:01Z",
       "side": 1,
       "message": "still experimental ?",
+      "range": {
+        "startLine": 256,
+        "startChar": 30,
+        "endLine": 256,
+        "endChar": 42
+      },
+      "revId": "2c9b8d5eb8062ea960d47bc812eb527f373a9160",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e01bd745_638e1253",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-10T00:36:45Z",
+      "side": 1,
+      "message": "I would say so. We should make sure that it works properly, after that we can flip/remove the flag.",
+      "parentUuid": "295765a7_ac80abf5",
       "range": {
         "startLine": 256,
         "startChar": 30,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "81fb0fa4_fe8cd36c",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-10T00:36:45Z",
+      "side": 1,
+      "message": "This is basically the existing class. I\u0027ve extracted an AdbCommand interface that has the minimum set of functionality. I will rename this and add documentation.",
+      "parentUuid": "46e63438_d1b51a74",
+      "range": {
+        "startLine": 81,
+        "startChar": 6,
+        "endLine": 81,
+        "endChar": 20
+      },
+      "revId": "2c9b8d5eb8062ea960d47bc812eb527f373a9160",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b099a8eb_da3862a5",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 5
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "e17490d7_7d7fcc4f",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-10T00:36:45Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b099a8eb_da3862a5",
+      "range": {
+        "startLine": 117,
+        "startChar": 6,
+        "endLine": 117,
+        "endChar": 30
+      },
+      "revId": "2c9b8d5eb8062ea960d47bc812eb527f373a9160",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "385ca9fe_9c11f390",
         "filename": "android/android-emu/android/emulation/control/AdbShellStream.h",
         "patchSetId": 5
@@ -105,6 +201,30 @@
       "writtenOn": "2019-12-05T01:02:01Z",
       "side": 1,
       "message": "which adb protocol ?",
+      "range": {
+        "startLine": 23,
+        "startChar": 2,
+        "endLine": 24,
+        "endChar": 30
+      },
+      "revId": "2c9b8d5eb8062ea960d47bc812eb527f373a9160",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0599d6cf_977cf304",
+        "filename": "android/android-emu/android/emulation/control/AdbShellStream.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-12-10T00:36:45Z",
+      "side": 1,
+      "message": "Will add documentation and pointers.",
+      "parentUuid": "385ca9fe_9c11f390",
       "range": {
         "startLine": 23,
         "startChar": 2,
