@@ -2083,7 +2083,7 @@ bool configAndStartRenderer(
                 opts->gpu,
                 &hw->hw_gpu_mode,
                 0,
-                opts->no_window,
+                host_emulator_is_headless,
                 uiPreferredBackend,
                 &hostGpuVulkanBlacklisted)) {
         derror("%s", config.status);
