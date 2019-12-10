@@ -118,13 +118,13 @@ void set_adb_port(int adb_port) {
     s_adb_port = adb_port;
 }
 
-bool track_async(int pid, const char* snapshot_name) {
+bool track_async(int pid, std::string snapshot_name) {
     return base::async([pid, snapshot_name] {
         bool result = track(pid, snapshot_name);
         D("track result %d\n", result);
     });
 }
-bool track(int pid, const char* snapshot_name) {
+bool track(int pid, std::string snapshot_name) {
     if (s_adb_port == -1) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
