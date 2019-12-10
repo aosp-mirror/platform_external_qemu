@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88ae3632_26ba4bc8",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-12-10T17:48:11Z",
+      "side": 1,
+      "message": "Could you please move to a function? I see a similar piece of code below.",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f97ba480_c2c97ca0",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-12-10T17:48:11Z",
+      "side": 1,
+      "message": "Are we sending empty pixels? Does the other party know how to read them?",
+      "range": {
+        "startLine": 198,
+        "startChar": 20,
+        "endLine": 198,
+        "endChar": 37
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ee1b487_687e44fe",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-12-10T17:48:11Z",
+      "side": 1,
+      "message": "This check seems unnecessary.",
+      "range": {
+        "startLine": 202,
+        "startChar": 8,
+        "endLine": 202,
+        "endChar": 25
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47fb3d8d_a878e797",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-12-10T17:48:11Z",
+      "side": 1,
+      "message": "auto\u0026 resources \u003d mContextResources[ctxId]\nauto idIt \u003d std::find(ids.begin(), ids.end(), resId);\nif (idIt \u003d\u003d ids.end())\n    ids.push_back(resId);",
+      "range": {
+        "startLine": 611,
+        "startChar": 0,
+        "endLine": 622,
+        "endChar": 9
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84331c9d_7987a044",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-12-10T17:48:11Z",
+      "side": 1,
+      "message": "Do we need this twice?",
+      "range": {
+        "startLine": 624,
+        "startChar": 0,
+        "endLine": 635,
+        "endChar": 9
+      },
+      "revId": "65e515be447f44a971c9705fec287d92e9bee07f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
