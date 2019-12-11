@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d4022d32_0046ec5f",
+        "filename": "android/android-emu/android/emulation/MediaH264Decoder_linux.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-11T17:35:37Z",
+      "side": 1,
+      "message": "is there a sw fallback if on linux without nvidia?",
+      "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
