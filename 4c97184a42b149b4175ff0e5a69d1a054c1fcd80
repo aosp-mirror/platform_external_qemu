@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e112045b_1f29bcdf",
+        "filename": "android/android-emu/android/emulation/control/AdbShellStream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-11T00:31:28Z",
+      "side": 1,
+      "message": "nit: line length",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 113
+      },
+      "revId": "4c97184a42b149b4175ff0e5a69d1a054c1fcd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
