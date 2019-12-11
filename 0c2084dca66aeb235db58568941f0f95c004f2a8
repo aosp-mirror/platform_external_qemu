@@ -16,6 +16,24 @@
       "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14818b46_00707710",
+        "filename": "android/android-emu/android/emulation/MediaH264Decoder_linux.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T17:51:44Z",
+      "side": 1,
+      "message": "good idea, probably ffmpeg should do that;\nwill look into that",
+      "parentUuid": "d4022d32_0046ec5f",
+      "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
