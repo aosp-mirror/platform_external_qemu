@@ -68,17 +68,24 @@ bool emulator_initMinimalSkinConfig(
 bool
 user_config_init( void )
 {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     SkinRect mmmRect;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     skin_winsys_get_monitor_rect(&mmmRect);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (min_config_qemu_mode) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         emulator_initMinimalSkinConfig(
             android_hw->hw_lcd_width,
             android_hw->hw_lcd_height,
             &mmmRect,
             &userConfig);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     } else {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         userConfig = auserConfig_new(android_avdInfo, &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
     }
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     return userConfig != NULL;
 }
 
@@ -181,6 +188,7 @@ parse_skin_files(const char*      skinDirPath,
         }
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     /* Magically support skins like "320x240" or "320x240x16" */
     if(isdigit(skinName[0])) {
         char *x = strchr(skinName, 'x');
@@ -208,6 +216,7 @@ parse_skin_files(const char*      skinDirPath,
         exit(1);
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     snprintf(tmp, sizeof tmp, "%s"PATH_SEP"%s"PATH_SEP"layout", skinDirPath, skinName);
     D("trying to load skin file '%s'", tmp);
 
@@ -387,14 +396,17 @@ bool emulator_initMinimalSkinConfig(
     s_deviceLcdWidth = lcd_width;
     s_deviceLcdHeight = lcd_height;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     create_minimal_skin_config(
         lcd_width, lcd_height,
         &s_skinConfig, &s_skinPath);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     *userConfig_out =
         auserConfig_new_custom(
             android_avdInfo, rect,
             s_deviceLcdWidth, s_deviceLcdHeight);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     return true;
 }
 
@@ -403,14 +415,18 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                         AndroidHwConfig* hw) {
     s_deviceLcdWidth = hw->hw_lcd_width;
     s_deviceLcdHeight = hw->hw_lcd_height;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (skin_charmap_setup(opts->charmap)) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         return false;
     }
 
     user_config_init();
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     parse_skin_files(opts->skindir, opts->skin, opts, hw,
                      &s_skinConfig, &s_skinPath);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (!opts->charmap) {
         /* Try to find a valid charmap name */
         char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
@@ -437,17 +453,22 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
     }
 
 #ifndef CONFIG_HEADLESS
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (opts->use_keycode_forwarding ||
         feature_is_enabled(kFeature_KeycodeForwarding)) {
         use_keycode_forwarding = 1;
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (use_keycode_forwarding) {
         const char* cur_keyboard_layout = skin_keyboard_host_layout_name();
         const char* android_keyboard_layout =
                 skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         if (android_keyboard_layout) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             boot_property_add("qemu.keyboard_layout", android_keyboard_layout);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         } else {
 // Always use keycode forwarding on Linux due to bug in prebuilt Libxkb.
 #if defined(_WIN32) || defined(__APPLE__)
@@ -465,11 +486,14 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
 
 bool emulator_initUserInterface(const AndroidOptions* opts,
                                 const UiEmuAgent* uiEmuAgent) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     user_config_init();
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     assert(s_skinConfig != NULL);
     assert(s_skinPath != NULL);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     return ui_init(s_skinConfig, s_skinPath, opts, uiEmuAgent);
 }
 
@@ -482,14 +506,19 @@ ui_init(const AConfig* skinConfig,
 {
     int  win_x, win_y;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     signal(SIGINT, SIG_DFL);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 #ifndef _WIN32
     signal(SIGQUIT, SIG_DFL);
 #endif
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (opts->ui_only) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         bool ret_OK = false;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         *(emulator_window_get()->opts) = *opts;
         if (!strcmp("snapshot-control", opts->ui_only)) {
             int winsys_ret;
@@ -501,8 +530,10 @@ ui_init(const AConfig* skinConfig,
         return ret_OK;
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     skin_winsys_start(opts->no_window);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (opts->no_window) {
 #ifndef _WIN32
        /* prevent SIGTTIN and SIGTTOUT from stopping us. this is necessary to be
@@ -515,6 +546,7 @@ ui_init(const AConfig* skinConfig,
         signal(SIGTTOU, SIG_IGN);
 #endif
     } else {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         // NOTE: On Windows, the program icon is embedded as a resource inside
         //       the executable. However, this only changes the icon that appears
         //       with the executable in a file browser. To change the icon that
@@ -536,14 +568,18 @@ ui_init(const AConfig* skinConfig,
         }
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     user_config_get_window_pos(&win_x, &win_y);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (emulator_window_init(emulator_window_get(), skinConfig, skinPath,
                              win_x, win_y, opts, uiEmuAgent) < 0) {
         derror("Could not load emulator skin from '%s'", skinPath);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         return false;
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     /* add an onion overlay image if needed */
     if (opts->onion) {
         SkinImage*  onion = skin_image_find_simple( opts->onion );
@@ -562,8 +598,10 @@ ui_init(const AConfig* skinConfig,
         emulator_window_get()->onion          = onion;
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     return true;
 }
 
