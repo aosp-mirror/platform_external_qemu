@@ -52,6 +52,24 @@
       "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1695f0ad_82e9a46b",
+        "filename": "android/android-emu/android/emulation/MediaH264Decoder_linux.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-12-11T18:18:23Z",
+      "side": 1,
+      "message": "We can also have an option to fallback to the guest SW decoder. We would just need to check if we have the necessary features on the host machine before setting those boot properties.",
+      "parentUuid": "56baa8d3_105300e8",
+      "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
