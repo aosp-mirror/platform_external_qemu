@@ -34,6 +34,24 @@
       "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56baa8d3_105300e8",
+        "filename": "android/android-emu/android/emulation/MediaH264Decoder_linux.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-11T18:15:37Z",
+      "side": 1,
+      "message": "yeah lets make sure that if cuda is not supported on linux, the hw decode is disabled at least, or using the sw fallback",
+      "parentUuid": "14818b46_00707710",
+      "revId": "0c2084dca66aeb235db58568941f0f95c004f2a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
