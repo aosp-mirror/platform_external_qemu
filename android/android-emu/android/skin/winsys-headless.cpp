@@ -276,6 +276,10 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel() {
 
 extern void skin_winsys_quit_request() {
     D(__FUNCTION__);
+
+    // Someone else already requested close.
+    if (sMainLoopShouldExit) return;
+
     sMainLoopShouldExit = true;
     bool needRequestClose = false;
 
