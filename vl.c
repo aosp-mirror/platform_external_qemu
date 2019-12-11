@@ -1997,9 +1997,7 @@ void qemu_system_reset_request(ShutdownCause reason)
     } else {
         reset_requested = reason;
 #ifdef CONFIG_ANDROID
-        if (android_qemu_mode) {
-            s_reset_request_uptime_ms = get_uptime_ms();
-        }
+        s_reset_request_uptime_ms = get_uptime_ms();
 #endif
     }
     cpu_stop_current();
@@ -5649,9 +5647,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     os_setup_post();
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
-        skin_winsys_report_entering_main_loop();
-    }
+    skin_winsys_report_entering_main_loop();
 #endif
     main_loop();
 
@@ -5678,12 +5674,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
 
 #ifdef CONFIG_ANDROID
+    qemu_android_emulation_teardown();
+    android_wear_agent_stop();
     if (android_qemu_mode) {
-        qemu_android_emulation_teardown();
-        android_wear_agent_stop();
         android_reporting_teardown();
-        android_devices_teardown();
     }
+    android_devices_teardown();
 #endif
 
     /* vhost-user must be cleaned up before chardevs.  */

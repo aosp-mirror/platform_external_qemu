@@ -686,6 +686,9 @@ static void enter_qemu_main_loop(int argc, char** argv) {
     if (android_init_error_occurred()) {
         skin_winsys_error_dialog(android_init_error_get_message(), "Error");
     }
+#ifdef CONFIG_HEADLESS
+     skin_winsys_quit_request();
+#endif
 }
 
 #ifdef CONFIG_HEADLESS
