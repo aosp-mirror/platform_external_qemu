@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8c4c6c59_e2738a1e",
+        "filename": "android/android-emu/android/emulation/MediaH264Decoder_darwin.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T17:54:18Z",
+      "side": 1,
+      "message": "will do;",
+      "parentUuid": "d60f5acc_5f154239",
+      "revId": "b3f2c05fdf0c9d9cd59db53110c95423d5c1e041",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ae695c3d_2a8ceca3",
         "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
         "patchSetId": 6
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "c13c41fc_90d88621",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T17:54:18Z",
+      "side": 1,
+      "message": "will look into that",
+      "parentUuid": "ae695c3d_2a8ceca3",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 16
+      },
+      "revId": "b3f2c05fdf0c9d9cd59db53110c95423d5c1e041",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1771360e_220ef122",
         "filename": "android/android-emu/android/emulation/address_space_host_media.h",
         "patchSetId": 6
@@ -53,6 +95,30 @@
       "writtenOn": "2019-12-11T17:28:48Z",
       "side": 1,
       "message": "let\u0027s see if we can get unit tests up that exercise this API; see address_space_graphics_unittests.cpp for an example",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 0
+      },
+      "revId": "b3f2c05fdf0c9d9cd59db53110c95423d5c1e041",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95ca33a1_a979b632",
+        "filename": "android/android-emu/android/emulation/address_space_host_media.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T17:54:18Z",
+      "side": 1,
+      "message": "that\u0027s good idea",
+      "parentUuid": "1771360e_220ef122",
       "range": {
         "startLine": 29,
         "startChar": 0,
