@@ -60,4 +60,15 @@ typedef enum PipeCloseReason {
     PIPE_CLOSE_ERROR    = 3,      /* some unrecoverable error on the pipe */
 } PipeCloseReason;
 
+/* Pipe flags for special transports and properties */
+enum AndroidPipeFlags {
+    /* first 4 bits are about whether it's using the normal goldfish pipe
+     * or using virtio-gpu / address space */
+    ANDROID_PIPE_DEFAULT = 0,
+    ANDROID_PIPE_VIRTIO_GPU_BIT = (1 << 0),
+    ANDROID_PIPE_ADDRESS_SPACE_BIT = (1 << 1),
+    ANDROID_PIPE_RESERVED0_BIT = (1 << 2),
+    ANDROID_PIPE_RESERVED1_BIT = (1 << 3),
+};
+
 ANDROID_END_HEADER

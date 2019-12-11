@@ -52,6 +52,7 @@
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
 static const AndroidPipeHwFuncs* sPipeHwFuncs = nullptr;
+static const AndroidPipeHwFuncs* sPipeHwVirtioFuncs = nullptr;
 
 using namespace android::base;
 
@@ -260,7 +261,13 @@ public:
           newPipe,
           mHwPipe,
           pipeName);
-        sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
+
+        newPipe->setFlags(mFlags);
+        if (newPipe->getFlags() & ANDROID_PIPE_VIRTIO_GPU_BIT) {
+            sPipeHwVirtioFuncs->resetPipe(mHwPipe, newPipe);
+        } else {
+            sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
+        }
         delete this;
 
         return result;
@@ -363,6 +370,7 @@ private:
         void* hwPipe = wake_cmd.hwPipe;
         int flags = wake_cmd.wakeFlags;
 
+        // Not used when in virtio mode.
         if (flags & PIPE_WAKE_CLOSED) {
             sPipeHwFuncs->closeFromHost(hwPipe);
         } else {
@@ -489,6 +497,8 @@ void AndroidPipe::Service::resetAll() {
 }
 
 void AndroidPipe::signalWake(int wakeFlags) {
+    // i.e., pipe not using normal pipe device
+    if (mFlags) return;
     if (!mHwPipe) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat(
@@ -501,6 +511,8 @@ void AndroidPipe::signalWake(int wakeFlags) {
 }
 
 void AndroidPipe::closeFromHost() {
+    // i.e., pipe not using normal pipe device
+    if (mFlags) return;
     if (!mHwPipe) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
@@ -512,6 +524,9 @@ void AndroidPipe::closeFromHost() {
 }
 
 void AndroidPipe::abortPendingOperation() {
+    // i.e., pipe not using normal pipe device
+    if (mFlags) return;
+
     if (!mHwPipe) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
@@ -596,6 +611,13 @@ const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
     return result;
 }
 
+const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
+        const AndroidPipeHwFuncs* hwFuncs) {
+    const AndroidPipeHwFuncs* result = sPipeHwVirtioFuncs;
+    sPipeHwVirtioFuncs = hwFuncs;
+    return result;
+}
+
 void android_pipe_reset_services() {
     AndroidPipe::Service::resetAll();
 }
@@ -604,6 +626,14 @@ void* android_pipe_guest_open(void* hwpipe) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
     return android::sGlobals->connectorService.create(hwpipe, nullptr);
+}
+
+void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
+    CHECK_VM_STATE_LOCK();
+    DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
+    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr);
+    pipe->setFlags((AndroidPipeFlags)flags);
+    return pipe;
 }
 
 void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
@@ -790,6 +820,7 @@ void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
     android::sGlobals->pipeWaker.signalWake(hwpipe, flags);
 }
 
+// Not used when in virtio mode.
 int android_pipe_get_id(void* hwpipe) {
     return sPipeHwFuncs->getPipeId(hwpipe);
 }
