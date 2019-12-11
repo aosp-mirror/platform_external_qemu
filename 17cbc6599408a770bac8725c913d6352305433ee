@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "448418c4_2d00f4aa",
+        "filename": "android/android-emu/android/adb-server.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T18:36:36Z",
+      "side": 1,
+      "message": "nit: android_get_jdwp_port()",
+      "range": {
+        "startLine": 37,
+        "startChar": 11,
+        "endLine": 37,
+        "endChar": 32
+      },
+      "revId": "17cbc6599408a770bac8725c913d6352305433ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6a0bb7a_fd06d549",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 71
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T18:36:36Z",
+      "side": 1,
+      "message": "set it to 0",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 15
+      },
+      "revId": "17cbc6599408a770bac8725c913d6352305433ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4f7647f_435d40ad",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 71
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T18:36:36Z",
+      "side": 1,
+      "message": "DD()",
+      "range": {
+        "startLine": 595,
+        "startChar": 4,
+        "endLine": 595,
+        "endChar": 10
+      },
+      "revId": "17cbc6599408a770bac8725c913d6352305433ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e5cc11f_25a59b58",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-12-11T18:36:36Z",
+      "side": 1,
+      "message": "should this be just a pointer  and only instantiated when jdwp port is enabled ?",
+      "range": {
+        "startLine": 235,
+        "startChar": 11,
+        "endLine": 235,
+        "endChar": 18
+      },
+      "revId": "17cbc6599408a770bac8725c913d6352305433ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
