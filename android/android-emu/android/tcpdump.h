@@ -17,7 +17,7 @@
 ANDROID_BEGIN_HEADER
 
 /* global flag, set to 1 when packet captupe is active */
-extern int  qemu_tcpdump_active;
+API extern int  qemu_tcpdump_active;
 
 /* start a new packet capture, close the current one if any.
  * returns 0 on success, and -1 on failure (see errno then) */

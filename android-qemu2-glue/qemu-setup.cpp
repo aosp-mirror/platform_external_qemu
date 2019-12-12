@@ -78,6 +78,10 @@ extern char* op_http_proxy;
 using android::VmLock;
 using android::DmaMap;
 
+
+extern "C" AndroidProxyCB* gAndroidProxyCB;
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
+
 extern "C" void ranchu_device_tree_setup(void *fdt) {
     /* fstab */
     qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
@@ -120,6 +124,25 @@ extern "C" void rng_random_generic_read_random_bytes(void *buf, int size) {
     stream.read(buf, size);
 }
 
+static const AndroidConsoleAgents* getConsoleAgents() {
+    // Initialize UI/console agents.
+    static const AndroidConsoleAgents consoleAgents = {
+            gQAndroidBatteryAgent,        gQAndroidDisplayAgent,
+            gQAndroidEmulatorWindowAgent, gQAndroidFingerAgent,
+            gQAndroidLocationAgent,       gQAndroidHttpProxyAgent,
+            gQAndroidRecordScreenAgent,   gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,      gQAndroidVmOperations,
+            gQAndroidNetAgent,            gQAndroidLibuiAgent,
+            gQCarDataAgent,               gAndroidProxyCB,
+            gQGrpcAgent,
+    };
+    return &consoleAgents;
+}
+
+void register_console_agents() {
+    android_register_console_agents(getConsoleAgents());
+}
+
 bool qemu_android_emulation_early_setup() {
     // Ensure that the looper is set for the main thread and for any
     // future thread created by QEMU.
@@ -140,6 +163,8 @@ bool qemu_android_emulation_early_setup() {
         // Register qemud-related snapshot callbacks.
         android_qemu2_qemud_init();
     }
+
+
 
     // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
@@ -170,6 +195,7 @@ bool qemu_android_emulation_early_setup() {
 
     qemu_android_address_space_device_init();
 
+
     androidSnapshot_initialize(gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent);
     qemu_snapshot_compression_setup();
@@ -183,19 +209,6 @@ bool qemu_android_emulation_early_setup() {
     return true;
 }
 
-const AndroidConsoleAgents* getConsoleAgents() {
-    // Initialize UI/console agents.
-    static const AndroidConsoleAgents consoleAgents = {
-            gQAndroidBatteryAgent,        gQAndroidDisplayAgent,
-            gQAndroidEmulatorWindowAgent, gQAndroidFingerAgent,
-            gQAndroidLocationAgent,       gQAndroidHttpProxyAgent,
-            gQAndroidRecordScreenAgent,   gQAndroidTelephonyAgent,
-            gQAndroidUserEventAgent,      gQAndroidVmOperations,
-            gQAndroidNetAgent,            gQAndroidLibuiAgent,
-            gQCarDataAgent,               gQGrpcAgent,
-    };
-    return &consoleAgents;
-}
 
 bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
