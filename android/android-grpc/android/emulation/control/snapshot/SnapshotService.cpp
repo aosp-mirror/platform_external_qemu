@@ -24,6 +24,7 @@
 
 #include "android/base/memory/ScopedPtr.h"
 
+#include "android/console.h"
 #include "android/base/Log.h"
 #include "android/base/StringView.h"
 #include "android/base/Uuid.h"
@@ -118,7 +119,7 @@ public:
         if (!snapshot->isImported()) {
             // Exports all qcow2 images..
             SnapshotLineConsumer slc(&result);
-            auto exp = gQAndroidVmOperations->snapshotExport(
+            auto exp = get_console_agents()->vm->snapshotExport(
                     snapshot->name().data(), tmpdir.data(), slc.opaque(),
                     LineConsumer::Callback);
 
@@ -271,7 +272,7 @@ public:
         }
 
         SnapshotLineConsumer slc(reply);
-        if (!gQAndroidVmOperations->snapshotLoad(snapshot->name().data(),
+        if (!get_console_agents()->vm->snapshotLoad(snapshot->name().data(),
                                                  slc.opaque(),
                                                  LineConsumer::Callback)) {
             slc.error();
@@ -298,7 +299,7 @@ public:
         }
 
         SnapshotLineConsumer slc(reply);
-        if (!gQAndroidVmOperations->snapshotSave(request->snapshot_id().c_str(),
+        if (!get_console_agents()->vm->snapshotSave(request->snapshot_id().c_str(),
                                                  slc.opaque(),
                                                  LineConsumer::Callback)) {
             slc.error();
