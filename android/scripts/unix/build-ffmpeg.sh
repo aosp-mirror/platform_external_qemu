@@ -114,6 +114,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-yasm \
                 --disable-avdevice \
                 --enable-avresample \
+                --enable-pic \
                 --enable-libx264 \
                 --enable-libvpx \
                 --disable-protocol=tls \
