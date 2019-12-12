@@ -95,6 +95,9 @@ uint16_t android_wifi_server_port = 0;
 uint16_t android_wifi_client_port = 0;
 }
 
+
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
+
 // The following code is used to support the -report-console option,
 // which takes a parameter in one of the following formats:
 //
@@ -420,6 +423,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_unix_pipes_init();
     android_init_opengles_pipe();
 
+
     if (android_qemu_mode) {
         android_opengles_pipe_set_recv_mode(0 /* android */);
     } else {
@@ -444,7 +448,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     }
 
     if (fc::isEnabled(fc::MultiDisplay)) {
-        android_init_multi_display_pipe(gQAndroidEmulatorWindowAgent);
+        android_init_multi_display_pipe(agents->emu);
     }
 
 #ifndef _WIN32

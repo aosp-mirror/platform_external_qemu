@@ -37,26 +37,11 @@ target_compile_definitions(emulator-crash-service PRIVATE
     -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
 target_link_libraries(emulator-crash-service PRIVATE android-emu-crash-service android-emu emulator-libui breakpad_server Qt5::Gui)
 
-
-# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though
-# we are not using them..
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  android_target_link_libraries(emulator-crash-service windows-x86_64 PRIVATE android-mock-vm-operations android-emu)
-endif ()
-
-
 android_install_exe(emulator-crash-service .)
 
 set(emulator64_test_crasher_src android/crashreport/testing/main-test-crasher.cpp)
 android_add_executable(emulator64_test_crasher)
 target_link_libraries(emulator64_test_crasher PRIVATE android-emu libqemu2-glue breakpad_server)
-
-
-# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though
-# we are not using them..
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  android_target_link_libraries(emulator64_test_crasher windows-x86_64 PRIVATE android-mock-vm-operations android-emu)
-endif ()
 
 set(emulator_crashreport_unittests_src
     android/crashreport/CrashService_common.cpp
