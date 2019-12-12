@@ -2051,10 +2051,12 @@ bool configAndStartRenderer(
          RendererConfig* config_out) {
     EmuglConfig config;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     int api_level = avdInfo_getApiLevel(avd);
     char* api_arch = avdInfo_getTargetAbi(avd);
     bool isGoogle = avdInfo_isGoogleApis(avd);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
         (isGuestRendererChoice(opts->gpu) ||
          isGuestRendererChoice(hw->hw_gpu_mode))) {
@@ -2068,13 +2070,16 @@ bool configAndStartRenderer(
         }
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // Map the generic "software" setting to our default software renderer
     if (!strcmp(hw->hw_gpu_mode, "software")) {
         str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     bool hostGpuVulkanBlacklisted = true;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
@@ -2089,9 +2094,11 @@ bool configAndStartRenderer(
         derror("%s", config.status);
         config_out->openglAlive = 0;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         crashhandler_append_message_format(
             "androidEmuglConfigInit failed.\n");
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         lastRendererConfig = *config_out;
         AFREE(api_arch);
 
@@ -2099,9 +2106,11 @@ bool configAndStartRenderer(
     }
 
     // Also write the selected renderer.
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     config_out->selectedRenderer =
         emuglConfig_get_current_renderer();
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // Determine whether to enable Vulkan (if in android qemu mode)
 
     if (android_qemu_mode) {
@@ -2115,6 +2124,7 @@ bool configAndStartRenderer(
             "API level: %d host GPU blacklisted? %d\n",
             config_out->selectedRenderer,
             api_level, hostGpuVulkanBlacklisted);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         switch (config_out->selectedRenderer) {
             // Host gpu: enable as long as not on blacklist
             // and api >= 29
@@ -2154,6 +2164,7 @@ bool configAndStartRenderer(
             feature_set_if_not_overridden_or_guest_disabled(kFeature_GLDirectMem, true);
         }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         if (shouldEnableVulkan) {
             crashhandler_append_message_format("Enabling Vulkan");
             feature_set_if_not_overridden(kFeature_GLDirectMem, true);
@@ -2167,6 +2178,7 @@ bool configAndStartRenderer(
 
     AFREE(api_arch);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // If the user is using -gpu off (not -gpu guest),
     // or if the API level is lower than 14 (Ice Cream Sandwich)
     // force 16-bit color depth.
@@ -2183,6 +2195,7 @@ bool configAndStartRenderer(
     str_reset(&hw->hw_gpu_mode, config.backend);
     D("%s", config.status);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
 
 #ifdef _WIN32
@@ -2204,7 +2217,9 @@ bool configAndStartRenderer(
     }
 #endif
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     emuglConfig_setupEnv(&config);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     // Now start the renderer, if applicable, and determine various things such as max supported
     // GLES version and the correct props to write.
@@ -2225,8 +2240,10 @@ bool configAndStartRenderer(
             config_out->glesMode = kAndroidGlesEmulationOff;
         }
     } else {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         int gles_init_res =
             android_initOpenglesEmulation();
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         int renderer_startup_res =
             android_startOpenglesRenderer(
                     hw->hw_lcd_width,
@@ -2237,6 +2254,7 @@ bool configAndStartRenderer(
                     window_agent,
                     &gles_major_version,
                     &gles_minor_version);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         if (gles_init_res || renderer_startup_res) {
             config_out->openglAlive = 0;
             if (gles_init_res) {
@@ -2252,6 +2270,7 @@ bool configAndStartRenderer(
         }
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // We need to know boot property
     // for opengles version in advance.
     const bool guest_es3_is_ok = feature_is_enabled(kFeature_GLESDynamicVersion);
@@ -2267,11 +2286,13 @@ bool configAndStartRenderer(
     // Use the conservative value for bytes per pixel (RGBA8)
     uint64_t pixelSizeBytes = 4;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     config_out->glFramebufferSizeBytes =
         hw->hw_lcd_width *
         hw->hw_lcd_height *
         pixelSizeBytes;
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     lastRendererConfig = *config_out;
     return true;
 }
