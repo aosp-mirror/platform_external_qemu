@@ -1,5 +1,6 @@
 # This file defines android-emu library
 prebuilt(VPX)
+prebuilt(FFMPEG)
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 
@@ -87,6 +88,8 @@ set(android-emu-common
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
     android/emulation/MediaVpxDecoder.cpp
+    android/emulation/MediaH264DecoderDefault.cpp
+    android/emulation/MediaH264Decoder.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/MultiDisplayPipe.cpp
@@ -325,6 +328,7 @@ android_add_library(android-emu)
 # ideally would like to keep this list small.
 target_link_libraries(android-emu
                               PUBLIC
+                              FFMPEG::FFMPEG
                               VPX::VPX
                               emulator-libext4_utils
                               android-emu-base
@@ -394,6 +398,8 @@ android_target_link_libraries(android-emu
                               "-framework CoreMedia" # Also for the camera.
                               "-framework CoreVideo" # Also for the camera.
                               "-framework IOKit"
+                              "-framework VideoToolbox" # For HW codec acceleration on mac
+                              "-framework VideoDecodeAcceleration" # For HW codec acceleration on mac
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
 
@@ -491,7 +497,8 @@ android_add_shared_library(android-emu-shared)
 
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
-                      PRIVATE emulator-libext4_utils
+    PUBLIC emulator-libext4_utils
+                              FFMPEG::FFMPEG
                               VPX::VPX
                               android-emu-base
                               android-net
@@ -548,7 +555,15 @@ android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu-shared. You should really only add things that are crucial for this library to link If you don't you might
 # see bizarre errors. (Add opengl as a link dependency, you will have fun)
-android_target_link_libraries(android-emu-shared darwin-x86_64 PRIVATE "-framework AppKit")
+android_target_link_libraries(android-emu-shared darwin-x86_64 PRIVATE
+        "-framework AppKit"
+        "-framework AVFoundation" # For camera-capture-mac.m
+        "-framework Accelerate" # Of course, our camera needs it!
+        "-framework CoreMedia" # Also for the camera.
+        "-framework CoreVideo" # Also for the camera.
+        "-framework VideoToolbox" # For HW codec acceleration on mac
+        "-framework VideoDecodeAcceleration" # For HW codec acceleration on mac
+        "-framework IOKit")
 
 target_include_directories(
   android-emu-shared
