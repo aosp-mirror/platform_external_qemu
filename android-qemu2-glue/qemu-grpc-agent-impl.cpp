@@ -17,13 +17,11 @@
 #ifdef ANDROID_GRPC
 #include "android/emulation/control/GrpcServices.h"
 
-extern const AndroidConsoleAgents* getConsoleAgents();
-
-int start_grpc(int port, const char* turncfg) {
-     return android::emulation::control::GrpcServices::setup(port, getConsoleAgents(), "forward", turncfg);
+int start_grpc(void* agents, int port, const char* turncfg) {
+     return android::emulation::control::GrpcServices::setup(port, (struct AndroidConsoleAgents*) agents, "forward", turncfg);
 }
 #else
-int start_grpc(int port, const char* turncfg) {
+int start_grpc(void* agents, int port, const char* turncfg) {
     printf("GRPC endpoint not available\n");
     return -1;
 }
