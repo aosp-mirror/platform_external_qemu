@@ -110,10 +110,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-doc \
                 --disable-programs \
                 --enable-gpl \
-                --enable-asm \
-                --enable-yasm \
+                --disable-asm \
+                --disable-yasm \
                 --disable-avdevice \
                 --enable-avresample \
+                --enable-pic \
                 --enable-libx264 \
                 --enable-libvpx \
                 --disable-protocol=tls \
