@@ -2005,6 +2005,9 @@ extern "C" int main(int argc, char** argv) {
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
 
+    // Crash.
+    *(uint32_t)(1321) = 42;
+
     if (VERBOSE_CHECK(init)) {
         printf("QEMU options list:\n");
         for (int i = 0; i < args.size(); i++) {
