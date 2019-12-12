@@ -97,16 +97,12 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
                                    mControlOps->get_host_ptr(info->phys_addr));
             break;
         case MediaCodecType::H264Codec:
-#ifndef _WIN32
             if (!mH264Decoder) {
                 mH264Decoder.reset(MediaH264Decoder::create());
             }
             mH264Decoder->handlePing(codecType,
                                      op,
                                      mControlOps->get_host_ptr(info->phys_addr));
-#else
-            AS_DEVICE_DPRINT("codec type %d not implemented", (int)codecType);
-#endif
             break;
         default:
             AS_DEVICE_DPRINT("codec type %d not implemented", (int)codecType);

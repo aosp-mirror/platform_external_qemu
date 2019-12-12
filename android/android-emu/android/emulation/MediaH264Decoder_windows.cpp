@@ -13,6 +13,24 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264Decoder.h"
+#include "android/emulation/MediaH264DecoderDefault.h"
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include <stdio.h>
+#include <string.h>
+
+// ffmpeg avcodec related headers
+//#include <libavcodec/avcodec.h>
+
+#define MEDIA_H264_DEBUG 1
+
+#if MEDIA_H264_DEBUG
+#define H264_DPRINT(fmt,...) fprintf(stderr, "h264-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define H264_DPRINT(fmt,...)
+#endif
 
 namespace android {
 namespace emulation {
@@ -70,7 +88,9 @@ void MediaH264DecoderImpl::flush(void* ptr) {
 
 // static
 MediaH264Decoder* MediaH264Decoder::create() {
-    return new MediaH264DecoderImpl();
+    // harware codec is not implemented on windows yet
+    // return new MediaH264DecoderImpl();
+    return new MediaH264DecoderDefault();
 }
 
 }  // namespace emulation

@@ -1,6 +1,8 @@
 # This file defines android-emu library
 prebuilt(VPX)
 prebuilt(LIBNVIDIA)
+prebuilt(VPX)
+prebuilt(FFMPEG)
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 
@@ -84,6 +86,7 @@ set(android-emu-common
     android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
     android/emulation/MediaVpxDecoder.cpp
+    android/emulation/MediaH264DecoderDefault.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/MultiDisplayPipe.cpp
@@ -299,6 +302,7 @@ set(android-emu_windows_src
     android/snapshot/MemoryWatch_windows.cpp
     android/windows_installer.cpp
     android/camera/camera-capture-windows.cpp
+    android/emulation/MediaH264Decoder_windows.cpp
     android/crashreport/CrashReporter_windows.cpp)
 
 # Mac specific sources, these will only be included when building for darwin
@@ -323,6 +327,7 @@ android_add_library(android-emu)
 # ideally would like to keep this list small.
 target_link_libraries(android-emu
                               PUBLIC
+                              FFMPEG::FFMPEG
                               VPX::VPX
                               emulator-libext4_utils
                               android-emu-base
@@ -472,6 +477,7 @@ set(android-emu-shared_src ${android-emu-common} stubs/stubs.cpp)
 
 # Windows specific sources
 set(android-emu-shared_windows_src android/opengl/NativeGpuInfo_windows.cpp android/snapshot/MemoryWatch_windows.cpp
+    android/emulation/MediaH264Decoder_windows.cpp
     android/windows_installer.cpp android/crashreport/CrashReporter_windows.cpp)
 
 # Mac specific sources, these will only be included when building for darwin
@@ -492,7 +498,8 @@ android_add_shared_library(android-emu-shared)
 
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
-                      PRIVATE emulator-libext4_utils
+    PUBLIC emulator-libext4_utils
+                              FFMPEG::FFMPEG
                               VPX::VPX
                               android-emu-base
                               emulator-libsparse
