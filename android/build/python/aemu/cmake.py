@@ -71,6 +71,11 @@ flags.DEFINE_multi_string('cmake_option', [], 'Options that should be passed '
                           'on directly to cmake. These will be passed on directly '
                           'to the underlying cmake project. For example: '
                           '--cmake_option QEMU_UPSTREAM=FALSE')
+flags.DEFINE_boolean(
+    'strip', False, 'Strip debug symbols.')
+
+flags.DEFINE_boolean(
+    'minbuild', False, 'Minimize the build to only support x86_64/aarch64.')
 
 def configure():
     """Configures the cmake project."""
@@ -115,6 +120,9 @@ def configure():
     if FLAGS.sanitizer:
         cmake_cmd += ['-DOPTION_ASAN=%s' % (','.join(FLAGS.sanitizer))]
 
+    if FLAGS.minbuild:
+        cmake_cmd += ['-DOPTION_MINBUILD=%s' % FLAGS.minbuild]
+
     cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
     cmake_cmd += [get_qemu_root()]
 
@@ -129,7 +137,7 @@ def get_build_cmd():
     '''Gets the command that will build all the sources.'''
     target = 'install'
     # Stripping is meaning less in windows world.
-    if FLAGS.crash != 'none' and platform.system().lower() != 'windows':
+    if (FLAGS.crash != 'none' or FLAGS.strip != 'none') and platform.system().lower() != 'windows':
         target += '/strip'
     return [get_cmake(), '--build', FLAGS.out, '--target', target]
 

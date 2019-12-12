@@ -41,6 +41,7 @@ else()
 endif()
 set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
 set(ANDROIDSTUDIO TRUE CACHE BOOL "True if we should build android studio components. Default on.")
+set(OPTION_MINBUILD FALSE CACHE BOOL "True if we should build a minimum set of components to support 64-bit guets only.")
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
@@ -557,14 +558,17 @@ target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-de
 android_install_exe(qemu-img .)
 
 # Create the qemu targets.
-android_add_qemu_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-android_add_qemu_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-android_add_qemu_headless_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_headless_executable(x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
 android_add_qemu_headless_executable(aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-android_add_qemu_headless_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+
+if (NOT OPTION_MINBUILD)
+  android_add_qemu_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_headless_executable(i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_headless_executable(armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+endif()
 
 # and the upstream qemu targets, if desired.
 if(QEMU_UPSTREAM)
