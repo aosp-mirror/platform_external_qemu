@@ -74,6 +74,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         builder_unpack_package_source x264
 
         builder_build_autotools_package x264 \
+                --enable-pic \
                 --enable-static
 
         # Copy binaries necessary for the build itself as well as static
