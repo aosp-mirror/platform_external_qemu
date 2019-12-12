@@ -100,6 +100,7 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
 #ifndef _WIN32
             if (!mH264Decoder) {
                 mH264Decoder.reset(MediaH264Decoder::create());
+                //mH264Decoder.reset(new MediaH264DecoderDefault());
             }
             mH264Decoder->handlePing(codecType,
                                      op,

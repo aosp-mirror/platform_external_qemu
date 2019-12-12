@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264Decoder.h"
+#include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/H264NaluParser.h"
 
 #include <cstdint>
@@ -555,7 +556,7 @@ bool MediaH264DecoderImpl::s_isCudaInitialized = false;
 // static
 MediaH264Decoder* MediaH264Decoder::create() {
     if(!MediaH264DecoderImpl::initCudaDrivers()) {
-      return nullptr;
+      return new MediaH264DecoderDefault();
     }
     return new MediaH264DecoderImpl();
 }

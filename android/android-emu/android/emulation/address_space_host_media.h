@@ -18,6 +18,7 @@
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/MediaVpxDecoder.h"
 #include "android/emulation/MediaH264Decoder.h"
+#include "android/emulation/MediaH264DecoderDefault.h"
 
 #include <unordered_map>
 
