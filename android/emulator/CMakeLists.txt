@@ -21,15 +21,23 @@ target_compile_definitions(emulator
                            "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 # Make sure we have the qemu dependencies available
-add_dependencies(emulator
-                 qemu-system-i386
-                 qemu-system-x86_64
-                 qemu-system-armel
-                 qemu-system-aarch64
-                 qemu-system-armel-headless
-                 qemu-system-x86_64-headless
-                 qemu-system-aarch64-headless
-                 emulator-crash-service)
+if (OPTION_MINBUILD)
+  add_dependencies(emulator
+                   qemu-system-x86_64
+                   qemu-system-aarch64
+                   qemu-system-x86_64-headless
+                   qemu-system-aarch64-headless)
+else()
+  add_dependencies(emulator
+                   qemu-system-i386
+                   qemu-system-x86_64
+                   qemu-system-armel
+                   qemu-system-aarch64
+                   qemu-system-armel-headless
+                   qemu-system-x86_64-headless
+                   qemu-system-aarch64-headless
+                   emulator-crash-service)
+endif()
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
@@ -53,7 +61,9 @@ set(EMULATOR_HW_DEPENDENCIES
 
 # Install all the depencies in the right place during build
 android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)
-android_target_dependency(emulator all MESA_DEPENDENCIES)
+if(NOT OPTION_MINBUILD)
+  android_target_dependency(emulator all MESA_DEPENDENCIES)
+endif()
 android_target_dependency(emulator all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_KEYMAP_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_BIOS_DEPENDENCIES)
@@ -74,7 +84,9 @@ android_target_dependency(emulator windows-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 # TODO(b/141205876): prebuilt executables are losing their execute permission on installation.
 # Once this issue is fixed, remove all of these "android_install_dependency_force_exec()" calls.
 android_install_dependency_force_exec(all QT5_SHARED_DEPENDENCIES)
-android_install_dependency(all MESA_DEPENDENCIES)
+if (NOT OPTION_MINBUILD)
+  android_install_dependency(all MESA_DEPENDENCIES)
+endif()
 android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
 android_install_dependency(all EMULATOR_BIOS_DEPENDENCIES)
