@@ -818,6 +818,7 @@ static int startEmulatorWithMinConfig(
                 __func__);
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // Register the quit callback
     android::base::registerEmulatorQuitCallback([] {
         android::base::ThreadLooper::runOnMainLooper([] {
@@ -825,6 +826,7 @@ static int startEmulatorWithMinConfig(
         });
     });
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 #if (SNAPSHOT_PROFILE > 1)
     printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
            get_uptime_ms());
@@ -835,14 +837,18 @@ static int startEmulatorWithMinConfig(
     WinsysPreferredGlesBackend uiPreferredGlesBackend =
             skin_winsys_get_preferred_gles_backend();
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 #ifndef _WIN32
     if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE ||
         uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
         uiPreferredGlesBackend = WINSYS_GLESBACKEND_PREFERENCE_AUTO;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         skin_winsys_set_preferred_gles_backend(uiPreferredGlesBackend);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 #endif
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // Feature flags-related last-microsecond renderer changes
     {
         // Should enable OpenGL ES 3.x?
@@ -870,10 +876,13 @@ static int startEmulatorWithMinConfig(
         }
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     RendererConfig rendererConfig;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                            gQAndroidEmulatorWindowAgent,
                            uiPreferredGlesBackend, &rendererConfig);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     // Gpu configuration is set, now initialize the screen recorder
     // and screenshot callback
