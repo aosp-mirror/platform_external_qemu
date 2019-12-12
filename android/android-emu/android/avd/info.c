@@ -19,6 +19,7 @@
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
 #include "android/utils/file_data.h"
@@ -38,8 +39,8 @@
 #include <errno.h>
 
 /* global variables - see android/globals.h */
-AvdInfoParams   android_avdParams[1];
-AvdInfo*        android_avdInfo;
+EXPORT AvdInfoParams   android_avdParams[1];
+EXPORT AvdInfo*        android_avdInfo;
 
 /* set to 1 for debugging */
 #define DEBUG 0

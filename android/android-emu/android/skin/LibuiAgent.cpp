@@ -10,11 +10,16 @@
 
 #include "android/skin/LibuiAgent.h"
 
-#include "android/base/ProcessControl.h"
+#include <memory>
+#include <string>
 
+#include "android/base/ProcessControl.h"
+#include "android/recording/video/player/VideoPlayer.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/skin/winsys.h"
+#include "emugl/common/OpenGLDispatchLoader.h"
 
 static int utf8_next(const unsigned char** pp, const unsigned char* end) {
     const unsigned char* p = *pp;
@@ -76,6 +81,18 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         [](int exitCode, const char* message) {
             android::base::restartEmulator();
         },
-};
+        [](bool show) { skin_winsys_show_virtual_scene_controls(show); },
+        []() { return emugl::LazyLoadedEGLDispatch::get(); },
+        []() { return emugl::LazyLoadedGLESv2Dispatch::get(); },
+        [](const char* path,
+           VideoPlayerRenderTarget* renderTarget,
+           VideoPlayerNotifier* notifier) {
+            return android::videoplayer::VideoPlayer::create(
+                           std::string(path), renderTarget,
+                           std::unique_ptr<
+                                   android::videoplayer::VideoPlayerNotifier>(
+                                   notifier))
+                    .release();
+        }};
 
 const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
