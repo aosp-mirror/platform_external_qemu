@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4220711b_4f47358d",
+        "filename": "android/android-emu/android/base/system/System_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-13T17:28:26Z",
+      "side": 1,
+      "message": "is this the whole second? that\u0027s quite heavyweight for a single test case IMO. even 50ms should be OK as that\u0027s more than three 16ms timer ticks from old Windows",
+      "range": {
+        "startLine": 158,
+        "startChar": 24,
+        "endLine": 158,
+        "endChar": 35
+      },
+      "revId": "e3f1e68cea3e6360e8a164365a2d1c75078d6c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac5d4433_b4c70aec",
+        "filename": "android/android-emu/android/base/system/System_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-13T17:28:26Z",
+      "side": 1,
+      "message": "unused?",
+      "range": {
+        "startLine": 159,
+        "startChar": 18,
+        "endLine": 159,
+        "endChar": 21
+      },
+      "revId": "e3f1e68cea3e6360e8a164365a2d1c75078d6c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "851a633f_3e4783a3",
+        "filename": "android/android-emu/android/base/system/System_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-13T17:28:26Z",
+      "side": 1,
+      "message": "please add an iteration limit, no matter how big. It\u0027s better to safeguard from a broken or mocked implementation than to debug a hanging treehugger 😊",
+      "range": {
+        "startLine": 161,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 5
+      },
+      "revId": "e3f1e68cea3e6360e8a164365a2d1c75078d6c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8fc99504_20bf68a1",
+        "filename": "android/msvc-posix-compat/src/gettimeofday.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-12-13T17:28:26Z",
+      "side": 1,
+      "message": "nit: please update the comments as they are misleading now",
+      "range": {
+        "startLine": 46,
+        "startChar": 33,
+        "endLine": 49,
+        "endChar": 74
+      },
+      "revId": "e3f1e68cea3e6360e8a164365a2d1c75078d6c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
