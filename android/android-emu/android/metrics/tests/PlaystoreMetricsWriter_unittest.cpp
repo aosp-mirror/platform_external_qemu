@@ -81,7 +81,8 @@ public:
     void SetUp() override {
         // Clean up mess and start up the fake http server.
         // android_verbose = -1; // Uncomment for lots of debug info.
-        mCookie = base::pj(mTestSystem.getTempDir(), "sam_cookie");
+        auto tmp = mTestSystem.getTempRoot();
+        mCookie = base::pj(tmp->pathString(), "sam_cookie");
         System::get()->deleteFile(mCookie);
         curl_init(nullptr);
         mRunning = true;
@@ -94,7 +95,7 @@ public:
         // Clean up the mess.
         System::get()->deleteFile(mCookie);
         mRunning = false;
-        close(mFd);
+        socketClose(mFd);
         curl_cleanup();
     }
 
@@ -282,14 +283,15 @@ static void writeFakeCookie(std::string fname, int64_t waitUntil) {
             fname, std::ios::out | std::ios::binary | std::ios::trunc);
     response.SerializeToOstream(&cookieResponse);
     cookieResponse.close();
+
+    // Make sure cookie was written.
+    System::FileSize fsize;
+    EXPECT_TRUE(System::get()->pathFileSize(fname, &fsize));
+    EXPECT_NE(0, fsize);
 }
 
 // sdk_tools_windows currently fails this test.
-#ifdef _MSC_VER
-TEST_F(PlaystoreMetricsWriterTest, DISABLED_noCallBeforeTime) {
-#else
 TEST_F(PlaystoreMetricsWriterTest, noCallBeforeTime) {
-#endif
     // This validates that we respect the timing in the cookie file.
     // If time > 100ms we should send.
     writeFakeCookie(mCookie, 100);
