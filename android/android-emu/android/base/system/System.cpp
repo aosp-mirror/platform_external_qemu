@@ -14,7 +14,9 @@
 
 #include "android/base/system/System.h"
 
+#include <inttypes.h>
 #include "android/base/EintrWrapper.h"
+#include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringParse.h"
 #include "android/base/files/PathUtils.h"
@@ -25,10 +27,9 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/base/threads/Thread.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/utils/tempfile.h"
-#include "android/utils/path.h"
 #include "android/utils/file_io.h"
-#include <inttypes.h>
+#include "android/utils/path.h"
+#include "android/utils/tempfile.h"
 
 #ifdef _WIN32
 #include "android/base/files/ScopedRegKey.h"
@@ -2327,8 +2328,8 @@ System::FileSize System::getFilePageSizeForPath(StringView path) {
     } while (ret != 0 && errno == EINTR);
 
     if (ret != 0) {
-        fprintf(stderr, "statvfs('%s') failed: %s\n", c_str(path).get(),
-                strerror(errno));
+        LOG(VERBOSE) << "statvfs('" << path << "') failed: " << strerror(errno)
+                     << "\n";
         pageSize = (System::FileSize)getpagesize();
     } else {
         if (fsStatus.f_type == HUGETLBFS_MAGIC) {
