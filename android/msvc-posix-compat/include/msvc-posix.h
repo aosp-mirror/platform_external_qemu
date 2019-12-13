@@ -80,6 +80,9 @@ typedef int64_t off64_t;
 #define __END_DECLS   /* empty */
 #endif
 
+
+typedef  VOID (CALLBACK* SystemTime)(LPFILETIME);
+
 // From <sys/time.h>
 struct timezone {
     int tz_minuteswest; /* of Greenwich */
@@ -99,6 +102,8 @@ struct timezone {
 
 __BEGIN_DECLS
 
+
+extern SystemTime getSystemTime;
 extern int gettimeofday(struct timeval* tp, struct timezone* tz);
 extern int asprintf(char** buf, const char* format, ...);
 extern int vasprintf(char** buf, const char* format, va_list args);

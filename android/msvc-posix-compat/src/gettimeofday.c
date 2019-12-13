@@ -11,6 +11,12 @@
     116444736000000000ull /* seconds between 1/1/1601 and 1/1/1970 */
 #define HECTONANOSEC_PER_SEC 10000000ull
 
+
+// This is a poor resolution timer, but at least it
+// is available on Win7 and older. System.cpp will install
+// a better one.
+static SystemTime getSystemTime = &GetSystemTimeAsFileTime;
+
 int getntptimeofday(struct timespec*, struct timezone*);
 
 int getntptimeofday(struct timespec* tp, struct timezone* z) {
@@ -37,7 +43,7 @@ int getntptimeofday(struct timespec* tp, struct timezone* z) {
     }
 
     if (tp != NULL) {
-        GetSystemTimeAsFileTime(&_now.ft); /* 100-nanoseconds since 1-1-1601 */
+        getSystemTime(&_now.ft); /* 100-nanoseconds since 1-1-1601 */
         /* The actual accuracy on XP seems to be 125,000 nanoseconds = 125
          * microseconds = 0.125 milliseconds */
         _now.ns100 -= FILETIME_1970; /* 100 nano-seconds since 1-1-1970 */
