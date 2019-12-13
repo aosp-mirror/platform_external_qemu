@@ -82,7 +82,8 @@ public:
         }
         mThread.reset(new ConnectorThread(data));
         mListening = false;
-        mGuestAgent->onHostConnection(mThread->releaseOutSocket());
+        mGuestAgent->onHostConnection(mThread->releaseOutSocket(),
+                                      AdbPortType::RegularAdb);
         mThread->start();
     }
 

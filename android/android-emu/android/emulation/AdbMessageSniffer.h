@@ -13,10 +13,13 @@
 
 #include "android/base/Log.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/apacket_utils.h"
 
 #include <map>
 #include <vector>
 #include <set>
+
+#define LOG_JDWP
 
 namespace android {
 namespace emulation {
@@ -25,15 +28,6 @@ namespace emulation {
 class AdbMessageSniffer {
 public:
 
-
-struct amessage {
-    unsigned command;       /* command identifier constant      */
-    unsigned arg0;          /* first argument                   */
-    unsigned arg1;          /* second argument                  */
-    unsigned data_length;   /* length of payload (0 is allowed) */
-    unsigned data_check;    /* checksum of data payload         */
-    unsigned magic;         /* command ^ 0xffffffff             */
-};
 
 struct apacket
 {
@@ -54,6 +48,10 @@ private:
     uint8_t* mBufferP;
     const char* mName;
     std::set<unsigned> mDummyShellArg0;
+#ifdef LOG_JDWP
+    std::set<std::pair<int, int> > mJdwp;
+    void printJdwp();
+#endif
 
     void grow_buffer_if_needed(int count);
     int getAllowedBytesToPrint(int bytes);

@@ -49,6 +49,7 @@ set(android-emu-common
     android/emulation/AdbMessageSniffer.cpp
     android/emulation/AdbHostListener.cpp
     android/emulation/AdbHostServer.cpp
+    android/emulation/AdbHub.cpp
     android/emulation/AndroidAsyncMessagePipe.cpp
     android/emulation/AndroidMessagePipe.cpp
     android/emulation/AndroidPipe.cpp
@@ -123,6 +124,7 @@ set(android-emu-common
     android/hw-kmsg.c
     android/hw-lcd.c
     android/hw-qemud.cpp
+    android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
@@ -698,6 +700,7 @@ set(android-emu_unittests_src
     android/emulation/AdbGuestPipe_unittest.cpp
     android/emulation/AdbHostListener_unittest.cpp
     android/emulation/AdbHostServer_unittest.cpp
+    android/emulation/AdbHub_unittest.cpp
     android/emulation/address_space_graphics_unittests.cpp
     android/emulation/address_space_host_memory_allocator_unittests.cpp
     android/emulation/android_pipe_pingpong_unittest.cpp
