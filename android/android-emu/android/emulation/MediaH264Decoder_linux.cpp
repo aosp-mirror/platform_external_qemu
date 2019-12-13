@@ -15,6 +15,7 @@
 #include "android/emulation/MediaH264Decoder.h"
 #include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/H264NaluParser.h"
+#include "android/emulation/CudaVideoLibraryLoader.h"
 
 #include <cstdint>
 #include <string>
@@ -131,6 +132,7 @@ public:
     // cuda related methods
     static bool initCudaDrivers();
     static bool s_isCudaInitialized;
+    static CudaVideoFunctions *s_func;
 
 private:
     // cuda call back
@@ -386,6 +388,13 @@ bool MediaH264DecoderImpl::initCudaDrivers() {
       return true;
     }
 
+    // load up cuda library
+    CudaVideoLibraryLoader myloader;
+    bool success = myloader.openLibrary();
+    if (!success) {
+        H264_DPRINT("cannot open cuda so library");
+    }
+
     // this should be called at the very beginning, before we call anything else
     CUresult initResult = cuInit(0);
     if (initResult != CUDA_SUCCESS) {
@@ -553,6 +562,7 @@ int MediaH264DecoderImpl::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
 };  // namespace
 
 bool MediaH264DecoderImpl::s_isCudaInitialized = false;
+CudaVideoFunctions* MediaH264DecoderImpl::s_func = nullptr;
 // static
 MediaH264Decoder* MediaH264Decoder::create() {
     if(!MediaH264DecoderImpl::initCudaDrivers()) {

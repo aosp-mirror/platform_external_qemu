@@ -84,6 +84,7 @@ set(android-emu-common
     android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
+    android/emulation/CudaVideoLibraryLoader.cpp
     android/emulation/H264NaluParser.cpp
     android/emulation/MediaVpxDecoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
@@ -329,6 +330,7 @@ target_link_libraries(android-emu
                               PUBLIC
                               FFMPEG::FFMPEG
                               VPX::VPX
+                              LIBNVIDIA::LIBNVIDIA
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
@@ -501,6 +503,7 @@ target_link_libraries(android-emu-shared
     PUBLIC emulator-libext4_utils
                               FFMPEG::FFMPEG
                               VPX::VPX
+                              LIBNVIDIA::LIBNVIDIA
                               android-emu-base
                               emulator-libsparse
                               emulator-libselinux
