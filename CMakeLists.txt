@@ -109,6 +109,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       set(OPTION_ASAN address)
     endif()
 
+    if (OPTION_ASAN STREQUAL "thread" AND OPTION_COVERAGE_IN_DEBUG)
+      message(FATAL_ERROR "You cannot run tsan with code coverage enabled.")
+    endif()
     if(NOT WINDOWS_MSVC_X86_64 AND OPTION_COVERAGE_IN_DEBUG)
       message("Enabling code coverage")
       # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
