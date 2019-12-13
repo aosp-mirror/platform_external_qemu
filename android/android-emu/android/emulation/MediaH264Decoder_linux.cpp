@@ -15,6 +15,7 @@
 #include "android/emulation/MediaH264Decoder.h"
 #include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/H264NaluParser.h"
+#include "android/emulation/CudaVideoLibraryLoader.h"
 
 #include <cstdint>
 #include <string>
@@ -42,7 +43,7 @@
         if( errorCode != CUDA_SUCCESS)                                                                             \
         {                                                                                                          \
             const char *msg = NULL;                              \
-            cuGetErrorName(errorCode, &msg);                              \
+            s_func->cuGetErrorName(errorCode, &msg);                              \
             H264_DPRINT("%s failed with error code %d %s\n", #cuvidAPI, (int)errorCode, msg);                              \
         }                                                                                                          \
     } while (0)
@@ -131,6 +132,8 @@ public:
     // cuda related methods
     static bool initCudaDrivers();
     static bool s_isCudaInitialized;
+    static CudaVideoLibraryLoader s_myloader;
+    static CudaVideoFunctions *s_func;
 
 private:
     // cuda call back
@@ -243,14 +246,14 @@ void MediaH264DecoderImpl::initH264Context(unsigned int width,
     const int gpuIndex = 0;
     const int cudaFlags = 0;
     CUdevice cudaDevice = 0;
-    CUresult myres = cuDeviceGet(&cudaDevice, gpuIndex);
+    CUresult myres = s_func->cuDeviceGet(&cudaDevice, gpuIndex);
     if (myres != CUDA_SUCCESS) {
       H264_DPRINT("Failed to get cuda device, error code %d", (int)myres);
       return;
     }
 
     char buf[1024];
-    myres = cuDeviceGetName(buf, sizeof(buf), cudaDevice);
+    myres = s_func->cuDeviceGetName(buf, sizeof(buf), cudaDevice);
     if (myres != CUDA_SUCCESS) {
       H264_DPRINT("Failed to get gpu device name, error code %d", (int)myres);
       return;
@@ -258,12 +261,14 @@ void MediaH264DecoderImpl::initH264Context(unsigned int width,
 
     H264_DPRINT("using gpu device %s", buf);
 
-    myres = cuCtxCreate(&mCudaContext, cudaFlags, cudaDevice);
+    myres = s_func->cuCtxCreate(&mCudaContext, cudaFlags, cudaDevice);
     if (myres != CUDA_SUCCESS) {
       H264_DPRINT("Failed to create cuda context, error code %d", (int)myres);
+    } else {
+      H264_DPRINT("created cuda context %p", mCudaContext);
     }
 
-    NVDEC_API_CALL(cuvidCtxLockCreate(&mCtxLock, mCudaContext));
+    NVDEC_API_CALL(s_func->cuvidCtxLockCreate(&mCtxLock, mCudaContext));
 
     CUVIDPARSERPARAMS videoParserParameters = {};
     videoParserParameters.CodecType = cudaVideoCodec_H264;
@@ -273,9 +278,9 @@ void MediaH264DecoderImpl::initH264Context(unsigned int width,
     videoParserParameters.pfnSequenceCallback = HandleVideoSequenceProc;
     videoParserParameters.pfnDecodePicture = HandlePictureDecodeProc;
     videoParserParameters.pfnDisplayPicture = HandlePictureDisplayProc;
-    NVDEC_API_CALL(cuvidCreateVideoParser(&mCudaParser, &videoParserParameters));
+    NVDEC_API_CALL(s_func->cuvidCreateVideoParser(&mCudaParser, &videoParserParameters));
 
-    H264_DPRINT("Successfully created cuda context %p", mCudaContext);
+    H264_DPRINT("Successfully created cuda context %p parser %p", mCudaContext, mCudaParser);
 }
 
 void MediaH264DecoderImpl::destroyH264Context() {
@@ -285,22 +290,22 @@ void MediaH264DecoderImpl::destroyH264Context() {
       mDecodedFrame = nullptr;
     }
 
-    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
-    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
+    NVDEC_API_CALL(s_func->cuCtxPushCurrent(mCudaContext));
+    NVDEC_API_CALL(s_func->cuCtxPopCurrent(NULL));
     if (mCudaParser != nullptr) {
-      NVDEC_API_CALL(cuvidDestroyVideoParser(mCudaParser));
+      NVDEC_API_CALL(s_func->cuvidDestroyVideoParser(mCudaParser));
       mCudaParser = nullptr;
     }
 
     if (mCudaDecoder != nullptr) {
-        NVDEC_API_CALL(cuvidDestroyDecoder(mCudaDecoder));
+        NVDEC_API_CALL(s_func->cuvidDestroyDecoder(mCudaDecoder));
         mCudaDecoder = nullptr;
     }
 
-    NVDEC_API_CALL(cuvidCtxLockDestroy(mCtxLock));
+    NVDEC_API_CALL(s_func->cuvidCtxLockDestroy(mCtxLock));
 
     if (mCudaContext != nullptr) {
-      CUresult myres = cuCtxDestroy(mCudaContext);
+      CUresult myres = s_func->cuCtxDestroy(mCudaContext);
       if (myres != CUDA_SUCCESS) {
         H264_DPRINT("Failed to destroy cuda context; error code %d", (int)myres);
       }
@@ -335,7 +340,11 @@ void MediaH264DecoderImpl::decodeFrame(void* ptr, const uint8_t* frame, size_t s
     if (!frame || szBytes == 0) {
         packet.flags |= CUVID_PKT_ENDOFSTREAM;
     }
-    NVDEC_API_CALL(cuvidParseVideoData(mCudaParser, &packet));
+    H264_DPRINT("now calling cuvidParseVideoData with %p with function %p", mCudaParser,
+                s_func->cuvidParseVideoData);
+    s_myloader.print(s_func);
+    NVDEC_API_CALL(s_func->cuvidParseVideoData(mCudaParser, &packet));
+    H264_DPRINT("successfully called cuvidParseVideoData");
     *retSzBytes = szBytes;
     *retErr = (int32_t)h264Err;
 }
@@ -386,19 +395,47 @@ bool MediaH264DecoderImpl::initCudaDrivers() {
       return true;
     }
 
+    // load up cuda library
+    CudaVideoLibraryLoader s_myloader;
+    bool success = s_myloader.openLibrary();
+    if (!success) {
+        H264_DPRINT("cannot open cuda so library");
+        exit(1);
+    } else {
+        H264_DPRINT("succesfully opened cuda so library");
+    }
+
+    CudaVideoFunctions* pf = s_myloader.getFunctions();
+    if (!pf) {
+        H264_DPRINT("empty cuda functions");
+        exit(1);
+    } else {
+        *s_func = *pf;
+        H264_DPRINT("successfully got cuda functions");
+    }
+
     // this should be called at the very beginning, before we call anything else
-    CUresult initResult = cuInit(0);
+    if (s_func->cuInit == nullptr) {
+        H264_DPRINT("empty cuInit");
+        exit(1);
+    }
+
+    CUresult initResult = s_func->cuInit(0);
     if (initResult != CUDA_SUCCESS) {
         H264_DPRINT("Failed to init cuda drivers error code %d", (int)initResult);
         s_isCudaInitialized = false;
         return false;
+    } else {
+        H264_DPRINT("successfully called cuInit");
     }
 
     int numGpuCards = 0;
-    CUresult myres = cuDeviceGetCount(&numGpuCards);
+    CUresult myres = s_func->cuDeviceGetCount(&numGpuCards);
     if (myres != CUDA_SUCCESS) {
         H264_DPRINT("Failed to get number of GPU cards installed on host; error code %d", (int)myres);
         return false;
+    } else {
+        H264_DPRINT("successfully called cuDeviceGetCount");
     }
 
     if (numGpuCards <= 0) {
@@ -406,6 +443,7 @@ bool MediaH264DecoderImpl::initCudaDrivers() {
         return false;
     }
 
+    s_myloader.print(s_func);
     // lukily, we get cuda initialized.
     s_isCudaInitialized = true;
 
@@ -414,6 +452,7 @@ bool MediaH264DecoderImpl::initCudaDrivers() {
 
 int MediaH264DecoderImpl::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat) {
 
+    H264_DPRINT("calling handle-video sequence with context %p", mCudaContext);
     int nDecodeSurface = pVideoFormat->min_num_decode_surfaces;
 
     CUVIDDECODECAPS decodecaps;
@@ -423,9 +462,12 @@ int MediaH264DecoderImpl::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat) {
     decodecaps.eChromaFormat = pVideoFormat->chroma_format;
     decodecaps.nBitDepthMinus8 = pVideoFormat->bit_depth_luma_minus8;
 
-    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
-    NVDEC_API_CALL(cuvidGetDecoderCaps(&decodecaps));
-    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuCtxPushCurrent(mCudaContext));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuvidGetDecoderCaps(&decodecaps));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuCtxPopCurrent(NULL));
 
     if(!decodecaps.bIsSupported){
         H264_DPRINT("Codec not supported on this GPU.");
@@ -473,26 +515,32 @@ int MediaH264DecoderImpl::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat) {
     mSurfaceWidth = videoDecodeCreateInfo.ulTargetWidth;
     mSurfaceHeight = videoDecodeCreateInfo.ulTargetHeight;
 
-    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
+    H264_DPRINT("calling handle-video sequence with cudacontext %p", mCudaContext);
+    NVDEC_API_CALL(s_func->cuCtxPushCurrent(mCudaContext));
     if (mCudaDecoder != nullptr) {
-        NVDEC_API_CALL(cuvidDestroyDecoder(mCudaDecoder));
+        NVDEC_API_CALL(s_func->cuvidDestroyDecoder(mCudaDecoder));
         mCudaDecoder = nullptr;
     }
     {
-      size_t free, total;
-      cuMemGetInfo(&free, &total);
+      unsigned int free, total;
+      s_func->cuMemGetInfo(&free, &total);
       H264_DPRINT("free memory %g M, total %g M", free/1048576.0, total/1048576.0);
     }
-    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
-    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
-    NVDEC_API_CALL(cuvidCreateDecoder(&mCudaDecoder, &videoDecodeCreateInfo));
-    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuCtxPopCurrent(NULL));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuCtxPushCurrent(mCudaContext));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuvidCreateDecoder(&mCudaDecoder, &videoDecodeCreateInfo));
+    H264_DPRINT("calling handle-video sequence");
+    NVDEC_API_CALL(s_func->cuCtxPopCurrent(NULL));
+    H264_DPRINT("calling handle-video sequence");
     H264_DPRINT("successfully called. decoder %p", mCudaDecoder);
     return nDecodeSurface;
 }
 
 int MediaH264DecoderImpl::HandlePictureDecode(CUVIDPICPARAMS *pPicParams) {
-    NVDEC_API_CALL(cuvidDecodePicture(mCudaDecoder, pPicParams));
+    NVDEC_API_CALL(s_func->cuvidDecodePicture(mCudaDecoder, pPicParams));
     H264_DPRINT("successfully called.");
     return 1;
 }
@@ -507,12 +555,11 @@ int MediaH264DecoderImpl::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
 
     CUdeviceptr dpSrcFrame = 0;
     unsigned int nSrcPitch = 0;
-    NVDEC_API_CALL(cuvidMapVideoFrame(mCudaDecoder, pDispInfo->picture_index, &dpSrcFrame,
-        &nSrcPitch, &videoProcessingParameters));
+    (s_func->cuvidMapVideoFrame(mCudaDecoder, pDispInfo->picture_index, (unsigned long long*)&dpSrcFrame, &nSrcPitch, &videoProcessingParameters));
 
     CUVIDGETDECODESTATUS DecodeStatus;
     memset(&DecodeStatus, 0, sizeof(DecodeStatus));
-    CUresult result = cuvidGetDecodeStatus(mCudaDecoder, pDispInfo->picture_index, &DecodeStatus);
+    CUresult result = s_func->cuvidGetDecodeStatus(mCudaDecoder, pDispInfo->picture_index, &DecodeStatus);
     if (result == CUDA_SUCCESS && (DecodeStatus.decodeStatus == cuvidDecodeStatus_Error
                                    || DecodeStatus.decodeStatus == cuvidDecodeStatus_Error_Concealed))
     {
@@ -522,7 +569,7 @@ int MediaH264DecoderImpl::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
 
     uint8_t *pDecodedFrame = mDecodedFrame;
 
-    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
+    NVDEC_API_CALL(s_func->cuCtxPushCurrent(mCudaContext));
     CUDA_MEMCPY2D m = { 0 };
     m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
     m.srcDevice = dpSrcFrame;
@@ -535,24 +582,27 @@ int MediaH264DecoderImpl::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
     H264_DPRINT("dstDevice %p, dstPitch %d, WidthInBytes %d Height %d",
                 m.dstHost, (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height);
 
-    NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    NVDEC_API_CALL(s_func->cuMemcpy2DAsync(&m, 0));
 
     m.srcDevice = (CUdeviceptr)((uint8_t *)dpSrcFrame + m.srcPitch * mSurfaceHeight);
     m.dstDevice = (CUdeviceptr)(m.dstHost = pDecodedFrame + m.dstPitch * mLumaHeight);
     m.Height = mChromaHeight;
-    NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    NVDEC_API_CALL(s_func->cuMemcpy2DAsync(&m, 0));
 
-    NVDEC_API_CALL(cuStreamSynchronize(0));
-    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
+    NVDEC_API_CALL(s_func->cuStreamSynchronize(0));
+    NVDEC_API_CALL(s_func->cuCtxPopCurrent(NULL));
 
-    NVDEC_API_CALL(cuvidUnmapVideoFrame(mCudaDecoder, dpSrcFrame));
+    NVDEC_API_CALL(s_func->cuvidUnmapVideoFrame(mCudaDecoder, dpSrcFrame));
     mImageReady = true;
+    s_myloader.print(s_func);
     H264_DPRINT("successfully called.");
     return 1;
 }
 };  // namespace
 
 bool MediaH264DecoderImpl::s_isCudaInitialized = false;
+CudaVideoLibraryLoader MediaH264DecoderImpl::s_myloader;
+CudaVideoFunctions* MediaH264DecoderImpl::s_func = new CudaVideoFunctions();
 // static
 MediaH264Decoder* MediaH264Decoder::create() {
     if(!MediaH264DecoderImpl::initCudaDrivers()) {

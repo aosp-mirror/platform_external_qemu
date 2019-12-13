@@ -9,19 +9,20 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 get_filename_component(
-  PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libnvidia/${ANDROID_TARGET_TAG}"
+  PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libnvidia/linux-x86_64"
   ABSOLUTE)
-if(ANDROID_TARGET_TAG MATCHES "linux.*")
   set(LIBNVIDIA_INCLUDE_DIR "${PREBUILT_ROOT}/include")
   set(LIBNVIDIA_INCLUDE_DIRS ${LIBNVIDIA_INCLUDE_DIR})
-  set(LIBNVIDIA_LIBRARIES -lcuda -lnvcuvid -L${PREBUILT_ROOT}/lib)
+  set(LIBNVIDIA_LIBRARIES )
+  #if(ANDROID_TARGET_TAG MATCHES "linux.*")
+  #set(LIBNVIDIA_LIBRARIES -lcuda -lnvcuvid -L${PREBUILT_ROOT}/lib)
+  #endif()
 
   add_library(LIBNVIDIA::LIBNVIDIA INTERFACE IMPORTED GLOBAL)
   set_target_properties(LIBNVIDIA::LIBNVIDIA PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${LIBNVIDIA_INCLUDE_DIRS}"
     INTERFACE_LINK_LIBRARIES "${LIBNVIDIA_LIBRARIES}"
   )
-endif()
 set(LIBNVIDIA_FOUND TRUE)
 
 set(PACKAGE_EXPORT
