@@ -152,6 +152,24 @@ TEST(System, getHostBitness) {
     }
 }
 
+TEST(System, granularity) {
+    auto start = System::get()->getUnixTimeUs();
+    auto now = start;
+    auto until = now  + 1000 * 1000;
+    int diff = 0, cnt = 0;
+
+    while(now < until) {
+        // Time should increase..
+        auto nxt = System::get()->getUnixTimeUs();
+        if (nxt != now)
+            diff++;
+        now = nxt;
+    }
+    float resolution = (float) (now-start) / diff;
+    LOG(INFO) << "Counted " << diff << " slices in " << (now-start) << " us, a slice is +/- " << resolution << " us.";
+    EXPECT_GT(diff, 1000);
+}
+
 TEST(System, getProgramBitness) {
     const int kExpected = (sizeof(void*) == 8) ? 64 : 32;
     EXPECT_EQ(kExpected, System::get()->getProgramBitness());
