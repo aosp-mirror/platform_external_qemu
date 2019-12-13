@@ -1,0 +1,9 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Open-Source-Licensing+2: Yahan Zhou <yahan@google.com>
+Autosubmit+1: Yahan Zhou <yahan@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Fri, 13 Dec 2019 19:39:40 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1189080
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
