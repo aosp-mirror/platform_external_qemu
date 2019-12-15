@@ -24,9 +24,12 @@
 #include <string.h>
 
 // cuda and nvidia decoder related headers
-#include <cuda.h>
-#include <nvcuvid.h>
-
+//#include <cuda.h>
+//##include <nvcuvid.h>
+extern "C" {
+#include "android/emulation/dynlink_nvcuvid.h"
+#include "android/emulation/dynlink_cuda.h"
+}
 #define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
@@ -41,9 +44,7 @@
         CUresult errorCode = cuvidAPI;                                                                             \
         if( errorCode != CUDA_SUCCESS)                                                                             \
         {                                                                                                          \
-            const char *msg = NULL;                              \
-            cuGetErrorName(errorCode, &msg);                              \
-            H264_DPRINT("%s failed with error code %d %s\n", #cuvidAPI, (int)errorCode, msg);                              \
+            H264_DPRINT("%s failed with error code %d\n", #cuvidAPI, (int)errorCode);                              \
         }                                                                                                          \
     } while (0)
 
@@ -385,14 +386,22 @@ bool MediaH264DecoderImpl::initCudaDrivers() {
     if (s_isCudaInitialized) {
       return true;
     }
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+    typedef HMODULE CUDADRIVER;
+#else
+    typedef void *CUDADRIVER;
+#endif
+    CUDADRIVER hHandleDriver = 0;
+    cuInit   (0, __CUDA_API_VERSION, hHandleDriver);
+    cuvidInit(0);
 
     // this should be called at the very beginning, before we call anything else
-    CUresult initResult = cuInit(0);
-    if (initResult != CUDA_SUCCESS) {
-        H264_DPRINT("Failed to init cuda drivers error code %d", (int)initResult);
-        s_isCudaInitialized = false;
-        return false;
-    }
+    //CUresult initResult = cuInit(0);
+    //if (initResult != CUDA_SUCCESS) {
+     //   H264_DPRINT("Failed to init cuda drivers error code %d", (int)initResult);
+      //  s_isCudaInitialized = false;
+       // return false;
+    //}
 
     int numGpuCards = 0;
     CUresult myres = cuDeviceGetCount(&numGpuCards);
@@ -414,7 +423,7 @@ bool MediaH264DecoderImpl::initCudaDrivers() {
 
 int MediaH264DecoderImpl::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat) {
 
-    int nDecodeSurface = pVideoFormat->min_num_decode_surfaces;
+    int nDecodeSurface = 4;//pVideoFormat->min_num_decode_surfaces;
 
     CUVIDDECODECAPS decodecaps;
     memset(&decodecaps, 0, sizeof(decodecaps));
@@ -464,8 +473,8 @@ int MediaH264DecoderImpl::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat) {
     videoDecodeCreateInfo.vidLock = mCtxLock;
     videoDecodeCreateInfo.ulWidth = pVideoFormat->coded_width;
     videoDecodeCreateInfo.ulHeight= pVideoFormat->coded_height;
-    videoDecodeCreateInfo.ulMaxWidth = pVideoFormat->coded_width;
-    videoDecodeCreateInfo.ulMaxHeight = pVideoFormat->coded_height;
+    //videoDecodeCreateInfo.ulMaxWidth = pVideoFormat->coded_width;
+    //videoDecodeCreateInfo.ulMaxHeight = pVideoFormat->coded_height;
 
     videoDecodeCreateInfo.ulTargetWidth = pVideoFormat->coded_width;
     videoDecodeCreateInfo.ulTargetHeight = pVideoFormat->coded_height;
@@ -510,15 +519,15 @@ int MediaH264DecoderImpl::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
     NVDEC_API_CALL(cuvidMapVideoFrame(mCudaDecoder, pDispInfo->picture_index, &dpSrcFrame,
         &nSrcPitch, &videoProcessingParameters));
 
-    CUVIDGETDECODESTATUS DecodeStatus;
-    memset(&DecodeStatus, 0, sizeof(DecodeStatus));
-    CUresult result = cuvidGetDecodeStatus(mCudaDecoder, pDispInfo->picture_index, &DecodeStatus);
-    if (result == CUDA_SUCCESS && (DecodeStatus.decodeStatus == cuvidDecodeStatus_Error
-                                   || DecodeStatus.decodeStatus == cuvidDecodeStatus_Error_Concealed))
-    {
-        H264_DPRINT("Decode Error occurred for picture");
-        return 0;
-    }
+    //CUVIDGETDECODESTATUS DecodeStatus;
+    //memset(&DecodeStatus, 0, sizeof(DecodeStatus));
+    //CUresult result = cuvidGetDecodeStatus(mCudaDecoder, pDispInfo->picture_index, &DecodeStatus);
+    //if (result == CUDA_SUCCESS && (DecodeStatus.decodeStatus == cuvidDecodeStatus_Error
+    //                               || DecodeStatus.decodeStatus == cuvidDecodeStatus_Error_Concealed))
+    //{
+     //   H264_DPRINT("Decode Error occurred for picture");
+      //  return 0;
+    //}
 
     uint8_t *pDecodedFrame = mDecodedFrame;
 
