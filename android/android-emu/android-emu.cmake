@@ -318,6 +318,8 @@ set(android-emu_darwin-x86_64_src
 # Linux specific sources.
 set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
     android/emulation/MediaH264Decoder_linux.cpp
+    android/emulation/dynlink_cuda.cpp
+    android/emulation/dynlink_nvcuvid.cpp
     android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
 
 android_add_library(android-emu)
