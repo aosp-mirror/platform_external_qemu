@@ -186,6 +186,12 @@ else()
                                "-DAEMU_TCMALLOC_ENABLED=0")
 endif()
 
+if (OPTION_GFXSTREAM_BACKEND)
+    target_compile_definitions(android-emu-base
+                               PRIVATE
+                               "-DAEMU_GFXSTREAM_BACKEND=1")
+endif()
+
 android_target_compile_options(android-emu-base darwin-x86_64 PRIVATE "-Wno-deprecated-declarations")
 # Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
 # these flags.
