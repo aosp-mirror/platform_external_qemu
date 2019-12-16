@@ -163,11 +163,13 @@ public:
                 // emulator's initialization, or the system image, or we're
                 // loading from an incompatible snapshot.
                 D("Trying to open the OpenGLES pipe without GPU emulation!");
+                fprintf(stderr, "%s: no gpu emulation\n", __func__);
                 return nullptr;
             }
 
             auto pipe = new EmuglPipe(hwPipe, service, renderer, loadStream);
             if (!pipe->mIsWorking) {
+                fprintf(stderr, "%s: pipe not working\n", __func__);
                 delete pipe;
                 pipe = nullptr;
             }

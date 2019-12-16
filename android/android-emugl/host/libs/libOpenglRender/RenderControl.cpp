@@ -807,6 +807,7 @@ static EGLint rcMakeCurrent(uint32_t context,
 
 static void rcFBPost(uint32_t colorBuffer)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {

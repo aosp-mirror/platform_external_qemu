@@ -772,6 +772,7 @@ void FrameBuffer::setPostCallback(
         void* onPostContext,
         bool useBgraReadback) {
     AutoLock mutex(m_lock);
+    fprintf(stderr, "%s: call\n", __func__);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
 
@@ -2016,6 +2017,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
 bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                            bool needLockAndBind,
                            bool repaint) {
+        fprintf(stderr, "%s: run\n", __func__);
     if (needLockAndBind) {
         m_lock.lock();
     }
@@ -2079,6 +2081,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     // Send framebuffer (without FPS overlay) to callback
     //
     if (m_onPost) {
+        fprintf(stderr, "%s: post callback run\n", __func__);
         if (m_asyncReadbackSupported) {
             auto cb = (*c).second.cb;
             if (!m_readbackWorker) {
@@ -2105,6 +2108,7 @@ EXIT:
 }
 
 void FrameBuffer::doPostCallback(void* pixels) {
+    fprintf(stderr, "%s: onpost context: %p\n", __func__, m_onPostContext);
     m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
              (unsigned char*)pixels);
 }
@@ -2225,6 +2229,7 @@ bool FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
 }
 
 bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    fprintf(stderr, "%s: call\n", __func__);
     ComposeDevice* p = (ComposeDevice*)buffer;
     AutoLock mutex(m_lock);
 
