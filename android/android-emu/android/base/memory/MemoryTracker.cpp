@@ -13,7 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-#if defined(__linux__)
+#if 0
 #include <malloc_extension_c.h>
 #include <malloc_hook.h>
 
@@ -40,7 +40,7 @@ struct FuncRange {
 
 class MemoryTracker::Impl {
 public:
-#if defined(__linux__)
+#if 0
     Impl()
         : mData([](const FuncRange* a, const FuncRange* b) {
               return a->mAddr + a->mLength < b->mAddr + b->mLength;
@@ -206,7 +206,7 @@ private:
     static const int kStackTraceLimit = 32;
 #else
     bool addToGroup(std::string group, std::string func) {
-        E("Not implemented");
+        /* E("Not implemented"); */
         return false;
     }
 
