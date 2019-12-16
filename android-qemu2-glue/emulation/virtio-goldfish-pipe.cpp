@@ -41,6 +41,20 @@ extern "C" {
 #define VGPLOG(fmt,...)
 #endif
 
+#ifdef VIRTIO_GOLDFISH_EXPORT_API
+
+#ifdef _WIN32
+#define VG_EXPORT __declspec(dllexport)
+#else
+#define VG_EXPORT __attribute__((visibility("default")))
+#endif
+
+#else
+
+#define VG_EXPORT
+
+#endif // !VIRTIO_GOLDFISH_EXPORT_API
+
 // Virtio Goldfish Pipe: Overview-----------------------------------------------
 //
 // Virtio Goldfish Pipe is meant for running goldfish pipe services with a
@@ -290,6 +304,7 @@ public:
         VGPLOG("cookie: %p", cookie);
         mCookie = cookie;
         mVirglRendererCallbacks = *callbacks;
+        VGPLOG("done");
         return 0;
     }
 
@@ -465,6 +480,12 @@ public:
             free(entry.linear);
             entry.linear = nullptr;
         }
+
+        if (entry.iov) {
+            free(entry.iov);
+            entry.iov = nullptr;
+            entry.numIovs = 0;
+        }
     }
 
     int attachIov(int resId, iovec* iov, int num_iovs) {
@@ -500,11 +521,13 @@ public:
 
         entry.numIovs = 0;
 
+        if (entry.iov) free(entry.iov);
+        entry.iov = nullptr;
+
         if (iov) {
             *iov = entry.iov;
         }
 
-        entry.iov = nullptr;
         allocResource(entry, entry.iov, entry.numIovs);
         VGPLOG("done");
     }
@@ -569,7 +592,10 @@ public:
 
         // Do the pipe service op here, if there is an associated hostpipe.
         auto hostPipe = entry.hostPipe;
-        if (!hostPipe) return syncRes;
+        if (!hostPipe) {
+            VGPLOG("No hostPipe");
+            return syncRes;
+        }
 
         VGPLOG("resid: %d offset: 0x%llx hostpipe: %p", resId,
                (unsigned long long)offset, hostPipe);
@@ -691,6 +717,10 @@ public:
         return 0;
     }
 
+    void callWriteFence(void* opaque, int fence) {
+        mVirglRendererCallbacks.write_fence(mCookie, fence);
+    }
+
 private:
     void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs) {
         VGPLOG("entry linear: %p", entry.linear);
@@ -709,8 +739,9 @@ private:
 
         if (linearSize) linear = malloc(linearSize);
 
-        entry.iov = iov;
+        entry.iov = (iovec*)malloc(sizeof(*iov) * num_iovs);
         entry.numIovs = num_iovs;
+        memcpy(entry.iov, iov, num_iovs * sizeof(*iov));
         entry.linear = linear;
         entry.linearSize = linearSize;
 
@@ -780,48 +811,48 @@ static LazyInstance<PipeVirglRenderer> sRenderer = LAZY_INSTANCE_INIT;
 
 extern "C" {
 
-static int pipe_virgl_renderer_init(
+VG_EXPORT int pipe_virgl_renderer_init(
     void *cookie, int flags, struct virgl_renderer_callbacks *cb) {
     sRenderer->init(cookie, flags, cb);
     return 0;
 }
 
-static void pipe_virgl_renderer_poll(void) {
+VG_EXPORT void pipe_virgl_renderer_poll(void) {
     sRenderer->poll();
 }
 
-static void* pipe_virgl_renderer_get_cursor_data(
+VG_EXPORT void* pipe_virgl_renderer_get_cursor_data(
     uint32_t resource_id, uint32_t *width, uint32_t *height) {
     return 0;
 }
 
-static int pipe_virgl_renderer_resource_create(
+VG_EXPORT int pipe_virgl_renderer_resource_create(
     struct virgl_renderer_resource_create_args *args,
     struct iovec *iov, uint32_t num_iovs) {
 
     return sRenderer->createResource(args, iov, num_iovs);
 }
 
-static void pipe_virgl_renderer_resource_unref(uint32_t res_handle) {
+VG_EXPORT void pipe_virgl_renderer_resource_unref(uint32_t res_handle) {
     sRenderer->unrefResource(res_handle);
 }
 
-static int pipe_virgl_renderer_context_create(
+VG_EXPORT int pipe_virgl_renderer_context_create(
     uint32_t handle, uint32_t nlen, const char *name) {
     return sRenderer->createContext(handle, nlen, name);
 }
 
-static void pipe_virgl_renderer_context_destroy(uint32_t handle) {
+VG_EXPORT void pipe_virgl_renderer_context_destroy(uint32_t handle) {
     sRenderer->destroyContext(handle);
 }
 
-static int pipe_virgl_renderer_submit_cmd(void *buffer,
+VG_EXPORT int pipe_virgl_renderer_submit_cmd(void *buffer,
                                           int ctx_id,
                                           int bytes) {
     return sRenderer->write(ctx_id, buffer, bytes);
 }
 
-static int pipe_virgl_renderer_transfer_read_iov(
+VG_EXPORT int pipe_virgl_renderer_transfer_read_iov(
     uint32_t handle, uint32_t ctx_id,
     uint32_t level, uint32_t stride,
     uint32_t layer_stride,
@@ -831,7 +862,7 @@ static int pipe_virgl_renderer_transfer_read_iov(
     return sRenderer->transferReadIov(handle, offset, box);
 }
 
-static int pipe_virgl_renderer_transfer_write_iov(
+VG_EXPORT int pipe_virgl_renderer_transfer_write_iov(
     uint32_t handle,
     uint32_t ctx_id,
     int level,
@@ -845,39 +876,39 @@ static int pipe_virgl_renderer_transfer_write_iov(
 }
 
 // Not implemented
-static void pipe_virgl_renderer_get_cap_set(uint32_t, uint32_t*, uint32_t*) { }
-static void pipe_virgl_renderer_fill_caps(uint32_t, uint32_t, void *caps) { }
+VG_EXPORT void pipe_virgl_renderer_get_cap_set(uint32_t, uint32_t*, uint32_t*) { }
+VG_EXPORT void pipe_virgl_renderer_fill_caps(uint32_t, uint32_t, void *caps) { }
 
-static int pipe_virgl_renderer_resource_attach_iov(
+VG_EXPORT int pipe_virgl_renderer_resource_attach_iov(
     int res_handle, struct iovec *iov,
     int num_iovs) {
     return sRenderer->attachIov(res_handle, iov, num_iovs);
 }
 
-static void pipe_virgl_renderer_resource_detach_iov(
+VG_EXPORT void pipe_virgl_renderer_resource_detach_iov(
     int res_handle, struct iovec **iov, int *num_iovs) {
     return sRenderer->detachIov(res_handle, iov, num_iovs);
 }
 
-static int pipe_virgl_renderer_create_fence(
+VG_EXPORT int pipe_virgl_renderer_create_fence(
     int client_fence_id, uint32_t cmd_type) {
     sRenderer->createFence(client_fence_id, cmd_type);
     return 0;
 }
 
-static void pipe_virgl_renderer_force_ctx_0(void) { }
+VG_EXPORT void pipe_virgl_renderer_force_ctx_0(void) { }
 
-static void pipe_virgl_renderer_ctx_attach_resource(
+VG_EXPORT void pipe_virgl_renderer_ctx_attach_resource(
     int ctx_id, int res_handle) {
     sRenderer->attachResource(ctx_id, res_handle);
 }
 
-static void pipe_virgl_renderer_ctx_detach_resource(
+VG_EXPORT void pipe_virgl_renderer_ctx_detach_resource(
     int ctx_id, int res_handle) {
     sRenderer->detachResource(ctx_id, res_handle);
 }
 
-static int pipe_virgl_renderer_resource_get_info(
+VG_EXPORT int pipe_virgl_renderer_resource_get_info(
     int res_handle,
     struct virgl_renderer_resource_info *info) {
     return sRenderer->getResourceInfo(res_handle, info);
@@ -889,41 +920,6 @@ static struct virgl_renderer_virtio_interface s_virtio_interface = {
     LIST_VIRGLRENDERER_API(VIRGLRENDERER_API_PIPE_STRUCT_DEF)
 };
 
-static void pipe_virgl_write_fence(void *opaque, uint32_t fence)
-{
-    VGPLOG("call");
-    virgl_write_fence(opaque, fence);
-}
-
-static virgl_renderer_gl_context
-pipe_virgl_create_context(void *opaque, int scanout_idx,
-                     struct virgl_renderer_gl_ctx_param *params)
-{
-    VGPLOG("call");
-    return (virgl_renderer_gl_context)0;
-}
-
-static void pipe_virgl_destroy_context(
-    void *opaque, virgl_renderer_gl_context ctx)
-{
-    VGPLOG("call");
-}
-
-static int pipe_virgl_make_context_current(
-    void *opaque, int scanout_idx, virgl_renderer_gl_context ctx)
-{
-    VGPLOG("call");
-    return 0;
-}
-
-static struct virgl_renderer_callbacks s_pipe_3d_cbs = {
-    .version             = 1,
-    .write_fence         = pipe_virgl_write_fence,
-    .create_gl_context   = pipe_virgl_create_context,
-    .destroy_gl_context  = pipe_virgl_destroy_context,
-    .make_current        = pipe_virgl_make_context_current,
-};
-
 struct virgl_renderer_virtio_interface*
 get_goldfish_pipe_virgl_renderer_virtio_interface(void) {
     return &s_virtio_interface;
@@ -931,7 +927,7 @@ get_goldfish_pipe_virgl_renderer_virtio_interface(void) {
 
 struct virgl_renderer_callbacks*
 get_goldfish_pipe_virgl_renderer_callbacks(void) {
-    return &s_pipe_3d_cbs;
+    return 0;
 }
 
 void virtio_goldfish_pipe_reset(void *pipe, void *host_pipe) {
