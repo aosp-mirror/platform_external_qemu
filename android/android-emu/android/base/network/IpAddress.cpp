@@ -102,31 +102,32 @@ IpAddress::IpAddress(const char* str) {
 
 std::string IpAddress::toString() const {
     std::string result;
-    switch (mKind) {
-        case Kind::Ipv4: {
-            struct in_addr ip4;
-            ip4.s_addr = htonl(mIpv4);
-            result.resize(INET_ADDRSTRLEN);
-            inet_ntop(AF_INET, &ip4, &result[0],
-                      static_cast<socklen_t>(result.size()));
-            result.resize(::strlen(result.c_str()));
-            break;
-        }
-        case Kind::Ipv6: {
-            struct in6_addr ip6;
-            static_assert(sizeof(ip6.s6_addr) == sizeof(mIpv6.mAddr),
-                          "Invalid Ipv6Address size");
-            memcpy(ip6.s6_addr, mIpv6.mAddr, sizeof(ip6.s6_addr));
-            result.resize(INET6_ADDRSTRLEN);
-            inet_ntop(AF_INET6, &ip6, &result[0],
-                      static_cast<socklen_t>(result.size()));
-            result.resize(::strlen(result.c_str()));
-            break;
-        }
-        default:
-            result = "<invalid>";
-    }
     return result;
+    // switch (mKind) {
+    //     case Kind::Ipv4: {
+    //         struct in_addr ip4;
+    //         ip4.s_addr = htonl(mIpv4);
+    //         result.resize(INET_ADDRSTRLEN);
+    //         inet_ntop(AF_INET, &ip4, &result[0],
+    //                   static_cast<socklen_t>(result.size()));
+    //         result.resize(::strlen(result.c_str()));
+    //         break;
+    //     }
+    //     case Kind::Ipv6: {
+    //         struct in6_addr ip6;
+    //         static_assert(sizeof(ip6.s6_addr) == sizeof(mIpv6.mAddr),
+    //                       "Invalid Ipv6Address size");
+    //         memcpy(ip6.s6_addr, mIpv6.mAddr, sizeof(ip6.s6_addr));
+    //         result.resize(INET6_ADDRSTRLEN);
+    //         inet_ntop(AF_INET6, &ip6, &result[0],
+    //                   static_cast<socklen_t>(result.size()));
+    //         result.resize(::strlen(result.c_str()));
+    //         break;
+    //     }
+    //     default:
+    //         result = "<invalid>";
+    // }
+    // return result;
 }
 
 size_t IpAddress::hash() const {
