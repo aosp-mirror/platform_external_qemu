@@ -1,3 +1,16 @@
+set(gfxstream_backend_src GoldfishOpenglTestEnv.cpp window-agent-mock-impl.cpp )
+android_add_shared_library(gfxstream_backend)
+target_compile_options(gfxstream_backend PRIVATE -fvisibility=hidden)
+target_include_directories(gfxstream_backend
+                                   PRIVATE
+                                   ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
+                                   ${GOLDFISH_EMUGL_DIR}/system/include
+                                   ${ANDROID_EMUGL_DIR}/guest
+                                   ${ANDROID_EMUGL_DIR}/guest/androidImpl
+                                   ${ANDROID_EMUGL_DIR}/host/include
+                                   ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util)
+target_link_libraries(gfxstream_backend PRIVATE OSWindow android-emu-shared emugl_base OpenglRender_standalone_common)
+
 set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp Toplevel.cpp window-agent-mock-impl.cpp)
 android_add_shared_library(aemugraphics)
 target_compile_options(aemugraphics PRIVATE -fvisibility=default)
