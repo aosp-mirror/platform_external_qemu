@@ -75,5 +75,6 @@ add_subdirectory(shared/emugl/common)
 if(NOT WINDOWS)
   add_subdirectory(guest)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl goldfish-opengl)
-  add_subdirectory(combined)
 endif()
+
+add_subdirectory(combined)
