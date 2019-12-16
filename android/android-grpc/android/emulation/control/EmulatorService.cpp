@@ -34,6 +34,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/control/AdbConnection.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/battery_agent.h"
@@ -423,6 +424,15 @@ Builder& Builder::withRtcBridge(RtcBridge* bridge) {
     return *this;
 }
 
+Builder& Builder::withWaterfall(const char* mode) {
+    if (mode != nullptr && strcmp("adb", mode) == 0)
+        mWaterfall = WaterfallProvider::adb;
+    else
+        mWaterfall = WaterfallProvider::forward;
+
+    return *this;
+}
+
 Builder& Builder::withCertAndKey(std::string certfile,
                                  std::string privateKeyFile) {
     if (!System::get()->pathExists(certfile)) {
@@ -469,8 +479,11 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     std::string server_address = mBindAddress + ":" + std::to_string(mPort);
     std::unique_ptr<EmulatorController::Service> controller(
             new EmulatorControllerImpl(mAgents, mBridge));
+
+    waterfall::Waterfall::Service* waterfall;
+
     std::unique_ptr<waterfall::Waterfall::Service> wfallforwarder(
-            getWaterfallService());
+            getWaterfallService(mWaterfall));
     std::unique_ptr<SnapshotService::Service> snapshotService(
             getSnapshotService());
 

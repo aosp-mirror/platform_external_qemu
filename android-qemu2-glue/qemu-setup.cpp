@@ -73,6 +73,8 @@ extern "C" {
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
 
+/* True if an external adb executable should be used for adb calls */
+bool android_use_external_adb = false;
 }  // extern "C"
 
 using android::VmLock;
@@ -179,7 +181,6 @@ bool qemu_android_emulation_early_setup() {
 
     android::emulation::AudioOutputEngine::set(
                 new android::qemu::QemuAudioOutputEngine());
-
     return true;
 }
 
@@ -222,7 +223,8 @@ bool qemu_android_emulation_setup() {
         }
 #endif
         // Go bridge go!
-        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), turn);
+        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(),
+            android_cmdLineOptions->waterfall, turn);
     }
 #endif
 
@@ -272,6 +274,8 @@ bool qemu_android_emulation_setup() {
                         "The goldfish event queue is overflowing, the system "
                         "is no longer responding.");
     }
+
+
     return true;
 }
 

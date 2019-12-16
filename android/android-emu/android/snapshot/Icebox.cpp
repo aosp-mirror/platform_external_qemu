@@ -14,8 +14,6 @@
 
 #include "android/snapshot/Icebox.h"
 
-#include <openssl/pem.h>
-#include <openssl/rsa.h>
 #include <stdio.h>
 #include <atomic>
 #include <memory>
@@ -35,6 +33,9 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
+
+#include "android/emulation/AdbMessageSniffer.h"
+#include "android/emulation/control/AdbAuthentication.h"
 
 #define DEBUG 0
 
@@ -74,66 +75,6 @@ static std::unique_ptr<android::base::Thread> s_workerThread = {};
 
 // Adb authentication
 #define TOKEN_SIZE 20
-
-static bool read_key(const char* file, std::vector<RSA*>& keys) {
-    FILE* fp = fopen(file, "r");
-    if (!fp) {
-        DD("Failed to open '%s': %s", file, strerror(errno));
-        return false;
-    }
-
-    RSA* key_rsa = RSA_new();
-
-    if (!PEM_read_RSAPrivateKey(fp, &key_rsa, NULL, NULL)) {
-        DD("Failed to read key");
-        fclose(fp);
-        RSA_free(key_rsa);
-        return false;
-    }
-
-    keys.push_back(key_rsa);
-    fclose(fp);
-    return true;
-}
-
-static bool sign_token(RSA* key_rsa,
-                       const char* token,
-                       int token_size,
-                       char* sig,
-                       int& len) {
-    if (token_size != TOKEN_SIZE) {
-        DD("Unexpected token size %d\n", token_size);
-    }
-
-    if (!RSA_sign(NID_sha1, (const unsigned char*)token, (size_t)token_size,
-                  (unsigned char*)sig, (unsigned int*)&len, key_rsa)) {
-        return false;
-    }
-
-    DD("successfully signed with siglen %d\n", (int)len);
-    return true;
-}
-
-static bool sign_auth_token(const char* token,
-                            int token_size,
-                            char* sig,
-                            int& siglen) {
-    // read key
-    using android::base::pj;
-    std::vector<RSA*> keys;
-    std::string key_path = pj(android::base::System::get()->getHomeDirectory(),
-                              ".android", "adbkey");
-    if (!read_key(key_path.c_str(), keys)) {
-        // TODO: test the windows code path
-        std::string key_path =
-                pj(android::base::System::get()->getAppDataDirectory(),
-                   ".android", "adbkey");
-        if (!read_key(key_path.c_str(), keys)) {
-            return false;
-        }
-    }
-    return sign_token(keys[0], token, token_size, sig, siglen);
-}
 
 static int tryConnect() {
     using namespace android::base;
@@ -206,7 +147,7 @@ static int tryConnect() {
             pack_send.mesg.magic = ADB_AUTH ^ 0xffffffff;
 
             pack_send.data.resize(sigLen);
-            if (!sign_auth_token((const char*)pack_recv.data.data(),
+            if (!android::emulation::sign_auth_token((const char*)pack_recv.data.data(),
                                  pack_recv.mesg.data_length,
                                  (char*)pack_send.data.data(), sigLen)) {
                 fprintf(stderr, "Fail to authenticate adb\n");
@@ -253,13 +194,12 @@ void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
 }
 
-bool run_async(const char* cmd) {
+bool run_async(std::string cmd_str) {
     if (s_workerThread) {
         if (!s_workerThread->tryWait(nullptr)) {
             return false;
         }
     }
-    std::string cmd_str(cmd);
     s_workerThread.reset(new android::base::FunctorThread([cmd_str] {
         int s = tryConnect();
         if (s < 0) {
@@ -307,7 +247,7 @@ bool run_async(const char* cmd) {
     return s_workerThread->start();
 }
 
-bool track_async(int pid, const char* snapshot_name) {
+bool track_async(int pid, const std::string snapshot_name) {
     if (s_workerThread) {
         if (!s_workerThread->tryWait(nullptr)) {
             return false;
@@ -319,7 +259,7 @@ bool track_async(int pid, const char* snapshot_name) {
     }));
     return s_workerThread->start();
 }
-bool track(int pid, const char* snapshot_name) {
+bool track(int pid, const std::string snapshot_name) {
     if (s_adb_port == -1) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;

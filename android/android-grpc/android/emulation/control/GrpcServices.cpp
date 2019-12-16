@@ -23,6 +23,7 @@ std::unique_ptr<RtcBridge> GrpcServices::g_rtc_bridge = nullptr;
 
 int GrpcServices::setup(int port,
                         const AndroidConsoleAgents* const consoleAgents,
+                        const char* waterfall,
                         const char* turnCfg) {
     // Return the active port if we are already running.
     if (g_controler_service) {
@@ -49,6 +50,7 @@ int GrpcServices::setup(int port,
                                     android::ConfigDirs::getUserDirectory(),
                                     kPrivateKeyFileName))
                     .withPort(port)
+                    .withWaterfall(waterfall)
                     .withRtcBridge(g_rtc_bridge.get())
                     .build();
 

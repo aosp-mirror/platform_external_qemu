@@ -1,5 +1,4 @@
-
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "waterfall.grpc.pb.h"
 
 namespace android {
 namespace emulation {
-namespace control {
+bool sign_auth_token(const char* token, int token_size, char* sig, int& siglen);
 
-enum class WaterfallProvider { adb, forward };
-
-waterfall::Waterfall::Service* getAdbWaterfallService();
-waterfall::Waterfall::Service* getWaterfallService();
-waterfall::Waterfall::Service* getWaterfallService(WaterfallProvider variant);
-
-}  // namespace control
-}  // namespace emulation
+}
 }  // namespace android

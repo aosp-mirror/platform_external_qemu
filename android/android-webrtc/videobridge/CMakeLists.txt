@@ -24,7 +24,7 @@ android_target_compile_definitions(goldfish-webrtc-bridge
 
 # WARNING! We are linking against a large webrtc prebuilt. This archive has everything needed for webrtc support This
 # includes SSL, LIBYUV, etc.. Be very careful linking any of the android emulator libraries against it
-target_link_libraries(goldfish-webrtc-bridge PRIVATE WebRTC::WebRTC Threads::Threads android-webrtc-net nlohmann_json::nlohmann_json android-emu-base)
+target_link_libraries(goldfish-webrtc-bridge PRIVATE WebRTC::WebRTC Threads::Threads android-net nlohmann_json::nlohmann_json android-emu-base)
 target_include_directories(goldfish-webrtc-bridge PRIVATE .)
 
 # The linker dependencies, mainly needed to keep the encoders/decoders happy..

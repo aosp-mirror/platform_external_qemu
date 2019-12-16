@@ -19,6 +19,7 @@ set(android-emu-common
     android/async-socket-connector.c
     android/async-utils.c
     android/base/async/AsyncReader.cpp
+    android/base/async/AsyncSocket.cpp
     android/base/async/AsyncSocketServer.cpp
     android/base/async/AsyncWriter.cpp
     android/base/async/DefaultLooper.cpp
@@ -65,7 +66,10 @@ set(android-emu-common
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
     android/emulation/ConfigDirs.cpp
+    android/emulation/control/AdbAuthentication.cpp
+    android/emulation/control/AdbConnection.cpp
     android/emulation/control/AdbInterface.cpp
+    android/emulation/control/AdbShellStream.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
@@ -347,6 +351,7 @@ target_link_libraries(android-emu
                               automation
                               offworld
                               # Prebuilt libraries
+                              android-net
                               breakpad_client
                               curl
                               ssl
@@ -489,6 +494,7 @@ target_link_libraries(android-emu-shared
                       PRIVATE emulator-libext4_utils
                               VPX::VPX
                               android-emu-base
+                              android-net
                               emulator-libsparse
                               emulator-libselinux
                               emulator-libjpeg
@@ -711,6 +717,7 @@ set(android-emu_unittests_src
     android/emulation/ConfigDirs_unittest.cpp
     android/emulation/DeviceContextRunner_unittest.cpp
     android/emulation/DmaMap_unittest.cpp
+    android/emulation/control/AdbConnection_unittest.cpp
     android/emulation/control/AdbInterface_unittest.cpp
     android/emulation/control/ApkInstaller_unittest.cpp
     android/emulation/control/FilePusher_unittest.cpp
@@ -811,9 +818,11 @@ set(android-emu_unittests_windows_src
 set(android-emu_unittests_windows_msvc-x86_64_src android/base/system/WinMsvcSystem_unittest.cpp)
 
 # Darwin & Linux only tests
-set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp)
+set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp
+                                            android/emulation/control/AdbShellStream_unittest.cpp)
 
-set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittest.cpp)
+set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittest.cpp
+                                           android/emulation/control/AdbShellStream_unittest.cpp)
 
 # And declare the test
 android_add_test(android-emu_unittests)
