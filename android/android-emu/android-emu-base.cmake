@@ -143,7 +143,7 @@ target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID)
 android_target_link_libraries(android-emu-base
                               linux-x86_64
                               PUBLIC
-                              TCMALLOC::TCMALLOC
+                              # TCMALLOC::TCMALLOC
                               LIBUNWIND::LIBUNWIND
                               -ldl
                               Threads::Threads
