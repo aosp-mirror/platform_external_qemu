@@ -1,0 +1,420 @@
+// Copyright (C) 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+#include "android/base/testing/TestTempDir.h"
+#include "android/emulation/address_space_device.h"
+#include "android/emulation/address_space_device.hpp"
+#include "android/emulation/address_space_graphics.h"
+#include "android/emulation/address_space_graphics_types.h"
+#include "android/emulation/AndroidPipe.h"
+#include "android/emulation/android_pipe_device.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/globals.h"
+#include "android/opengl/emugl_config.h"
+#include "android/opengles-pipe.h"
+#include "android/opengles.h"
+#include "android/refcount-pipe.h"
+#include "android/snapshot/interface.h"
+
+#include <fstream>
+#include <string>
+
+#include <stdio.h>
+
+#include "VulkanDispatch.h"
+
+#define GFXSTREAM_DEBUG_LEVEL 1
+
+#if GFXSTREAM_DEBUG_LEVEL >= 1
+#define GFXS_LOG(fmt,...) printf("%s:%d" fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define GFXS_LOG(fmt,...)
+#endif
+
+extern "C" {
+#include "hw/misc/goldfish_pipe.h"
+#include "hw/virtio/virtio-goldfish-pipe.h"
+}  // extern "C"
+
+using android::AndroidPipe;
+using android::base::pj;
+using android::base::System;
+
+static bool sInitialized = false;
+
+#ifdef _WIN32
+#define VG_EXPORT __declspec(dllexport)
+#else
+#define VG_EXPORT __attribute__((visibility("default")))
+#endif
+
+extern "C" VG_EXPORT void init_global_state();
+
+struct renderer_display_info;
+typedef void (*get_pixels_t)(void*, uint32_t);
+static get_pixels_t sGetPixelsFunc = 0;
+typedef void (*post_callback_t)(void*, int, int, int, int, int, unsigned char*);
+extern "C" VG_EXPORT void set_post_callback(struct renderer_display_info* r, post_callback_t);
+
+static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
+        // guest_open()
+        [](GoldfishHwPipe* hwPipe) -> GoldfishHostPipe* {
+            return static_cast<GoldfishHostPipe*>(
+                    android_pipe_guest_open(hwPipe));
+        },
+        // guest_open_with_flags()
+        [](GoldfishHwPipe* hwPipe, uint32_t flags) -> GoldfishHostPipe* {
+            return static_cast<GoldfishHostPipe*>(
+                    android_pipe_guest_open_with_flags(hwPipe, flags));
+        },
+        // guest_close()
+        [](GoldfishHostPipe* hostPipe, GoldfishPipeCloseReason reason) {
+            static_assert((int)GOLDFISH_PIPE_CLOSE_GRACEFUL ==
+                                  (int)PIPE_CLOSE_GRACEFUL,
+                          "Invalid PIPE_CLOSE_GRACEFUL value");
+            static_assert(
+                    (int)GOLDFISH_PIPE_CLOSE_REBOOT == (int)PIPE_CLOSE_REBOOT,
+                    "Invalid PIPE_CLOSE_REBOOT value");
+            static_assert((int)GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT ==
+                                  (int)PIPE_CLOSE_LOAD_SNAPSHOT,
+                          "Invalid PIPE_CLOSE_LOAD_SNAPSHOT value");
+            static_assert(
+                    (int)GOLDFISH_PIPE_CLOSE_ERROR == (int)PIPE_CLOSE_ERROR,
+                    "Invalid PIPE_CLOSE_ERROR value");
+
+            android_pipe_guest_close(hostPipe,
+                                     static_cast<PipeCloseReason>(reason));
+        },
+        // guest_pre_load()
+        [](QEMUFile* file) { (void)file; },
+        // guest_post_load()
+        [](QEMUFile* file) { (void)file; },
+        // guest_pre_save()
+        [](QEMUFile* file) { (void)file; },
+        // guest_post_save()
+        [](QEMUFile* file) { (void)file; },
+        // guest_load()
+        [](QEMUFile* file,
+           GoldfishHwPipe* hwPipe,
+           char* force_close) -> GoldfishHostPipe* {
+            (void)file;
+            (void)hwPipe;
+            (void)force_close;
+           return nullptr;
+        },
+        // guest_save()
+        [](GoldfishHostPipe* hostPipe, QEMUFile* file) {
+            (void)hostPipe;
+            (void)file;
+        },
+        // guest_poll()
+        [](GoldfishHostPipe* hostPipe) {
+            static_assert((int)GOLDFISH_PIPE_POLL_IN == (int)PIPE_POLL_IN,
+                          "invalid POLL_IN values");
+            static_assert((int)GOLDFISH_PIPE_POLL_OUT == (int)PIPE_POLL_OUT,
+                          "invalid POLL_OUT values");
+            static_assert((int)GOLDFISH_PIPE_POLL_HUP == (int)PIPE_POLL_HUP,
+                          "invalid POLL_HUP values");
+
+            return static_cast<GoldfishPipePollFlags>(
+                    android_pipe_guest_poll(hostPipe));
+        },
+        // guest_recv()
+        [](GoldfishHostPipe* hostPipe,
+           GoldfishPipeBuffer* buffers,
+           int numBuffers) -> int {
+            // NOTE: Assumes that AndroidPipeBuffer and GoldfishPipeBuffer
+            //       have exactly the same layout.
+            static_assert(
+                    sizeof(AndroidPipeBuffer) == sizeof(GoldfishPipeBuffer),
+                    "Invalid PipeBuffer sizes");
+        // We can't use a static_assert with offsetof() because in msvc, it uses
+        // reinterpret_cast.
+        // TODO: Add runtime assertion instead?
+        // https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
+            static_assert(offsetof(AndroidPipeBuffer, data) ==
+                                  offsetof(GoldfishPipeBuffer, data),
+                          "Invalid PipeBuffer::data offsets");
+            static_assert(offsetof(AndroidPipeBuffer, size) ==
+                                  offsetof(GoldfishPipeBuffer, size),
+                          "Invalid PipeBuffer::size offsets");
+#endif
+            return android_pipe_guest_recv(
+                    hostPipe, reinterpret_cast<AndroidPipeBuffer*>(buffers),
+                    numBuffers);
+        },
+        // guest_send()
+        [](GoldfishHostPipe* hostPipe,
+           const GoldfishPipeBuffer* buffers,
+           int numBuffers) -> int {
+            return android_pipe_guest_send(
+                    hostPipe,
+                    reinterpret_cast<const AndroidPipeBuffer*>(buffers),
+                    numBuffers);
+        },
+        // guest_wake_on()
+        [](GoldfishHostPipe* hostPipe, GoldfishPipeWakeFlags wakeFlags) {
+            android_pipe_guest_wake_on(hostPipe, static_cast<int>(wakeFlags));
+        },
+        // dma_add_buffer()
+        [](void* pipe, uint64_t paddr, uint64_t sz) {
+            // not considered for virtio
+        },
+        // dma_remove_buffer()
+        [](uint64_t paddr) {
+            // not considered for virtio
+        },
+        // dma_invalidate_host_mappings()
+        []() {
+            // not considered for virtio
+        },
+        // dma_reset_host_mappings()
+        []() {
+            // not considered for virtio
+        },
+        // dma_save_mappings()
+        [](QEMUFile* file) {
+            (void)file;
+        },
+        // dma_load_mappings()
+        [](QEMUFile* file) {
+            (void)file;
+        },
+};
+
+// android_pipe_hw_funcs but for virtio-gpu
+static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
+        // resetPipe()
+        [](void* hwPipe, void* hostPipe) {
+            virtio_goldfish_pipe_reset(hwPipe, hostPipe);
+        },
+        // closeFromHost()
+        [](void* hwPipe) {
+            fprintf(stderr, "%s: closeFromHost not supported!\n", __func__);
+        },
+        // signalWake()
+        [](void* hwPipe, unsigned flags) {
+            fprintf(stderr, "%s: signalWake not supported!\n", __func__);
+        },
+        // getPipeId()
+        [](void* hwPipe) {
+            fprintf(stderr, "%s: getPipeId not supported!\n", __func__);
+            return 0;
+        },
+        // lookupPipeById()
+        [](int id) -> void* {
+            fprintf(stderr, "%s: lookupPipeById not supported!\n", __func__);
+            return nullptr;
+        }
+};
+
+static android::base::TestTempDir* sTestContentDir = nullptr;
+
+extern const QAndroidVmOperations* const gQAndroidVmOperations;
+
+extern "C" VG_EXPORT void init_global_state() {
+    GFXS_LOG("start");
+
+    android_avdInfo = avdInfo_newCustom(
+        "goldfish_opengl_test",
+        28,
+        "x86_64",
+        "x86_64",
+        true /* is google APIs */,
+        AVD_PHONE);
+
+    sTestContentDir = new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
+    avdInfo_setCustomContentPath(android_avdInfo, sTestContentDir->path());
+    auto customHwIniPath =
+        pj(sTestContentDir->path(), "hardware.ini");
+
+    std::ofstream hwIniPathTouch(customHwIniPath, std::ios::out);
+    hwIniPathTouch << "test ini";
+    hwIniPathTouch.close();
+
+    avdInfo_setCustomCoreHwIniPath(android_avdInfo, customHwIniPath.c_str());
+
+    System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
+                          System::get()->getProgramDirectory());
+
+    auto dispString = System::get()->envGet("DISPLAY");
+    GFXS_LOG("current display: %s", dispString.c_str());
+
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLPipeChecksum, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLESDynamicVersion, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLDMA, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLAsyncSwap, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::RefCountPipe, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLDirectMem, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::Vulkan, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanSnapshots, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanNullOptionalStrings, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::HostComposition, true);
+
+    bool useHostGpu =
+            System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+
+    emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
+
+    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
+    android_hw->hw_gltransport_asg_writeStepSize = 8192;
+    android_hw->hw_gltransport_asg_dataRingSize = 131072;
+    android_hw->hw_gltransport_drawFlushInterval = 800;
+
+    EmuglConfig config;
+
+    emuglConfig_init(&config, true /* gpu enabled */, "auto",
+                     useHostGpu ? "host" : "swiftshader_indirect", /* gpu mode, option */
+                     64,                     /* bitness */
+                     true,                   /* no window */
+                     false,                  /* blacklisted */
+                     false,                  /* has guest renderer */
+                     WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+
+    emuglConfig_setupEnv(&config);
+
+    android_initOpenglesEmulation();
+    int maj;
+    int min;
+    const int kWindowSize = 256;
+    android_startOpenglesRenderer(
+        720, 1280, 1, 28, gQAndroidVmOperations,
+        gQAndroidEmulatorWindowAgent, &maj, &min);
+
+    char* vendor = nullptr;
+    char* renderer = nullptr;
+    char* version = nullptr;
+
+    android_getOpenglesHardwareStrings(
+        &vendor, &renderer, &version);
+
+    GFXS_LOG("GL strings; [%s] [%s] [%s].\n",
+             vendor, renderer, version);
+
+    auto openglesRenderer = android_getOpenglesRenderer().get();
+
+    if (!openglesRenderer) {
+        fprintf(stderr, "%s: no renderer started, fatal\n", __func__);
+        abort();
+    }
+
+    android_init_opengles_pipe();
+    android_init_refcount_pipe();
+    android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
+
+    sGetPixelsFunc = android_getReadPixelsFunc();
+
+    GFXS_LOG("Started renderer");
+}
+
+extern "C" VG_EXPORT void set_post_callback(struct renderer_display_info* r, post_callback_t func) {
+    // crosvm needs bgra readback
+    android_setPostCallback(func, r, true /* bgra readback */);
+}
+
+extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {
+    sGetPixelsFunc(pixels, bytes);
+}
+
+extern "C" const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops() {
+    return &goldfish_pipe_service_ops;
+}
+
+static const QAndroidVmOperations sQAndroidVmOperations = {
+    .vmStop = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm stop\n"); return true; },
+    .vmStart = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm start\n"); return true; },
+    .vmReset = []() { fprintf(stderr, "goldfish-opengl vm ops: vm reset\n"); },
+    .vmShutdown = []() { fprintf(stderr, "goldfish-opengl vm ops: vm reset\n"); },
+    .vmPause = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm pause\n"); return true; },
+    .vmResume = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm resume\n"); return true; },
+    .vmIsRunning = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm is running\n"); return true; },
+    .snapshotList = [](void*, LineConsumerCallback, LineConsumerCallback) -> bool { fprintf(stderr, "goldfish-opengl vm ops: snapshot list\n"); return true; },
+    .snapshotSave = [](const char* name, void* opaque, LineConsumerCallback) -> bool {
+        fprintf(stderr, "gfxstream vm ops: snapshot save\n");
+        return true;
+    },
+    .snapshotLoad = [](const char* name, void* opaque, LineConsumerCallback) -> bool {
+        fprintf(stderr, "gfxstream vm ops: snapshot load\n");
+        return true;
+    },
+    .snapshotDelete = [](const char* name, void* opaque, LineConsumerCallback errConsumer) -> bool {
+        fprintf(stderr, "goldfish-opengl vm ops: snapshot delete\n");
+        return true;
+    },
+    .snapshotRemap = [](bool shared, void* opaque, LineConsumerCallback errConsumer) -> bool {
+        fprintf(stderr, "goldfish-opengl vm ops: snapshot remap\n");
+        return true;
+    },
+    .snapshotExport = [](const char* snapshot,
+                             const char* dest,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) -> bool {
+        fprintf(stderr, "goldfish-opengl vm ops: snapshot export image\n");
+        return true;
+    },
+    .setSnapshotCallbacks = [](void* opaque, const SnapshotCallbacks* callbacks) {
+        fprintf(stderr, "goldfish-opengl vm ops: set snapshot callbacks\n");
+    },
+    .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {
+        fprintf(stderr, "%s: map user backed ram\n", __func__);
+    },
+    .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {
+        fprintf(stderr, "%s: unmap user backed ram\n", __func__);
+    },
+    .getVmConfiguration = [](VmConfiguration* out) {
+        fprintf(stderr, "goldfish-opengl vm ops: get vm configuration\n");
+     },
+    .setFailureReason = [](const char* name, int failureReason) {
+        fprintf(stderr, "goldfish-opengl vm ops: set failure reason\n");
+     },
+    .setExiting = []() {
+        fprintf(stderr, "goldfish-opengl vm ops: set exiting\n");
+     },
+    .allowRealAudio = [](bool allow) {
+        fprintf(stderr, "goldfish-opengl vm ops: allow real audio\n");
+     },
+    .physicalMemoryGetAddr = [](uint64_t gpa) {
+        fprintf(stderr, "%s: physmemGetAddr\n", __func__);
+        return (void*)nullptr;
+     },
+    .isRealAudioAllowed = [](void) {
+        fprintf(stderr, "goldfish-opengl vm ops: is real audiop allowed\n");
+        return true;
+    },
+    .setSkipSnapshotSave = [](bool used) {
+        fprintf(stderr, "goldfish-opengl vm ops: set skip snapshot save\n");
+    },
+    .isSnapshotSaveSkipped = []() {
+        fprintf(stderr, "goldfish-opengl vm ops: is snapshot save skipped\n");
+        return false;
+    },
+};
+
+const QAndroidVmOperations* const gQAndroidVmOperations =
+        &sQAndroidVmOperations;
