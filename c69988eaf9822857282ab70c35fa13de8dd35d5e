@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f7c5a0c_585f8ab6",
+        "filename": "android/android-emugl/combined/CMakeLists.txt",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-17T02:13:54Z",
+      "side": 0,
+      "message": "why not android-emu-shared?",
+      "revId": "c69988eaf9822857282ab70c35fa13de8dd35d5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
