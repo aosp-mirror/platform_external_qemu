@@ -21,10 +21,10 @@ ANDROID_BEGIN_HEADER
 /** in android-qemu1-glue/telephony/modem_driver.c */
 /* this is the internal character driver used to communicate with the
  * emulated GSM modem. see qemu_chr_open() in vl.c */
-extern CSerialLine* android_modem_serial_line;
+API extern CSerialLine* android_modem_serial_line;
 
 /* the emulated GSM modem itself */
-extern AModem  android_modem;
+API  extern AModem  android_modem;
 
 /* must be called before the VM runs if there is a modem to emulate */
 extern void   android_modem_init( int  base_port, int sim_present );

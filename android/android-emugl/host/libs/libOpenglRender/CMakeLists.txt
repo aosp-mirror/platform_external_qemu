@@ -20,7 +20,7 @@ set(OSWindow_windows_src standalone_common/angle-util/windows/WindowsTimer.cpp
     standalone_common/angle-util/windows/win32/Win32Window.cpp)
 android_add_library(OSWindow)
 
-android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt" android-emu-shared)
+android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt" android-emu)
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
 android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")
 target_link_libraries(OSWindow PRIVATE emugl_base)
@@ -184,7 +184,7 @@ set(OpenglRender_unittests_src
 
 # Note! We build the test but are not registering it, as the darwin build has some concurrency issues with these tests.
 android_add_test(OpenglRender_unittests)
-target_link_libraries(OpenglRender_unittests PRIVATE android-emu-base gmock_main OpenglRender_standalone_common)
+target_link_libraries(OpenglRender_unittests PRIVATE android-emu gmock_main OpenglRender_standalone_common)
 android_target_compile_definitions(OpenglRender_unittests windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 add_opengl_dependencies(OpenglRender_unittests)
 
