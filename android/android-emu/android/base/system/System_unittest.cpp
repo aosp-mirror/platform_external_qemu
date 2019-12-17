@@ -280,7 +280,11 @@ TEST(System, pathIsDir) {
 #endif
 }
 
+#ifdef _MSC_VER
+TEST(System, DISABLED_pathOperations) {
+#else
 TEST(System, pathOperations) {
+#endif
     System* sys = System::get();
     TestTempDir tempDir("path_opts");
     std::string fooPath = tempDir.path();
