@@ -133,6 +133,9 @@ LocationPage::LocationPage(QWidget *parent) :
     bool useLocationV2 = false;
 
 #ifdef USE_WEBENGINE
+    mUi->loc_importGpxKmlButton->setEnabled(true);
+    mUi->loc_importGpxKmlButton_route->setEnabled(true);
+
     if (feature_is_enabled(kFeature_LocationUiV2)) {
         useLocationV2 = true;
         auto mapsKeyHolder = android::location::MapsKey::get();
@@ -422,8 +425,7 @@ void LocationPage::onConnectivityStateChanged(NetworkConnectivityManager::State 
 }
 
 void LocationPage::onConnectivityOffline() {    
-    mUi->loc_importGpxKmlButton->setEnabled(false);
-    mUi->loc_importGpxKmlButton_route->setEnabled(false);
+    // do nothing
 }
 
 void LocationPage::onConnectivityOnline() {
@@ -431,8 +433,6 @@ void LocationPage::onConnectivityOnline() {
         mUi->loc_pointWebEngineView->reload();
         mUi->loc_routeWebEngineView->reload();
     }
-    mUi->loc_importGpxKmlButton->setEnabled(true);
-    mUi->loc_importGpxKmlButton_route->setEnabled(true);
 }
 #endif // USE_WEBENGINE
 
