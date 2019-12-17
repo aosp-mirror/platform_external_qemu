@@ -236,7 +236,7 @@ void LocationPage::on_loc_routeList_itemSelectionChanged() {
         auto& routeElement = item->routeElement();
         mRouteJson = ""; // Forget any unsaved route we may have received
 
-        setLoadingOverlayVisible(true, tr("Loading Saved Route..."));
+        // setLoadingOverlayVisible(true, tr("Loading Saved Route..."));
         mRouteTravelMode = routeElement.modeIndex;
         mRouteNumPoints = routeElement.numPoints;
         mUi->loc_playRouteButton->setEnabled(false);
@@ -439,7 +439,7 @@ void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, con
 }
 
 void LocationPage::onSavedRouteDrawn() {
-    setLoadingOverlayVisible(false);
+    // setLoadingOverlayVisible(false);
 }
 
 void MapBridge::saveRoute() {

@@ -703,8 +703,8 @@ void LocationPage::points_updateTheme() {
 }
 
 void LocationPage::setLoadingOverlayVisible(bool visible, QString text) {
-    mUi->loc_loadingOverlay->setVisible(visible);
-    mUi->loc_loadingOverlayLabel->setText(text);
+    // mUi->loc_loadingOverlay->setVisible(visible);
+    // mUi->loc_loadingOverlayLabel->setText(text);
 }
 
 void LocationPage::handle_importGpxKmlButton_clicked() {
@@ -717,7 +717,7 @@ void LocationPage::handle_importGpxKmlButton_clicked() {
     // Asynchronously parse the file with geo data.
     // If the file is big enough, parsing it synchronously will cause a noticeable
     // hiccup in the UI.
-    setLoadingOverlayVisible(true, tr("Importing GPX/KML file..."));
+    // setLoadingOverlayVisible(true, tr("Importing GPX/KML file..."));
     mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
                                                       SLOT(geoDataThreadStarted_v2()),
                                                       SLOT(geoDataThreadFinished_v2(QString, bool, QString))));
