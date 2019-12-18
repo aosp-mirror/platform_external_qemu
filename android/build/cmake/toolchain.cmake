@@ -134,8 +134,6 @@ function(toolchain_generate TARGET_OS)
     # set(CMAKE_AR ${COMPILER_PREFIX}ar PARENT_SCOPE)
     set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib CACHE PATH "Ranlib")
     set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy CACHE PATH "Objcopy")
-    set(CMAKE_OBJDUMP ${COMPILER_PREFIX}objdump CACHE PATH "Objdump info from object files")
-    set(CMAKE_NM ${COMPILER_PREFIX}nm CACHE PATH "Symbols from object files")
     set(CMAKE_STRIP ${COMPILER_PREFIX}strip CACHE PATH "strip")
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} CACHE PATH "Sysroot")
     set(ANDROID_LLVM_SYMBOLIZER ${PROJECT_BINARY_DIR}/toolchain/llvm-symbolizer CACHE PATH "symbolizer")
@@ -152,6 +150,34 @@ function(_get_host_tag RET_VAL)
         set (${RET_VAL} "windows_msvc-x86_64" PARENT_SCOPE)
     endif ()
 endfunction()
+
+function(toolchain_generate_msvc TARGET_OS)
+    # This is a hack to workaround the fact that cmake will keep including
+    # the toolchain defintion over and over, and it will wipe out all the settings.
+    # so we will just store them in the environment, which gets blown away on exit
+    # anyway..
+    get_env_cache(COMPILER_PREFIX)
+    get_env_cache(ANDROID_SYSROOT)
+    if ("${COMPILER_PREFIX}" STREQUAL "")
+        toolchain_generate_internal(${TARGET_OS})
+        set_env_cache(COMPILER_PREFIX "${ANDROID_COMPILER_PREFIX}")
+        set_env_cache(ANDROID_SYSROOT "${ANDROID_SYSROOT}")
+    endif ()
+
+    set(triple x86_64-pc-win32)
+    set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}windres PARENT_SCOPE)
+    set(CMAKE_C_COMPILER ${COMPILER_PREFIX}clang PARENT_SCOPE)
+    set(CMAKE_C_COMPILER_TARGET ${triple} PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER ${COMPILER_PREFIX}clang++ PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_TARGET ${triple} PARENT_SCOPE)
+    # We will use system bintools
+    # set(CMAKE_AR ${COMPILER_PREFIX}ar PARENT_SCOPE)
+    set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib PARENT_SCOPE)
+    set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy PARENT_SCOPE)
+    set(CMAKE_STRIP ${COMPILER_PREFIX}strip PARENT_SCOPE)
+    set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
+endfunction()
+
 
 function(toolchain_configure_tags tag)
     set(ANDROID_TARGET_TAG ${tag})

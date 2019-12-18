@@ -59,8 +59,6 @@ if(WIN32)
     set(CMAKE_C_COMPILER "${CLANG_CL}")
     set(CMAKE_CXX_COMPILER "${CLANG_CL}")
   endif()
-  set(CMAKE_OBJDUMP ${CLANG_DIR}/bin/llvm-objdump.exe)
-  set(CMAKE_NM ${CLANG_DIR}/bin/llvm-nm.exe)
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
   # Set the debug flags, erasing whatever cmake stuffs in there.
   # We are going to produce "fat" binaries with all debug information in there.

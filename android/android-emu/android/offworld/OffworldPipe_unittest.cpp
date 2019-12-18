@@ -36,8 +36,7 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/looper.h"
 #include "android/videoinjection/VideoInjectionController.h"
-#include "android/emulation/testing/MockAndroidConsoleAgent.h"
-#include "android/console.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -231,9 +230,8 @@ protected:
                 replaceMock(&MockAndroidVmOperations::mock, &mock);
 
         EXPECT_CALL(mock, setSnapshotCallbacks(_, _)).Times(1);
-        register_mock_agents();
-
-        androidSnapshot_initialize(get_console_agents()->vm, get_console_agents()->emu);
+        androidSnapshot_initialize(gQAndroidVmOperations,
+                                   gQAndroidEmulatorWindowAgent);
         Mock::VerifyAndClearExpectations(&mock);
 
         EXPECT_CALL(mock, vmStop()).Times(1);

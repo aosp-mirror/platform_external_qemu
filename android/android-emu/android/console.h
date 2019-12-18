@@ -51,8 +51,8 @@ ANDROID_BEGIN_HEADER
     X(QAndroidNetAgent, net)              \
     X(QAndroidLibuiAgent, libui)          \
     X(QCarDataAgent, car)                 \
-    X(AndroidProxyCB, cbProxy)            \
     X(QGrpcAgent, grpc)                   \
+
 
 
 // A structure used to group pointers to all agent interfaces used by the
@@ -67,11 +67,4 @@ typedef struct AndroidConsoleAgents {
 // functions. Takes ownership of |agents|.
 extern int android_console_start(int port, const AndroidConsoleAgents* agents);
 
-// Injection point for the console agents. Many components rely on these agents
-// being available. These agents will be registered early on during startup.
-extern void android_register_console_agents(const AndroidConsoleAgents* agents);
-
-// Access point for any of the console agents. Make sure to make use of
-// The MockAndroidConsoleAgent.h if you need to access mock agents in your unittests.
-extern const AndroidConsoleAgents* get_console_agents();
 ANDROID_END_HEADER

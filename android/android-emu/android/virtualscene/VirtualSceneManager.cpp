@@ -19,7 +19,6 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
-#include "android/console.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/skin/winsys.h"
@@ -178,7 +177,7 @@ VirtualSceneManagerImpl::VirtualSceneManagerImpl(
 }
 
 VirtualSceneManagerImpl::~VirtualSceneManagerImpl() {
-    get_console_agents()->libui->show_virtual_scene_controls(false);
+    skin_winsys_show_virtual_scene_controls(false);
     mScene->releaseResources();
 }
 
@@ -205,7 +204,7 @@ std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
         }
     }
 
-    get_console_agents()->libui->show_virtual_scene_controls(true);
+    skin_winsys_show_virtual_scene_controls(true);
 
     return std::unique_ptr<VirtualSceneManagerImpl>(
             new VirtualSceneManagerImpl(std::move(renderer), std::move(scene)));

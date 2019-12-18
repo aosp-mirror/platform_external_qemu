@@ -13,16 +13,16 @@
 // limitations under the License.
 #include "android/emulation/HostMemoryService.h"
 
+#include "android/base/AlignedBuf.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "android/emulation/control/vm_operations.h"
+
 #include <iomanip>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include "android/base/AlignedBuf.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/console.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/emulation/control/vm_operations.h"
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -34,16 +34,16 @@ namespace android {
 class HostMemoryPipe : public AndroidAsyncMessagePipe {
 public:
     class Service : public AndroidAsyncMessagePipe::Service<HostMemoryPipe> {
-        typedef AndroidAsyncMessagePipe::Service<HostMemoryPipe> Super;
-
+    typedef AndroidAsyncMessagePipe::Service<HostMemoryPipe> Super;
     public:
         Service() : Super("HostMemoryPipe") {}
 
         ~Service() {
             AutoLock lock(sServiceLock);
             sService = nullptr;
-            get_console_agents()->vm->unmapUserBackedRam(mSharedRegionPhysAddr,
-                                                         mSharedRegionSize);
+            gQAndroidVmOperations->unmapUserBackedRam(
+                mSharedRegionPhysAddr,
+                mSharedRegionSize);
         }
 
         static Service* create() {
@@ -72,9 +72,10 @@ public:
             mSharedRegionPhysAddr = physAddr;
             mSharedRegionSize = size;
 
-            get_console_agents()->vm->mapUserBackedRam(
-                    mSharedRegionPhysAddr, sharedRegionHostAddrLocked(),
-                    mSharedRegionSize);
+            gQAndroidVmOperations->mapUserBackedRam(
+                mSharedRegionPhysAddr,
+                sharedRegionHostAddrLocked(),
+                mSharedRegionSize);
         }
 
         bool isSharedRegionAllocatedLocked() const {
@@ -91,9 +92,8 @@ public:
         void onSubRegionFreedLocked(uint64_t offset) {
             auto it = subRegions.find(offset);
             if (it == subRegions.end()) {
-                fprintf(stderr,
-                        "%s: warning: subregion offset 0x%llx not found\n",
-                        __func__, (unsigned long long)offset);
+                fprintf(stderr, "%s: warning: subregion offset 0x%llx not found\n", __func__,
+                        (unsigned long long)offset);
             }
             subRegions.erase(it);
         }
@@ -102,11 +102,10 @@ public:
 
         uint64_t mSharedRegionPhysAddr = 0;
         uint64_t mSharedRegionSize = 0;
-        AlignedBuf<uint8_t, 4096> mSharedRegionHostBuf{0};
+        AlignedBuf<uint8_t, 4096> mSharedRegionHostBuf { 0 };
         std::unordered_map<uint64_t, SubRegion> subRegions = {};
         uint64_t currentSubRegionPhysAddr = 0;
         uint64_t currentSubRegionSize = 0;
-
     private:
         static Service* sService;
     };
@@ -115,11 +114,11 @@ public:
         : AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
 
 private:
+
     void onMessage(const std::vector<uint8_t>& input) override {
         uint32_t size = (uint32_t)input.size();
         if (size < sizeof(uint32_t)) {
-            fprintf(stderr,
-                    "HostMemoryService::%s: unexpected size from guest: %u\n",
+            fprintf(stderr, "HostMemoryService::%s: unexpected size from guest: %u\n",
                     __func__, size);
             return;
         }
@@ -127,45 +126,48 @@ private:
         auto service = Service::get();
         AutoLock lock(service->sServiceLock);
 
-        HostMemoryServiceCommand cmd = (HostMemoryServiceCommand)(
+        HostMemoryServiceCommand cmd =
+            (HostMemoryServiceCommand)(
                 *reinterpret_cast<const uint32_t*>(input.data()));
 
-        onCommandLocked(service, cmd, input.data() + sizeof(uint32_t),
-                        input.size() - sizeof(uint32_t));
+        onCommandLocked(service, cmd,
+            input.data() + sizeof(uint32_t),
+            input.size() - sizeof(uint32_t));
     }
 
     void onCommandLocked(Service* service,
                          HostMemoryServiceCommand cmd,
                          const uint8_t* data,
                          size_t payloadBytes) {
+
         std::vector<uint8_t> cmdResponse(sizeof(uint32_t));
         std::vector<uint8_t> dataResponse(sizeof(uint64_t));
 
         switch (cmd) {
             case HostMemoryServiceCommand::IsSharedRegionAllocated:
                 *(uint32_t*)(cmdResponse.data()) =
-                        service->isSharedRegionAllocatedLocked();
+                    service->isSharedRegionAllocatedLocked();
                 send(std::move(cmdResponse));
                 break;
             case HostMemoryServiceCommand::AllocSharedRegion:
             case HostMemoryServiceCommand::AllocSubRegion:
             case HostMemoryServiceCommand::FreeSubRegion:
                 if (payloadBytes < 2 * sizeof(uint64_t)) {
-                    fprintf(stderr,
-                            "%s: Error: not enough bytes to read region cmd "
-                            "info\n",
+                    fprintf(stderr, "%s: Error: not enough bytes to read region cmd info\n",
                             __func__);
                     return;
                 } else {
-                    uint64_t addr = *reinterpret_cast<const uint64_t*>(data);
-                    uint64_t size = *reinterpret_cast<const uint64_t*>(
-                            data + sizeof(uint64_t));
-                    onRegionCommandLocked(service, cmd, addr, size);
+                    uint64_t addr =
+                        *reinterpret_cast<const uint64_t*>(data);
+                    uint64_t size =
+                        *reinterpret_cast<const uint64_t*>(data + sizeof(uint64_t));
+                    onRegionCommandLocked(
+                        service, cmd, addr, size);
                 }
                 break;
             case HostMemoryServiceCommand::GetHostAddrOfSharedRegion:
                 *(uint64_t*)(dataResponse.data()) =
-                        (uintptr_t)(service->sharedRegionHostAddrLocked());
+                    (uintptr_t)(service->sharedRegionHostAddrLocked());
                 send(std::move(dataResponse));
                 break;
             default:
@@ -188,8 +190,8 @@ private:
                 service->onSubRegionFreedLocked(addr);
                 break;
             default:
-                fprintf(stderr, "%s: invalid command 0x%x\n", __func__,
-                        (uint32_t)(cmd));
+                fprintf(stderr, "%s: invalid command 0x%x\n",
+                        __func__, (uint32_t)(cmd));
                 break;
         }
     }
@@ -199,8 +201,9 @@ private:
 StaticLock HostMemoryPipe::Service::sServiceLock;
 HostMemoryPipe::Service* HostMemoryPipe::Service::sService = nullptr;
 
-}  // namespace android
+} // namespace android
 
 void android_host_memory_service_init(void) {
-    registerAsyncMessagePipeService(android::HostMemoryPipe::Service::create());
+    registerAsyncMessagePipeService(
+        android::HostMemoryPipe::Service::create());
 }

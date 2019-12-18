@@ -21,7 +21,6 @@
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
-#include "android/console.h"
 
 #include <assert.h>
 
@@ -144,7 +143,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         guest_boot_completed = 1;
 
         if (android_hw->test_quitAfterBootTimeOut > 0) {
-            get_console_agents()->vm->vmShutdown();
+            gQAndroidVmOperations->vmShutdown();
         } else {
             auto adbInterface = emulation::AdbInterface::getGlobal();
             if (!adbInterface) return;
@@ -160,7 +159,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             // If we allowed host audio, don't revoke
             // microphone perms.
-            if (get_console_agents()->vm->isRealAudioAllowed()) {
+            if (gQAndroidVmOperations->isRealAudioAllowed()) {
                 printf("emulator: Not revoking microphone permissions "
                        "for Google App.\n");
                 return;

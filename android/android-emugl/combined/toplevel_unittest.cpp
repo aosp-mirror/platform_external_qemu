@@ -17,10 +17,11 @@
 
 #include "android/base/GLObjectCounter.h"
 #include "android/base/system/System.h"
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
-#include "android/emulation/testing/MockAndroidConsoleAgent.h"
+
 #include <memory>
 
 using android::base::System;
@@ -28,7 +29,6 @@ using android::base::System;
 namespace aemu {
 
 TEST(Toplevel, Basic) {
-    register_mock_agents();
     std::vector<size_t> beforeTest, afterTest;
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
     auto t(std::make_unique<Toplevel>());

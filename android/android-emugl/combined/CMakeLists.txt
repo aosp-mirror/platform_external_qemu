@@ -38,7 +38,7 @@ target_link_libraries(emugl_combined_unittests
                               gtest
                               gtest_main)
 target_compile_definitions(emugl_combined_unittests PRIVATE -D__ANDROID_API__=28)
-target_include_directories(emugl_combined_unittests PRIVATE
+target_include_directories(emugl_combined_unittests PRIVATE 
                                    ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
                                    ${GOLDFISH_EMUGL_DIR}/system/include
                                    ${ANDROID_EMUGL_DIR}/guest/androidImpl)
@@ -63,14 +63,13 @@ set(aemugraphics_toplevel_unittests_src toplevel_unittest.cpp)
 android_add_test(aemugraphics_toplevel_unittests)
 target_compile_options(aemugraphics_toplevel_unittests PRIVATE -fvisibility=default)
 target_compile_definitions(aemugraphics_toplevel_unittests PRIVATE -D__ANDROID_API__=28)
-target_include_directories(aemugraphics_toplevel_unittests PRIVATE
+target_include_directories(aemugraphics_toplevel_unittests PRIVATE 
                                    ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
                                    ${GOLDFISH_EMUGL_DIR}/system/include)
 target_link_libraries(aemugraphics_toplevel_unittests
                               PUBLIC
                               aemugraphics
                               OSWindow
-                              android-mock-agents
                               gtest
                               gtest_main)
 android_target_dependency(aemugraphics_toplevel_unittests all  SWIFTSHADER_DEPENDENCIES)

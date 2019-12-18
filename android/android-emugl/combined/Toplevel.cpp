@@ -17,7 +17,6 @@
 #include "android/base/memory/OnDemand.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/console.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/vm_operations.h"
@@ -34,8 +33,8 @@
 #include "AndroidWindow.h"
 #include "AndroidWindowBuffer.h"
 #include "ClientComposer.h"
-#include "Display.h"
 #include "GrallocDispatch.h"
+#include "Display.h"
 #include "SurfaceFlinger.h"
 #include "Vsync.h"
 #include "VulkanDispatch.h"
@@ -45,7 +44,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
-#include <hardware/gralloc.h>
 
 #include <string>
 #include <unordered_set>
@@ -60,13 +58,13 @@ using aemu::SurfaceFlinger;
 using aemu::Vsync;
 
 using android::AndroidPipe;
-using android::HostGoldfishPipeDevice;
 using android::base::AutoLock;
 using android::base::Lock;
 using android::base::makeOnDemand;
 using android::base::OnDemandT;
 using android::base::pj;
 using android::base::System;
+using android::HostGoldfishPipeDevice;
 
 namespace aemu {
 
@@ -94,8 +92,7 @@ public:
 
     AndroidWindow* createAppWindowAndSetCurrent(int width, int height) {
         AutoLock lock(mLock);
-        if (!mSf)
-            startDisplay();
+        if (!mSf) startDisplay();
 
         AndroidWindow* window = new AndroidWindow(width, height);
 
@@ -108,10 +105,8 @@ public:
     void destroyAppWindow(AndroidWindow* window) {
         AutoLock lock(mLock);
 
-        if (!window)
-            return;
-        if (mWindows.find(window) == mWindows.end())
-            return;
+        if (!window) return;
+        if (mWindows.find(window) == mWindows.end()) return;
 
         if (mSf) {
             mSf->connectWindow(nullptr);
@@ -123,8 +118,7 @@ public:
     }
 
     void teardownDisplay() {
-        if (!mSf)
-            return;
+        if (!mSf) return;
         mSf->join();
 
         AutoLock lock(mLock);
@@ -139,9 +133,12 @@ public:
         }
     }
 
-    void loop() { mDisplay.loop(); }
+    void loop() {
+        mDisplay.loop();
+    }
 
 private:
+
     void setupAndroidEmugl() {
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLESDynamicVersion, true);
@@ -165,10 +162,11 @@ private:
 
         emuglConfig_init(
                 &config, true /* gpu enabled */, "auto",
-                mUseHostGpu ? "host" : "swiftshader_indirect", /* gpu option */
-                64,                                            /* bitness */
-                mUseWindow, false,                             /* blacklisted */
-                false, /* has guest renderer */
+                mUseHostGpu ? "host"
+                            : "swiftshader_indirect", /* gpu option */
+                64,                                   /* bitness */
+                mUseWindow, false,                    /* blacklisted */
+                false,                                /* has guest renderer */
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO);
 
         emugl::vkDispatch(false /* not for test only */);
@@ -187,8 +185,9 @@ private:
         int min;
 
         android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28,
-                                      get_console_agents()->vm,
-                                      get_console_agents()->emu, &maj, &min);
+                                      gQAndroidVmOperations,
+                                      gQAndroidEmulatorWindowAgent,
+                                      &maj, &min);
 
         char* vendor = nullptr;
         char* renderer = nullptr;
@@ -202,13 +201,11 @@ private:
         if (mUseWindow) {
             android_showOpenglesWindow(mDisplay.getNative(), 0, 0, kWindowSize,
                                        kWindowSize, kWindowSize, kWindowSize,
-                                       mDisplay.getDevicePixelRatio(), 0,
-                                       false);
+                                       mDisplay.getDevicePixelRatio(), 0, false);
             mDisplay.loop();
         }
 
-        android::emulation::goldfish_address_space_set_vm_operations(
-                get_console_agents()->vm);
+        android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
 
         HostGoldfishPipeDevice::get();
 
@@ -234,10 +231,11 @@ private:
 
     void teardownGralloc() { unload_gralloc_module(&mGralloc); }
 
-    buffer_handle_t createGrallocBuffer(int usage = GRALLOC_USAGE_HW_RENDER,
-                                        int format = HAL_PIXEL_FORMAT_RGBA_8888,
-                                        int width = kWindowSize,
-                                        int height = kWindowSize) {
+    buffer_handle_t createGrallocBuffer(
+            int usage = GRALLOC_USAGE_HW_RENDER,
+            int format = HAL_PIXEL_FORMAT_RGBA_8888,
+            int width = kWindowSize,
+            int height = kWindowSize) {
         buffer_handle_t buffer;
         int stride;
         int res;
@@ -275,8 +273,7 @@ private:
         }
     }
 
-    std::vector<AndroidWindowBuffer> allocBuffersForQueue(
-            int usage = GRALLOC_USAGE_HW_RENDER) {
+    std::vector<AndroidWindowBuffer> allocBuffersForQueue(int usage = GRALLOC_USAGE_HW_RENDER) {
         std::vector<AndroidWindowBuffer> buffers;
         for (int i = 0; i < AndroidBufferQueue::kCapacity; i++) {
             buffers.push_back(AndroidWindowBuffer(kWindowSize, kWindowSize,
@@ -307,15 +304,16 @@ private:
         }
 
         mSf.reset(new SurfaceFlinger(
-                mRefreshRate, &mComposeWindow, buffersToNativePtrs(mAppBuffers),
-                [](AndroidWindow* composeWindow, AndroidBufferQueue* fromApp,
-                   AndroidBufferQueue* toApp) {
-                    return new ClientComposer(composeWindow, fromApp, toApp);
-                },
-                [this]() {
-                    mSf->advanceFrame();
-                    this->clientPost();
-                }));
+            mRefreshRate,
+            &mComposeWindow,
+            buffersToNativePtrs(mAppBuffers),
+            [](AndroidWindow* composeWindow, AndroidBufferQueue* fromApp,
+               AndroidBufferQueue* toApp) {
+
+                return new ClientComposer(composeWindow, fromApp, toApp);
+
+            },
+            [this]() { mSf->advanceFrame(); this->clientPost(); }));
 
         mSf->start();
     }
@@ -355,16 +353,15 @@ Toplevel::Toplevel(int refreshRate) : mImpl(new Toplevel::Impl(refreshRate)) {}
 Toplevel::~Toplevel() = default;
 
 ANativeWindow* Toplevel::createWindow(int width, int height) {
-    return static_cast<ANativeWindow*>(
-            mImpl->createAppWindowAndSetCurrent(width, height));
+    return static_cast<ANativeWindow*>(mImpl->createAppWindowAndSetCurrent(width, height));
 }
 
 void Toplevel::destroyWindow(ANativeWindow* window) {
-    mImpl->destroyAppWindow((AndroidWindow*)window);
+    mImpl->destroyAppWindow((AndroidWindow*) window);
 }
 
 void Toplevel::destroyWindow(void* window) {
-    mImpl->destroyAppWindow((AndroidWindow*)window);
+    mImpl->destroyAppWindow((AndroidWindow*) window);
 }
 
 void Toplevel::teardownDisplay() {
@@ -374,4 +371,4 @@ void Toplevel::teardownDisplay() {
 void Toplevel::loop() {
     mImpl->loop();
 }
-}  // namespace aemu
+} // namespace aemu

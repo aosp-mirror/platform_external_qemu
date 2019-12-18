@@ -1,6 +1,5 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
-project(Android-Emulator)
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(WARNING "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, "
                   "It is best to invoke: android/scripts/rebuild. "
@@ -185,11 +184,10 @@ if(WINDOWS_MSVC_X86_64)
 
     # Link time optization tragically fails when cross compiling.
     if (NOT CROSSCOMPILE)
-      # We cannot optimize when creating shared libraries.
       # Do a global optimization pass (note, link times --> infinity)
-      # add_c_flag("-flto=full")
+      add_c_flag("-flto=thin")
       # Optimize a bit more on the vtables in use, note this requires -flto
-      # add_c_flag("-fwhole-program-vtables")
+      add_c_flag("-fwhole-program-vtables")
     endif()
   endif()
 endif()
@@ -520,8 +518,7 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-unused-variable")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
-android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE android-emu-base) 
-android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE android-emu-base iphlpapi::iphlpapi) 
+android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE android-emu-base)
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})

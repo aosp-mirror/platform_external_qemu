@@ -15,7 +15,6 @@
  */
 
 #include "android/camera/camera-virtualscene-utils.h"
-#include "android/console.h"
 
 #define VIRTUALSCENE_PIXEL_FORMAT V4L2_PIX_FMT_RGB32
 
@@ -114,8 +113,8 @@ int RenderedCameraDevice::readFrame(ClientFrame* resultFrame,
 }
 
 bool RenderedCameraDevice::initializeEgl() {
-    mEglDispatch = get_console_agents()->libui->eglDispatcher();
-    mGles2 = get_console_agents()->libui->glesV2Dispatcher();
+    mEglDispatch = emugl::LazyLoadedEGLDispatch::get();
+    mGles2 = emugl::LazyLoadedGLESv2Dispatch::get();
     mEglDisplay = mEglDispatch->eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     if (mEglDisplay == EGL_NO_DISPLAY) {

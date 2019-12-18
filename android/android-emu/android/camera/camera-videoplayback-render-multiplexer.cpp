@@ -26,8 +26,6 @@
 #include "android/base/misc/FileUtils.h"
 #include "android/offworld/proto/offworld.pb.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
-#include "android/utils/tempfile.h"
-#include "android/console.h"
 
 namespace android {
 namespace videoplayback {
@@ -272,10 +270,10 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
                 true, "Failed to load the video.");
         return;
     }
-
-    mPlayer = std::unique_ptr<videoplayer::VideoPlayer>(
-        get_console_agents()->libui->createVideoPlayer(path,
-        mVideoRenderer->renderTarget(), new VideoplaybackNotifier()));
+    mPlayer = videoplayer::VideoPlayer::create(
+            path, mVideoRenderer->renderTarget(),
+            std::unique_ptr<videoplayer::VideoPlayerNotifier>(
+                    new VideoplaybackNotifier()));
 
     //File Loaded, sends async response indicating execution completed.
     videoinjection::VideoInjectionController::trySendAsyncResponse(

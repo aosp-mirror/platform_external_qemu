@@ -153,8 +153,6 @@ static inline const QAndroidVmOperations* vmopers(ControlClient client) {
 //////////// Module level globals //////////////////////////
 static ControlGlobalRec _g_global;
 
-static const AndroidConsoleAgents* _g_console_agents = nullptr;
-
 // Some commands may be controlled by a feature flag, so we need to check it.
 namespace {
 using android::featurecontrol::Feature;
@@ -782,6 +780,7 @@ static void control_global_accept6(void* opaque,
 int android_console_start(int control_port,
                           const AndroidConsoleAgents* agents) {
     ControlGlobal global = &_g_global;
+
     memset( global, 0, sizeof(*global) );
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
@@ -839,26 +838,7 @@ int android_console_start(int control_port,
     return 0;
 }
 
-static std::atomic<bool> initialized(false);
 
-void android_register_console_agents(const AndroidConsoleAgents* agents) {
-    bool firstRun = false;
-    if (initialized.compare_exchange_strong(firstRun, true)) {
-         _g_console_agents = agents;
-    } else {
-        D( ("%s:%d: Ignoring second registration of console agents.\n",
-        __func__, __LINE__));
-    }
-}
-const AndroidConsoleAgents* get_console_agents() {
-    assert(_g_console_agents != nullptr);
-    if (_g_console_agents == nullptr) {
-        fprintf(stderr,
-         "%s:%d: Retrieving console agents before registration has taken place..\n",
-         __func__, __LINE__);
-    }
-    return _g_console_agents;
-}
 
 static int
 do_quit( ControlClient  client, char*  args )
@@ -3737,7 +3717,7 @@ do_start_grpc( ControlClient  client, char*  args )
         int port;
 
         if (sscanf(args, "%d", &port) == 1 && port > 0 && port < 65536) {
-            int active = client->global->grpc_agent->start( (void*) _g_console_agents, port, "");
+            int active = client->global->grpc_agent->start(port, "");
             control_write(client, "{ \"port\": \"%d\" }\n", active);
             if (active < 0) {
                 control_write( client, "KO: Failed to launch gRPC service\n" );

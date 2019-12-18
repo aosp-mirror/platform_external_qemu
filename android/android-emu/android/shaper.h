@@ -47,9 +47,9 @@ void       netdelay_send_aux( NetDelay  delay, const void*  data, size_t  size, 
 void       netdelay_destroy( NetDelay  delay );
 
 /* network traffic shaper and delayer */
-API extern NetShaper   android_net_shaper_in;
-API extern NetShaper   android_net_shaper_out;
-API extern NetDelay    android_net_delay_in;
+extern NetShaper   android_net_shaper_in;
+extern NetShaper   android_net_shaper_out;
+extern NetDelay    android_net_delay_in;
 
 ANDROID_END_HEADER
 
