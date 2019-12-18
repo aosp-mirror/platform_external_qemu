@@ -896,6 +896,8 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
     CameraInfo* ci;
     int res;
 
+    fprintf(stderr, "%s:%d param=%s\n", __func__, __LINE__, param);
+
     /*
      * Parse parameter string, containing camera client properties.
      */
@@ -931,8 +933,8 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
      * in the array, we fail this connection due to protocol violation. */
     ci = _camera_service_get_camera_info_by_device_name(csd, cc->device_name);
     if (ci == NULL) {
-        E("%s: Cannot find camera info for device '%s'",
-          __FUNCTION__, cc->device_name);
+        E("%s: Cannot find camera info for device '%s' param='%s'",
+          __FUNCTION__, cc->device_name, param);
         _camera_client_free(cc);
         return NULL;
     }

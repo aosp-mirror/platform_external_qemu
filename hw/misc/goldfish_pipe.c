@@ -469,6 +469,8 @@ static HwPipe* hwpipe_new(uint32_t id, uint64_t channel, PipeDevice* dev) {
 }
 
 static void hwpipe_free(HwPipe* pipe, GoldfishPipeCloseReason reason) {
+    fprintf(stderr, "rkir555 %s:%d pipe=%p\n", __func__, __LINE__, pipe);
+
     if (pipe->host_pipe)
         service_ops->guest_close(pipe->host_pipe, reason);
 
@@ -1833,6 +1835,8 @@ void goldfish_pipe_reset(GoldfishHwPipe *pipe, GoldfishHostPipe *host_pipe) {
 
 void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
                                GoldfishPipeWakeFlags flags) {
+    fprintf(stderr, "rkir555 %s:%d pipe=%p\n", __func__, __LINE__, pipe);
+
     if (!pipe) return;
 
     PipeDevice *dev = pipe->dev;
