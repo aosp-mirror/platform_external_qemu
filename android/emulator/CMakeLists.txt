@@ -121,12 +121,3 @@ android_install_exe(emulator .)
 
 # Install files we need.
 install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
-
-# Note, these files are identical..
-if(WINDOWS)
-  install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
-elseif(LINUX_X86_64)
-  install(FILES ${ANDROID_QEMU2_TOP_DIR}/source.properties DESTINATION .)
-elseif(DARWIN_X86_64)
-  install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
-endif()

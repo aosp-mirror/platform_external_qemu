@@ -193,6 +193,13 @@ if(WINDOWS_MSVC_X86_64)
 endif()
 
 
+# Copy the source properties and add the build number to it, this will enable
+# external tools to easily operate on version id.
+set(SOURCE_PROP_DEST ${CMAKE_BINARY_DIR}/source.properties)
+file(COPY ${ANDROID_QEMU2_TOP_DIR}/source.properties DESTINATION ${CMAKE_BINARY_DIR})
+file(APPEND ${SOURCE_PROP_DEST} "Pkg.BuildId=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+install(FILES ${SOURCE_PROP_DEST} DESTINATION . RENAME source.properties)
+
 if(OPTION_CLANG_TIDY)
   set(DO_FIX "")
   if(OPTION_CLANG_TIDY_FIX)
