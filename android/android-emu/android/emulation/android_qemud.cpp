@@ -26,6 +26,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
+pthread_mutex_t qemud_global_lock = PTHREAD_MUTEX_INITIALIZER;
+
 /* Initializes QEMUD serial interface.
  */
 static void _android_qemud_serial_init(CSerialLine* sl) {
@@ -207,6 +209,8 @@ _qemudPipe_sendBuffers(void* opaque,
  */
 static int
 _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers) {
+    pthread_mutex_lock(&qemud_global_lock);
+
     QemudPipe* pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* client = pipe->client;
     QemudPipeMessage** msg_list;
@@ -217,6 +221,7 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
 
     if (client == NULL) {
         D("%s: Unexpected NULL client", __FUNCTION__);
+        pthread_mutex_unlock(&qemud_global_lock);
         return -1;
     }
 
@@ -224,6 +229,7 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
     if (*msg_list == NULL) {
         /* No data to send. Let it block until we wake it up with
          * PIPE_WAKE_READ when service sends data to the client. */
+        pthread_mutex_unlock(&qemud_global_lock);
         return PIPE_ERROR_AGAIN;
     }
 
@@ -257,6 +263,7 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
 
     D("%s: -> %u (of %u)", __FUNCTION__, sent_bytes, buffers->size);
 
+    pthread_mutex_unlock(&qemud_global_lock);
     return sent_bytes;
 }
 

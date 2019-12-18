@@ -16,8 +16,11 @@
 #include "android/utils/stream.h"
 
 #include <stdbool.h>
+#include <pthread.h>
 
 ANDROID_BEGIN_HEADER
+
+extern pthread_mutex_t qemud_global_lock;
 
 /* Support for the qemud-based 'services' in the emulator.
  * Please read docs/ANDROID-QEMUD.TXT to understand what this is about.
