@@ -42,7 +42,11 @@ TEST(MapsKeyFileParser, ReadEmptyFile) {
     EXPECT_TRUE(key.empty());
 }
 
+#ifdef _MSC_VER
+TEST(MapsKeyFileParser, DISABLED_ReadGarbageFile) {
+#else
 TEST(MapsKeyFileParser, ReadGarbageFile) {
+#endif
     char text[] = "Some random data\n"
                   "That is not a valid protobuf\n";
 
