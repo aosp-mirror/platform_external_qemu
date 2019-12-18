@@ -46,12 +46,24 @@
 #endif
 
 #if DEBUG >= 2
-#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define DD(...) D(__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
 
-using amessage = android::emulation::AdbMessageSniffer::amessage;
+#define ADB_SYNC 0x434e5953
+#define ADB_CNXN 0x4e584e43
+#define ADB_OPEN 0x4e45504f
+#define ADB_OKAY 0x59414b4f
+#define ADB_CLSE 0x45534c43
+#define ADB_WRTE 0x45545257
+#define ADB_AUTH 0x48545541
+
+#define ADB_AUTH_TOKEN 1
+#define ADB_AUTH_SIGNATURE 2
+#define ADB_AUTH_RSAPUBLICKEY 3
+
+using amessage = android::emulation::amessage;
 using namespace android::emulation;
 using namespace android::jdwp;
 
@@ -59,6 +71,7 @@ static int s_adb_port = -1;
 static int s_adb_scoket = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
 static std::unique_ptr<android::base::Thread> s_workerThread = {};
+static int s_version = A_VERSION_MIN;
 
 // Adb authentication
 #define TOKEN_SIZE 20
@@ -123,6 +136,16 @@ static bool sign_auth_token(const char* token,
     return sign_token(keys[0], token, token_size, sig, siglen);
 }
 
+static void assignChecksum(apacket* packet) {
+    if (s_version >= A_VERSION_SKIP_CHECKSUM) {
+        return;
+    }
+    packet->mesg.data_check = 0;
+    for (size_t i = 0; i < packet->data.size(); ++i) {
+        packet->mesg.data_check += packet->data[i];
+    }
+}
+
 static int tryConnect() {
     using namespace android::base;
     if (s_adb_scoket > 0) {
@@ -144,6 +167,7 @@ static int tryConnect() {
 
 #define _SEND_PACKET(packet)           \
     {                                  \
+        assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
             return -1;                 \
         }                              \
@@ -168,15 +192,17 @@ static int tryConnect() {
 
     {
         apacket to_guest;
-        const char* kCnxnData = "";
+        const char* kCnxnData =
+                "host::features=remount_shell,abb_exec,fixed_push_symlink_"
+                "timestamp,abb,stat_v2,apex,shell_v2,fixed_push_mkdir,cmd";
         to_guest.mesg.command = ADB_CNXN;
-        to_guest.mesg.arg1 = 256 * 1024;
-        to_guest.mesg.data_length = (unsigned)strlen(kCnxnData) + 1;
+        to_guest.mesg.arg0 = A_VERSION;
+        to_guest.mesg.arg1 = 64 * 1024;
+        to_guest.mesg.data_length = (unsigned)strlen(kCnxnData);
         to_guest.mesg.magic = ADB_CNXN ^ 0xffffffff;
 
-        to_guest.data.resize(strlen(kCnxnData) + 1);
+        to_guest.data.resize(strlen(kCnxnData));
         memcpy(to_guest.data.data(), kCnxnData, strlen(kCnxnData));
-        to_guest.data[strlen(kCnxnData)] = 0;
         DD("now write connection command...\n");
         _SEND_PACKET(to_guest);
 
@@ -210,6 +236,10 @@ static int tryConnect() {
             DD("read for connection\n");
             _RECV_PACKET(pack_recv);
         }
+        if (pack_recv.mesg.command != ADB_CNXN) {
+            return -1;
+        }
+        s_version = std::min((unsigned)A_VERSION, pack_recv.mesg.arg0);
     }
     s_adb_scoket = s;
 #undef _SEND_PACKET
@@ -257,6 +287,7 @@ bool run_async(const char* cmd) {
         uint32_t remote_id = 0;
 #define _SEND_PACKET(packet)           \
     {                                  \
+        assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
             return -1;                 \
         }                              \
@@ -323,11 +354,14 @@ bool track(int pid, const char* snapshot_name) {
     D("Setup socket");
     int s = tryConnect();
     if (s < 0) {
+        D("Connect failed");
         return false;
     }
+    D("Connect succeeded");
 
 #define _SEND_PACKET(packet)           \
     {                                  \
+        assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
             return false;              \
         }                              \
