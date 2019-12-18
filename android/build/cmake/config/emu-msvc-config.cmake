@@ -15,5 +15,7 @@ get_filename_component(
 set(MSVC_FOUND TRUE)
 set(MSVC_DEPENDENCIES
     "${PREBUILT_ROOT}/msvcp140.dll>./msvcp140.dll"
-    "${PREBUILT_ROOT}/vcruntime140.dll>./vcruntime140.dll")
+    "${PREBUILT_ROOT}/vcruntime140.dll>./vcruntime140.dll"
+    "${PREBUILT_ROOT}/msvcp140.dll>lib64/msvcp140.dll"
+    "${PREBUILT_ROOT}/vcruntime140.dll>lib64/vcruntime140.dll")
 set(PACKAGE_EXPORT "MSVC_DEPENDENCIES;MSVC_FOUND")
