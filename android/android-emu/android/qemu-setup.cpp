@@ -400,9 +400,13 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_adb_port = adb_port;
     android_serial_number_port = adb_port - 1;
 
-    auto looper = ThreadLooper::get();
-    android::emulation::AdbConnection::setAdbSocket(
-            new AsyncSocket(looper, android_adb_port));
+    // Only initialize adb when the user explicitly requests it.
+    // We can revisit this once we properly resolve b/146491687
+    if (android_cmdLineOptions->direct_adb) {
+        auto looper = ThreadLooper::get();
+        android::emulation::AdbConnection::setAdbSocket(
+                new AsyncSocket(looper, android_adb_port));
+    }
 
     return true;
 }
