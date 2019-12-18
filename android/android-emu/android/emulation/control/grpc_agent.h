@@ -17,7 +17,7 @@
 ANDROID_BEGIN_HEADER
 
 typedef struct QGrpcAgent {
-    int (*start)(void* console_agents, int port, const char* turn_cfg);
+    int (*start)(int port, const char* turn_cfg);
 } QGrpcAgent;
 
 ANDROID_END_HEADER

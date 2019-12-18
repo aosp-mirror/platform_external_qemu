@@ -10,7 +10,6 @@
 ** GNU General Public License for more details.
 */
 #include "android/avd/hw-config.h"
-#include "android/utils/compiler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/avd/util.h"
 #include "android/utils/path.h"
@@ -23,7 +22,7 @@
 
 
 /* the global variable containing the hardware config for this device */
-EXPORT AndroidHwConfig   android_hw[1];
+AndroidHwConfig   android_hw[1];
 
 static int stringToBoolean(const char* value) {
     if (!strcmp(value,"1")    ||

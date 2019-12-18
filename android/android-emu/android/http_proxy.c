@@ -15,11 +15,11 @@
 #include "android/utils/debug.h"
 #include "android/utils/stralloc.h"
 #include "android/emulation/control/http_proxy_agent.h"
-#include "android/console.h"
 #include <stdio.h>
 #include <string.h>
 #define  D(...)  VERBOSE_PRINT(proxy,__VA_ARGS__)
 
+extern AndroidProxyCB *const gAndroidProxyCB;
 extern void proxy_manager_atexit(void);
 STRALLOC_DEFINE(UIProxy);
 
@@ -34,8 +34,8 @@ android_http_proxy_set( const char*  proxy )
         if (stralloc_cstr(UIProxy) != '\0') {
             stralloc_reset(UIProxy);
         }
-        if (get_console_agents()->cbProxy->ProxyUnset) {
-            get_console_agents()->cbProxy->ProxyUnset();
+        if (gAndroidProxyCB->ProxyUnset) {
+            gAndroidProxyCB->ProxyUnset();
         }
         proxy_manager_atexit();
         return rt;
@@ -48,8 +48,8 @@ android_http_proxy_set( const char*  proxy )
             stralloc_reset(UIProxy);
         }
         stralloc_add_str(UIProxy, proxy);
-        if(get_console_agents()->cbProxy->ProxySet) {
-            get_console_agents()->cbProxy->ProxySet(stralloc_cstr(UIProxy));
+        if(gAndroidProxyCB->ProxySet) {
+            gAndroidProxyCB->ProxySet(stralloc_cstr(UIProxy));
         }
     }
     return rt;

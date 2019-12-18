@@ -941,5 +941,5 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .isSnapshotSaveSkipped = is_snapshot_save_skipped,
 };
 
-extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
+const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;

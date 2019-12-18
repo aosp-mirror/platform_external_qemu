@@ -27,21 +27,3 @@
 #else
 # define ANDROID_GCC_PREREQ(maj, min) 0
 #endif
-
-
-#if defined(_MSC_VER)
-    //  Microsoft
-    #define EXPORT __declspec(dllexport)
-    #define IMPORT __declspec(dllimport)
-#else
-    #define EXPORT __attribute__((visibility("default")))
-    #define IMPORT
-#endif
-
-// Define PROJECT_EXPORTS for the DLL target, otherwise the symbols will not
-// be properly resolved when linking.
-#ifdef PROJECT_EXPORTS
-    #define API EXPORT
-#else
-    #define API IMPORT
-#endif

@@ -39,9 +39,6 @@ namespace asg {
 #define ASG_TEST_READ_PATTERN 0xAA
 #define ASG_TEST_WRITE_PATTERN 0xBB
 
-// These come in from a satic lib we link against.
-extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
-
 class AddressSpaceGraphicsTest : public ::testing::Test {
 public:
     class Client {
@@ -465,7 +462,7 @@ public:
                 uint8_t* currentXferPtr = (uint8_t*)(&currentXfer);
 
                 EXPECT_EQ(0, ring_buffer_copy_contents(
-                    mContext.to_host, 0,
+                    mContext.to_host, 0, 
                     sizeof(currentXfer), currentXferPtr));
 
                 char* ptr = mContext.buffer + currentXfer.offset;

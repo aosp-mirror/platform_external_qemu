@@ -17,7 +17,6 @@
 #include "android/base/Log.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
-#include "android/console.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/proto/observation.pb.h"
@@ -37,18 +36,16 @@ namespace emulation {
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* pOutputFilepath) {
     const auto& renderer = android_getOpenglesRenderer();
-    SkinRotation rotation = get_console_agents()->emu->getRotation();
+    SkinRotation rotation = gQAndroidEmulatorWindowAgent->getRotation();
     if (const auto renderer_ptr = renderer.get()) {
         return captureScreenshot(renderer_ptr, nullptr, rotation,
                                  outputDirectoryPath, pOutputFilepath);
     } else {
         // renderer is nullptr in -gpu guest
-        return captureScreenshot(nullptr,
-                                 get_console_agents()
-                                         ->emu->getEmulatorWindow()
-                                         ->uiEmuAgent->display->getFrameBuffer,
-                                 rotation, outputDirectoryPath,
-                                 pOutputFilepath);
+        return captureScreenshot(
+                nullptr,
+                emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
+                rotation, outputDirectoryPath, pOutputFilepath);
     }
 }
 
@@ -112,33 +109,31 @@ Image takeScreenshot(
             pixels = pixelBuffer.data();
         } else {
             // Just copy the pixels to our buffer.
-            pixelBuffer.insert(pixelBuffer.end(), &pixels[0],
-                               &pixels[width * height * nChannels]);
+            pixelBuffer.insert(pixelBuffer.end(), &pixels[0], &pixels[width * height * nChannels]);
         }
     }
     // We only convert png at this time..
     if (desiredFormat == ImageFormat::PNG) {
-        std::vector<uint8_t> pngData;
-        png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                                NULL, NULL);
-        png_infop pi = png_create_info_struct(p);
-        png_set_write_fn(
-                p, &pngData,
-                [](png_structp png_ptr, png_bytep data, png_size_t length) {
-                    std::vector<uint8_t>* vec =
-                            reinterpret_cast<std::vector<uint8_t>*>(
-                                    png_get_io_ptr(png_ptr));
-                    vec->insert(vec->end(), &data[0], &data[length]);
-                },
-                [](png_structp png_ptr) {});
-        write_png_user_function(p, pi, nChannels, width, height, rotation,
-                                pixelBuffer.data());
-        png_destroy_write_struct(&p, &pi);
-        return Image((uint16_t)width, (uint16_t)height, nChannels,
-                     ImageFormat::PNG, pngData);
+            std::vector<uint8_t> pngData;
+            png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                                    NULL, NULL);
+            png_infop pi = png_create_info_struct(p);
+            png_set_write_fn(
+                    p, &pngData,
+                    [](png_structp png_ptr, png_bytep data, png_size_t length) {
+                        std::vector<uint8_t>* vec =
+                                reinterpret_cast<std::vector<uint8_t>*>(
+                                        png_get_io_ptr(png_ptr));
+                        vec->insert(vec->end(), &data[0], &data[length]);
+                    },
+                    [](png_structp png_ptr) {});
+            write_png_user_function(p, pi, nChannels, width,
+                                    height, rotation,
+                                    pixelBuffer.data());
+            png_destroy_write_struct(&p, &pi);
+            return Image((uint16_t)width, (uint16_t)height, nChannels, ImageFormat::PNG, pngData);
     }
-    return Image((uint16_t)width, (uint16_t)height, nChannels, outputFormat,
-                 pixelBuffer);
+    return Image((uint16_t)width, (uint16_t)height, nChannels, outputFormat, pixelBuffer);
 }
 
 bool captureScreenshot(
@@ -156,8 +151,7 @@ bool captureScreenshot(
         return false;
     }
 
-    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer,
-                               getFrameBuffer);
+    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer, getFrameBuffer);
 
     if (img.getWidth() == 0 || img.getHeight() == 0) {
         return false;

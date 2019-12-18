@@ -23,16 +23,16 @@ ANDROID_BEGIN_HEADER
  * after that, you can read the 'flags' field to determine
  * wether a data or cache wipe has been in effect.
  */
-API extern AvdInfoParams     android_avdParams[1];
+extern AvdInfoParams     android_avdParams[1];
 
 /* a pointer to the android virtual device information
  * object, which can be queried for the paths of various
  * image files or the skin
  */
-API extern AvdInfo*          android_avdInfo;
+extern AvdInfo*          android_avdInfo;
 
 /* the hardware configuration for this specific virtual device */
-API extern AndroidHwConfig   android_hw[1];
+extern AndroidHwConfig   android_hw[1];
 
 /* this is to support snapshot (currently only qemu1+software-renderer) */
 extern const char* savevm_on_exit;

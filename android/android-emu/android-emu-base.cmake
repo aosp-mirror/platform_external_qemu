@@ -108,21 +108,7 @@ set(android-emu-base_src
     android/utils/uri.cpp
     android/utils/utf8_utils.cpp
     android/utils/vector.c
-    android/utils/x86_cpuid.cpp
-
-    # Needed for launching emulator.
-    android/emulation/ConfigDirs.cpp
-    android/avd/scanner.c
-    android/avd/util.c
-    android/emulation/bufprint_config_dirs.cpp
-    android/qt/qt_setup.cpp
-    android/qt/qt_path.cpp
-
-    # Help brings all these extras..
-    android/main-help.cpp
-    android/help.c
-    android/network/constants.c
-)
+    android/utils/x86_cpuid.cpp)
 
 # Windows 32-bit specific sources, these are only included in the windows 32 bit build
 set(android-emu-base_windows_src
@@ -150,17 +136,19 @@ android_add_library(android-emu-base)
 android_target_link_libraries(android-emu-base windows_msvc-x86_64 PUBLIC dirent-win32)
 
 # Anyone who takes a dependency gets to use our header files.
-target_include_directories(android-emu-base PUBLIC .
-                                   # TODO(jansene): We actually have a hard dependency on qemu-glue (from help.c)
-                                   # as there are a lot of externs that are actually defined in qemu2-glue.
-                                   # this has to be sorted out,
-                                   ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-
-)
+target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
-target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID android-hw-config)
-android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC TCMALLOC::TCMALLOC LIBUNWIND::LIBUNWIND -ldl Threads::Threads -lrt)
+target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID)
+android_target_link_libraries(android-emu-base
+                              linux-x86_64
+                              PUBLIC
+                              TCMALLOC::TCMALLOC
+                              LIBUNWIND::LIBUNWIND
+                              -ldl
+                              Threads::Threads
+                              -lrt)
+
 android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
 
 android_target_link_libraries(android-emu-base

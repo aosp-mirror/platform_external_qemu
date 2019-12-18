@@ -168,12 +168,7 @@ void android_display_init_no_window(QFrameBuffer* qf) {
                               android_display_producer_invalidate, nullptr);
 }
 
-extern void register_console_agents();
-
 bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
-    // Make sure the console agents are configured before we enable the display.
-    register_console_agents();
-
     QemuConsole* con = find_graphic_console();
     if (!con) {
         return false;
