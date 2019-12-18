@@ -31,7 +31,10 @@ namespace emulation {
 #define ADB_AUTH_TOKEN 1
 #define ADB_AUTH_SIGNATURE 2
 #define ADB_AUTH_RSAPUBLICKEY 3
-#define A_VERSION 0x01000000
+
+#define A_VERSION_MIN 0x01000000
+#define A_VERSION_SKIP_CHECKSUM 0x01000001
+#define A_VERSION 0x01000001
 
 struct amessage {
     unsigned command = 0;     /* command identifier constant      */
