@@ -1287,6 +1287,7 @@ message EmulatorFeatures {
   optional bool gps = 1;
   optional bool sensors = 2;
   optional bool virtualscene_config = 3;
+  optional bool container_launch = 4;
 }
 
 // A description of a single file from an AVD.
