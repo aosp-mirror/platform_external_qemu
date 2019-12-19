@@ -46,6 +46,7 @@ public:
     // Returns the fully configured and running service, or nullptr if
     // construction failed.
     std::unique_ptr<EmulatorControllerService> build();
+    int port();
 
 private:
     const AndroidConsoleAgents* mAgents;
