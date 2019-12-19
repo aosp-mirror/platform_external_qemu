@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db7d912c_7a733729",
+        "filename": "android/android-grpc/android/emulation/control/GrpcServices.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-12-19T18:42:54Z",
+      "side": 1,
+      "message": "nit: indentaton",
+      "range": {
+        "startLine": 56,
+        "startChar": 28,
+        "endLine": 56,
+        "endChar": 66
+      },
+      "revId": "ea0b915e7d1851674a6faaefb3245cf9456ae3ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
