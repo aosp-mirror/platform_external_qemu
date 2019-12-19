@@ -31,6 +31,8 @@
 
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
+#include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
@@ -419,6 +421,10 @@ Builder& Builder::withConsoleAgents(
     return *this;
 }
 
+int Builder::port() {
+    return mPort;
+}
+
 Builder& Builder::withRtcBridge(RtcBridge* bridge) {
     mBridge = bridge;
     return *this;
@@ -466,6 +472,11 @@ Builder& Builder::withCertAndKey(std::string certfile,
 }
 
 Builder& Builder::withPort(int port) {
+    if (port == 0) {
+        // Find a free port.
+        android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
+        port = android::base::socketGetPort(s0.get());
+    }
     mPort = port;
     return *this;
 }

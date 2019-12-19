@@ -3716,14 +3716,14 @@ do_start_grpc( ControlClient  client, char*  args )
      if (args) {
         int port;
 
-        if (sscanf(args, "%d", &port) == 1 && port > 0 && port < 65536) {
+        if (sscanf(args, "%d", &port) == 1 && port >= 0 && port < 65536) {
             int active = client->global->grpc_agent->start(port, "");
-            control_write(client, "{ \"port\": \"%d\" }\n", active);
+            control_write(client, "OK: { \"port\": \"%d\" }\n", active);
             if (active < 0) {
                 control_write( client, "KO: Failed to launch gRPC service\n" );
                 return -1;
             }
-            if (active != port) {
+            if (port != 0 && active != port) {
                 control_write( client, "OK: Port has already been activated at port: %d\n", active);
             } else {
                control_write( client, "OK: gRPC endpoint available at port %d\r\n", active );
