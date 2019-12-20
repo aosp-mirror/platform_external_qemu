@@ -380,9 +380,9 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
 
     // Use Swiftshader vk icd if using swiftshader_indirect
-    if (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
-        system->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
-    }
+    // if (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+        //system->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
+    //}
 
     if (!config->enabled) {
         // There is no real GPU emulation. As a special case, define
