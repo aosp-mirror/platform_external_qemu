@@ -2085,7 +2085,8 @@ bool configAndStartRenderer(
                 0,
                 host_emulator_is_headless,
                 uiPreferredBackend,
-                &hostGpuVulkanBlacklisted)) {
+                &hostGpuVulkanBlacklisted,
+                opts->use_host_vulkan)) {
         derror("%s", config.status);
         config_out->openglAlive = 0;
 

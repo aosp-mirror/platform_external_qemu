@@ -101,7 +101,7 @@ protected:
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(&config, true, "host", "off", 0, false,
                                      false, false,
-                                     WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                                     WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     }
 
     void TearDown() override {

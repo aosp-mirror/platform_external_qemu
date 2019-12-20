@@ -32,7 +32,8 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             int wantedBitness,
                             bool noWindow,
                             enum WinsysPreferredGlesBackend uiPreferredBackend,
-                            bool* hostGpuVulkanBlacklisted) {
+                            bool* hostGpuVulkanBlacklisted,
+                            bool forceUseHostGpuVulkan) {
     bool gpuEnabled = false;
 
     bool avdManagerHasWrongSetting = apiLevel < 16;
@@ -100,7 +101,8 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     bool result = emuglConfig_init(
             config, gpuEnabled, *hwGpuModePtr, gpuOption, wantedBitness,
-            noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend);
+            noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend,
+            forceUseHostGpuVulkan);
 
     *hostGpuVulkanBlacklisted =
         async_query_host_gpu_VulkanBlacklisted();

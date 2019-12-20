@@ -41,6 +41,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             int wantedBitness,
                             bool noWindow,
                             enum WinsysPreferredGlesBackend uiPreferredBackend,
-                            bool* hostGpuVulkanBlacklisted);
+                            bool* hostGpuVulkanBlacklisted,
+                            bool forceUseHostGpuVulkan);
 
 ANDROID_END_HEADER
