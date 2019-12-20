@@ -60,7 +60,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, false, "host", NULL, 0, false, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -69,7 +69,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, true, "host", NULL, 0, false, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -81,7 +81,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, true, "host", "host", 0, true, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -91,7 +91,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, true, "mesa", NULL, 0, false, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("mesa", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -101,7 +101,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, true, "host", "off", 0, false, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -110,7 +110,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "host", "disable", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -119,7 +119,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, false, "host", "on", 0, false, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -129,7 +129,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, false, NULL, "on", 0, false, false, false,
-                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -139,7 +139,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, false, "mesa", "enable", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("mesa", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -150,7 +150,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "vendor", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
@@ -165,7 +165,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, false, "vendor", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -174,7 +174,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "host", "vendor", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode", config.status);
@@ -184,7 +184,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "guest", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -193,7 +193,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, false, "guest", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -202,9 +202,10 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "host", "guest", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_FALSE(config.enabled);
     }
+
 }
 
 TEST(EmuglConfig, initFromUISetting) {
@@ -234,7 +235,7 @@ TEST(EmuglConfig, initFromUISetting) {
             EmuglConfig config;
             EXPECT_TRUE(emuglConfig_init(
                         &config, false, "host", "on", 0, false, false, false,
-                        (enum WinsysPreferredGlesBackend)i));
+                        (enum WinsysPreferredGlesBackend)i, false));
             EXPECT_TRUE(config.enabled);
             EXPECT_STREQ("host", config.backend);
             EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -244,7 +245,7 @@ TEST(EmuglConfig, initFromUISetting) {
             EmuglConfig config;
             EXPECT_TRUE(emuglConfig_init(
                         &config, false, "guest", "auto", 0, false, false, false,
-                        WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                        WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
             EXPECT_FALSE(config.enabled);
             EXPECT_STREQ("GPU emulation is disabled", config.status);
         }
@@ -256,7 +257,8 @@ TEST(EmuglConfig, initFromUISetting) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                     &config, false, "host", NULL, 0, false, false, false,
-                    (enum WinsysPreferredGlesBackend)i));
+                    (enum WinsysPreferredGlesBackend)i, false));
+
         EXPECT_TRUE(config.enabled);
         switch (i) {
         case 0:
@@ -313,7 +315,7 @@ TEST(EmuglConfig, initGLESv2Only) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "angle", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("angle", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
@@ -330,7 +332,7 @@ TEST(EmuglConfig, initGLESv2Only) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "angle", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("angle", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
@@ -358,7 +360,7 @@ TEST(EmuglConfig, initNxWithSwiftshader) {
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader_indirect' mode",
@@ -376,7 +378,7 @@ TEST(EmuglConfig, initNxWithoutSwiftshader) {
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled under NX without Swiftshader", config.status);
 }
@@ -397,7 +399,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader_indirect' mode",
@@ -415,7 +417,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Swiftshader", config.status);
 }
@@ -434,11 +436,45 @@ TEST(EmuglConfig, initNoWindowWithSwiftshader) {
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, true, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader_indirect' mode",
             config.status);
+}
+
+TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
+    TestSystem testSys("foo", System::kProgramBitness, "/");
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeLibSubDir(myDir, "gles_swiftshader");
+    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
+
+    // Do not force use host vulkan
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                    &config, true, "auto", NULL, 0, true, false, false,
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
+        emuglConfig_setupEnv(&config);
+        EXPECT_STREQ("swiftshader",
+                System::get()->envGet("ANDROID_EMU_VK_ICD").c_str());
+    }
+
+    // Force use host vulkan
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                    &config, true, "auto", NULL, 0, true, false, false,
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO, true));
+        emuglConfig_setupEnv(&config);
+        EXPECT_STREQ("",
+                System::get()->envGet("ANDROID_EMU_VK_ICD").c_str());
+    }
 }
 
 TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
@@ -450,7 +486,7 @@ TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, true, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled (-no-window without Swiftshader)",
                  config.status);

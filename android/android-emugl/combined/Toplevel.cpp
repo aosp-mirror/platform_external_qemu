@@ -167,7 +167,7 @@ private:
                 64,                                   /* bitness */
                 mUseWindow, false,                    /* blacklisted */
                 false,                                /* has guest renderer */
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false);
 
         emugl::vkDispatch(false /* not for test only */);
 
