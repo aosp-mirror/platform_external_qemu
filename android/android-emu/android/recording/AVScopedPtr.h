@@ -85,6 +85,7 @@ struct AVDeleter<AVFormatContext> : std::true_type {
         } else {
             // output context
             if (ocp->pb) {
+                avio_flush(ocp->pb);
                 avio_closep(&ocp->pb);
             }
         }

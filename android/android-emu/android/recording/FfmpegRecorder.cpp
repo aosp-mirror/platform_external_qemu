@@ -354,6 +354,9 @@ void FfmpegRecorderImpl::abortRecording() {
     mVideoProducer->stop();
     mVideoProducer->wait();
 
+    // Close the output file and free the stream
+    mOutputContext.reset();
+
     mValid = false;
 }
 
