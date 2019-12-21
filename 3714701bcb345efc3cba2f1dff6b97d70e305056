@@ -46,6 +46,30 @@
       "revId": "3714701bcb345efc3cba2f1dff6b97d70e305056",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c0bbf36_eb668d1d",
+        "filename": "android/android-emu/android/emulation/android_qemud.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-21T01:37:42Z",
+      "side": 1,
+      "message": "we probly need to use the android-emu-base Lock anyway; perhaps we can try exposing only a qemud_glboal_lock() and qemud_global_unlock() function here, then in the .cpp files, use the Lock.h",
+      "parentUuid": "0a71753d_86a4ba47",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 41
+      },
+      "revId": "3714701bcb345efc3cba2f1dff6b97d70e305056",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
