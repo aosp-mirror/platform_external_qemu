@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3298ad4_12ed3e57",
+        "filename": "android/android-emu/android/emulation/android_qemud.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-12-21T01:33:52Z",
+      "side": 1,
+      "message": "you can get this to work on windows easily too, via the fact that the .cpp files are C++ comaptible, then you can use #include \"android/base/synchronization/Lock.h\" and do a StaticLock somewhere",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 41
+      },
+      "revId": "3714701bcb345efc3cba2f1dff6b97d70e305056",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
