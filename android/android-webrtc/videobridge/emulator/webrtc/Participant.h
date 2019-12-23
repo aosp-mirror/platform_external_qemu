@@ -17,6 +17,11 @@
 #include <api/peerconnectioninterface.h>
 #include <emulator/net/SocketTransport.h>
 
+#include <memory>
+#include <thread>
+#include <unordered_map>
+#include <unordered_set>
+
 #include "Switchboard.h"
 #include "nlohmann/json.hpp"
 
@@ -30,6 +35,7 @@ namespace emulator {
 namespace webrtc {
 
 class Switchboard;
+class Participant;
 
 // A default peer connection observer that does nothing
 class EmptyConnectionObserver : public ::webrtc::PeerConnectionObserver {
@@ -54,6 +60,25 @@ public:
     void OnIceCandidate(
             const ::webrtc::IceCandidateInterface* candidate) override {}
     void OnIceConnectionReceivingChange(bool receiving) override {}
+};
+
+// An EventForwarder forwards mouse & keyevents to the emulator.
+
+class EventForwarder : public ::webrtc::DataChannelObserver {
+public:
+    EventForwarder(Participant* part,
+                   scoped_refptr<::webrtc::DataChannelInterface> channel,
+                   std::string label);
+    ~EventForwarder();
+    // The data channel state have changed.
+    void OnStateChange() override;
+    //  A data buffer was successfully received.
+    void OnMessage(const ::webrtc::DataBuffer& buffer) override;
+
+private:
+    scoped_refptr<::webrtc::DataChannelInterface> mChannel;
+    Participant* mParticipant;
+    std::string mLabel;
 };
 
 // A Participant in an webrtc streaming session. This class is
@@ -94,6 +119,7 @@ public:
     void IncomingMessage(json msg);
     bool Initialize();
     inline const std::string GetPeerId() const { return mPeerId; };
+    void SendToBridge(json msg);
 
 private:
     void SendMessage(json msg);
@@ -102,13 +128,21 @@ private:
     void DeletePeerConnection();
     bool AddStreams();
     bool CreatePeerConnection(bool dtls);
+    void AddDataChannel(const std::string& channel);
     VideoCapturer* OpenVideoCaptureDevice();
 
     scoped_refptr<PeerConnectionInterface> peer_connection_;
     scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
             peer_connection_factory_;
-    std::map<std::string, scoped_refptr<::webrtc::MediaStreamInterface>>
+    std::unordered_map<std::string,
+                       scoped_refptr<::webrtc::MediaStreamInterface>>
             active_streams_;
+    std::unique_ptr<rtc::Thread> worker_thread_;
+    std::unique_ptr<rtc::Thread> signaling_thread_;
+    std::unique_ptr<rtc::Thread> network_thread_;
+
+    std::unordered_map<std::string, std::unique_ptr<EventForwarder>>
+            mEventForwarders;
 
     Switchboard* mSwitchboard;
     std::string mPeerId;
@@ -119,6 +153,10 @@ private:
     const std::string kAudioLabel = "emulator_audio_stream";
     const std::string kVideoLabel = "emulator_video_stream";
     const std::string kStreamLabel = "emulator_view";
+
+
+    const std::unordered_set<std::string> mValidLabels{"mouse", "keyboard",
+                                                       "touch"};
 };
 }  // namespace webrtc
 }  // namespace emulator
