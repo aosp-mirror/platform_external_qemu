@@ -17,6 +17,7 @@
 #include <api/test/fakeconstraints.h>
 #include <emulator/webrtc/capture/VideoShareFactory.h>
 #include <rtc_base/logging.h>
+#include "rtc_base/third_party/base64/base64.h"
 
 #include "api/audio_codecs/builtin_audio_decoder_factory.h"
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
@@ -47,7 +48,36 @@ protected:
     ~DummySetSessionDescriptionObserver() {}
 };
 
-Participant::~Participant() {}
+EventForwarder::EventForwarder(
+        Participant* part,
+        scoped_refptr<::webrtc::DataChannelInterface> channel,
+        std::string label)
+    : mParticipant(part), mChannel(channel), mLabel(label) {
+    channel->RegisterObserver(this);
+}
+
+EventForwarder::~EventForwarder() {
+    mChannel->UnregisterObserver();
+}
+
+void EventForwarder::OnStateChange() {}
+
+void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
+    std::string encoded;
+    rtc::Base64::EncodeFromArray(buffer.data.cdata(), buffer.data.size(),
+                                 &encoded);
+    json msg;
+    msg["msg"] = encoded;
+    msg["label"] = mLabel;
+
+    mParticipant->SendToBridge(msg);
+}
+
+Participant::~Participant() {
+    worker_thread_->Stop();
+    signaling_thread_->Stop();
+    network_thread_->Stop();
+}
 
 Participant::Participant(Switchboard* board,
                          std::string id,
@@ -84,6 +114,10 @@ void Participant::OnIceCandidate(
     msg["sdpMLineIndex"] = candidate->sdp_mline_index();
     msg["candidate"] = sdp;
     SendMessage(msg);
+}
+
+void Participant::SendToBridge(json msg) {
+    mSwitchboard->send(Switchboard::BRIDGE_RECEIVER, msg);
 }
 
 void Participant::SendMessage(json msg) {
@@ -215,13 +249,28 @@ bool Participant::AddStreams() {
     return true;
 }
 
+void Participant::AddDataChannel(const std::string& label) {
+    auto channel = peer_connection_->CreateDataChannel(label, nullptr);
+    mEventForwarders[label] =
+            std::make_unique<EventForwarder>(this, channel, label);
+}
+
 bool Participant::Initialize() {
     RTC_DCHECK(peer_connection_factory_.get() == nullptr);
     RTC_DCHECK(peer_connection_.get() == nullptr);
 
+    network_thread_ = rtc::Thread::CreateWithSocketServer();
+    network_thread_->Start();
+    worker_thread_ = rtc::Thread::Create();
+    worker_thread_->Start();
+    signaling_thread_ = rtc::Thread::Create();
+    signaling_thread_->Start();
+
     peer_connection_factory_ = ::webrtc::CreatePeerConnectionFactory(
-            nullptr /* network_thread */, nullptr /* worker_thread */,
-            nullptr /* signaling_thread */, nullptr /* default_adm */,
+            network_thread_.get() /* network_thread */,
+            worker_thread_.get() /* worker_thread */,
+            signaling_thread_.get() /* signaling_thread */,
+            nullptr /* default_adm */,
             ::webrtc::CreateBuiltinAudioEncoderFactory(),
             ::webrtc::CreateBuiltinAudioDecoderFactory(),
             ::webrtc::CreateBuiltinVideoEncoderFactory(),
@@ -249,6 +298,10 @@ bool Participant::Initialize() {
         RTC_LOG(LS_ERROR) << "Failed to get peer connection";
         return false;
     }
+
+    AddDataChannel("mouse");
+    AddDataChannel("touch");
+    AddDataChannel("keyboard");
 
     RTC_LOG(INFO) << "Creating offer";
     peer_connection_->CreateOffer(

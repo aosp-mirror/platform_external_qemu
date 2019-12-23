@@ -56,6 +56,9 @@
 #ifdef ANDROID_GRPC
 #include "android/emulation/control/GrpcServices.h"
 #endif
+#ifdef ANDROID_WEBRTC
+#include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
+#endif
 
 extern "C" {
 
@@ -213,16 +216,21 @@ bool qemu_android_emulation_setup() {
 
 #ifdef ANDROID_GRPC
     int grpc = -1;
+    android::emulation::control::RtcBridge *rtc_bridge = nullptr;
     if (android_cmdLineOptions->grpc && sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-        char *turn = nullptr;
 #ifdef ANDROID_WEBRTC
-        if (android_cmdLineOptions->turncfg) {
-            turn = android_cmdLineOptions->turncfg;
-        }
+    std::string turn;
+    if (android_cmdLineOptions->turncfg) {
+        turn = android_cmdLineOptions->turncfg;
+    }
+    rtc_bridge = android::emulation::control::WebRtcBridge::create(
+        0, getConsoleAgents(), turn);
+#else
+    rtc_bridge =  new  android::emulation::control::NopRtcBridge>();
 #endif
         // Go bridge go!
-        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(),
-            android_cmdLineOptions->waterfall, turn);
+        android::emulation::control::GrpcServices::setup(grpc, getConsoleAgents(), rtc_bridge,
+            android_cmdLineOptions->waterfall);
     }
 #endif
 

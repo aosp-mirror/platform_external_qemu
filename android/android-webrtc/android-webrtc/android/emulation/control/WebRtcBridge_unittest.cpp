@@ -112,12 +112,19 @@ bool stopSharedMemoryModule() {
 }
 }
 
+
 static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
         .startSharedMemoryModule = startSharedMemoryModule,
         .stopSharedMemoryModule = stopSharedMemoryModule};
 
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
         &sQAndroidRecordScreenAgent;
+
+
+static const AndroidConsoleAgents fakeAgents = {
+    .record = gQAndroidRecordScreenAgent,
+};
+
 
 json msg1 = {{"topic", "moi"}, {"msg", "hello"}};
 json msg2 = {{"topic", "moi"}, {"msg", "world"}};
@@ -156,7 +163,7 @@ public:
 class TestBridge : public WebRtcBridge {
 public:
     TestBridge(TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({}))
-        : WebRtcBridge(socket, gQAndroidRecordScreenAgent, 24, 1234) {
+        : WebRtcBridge(socket, &fakeAgents, 24, 1234) {
         // Let's not get weird behavior due to our locks immediately expiring.
         testSys.setLiveUnixTime(true);
         // Make sure we can find goldfish-videobridge
@@ -294,7 +301,7 @@ TEST(WebRtcBridge, unconnectedSaysBye) {
 
 TEST(WebRtcBridge, connectedTimeoutSaysNothing) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
-    WebRtcBridge bridge(socket, gQAndroidRecordScreenAgent,
+    WebRtcBridge bridge(socket, &fakeAgents,
                         WebRtcBridge::kMaxFPS, 1234);
     std::string msg;
 
