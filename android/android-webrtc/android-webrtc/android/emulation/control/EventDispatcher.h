@@ -13,36 +13,31 @@
 // limitations under the License.
 
 #pragma once
+#include <nlohmann/json.hpp>
+#include "android/console.h"
+#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/keyboard/TouchEventSender.h"
 
-#include <memory>  // for unique_ptr
-#include <string>
-#include "android/console.h"                      // for AndroidConsoleAgents
-#include "android/emulation/control/RtcBridge.h"  // for RtcBridge
+using json = nlohmann::json;
 
 namespace android {
 namespace emulation {
-
 namespace control {
-class EmulatorControllerService;
-class RtcBridge;
 
-class GrpcServices {
+// An EventDispatcher can dispatch mouse,keyboard and touch events.
+// It expects base64 protocol buffer definitions in the "msg" part of the json blob.
+// The protocol buffers are defined in emulator_controller.proto.
+class EventDispatcher {
 public:
-    // Returns the port or -1 if the service didn't start.
-    static int setup(int port,
-                     const AndroidConsoleAgents* const consoleAgents,
-                     RtcBridge* rtcBridge,
-                     const char* waterfall);
-
-    static void teardown();
+    EventDispatcher(const AndroidConsoleAgents* const agents);
+    void dispatchEvent(const json msg);
 
 private:
-    static std::unique_ptr<EmulatorControllerService> g_controler_service;
-    static std::unique_ptr<RtcBridge> g_rtc_bridge;
-
-    static const std::string kCertFileName;
-    static const std::string kPrivateKeyFileName;
+    const AndroidConsoleAgents* const mAgents;
+    keyboard::EmulatorKeyEventSender mKeyEventSender;
+    TouchEventSender mTouchEventSender;
 };
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
