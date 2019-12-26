@@ -82,11 +82,7 @@
             "args": [
                 "@Q",  // Pick the image you would like to use
                 "-grpc",
-                "8556",
-                "-monitor-adb"
-                "2",
-                "-waterfall",
-                "adb", // With some additional parameters.
+                "5556", // With some additional parameters.
             ],
             "linux": {
                 "env": {
@@ -127,7 +123,7 @@
         "request": "attach",
         // Replace this with the process executable you want to attach to
         "program": "${command:cmake.launchTargetPath}",
-        "pid": 96157, // replace pid with your real pid
+        "pid": 137239, // replace pid with your real pid
         // Ignore signal SIGUSR1
         "postRunCommands": [
             "pro hand -p true -s false SIGUSR1",
