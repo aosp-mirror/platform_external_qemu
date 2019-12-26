@@ -13,13 +13,24 @@
 // limitations under the License.
 #include "Participant.h"
 
-#include <api/create_peerconnection_factory.h>
-#include <api/test/fakeconstraints.h>
-#include <emulator/webrtc/capture/VideoShareFactory.h>
-#include <rtc_base/logging.h>
-#include "rtc_base/third_party/base64/base64.h"
+#include <absl/types/optional.h>                        // for optional
+#include <api/mediastreaminterface.h>                   // for MediaStreamTr...
+#include <api/rtcerror.h>                               // for RTCError, ToS...
+#include <emulator/webrtc/capture/VideoShareFactory.h>  // for VideoShareFac...
+#include <media/base/device.h>                          // for Device
+#include <media/base/videocapturer.h>                   // for VideoCapturer
+#include <media/engine/webrtcvideocapturer.h>           // for WebRtcVideoCa...
+#include <p2p/base/portallocator.h>                     // for PortAllocator
+#include <rtc_base/checks.h>                            // for FatalLogCall
+#include <rtc_base/copyonwritebuffer.h>                 // for CopyOnWriteBu...
+#include <rtc_base/logging.h>                           // for RTC_LOG
+#include <rtc_base/refcountedobject.h>                  // for RefCountedObject
+#include <rtc_base/rtccertificategenerator.h>           // for RTCCertificat...
+#include <utility>                                      // for move, pair
 
-#include "nlohmann/json.hpp"
+#include "emulator/webrtc/Switchboard.h"                // for Switchboard
+#include "nlohmann/json.hpp"                            // for basic_json<>:...
+#include "rtc_base/third_party/base64/base64.h"         // for Base64
 
 using json = nlohmann::json;
 using MediaStreamPair =

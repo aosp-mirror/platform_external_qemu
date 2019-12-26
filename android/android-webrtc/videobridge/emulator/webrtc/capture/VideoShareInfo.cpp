@@ -13,14 +13,14 @@
 // limitations under the License.
 #include "VideoShareInfo.h"
 
-#include <fcntl.h>
-#include <rtc_base/logging.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <common_types.h>                      // for VideoType, VideoType::...
+#include <rtc_base/logging.h>                  // for RTC_LOG
+#include <stdio.h>                             // for snprintf
+#include <string.h>                            // for memset, memcpy
+#include <cstdint>                             // for int32_t, uint32_t
 
-#include <cstdint>
-
-#include "android/base/memory/SharedMemory.h"
+#include "android/base/StringView.h"           // for StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
 
 using android::base::SharedMemory;
 
