@@ -95,7 +95,7 @@ public:
     Participant(Switchboard* board,
                 std::string id,
                 std::string mem_handle,
-                int desiredFps);
+                int desiredFps,::webrtc::PeerConnectionFactoryInterface *peerConnectionFactory);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
@@ -120,26 +120,22 @@ public:
     bool Initialize();
     inline const std::string GetPeerId() const { return mPeerId; };
     void SendToBridge(json msg);
+    void Close();
 
 private:
     void SendMessage(json msg);
     void HandleOffer(const json& msg) const;
     void HandleCandidate(const json& msg) const;
-    void DeletePeerConnection();
     bool AddStreams();
     bool CreatePeerConnection(bool dtls);
     void AddDataChannel(const std::string& channel);
     VideoCapturer* OpenVideoCaptureDevice();
 
-    scoped_refptr<PeerConnectionInterface> peer_connection_;
-    scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
-            peer_connection_factory_;
+    scoped_refptr<PeerConnectionInterface> mPeerConnection;
+    ::webrtc::PeerConnectionFactoryInterface *mPeerConnectionFactory;
     std::unordered_map<std::string,
                        scoped_refptr<::webrtc::MediaStreamInterface>>
-            active_streams_;
-    std::unique_ptr<rtc::Thread> worker_thread_;
-    std::unique_ptr<rtc::Thread> signaling_thread_;
-    std::unique_ptr<rtc::Thread> network_thread_;
+            mStreams;
 
     std::unordered_map<std::string, std::unique_ptr<EventForwarder>>
             mEventForwarders;
@@ -148,12 +144,12 @@ private:
     std::string mPeerId;
     std::string mMemoryHandle;
     uint32_t mFps = 24;
+    uint32_t mId{0};
 
     const std::string kStunUri = "stun:stun.l.google.com:19302";
     const std::string kAudioLabel = "emulator_audio_stream";
     const std::string kVideoLabel = "emulator_video_stream";
     const std::string kStreamLabel = "emulator_view";
-
 
     const std::unordered_set<std::string> mValidLabels{"mouse", "keyboard",
                                                        "touch"};

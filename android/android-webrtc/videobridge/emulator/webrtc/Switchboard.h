@@ -20,6 +20,9 @@
 #include "emulator/net/EmulatorConnection.h"
 #include "emulator/net/JsonProtocol.h"
 
+#include <api/create_peerconnection_factory.h>
+#include <api/peerconnectioninterface.h>
+
 namespace emulator {
 
 namespace net {
@@ -55,33 +58,49 @@ public:
                                State current) override;
     void send(std::string to, json msg);
 
-    // Called when a participant is unable to send the rtc stream.
-    // The participant will no longer be in use and can be finalized.
+    // Called when a participant is unable to continue the rtc stream.
+    // The participant will no longer be in use and close can be called.
     void rtcConnectionDropped(std::string participant);
+
+    // The connection has actually closed, and can be properly garbage
+    // collected.
+    void rtcConnectionClosed(std::string participant);
 
     // Cleans up connections that have marked themselves as deleted
     // due to a dropped connection.
     void finalizeConnections();
 
     static std::string BRIDGE_RECEIVER;
+
 private:
     // We want the turn config delivered in under a second.
     const int kMaxTurnConfigTime = 1000;
-    std::map<std::string, rtc::scoped_refptr<Participant> > mConnections;
-    std::map<std::string, std::string> mIdentityMap;
+    std::unordered_map<std::string, rtc::scoped_refptr<Participant>>
+            mConnections;
+    std::unordered_map<std::string, std::string> mIdentityMap;
 
     std::vector<std::string> mDroppedConnections;  // Connections that need to
                                                    // be garbage collected.
+    std::vector<std::string> mClosedConnections;
     const std::string mHandle = "video0";  // Handle to shared memory region
     std::vector<std::string>
             mTurnConfig;  // Process to invoke to retrieve turn config.
     int32_t mFps = 24;    // Desired fps
+
+    // Worker threads for all the participants.
+    std::unique_ptr<rtc::Thread> mWorker;
+    std::unique_ptr<rtc::Thread> mSignaling;
+    std::unique_ptr<rtc::Thread> mNetwork;
+
+    rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
+            mConnectionFactory;
 
     // Network/communication things.
     JsonProtocol mProtocol;
     SocketTransport mTransport;
     net::EmulatorConnection* mEmulator;
     rtc::CriticalSection mCleanupCS;
+    rtc::CriticalSection mCleanupClosedCS;
 };
 }  // namespace webrtc
 }  // namespace emulator
