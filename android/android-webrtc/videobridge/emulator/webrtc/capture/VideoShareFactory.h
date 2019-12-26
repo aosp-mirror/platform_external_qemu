@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <string>
+#include <stdint.h>                               // for int32_t
+#include <string>                                 // for string, basic_string
 
-#include "VideoShareCapture.h"
-#include "VideoShareInfo.h"
-#include "api/scoped_refptr.h"
-#include "media/engine/webrtcvideocapturer.h"
-#include "media/engine/webrtcvideocapturerfactory.h"
-#include "modules/video_capture/video_capture.h"
-#include "modules/video_capture/video_capture_factory.h"
+#include "VideoShareInfo.h"                       // for VideoShareInfo
+#include "api/scoped_refptr.h"                    // for scoped_refptr
+#include "media/engine/webrtcvideocapturer.h"     // for WebRtcVcmFactoryInt...
+#include "modules/video_capture/video_capture.h"  // for VideoCaptureModule
 
 using DeviceInfo = webrtc::VideoCaptureModule::DeviceInfo;
 

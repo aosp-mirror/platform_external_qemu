@@ -13,17 +13,28 @@
 // limitations under the License.
 #pragma once
 
-#include <api/jsep.h>
-#include <api/peerconnectioninterface.h>
-#include <emulator/net/SocketTransport.h>
+#include <api/datachannelinterface.h>     // for DataChannelInterface (ptr o...
+#include <api/jsep.h>                     // for IceCandidateInterface (ptr ...
+#include <api/peerconnectioninterface.h>  // for PeerConnectionInterface
+#include <api/scoped_refptr.h>            // for scoped_refptr
+#include <stdint.h>                       // for uint32_t
+#include <memory>                         // for unique_ptr
+#include <string>                         // for string, basic_string, opera...
+#include <unordered_map>                  // for unordered_map
+#include <unordered_set>                  // for unordered_set
+#include <vector>                         // for vector
 
-#include <memory>
-#include <thread>
-#include <unordered_map>
-#include <unordered_set>
+#include "nlohmann/json.hpp"              // for json
 
-#include "Switchboard.h"
-#include "nlohmann/json.hpp"
+namespace cricket {
+class VideoCapturer;
+}  // namespace cricket
+namespace webrtc {
+class MediaStreamInterface;
+class RTCError;
+class RtpReceiverInterface;
+class VideoTrackInterface;
+}  // namespace webrtc
 
 using cricket::VideoCapturer;
 using json = nlohmann::json;
@@ -34,8 +45,8 @@ using webrtc::VideoTrackInterface;
 namespace emulator {
 namespace webrtc {
 
-class Switchboard;
 class Participant;
+class Switchboard;
 
 // A default peer connection observer that does nothing
 class EmptyConnectionObserver : public ::webrtc::PeerConnectionObserver {

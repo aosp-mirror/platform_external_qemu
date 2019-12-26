@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "VideoShareFactory.h"
+
+#include <api/scoped_refptr.h>                            // for scoped_refptr
+#include <modules/video_capture/video_capture.h>          // for VideoCaptur...
+#include <modules/video_capture/video_capture_defines.h>  // for VideoCaptur...
+#include <rtc_base/refcountedobject.h>                    // for RefCountedO...
+
+#include "VideoShareCapture.h"                            // for VideoCaptur...
+
 namespace emulator {
 namespace webrtc {
 
