@@ -12,13 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <map>
-#include <memory>
-#include <string>
+#include <rtc_base/third_party/sigslot/sigslot.h>  // for has_slots
+#include <memory>                                  // for unique_ptr
+#include <string>                                  // for string
+#include <vector>                                  // for vector
 
-#include "emulator/webrtc/Switchboard.h"
-#include "rtc_base/asyncsocket.h"
-#include "rtc_base/physicalsocketserver.h"
+#include "rtc_base/physicalsocketserver.h"         // for PhysicalSocketServer
+
+namespace rtc {
+class AsyncSocket;
+class AutoSocketServerThread;
+}  // namespace rtc
 
 namespace emulator {
 namespace webrtc {

@@ -11,12 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/memory/SharedMemory.h"
-#include "emulator/main/flagdefs.h"
-#include "emulator/net/EmulatorConnection.h"
-#include "rtc_base/logging.h"
-#include "rtc_base/logsinks.h"
-#include "rtc_base/ssladapter.h"
+#include <rtc_base/flags.h>                    // for FlagList
+#include <stdio.h>                             // for fprintf, printf, NULL
+#include <memory>                              // for unique_ptr
+#include <string>                              // for string, operator!=
+
+#include "android/base/StringView.h"           // for StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
+#include "emulator/main/flagdefs.h"            // for FLAG_handle, FLAG_port
+#include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
+#include "rtc_base/logging.h"                  // for LogSink, RTC_LOG, INFO
+#include "rtc_base/logsinks.h"                 // for FileRotatingLogSink
+#include "rtc_base/ssladapter.h"               // for CleanupSSL, InitializeSSL
+
+namespace emulator {
+namespace webrtc {
+class Switchboard;
+}  // namespace webrtc
+}  // namespace emulator
 
 using android::base::SharedMemory;
 using emulator::webrtc::Switchboard;
