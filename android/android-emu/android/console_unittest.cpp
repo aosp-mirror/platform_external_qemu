@@ -87,6 +87,7 @@ static void ping_test() {
     const int BUFF_SIZE = STUDIO_BUFF_SIZE + 1;
     char buff[BUFF_SIZE];
     int sock[2];
+    errno = 0;
 
     EXPECT_GT(BUFF_SIZE, PING_SIZE);
     ASSERT_EQ(0, socketCreatePair(&sock[0], &sock[1]));
@@ -95,9 +96,12 @@ static void ping_test() {
     void* opaque = test_control_client_create(sock[1]);
     ASSERT_TRUE(opaque != nullptr);
 
+    errno = 0;
     send_test_string(opaque, "ping");
+    EXPECT_EQ(0, errno);
 
     // Read back the output
+    errno = 0;
     memset(buff, 0, BUFF_SIZE);
     bool hasRecvAll = socketRecvAll(sock[0], buff, PING_SIZE);
 
