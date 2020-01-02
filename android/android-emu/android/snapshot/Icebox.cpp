@@ -61,12 +61,56 @@
 #define ADB_AUTH_RSAPUBLICKEY 3
 #define A_VERSION 0x01000000
 
-using amessage = android::emulation::amessage;
-using namespace android::emulation;
+using amessage = android::emulation::AdbMessageSniffer::amessage;
+
 using namespace android::jdwp;
+
+namespace {
+struct apacket {
+    amessage mesg;
+    std::vector<uint8_t> data;
+};
+}  // namespace
 
 static int s_adb_port = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
+
+static bool sendPacket(int s, const apacket* packet) {
+    using android::base::socketSendAll;
+    assert(packet->mesg.data_length == packet->data.size());
+    if (!socketSendAll(s, &packet->mesg, sizeof(packet->mesg))) {
+        return false;
+    }
+    if (packet->mesg.data_length &&
+        !socketSendAll(s, packet->data.data(), packet->mesg.data_length)) {
+        return false;
+    }
+    return true;
+}
+
+static bool recvPacket(int s, apacket* packet) {
+    using android::base::socketRecvAll;
+    if (!socketRecvAll(s, &packet->mesg, sizeof(packet->mesg))) {
+        return false;
+    }
+    packet->data.resize(packet->mesg.data_length);
+    if (packet->mesg.data_length &&
+        !socketRecvAll(s, packet->data.data(), packet->mesg.data_length)) {
+        return false;
+    }
+    return true;
+}
+
+static bool recvOkay(int s) {
+    apacket connect_ok;
+    if (!recvPacket(s, &connect_ok)) {
+        return false;
+    }
+    if (connect_ok.mesg.command != ADB_OKAY) {
+        return false;
+    }
+    return true;
+}
 
 // Adb authentication
 #define TOKEN_SIZE 20
