@@ -76,6 +76,7 @@ service EmulatorController {
     rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
 }
 
+
 message RtcId {
     // The unique identifier of this connection. You will have to use the same
     // identifier when sending/receiving messages. The server will generate a
@@ -468,7 +469,7 @@ message EmulatorStatus {
     // True if the device has completed booting.
     // For P and later this information will accurate,
     // for older images we rely on adb.
-    bool booted = 3; 
+    bool booted = 3;
 
     // The current vm configuration
     VmConfiguration vmConfig = 4;
