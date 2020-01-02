@@ -306,7 +306,6 @@ static bool setup_console_and_adb_ports(int console_port,
         if (android_adb_server_init(adb_port) < 0) {
             return false;
         }
-        android::icebox::set_jdwp_port(android_get_jdwp_port());
         register_adb_service = true;
     }
     if (qemu_android_console_start(console_port, agents) < 0) {
@@ -393,6 +392,7 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* Save base port and ADB port. */
     android_base_port = base_port;
     android_adb_port = adb_port;
+    android::icebox::set_adb_port(adb_port);
     android_serial_number_port = adb_port - 1;
     return true;
 }
