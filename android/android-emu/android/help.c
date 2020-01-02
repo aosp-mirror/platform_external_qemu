@@ -1151,18 +1151,6 @@ help_grpc(stralloc_t*  out)
 }
 
 static void
-help_waterfall(stralloc_t*  out)
-{
-    PRINTF(
-    "  Mode in which to run the waterfall grpc endpoint..\n\n"
-    "    \n\n"
-    "    fwd:  Forward the waterfall commands to the waterfall service\n"
-    "          running inside the emulator.\n"
-    "    adb:  Translate the waterfall commands to ADB.\n\n"
-    );
-}
-
-static void
 help_share_vid(stralloc_t*  out)
 {
     PRINTF(
@@ -1832,16 +1820,6 @@ help_legacy_fake_camera(stralloc_t* out)
 {
     PRINTF(
     "  Emulates the fake camera by legacy camera HAL.\n\n"
-    );
-}
-
-
-static void
-help_direct_adb(stralloc_t* out)
-{
-    PRINTF(
-    "  Use an internal ADB bridge versus the external adb bridge.\n"
-    "  currently experimental.\n\n"
     );
 }
 #define  help_no_skin   NULL

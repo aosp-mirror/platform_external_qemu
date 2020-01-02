@@ -23,9 +23,6 @@ namespace jdwp {
 
 // We only list those that are used
 
-static const char* sJdwpHandshake = "JDWP-Handshake";
-static const int sJdwpHandshakeSize = 14;  // exclude the ending 0
-
 enum CommandSet {
     VirtualMachine = 0x1,
     EventRequest = 0xf,

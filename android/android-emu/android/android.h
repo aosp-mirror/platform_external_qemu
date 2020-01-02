@@ -79,10 +79,6 @@ extern int   android_base_port;
  * default is 5037 */
 extern int   android_adb_port;
 
-/* Use external ADB executable vs. the internal adb connection.
-*/
-extern bool   android_use_external_adb;
-
 /* This number is used to form the "serial number" of
  * the AVD. The default is 5554, so the default serial
  * number is "emulator-5554". */

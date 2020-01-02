@@ -14,7 +14,6 @@
 // limitations under the License.
 #pragma once
 #include <cstdint>
-#include <limits>
 
 namespace emulator {
 namespace net {
@@ -29,7 +28,7 @@ public:
     // Called when this socket is closed.
     virtual void onClose(AsyncSocketAdapter* socket, int err) = 0;
 
-    // Called when this socket (re) established a connection.
+    // Called when this socket (re) established a connection
     virtual void onConnected(AsyncSocketAdapter* socket) = 0;
 };
 
@@ -49,21 +48,9 @@ public:
     // True if this socket is connected
     virtual bool connected() = 0;
 
-    // Re-connect the socket, return false if
-    // reconnection will never succeed,
+    // Asynchronously re-connect the socket, return false if
+    // reconnection will never succeed.
     virtual bool connect() = 0;
-
-    // Connect synchronously, returning true if succeeded
-    // false if we timed out. The onConnected callback will have been called
-    // before this function returns. This means that if you lock on mutex x before
-    // calling this you will not be able to lock mutex x in the onConnected callback.
-    virtual bool connectSync(uint64_t timeoutms=std::numeric_limits<int>::max()) = 0;
-
-    // Disposes this socket, after return the following should hold:
-    // - No events will be delivered.
-    // - No send/recv/connect/close calls will be made.
-    // - The socket can be closed, and any ongoing connects should stop.
-    virtual void dispose() = 0;
 
 protected:
     AsyncSocketEventListener* mListener = nullptr;

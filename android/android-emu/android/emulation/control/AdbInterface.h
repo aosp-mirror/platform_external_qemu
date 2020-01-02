@@ -48,10 +48,6 @@ struct AdbCommandResult {
     AdbCommandResult(android::base::System::ProcessExitCode exitCode,
                      const std::string& outputName);
 
-
-    AdbCommandResult(android::base::System::ProcessExitCode exitCode,
-                    std::istream* stream);
-
     ~AdbCommandResult();
 
 private:
@@ -142,18 +138,38 @@ class AdbInterfaceImpl;
 // Representation of an asynchronously running ADB command.
 // These shouldn't be created directly, use AdbInterface::runAdbCommand.
 class AdbCommand : public std::enable_shared_from_this<AdbCommand> {
-public:
-    ~AdbCommand() = default;
+    friend android::emulation::AdbInterfaceImpl;
 
+public:
     using ResultCallback = AdbInterface::ResultCallback;
 
     // Returns true if the command is currently in the process of execution.
-    virtual bool inFlight() const = 0;
+    bool inFlight() const { return static_cast<bool>(mTask); }
 
     // Cancels the running command (has no effect if the command isn't running).
-    virtual void cancel()  = 0;
+    void cancel() { mCancelled = true; }
 
-    virtual void start(int checkTimeoutMs = 1000) = 0;
+private:
+    AdbCommand(android::base::Looper* looper,
+               const std::string& adb_path,
+               const std::string& serial_string,
+               const std::vector<std::string>& command,
+               bool want_output,
+               base::System::Duration timeoutMs,
+               ResultCallback&& callback);
+    void start(int checkTimeoutMs = 1000);
+    void taskFunction(OptionalAdbCommandResult* result);
+    void taskDoneFunction(const OptionalAdbCommandResult& result);
+
+    android::base::Looper* mLooper;
+    std::unique_ptr<base::ParallelTask<OptionalAdbCommandResult>> mTask;
+    ResultCallback mResultCallback;
+    std::string mOutputFilePath;
+    std::vector<std::string> mCommand;
+    bool mWantOutput;
+    bool mCancelled = false;
+    bool mFinished = false;
+    int mTimeoutMs;
 };
 
 // Builder that can be used by unit tests to inject different behaviors,

@@ -20,7 +20,7 @@
 extern const AndroidConsoleAgents* getConsoleAgents();
 
 int start_grpc(int port, const char* turncfg) {
-     return android::emulation::control::GrpcServices::setup(port, getConsoleAgents(), "forward", turncfg);
+     return android::emulation::control::GrpcServices::setup(port, getConsoleAgents(), turncfg);
 }
 #else
 int start_grpc(int port, const char* turncfg) {

@@ -1,17 +1,3 @@
-// Copyright (C) 2019 The Android Open Source Project
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#pragma once
 #include "android/base/Log.h"
 #include "android/base/async/AsyncWriter.h"
 #include "android/base/async/Looper.h"
@@ -21,11 +7,11 @@
 #include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
 
-namespace android {
-namespace base {
+namespace emulator {
+namespace net {
 using MessageQueue = android::base::BufferQueue<std::string>;
-using android::base::FunctorThread;
-using emulator::net::AsyncSocketAdapter;
+using android::base::Lock;
+using android::base::Looper;
 
 // An AsyncSocket is a socket that can connect to a local port on
 // the current machine.
@@ -39,9 +25,6 @@ public:
 
     bool connect() override;
     bool connected() override;
-    bool connectSync(
-            uint64_t timeoutms = std::numeric_limits<int>::max()) override;
-    void dispose() override;
 
     void onWrite();
     void onRead();
@@ -58,16 +41,15 @@ private:
 
     std::unique_ptr<Looper::FdWatch> mFdWatch;
     ::android::base::AsyncWriter mAsyncWriter;
-    std::unique_ptr<FunctorThread> mConnectThread;
+    ::android::base::FunctorThread mConnectThread;
 
     // Queue of message that need to go out over this socket.
     MessageQueue mWriteQueue;
     Lock mWriteQueueLock;
     Lock mWatchLock;
-    ConditionVariable mWatchLockCv;
 
     // Write buffer used by the async writer.
     std::string mWriteBuffer;
 };
-}  // namespace base
-}  // namespace android
+}  // namespace net
+}  // namespace emulator

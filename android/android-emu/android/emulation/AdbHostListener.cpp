@@ -13,6 +13,7 @@
 
 #include "android/base/async/AsyncSocketServer.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/Log.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/emulation/AdbHostServer.h"
@@ -37,69 +38,49 @@ using android::base::ScopedSocket;
 
 bool AdbHostListener::reset(int adbPort) {
     if (adbPort < 0) {
-        mRegularAdbServer.reset();
-        mJdwpServer.reset();
-    } else if (!mRegularAdbServer || adbPort != mRegularAdbServer->port()) {
+        mServer.reset();
+    } else if (!mServer || adbPort != mServer->port()) {
         CHECK(adbPort < 65536);
         AsyncSocketServer::LoopbackMode mode =
             AsyncSocketServer::kIPv4AndOptionalIPv6;
         if (!systemSupportsIPv4()) {
             mode = AsyncSocketServer::kIPv6;
         }
-        mRegularAdbServer = AsyncSocketServer::createTcpLoopbackServer(
+        mServer = AsyncSocketServer::createTcpLoopbackServer(
                 adbPort,
-                [this](int socket) {
-                    return onHostServerConnection(socket, AdbPortType::RegularAdb);
-                },
-                mode, android::base::ThreadLooper::get());
-        if (!mJdwpServer) {
-            mJdwpServer = AsyncSocketServer::createTcpLoopbackServer(
-                    0,  // Get a random port
-                    [this](int socket) {
-                        return onHostServerConnection(socket, AdbPortType::Jdwp);
-                    },
-                    mode, android::base::ThreadLooper::get());
-            if (!mJdwpServer) {
-                fprintf(stderr, "WARNING: jdwp port creation fails,"
-                        " Icebox will not work.\n");
-            }
-        }
-        // Don't start listening until startListening() is called.
-        if (!mRegularAdbServer) {
+                [this](int socket) { return onHostServerConnection(socket); },
+                mode,
+                android::base::ThreadLooper::get());
+        if (!mServer) {
             // This can happen when the emulator is probing for a free port
             // at startup, so don't print a warning here.
             return false;
         }
+        // Don't start listening until startListening() is called.
     }
     return true;
 }
 
 void AdbHostListener::startListening() {
-    if (mRegularAdbServer) {
-        mRegularAdbServer->startListening();
-    }
-    if (mJdwpServer) {
-        mJdwpServer->startListening();
+    if (mServer) {
+        mServer->startListening();
     }
 }
 
 void AdbHostListener::stopListening() {
-    if (mRegularAdbServer) {
-        mRegularAdbServer->stopListening();
-    }
-    if (mJdwpServer) {
-        mJdwpServer->stopListening();
+    if (mServer) {
+        mServer->stopListening();
     }
 }
 
 void AdbHostListener::notifyServer() {
-    if (mRegularAdbServer && mAdbClientPort > 0) {
-        AdbHostServer::notify(mRegularAdbServer->port(), mAdbClientPort);
+    if (mServer && mAdbClientPort > 0) {
+        AdbHostServer::notify(mServer->port(), mAdbClientPort);
     }
 }
 
-bool AdbHostListener::onHostServerConnection(int socket, AdbPortType portType) {
-    mGuestAgent->onHostConnection(ScopedSocket(socket), portType);
+bool AdbHostListener::onHostServerConnection(int socket) {
+    mGuestAgent->onHostConnection(ScopedSocket(socket));
     return true;
 }
 

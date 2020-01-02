@@ -14,6 +14,8 @@
 
 #include "android/snapshot/Icebox.h"
 
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
 #include <stdio.h>
 #include <atomic>
 #include <memory>
@@ -27,17 +29,12 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/Thread.h"
-#include "android/emulation/apacket_utils.h"
+#include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
-#include "android/emulation/AdbMessageSniffer.h"
-#include "android/emulation/control/AdbAuthentication.h"
-
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -46,7 +43,7 @@
 #endif
 
 #if DEBUG >= 2
-#define DD(...) D(__VA_ARGS__)
+#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
 #else
 #define DD(...) (void)0
 #endif
@@ -62,61 +59,147 @@
 #define ADB_AUTH_TOKEN 1
 #define ADB_AUTH_SIGNATURE 2
 #define ADB_AUTH_RSAPUBLICKEY 3
+#define A_VERSION 0x01000000
 
-using amessage = android::emulation::amessage;
-using namespace android::emulation;
+using amessage = android::emulation::AdbMessageSniffer::amessage;
+
 using namespace android::jdwp;
 
+namespace {
+struct apacket {
+    amessage mesg;
+    std::vector<uint8_t> data;
+};
+}  // namespace
+
 static int s_adb_port = -1;
-static int s_adb_scoket = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
-static std::unique_ptr<android::base::Thread> s_workerThread = {};
-static int s_version = A_VERSION_MIN;
+
+static bool sendPacket(int s, const apacket* packet) {
+    using android::base::socketSendAll;
+    assert(packet->mesg.data_length == packet->data.size());
+    if (!socketSendAll(s, &packet->mesg, sizeof(packet->mesg))) {
+        return false;
+    }
+    if (packet->mesg.data_length &&
+        !socketSendAll(s, packet->data.data(), packet->mesg.data_length)) {
+        return false;
+    }
+    return true;
+}
+
+static bool recvPacket(int s, apacket* packet) {
+    using android::base::socketRecvAll;
+    if (!socketRecvAll(s, &packet->mesg, sizeof(packet->mesg))) {
+        return false;
+    }
+    packet->data.resize(packet->mesg.data_length);
+    if (packet->mesg.data_length &&
+        !socketRecvAll(s, packet->data.data(), packet->mesg.data_length)) {
+        return false;
+    }
+    return true;
+}
+
+static bool recvOkay(int s) {
+    apacket connect_ok;
+    if (!recvPacket(s, &connect_ok)) {
+        return false;
+    }
+    if (connect_ok.mesg.command != ADB_OKAY) {
+        return false;
+    }
+    return true;
+}
 
 // Adb authentication
 #define TOKEN_SIZE 20
 
-static void assignChecksum(apacket* packet) {
-    if (s_version >= A_VERSION_SKIP_CHECKSUM) {
-        return;
+static bool read_key(const char* file, std::vector<RSA*>& keys) {
+    FILE* fp = fopen(file, "r");
+    if (!fp) {
+        DD("Failed to open '%s': %s", file, strerror(errno));
+        return false;
     }
-    packet->mesg.data_check = 0;
-    for (size_t i = 0; i < packet->data.size(); ++i) {
-        packet->mesg.data_check += packet->data[i];
+
+    RSA* key_rsa = RSA_new();
+
+    if (!PEM_read_RSAPrivateKey(fp, &key_rsa, NULL, NULL)) {
+        DD("Failed to read key");
+        fclose(fp);
+        RSA_free(key_rsa);
+        return false;
     }
+
+    keys.push_back(key_rsa);
+    fclose(fp);
+    return true;
 }
 
-static int tryConnect() {
-    using namespace android::base;
-    if (s_adb_scoket > 0) {
-        return s_adb_scoket;
+static bool sign_token(RSA* key_rsa,
+                       const char* token,
+                       int token_size,
+                       char* sig,
+                       int& len) {
+    if (token_size != TOKEN_SIZE) {
+        DD("Unexpected token size %d\n", token_size);
     }
+
+    if (!RSA_sign(NID_sha1, (const unsigned char*)token, (size_t)token_size,
+                  (unsigned char*)sig, (unsigned int*)&len, key_rsa)) {
+        return false;
+    }
+
+    DD("successfully signed with siglen %d\n", (int)len);
+    return true;
+}
+
+static bool sign_auth_token(const char* token,
+                            int token_size,
+                            char* sig,
+                            int& siglen) {
+    // read key
+    using android::base::pj;
+    std::vector<RSA*> keys;
+    std::string key_path = pj(android::base::System::get()->getHomeDirectory(),
+                              ".android", "adbkey");
+    if (!read_key(key_path.c_str(), keys)) {
+        // TODO: test the windows code path
+        std::string key_path =
+                pj(android::base::System::get()->getAppDataDirectory(),
+                   ".android", "adbkey");
+        if (!read_key(key_path.c_str(), keys)) {
+            return false;
+        }
+    }
+    return sign_token(keys[0], token, token_size, sig, siglen);
+}
+
+namespace android {
+namespace icebox {
+
+void set_adb_port(int adb_port) {
+    s_adb_port = adb_port;
+}
+
+bool track_async(int pid, const char* snapshot_name) {
+    return base::async([pid, snapshot_name] {
+        bool result = track(pid, snapshot_name);
+        D("track result %d\n", result);
+    });
+}
+bool track(int pid, const char* snapshot_name) {
     if (s_adb_port == -1) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
     }
 
-    int s = socketTcp4LoopbackClient(s_adb_port);
+    int s = base::socketTcp4LoopbackClient(s_adb_port);
     if (s < 0) {
-        s = socketTcp6LoopbackClient(s_adb_port);
+        s = base::socketTcp6LoopbackClient(s_adb_port);
     }
     if (s < 0) {
-        fprintf(stderr, "failed to connect to adb port %d\n", s_adb_port);
-        return -1;
-    }
-
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return -1;                 \
-        }                              \
-    }
-#define _RECV_PACKET(packet)           \
-    {                                  \
-        if (!recvPacket(s, &packet)) { \
-            return -1;                 \
-        }                              \
+        return false;
     }
 
     uint32_t local_id = s_id.fetch_add(1);
@@ -126,23 +209,38 @@ static int tryConnect() {
     if (s_id == 0) {
         s_id++;
     }
-    socketSetBlocking(s);
-    socketSetNoDelay(s);
+    base::ScopedSocket ss(s);
+    base::socketSetBlocking(s);
+    base::socketSetNoDelay(s);
     D("Setup socket");
 
+#define _SEND_PACKET(packet)           \
+    {                                  \
+        if (!sendPacket(s, &packet)) { \
+            return false;              \
+        }                              \
+    }
+#define _SEND_PACKET_OK(packet) \
+    {                           \
+        _SEND_PACKET(packet);   \
+        if (!recvOkay(s)) {     \
+            return false;       \
+        }                       \
+    }
+#define _RECV_PACKET(packet)           \
+    {                                  \
+        if (!recvPacket(s, &packet)) { \
+            return false;              \
+        }                              \
+    }
     {
         apacket to_guest;
-        const char* kCnxnData =
-                "host::features=remount_shell,abb_exec,fixed_push_symlink_"
-                "timestamp,abb,stat_v2,apex,shell_v2,fixed_push_mkdir,cmd";
         to_guest.mesg.command = ADB_CNXN;
-        to_guest.mesg.arg0 = A_VERSION;
-        to_guest.mesg.arg1 = 64 * 1024;
-        to_guest.mesg.data_length = (unsigned)strlen(kCnxnData);
-        to_guest.mesg.magic = ADB_CNXN ^ 0xffffffff;
-
-        to_guest.data.resize(strlen(kCnxnData));
-        memcpy(to_guest.data.data(), kCnxnData, strlen(kCnxnData));
+        to_guest.mesg.arg0 = 0;
+        to_guest.mesg.arg1 = 256 * 1024;
+        to_guest.mesg.data_length = 0;
+        to_guest.mesg.data_check = 0;
+        to_guest.mesg.magic = to_guest.mesg.command ^ 0xffffffff;
         DD("now write connection command...\n");
         _SEND_PACKET(to_guest);
 
@@ -151,16 +249,15 @@ static int tryConnect() {
         _RECV_PACKET(pack_recv);
 
         // Authenticate ADB for playstore images
-        while (pack_recv.mesg.command == ADB_AUTH) {
+        if (pack_recv.mesg.command == ADB_AUTH) {
             int sigLen = 256;
             apacket pack_send;
             pack_send.mesg.command = ADB_AUTH;
             pack_send.mesg.arg0 = ADB_AUTH_SIGNATURE;
-            pack_send.mesg.data_length = (unsigned)sigLen;
-            pack_send.mesg.magic = ADB_AUTH ^ 0xffffffff;
-
+            pack_send.mesg.arg1 = 0;
             pack_send.data.resize(sigLen);
-            if (!android::emulation::sign_auth_token((const char*)pack_recv.data.data(),
+            pack_send.mesg.magic = pack_send.mesg.command ^ 0xffffffff;
+            if (!sign_auth_token((const char*)pack_recv.data.data(),
                                  pack_recv.mesg.data_length,
                                  (char*)pack_send.data.data(), sigLen)) {
                 fprintf(stderr, "Fail to authenticate adb\n");
@@ -176,154 +273,15 @@ static int tryConnect() {
             DD("read for connection\n");
             _RECV_PACKET(pack_recv);
         }
-        if (pack_recv.mesg.command != ADB_CNXN) {
-            return -1;
-        }
-        s_version = std::min((unsigned)A_VERSION, pack_recv.mesg.arg0);
-    }
-    s_adb_scoket = s;
-#undef _SEND_PACKET
-#undef _RECV_PACKET
-    return s;
-}
-
-static bool recvPacketWithId(int s, int hostId, apacket* packet) {
-    do {
-        if (!recvPacket(s, packet)) {
-            return false;
-        }
-    } while (packet->mesg.arg1 != hostId);
-    return true;
-}
-
-static bool recvOkayWithId(int s, int hostId) {
-    apacket packet;
-    if (!recvPacketWithId(s, hostId, &packet)) {
-        return false;
-    }
-    return packet.mesg.command == ADB_OKAY;
-}
-
-namespace android {
-namespace icebox {
-
-void set_jdwp_port(int adb_port) {
-    s_adb_port = adb_port;
-}
-
-bool run_async(std::string cmd_str) {
-    if (s_workerThread) {
-        if (!s_workerThread->tryWait(nullptr)) {
-            return false;
-        }
-    }
-    s_workerThread.reset(new android::base::FunctorThread([cmd_str] {
-        int s = tryConnect();
-        if (s < 0) {
-            return -1;
-        }
-        uint32_t local_id = s_id.fetch_add(1);
-        uint32_t remote_id = 0;
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return -1;                 \
-        }                              \
-    }
-#define _RECV_PACKET(packet)                           \
-    {                                                  \
-        if (!recvPacketWithId(s, local_id, &packet)) { \
-            return -1;                                 \
-        }                                              \
-    }
-        {
-            apacket connect;
-            connect.mesg.command = ADB_OPEN;
-            connect.mesg.arg0 = local_id;
-            connect.mesg.data_length = (unsigned)cmd_str.length() + 1;
-            connect.mesg.magic =  ADB_OPEN ^ 0xffffffff;
-
-            connect.data.resize(connect.mesg.data_length);
-            memcpy(connect.data.data(), cmd_str.data(), cmd_str.length());
-            connect.data[cmd_str.length()] = 0;
-            _SEND_PACKET(connect);
-        }
-        {
-            apacket connect_ok;
-            _RECV_PACKET(connect_ok);
-            if (connect_ok.mesg.command != ADB_OKAY) {
-                return -1;
-            }
-            remote_id = connect_ok.mesg.arg0;
-            local_id = connect_ok.mesg.arg1;
-        }
-        return 0;
-#undef _SEND_PACKET
-#undef _RECV_PACKET
-    }));
-    return s_workerThread->start();
-}
-
-bool track_async(int pid, const std::string snapshot_name) {
-    if (s_workerThread) {
-        if (!s_workerThread->tryWait(nullptr)) {
-            return false;
-        }
-    }
-    s_workerThread.reset(new android::base::FunctorThread([pid, snapshot_name] {
-        bool result = track(pid, snapshot_name);
-        D("track result %d\n", result);
-    }));
-    return s_workerThread->start();
-}
-bool track(int pid, const std::string snapshot_name) {
-    if (s_adb_port == -1) {
-        fprintf(stderr, "adb port uninitialized\n");
-        return false;
     }
 
-    uint32_t local_id = s_id.fetch_add(1);
-    uint32_t remote_id = 0;
-    // It is ok for some non-thread safe to happen during the following loop,
-    // as long as you don't have 2^32 threads simultaneously.
-    if (s_id == 0) {
-        s_id++;
-    }
-    D("Setup socket");
-    int s = tryConnect();
-    if (s < 0) {
-        D("Connect failed");
-        return false;
-    }
-    D("Connect succeeded");
-
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return false;              \
-        }                              \
-    }
-#define _RECV_PACKET(packet)                           \
-    {                                                  \
-        if (!recvPacketWithId(s, local_id, &packet)) { \
-            return false;                              \
-        }                                              \
-    }
-#define _SEND_PACKET_OK(packet)             \
-    {                                       \
-        _SEND_PACKET(packet);               \
-        if (!recvOkayWithId(s, local_id)) { \
-            return false;                   \
-        }                                   \
-    }
     {
         apacket jdwp_connect;
         jdwp_connect.mesg.command = ADB_OPEN;
         jdwp_connect.mesg.arg0 = local_id;
-        jdwp_connect.mesg.magic = ADB_OPEN ^ 0xffffffff;
-
+        jdwp_connect.mesg.arg1 = 0;
+        jdwp_connect.mesg.data_check = 0;
+        jdwp_connect.mesg.magic = jdwp_connect.mesg.command ^ 0xffffffff;
         jdwp_connect.data.resize(20);
         jdwp_connect.mesg.data_length =
                 sprintf((char*)jdwp_connect.data.data(), "jdwp:%d", pid) + 1;
@@ -337,15 +295,15 @@ bool track(int pid, const std::string snapshot_name) {
             return false;
         }
         remote_id = connect_ok.mesg.arg0;
-        local_id = connect_ok.mesg.arg1;  // Hack replace host ID
     }
     D("Open jdwp");
     apacket ok_out;
     ok_out.mesg.command = ADB_OKAY;
     ok_out.mesg.arg0 = local_id;
     ok_out.mesg.arg1 = remote_id;
-    ok_out.mesg.magic = ADB_OKAY ^ 0xffffffff;
-
+    ok_out.mesg.data_check = 0;
+    ok_out.mesg.magic = ok_out.mesg.command ^ 0xffffffff;
+    ok_out.mesg.data_length = 0;
     ok_out.data.clear();
 #define _RECV_PACKET_OK(packet) \
     {                           \
@@ -357,7 +315,8 @@ bool track(int pid, const std::string snapshot_name) {
     packet_out.mesg.command = ADB_WRTE;
     packet_out.mesg.arg0 = local_id;
     packet_out.mesg.arg1 = remote_id;
-    packet_out.mesg.magic = ADB_WRTE ^ 0xffffffff;
+    packet_out.mesg.data_check = 0;
+    packet_out.mesg.magic = packet_out.mesg.command ^ 0xffffffff;
 
     // Send handshake
     packet_out.mesg.data_length = 14;
@@ -544,12 +503,8 @@ bool track(int pid, const std::string snapshot_name) {
     }
     while (1) {
         apacket reply;
-        _RECV_PACKET(reply);
-        if (reply.mesg.command == ADB_CLSE) {
-            return true;
-        }
-        // we wait for the snapshot before replying OK, to avoid any concurrency
-        // issue between pipe receive and snapshots.
+        _RECV_PACKET_OK(reply);
+        // TODO: close the socket when disconnected from the guest
         if (reply.mesg.data_length > 11 &&
             reply.data[11] == SuspendPolicy::All) {  // Thread suspend all
             // Take snapshot when AssertionError is thrown
@@ -571,7 +526,6 @@ bool track(int pid, const std::string snapshot_name) {
             snapshot_signal.wait(&snapshot_lock,
                                  [&snapshot_done]() { return snapshot_done; });
             snapshot_lock.unlock();
-            _SEND_PACKET(ok_out);
             // Resume and quit
             JdwpCommandHeader jdwp_command = {
                     11 /*length*/,
@@ -585,21 +539,10 @@ bool track(int pid, const std::string snapshot_name) {
             jdwp_command.writeToBuffer(packet_out.data.data());
             _SEND_PACKET_OK(packet_out);
             _RECV_PACKET_OK(reply);
-            packet_out.mesg.command = ADB_CLSE;
-            packet_out.mesg.data_length = 0;
-            packet_out.data.resize(0);
-            packet_out.mesg.magic = packet_out.mesg.command ^ 0xffffffff;
-            _SEND_PACKET(packet_out);
-            //_RECV_PACKET(reply);
             return true;
         }
-        _SEND_PACKET(ok_out);
     }
     return true;
-#undef _SEND_PACKET
-#undef _RECV_PACKET
-#undef _SEND_PACKET_OK
-#undef _RECV_PACKET_OK
 }
 }  // namespace icebox
 }  // namespace android

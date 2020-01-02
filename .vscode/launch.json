@@ -11,8 +11,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "--gtest_break_on_failure"
-             ,"--gtest_filter=AdbConnectionTest.writeWaitsForOkay"
-             ,"--gtest_repeat=-1"
+                // ,"--gtest_filter=AutomationControllerTest.InvalidInput"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -31,7 +30,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
             "args": [
-                "@P",
+                "@P_64",
                 "-verbose",
                 "-show-kernel"
             ],
@@ -62,10 +61,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--gtest_break_on_failure"
-                ,"--gtest_filter=Console.*"
-                ,"--gtest_repeat=-1"
-
+               // "--verbose"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -82,11 +78,9 @@
             "args": [
                 "@Q",  // Pick the image you would like to use
                 "-grpc",
-                "8556",
-                "-monitor-adb"
-                "2",
-                "-waterfall",
-                "adb", // With some additional parameters.
+                "5556",
+                "-wipe-data",
+                "-verbose", // With some additional parameters.
             ],
             "linux": {
                 "env": {
@@ -100,7 +94,7 @@
             },
             "osx": {
                 "args": [
-                    "@P",
+                    "@Q",
                     "-verbose",
                     "-grpc",
                     "5556",
@@ -127,7 +121,7 @@
         "request": "attach",
         // Replace this with the process executable you want to attach to
         "program": "${command:cmake.launchTargetPath}",
-        "pid": 96157, // replace pid with your real pid
+        "pid": 80501, // replace pid with your real pid
         // Ignore signal SIGUSR1
         "postRunCommands": [
             "pro hand -p true -s false SIGUSR1",

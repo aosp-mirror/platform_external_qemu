@@ -13,12 +13,8 @@
 
 #include "android/base/ArraySize.h"
 #include "android/globals.h"
-#include "android/jdwp/Jdwp.h"
 
-#include <algorithm>
 #include <atomic>
-#include <numeric>
-#include <set>
 
 static std::atomic<int> host_cts_heart_beat_count {};
 
@@ -41,9 +37,6 @@ namespace emulation {
 #define ADB_VERSION 0x01000000
 // 1 MB
 #define MAX_ADB_MESSAGE_PAYLOAD 1048576
-
-using namespace android::jdwp;
-using android::jdwp::JdwpCommandHeader;
 
 AdbMessageSniffer::AdbMessageSniffer(const char* name):mName(name) {
     memset(&mPacket, 0, sizeof(apacket));
@@ -172,12 +165,6 @@ int AdbMessageSniffer::readPayload(int dataSize) {
         copyFromBuffer(need);
         updateCtsHeartBeatCount();
         printPayload();
-#ifdef LOG_JDWP
-        if (memcmp(mPacket.data, jdwp::sJdwpHandshake,
-                   jdwp::sJdwpHandshakeSize) == 0) {
-            mJdwp.insert(std::make_pair(mPacket.mesg.arg0, mPacket.mesg.arg1));
-        }
-#endif
         startNewMessage();
         return need;
     }
@@ -211,31 +198,6 @@ int AdbMessageSniffer::getAllowedBytesToPrint(int bytes) {
     return allowed;
 }
 
-#ifdef LOG_JDWP
-void AdbMessageSniffer::printJdwp() {
-    printf("%s:", mName);
-    JdwpCommandHeader command_header;
-    command_header.parseFrom((const unsigned char*)mPacket.data);
-    printf("jdwp length: %d id: %d flags: 0x%x command set: 0x%x command: "
-           "0x%x\n",
-           command_header.length, command_header.id, command_header.flags,
-           command_header.command_set, command_header.command);
-    printf("%s jdwp data:", mName);
-    for (int i = 11; i < std::min(command_header.length, (uint32_t)50); i++) {
-        printf("%02x", mPacket.data[i]);
-    }
-    printf("\n");
-    if (command_header.length > 11) {
-        printf("%s jdwp str:", mName);
-        for (int i = 11; i < std::min(command_header.length, (uint32_t)50);
-             i++) {
-            printf("%c", mPacket.data[i]);
-        }
-        printf("\n");
-    }
-}
-#endif
-
 void AdbMessageSniffer::printPayload() {
     if (android_hw->test_monitorAdb < 2 ) {
         return;
@@ -243,34 +205,24 @@ void AdbMessageSniffer::printPayload() {
     amessage & msg = mPacket.mesg;
     if (msg.command == ADB_OKAY) return;
     if ((msg.command == ADB_WRTE) && (android_hw->test_monitorAdb < 3)) return;
-#ifdef LOG_JDWP
-    if (msg.command == ADB_WRTE &&
-        mJdwp.count(std::make_pair(msg.arg0, msg.arg1))) {
-        printJdwp();
-    } else
-#endif
-    {
-        int length = msg.data_length;
-        length = getAllowedBytesToPrint(length);
-        if (length <= 0) {
-            return;
+    int length = msg.data_length;
+    length = getAllowedBytesToPrint(length);
+    if (length <= 0 ) return;
+    uint8_t* data = mPacket.data;
+    for (int i=0; i < length; ++i) {
+        if (i % 1024 == 0) {
+            printf("%s:", mName);
         }
-        uint8_t* data = mPacket.data;
-        for (int i = 0; i < length; ++i) {
-            if (i % 1024 == 0) {
-                printf("%s:", mName);
-            }
-            int ch = data[i];
-            if (isprint(ch)) {
-                printf("%c", ch);
-            } else if (isspace(ch)) {
-                // printf("%c", ch);
-            } else {
-                // printf(" ");
-            }
+        int ch = data[i];
+        if (isprint(ch)) {
+            printf("%c", ch);
+        } else if (isspace(ch)) {
+            //printf("%c", ch);
+        } else {
+            //printf(" ");
         }
-        printf("\n");
     }
+    printf("\n");
 }
 
 const char* AdbMessageSniffer::getCommandName(unsigned code) {

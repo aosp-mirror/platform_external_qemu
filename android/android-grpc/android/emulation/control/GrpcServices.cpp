@@ -6,7 +6,7 @@
 #include "android/emulation/control/RtcBridge.h"        // for RtcBridge
 
 #ifdef ANDROID_WEBRTC
-#include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
+#include "android/emulation/control/WebRtcBridge.h"     // for WebRtcBridge
 #endif
 
 using android::emulation::control::EmulatorControllerService;
@@ -23,7 +23,6 @@ std::unique_ptr<RtcBridge> GrpcServices::g_rtc_bridge = nullptr;
 
 int GrpcServices::setup(int port,
                         const AndroidConsoleAgents* const consoleAgents,
-                        const char* waterfall,
                         const char* turnCfg) {
     // Return the active port if we are already running.
     if (g_controler_service) {
@@ -39,7 +38,7 @@ int GrpcServices::setup(int port,
 #endif
     g_rtc_bridge->start();
 
-    auto builder =
+    g_controler_service =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(consoleAgents)
                     .withCertAndKey(
@@ -50,12 +49,10 @@ int GrpcServices::setup(int port,
                                     android::ConfigDirs::getUserDirectory(),
                                     kPrivateKeyFileName))
                     .withPort(port)
-                    .withWaterfall(waterfall)
-                    .withRtcBridge(g_rtc_bridge.get());
+                    .withRtcBridge(g_rtc_bridge.get())
+                    .build();
 
-                            g_controler_service = builder.build();
-
-    return (g_controler_service) ? builder.port() : -1;
+    return (g_controler_service) ? port : -1;
 }
 
 void GrpcServices::teardown() {
