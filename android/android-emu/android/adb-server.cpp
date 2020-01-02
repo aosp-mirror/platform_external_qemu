@@ -83,10 +83,6 @@ int android_adb_server_init(int port) {
     return 0;
 }
 
-int android_get_jdwp_port() {
-    return sGlobals->hostListener.jdwpPort();
-}
-
 void android_adb_server_undo_init(void) {
     sGlobals->hostListener.reset(-1);
 }

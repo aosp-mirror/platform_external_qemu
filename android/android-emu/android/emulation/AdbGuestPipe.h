@@ -17,17 +17,15 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
-#include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/CrossSessionSocket.h"
 
-#include <map>
-#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <map>
 
 namespace android {
 namespace emulation {
@@ -97,8 +95,7 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket,
-                                      AdbPortType portType) override;
+        virtual void onHostConnection(ScopedSocket&& socket) override;
 
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
@@ -147,11 +144,9 @@ public:
     virtual void onGuestWantWakeOn(int flags) override;
 
     // Called when a host connection occurs. Transfers ownership of
-    // |socket| to the pipe. |portType| tells if the connection is a
-    // regular adb connection, or a jdwp connection from icebox
-    // On success, return true, on error return false and closes the
-    // socket.
-    void onHostConnection(ScopedSocket&& socket, AdbPortType portType);
+    // |socket| to the pipe. On success, return true, on error return
+    // false and closes the socket.
+    void onHostConnection(ScopedSocket&& socket);
 
     bool isProxyingData() const {
         return mState == State::ProxyingData;
@@ -214,11 +209,7 @@ private:
     void waitForHostConnection();
 
     bool shouldUseRecvBuffer();
-    void stopSocketTraffic();
-    // Need to use adb hub to translate messages
-    // Returns true for jdwp pipes, or previous jdwp pipes that have been
-    // snapshotted and reused for other adb traffics.
-    bool needsHubTranslation() const;
+
     // Command/reply buffer and cursor.
     char mBuffer[16];        // the command being accepted or reply being sent.
     size_t mBufferSize = 0;  // size of valid bytes in mBuffer.
@@ -232,9 +223,6 @@ private:
 
     android::emulation::AdbMessageSniffer mReceivedMesg;
     android::emulation::AdbMessageSniffer mSendingMesg;
-    AdbPortType mPortType = AdbPortType::RegularAdb;
-    std::unique_ptr<AdbHub> mAdbHub;
-    bool mReuseFromSnapshot = false;
 };
 
 }  // namespace emulation

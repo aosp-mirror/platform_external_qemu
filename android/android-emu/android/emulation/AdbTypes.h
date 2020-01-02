@@ -18,11 +18,6 @@
 namespace android {
 namespace emulation {
 
-enum AdbPortType {
-    RegularAdb,
-    Jdwp,
-};
-
 // Interfaces used to implement the communication channel between the
 // host ADB Server and the guest adbd daemon, provided by the emulator.
 //
@@ -44,8 +39,7 @@ struct AdbGuestAgent {
     // Called when the host ADB server connects. This passes ownership of
     // |socket| to the AdbGuestAgent instance. This should only happen after
     // startListening() was called on the AdbHostAgent.
-    virtual void onHostConnection(android::base::ScopedSocket&& socket,
-                                  AdbPortType portType) = 0;
+    virtual void onHostConnection(android::base::ScopedSocket&& socket) = 0;
 };
 
 // AdbHostAgent is an abstract class to the code that actually
