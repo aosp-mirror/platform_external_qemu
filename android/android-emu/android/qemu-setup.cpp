@@ -33,7 +33,6 @@
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/android_pipe_zero.h"
-#include "android/emulation/control/AdbConnection.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
@@ -179,7 +178,7 @@ static int report_console(const char* proto_port, int console_port) {
                 s = socket_loopback4_server( port, SOCKET_STREAM );
             }
             if (s < 0) {
-                derror("could not connect server socket on TCP:%ld: %s", port,
+                derror("could not create server socket on TCP:%ld: %s", port,
                        errno_str);
                 return -1;
             }
@@ -395,7 +394,6 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_base_port = base_port;
     android_adb_port = adb_port;
     android_serial_number_port = adb_port - 1;
-    android::emulation::AdbConnection::setAdbPort(adb_port);
     return true;
 }
 
@@ -521,7 +519,6 @@ void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
     android::videoinjection::VideoInjectionController::shutdown();
     android::base::CpuUsage::get()->stop();
-    android::emulation::AdbConnection::connection()->close();
     auto memTracker = android::base::MemoryTracker::get();
     if (memTracker)
         memTracker->stop();

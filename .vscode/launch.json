@@ -11,8 +11,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "--gtest_break_on_failure"
-             ,"--gtest_filter=PlaystoreMetricsWriterTest.noCallBeforeTime"
-             ,"--gtest_repeat=-1"
+                // ,"--gtest_filter=AutomationControllerTest.InvalidInput"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

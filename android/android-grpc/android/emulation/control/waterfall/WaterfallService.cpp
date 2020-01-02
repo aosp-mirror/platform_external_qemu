@@ -120,7 +120,6 @@ waterfall::Waterfall::Service* getWaterfallService() {
     return new WaterfallImpl();
 };
 
-
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

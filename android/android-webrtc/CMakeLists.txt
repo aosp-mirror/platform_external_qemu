@@ -5,5 +5,6 @@ if (WINDOWS_X86_64)
 endif()
 
 
+add_subdirectory(android-webrtc-net)
 add_subdirectory(videobridge)
 add_subdirectory(android-webrtc)

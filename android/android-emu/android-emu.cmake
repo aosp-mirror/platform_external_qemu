@@ -19,7 +19,6 @@ set(android-emu-common
     android/async-socket-connector.c
     android/async-utils.c
     android/base/async/AsyncReader.cpp
-    android/base/async/AsyncSocket.cpp
     android/base/async/AsyncSocketServer.cpp
     android/base/async/AsyncWriter.cpp
     android/base/async/DefaultLooper.cpp
@@ -66,8 +65,6 @@ set(android-emu-common
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
     android/emulation/ConfigDirs.cpp
-    android/emulation/control/AdbAuthentication.cpp
-    android/emulation/control/AdbConnection.cpp
     android/emulation/control/AdbInterface.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
@@ -350,7 +347,6 @@ target_link_libraries(android-emu
                               automation
                               offworld
                               # Prebuilt libraries
-                              android-net
                               breakpad_client
                               curl
                               ssl
@@ -493,7 +489,6 @@ target_link_libraries(android-emu-shared
                       PRIVATE emulator-libext4_utils
                               VPX::VPX
                               android-emu-base
-                              android-net
                               emulator-libsparse
                               emulator-libselinux
                               emulator-libjpeg

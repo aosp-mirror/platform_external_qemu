@@ -232,8 +232,7 @@ OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the backgroun
 OPT_FLAG(share_vid, "Share current video state in shared memory region.")
 
 #ifdef ANDROID_GRPC
-OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge." )
-OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
+OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge" )
 #endif
 
 #ifdef ANDROID_WEBRTC

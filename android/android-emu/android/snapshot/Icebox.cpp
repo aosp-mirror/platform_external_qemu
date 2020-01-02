@@ -14,6 +14,8 @@
 
 #include "android/snapshot/Icebox.h"
 
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
 #include <stdio.h>
 #include <atomic>
 #include <memory>
@@ -34,9 +36,6 @@
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
-#include "android/emulation/AdbMessageSniffer.h"
-#include "android/emulation/control/AdbAuthentication.h"
-
 #define DEBUG 0
 
 #if DEBUG >= 1
@@ -46,7 +45,7 @@
 #endif
 
 #if DEBUG >= 2
-#define DD(...) D(__VA_ARGS__)
+#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
 #else
 #define DD(...) (void)0
 #endif
@@ -62,6 +61,7 @@
 #define ADB_AUTH_TOKEN 1
 #define ADB_AUTH_SIGNATURE 2
 #define ADB_AUTH_RSAPUBLICKEY 3
+#define A_VERSION 0x01000000
 
 using amessage = android::emulation::amessage;
 using namespace android::emulation;
@@ -71,19 +71,68 @@ static int s_adb_port = -1;
 static int s_adb_scoket = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
 static std::unique_ptr<android::base::Thread> s_workerThread = {};
-static int s_version = A_VERSION_MIN;
 
 // Adb authentication
 #define TOKEN_SIZE 20
 
-static void assignChecksum(apacket* packet) {
-    if (s_version >= A_VERSION_SKIP_CHECKSUM) {
-        return;
+static bool read_key(const char* file, std::vector<RSA*>& keys) {
+    FILE* fp = fopen(file, "r");
+    if (!fp) {
+        DD("Failed to open '%s': %s", file, strerror(errno));
+        return false;
     }
-    packet->mesg.data_check = 0;
-    for (size_t i = 0; i < packet->data.size(); ++i) {
-        packet->mesg.data_check += packet->data[i];
+
+    RSA* key_rsa = RSA_new();
+
+    if (!PEM_read_RSAPrivateKey(fp, &key_rsa, NULL, NULL)) {
+        DD("Failed to read key");
+        fclose(fp);
+        RSA_free(key_rsa);
+        return false;
     }
+
+    keys.push_back(key_rsa);
+    fclose(fp);
+    return true;
+}
+
+static bool sign_token(RSA* key_rsa,
+                       const char* token,
+                       int token_size,
+                       char* sig,
+                       int& len) {
+    if (token_size != TOKEN_SIZE) {
+        DD("Unexpected token size %d\n", token_size);
+    }
+
+    if (!RSA_sign(NID_sha1, (const unsigned char*)token, (size_t)token_size,
+                  (unsigned char*)sig, (unsigned int*)&len, key_rsa)) {
+        return false;
+    }
+
+    DD("successfully signed with siglen %d\n", (int)len);
+    return true;
+}
+
+static bool sign_auth_token(const char* token,
+                            int token_size,
+                            char* sig,
+                            int& siglen) {
+    // read key
+    using android::base::pj;
+    std::vector<RSA*> keys;
+    std::string key_path = pj(android::base::System::get()->getHomeDirectory(),
+                              ".android", "adbkey");
+    if (!read_key(key_path.c_str(), keys)) {
+        // TODO: test the windows code path
+        std::string key_path =
+                pj(android::base::System::get()->getAppDataDirectory(),
+                   ".android", "adbkey");
+        if (!read_key(key_path.c_str(), keys)) {
+            return false;
+        }
+    }
+    return sign_token(keys[0], token, token_size, sig, siglen);
 }
 
 static int tryConnect() {
@@ -107,7 +156,6 @@ static int tryConnect() {
 
 #define _SEND_PACKET(packet)           \
     {                                  \
-        assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
             return -1;                 \
         }                              \
@@ -132,17 +180,15 @@ static int tryConnect() {
 
     {
         apacket to_guest;
-        const char* kCnxnData =
-                "host::features=remount_shell,abb_exec,fixed_push_symlink_"
-                "timestamp,abb,stat_v2,apex,shell_v2,fixed_push_mkdir,cmd";
+        const char* kCnxnData = "";
         to_guest.mesg.command = ADB_CNXN;
-        to_guest.mesg.arg0 = A_VERSION;
-        to_guest.mesg.arg1 = 64 * 1024;
-        to_guest.mesg.data_length = (unsigned)strlen(kCnxnData);
+        to_guest.mesg.arg1 = 256 * 1024;
+        to_guest.mesg.data_length = (unsigned)strlen(kCnxnData) + 1;
         to_guest.mesg.magic = ADB_CNXN ^ 0xffffffff;
 
-        to_guest.data.resize(strlen(kCnxnData));
+        to_guest.data.resize(strlen(kCnxnData) + 1);
         memcpy(to_guest.data.data(), kCnxnData, strlen(kCnxnData));
+        to_guest.data[strlen(kCnxnData)] = 0;
         DD("now write connection command...\n");
         _SEND_PACKET(to_guest);
 
@@ -160,7 +206,7 @@ static int tryConnect() {
             pack_send.mesg.magic = ADB_AUTH ^ 0xffffffff;
 
             pack_send.data.resize(sigLen);
-            if (!android::emulation::sign_auth_token((const char*)pack_recv.data.data(),
+            if (!sign_auth_token((const char*)pack_recv.data.data(),
                                  pack_recv.mesg.data_length,
                                  (char*)pack_send.data.data(), sigLen)) {
                 fprintf(stderr, "Fail to authenticate adb\n");
@@ -176,10 +222,6 @@ static int tryConnect() {
             DD("read for connection\n");
             _RECV_PACKET(pack_recv);
         }
-        if (pack_recv.mesg.command != ADB_CNXN) {
-            return -1;
-        }
-        s_version = std::min((unsigned)A_VERSION, pack_recv.mesg.arg0);
     }
     s_adb_scoket = s;
 #undef _SEND_PACKET
@@ -227,7 +269,6 @@ bool run_async(const char* cmd) {
         uint32_t remote_id = 0;
 #define _SEND_PACKET(packet)           \
     {                                  \
-        assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
             return -1;                 \
         }                              \
@@ -294,14 +335,11 @@ bool track(int pid, const char* snapshot_name) {
     D("Setup socket");
     int s = tryConnect();
     if (s < 0) {
-        D("Connect failed");
         return false;
     }
-    D("Connect succeeded");
 
 #define _SEND_PACKET(packet)           \
     {                                  \
-        assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
             return false;              \
         }                              \

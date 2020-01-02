@@ -12,19 +12,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#pragma once
 #include "waterfall.grpc.pb.h"
+
 
 namespace android {
 namespace emulation {
 namespace control {
 
-enum class WaterfallProvider { adb, forward };
-
-waterfall::Waterfall::Service* getAdbWaterfallService();
 waterfall::Waterfall::Service* getWaterfallService();
-waterfall::Waterfall::Service* getWaterfallService(WaterfallProvider variant);
 
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
+
