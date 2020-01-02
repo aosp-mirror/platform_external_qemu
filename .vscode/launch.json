@@ -63,7 +63,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "--gtest_break_on_failure"
-                ,"--gtest_filter=AdbConnectionTest.eventuallyConnectAfterTimeout"
+                ,"--gtest_filter=Console.*"
                 ,"--gtest_repeat=-1"
 
             ],
