@@ -47,10 +47,6 @@ service SnapshotService {
 
     // Deletes the given snapshot from the avd.
     rpc deleteSnapshot(Snapshot) returns (Snapshot) {}
-
-    // Tracks the given process for automated snapshot creation in case of
-    // assert failures.
-    rpc trackProcess(IceboxTarget) returns (IceboxTarget) {}
 }
 
 message Snapshot {
@@ -72,27 +68,4 @@ message SnapshotDetails {
 
 message SnapshotList {
     repeated SnapshotDetails snapshots = 1;
-}
-
-//
-message IceboxTarget {
-    // This is the process id to attach to, if this value is not set (0)
-    // The process name will be used instead.
-    int64 pid = 1;
-
-    // The process name to attach to if any, if this is not set the pid will
-    // be used. This is usually the application name of your application under
-    // test, that is passed in to the am instrument command. It is likely
-    // what you will find in your AndroidManifest.xml
-    string packageName = 2;
-
-    // The name of the snapshot that icebox will create if a snapshot is
-    // generated.
-    string snapshotId = 3;
-
-    // True if icebox failed to track the given target.
-    bool failed = 4;
-
-    // Detailed error message that might provide more information.
-    string err = 5;
 }

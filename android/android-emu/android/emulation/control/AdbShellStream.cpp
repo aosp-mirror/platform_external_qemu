@@ -22,13 +22,13 @@
 #define DD(...) (void)0
 #endif
 
+
 namespace android {
 namespace emulation {
 
 // A shell stream that will automatically switch to v1/v2 depending on support
 // of your adb protocol. Note that shell v1 will not provide status codes.
-AdbShellStream::AdbShellStream(std::string service,
-                               std::shared_ptr<AdbConnection> connection)
+AdbShellStream::AdbShellStream(std::string service, std::shared_ptr<AdbConnection> connection)
     : mAdb(connection) {
     mShellV2 = mAdb->hasFeature("shell_v2");
     if (mShellV2) {
@@ -55,14 +55,6 @@ bool AdbShellStream::read(std::vector<char>& sout,
         return readV2(sout, serr, exitCode);
     }
     return readV1(sout, serr, exitCode);
-}
-
-int AdbShellStream::readAll(std::vector<char>& sout, std::vector<char>& serr) {
-    int exitcode = 0;
-    do {
-        read(sout, serr, exitcode);
-    } while(good());
-    return exitcode;
 }
 
 bool AdbShellStream::write(const char* data, size_t cData) {
@@ -107,7 +99,7 @@ bool AdbShellStream::readV1(std::vector<char>& sout,
     while (strmbuf->in_avail() > 0 && chunksize > 0) {
         size_t toRead = std::min<size_t>(strmbuf->in_avail(), chunksize);
         sout.resize(sout.size() + toRead);
-        char* end = &sout[sout.size() - toRead];
+        char *end = &sout[sout.size() - toRead];
         if (mAdbStream->read(end, toRead)) {
             chunksize -= mAdbStream->gcount();
         }

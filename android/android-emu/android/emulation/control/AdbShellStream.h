@@ -28,7 +28,7 @@ class AdbShellStream {
 public:
     // cmd to be executed on shell. Shell V2 will be chosen if
     // the system image supports it.
-    AdbShellStream(std::string cmd, std::shared_ptr<AdbConnection> connection = AdbConnection::connection(2000));
+    AdbShellStream(std::string cmd, std::shared_ptr<AdbConnection> connection = AdbConnection::connection());
     ~AdbShellStream();
 
     bool good();
@@ -51,11 +51,6 @@ public:
     bool read(std::vector<char>& sout,
               std::vector<char>& serr,
               int& exitCode);
-
-    // Reads until the stream is bad / eof, returning the exitcode.
-    // note the exit code is only valid if the stream is eof.
-    int readAll(std::vector<char>& sout,
-              std::vector<char>& serr);
 
     // Write bytes to stdin
     bool write(std::string sin);
