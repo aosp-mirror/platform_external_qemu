@@ -770,7 +770,6 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
             {
                 // Possible that the host socket has been reset.
                 if (mHostSocket.valid()) {
-                    mSendingMesg.read(buffers, 1, dataSize);
                     len = android::base::socketSend(
                             mHostSocket.fd(), data, dataSize);
 #ifdef _DEBUG

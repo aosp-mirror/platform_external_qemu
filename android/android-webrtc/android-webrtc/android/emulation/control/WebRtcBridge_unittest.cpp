@@ -44,7 +44,6 @@ public:
             mListener->onClose(this, 123);
         mConnected = false;
     }
-    void dispose() override {};
 
     uint64_t recv(char* buffer, uint64_t bufferSize) override {
         base::AutoLock lock(mReadLock);
@@ -75,8 +74,6 @@ public:
 
     // This will push out all the messages.
     void signalRecv() { mListener->onRead(this); }
-
-    bool connectSync(uint64_t timeoutms) override { return false; };
 
     // Signal the arrival of a new message..
     void signalRecv(std::string msg) {

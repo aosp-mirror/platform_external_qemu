@@ -69,7 +69,6 @@ set(android-emu-common
     android/emulation/control/AdbAuthentication.cpp
     android/emulation/control/AdbConnection.cpp
     android/emulation/control/AdbInterface.cpp
-    android/emulation/control/AdbShellStream.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
@@ -717,7 +716,6 @@ set(android-emu_unittests_src
     android/emulation/ConfigDirs_unittest.cpp
     android/emulation/DeviceContextRunner_unittest.cpp
     android/emulation/DmaMap_unittest.cpp
-    android/emulation/control/AdbConnection_unittest.cpp
     android/emulation/control/AdbInterface_unittest.cpp
     android/emulation/control/ApkInstaller_unittest.cpp
     android/emulation/control/FilePusher_unittest.cpp
@@ -818,11 +816,9 @@ set(android-emu_unittests_windows_src
 set(android-emu_unittests_windows_msvc-x86_64_src android/base/system/WinMsvcSystem_unittest.cpp)
 
 # Darwin & Linux only tests
-set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp
-                                            android/emulation/control/AdbShellStream_unittest.cpp)
+set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp)
 
-set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittest.cpp
-                                           android/emulation/control/AdbShellStream_unittest.cpp)
+set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittest.cpp)
 
 # And declare the test
 android_add_test(android-emu_unittests)

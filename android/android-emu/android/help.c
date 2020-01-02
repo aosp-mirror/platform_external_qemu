@@ -1834,16 +1834,6 @@ help_legacy_fake_camera(stralloc_t* out)
     "  Emulates the fake camera by legacy camera HAL.\n\n"
     );
 }
-
-
-static void
-help_direct_adb(stralloc_t* out)
-{
-    PRINTF(
-    "  Use an internal ADB bridge versus the external adb bridge.\n"
-    "  currently experimental.\n\n"
-    );
-}
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

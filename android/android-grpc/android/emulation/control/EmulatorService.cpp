@@ -121,7 +121,8 @@ public:
           mRtcBridge(rtcBridge),
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
-          mTouchEventSender(agents) {
+          mTouchEventSender(agents),
+          mAdb(AdbConnection::connection()) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -143,6 +144,23 @@ public:
             reply->set_contents(message.second);
             reply->set_next(message.first + message.second.size());
         }
+        return Status::OK;
+    }
+
+    Status sendShellCmd(ServerContext* context,
+                        const Cmd* request,
+                        ServerWriter<Cmd>* writer) override {
+        auto stream = mAdb->open("shell:" + request->path());
+        int offset = 0;
+        bool ok = stream->good();
+        while (ok) {
+            Cmd cmd;
+            char buffer[512];
+            stream->read(buffer, sizeof(buffer));
+            cmd.set_payload(std::string(buffer, stream->gcount()));
+            ok = writer->Write(cmd) && stream->good();
+        }
+        stream->close();
         return Status::OK;
     }
 
@@ -405,6 +423,7 @@ private:
     RtcBridge* mRtcBridge;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+    std::unique_ptr<AdbConnection> mAdb;
 
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;

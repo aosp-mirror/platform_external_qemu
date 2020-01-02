@@ -18,12 +18,10 @@
 #include <string>
 
 #include "android/emulation/control/AdbInterface.h"
-#include "emulator/net/AsyncSocketAdapter.h"
 
 namespace android {
 namespace emulation {
 
-using emulator::net::AsyncSocketAdapter;
 // A connection to a service endpoint, this is a general
 // std::iostream, you can read bytes that came from the service
 // and write bytes to the service.
@@ -48,12 +46,6 @@ public:
     // will unblock waiters on the streambuf as well.
     virtual void close() = 0;
 
-    // Set the write timeout. This is the maximum
-    // time we are willing to wait for ADBD to respond with
-    // a reply to a WRITE request. You should only need this
-    // for unit tests, as we expect ADBD to behave properly.
-    virtual void setWriteTimeout(uint64_t timeoutMs = std::numeric_limits<uint64_t>::max()) = 0;
-
 protected:
     AdbStream(std::streambuf* buf) : std::iostream(buf) {}
 };
@@ -61,12 +53,10 @@ protected:
 // State of the connection to the adb deamon inside the emulator.
 enum class AdbState {
     disconnected,  // Socket has not yet been opened.
-    socket,      // Socket is open, but we have not yet send any messages to the
-                 // emulator
-    connecting,  // Haven't received a response from the device yet.
-    authorizing,  // Authorizing with keys from ADB_VENDOR_KEYS.
-    connected,    // We are in a valid connected state, you can call open
-    failed,       // We've given up and adb working..
+    connecting,    // Haven't received a response from the device yet.
+    authorizing,   // Authorizing with keys from ADB_VENDOR_KEYS.
+    connected,     // We are in a valid connected state, you can call open
+    failed,        // We've given up and adb working..
 };
 
 // A connection to the adb deamon running inside the emulator.
@@ -79,17 +69,7 @@ public:
     // Opens up an adb stream to the given service.
     // For example shell:<cmd>, or reboot:
     // note that push/pull is not yet supported.
-    // The stream will be in a bad state (i.e. ->bad() == true) if
-    // If a connection did not take place within the given timeout.
-    // This will re-establish a connection to adbd if it was broken for
-    // any reason, which can happen if you connect to ADBD very early on
-    // in the boot process.
-    //
-    // Note that setting aggressive timeouts can result in returning
-    // before the handshake has completed. Which can vary greatly depending
-    // where you are in the image boot process.
-    virtual std::shared_ptr<AdbStream> open(const std::string& service,
-                                            uint32_t timeoutMs = 2000) = 0;
+    virtual std::shared_ptr<AdbStream> open(const std::string& service) = 0;
 
     // Returns the state..
     virtual AdbState state() const = 0;
@@ -97,23 +77,16 @@ public:
     // Close down the connection, closing all open streams.
     virtual void close() = 0;
 
-    // True if the feature is supported, this will return false
-    // if the state() != connected.
+    // True if the feature is supported
     virtual bool hasFeature(const std::string& feature) const = 0;
 
-    // Get the connection to the Adb service, executing the handshake
-    // if needed. A timeout of 0 will not try to (re) establish a connection.
-    //
-    // Note: establishing the connection will continue if the timeout is
-    // non-zero. A larger timeout usually reduces the chance of state()
-    // not returning ::connected, which is needed for querying features.
-    static std::shared_ptr<AdbConnection> connection(int timeoutMs = 1000);
+    // connect a new connection to adbd, this will open up a socket to
+    // the emulator adb port. You do not own this..
+    static AdbConnection* connection();
 
-    // Inject the adb socket into the connection. This should be called
-    // before anyone obtains a reference to an AdbConnection.
-    // The AdbConnection will take ownership of the socket.
-    // Note that this is not thread safe!
-    static void setAdbSocket(AsyncSocketAdapter* socket);
+    // Inject the adbport into the connection. This should be called
+    // before anyone obtains a reference to an AdbConnection
+    static void setAdbPort(int port);
 };
 
 // Adb uses the shell protocol when making use of the shell service v2.
