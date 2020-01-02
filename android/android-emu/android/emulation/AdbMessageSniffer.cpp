@@ -184,13 +184,14 @@ int AdbMessageSniffer::getPayloadSize() {
 void AdbMessageSniffer::copyFromBuffer(int count) {
     // guard against overflow
     int avail = sizeof(mPacket) - (mCurrPos - mPacket.data) - sizeof(mPacket.mesg);
-    if (avail > 0 ) {
-        int size = std::min(avail, count);
+    int size = 0;
+    if (avail > 0) {
+        size = std::min(avail, count);
         memcpy(mCurrPos, mBufferP, size);
     }
 
-    mCurrPos += count;
-    mBufferP += count;
+    mCurrPos += size;
+    mBufferP += size;
 }
 
 int AdbMessageSniffer::getAllowedBytesToPrint(int bytes) {
