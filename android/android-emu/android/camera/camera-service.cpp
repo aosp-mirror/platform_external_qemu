@@ -851,11 +851,6 @@ struct CameraClient
           }) {};
 
     ~CameraClient() {
-        if (eventHandlerThread.isStarted()) {
-            eventHandlerThread.enqueue({END, nullptr, 0, nullptr});
-        }
-        eventHandlerThread.join();
-
         if (camera_info != NULL) {
             ((CameraInfo*)camera_info)->in_use = 0;
         }
@@ -868,6 +863,10 @@ struct CameraClient
         if (device_name != NULL) {
             free(device_name);
         }
+        if (eventHandlerThread.isStarted()) {
+            eventHandlerThread.enqueue({END, nullptr, 0, nullptr});
+        }
+        eventHandlerThread.join();
     };
 };
 
