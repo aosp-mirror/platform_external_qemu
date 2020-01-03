@@ -1,0 +1,320 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d769a30_0f52fd7c",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "nit: \u003d default",
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3204fa57_20d8f80b",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "\u0027\\n\u0027?",
+      "range": {
+        "startLine": 105,
+        "startChar": 73,
+        "endLine": 105,
+        "endChar": 75
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd2485d4_e87a1824",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "endl already flushes the stream",
+      "range": {
+        "startLine": 128,
+        "startChar": 67,
+        "endLine": 128,
+        "endChar": 77
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38e6d046_74911852",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "nit: static const char* const ?",
+      "range": {
+        "startLine": 140,
+        "startChar": 3,
+        "endLine": 140,
+        "endChar": 47
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84fd6636_1747eb87",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "is there a startsWith() function somewhere in android/base/strings ?",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 9
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92661dcb_9e24d94f",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "nit: static const char* const ?",
+      "range": {
+        "startLine": 154,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 19
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "26d40fb5_8132543e",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "this set is never used as an ordered one. Change to unordered_set\u003c\u003e?",
+      "range": {
+        "startLine": 167,
+        "startChar": 15,
+        "endLine": 167,
+        "endChar": 30
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c06a447_12dcc9bd",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "nit: it would be nice to add a pointer to the ADB code to know where to look if anything breaks",
+      "range": {
+        "startLine": 190,
+        "startChar": 4,
+        "endLine": 190,
+        "endChar": 64
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6f59e9e_3d1ccef3",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "this together with |size| can easily go inside the if",
+      "range": {
+        "startLine": 218,
+        "startChar": 0,
+        "endLine": 220,
+        "endChar": 21
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8dfb551_e31d93bf",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "nit: remove or add a TODO(bug#) for uncommenting?",
+      "range": {
+        "startLine": 249,
+        "startChar": 9,
+        "endLine": 253,
+        "endChar": 9
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12905d4f_2ee1f3b9",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "do you really want to flush the stream every time? this forces a disk flush if it\u0027s an fstream, or a console write for cout",
+      "range": {
+        "startLine": 292,
+        "startChar": 63,
+        "endLine": 292,
+        "endChar": 67
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "963a6348_279cb69e",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "this is the heaviest include of all in the STL. Is there a different way of specifying cout without mentioning it in the header? E.g. nullptr \u003d\u003d std::cout or a special constructor overload, or a factory function? otherwise it will slow down everything that includes this header, and will instantiate tons of global variables inside cin/cout even if no one uses those",
+      "range": {
+        "startLine": 18,
+        "startChar": 10,
+        "endLine": 18,
+        "endChar": 18
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee7d03e1_cbffd07c",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "nit: unused",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 14
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd9a0876_e578fa62",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-03T20:57:12Z",
+      "side": 1,
+      "message": "can any of these functions be const?",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 39
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
