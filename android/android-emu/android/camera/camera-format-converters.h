@@ -95,6 +95,7 @@ extern int convert_frame_slow(const void* src_frame,
  *  |src_framebuffer_size|, |src_width|, |src_height| - Source framebuffer byte
  *                                                      size,  width, and
  *                                                      height.
+ *  |result_width|, |result_height| - Destination width and height.
  *  |result_frame| - ClientFrame struct containing an array of framebuffers
  *                   where to convert the frame.
  *  |exp_comp| - Exposure compensation.
@@ -106,6 +107,8 @@ extern int convert_frame_fast(const void* src_frame,
                               size_t src_framebuffer_size,
                               int src_width,
                               int src_height,
+                              int result_width,
+                              int result_height,
                               ClientFrame* result_frame,
                               float exp_comp);
 

@@ -246,7 +246,7 @@ set(android_emu_dependent_src
     android/camera/camera-format-converters.c
     android/camera/camera-list.cpp
     android/camera/camera-metrics.cpp
-    android/camera/camera-service.cpp
+    android/camera/camera-service.c
     android/camera/camera-videoplayback.cpp
     android/camera/camera-videoplayback-default-renderer.cpp
     android/camera/camera-videoplayback-render-multiplexer.cpp

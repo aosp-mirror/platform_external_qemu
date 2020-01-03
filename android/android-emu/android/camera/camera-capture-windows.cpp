@@ -952,6 +952,7 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
             uint32_t emptyPixel = 0;
             return convert_frame_fast(&emptyPixel, V4L2_PIX_FMT_BGR32,
                                       sizeof(emptyPixel), 1, 1,
+                                      mFramebufferWidth, mFramebufferHeight,
                                       resultFrame, expComp);
         }
 
@@ -996,7 +997,7 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
     const int result = convert_frame_fast(
             data, subtypeToPixelFormat(mSubtype), currentLength,
             mSourceFramebufferWidth, mSourceFramebufferHeight,
-            resultFrame, expComp);
+            mFramebufferWidth, mFramebufferHeight, resultFrame, expComp);
     (void)buffer->Unlock();
 
     return result;

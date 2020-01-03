@@ -16,14 +16,9 @@
 
 #pragma once
 
-#include "android/utils/compiler.h"
-
-ANDROID_BEGIN_HEADER
 /*
  * Contains public camera service API.
  */
 
 /* Initializes camera emulation service over qemu pipe. */
-void android_camera_service_init(void);
-
-ANDROID_END_HEADER
+extern void android_camera_service_init(void);
