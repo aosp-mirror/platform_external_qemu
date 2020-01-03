@@ -221,8 +221,8 @@ private:
     bool mPlayStoreImage = false;
     std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
 
-    android::emulation::AdbMessageSniffer mReceivedMesg;
-    android::emulation::AdbMessageSniffer mSendingMesg;
+    std::unique_ptr<android::emulation::AdbMessageSniffer> mReceivedMesg;
+    std::unique_ptr<android::emulation::AdbMessageSniffer> mSendingMesg;
 };
 
 }  // namespace emulation
