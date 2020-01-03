@@ -13,38 +13,51 @@
 
 #include "android/base/Log.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/globals.h"
 
+#include <iostream>
 #include <map>
-#include <vector>
 #include <set>
+#include <vector>
 
 namespace android {
 namespace emulation {
 
-// AdbMessageSniffer wraps around the raw adb message struct
+// An AdbMessageSniffer can intercept the adb message stream and output
+// them to a std::ostream when a complete packet is received.
+// Will only consume resources if the logging level > 1
 class AdbMessageSniffer {
 public:
+    struct amessage {
+        unsigned command;     /* command identifier constant      */
+        unsigned arg0;        /* first argument                   */
+        unsigned arg1;        /* second argument                  */
+        unsigned data_length; /* length of payload (0 is allowed) */
+        unsigned data_check;  /* checksum of data payload         */
+        unsigned magic;       /* command ^ 0xffffffff             */
+    };
 
+    struct apacket {
+        amessage mesg;
+        uint8_t data[1024];
+    };
 
-struct amessage {
-    unsigned command;       /* command identifier constant      */
-    unsigned arg0;          /* first argument                   */
-    unsigned arg1;          /* second argument                  */
-    unsigned data_length;   /* length of payload (0 is allowed) */
-    unsigned data_check;    /* checksum of data payload         */
-    unsigned magic;         /* command ^ 0xffffffff             */
-};
-
-struct apacket
-{
-    amessage mesg;
-    uint8_t data[1024];
-};
-
-    AdbMessageSniffer(const char* name);
+    // Creates a new sniffer.
+    // |name| The prefix printed for each log message.
+    // |level| The requested logging level, only level > 1 will use resources.
+    // |oStream| Stream to which to log the messages.
+    AdbMessageSniffer(const char* name,
+                      int level = android_hw->test_monitorAdb,
+                      std::ostream* oStream = &std::cout);
     ~AdbMessageSniffer();
 
     void read(const AndroidPipeBuffer*, int numBuffers, int count);
+
+protected:
+    // Only used by unit test, needs to be called before any read message is
+    // called.
+    void setLevel(int level) { mLevel = level; };
+
 private:
     apacket mPacket;
     int mState;
@@ -52,14 +65,17 @@ private:
     std::vector<uint8_t> mBufferVec;
     uint8_t* mBuffer;
     uint8_t* mBufferP;
-    const char* mName;
+    const std::string mName;
+    int mLevel;
+    std::ostream* mLogStream;
+
     std::set<unsigned> mDummyShellArg0;
 
     void grow_buffer_if_needed(int count);
     int getAllowedBytesToPrint(int bytes);
     bool checkForDummyShellCommand();
-    int getPayloadSize();
-    void copyFromBuffer(int count);
+    size_t getPayloadSize();
+    void copyFromBuffer(size_t count);
     int readPayload(int dataSize);
     void printMessage();
     void updateCtsHeartBeatCount();
@@ -67,7 +83,9 @@ private:
     const char* getCommandName(unsigned code);
     void startNewMessage();
     int readHeader(int inputDataSize);
-    void readToBuffer(const AndroidPipeBuffer* buffers, int numBuffers, int inputDataSize);
+    void readToBuffer(const AndroidPipeBuffer* buffers,
+                      int numBuffers,
+                      int inputDataSize);
     void parseBuffer(int bufferLength);
 };
 
