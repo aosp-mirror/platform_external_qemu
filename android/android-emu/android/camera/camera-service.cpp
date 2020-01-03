@@ -20,7 +20,6 @@
 
 #include "android/camera/camera-service.h"
 
-#include "android/base/threads/WorkerThread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
@@ -38,7 +37,11 @@
 #include "android/utils/system.h"
 #include "android/avd/hw-config.h"
 
+#include <condition_variable>
+#include <mutex>
+#include <queue>
 #include <stdio.h>
+#include <thread>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -723,26 +726,9 @@ _factory_client_close(void*  opaque)
 /********************************************************************************
  * Camera client API
  *******************************************************************************/
-
-enum CameraEventType {
-    OPERATION,
-    END
-};
-struct CameraEvent {
-    CameraEventType type;
-    std::vector<uint8_t> msg;
-    QemudClient* qClient;
-    CameraEvent(CameraEventType type, uint8_t* msg, int msglen, QemudClient* qClient)
-        : type(type), msg(msg, msg + msglen), qClient(qClient) {};
-};
-
 /* Describes an emulated camera client.
  */
 typedef struct CameraClient CameraClient;
-static void camera_client_handle_event(CameraClient*  cc,
-                                       uint8_t*       msg,
-                                       int            msglen,
-                                       QemudClient*   client);
 struct CameraClient
 {
     /* Client name.
@@ -810,7 +796,6 @@ struct CameraClient
     bool                need_frame_cache;
     size_t              frame_cache_size;
     std::vector<uint8_t>    frame_cache;
-    android::base::WorkerThread<CameraEvent> eventHandlerThread;
     CameraClient()
         : device_name(nullptr),
           inp_channel(0),
@@ -836,19 +821,7 @@ struct CameraClient
           frame_count(0),
           started(false),
           need_frame_cache(false),
-          frame_cache_size(0),
-          eventHandlerThread([this](CameraEvent&& event) {
-              switch(event.type) {
-                  case OPERATION:
-                      camera_client_handle_event(this, event.msg.data(),
-                                                 event.msg.size(),
-                                                 event.qClient);
-                      return android::base::WorkerProcessingResult::Continue;
-                  case END:
-                      D("exit handleEvent thread");
-                      return android::base::WorkerProcessingResult::Stop;
-              }
-          }) {};
+          frame_cache_size(0) {};
 
     ~CameraClient() {
         if (camera_info != NULL) {
@@ -863,10 +836,6 @@ struct CameraClient
         if (device_name != NULL) {
             free(device_name);
         }
-        if (eventHandlerThread.isStarted()) {
-            eventHandlerThread.enqueue({END, nullptr, 0, nullptr});
-        }
-        eventHandlerThread.join();
     };
 };
 
@@ -1147,7 +1116,6 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
               (char*)&cc->pixel_format);
             return CLIENT_START_RESULT_NO_PIXEL_CONVERSION;
         }
-
         /* Allocate buffer large enough to contain both, video and preview
          * framebuffers. */
         cc->video_frame =
@@ -1841,14 +1809,29 @@ _camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* par
     }
 }
 
+/* Handles a message received from the emulated camera client.
+ * Queries received here are represented as strings:
+ * - 'connect' - Connects to the camera device (opens it).
+ * - 'disconnect' - Disconnexts from the camera device (closes it).
+ * - 'start' - Starts capturing video from the connected camera device.
+ * - 'stop' - Stop capturing video from the connected camera device.
+ * - 'frame' - Queries video and preview frames captured from the camera.
+ * Param:
+ *  opaque - Camera service descriptor.
+ *  msg, msglen - Message received from the camera factory client.
+ *  client - Camera factory client pipe.
+ */
 static void
-camera_client_handle_event(CameraClient*  cc,
-                            uint8_t*       msg,
-                            int            msglen,
-                            QemudClient*   client) {
+_camera_client_recv(void*         opaque,
+                    uint8_t*      msg,
+                    int           msglen,
+                    QemudClient*  client)
+{
     /*
      * Emulated camera client queries.
      */
+    CameraClient* cc = (CameraClient*)opaque;
+
     if (msglen <= 0) {
         D("%s: query message has invalid length %d", __func__, msglen);
         return;
@@ -1928,31 +1911,6 @@ camera_client_handle_event(CameraClient*  cc,
         E("%s: Unknown query '%s'", __FUNCTION__, (char*)msg);
         _qemu_client_reply_ko(client, "Unknown query");
     }
-}
-
-/* Handles a message received from the emulated camera client.
- * Queries received here are represented as strings:
- * - 'connect' - Connects to the camera device (opens it).
- * - 'disconnect' - Disconnexts from the camera device (closes it).
- * - 'start' - Starts capturing video from the connected camera device.
- * - 'stop' - Stop capturing video from the connected camera device.
- * - 'frame' - Queries video and preview frames captured from the camera.
- * Param:
- *  opaque - Camera service descriptor.
- *  msg, msglen - Message received from the camera factory client.
- *  client - Camera factory client pipe.
- */
-static void
-_camera_client_recv(void*         opaque,
-                    uint8_t*      msg,
-                    int           msglen,
-                    QemudClient*  client)
-{
-    CameraClient* cc = (CameraClient*)opaque;
-    if (!cc->eventHandlerThread.isStarted()) {
-        cc->eventHandlerThread.start();
-    }
-    cc->eventHandlerThread.enqueue({OPERATION, msg, msglen, client});
 }
 
 /* Emulated camera client has been disconnected from the service. */
