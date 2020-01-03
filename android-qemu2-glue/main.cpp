@@ -2016,6 +2016,7 @@ extern "C" int main(int argc, char** argv) {
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
+
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
     skin_winsys_enter_main_loop(opts->no_window);
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);
