@@ -61,12 +61,27 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-               // "--verbose"
+                // "--verbose"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
             },
+        },
+        {
+            "name": "(Google) Debug Cmake Target",
+            "type": "lldb-vscode", // sudo apt install google-lldb-vscode
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--gtest_filter=AdbMessageSnifferTest.shell_commands_do_not_heartbeat",
+                //"--gtest_repeat=-1"
+            ],
+            "env": [
+                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
+                "ASAN_OPTIONS=detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+            ],
         },
         {
             "name": "(lldb) Debug Emulator",
@@ -76,7 +91,7 @@
             // As there lldb is not capable of following child processes (like gdb can with follow-fork-mode)
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "@Q",  // Pick the image you would like to use
+                "@Q", // Pick the image you would like to use
                 "-grpc",
                 "5556",
                 "-wipe-data",
@@ -102,39 +117,39 @@
                     "-HVF",
                 ],
                 "env": {
-                  // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                  "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
-                  // Setup the LD_LIBRARY_PATH so we can resolve all the dynamic libs properly.
-                  "DYLD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan",
-              },
+                    // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
+                    "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
+                    // Setup the LD_LIBRARY_PATH so we can resolve all the dynamic libs properly.
+                    "DYLD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan",
+                },
             },
             "postRunCommands": [
                 "pro handle -p true -s false SIGUSR1",
                 "pro handle -p true -s false SIGUSR2"
             ],
             "cwd": "${workspaceFolder}/build",
-    },
-    {
-        // You need root access to attach debugger
-        "name": "(lldb) Debug attach Emulator",
-        "type": "lldb",
-        "request": "attach",
-        // Replace this with the process executable you want to attach to
-        "program": "${command:cmake.launchTargetPath}",
-        "pid": 80501, // replace pid with your real pid
-        // Ignore signal SIGUSR1
-        "postRunCommands": [
-            "pro hand -p true -s false SIGUSR1",
-            "pro hand -p true -s false SIGUSR2",
-        ],
-    },
-    {
-        "name": "(lldb) Debug core dump",
-        "type": "lldb",
-        "request": "custom",
-        "targetCreateCommands": [
-            "target create -c ${workspaceFolder}/core"
-        ],
-    }
-]
+        },
+        {
+            // You need root access to attach debugger
+            "name": "(lldb) Debug attach Emulator",
+            "type": "lldb",
+            "request": "attach",
+            // Replace this with the process executable you want to attach to
+            "program": "${command:cmake.launchTargetPath}",
+            "pid": 80501, // replace pid with your real pid
+            // Ignore signal SIGUSR1
+            "postRunCommands": [
+                "pro hand -p true -s false SIGUSR1",
+                "pro hand -p true -s false SIGUSR2",
+            ],
+        },
+        {
+            "name": "(lldb) Debug core dump",
+            "type": "lldb",
+            "request": "custom",
+            "targetCreateCommands": [
+                "target create -c ${workspaceFolder}/core"
+            ],
+        }
+    ]
 }
