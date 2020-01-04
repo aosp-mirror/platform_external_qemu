@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "71f804e3_1878affe",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e69b1fb_6658fc8a",
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3204fa57_20d8f80b",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 3
@@ -72,6 +90,30 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "3204fa57_20d8f80b",
+      "range": {
+        "startLine": 105,
+        "startChar": 73,
+        "endLine": 105,
+        "endChar": 75
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9da9dce_1f064ee9",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0bff854_d131d7d6",
       "range": {
         "startLine": 105,
         "startChar": 73,
@@ -131,6 +173,30 @@
     },
     {
       "key": {
+        "uuid": "c5636451_e39bab50",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41e73276_91827d36",
+      "range": {
+        "startLine": 128,
+        "startChar": 67,
+        "endLine": 128,
+        "endChar": 77
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38e6d046_74911852",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 3
@@ -166,6 +232,30 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "38e6d046_74911852",
+      "range": {
+        "startLine": 140,
+        "startChar": 3,
+        "endLine": 140,
+        "endChar": 47
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d1519ce_c6e29897",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f25de68_70c64c09",
       "range": {
         "startLine": 140,
         "startChar": 3,
@@ -225,6 +315,30 @@
     },
     {
       "key": {
+        "uuid": "108c9b69_6e57a575",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28810ca5_f1da04e4",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 9
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "92661dcb_9e24d94f",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 3
@@ -260,6 +374,30 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "92661dcb_9e24d94f",
+      "range": {
+        "startLine": 154,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 19
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59850465_2b19b6be",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7ffc37f_6452dff1",
       "range": {
         "startLine": 154,
         "startChar": 8,
@@ -319,6 +457,30 @@
     },
     {
       "key": {
+        "uuid": "e5ea5fd1_2329b8a3",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34e1734d_450ebec8",
+      "range": {
+        "startLine": 167,
+        "startChar": 15,
+        "endLine": 167,
+        "endChar": 30
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c06a447_12dcc9bd",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 3
@@ -354,6 +516,30 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "1c06a447_12dcc9bd",
+      "range": {
+        "startLine": 190,
+        "startChar": 4,
+        "endLine": 190,
+        "endChar": 64
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12d00629_fdfe14a1",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1503f84a_fb94da03",
       "range": {
         "startLine": 190,
         "startChar": 4,
@@ -413,6 +599,30 @@
     },
     {
       "key": {
+        "uuid": "f0367850_671beddc",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f8c708ad_ccb03662",
+      "range": {
+        "startLine": 218,
+        "startChar": 0,
+        "endLine": 220,
+        "endChar": 21
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8dfb551_e31d93bf",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
         "patchSetId": 3
@@ -448,6 +658,30 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "f8dfb551_e31d93bf",
+      "range": {
+        "startLine": 249,
+        "startChar": 9,
+        "endLine": 253,
+        "endChar": 9
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9339d9d2_a4259d66",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b31e0ed_cdc1764c",
       "range": {
         "startLine": 249,
         "startChar": 9,
@@ -507,6 +741,30 @@
     },
     {
       "key": {
+        "uuid": "8481049f_0996a889",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f1a537fd_9f62fc25",
+      "range": {
+        "startLine": 292,
+        "startChar": 63,
+        "endLine": 292,
+        "endChar": 67
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "963a6348_279cb69e",
         "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
         "patchSetId": 3
@@ -542,6 +800,30 @@
       "side": 1,
       "message": "Let me see what we can do here, maybe we can make this an interface.",
       "parentUuid": "963a6348_279cb69e",
+      "range": {
+        "startLine": 18,
+        "startChar": 10,
+        "endLine": 18,
+        "endChar": 18
+      },
+      "revId": "bf0e53ea5b3a2f201e322822f3392c9c9f2e168a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb81ee35_b2592e57",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "well, simply removing the std::cout mention here would be enough, and maybe changing the parameter type to ostream\u0026 to force the caller passing it. Having a factory looks like an overkill to me, but it works",
+      "parentUuid": "eb328303_55efc044",
       "range": {
         "startLine": 18,
         "startChar": 10,

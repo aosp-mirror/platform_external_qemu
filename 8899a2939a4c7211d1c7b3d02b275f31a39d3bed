@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebc9e469_ff0d3268",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 300,
+        "startChar": 51,
+        "endLine": 300,
+        "endChar": 56
+      },
+      "revId": "8899a2939a4c7211d1c7b3d02b275f31a39d3bed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d9aebc9_5be7efb4",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "is this supposed to be || ?",
+      "range": {
+        "startLine": 218,
+        "startChar": 39,
+        "endLine": 218,
+        "endChar": 41
+      },
+      "revId": "8899a2939a4c7211d1c7b3d02b275f31a39d3bed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96c8c00f_467715dd",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-04T00:53:40Z",
+      "side": 1,
+      "message": "nit: combine?",
+      "range": {
+        "startLine": 283,
+        "startChar": 4,
+        "endLine": 284,
+        "endChar": 42
+      },
+      "revId": "8899a2939a4c7211d1c7b3d02b275f31a39d3bed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
