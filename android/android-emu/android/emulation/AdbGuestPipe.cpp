@@ -220,7 +220,7 @@ void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
 }
 
 void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
-    int activeFd = stream->getBe32();
+    int activeFd = stream ? stream->getBe32() : 0;
     if (activeFd == 0) {
         mCurrentActivePipe = nullptr;
     } else {
