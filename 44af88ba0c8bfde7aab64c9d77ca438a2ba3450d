@@ -22,6 +22,30 @@
       "revId": "44af88ba0c8bfde7aab64c9d77ca438a2ba3450d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bb8f372a_1204a85d",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-06T21:53:21Z",
+      "side": 1,
+      "message": "Oops!",
+      "parentUuid": "530ad0fc_46c81511",
+      "range": {
+        "startLine": 300,
+        "startChar": 51,
+        "endLine": 300,
+        "endChar": 56
+      },
+      "revId": "44af88ba0c8bfde7aab64c9d77ca438a2ba3450d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
