@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "530ad0fc_46c81511",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-06T19:01:08Z",
+      "side": 1,
+      "message": "nit: change the name back to \"HOST\u003c\u003d\u003dGUEST\"? Also the line is too long",
+      "range": {
+        "startLine": 300,
+        "startChar": 51,
+        "endLine": 300,
+        "endChar": 56
+      },
+      "revId": "44af88ba0c8bfde7aab64c9d77ca438a2ba3450d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
