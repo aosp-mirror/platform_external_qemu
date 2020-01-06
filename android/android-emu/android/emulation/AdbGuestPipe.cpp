@@ -32,6 +32,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <iostream>
 
 #include <assert.h>
 
@@ -295,7 +296,8 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
     : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
-    mReceivedMesg("HOST==>GUEST"), mSendingMesg("HOST<==GUEST"){
+    mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  android_hw->test_monitorAdb, &std::cout)),
+    mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  android_hw->test_monitorAdb, &std::cout)) {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {
@@ -436,7 +438,7 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
         // Common case, proxy-ing the data from the host to the guest.
         int count = onGuestRecvData(buffers, numBuffers);
         if (android_hw->test_monitorAdb> 0) {
-            mReceivedMesg.read(buffers, numBuffers, count);
+            mReceivedMesg->read(buffers, numBuffers, count);
         }
         return count;
     } else if (guest_boot_completed == 0 && android_hw->test_delayAdbTillBootComplete == 1) {
