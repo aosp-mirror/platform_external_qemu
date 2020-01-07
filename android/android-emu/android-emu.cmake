@@ -127,6 +127,7 @@ set(android-emu-common
     android/hw-kmsg.c
     android/hw-lcd.c
     android/hw-qemud.cpp
+    android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
