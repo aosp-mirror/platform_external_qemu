@@ -634,6 +634,7 @@ static const struct {
     { 26, "Oreo", "8.0 (Oreo) - API 26" },
     { 27, "Oreo", "8.1 (Oreo) - API 27" },
     { 28, "Pie", "9.0 (Pie) - API 28" },
+    { 29, "Q", "10.0 (Q) - API 29" },
 };
 
 const char* avdInfo_getApiDessertName(int apiLevel) {
