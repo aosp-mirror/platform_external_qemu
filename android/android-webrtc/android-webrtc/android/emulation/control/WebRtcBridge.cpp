@@ -10,15 +10,14 @@
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/Uuid.h"
+#include "android/base/async/AsyncSocket.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/window_agent.h"
-#include "emulator/net/AsyncSocket.h"
 
-using emulator::net::AsyncSocket;
 using nlohmann::json;
 
 namespace android {
@@ -343,7 +342,8 @@ RtcBridge* WebRtcBridge::create(int port,
 
     Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
-    return new WebRtcBridge(socket, consoleAgents->record, kMaxFPS, port, turncfg);
+    return new WebRtcBridge(socket, consoleAgents->record, kMaxFPS, port,
+                            turncfg);
 }
 }  // namespace control
 }  // namespace emulation
