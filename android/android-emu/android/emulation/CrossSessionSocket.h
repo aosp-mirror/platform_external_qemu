@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#pragma once
+
 #include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
 #include "android/base/async/ScopedSocketWatch.h"
