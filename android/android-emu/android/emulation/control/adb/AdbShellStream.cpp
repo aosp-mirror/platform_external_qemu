@@ -12,7 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/AdbShellStream.h"
+#include "android/emulation/control/adb/AdbShellStream.h"
+
+#include <stdint.h>            // for uint32_t
+#include <algorithm>           // for min
+#include <istream>             // for basic_istream<>::__istream_type, basic...
+#include <iterator>            // for begin, end
+
+#include "android/base/Log.h"  // for LOG, LogMessage, LogStream
 
 #define DEBUG 0
 

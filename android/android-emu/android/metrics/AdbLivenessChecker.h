@@ -19,7 +19,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
 #include "android/base/threads/ParallelTask.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/metrics/MetricsReporter.h"
 
 #include <memory>

@@ -649,6 +649,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
     while (numBuffers > 0) {
         const uint8_t* data = buffers[0].data;
         size_t dataSize = buffers[0].size;
+        mSendingMesg->read(buffers, 1, dataSize);
         while (dataSize > 0) {
             ssize_t len;
             {

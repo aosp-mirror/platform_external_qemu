@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <memory>
-#include <string>
-#include <vector>
-#include "android/emulation/control/AdbConnection.h"
+#include <stddef.h>                                       // for size_t
+#include <memory>                                         // for shared_ptr
+#include <string>                                         // for string
+#include <vector>                                         // for vector
+
+#include "android/emulation/control/adb/AdbConnection.h"  // for AdbConnection
 
 namespace android {
 namespace emulation {

@@ -21,7 +21,7 @@
 
 #include "android/avd/info.h"
 #include "android/base/synchronization/ConditionVariable.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/globals.h"
 
 using android::base::AutoLock;
