@@ -17,6 +17,7 @@
 
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
+#include "android/emulation/control/waterfall/WaterfallService.h"
 
 namespace android {
 namespace emulation {
@@ -40,6 +41,7 @@ public:
 
     Builder& withPort(int port);
     Builder& withRtcBridge(RtcBridge* bridge);
+    Builder& withWaterfall(const char* mode);
 
     // Returns the fully configured and running service, or nullptr if
     // construction failed.
@@ -49,6 +51,7 @@ public:
 private:
     const AndroidConsoleAgents* mAgents;
     int mPort{5556};
+    WaterfallProvider mWaterfall{WaterfallProvider::adb};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
     std::string mBindAddress{"0.0.0.0"};
 
