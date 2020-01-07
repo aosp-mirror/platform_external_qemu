@@ -18,7 +18,7 @@
 #include "android/base/async/Looper.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 
 #include <functional>
 #include <memory>

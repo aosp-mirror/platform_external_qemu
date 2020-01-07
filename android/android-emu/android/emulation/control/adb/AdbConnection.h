@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "emulator/net/AsyncSocketAdapter.h"
 
 namespace android {
@@ -52,7 +52,8 @@ public:
     // time we are willing to wait for ADBD to respond with
     // a reply to a WRITE request. You should only need this
     // for unit tests, as we expect ADBD to behave properly.
-    virtual void setWriteTimeout(uint64_t timeoutMs = std::numeric_limits<uint64_t>::max()) = 0;
+    virtual void setWriteTimeout(
+            uint64_t timeoutMs = std::numeric_limits<uint64_t>::max()) = 0;
 
 protected:
     AdbStream(std::streambuf* buf) : std::iostream(buf) {}
@@ -65,6 +66,7 @@ enum class AdbState {
                  // emulator
     connecting,  // Haven't received a response from the device yet.
     authorizing,  // Authorizing with keys from ADB_VENDOR_KEYS.
+    offer_key,    // A public key has been offered to the consumer.
     connected,    // We are in a valid connected state, you can call open
     failed,       // We've given up and adb working..
 };

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 
 #include "android/avd/info.h"
 #include "android/avd/util.h"
@@ -35,8 +35,8 @@
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/emulation/control/AdbConnection.h"
-#include "android/emulation/control/AdbShellStream.h"
+#include "android/emulation/control/adb/AdbConnection.h"
+#include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"

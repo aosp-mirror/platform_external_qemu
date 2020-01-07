@@ -15,7 +15,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "android/emulation/control/AdbConnection.h"
+#include "android/emulation/control/adb/AdbConnection.h"
 
 namespace android {
 namespace emulation {

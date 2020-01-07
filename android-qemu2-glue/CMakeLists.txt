@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
 set(libqemu2-glue_src
-    adbkey.cpp
-    android_pubkey.cpp
     android_qemud.cpp
     audio-capturer.cpp
     audio-output.cpp

@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/AdbConnection.h"
+#include "android/emulation/control/adb/AdbConnection.h"
 
 #include <atomic>
+#include <fstream>
 #include <memory>
 #include <sstream>
+#include <streambuf>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -31,11 +33,11 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/emulation/control/AdbAuthentication.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "android/emulation/control/adb/adbkey.h"
 
 /* set >0 for very verbose debugging */
-#define DEBUG 0
+#define DEBUG 2
 
 #define D(...) (void)0
 #define DD(...) (void)0
@@ -133,6 +135,7 @@ tstream& operator<<(tstream& out, const AdbState value) {
         STATE(authorizing);
         STATE(connected);
         STATE(failed);
+        STATE(offer_key);
     }
 #undef STATE
     return out << s;
@@ -262,6 +265,10 @@ public:
     AdbStreambuf* adbbuf() { return reinterpret_cast<AdbStreambuf*>(rdbuf()); }
 };
 
+constexpr const char hdr[] =
+        "host::features=remount_shell,abb_exec,fixed_push_symlink_"
+        "timestamp,abb,stat_v2,apex,shell_v2,fixed_push_mkdir,cmd";
+
 // This class manages the stream multiplexing and auth to the adbd deamon.
 // This uses async i/o an ThreadLooper thread.
 // Note that ADBD can be very flaky during system image boot. The kernel
@@ -375,8 +382,10 @@ public:
         }
 
         if (!buf->waitForUnlock(timeoutMs)) {
-            // Okay, we failed.. We should close our socket and redo the handshake.
-            mSocket->close();
+            // Okay, we failed.. We should close our socket and redo the
+            // handshake if we are not showing a ui..
+            if (state() != AdbState::offer_key)
+                mSocket->close();
             D("Open %s, timeout", id.c_str());
             return std::make_shared<BasicAdbStream>(nullptr);
         }
@@ -450,6 +459,7 @@ public:
         base::AutoLock lock(mStateLock);
         LOG(VERBOSE) << "Adb transition " << mState << " -> " << newState;
         mState = newState;
+        mStateChange = System::get()->getUnixTimeUs();
 
         // Wake up everyone, as we might be in a fully connected state.
         mStateCv.broadcast();
@@ -518,35 +528,66 @@ public:
     }
 
     void sendCnxn() {
-        mAuthAttempts = 8;
-        const char* hdr =
-                "host::features=remount_shell,abb_exec,fixed_push_symlink_"
-                "timestamp,abb,stat_v2,apex,shell_v2,fixed_push_mkdir,cmd";
+        mAuthAttempts = 2;
         sendPacket(AdbWireMessage::A_CNXN, A_VERSION, MAX_PAYLOAD,
-                   {hdr, hdr + strlen(hdr)});
+                   {hdr, hdr + sizeof(hdr)});
     }
 
-    void sendAuth(const apacket& recv) {
-        // Bail out if we tried a few times to auth and it failed..
-        if (mAuthAttempts == 0) {
-            LOG(ERROR) << "Unable to authenticate at this time, should send public key.";
+    void sendPublicKeyToDevice() {
+        // So we have a mismatch between our private key and the pub. key inside
+        // the emulator.
+        auto privkey = getPrivateAdbKeyPath();
+        if (privkey.empty()) {
+            LOG(WARNING) << "No private key exists, we will have to "
+                            "generate one.";
+            privkey = base::pj(System::get()->getHomeDirectory(), ".android",
+                               "adbkey");
+            if (!adb_auth_keygen(privkey.c_str())) {
+                LOG(ERROR) << "Cannot create private key: " << privkey;
+                return;
+            }
+        }
+
+        std::string key = "";
+        // Welp! We didn't get a key..
+        if (!pubkey_from_privkey(privkey, &key)) {
+            LOG(ERROR) << "Failure to create public key.";
             mSocket->close();
             return;
         }
+
+        // This will show a message to the user, if the user accepts a
+        // connection message will arrive..
+        setState(AdbState::authorizing);
+        sendPacket(AdbWireMessage::A_AUTH, ADB_AUTH_RSAPUBLICKEY, 0,
+                   {key.c_str(), key.c_str() + key.size()});
+    }
+
+    void sendAuth(const apacket& recv) {
         mAuthAttempts--;
+        // Bail out if we tried a few times to auth and it failed..
+        if (mAuthAttempts < 0) {
+            mSocket->close();
+        }
+        if (mAuthAttempts == 0) {
+            sendPublicKeyToDevice();
+            return;
+        }
+
         int sigLen = 256;
         std::vector<char> signed_token{};
         signed_token.resize(256);
-        if (!sign_auth_token((const char*)recv.payload.data(),
-                             recv.msg.data_length, signed_token.data(),
-                             sigLen)) {
-            LOG(ERROR) << "Unable to sign token.";
+        if (!sign_auth_token((uint8_t*)recv.payload.data(),
+                             recv.msg.data_length,
+                             (uint8_t*)signed_token.data(), sigLen)) {
+            // Oh, oh.. We are likely missing our private key..
+            sendPublicKeyToDevice();
+            return;
         }
         signed_token.resize(sigLen);
+        setState(AdbState::authorizing);
         sendPacket(AdbWireMessage::A_AUTH, ADB_AUTH_SIGNATURE, 0,
                    std::move(signed_token));
-
-        setState(AdbState::authorizing);
     }
 
     void onRead(AsyncSocketAdapter* socket) override {
@@ -625,16 +666,18 @@ private:
     ConditionVariable mStateCv;
     std::atomic<AdbState> mState{
             AdbState::disconnected};  // Current connection state
+    std::atomic<uint64_t> mStateChange{0}; // Timestamp of this state change.
 
     // Stream management
     Lock mActiveStreamsLock;
     std::unordered_map<int32_t, std::shared_ptr<BasicAdbStream>> mActiveStreams;
 
     uint32_t mNextClientId{1};  // Client id generator.
-    uint32_t mAuthAttempts{8};
+    int8_t mAuthAttempts{1};
 
     uint32_t mMaxPayloadSize{MAX_PAYLOAD};
     uint32_t mProtocolVersion{A_VERSION_MIN};
+
 };  // namespace emulation
 
 static std::shared_ptr<AdbConnectionImpl> gAdbConnection;

@@ -20,7 +20,7 @@
 
 #include "android/avd/BugreportInfo.h"               // for BugreportInfo
 #include "android/base/StringView.h"                 // for StringView
-#include "android/emulation/control/AdbInterface.h"  // for AdbCommandPtr
+#include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
 #include "android/settings-agent.h"                  // for SettingsTheme
 
 class QEvent;

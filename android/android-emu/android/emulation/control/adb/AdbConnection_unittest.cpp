@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/AdbConnection.h"
+#include "android/emulation/control/adb/AdbConnection.h"
 #include <gtest/gtest.h>
 #include "android/base/async/TestAsyncSocket.h"
 #include "android/base/testing/TestLooper.h"

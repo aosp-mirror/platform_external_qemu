@@ -34,7 +34,7 @@
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/android_pipe_zero.h"
-#include "android/emulation/control/AdbConnection.h"
+#include "android/emulation/control/adb/AdbConnection.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"

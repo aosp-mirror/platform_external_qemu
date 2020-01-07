@@ -30,6 +30,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/ParameterList.h"
+#include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
@@ -77,7 +78,6 @@ extern "C" {
 #include "hw/misc/goldfish_pstore.h"
 }
 
-#include "android-qemu2-glue/adbkey.h"
 #include "android-qemu2-glue/dtb.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
@@ -289,45 +289,12 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
-// Get adbkey path, return "" if failed
-// adbKeyFileName could be "adbkey" or "adbkey.pub"
-static std::string getAdbKeyPath(const char* adbKeyFileName) {
-    std::string adbKeyPath = PathUtils::join(
-            android::ConfigDirs::getUserDirectory(), adbKeyFileName);
-    if (path_is_regular(adbKeyPath.c_str()) &&
-        path_can_read(adbKeyPath.c_str())) {
-        return adbKeyPath;
-    }
-    D("cannot read adb key file: %s", adbKeyPath.c_str());
-    D("trying again by copying from home dir");
-
-    auto home = System::get()->getHomeDirectory();
-    if (home.empty()) {
-        home = System::get()->getTempDir();
-        if (home.empty()) {
-            home = "/tmp";
-        }
-    }
-
-    auto guessedSrcAdbKeyPub =
-            PathUtils::join(home, ".android", adbKeyFileName);
-    path_copy_file(adbKeyPath.c_str(), guessedSrcAdbKeyPub.c_str());
-
-    if (path_is_regular(adbKeyPath.c_str()) &&
-        path_can_read(adbKeyPath.c_str())) {
-        return adbKeyPath;
-    }
-    D("cannot read adb key file (failed): %s", adbKeyPath.c_str());
-    return "";
-}
 
 static void prepareDataFolder(const char* destDirectory,
                               const char* srcDirectory) {
     // The adb_keys file permission will also be set in guest system.
     // Referencing system/core/rootdir/init.usb.rc
     static const int kAdbKeyDirFilePerm = 02750;
-    const char* kPrivateKeyFileName = "adbkey";
-    const char* kPublicKeyFileName = "adbkey.pub";
     path_copy_dir(destDirectory, srcDirectory);
     std::string adbKeyPubPath = getAdbKeyPath(kPublicKeyFileName);
     std::string adbKeyPrivPath = getAdbKeyPath(kPrivateKeyFileName);
