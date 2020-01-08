@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d68cb8cd_af911f4b",
+        "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-08T04:18:45Z",
+      "side": 1,
+      "message": "sizeof includes \u0027\\0\u0027 from the array, is that expected?\nyou can use android/base/ArraySize.h::stringLiteralLength() if you need compile-time strlen()",
+      "range": {
+        "startLine": 533,
+        "startChar": 31,
+        "endLine": 533,
+        "endChar": 37
+      },
+      "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d41ba2f_0c810b8c",
+        "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-08T04:18:45Z",
+      "side": 1,
+      "message": "nit: |sigLen|",
+      "range": {
+        "startLine": 579,
+        "startChar": 28,
+        "endLine": 579,
+        "endChar": 31
+      },
+      "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9b3462f_70fc4560",
+        "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-08T04:18:45Z",
+      "side": 1,
+      "message": "nit: please use \u003cistream\u003e, iostream is purely for console IO (yes, it is messed up)",
+      "range": {
+        "startLine": 16,
+        "startChar": 10,
+        "endLine": 16,
+        "endChar": 18
+      },
+      "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
