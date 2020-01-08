@@ -11,15 +11,27 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/memory/SharedMemory.h"
-#include "emulator/main/flagdefs.h"
-#include "emulator/net/EmulatorConnection.h"
-#include "rtc_base/logging.h"
-#include "rtc_base/logsinks.h"
-#include "rtc_base/ssladapter.h"
+#include <rtc_base/flags.h>                    // for FlagList
+#include <stdio.h>                             // for fprintf, printf, NULL
+#include <memory>                              // for unique_ptr
+#include <string>                              // for string, operator!=
 
-using emulator::webrtc::Switchboard;
+#include "android/base/StringView.h"           // for StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
+#include "emulator/main/flagdefs.h"            // for FLAG_handle, FLAG_port
+#include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
+#include "rtc_base/logging.h"                  // for LogSink, RTC_LOG, INFO
+#include "rtc_base/logsinks.h"                 // for FileRotatingLogSink
+#include "rtc_base/ssladapter.h"               // for CleanupSSL, InitializeSSL
+
+namespace emulator {
+namespace webrtc {
+class Switchboard;
+}  // namespace webrtc
+}  // namespace emulator
+
 using android::base::SharedMemory;
+using emulator::webrtc::Switchboard;
 
 const int kMaxFileLogSizeInBytes = 64 * 1024 * 1024;
 
@@ -78,8 +90,9 @@ int main(int argc, char* argv[]) {
     }
 
     rtc::InitializeSSL();
+    bool deamon = FLAG_daemon;
     emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle, FLAG_turn);
-    int status = server.listen(FLAG_daemon) ? 0 : 1;
+    int status = server.listen(deamon) ? 0 : 1;
     RTC_LOG(INFO) << "Finished, status: " << status;
     rtc::CleanupSSL();
     return status;
