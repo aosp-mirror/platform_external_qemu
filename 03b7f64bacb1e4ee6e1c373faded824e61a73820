@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7cdfe893_5cf7b6a9",
+        "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-08T20:44:50Z",
+      "side": 1,
+      "message": "Should not be a problem, but was looking for stringLiteralLength at compile time :-).",
+      "parentUuid": "d68cb8cd_af911f4b",
+      "range": {
+        "startLine": 533,
+        "startChar": 31,
+        "endLine": 533,
+        "endChar": 37
+      },
+      "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6d41ba2f_0c810b8c",
         "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "adaf6a61_cf91774c",
+        "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-08T20:44:50Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6d41ba2f_0c810b8c",
+      "range": {
+        "startLine": 579,
+        "startChar": 28,
+        "endLine": 579,
+        "endChar": 31
+      },
+      "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d9b3462f_70fc4560",
         "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.h",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a04f314d_d766b473",
+        "filename": "android/android-emu/android/emulation/control/adb/AdbConnection.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-08T20:44:50Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d9b3462f_70fc4560",
+      "range": {
+        "startLine": 16,
+        "startChar": 10,
+        "endLine": 16,
+        "endChar": 18
+      },
+      "revId": "03b7f64bacb1e4ee6e1c373faded824e61a73820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
