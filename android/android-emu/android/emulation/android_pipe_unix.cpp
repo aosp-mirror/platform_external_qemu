@@ -600,7 +600,7 @@ static AndroidPipeFuncs s_unix_pipe_funcs = {
 void android_unix_pipes_init(void) {
     Looper* looper = looper_getForThread();
     if (android::featurecontrol::isEnabled(
-                android::featurecontrol::Feature::SnapshotAdb)) {
+            android::featurecontrol::Feature::SnapshotAdb)) {
         s_unix_pipe_funcs.save = socketPipe_save;
         s_unix_pipe_funcs.load = socketPipe_load;
     }
