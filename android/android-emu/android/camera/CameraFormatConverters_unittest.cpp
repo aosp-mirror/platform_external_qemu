@@ -262,6 +262,8 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
         ClientFrameBuffer framebuffer = {};
         framebuffer.pixel_format = format;
         framebuffer.framebuffer = dest.data();
+        framebuffer.width = param.width;
+        framebuffer.height = param.height;
 
         ClientFrame resultFrame = {};
         resultFrame.framebuffers = &framebuffer;
@@ -270,9 +272,8 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
         resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
         EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
-                                        param.width, param.height, param.width,
-                                        param.height, &resultFrame,
-                                        kDefaultExpComp));
+                                        param.width, param.height,
+                                        &resultFrame, kDefaultExpComp));
 
         compareSumOfSquaredDifferences(src, dest, param.getThreshold());
 
@@ -309,6 +310,8 @@ TEST_P(ConvertWithSize, Resize) {
         ClientFrameBuffer framebuffer = {};
         framebuffer.pixel_format = format;
         framebuffer.framebuffer = intermediate.data();
+        framebuffer.width = param.width / kScaleAmount;
+        framebuffer.height = param.height / kScaleAmount;
 
         ClientFrame resultFrame = {};
         resultFrame.framebuffers = &framebuffer;
@@ -318,18 +321,19 @@ TEST_P(ConvertWithSize, Resize) {
 
         EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
                                         param.width, param.height,
-                                        param.width / kScaleAmount,
-                                        param.height / kScaleAmount,
                                         &resultFrame, kDefaultExpComp));
 
         memset(stagingFramebuffer, 0, stagingFramebufferSize);
 
         framebuffer.framebuffer = dest.data();
+        framebuffer.width = param.width;
+        framebuffer.height = param.height;
+
         EXPECT_EQ(0, convert_frame_fast(
                              intermediate.data(), format, intermediate.size(),
                              param.width / kScaleAmount,
-                             param.height / kScaleAmount, param.width,
-                             param.height, &resultFrame, kDefaultExpComp));
+                             param.height / kScaleAmount,
+                             &resultFrame, kDefaultExpComp));
 
         compareSumOfSquaredDifferences(src, dest,
                                        param.getThresholdForResize());
@@ -365,6 +369,8 @@ TEST_P(ConvertWithSize, SourceToDest) {
             ClientFrameBuffer framebuffer = {};
             framebuffer.pixel_format = dest_format;
             framebuffer.framebuffer = dest.data();
+            framebuffer.width = param.width;
+            framebuffer.height = param.height;
 
             ClientFrame resultFrame = {};
             resultFrame.framebuffers = &framebuffer;
@@ -447,6 +453,8 @@ TEST_P(FrameModifiers, ExpComp) {
             ClientFrameBuffer framebuffer = {};
             framebuffer.pixel_format = dest_format;
             framebuffer.framebuffer = dest.data();
+            framebuffer.width = kWidth;
+            framebuffer.height = kHeight;
 
             ClientFrame resultFrame = {};
             resultFrame.framebuffers = &framebuffer;

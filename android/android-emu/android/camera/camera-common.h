@@ -111,6 +111,8 @@ ANDROID_BEGIN_HEADER
 typedef struct ClientFrameBuffer {
     /* Pixel format used in the client framebuffer. */
     uint32_t    pixel_format;
+    int width;
+    int height;
     /* Address of the client framebuffer. */
     void*       framebuffer;
 } ClientFrameBuffer;
