@@ -83,6 +83,4 @@ enum Feature {
     YUVCache = 47;
 
     KeycodeForwarding = 48;
-
-    CameraV1 = 49;
 }
