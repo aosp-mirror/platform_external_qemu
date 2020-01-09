@@ -723,14 +723,11 @@ private:
         entry.linear = linear;
         entry.linearSize = linearSize;
 
-        memset(entry.linear, 0xff, entry.linearSize);
-
         virgl_box initbox;
         initbox.x = 0;
         initbox.y = 0;
         initbox.w = (uint32_t)linearSize;
         initbox.h = 1;
-        sync_linear_to_iovec(&entry, 0, &initbox);
     }
 
     void detachResourceLocked(uint32_t ctxId, uint32_t toUnrefId) {
