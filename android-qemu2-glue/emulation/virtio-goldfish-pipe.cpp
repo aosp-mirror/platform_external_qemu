@@ -251,8 +251,12 @@ static int sync_iovec_to_linear(PipeResEntry* res, uint64_t offset, const virgl_
     // height - 1 in order to treat the (w * bpp) row specially
     // (i.e., the last row does not occupy the full stride)
     size_t length = (h - 1U) * stride + w * bpp;
-    if (offset + length > res->linearSize)
+    if (offset + length > res->linearSize) {
+        VGPLOG("offset + length overflows! linearSize %zu, offset %zu length %zu (wanted %zu)",
+               res->linearSize, offset, length, offset + length);
+        abort();
         return EINVAL;
+    }
 
     char* linear = static_cast<char*>(res->linear);
     for (uint32_t i = 0, iovOffset = 0U; length && i < res->numIovs; i++) {
