@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2be4c236_2a043bfa",
+        "filename": "hw/display/virtio-gpu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-09T23:28:33Z",
+      "side": 1,
+      "message": "nit: tab",
+      "range": {
+        "startLine": 1174,
+        "startChar": 0,
+        "endLine": 1174,
+        "endChar": 1
+      },
+      "revId": "09290696692c2a3c30459f9e3af54367b9ffedcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
