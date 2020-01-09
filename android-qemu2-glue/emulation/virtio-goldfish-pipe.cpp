@@ -465,6 +465,12 @@ public:
             free(entry.linear);
             entry.linear = nullptr;
         }
+
+        if (entry.iov) {
+            free(entry.iov);
+            entry.iov = nullptr;
+            entry.numIovs = 0;
+        }
     }
 
     int attachIov(int resId, iovec* iov, int num_iovs) {
@@ -500,11 +506,13 @@ public:
 
         entry.numIovs = 0;
 
+        if (entry.iov) free(entry.iov);
+        entry.iov = nullptr;
+
         if (iov) {
             *iov = entry.iov;
         }
 
-        entry.iov = nullptr;
         allocResource(entry, entry.iov, entry.numIovs);
         VGPLOG("done");
     }
@@ -709,8 +717,9 @@ private:
 
         if (linearSize) linear = malloc(linearSize);
 
-        entry.iov = iov;
+        entry.iov = (iovec*)malloc(sizeof(*iov) * num_iovs);
         entry.numIovs = num_iovs;
+        memcpy(entry.iov, iov, num_iovs * sizeof(*iov));
         entry.linear = linear;
         entry.linearSize = linearSize;
 
