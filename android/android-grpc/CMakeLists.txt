@@ -44,6 +44,10 @@ target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 
+if(WEBRTC)
+  target_link_libraries(android-grpc PRIVATE android-webrtc)
+endif()
+
 set(android-grpc_unittest_src
     android/emulation/control/logcat/LogcatParser_unittest.cpp
     android/emulation/control/logcat/RingStreambuf_unittest.cpp

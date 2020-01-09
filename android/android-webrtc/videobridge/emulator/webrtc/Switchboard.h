@@ -63,7 +63,6 @@ public:
     // due to a dropped connection.
     void finalizeConnections();
 
-    static std::string BRIDGE_RECEIVER;
 private:
     // We want the turn config delivered in under a second.
     const int kMaxTurnConfigTime = 1000;

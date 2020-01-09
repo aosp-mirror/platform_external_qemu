@@ -21,7 +21,6 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/console.h"
-#include "android/emulation/control/EventDispatcher.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "emulator/net/JsonProtocol.h"
 
@@ -56,7 +55,7 @@ using emulator::net::State;
 class WebRtcBridge : public RtcBridge, public JsonReceiver {
 public:
     WebRtcBridge(AsyncSocketAdapter* socket,
-                 const AndroidConsoleAgents* const consoleAgents,
+                 const QAndroidRecordScreenAgent* const screenAgent,
                  int desiredFps,
                  int videoBridgePort,
                  std::string turncfg = "");
@@ -88,11 +87,8 @@ public:
     static const int kMaxFPS = 24;
     static const std::string kVideoBridgeExe;
 
-    // Maximum number of messages we are willing to queue, before we start
-    // dropping them.
+    // Maximum number of messages we are willing to queue, before we start dropping them.
     static const uint16_t kMaxMessageQueueLen = 128;
-
-    static std::string BRIDGE_RECEIVER;
 private:
     void received(std::string msg);
     void updateBridgeState();
@@ -106,7 +102,6 @@ private:
 
     // Needed to start/stop the emulators streaming rtc module..
     const QAndroidRecordScreenAgent* const mScreenAgent;
-    EventDispatcher mEventDispatcher;
 
     // Message queues used to store messages received from the videobridge.
     std::map<std::string, std::shared_ptr<MessageQueue>> mId;
