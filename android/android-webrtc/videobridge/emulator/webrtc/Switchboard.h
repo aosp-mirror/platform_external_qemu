@@ -13,25 +13,25 @@
 // limitations under the License.
 #pragma once
 
-#include "emulator/net/JsonProtocol.h"     // for JsonProtocol (ptr only)
-#include "emulator/net/SocketTransport.h"  // for SocketTransport (ptr only)
-#include <rtc_base/criticalsection.h>                           // for CritS...
-#include <rtc_base/refcountedobject.h>                          // for RefCo...
-#include <rtc_base/thread.h>                                    // for Thread
-#include <api/peerconnectioninterface.h>                        // for PeerC...
+#include <string>
+
+#include "Participant.h"
+#include "emulator/net/AsyncSocketAdapter.h"
+#include "emulator/net/EmulatorConnection.h"
+#include "emulator/net/JsonProtocol.h"
+
+#include <api/create_peerconnection_factory.h>
+#include <api/peerconnectioninterface.h>
+
 namespace emulator {
 
 namespace net {
-class AsyncSocketAdapter;
-class EmulatorConnection;
-
 class EmulatorConnection;
 }
 
 namespace webrtc {
 
 class Participant;
-
 
 using net::AsyncSocketAdapter;
 using net::EmulatorConnection;

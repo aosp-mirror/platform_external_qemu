@@ -14,26 +14,16 @@
 
 #pragma once
 
-#include <stdint.h>                                         // for uint16_t
-#include <map>                                              // for map
-#include <memory>                                           // for shared_ptr
-#include <string>                                           // for string
+#include <map>
+#include <memory>
+#include <string>
 
-#include "android/base/containers/BufferQueue.h"            // for BufferQueue
-#include "android/base/synchronization/Lock.h"              // for Lock (ptr...
-#include "android/base/system/System.h"                     // for System
-#include "android/console.h"                                // for AndroidCo...
-#include "android/emulation/control/EventDispatcher.h"      // for EventDisp...
-#include "android/emulation/control/RtcBridge.h"            // for RtcBridge...
-#include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
-#include "emulator/net/JsonProtocol.h"                      // for JsonProtocol
-#include "emulator/net/SocketTransport.h"                   // for SocketTra...
-
-namespace emulator {
-namespace net {
-class AsyncSocketAdapter;
-}  // namespace net
-}  // namespace emulator
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/console.h"
+#include "android/emulation/control/EventDispatcher.h"
+#include "android/emulation/control/RtcBridge.h"
+#include "emulator/net/JsonProtocol.h"
 
 namespace android {
 namespace emulation {

@@ -13,18 +13,10 @@
 // limitations under the License.
 #include "emulator/net/EmulatorConnection.h"
 
-#include <rtc_base/asyncsocket.h>                // for AsyncSocket
-#include <rtc_base/logging.h>                    // for RTC_LOG
-#include <rtc_base/thread.h>                     // for AutoSocketServerThread
-#include <stdio.h>                               // for fprintf, stderr
-#include <sys/socket.h>                          // for AF_INET, SOCK_STREAM
-#include <unistd.h>                              // for fork, pid_t
-#include <utility>                               // for move
-
-#include "emulator/net/RtcAsyncSocketAdapter.h"  // for AsyncSocket, RtcAsyn...
-#include "emulator/webrtc/Switchboard.h"         // for Switchboard
-#include "rtc_base/physicalsocketserver.h"       // for PhysicalSocketServer
-#include "rtc_base/socketaddress.h"              // for SocketAddress
+#include "emulator/net/RtcAsyncSocketAdapter.h"
+#include "rtc_base/physicalsocketserver.h"
+#include "rtc_base/socketaddress.h"
+#include <unistd.h>
 
 namespace emulator {
 namespace net {

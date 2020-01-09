@@ -1,31 +1,25 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <nlohmann/json.hpp>                    // for basic_json<>::value_type
-#include <stdio.h>                              // for sscanf
-#include <memory>                               // for shared_ptr, shared_pt...
-#include <new>                                  // for operator new
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include <inttypes.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-#include "android/base/CpuTime.h"               // for base
-#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
-#include "android/base/Optional.h"              // for Optional
-#include "android/base/async/AsyncSocket.h"     // for AsyncSocket
-#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
-#include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
-#include "android/base/sockets/SocketUtils.h"   // for socketGetPort, socket...
-#include "android/base/system/System.h"         // for System, System::Pid
+#include <memory>
+#include <nlohmann/json.hpp>
+#include "android/base/ArraySize.h"
+#include "android/base/Optional.h"
+#include "android/base/Uuid.h"
+#include "android/base/async/AsyncSocket.h"
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/misc/StringUtils.h"
+#include "android/base/sockets/SocketErrors.h"
+#include "android/base/sockets/SocketUtils.h"
+#include "android/base/system/System.h"
+#include "android/emulation/control/window_agent.h"
 
-namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-}  // namespace android
-namespace emulator {
-namespace net {
-class AsyncSocketAdapter;
-}  // namespace net
-}  // namespace emulator
+#include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketUtils.h"
 
 using nlohmann::json;
 

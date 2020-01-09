@@ -13,25 +13,10 @@
 // limitations under the License.
 
 #include "android/emulation/control/EventDispatcher.h"
-
-#include <openssl/base64.h>                              // for EVP_DecodeBa...
-#include <stddef.h>                                      // for size_t
-#include <cstdint>                                       // for uint8_t
-#include <string>                                        // for operator==
-#include <vector>                                        // for vector
-
-#include "android/base/Log.h"                            // for LogStream, LOG
-#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
-#include "emulator_controller.pb.h"                      // for MouseEvent
-#include "nlohmann/json.hpp"                             // for basic_json
-
-namespace google {
-namespace protobuf {
-namespace io {
-class ArrayInputStream;
-}  // namespace io
-}  // namespace protobuf
-}  // namespace google
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <openssl/base64.h>
+#include <vector>
+#include "android/base/Log.h"
 
 namespace android {
 namespace emulation {
