@@ -584,7 +584,7 @@ public:
 
         auto ops = ensureAndGetServiceOps();
 
-        size_t writtenBytes = (size_t)box->x;
+        size_t writtenBytes = 0;
         size_t wantedBytes = writtenBytes + (size_t)box->w;
 
         while (writtenBytes < wantedBytes) {
