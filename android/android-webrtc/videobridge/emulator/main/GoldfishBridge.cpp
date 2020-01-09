@@ -18,8 +18,8 @@
 #include "rtc_base/logsinks.h"
 #include "rtc_base/ssladapter.h"
 
-using android::base::SharedMemory;
 using emulator::webrtc::Switchboard;
+using android::base::SharedMemory;
 
 const int kMaxFileLogSizeInBytes = 64 * 1024 * 1024;
 
@@ -78,9 +78,8 @@ int main(int argc, char* argv[]) {
     }
 
     rtc::InitializeSSL();
-    bool deamon = FLAG_daemon;
     emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle, FLAG_turn);
-    int status = server.listen(deamon) ? 0 : 1;
+    int status = server.listen(FLAG_daemon) ? 0 : 1;
     RTC_LOG(INFO) << "Finished, status: " << status;
     rtc::CleanupSSL();
     return status;

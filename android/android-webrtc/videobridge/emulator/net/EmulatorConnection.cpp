@@ -26,8 +26,7 @@ EmulatorConnection::EmulatorConnection(int port, std::string handle, std::string
 
 EmulatorConnection::~EmulatorConnection() {}
 
-bool EmulatorConnection::listen(bool should_fork) {
-    RTC_LOG(INFO) << "Listening as " << (should_fork ? " deamon (forked)" : " thread, not returning.");
+bool EmulatorConnection::listen(bool fork) {
     rtc::PhysicalSocketServer socket_server;
 
     // TODO(jansen): Use own thread that finalizes participants?
@@ -46,7 +45,7 @@ bool EmulatorConnection::listen(bool should_fork) {
     }
 
 #ifndef _WIN32
-    if (should_fork) {
+    if (fork) {
         pid_t pid = ::fork();
         if (pid != 0) {
             RTC_LOG(INFO) << "Spawned a child under: " << pid;
