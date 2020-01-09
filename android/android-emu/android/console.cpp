@@ -3509,6 +3509,18 @@ static const CommandDefRec screenrecord_commands[] = {
 /********************************************************************************************/
 /********************************************************************************************/
 
+static int do_icebox_run(ControlClient client, char* args) {
+    if (android::icebox::run_async(args)) {
+        control_write(client, "OK: run command: %s\r\n", args);
+        return 0;
+    } else {
+        control_write(client,
+                      "KO: Failed to run command, might have pending icebox "
+                      "operations, please try again\r\n");
+        return -1;
+    }
+}
+
 static int do_icebox_track(ControlClient client, char* args) {
     int pid = -1;
     if (!args || strlen(args) == 0) {
@@ -3524,7 +3536,10 @@ static int do_icebox_track(ControlClient client, char* args) {
         control_write(client, "OK: Start tracking PID %d\r\n", pid);
         return 0;
     } else {
-        control_write(client, "KO: Failed to track PID %d\r\n", pid);
+        control_write(client,
+                      "KO: Failed to track PID %d, might have pending icebox "
+                      "operations, please try again\r\n",
+                      pid);
         return -1;
     }
 }
@@ -3532,6 +3547,8 @@ static int do_icebox_track(ControlClient client, char* args) {
 static const CommandDefRec icebox_commands[] = {
         {"track", "(experimental) track exceptions in <pid>",
          "'icebox track <pid>'\r\n", NULL, do_icebox_track, NULL},
+        {"run", "(experimental) run adb open command",
+         "'icebox run \"command\"'\r\n", NULL, do_icebox_run, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
