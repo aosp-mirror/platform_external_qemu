@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65514928_081580c0",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-01-09T23:45:03Z",
+      "side": 0,
+      "message": "Since we cannot this memset here, where will we run it?",
+      "range": {
+        "startLine": 726,
+        "startChar": 8,
+        "endLine": 726,
+        "endChar": 14
+      },
+      "revId": "c13ae259a3eafb7c8d63f5ac19c7924fde9d0921",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
