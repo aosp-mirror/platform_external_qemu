@@ -23,8 +23,6 @@ using namespace android::base;
 namespace emulator {
 namespace webrtc {
 
-std::string Switchboard::BRIDGE_RECEIVER ="WebrtcVideoBridge";
-
 void Switchboard::stateConnectionChange(SocketTransport* connection,
                                         State current) {
     if (current == State::CONNECTED) {
@@ -166,16 +164,10 @@ void Switchboard::received(SocketTransport* transport, const json object) {
 }
 
 void Switchboard::send(std::string to, json message) {
-    if (to.compare(BRIDGE_RECEIVER) == 0) {
-        // Directly forward messages intended for the bridge
-        message["topic"] = BRIDGE_RECEIVER;
-        mProtocol.write(&mTransport, message);
-        return;
-    }
-
     if (!mIdentityMap.count(to)) {
         return;
     }
+
     json msg;
     msg["msg"] = message.dump();
     msg["topic"] = mIdentityMap[to];

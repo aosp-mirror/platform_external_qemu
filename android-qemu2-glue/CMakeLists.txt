@@ -61,9 +61,6 @@ android_target_include_directories(libqemu2-glue
 if(GRPC)
   target_link_libraries(libqemu2-glue PRIVATE android-grpc)
 endif()
-if(WEBRTC)
-  target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
-endif()
 target_link_libraries(libqemu2-glue
                       PRIVATE android-emu
                               GLIB2::GLIB2
