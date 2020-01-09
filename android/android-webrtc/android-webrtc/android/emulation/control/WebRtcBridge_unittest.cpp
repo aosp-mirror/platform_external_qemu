@@ -14,25 +14,17 @@
 
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <fcntl.h>                               // for open, O_CREAT, O_WRONLY
-#include <gtest/gtest.h>                         // for Test, AssertionResult
-#include <string.h>                              // for memcpy
-#include <unistd.h>                              // for close
-#include <algorithm>                             // for min
-#include <functional>                            // for __base
-#include <new>                                   // for operator new
-#include <string>                                // for string, to_string
-#include <vector>                                // for vector
+#include <gtest/gtest.h>
 
-#include "android/base/Log.h"                    // for setMinLogLevel, LOG_...
-#include "android/base/Optional.h"               // for Optional
-#include "android/base/StringView.h"             // for StringView
-#include "android/base/files/PathUtils.h"        // for PathUtils
-#include "android/base/testing/TestSystem.h"     // for TestSystem
-#include "android/base/testing/TestTempDir.h"    // for TestTempDir
-#include "android/base/threads/FunctorThread.h"  // for FunctorThread
-#include "emulator/net/AsyncSocketAdapter.h"     // for AsyncSocketEventList...
-#include "nlohmann/json.hpp"                     // for json_ref, basic_json...
+#include <functional>
+#include <string>
+#include <vector>
+
+
+#include "android/base/testing/TestSystem.h"
+#include "android/base/threads/FunctorThread.h"
+#include "emulator/net/AsyncSocketAdapter.h"
+#include "android/base/Optional.h"
 
 namespace android {
 namespace emulation {
@@ -120,19 +112,12 @@ bool stopSharedMemoryModule() {
 }
 }
 
-
 static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
         .startSharedMemoryModule = startSharedMemoryModule,
         .stopSharedMemoryModule = stopSharedMemoryModule};
 
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
         &sQAndroidRecordScreenAgent;
-
-
-static const AndroidConsoleAgents fakeAgents = {
-    .record = gQAndroidRecordScreenAgent,
-};
-
 
 json msg1 = {{"topic", "moi"}, {"msg", "hello"}};
 json msg2 = {{"topic", "moi"}, {"msg", "world"}};
@@ -171,7 +156,7 @@ public:
 class TestBridge : public WebRtcBridge {
 public:
     TestBridge(TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({}))
-        : WebRtcBridge(socket, &fakeAgents, 24, 1234) {
+        : WebRtcBridge(socket, gQAndroidRecordScreenAgent, 24, 1234) {
         // Let's not get weird behavior due to our locks immediately expiring.
         testSys.setLiveUnixTime(true);
         // Make sure we can find goldfish-videobridge
@@ -309,7 +294,7 @@ TEST(WebRtcBridge, unconnectedSaysBye) {
 
 TEST(WebRtcBridge, connectedTimeoutSaysNothing) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
-    WebRtcBridge bridge(socket, &fakeAgents,
+    WebRtcBridge bridge(socket, gQAndroidRecordScreenAgent,
                         WebRtcBridge::kMaxFPS, 1234);
     std::string msg;
 

@@ -11,13 +11,8 @@
 
 #include "android-qemu2-glue/qemu-control-impl.h"
 
-#include <stdio.h>
-#include "android/cmdline-option.h"
 #include "android/emulation/control/grpc_agent.h"
-
-#ifdef ANDROID_WEBRTC
-#include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
-#endif
+#include <stdio.h>
 
 #ifdef ANDROID_GRPC
 #include "android/emulation/control/GrpcServices.h"
@@ -25,19 +20,7 @@
 extern const AndroidConsoleAgents* getConsoleAgents();
 
 int start_grpc(int port, const char* turncfg) {
-    android::emulation::control::RtcBridge* rtc_bridge = nullptr;
-#ifdef ANDROID_WEBRTC
-    char* turn = nullptr;
-    if (android_cmdLineOptions->turncfg) {
-        turn = android_cmdLineOptions->turncfg;
-    }
-    rtc_bridge = android::emulation::control::WebRtcBridge::create(
-            0, getConsoleAgents(), turn);
-#else
-    rtc_bridge = new android::emulation::control::NopRtcBridge > ();
-#endif
-    return android::emulation::control::GrpcServices::setup(
-            port, getConsoleAgents(), rtc_bridge, "forward");
+     return android::emulation::control::GrpcServices::setup(port, getConsoleAgents(), "forward", turncfg);
 }
 #else
 int start_grpc(int port, const char* turncfg) {
@@ -45,6 +28,7 @@ int start_grpc(int port, const char* turncfg) {
     return -1;
 }
 #endif
+
 
 static const QGrpcAgent grpcAgent = {
         .start = start_grpc,

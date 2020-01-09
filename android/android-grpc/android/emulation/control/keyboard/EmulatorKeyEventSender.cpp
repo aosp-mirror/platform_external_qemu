@@ -245,15 +245,8 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
             } else {
                 // Nope we have to send the domcode..
                 auto evdev = domCodeToEvDevKeycode(code);
-                auto eventType = request->eventtype();
-                if (eventType == KeyboardEvent::keydown ||
-                    eventType == KeyboardEvent::keypress) {
-                    mAgents->user_event->sendKeyCode(evdev | 0x400);
-                }
-                if (eventType == KeyboardEvent::keyup ||
-                    eventType == KeyboardEvent::keypress) {
-                    mAgents->user_event->sendKeyCode(evdev);
-                }
+                mAgents->user_event->sendKeyCode(evdev | 0x400);
+                mAgents->user_event->sendKeyCode(evdev);
             }
         }
     }

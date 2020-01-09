@@ -16,8 +16,7 @@
 
 #include <memory>  // for unique_ptr
 #include <string>
-#include "android/console.h"                      // for AndroidConsoleAgents
-#include "android/emulation/control/RtcBridge.h"  // for RtcBridge
+#include "android/console.h"  // for AndroidConsoleAgents
 
 namespace android {
 namespace emulation {
@@ -31,8 +30,8 @@ public:
     // Returns the port or -1 if the service didn't start.
     static int setup(int port,
                      const AndroidConsoleAgents* const consoleAgents,
-                     RtcBridge* rtcBridge,
-                     const char* waterfall);
+                     const char* waterfall,
+                     const char* turnCfg);
 
     static void teardown();
 

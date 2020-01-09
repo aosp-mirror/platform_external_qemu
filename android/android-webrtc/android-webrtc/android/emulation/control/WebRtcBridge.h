@@ -14,26 +14,15 @@
 
 #pragma once
 
-#include <stdint.h>                                         // for uint16_t
-#include <map>                                              // for map
-#include <memory>                                           // for shared_ptr
-#include <string>                                           // for string
+#include <map>
+#include <memory>
+#include <string>
 
-#include "android/base/containers/BufferQueue.h"            // for BufferQueue
-#include "android/base/synchronization/Lock.h"              // for Lock (ptr...
-#include "android/base/system/System.h"                     // for System
-#include "android/console.h"                                // for AndroidCo...
-#include "android/emulation/control/EventDispatcher.h"      // for EventDisp...
-#include "android/emulation/control/RtcBridge.h"            // for RtcBridge...
-#include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
-#include "emulator/net/JsonProtocol.h"                      // for JsonProtocol
-#include "emulator/net/SocketTransport.h"                   // for SocketTra...
-
-namespace emulator {
-namespace net {
-class AsyncSocketAdapter;
-}  // namespace net
-}  // namespace emulator
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/console.h"
+#include "android/emulation/control/RtcBridge.h"
+#include "emulator/net/JsonProtocol.h"
 
 namespace android {
 namespace emulation {
@@ -66,7 +55,7 @@ using emulator::net::State;
 class WebRtcBridge : public RtcBridge, public JsonReceiver {
 public:
     WebRtcBridge(AsyncSocketAdapter* socket,
-                 const AndroidConsoleAgents* const consoleAgents,
+                 const QAndroidRecordScreenAgent* const screenAgent,
                  int desiredFps,
                  int videoBridgePort,
                  std::string turncfg = "");
@@ -98,11 +87,8 @@ public:
     static const int kMaxFPS = 24;
     static const std::string kVideoBridgeExe;
 
-    // Maximum number of messages we are willing to queue, before we start
-    // dropping them.
+    // Maximum number of messages we are willing to queue, before we start dropping them.
     static const uint16_t kMaxMessageQueueLen = 128;
-
-    static std::string BRIDGE_RECEIVER;
 private:
     void received(std::string msg);
     void updateBridgeState();
@@ -116,7 +102,6 @@ private:
 
     // Needed to start/stop the emulators streaming rtc module..
     const QAndroidRecordScreenAgent* const mScreenAgent;
-    EventDispatcher mEventDispatcher;
 
     // Message queues used to store messages received from the videobridge.
     std::map<std::string, std::shared_ptr<MessageQueue>> mId;

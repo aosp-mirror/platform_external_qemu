@@ -13,18 +13,10 @@
 // limitations under the License.
 #include "emulator/net/EmulatorConnection.h"
 
-#include <rtc_base/asyncsocket.h>                // for AsyncSocket
-#include <rtc_base/logging.h>                    // for RTC_LOG
-#include <rtc_base/thread.h>                     // for AutoSocketServerThread
-#include <stdio.h>                               // for fprintf, stderr
-#include <sys/socket.h>                          // for AF_INET, SOCK_STREAM
-#include <unistd.h>                              // for fork, pid_t
-#include <utility>                               // for move
-
-#include "emulator/net/RtcAsyncSocketAdapter.h"  // for AsyncSocket, RtcAsyn...
-#include "emulator/webrtc/Switchboard.h"         // for Switchboard
-#include "rtc_base/physicalsocketserver.h"       // for PhysicalSocketServer
-#include "rtc_base/socketaddress.h"              // for SocketAddress
+#include "emulator/net/RtcAsyncSocketAdapter.h"
+#include "rtc_base/physicalsocketserver.h"
+#include "rtc_base/socketaddress.h"
+#include <unistd.h>
 
 namespace emulator {
 namespace net {
@@ -34,8 +26,7 @@ EmulatorConnection::EmulatorConnection(int port, std::string handle, std::string
 
 EmulatorConnection::~EmulatorConnection() {}
 
-bool EmulatorConnection::listen(bool should_fork) {
-    RTC_LOG(INFO) << "Listening as " << (should_fork ? " deamon (forked)" : " thread, not returning.");
+bool EmulatorConnection::listen(bool fork) {
     rtc::PhysicalSocketServer socket_server;
 
     // TODO(jansen): Use own thread that finalizes participants?
@@ -54,7 +45,7 @@ bool EmulatorConnection::listen(bool should_fork) {
     }
 
 #ifndef _WIN32
-    if (should_fork) {
+    if (fork) {
         pid_t pid = ::fork();
         if (pid != 0) {
             RTC_LOG(INFO) << "Spawned a child under: " << pid;

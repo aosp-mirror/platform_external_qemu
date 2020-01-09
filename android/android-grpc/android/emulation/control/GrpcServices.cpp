@@ -5,6 +5,9 @@
 #include "android/emulation/control/EmulatorService.h"  // for EmulatorContr...
 #include "android/emulation/control/RtcBridge.h"        // for RtcBridge
 
+#ifdef ANDROID_WEBRTC
+#include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
+#endif
 
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::GrpcServices;
@@ -20,14 +23,20 @@ std::unique_ptr<RtcBridge> GrpcServices::g_rtc_bridge = nullptr;
 
 int GrpcServices::setup(int port,
                         const AndroidConsoleAgents* const consoleAgents,
-                        RtcBridge* rtcBridge,
-                        const char* waterfall) {
+                        const char* waterfall,
+                        const char* turnCfg) {
     // Return the active port if we are already running.
     if (g_controler_service) {
         return g_controler_service->port();
     }
 
-    g_rtc_bridge.reset(rtcBridge);
+    std::string turn = turnCfg ? std::string(turnCfg) : "";
+#ifdef ANDROID_WEBRTC
+    g_rtc_bridge.reset(android::emulation::control::WebRtcBridge::create(
+            port + 1, consoleAgents, turn));
+#else
+    g_rtc_bridge = std::make_unique<NopRtcBridge>();
+#endif
     g_rtc_bridge->start();
 
     auto builder =

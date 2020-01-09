@@ -94,13 +94,9 @@
             "args": [
                 "@Q", // Pick the image you would like to use
                 "-grpc",
-<<<<<<< HEAD
                 "5556",
                 "-wipe-data",
                 "-verbose", // With some additional parameters.
-=======
-                "5556", // With some additional parameters.
->>>>>>> 1815c19b7e... [WebRTC] Fix potential deadlock in participant cleanup.
             ],
             "linux": {
                 "env": {
@@ -133,7 +129,6 @@
                 "pro handle -p true -s false SIGUSR2"
             ],
             "cwd": "${workspaceFolder}/build",
-<<<<<<< HEAD
         },
         {
             // You need root access to attach debugger
@@ -158,30 +153,4 @@
             ],
         }
     ]
-=======
-    },
-    {
-        // You need root access to attach debugger
-        "name": "(lldb) Debug attach Emulator",
-        "type": "lldb",
-        "request": "attach",
-        // Replace this with the process executable you want to attach to
-        "program": "${command:cmake.launchTargetPath}",
-        "pid": 137239, // replace pid with your real pid
-        // Ignore signal SIGUSR1
-        "postRunCommands": [
-            "pro hand -p true -s false SIGUSR1",
-            "pro hand -p true -s false SIGUSR2",
-        ],
-    },
-    {
-        "name": "(lldb) Debug core dump",
-        "type": "lldb",
-        "request": "custom",
-        "targetCreateCommands": [
-            "target create -c ${workspaceFolder}/core"
-        ],
-    }
-]
->>>>>>> 1815c19b7e... [WebRTC] Fix potential deadlock in participant cleanup.
 }

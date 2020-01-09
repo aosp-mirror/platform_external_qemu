@@ -1,15 +1,12 @@
 
-#include <rtc_base/third_party/sigslot/sigslot.h>  // for has_slots
-#include <stdint.h>                                // for uint64_t
-#include <memory>                                  // for unique_ptr
-#include <mutex>                                   // for condition_variable
+#include <rtc_base/nethelpers.h>
+#include <rtc_base/socketaddress.h>
 
-#include "emulator/net/AsyncSocketAdapter.h"       // for AsyncSocketAdapter
+#include <mutex>
+#include <condition_variable>
+#include <string>
 
-namespace rtc {
-class AsyncSocket;
-}  // namespace rtc
-
+#include "emulator/net/AsyncSocketAdapter.h"
 using rtc::AsyncSocket;
 
 namespace emulator {
