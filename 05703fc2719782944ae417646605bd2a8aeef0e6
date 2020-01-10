@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "83e1c7e4_40526a9b",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-01-10T18:10:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b17fba4_6784e2e8",
+      "range": {
+        "startLine": 267,
+        "startChar": 8,
+        "endLine": 267,
+        "endChar": 27
+      },
+      "revId": "05703fc2719782944ae417646605bd2a8aeef0e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af67c5b8_7c89198e",
         "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "05703fc2719782944ae417646605bd2a8aeef0e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8294be00_f96cd5c4",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-01-10T18:10:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af67c5b8_7c89198e",
+      "range": {
+        "startLine": 268,
+        "startChar": 13,
+        "endLine": 268,
+        "endChar": 23
+      },
+      "revId": "05703fc2719782944ae417646605bd2a8aeef0e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
