@@ -15,25 +15,86 @@ FROM debian:buster-slim AS osxcross-build
 
 # Install all the dependencies needed to compile osxcross.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        clang llvm-dev libxml2-dev uuid-dev cmake libc++1 git liblzma-dev \
+        software-properties-common curl gpg gpg-agent \
+         libxml2-dev uuid-dev cmake libc++1 git liblzma-dev \
         libssl-dev bash patch make tar xz-utils bzip2 gzip sed cpio libbz2-dev \
         zlib1g-dev python3 ca-certificates &&  git clone https://github.com/tpoechtrager/osxcross.git
+RUN curl https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+RUN add-apt-repository "deb http://apt.llvm.org/buster/   llvm-toolchain-buster-9  main" && apt-get update && \
+apt-get install -y clang-9 llvm-9 libc++1-9 llvm-9-dev
 
-# Make our git repo available.
+# Bind clang-9 --> clang
+RUN update-alternatives \
+    --install /usr/bin/clang                 clang                  /usr/bin/clang-9     20 \
+    --slave   /usr/bin/clang++               clang++                /usr/bin/clang++-9 && \
+    update-alternatives \
+    --install /usr/lib/llvm              llvm             /usr/lib/llvm-9  20 \
+    --slave   /usr/bin/llvm-config       llvm-config      /usr/bin/llvm-config-9  \
+    --slave   /usr/bin/llvm-ar           llvm-ar          /usr/bin/llvm-ar-9 \
+    --slave   /usr/bin/llvm-as           llvm-as          /usr/bin/llvm-as-9 \
+    --slave   /usr/bin/llvm-bcanalyzer   llvm-bcanalyzer  /usr/bin/llvm-bcanalyzer-9 \
+    --slave   /usr/bin/llvm-cov          llvm-cov         /usr/bin/llvm-cov-9 \
+    --slave   /usr/bin/llvm-diff         llvm-diff        /usr/bin/llvm-diff-9 \
+    --slave   /usr/bin/llvm-dis          llvm-dis         /usr/bin/llvm-dis-9 \
+    --slave   /usr/bin/llvm-dwarfdump    llvm-dwarfdump   /usr/bin/llvm-dwarfdump-9 \
+    --slave   /usr/bin/llvm-extract      llvm-extract     /usr/bin/llvm-extract-9 \
+    --slave   /usr/bin/llvm-link         llvm-link        /usr/bin/llvm-link-9 \
+    --slave   /usr/bin/llvm-mc           llvm-mc          /usr/bin/llvm-mc-9 \
+    --slave   /usr/bin/llvm-mcmarkup     llvm-mcmarkup    /usr/bin/llvm-mcmarkup-9 \
+    --slave   /usr/bin/llvm-nm           llvm-nm          /usr/bin/llvm-nm-9 \
+    --slave   /usr/bin/llvm-objdump      llvm-objdump     /usr/bin/llvm-objdump-9 \
+    --slave   /usr/bin/llvm-ranlib       llvm-ranlib      /usr/bin/llvm-ranlib-9 \
+    --slave   /usr/bin/llvm-readobj      llvm-readobj     /usr/bin/llvm-readobj-9 \
+    --slave   /usr/bin/llvm-rtdyld       llvm-rtdyld      /usr/bin/llvm-rtdyld-9 \
+    --slave   /usr/bin/llvm-size         llvm-size        /usr/bin/llvm-size-9 \
+    --slave   /usr/bin/llvm-stress       llvm-stress      /usr/bin/llvm-stress-9 \
+    --slave   /usr/bin/llvm-symbolizer   llvm-symbolizer  /usr/bin/llvm-symbolizer-9 \
+    --slave   /usr/bin/llvm-tblgen       llvm-tblgen      /usr/bin/llvm-tblgen-9
+
+# Make xcode distro available.
 COPY  xcode.xip /tmp/xcode.xip
 
 # Unpack it, and move the final tarball to the tarbalss directory
 RUN /osxcross/tools/gen_sdk_package_pbzx.sh /tmp/xcode.xip && mv /osxcross/*.xz /osxcross/tarballs
-
 # Now build the cross compiler.
-RUN cd /osxcross &&  { yes | ./build.sh; }
+ENV UNATTENDED=1
+RUN cd /osxcross && ./build.sh
 
 # Now we create the final debian container that only contains the compiler.
 FROM debian:buster-slim AS osxcross
 COPY --from=osxcross-build /osxcross/target/ /opt/osxcross
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libc++1 clang llvm
+        software-properties-common curl gpg gpg-agent
+RUN curl https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+RUN add-apt-repository "deb http://apt.llvm.org/buster/   llvm-toolchain-buster-9  main" && apt-get update && \
+    apt-get install -y --no-install-recommends libc++1-9 clang-9 llvm-9 && \
+    update-alternatives \
+    --install /usr/bin/clang                 clang                  /usr/bin/clang-9     20 \
+    --slave   /usr/bin/clang++               clang++                /usr/bin/clang++-9 && \
+    update-alternatives \
+    --install /usr/lib/llvm              llvm             /usr/lib/llvm-9  20 \
+    --slave   /usr/bin/llvm-config       llvm-config      /usr/bin/llvm-config-9  \
+    --slave   /usr/bin/llvm-ar           llvm-ar          /usr/bin/llvm-ar-9 \
+    --slave   /usr/bin/llvm-as           llvm-as          /usr/bin/llvm-as-9 \
+    --slave   /usr/bin/llvm-bcanalyzer   llvm-bcanalyzer  /usr/bin/llvm-bcanalyzer-9 \
+    --slave   /usr/bin/llvm-cov          llvm-cov         /usr/bin/llvm-cov-9 \
+    --slave   /usr/bin/llvm-diff         llvm-diff        /usr/bin/llvm-diff-9 \
+    --slave   /usr/bin/llvm-dis          llvm-dis         /usr/bin/llvm-dis-9 \
+    --slave   /usr/bin/llvm-dwarfdump    llvm-dwarfdump   /usr/bin/llvm-dwarfdump-9 \
+    --slave   /usr/bin/llvm-extract      llvm-extract     /usr/bin/llvm-extract-9 \
+    --slave   /usr/bin/llvm-link         llvm-link        /usr/bin/llvm-link-9 \
+    --slave   /usr/bin/llvm-mc           llvm-mc          /usr/bin/llvm-mc-9 \
+    --slave   /usr/bin/llvm-mcmarkup     llvm-mcmarkup    /usr/bin/llvm-mcmarkup-9 \
+    --slave   /usr/bin/llvm-nm           llvm-nm          /usr/bin/llvm-nm-9 \
+    --slave   /usr/bin/llvm-objdump      llvm-objdump     /usr/bin/llvm-objdump-9 \
+    --slave   /usr/bin/llvm-ranlib       llvm-ranlib      /usr/bin/llvm-ranlib-9 \
+    --slave   /usr/bin/llvm-readobj      llvm-readobj     /usr/bin/llvm-readobj-9 \
+    --slave   /usr/bin/llvm-rtdyld       llvm-rtdyld      /usr/bin/llvm-rtdyld-9 \
+    --slave   /usr/bin/llvm-size         llvm-size        /usr/bin/llvm-size-9 \
+    --slave   /usr/bin/llvm-stress       llvm-stress      /usr/bin/llvm-stress-9 \
+    --slave   /usr/bin/llvm-symbolizer   llvm-symbolizer  /usr/bin/llvm-symbolizer-9 \
+    --slave   /usr/bin/llvm-tblgen       llvm-tblgen      /usr/bin/llvm-tblgen-9
+
 ENV PATH="${PATH}:/opt/osxcross/bin"
 ENV LD_LIBRARY_PATH=/opt/osxcross/lib
-RUN tar cvf /opt/osxcross.tar.gz /opt/osxcross
 

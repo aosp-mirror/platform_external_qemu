@@ -36,13 +36,21 @@ if(NOT APPLE)
   set(CMAKE_SYSTEM_NAME "Darwin")
   string(REGEX REPLACE "-.*" "" CMAKE_SYSTEM_PROCESSOR "${OSXCROSS_HOST}")
 
+  # Detect sdk version
   foreach(sdk_version 10.13 10.14 10.15)
     if(EXISTS "${OSXCROSS_TARGET_DIR}/SDK/MacOSX${sdk_version}.sdk")
         set(CMAKE_OSX_DEPLOYMENT_TARGET ${sdk_version})
     endif()
   endforeach()
 
-  message(STATUS "Using MacOS SDK ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+  # Detect cross compiler name, needed for linker config.
+  foreach(darwin_ver 16 17 18 19)
+    if(EXISTS "${OSXCROSS_TARGET_DIR}/bin/x86_64-apple-darwin${darwin_ver}-clang")
+       set(OSXCROSS_HOST x86_64-apple-darwin${darwin_ver})
+    endif()
+  endforeach()
+
+  message(STATUS "Using MacOS SDK ${CMAKE_OSX_DEPLOYMENT_TARGET}, and compiler host ${OSXCROSS_HOST}")
   # specify the cross compiler
   set(CMAKE_C_COMPILER "${OSXCROSS_TARGET_DIR}/bin/o64-clang")
   set(CMAKE_CXX_COMPILER "${OSXCROSS_TARGET_DIR}/bin/o64-clang++")

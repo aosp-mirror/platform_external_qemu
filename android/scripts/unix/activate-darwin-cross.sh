@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,16 @@ PROGRAM_DESCRIPTION=\
  you can go to go/xcode to find more information about how to obtain xcode, or obtain
  it directly from Apple: https://developer.apple.com/download/more.
 
- This requires that you have docker installed if you need to build the cross compiler.
+ You must also have access to llvm-9/clang-9. If you do not have those packages update your
+ apt repo by following the steps here:
+
+ https://apt.llvm.org/.
+
+ Or if you feel couragous:
+
+ wget https://apt.llvm.org/llvm.sh
+ chmod +x llvm.sh
+ sudo ./llvm.sh 9
 "
 
 OPT_XCODE=
@@ -63,12 +72,15 @@ function approve() {
 option_parse "$@"
 
 echo "${RED}This file will build xcode in a docker container, and install the cross tools in /opt/osxcross"
-echo "It will copy over the /opt/osxcross/lib director to /usr/lib${RESET}"
+echo "The cross toolchain requires llvm-9 to be installed. if it is not available you might need to follow"
+echo "the steps given here: https://apt.llvm.org/"
+echo "It will copy over the /opt/osxcross/lib directory to /usr/lib${RESET}"
 approve
 
 
 
 function build_sdk() {
+    run rm -rf /tmp/xcode-build /tmp/osxcross
     run mkdir -p /tmp/xcode-build
     run mkdir -p /tmp/osxcross
     run cp $OPT_XCODE /tmp/xcode-build/xcode.xip
@@ -88,10 +100,39 @@ if [ -z $OPT_CROSS_TAR ]; then
     build_sdk
 fi
 
-# We currently use the clang-7 backend..
-run sudo apt-get install -y --no-install-recommends llvm-7 clang-7
+# We currently use the clang-9 backend..
+run sudo apt-get install -y  llvm-9-dev clang-9 llvm-9
+run sudo rm -rf /opt/osxcross/
 run sudo mkdir -p /opt/osxcross
 run sudo chmod a+rwx /opt/osxcross
-run tar xzf ${OPT_CROSS_TAR}
+run tar xzf ${OPT_CROSS_TAR} -C /opt/osxcross
+# Bind clang-9 --> clang
+run sudo update-alternatives \
+    --install /usr/bin/clang                 clang                  /usr/bin/clang-9     20 \
+    --slave   /usr/bin/clang++               clang++                /usr/bin/clang++-9
+run sudo update-alternatives \
+    --install /usr/lib/llvm              llvm             /usr/lib/llvm-9  20 \
+    --slave   /usr/bin/llvm-config       llvm-config      /usr/bin/llvm-config-9  \
+    --slave   /usr/bin/llvm-ar           llvm-ar          /usr/bin/llvm-ar-9 \
+    --slave   /usr/bin/llvm-as           llvm-as          /usr/bin/llvm-as-9 \
+    --slave   /usr/bin/llvm-bcanalyzer   llvm-bcanalyzer  /usr/bin/llvm-bcanalyzer-9 \
+    --slave   /usr/bin/llvm-cov          llvm-cov         /usr/bin/llvm-cov-9 \
+    --slave   /usr/bin/llvm-diff         llvm-diff        /usr/bin/llvm-diff-9 \
+    --slave   /usr/bin/llvm-dis          llvm-dis         /usr/bin/llvm-dis-9 \
+    --slave   /usr/bin/llvm-dwarfdump    llvm-dwarfdump   /usr/bin/llvm-dwarfdump-9 \
+    --slave   /usr/bin/llvm-extract      llvm-extract     /usr/bin/llvm-extract-9 \
+    --slave   /usr/bin/llvm-link         llvm-link        /usr/bin/llvm-link-9 \
+    --slave   /usr/bin/llvm-mc           llvm-mc          /usr/bin/llvm-mc-9 \
+    --slave   /usr/bin/llvm-mcmarkup     llvm-mcmarkup    /usr/bin/llvm-mcmarkup-9 \
+    --slave   /usr/bin/llvm-nm           llvm-nm          /usr/bin/llvm-nm-9 \
+    --slave   /usr/bin/llvm-objdump      llvm-objdump     /usr/bin/llvm-objdump-9 \
+    --slave   /usr/bin/llvm-ranlib       llvm-ranlib      /usr/bin/llvm-ranlib-9 \
+    --slave   /usr/bin/llvm-readobj      llvm-readobj     /usr/bin/llvm-readobj-9 \
+    --slave   /usr/bin/llvm-rtdyld       llvm-rtdyld      /usr/bin/llvm-rtdyld-9 \
+    --slave   /usr/bin/llvm-size         llvm-size        /usr/bin/llvm-size-9 \
+    --slave   /usr/bin/llvm-stress       llvm-stress      /usr/bin/llvm-stress-9 \
+    --slave   /usr/bin/llvm-symbolizer   llvm-symbolizer  /usr/bin/llvm-symbolizer-9 \
+    --slave   /usr/bin/llvm-tblgen       llvm-tblgen      /usr/bin/llvm-tblgen-9
+
 run sudo rsync -a /opt/osxcross/osxcross/lib/* /usr/lib
 run sudo ldconfig
