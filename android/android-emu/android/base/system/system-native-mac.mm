@@ -16,7 +16,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOBSD.h>
 #include <IOKit/IOKitLib.h>
-#include <IOKit/Kext/KextManager.h>
+
+#include <IOKit/kext/KextManager.h>
 #include <IOKit/storage/IOBlockStorageDevice.h>
 
 #import <Foundation/Foundation.h>

@@ -91,6 +91,7 @@ def configure():
     # Configure..
     cmake_cmd = [get_cmake(), '-B%s' % FLAGS.out]
 
+
     # Setup the right toolchain/compiler configuration.
     cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
@@ -136,8 +137,10 @@ def configure():
 def get_build_cmd():
     '''Gets the command that will build all the sources.'''
     target = 'install'
-    # Stripping is meaning less in windows world.
-    if (FLAGS.crash != 'none' or FLAGS.strip != 'none') and platform.system().lower() != 'windows':
+    cross_compile = platform.system().lower() != FLAGS.target
+
+    # Stripping is meaning less in windows world, or when we are cross compiling.
+    if (FLAGS.crash != 'none' or FLAGS.strip != 'none') and (platform.system().lower() != 'windows' and not cross_compile):
         target += '/strip'
     return [get_cmake(), '--build', FLAGS.out, '--target', target]
 
@@ -159,7 +162,11 @@ def main(argv=None):
 
     # Test.
     if FLAGS.tests:
-        run_tests(FLAGS.out, FLAGS.test_jobs)
+        cross_compile = platform.system().lower() != FLAGS.target
+        if not cross_compile:
+            run_tests(FLAGS.out, FLAGS.test_jobs)
+        else:
+            logging.info("Not running tests for cross compile.")
 
     # Create a distribution if needed.
     if FLAGS.dist:
