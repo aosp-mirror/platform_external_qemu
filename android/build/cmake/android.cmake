@@ -338,8 +338,9 @@ endfunction()
 function(android_add_test name)
   android_add_executable(${name})
 
-  # We cannot run tests when we are cross compiling
-  if(CROSSCOMPILE)
+  # We cannot run tests when we are cross compiling, and for mingw
+  # it is very expensive.
+  if(WINDOWS_X86_64)
     # Only build them when user explicitly asks for it.
     set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     return()
