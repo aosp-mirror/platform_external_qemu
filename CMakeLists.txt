@@ -104,7 +104,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
   add_c_flag("-O0 -g3")
 
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"  AND NOT CROSSCOMPILE)
     if(NOT OPTION_ASAN AND OPTION_ASAN_IN_DEBUG)
       set(OPTION_ASAN address)
     endif()

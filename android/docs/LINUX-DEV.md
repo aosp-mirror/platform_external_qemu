@@ -165,6 +165,27 @@ If all went well you can now target windows as follows:
 
     ./android/rebuild.sh --target windows
 
+### Cross compiling to Darwin with clang-cl
+
+***It is higly recommended to use a mac for mac development, vs cross compilation.***
+
+It is possible to cross compile from linux to mac os. This is mainly useful to quickly discover compilation issues, as you will not be able to actually run the code.
+
+The windows target requires you to install the a cross compilers. These libraries need manual intervention to be installed on your linux machine. You will need to
+obtain a xcode.xip with MacOS-SDK (10.13-10.15) (Xcode 11.3 has been tested). You can obtain it from [go/xcode](http://go/xcode) if you're within Google or from
+[Apple](https://developer.apple.com/download/more.).
+
+Once you have obtained the .xip you can create the toolchain as follows:
+
+```sh
+  ./android/scripts/unix/activate-darwin-cross.sh --xcode=/data/.../Xcode_11.3.xip
+```
+
+After that succeeds you should be able to target darwin:
+
+    ./android/rebuild.sh --target darwin
+
+
 ### Sending patches
 
 Here you can find details on [submitting patches](
