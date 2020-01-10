@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "482d0cd7_737c695e",
+        "filename": "android/build/python/aemu/cmake.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-01-10T00:50:41Z",
+      "side": 1,
+      "message": "nit: extra line",
+      "revId": "f06c684e17a7f68cb61d30d75bc5ea0e0c0575e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
