@@ -41,6 +41,11 @@ extern "C" {
 #define VGPLOG(fmt,...)
 #endif
 
+#define VGP_FATAL(fmt,...) do { \
+    fprintf(stderr, "virto-goldfish-pipe fatal error: %s:%d: " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
+    abort(); \
+} while(0);
+
 #ifdef VIRTIO_GOLDFISH_EXPORT_API
 
 #ifdef _WIN32
@@ -134,10 +139,9 @@ extern "C" {
 // The resource object itself is currently backed via plain guest RAM, which
 // can be physically not-contiguous from the guest POV, and therefore
 // corresponds to a possibly-long list of pointers and sizes (iov) on the host
-// side. The sync_iovec_to_linear and sync_linear_to_iovec helper functions
-// convert the list of pointers to one contiguous buffer on the host, at the
-// cost of a copy.  (TODO: see if we can use host coherent memory to do away
-// with the copy).
+// side. The sync_iov helper function converts convert the list of pointers
+// to one contiguous buffer on the host (or vice versa), at the cost of a copy.
+// (TODO: see if we can use host coherent memory to do away with the copy).
 //
 // We can see this abstraction in use via the implementation of
 // transferWriteIov and transferReadIov below, which sync the iovec to/from a
@@ -200,101 +204,88 @@ static inline uint32_t virgl_format_to_bpp(uint32_t format) {
     return bpp;
 }
 
-static int sync_linear_to_iovec(PipeResEntry* res, uint64_t offset, const virgl_box* box) {
+enum IovSyncDir {
+    IOV_TO_LINEAR = 0,
+    LINEAR_TO_IOV = 1,
+};
 
-    uint32_t bpp = virgl_format_to_bpp(res->args.format);
+static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, IovSyncDir dir) {
+    // precondition: format is already R8 and bpp is 1
+    if (res->args.format != VIRGL_FORMAT_R8_UNORM) {
+        VGP_FATAL("Must use R8 format");
+    }
 
     VGPLOG("offset: 0x%llx box: %u %u %u %u res bpp %u size %u x %u iovs %u linearSize %zu",
             (unsigned long long)offset,
             box->x, box->y, box->w, box->h,
-            bpp, res->args.width, res->args.height,
+            1, res->args.width, res->args.height,
             res->numIovs,
             res->linearSize);
 
-    if (box->x > res->args.width || box->y > res->args.height)
-        return 0;
-    if (box->w == 0U || box->h == 0U)
-        return 0;
-    uint32_t w = std::min(box->w, res->args.width - box->x);
-    uint32_t h = std::min(box->h, res->args.height - box->y);
-    uint32_t stride = align_up(res->args.width * bpp, 16U);
-    offset += box->y * stride + box->x * bpp;
-    // height - 1 in order to treat the (w * bpp) row specially
-    // (i.e., the last row does not occupy the full stride)
-    size_t length = (h - 1U) * stride + w * bpp;
-    if (offset + length > res->linearSize)
-        return EINVAL;
-
-    const char* linear = static_cast<const char*>(res->linear);
-    for (uint32_t i = 0, iovOffset = 0U; length && i < res->numIovs; i++) {
-        if (iovOffset + res->iov[i].iov_len > offset) {
-            char* iov_base = static_cast<char*>(res->iov[i].iov_base);
-            size_t copyLength = std::min(length, res->iov[i].iov_len);
-            memcpy(iov_base + offset - iovOffset, linear, copyLength);
-            VGPLOG("first word of iovbase %p: 0x%x", iov_base, *(uint32_t*)iov_base);
-            linear += copyLength;
-            offset += copyLength;
-            length -= copyLength;
-        }
-        iovOffset += res->iov[i].iov_len;
+    if (box->x > res->args.width || box->y > res->args.height) {
+        VGP_FATAL("Box out of range of resource");
+    }
+    if (box->w == 0U || box->h == 0U) {
+        VGP_FATAL("Empty transfer");
+    }
+    if (box->x + box->w > res->args.width) {
+        VGP_FATAL("Box overflows resource width");
     }
 
-    return 0;
-}
-
-static int sync_iovec_to_linear(PipeResEntry* res, uint64_t offset, const virgl_box* box) {
-    uint32_t bpp = virgl_format_to_bpp(res->args.format);
-
-    VGPLOG("offset: 0x%llx box: %u %u %u %u res bpp %u size %u x %u iovs %u linearSize %zu",
-            (unsigned long long)offset,
-            box->x, box->y, box->w, box->h,
-            bpp, res->args.width, res->args.height,
-            res->numIovs,
-            res->linearSize);
-
-    if (box->x > res->args.width || box->y > res->args.height)
-        return 0;
-    if (box->w == 0U || box->h == 0U)
-        return 0;
-    uint32_t w = std::min(box->w, res->args.width - box->x);
-    uint32_t h = std::min(box->h, res->args.height - box->y);
-    uint32_t stride = align_up(res->args.width * bpp, 16U);
-    VGPLOG("stride: %u", stride);
-    offset += box->y * stride + box->x * bpp;
-    VGPLOG("offset: %u", (uint32_t)offset);
+    uint32_t w = box->w;
+    uint32_t h = box->h;
+    uint32_t stride = res->args.width;
+    size_t linearBase = box->y * stride + box->x;
+    size_t start = box->y * stride + box->x;
     // height - 1 in order to treat the (w * bpp) row specially
     // (i.e., the last row does not occupy the full stride)
-    size_t length = (h - 1U) * stride + w * bpp;
-    if (offset + length > res->linearSize) {
-        VGPLOG("offset + length overflows! linearSize %zu, offset %zu length %zu (wanted %zu)",
-               res->linearSize, offset, length, offset + length);
-        abort();
-        return EINVAL;
+    size_t length = (h - 1U) * stride + w;
+    size_t end = start + length;
+
+    if (end > res->linearSize) {
+        VGP_FATAL("start + length overflows! linearSize %zu, start %zu length %zu (wanted %zu)",
+                  res->linearSize, start, length, start + length);
     }
 
+    uint32_t iovIndex = 0;
+    size_t iovOffset = 0;
+    bool first = true;
+    size_t written = 0;
     char* linear = static_cast<char*>(res->linear);
 
-    for (uint32_t i = 0, iovOffset = 0U; length && i < res->numIovs; i++) {
-        VGPLOG("i: %u", i);
-        if (iovOffset + res->iov[i].iov_len > offset) {
-            const char* iov_base = static_cast<const char*>(res->iov[i].iov_base);
-            VGPLOG("first word of iov base %p: 0x%x iovlen: %zu",
-                    iov_base,
-                    *(uint32_t*)iov_base,
-                    (size_t)(res->iov[i].iov_len));
-            size_t copyLength = std::min(length, res->iov[i].iov_len);
-            VGPLOG("copylen: %zu off: %zu iovoff: %u. copy: %p -> %p", copyLength, offset, iovOffset,
-                    iov_base + offset - iovOffset,
-                    linear);
-            memcpy(linear, iov_base + offset - iovOffset, copyLength);
-            VGPLOG("first word of linear %p: 0x%x",
-                    linear,
-                    *(uint32_t*)linear);
-            linear += copyLength;
-            offset += copyLength;
-            length -= copyLength;
+    while (written < w) {
+
+        if (iovIndex >= res->numIovs) {
+            VGP_FATAL("write request overflowed numIovs");
         }
-        iovOffset += res->iov[i].iov_len;
+
+        const char* iovBase_const = static_cast<const char*>(res->iov[iovIndex].iov_base);
+        char* iovBase = static_cast<char*>(res->iov[iovIndex].iov_base);
+        size_t iovLen = res->iov[iovIndex].iov_len;
+        size_t iovOffsetEnd = iovOffset + iovLen;
+
+        auto lower_intersect = std::max(iovOffset, start);
+        auto upper_intersect = std::min(iovOffsetEnd, end);
+        if (lower_intersect < upper_intersect) {
+            size_t toWrite = upper_intersect - lower_intersect;
+            switch (dir) {
+                case IOV_TO_LINEAR:
+                    memcpy(linear + lower_intersect,
+                           iovBase_const + lower_intersect - iovOffset,
+                           toWrite);
+                    break;
+                case LINEAR_TO_IOV:
+                    memcpy(iovBase + lower_intersect - iovOffset,
+                           linear + lower_intersect,
+                           toWrite);
+                    break;
+                default:
+                    VGP_FATAL("Invalid sync dir: %d", dir);
+            }
+            written += toWrite;
+        }
+        ++iovIndex;
+        iovOffset += iovLen;
     }
 
     return 0;
@@ -559,12 +550,13 @@ public:
 
         auto ops = ensureAndGetServiceOps();
 
-        size_t readBytes = (size_t)box->x;
+        size_t readBytes = 0;
         size_t wantedBytes = readBytes + (size_t)box->w;
 
         while (readBytes < wantedBytes) {
             GoldfishPipeBuffer buf = {
-                ((char*)entry.linear) + readBytes, wantedBytes - readBytes,
+                ((char*)entry.linear) + box->x + readBytes,
+                wantedBytes - readBytes,
             };
             auto status = ops->guest_recv(hostPipe, &buf, 1);
 
@@ -577,7 +569,7 @@ public:
 
         VGPLOG("Linear first word: %d", *(int*)(entry.linear));
 
-        auto syncRes = sync_linear_to_iovec(&entry, offset, box);
+        auto syncRes = sync_iov(&entry, offset, box, LINEAR_TO_IOV);
         mLastSubmitCmdCtxExists = true;
         mLastSubmitCmdCtx = entry.ctxId;
 
@@ -594,7 +586,7 @@ public:
         if (it == mResources.end()) return EINVAL;
 
         auto& entry = it->second;
-        auto syncRes = sync_iovec_to_linear(&entry, offset, box);
+        auto syncRes = sync_iov(&entry, offset, box, IOV_TO_LINEAR);
 
         // Do the pipe service op here, if there is an associated hostpipe.
         auto hostPipe = entry.hostPipe;
@@ -609,11 +601,12 @@ public:
         auto ops = ensureAndGetServiceOps();
 
         size_t writtenBytes = 0;
-        size_t wantedBytes = writtenBytes + (size_t)box->w;
+        size_t wantedBytes = (size_t)box->w;
 
         while (writtenBytes < wantedBytes) {
             GoldfishPipeBuffer buf = {
-                ((char*)entry.linear) + writtenBytes, wantedBytes - writtenBytes,
+                ((char*)entry.linear) + box->x + writtenBytes,
+                wantedBytes - writtenBytes,
             };
             auto status = ops->guest_send(hostPipe, &buf, 1);
 
