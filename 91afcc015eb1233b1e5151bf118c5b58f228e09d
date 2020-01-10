@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a17ec01_040a9207",
+        "filename": "android/android-emu/android/base/memory/MemoryTracker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-01-10T00:21:57Z",
+      "side": 1,
+      "message": "Is there a reason we pass strings by value? Seems not very useful.",
+      "range": {
+        "startLine": 212,
+        "startChar": 25,
+        "endLine": 212,
+        "endChar": 31
+      },
+      "revId": "91afcc015eb1233b1e5151bf118c5b58f228e09d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
