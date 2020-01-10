@@ -30,7 +30,16 @@ PROGRAM_DESCRIPTION=\
  you can go to go/xcode to find more information about how to obtain xcode, or obtain
  it directly from Apple: https://developer.apple.com/download/more.
 
- This requires that you have docker installed if you need to build the cross compiler.
+ You must also have access to llvm-9/clang-9. If you do not have those packages update your
+ apt repo by following the steps here:
+
+ https://apt.llvm.org/.
+
+ Or if you feel couragous:
+
+ wget https://apt.llvm.org/llvm.sh
+ chmod +x llvm.sh
+ sudo ./llvm.sh 9
 "
 
 OPT_XCODE=
@@ -63,12 +72,15 @@ function approve() {
 option_parse "$@"
 
 echo "${RED}This file will build xcode in a docker container, and install the cross tools in /opt/osxcross"
-echo "It will copy over the /opt/osxcross/lib director to /usr/lib${RESET}"
+echo "The cross toolchain requires llvm-9 to be installed. if it is not available you might need to follow"
+echo "the steps given here: https://apt.llvm.org/"
+echo "It will copy over the /opt/osxcross/lib directory to /usr/lib${RESET}"
 approve
 
 
 
 function build_sdk() {
+    run rm -rf /tmp/xcode-build /tmp/osxcross
     run mkdir -p /tmp/xcode-build
     run mkdir -p /tmp/osxcross
     run cp $OPT_XCODE /tmp/xcode-build/xcode.xip
@@ -88,10 +100,10 @@ if [ -z $OPT_CROSS_TAR ]; then
     build_sdk
 fi
 
-# We currently use the clang-7 backend..
-run sudo apt-get install -y --no-install-recommends llvm-7 clang-7
+# We currently use the clang-9 backend..
+run sudo apt-get install -y --no-install-recommends llvm-9 clang-9 libc++1-9
 run sudo mkdir -p /opt/osxcross
 run sudo chmod a+rwx /opt/osxcross
-run tar xzf ${OPT_CROSS_TAR}
+run tar xzf ${OPT_CROSS_TAR} -C /opt/osxcross
 run sudo rsync -a /opt/osxcross/osxcross/lib/* /usr/lib
 run sudo ldconfig
