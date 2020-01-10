@@ -1422,8 +1422,7 @@ message EmulatorFeatureFlagState {
     YUV420_888_to_NV21 = 51;
     YUV_Cache = 52;
     KEYCODE_FORWARDING = 53;
-    CAMERA_V1 = 54;
-    // Next tag: 55
+    // Next tag: 54
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
