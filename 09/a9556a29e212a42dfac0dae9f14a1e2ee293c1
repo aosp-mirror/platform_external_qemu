@@ -1,0 +1,7 @@
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Submitted-by: Huan Song <huans@google.com>
+Submitted-at: Fri, 10 Jan 2020 17:45:30 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1204005
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
