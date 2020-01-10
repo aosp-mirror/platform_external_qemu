@@ -3731,6 +3731,10 @@ do_crash_on_exit( ControlClient  client, char*  args )
 static int
 do_kill( ControlClient  client, char*  args )
 {
+    if (client->global->record_agent->getRecorderState() == RECORDER_RECORDING) {
+        D(("Stopping the recording ...\n"));
+        client->global->record_agent->stopRecording();
+    }
     control_write( client, "OK: killing emulator, bye bye\r\n" );
     DINIT("Emulator killed by console kill command.\n");
     fflush(stdout);
