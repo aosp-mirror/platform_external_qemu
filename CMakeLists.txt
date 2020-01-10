@@ -42,6 +42,8 @@ endif()
 set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
 set(ANDROIDSTUDIO TRUE CACHE BOOL "True if we should build android studio components. Default on.")
 set(OPTION_MINBUILD FALSE CACHE BOOL "True if we should build a minimum set of components to support 64-bit guets only.")
+set(OPTION_TCMALLOC TRUE CACHE BOOL "True if we should use TCMalloc on its supported platforms (currently, linux).")
+set(OPTION_GFXSTREAM_BACKEND FALSE CACHE BOOL "True if we should build the gfxstream backend.")
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)

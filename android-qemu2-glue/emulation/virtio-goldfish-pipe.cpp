@@ -41,6 +41,25 @@ extern "C" {
 #define VGPLOG(fmt,...)
 #endif
 
+#define VGP_FATAL(fmt,...) do { \
+    fprintf(stderr, "virto-goldfish-pipe fatal error: %s:%d: " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
+    abort(); \
+} while(0);
+
+#ifdef VIRTIO_GOLDFISH_EXPORT_API
+
+#ifdef _WIN32
+#define VG_EXPORT __declspec(dllexport)
+#else
+#define VG_EXPORT __attribute__((visibility("default")))
+#endif
+
+#else
+
+#define VG_EXPORT
+
+#endif // !VIRTIO_GOLDFISH_EXPORT_API
+
 // Virtio Goldfish Pipe: Overview-----------------------------------------------
 //
 // Virtio Goldfish Pipe is meant for running goldfish pipe services with a
@@ -120,10 +139,9 @@ extern "C" {
 // The resource object itself is currently backed via plain guest RAM, which
 // can be physically not-contiguous from the guest POV, and therefore
 // corresponds to a possibly-long list of pointers and sizes (iov) on the host
-// side. The sync_iovec_to_linear and sync_linear_to_iovec helper functions
-// convert the list of pointers to one contiguous buffer on the host, at the
-// cost of a copy.  (TODO: see if we can use host coherent memory to do away
-// with the copy).
+// side. The sync_iov helper function converts convert the list of pointers
+// to one contiguous buffer on the host (or vice versa), at the cost of a copy.
+// (TODO: see if we can use host coherent memory to do away with the copy).
 //
 // We can see this abstraction in use via the implementation of
 // transferWriteIov and transferReadIov below, which sync the iovec to/from a
@@ -186,96 +204,88 @@ static inline uint32_t virgl_format_to_bpp(uint32_t format) {
     return bpp;
 }
 
-static int sync_linear_to_iovec(PipeResEntry* res, uint64_t offset, const virgl_box* box) {
+enum IovSyncDir {
+    IOV_TO_LINEAR = 0,
+    LINEAR_TO_IOV = 1,
+};
 
-    uint32_t bpp = virgl_format_to_bpp(res->args.format);
-
-    VGPLOG("offset: 0x%llx box: %u %u %u %u res bpp %u size %u x %u iovs %u linearSize %zu",
-            (unsigned long long)offset,
-            box->x, box->y, box->w, box->h,
-            bpp, res->args.width, res->args.height,
-            res->numIovs,
-            res->linearSize);
-
-    if (box->x > res->args.width || box->y > res->args.height)
-        return 0;
-    if (box->w == 0U || box->h == 0U)
-        return 0;
-    uint32_t w = std::min(box->w, res->args.width - box->x);
-    uint32_t h = std::min(box->h, res->args.height - box->y);
-    uint32_t stride = align_up(res->args.width * bpp, 16U);
-    offset += box->y * stride + box->x * bpp;
-    // height - 1 in order to treat the (w * bpp) row specially
-    // (i.e., the last row does not occupy the full stride)
-    size_t length = (h - 1U) * stride + w * bpp;
-    if (offset + length > res->linearSize)
-        return EINVAL;
-
-    const char* linear = static_cast<const char*>(res->linear);
-    for (uint32_t i = 0, iovOffset = 0U; length && i < res->numIovs; i++) {
-        if (iovOffset + res->iov[i].iov_len > offset) {
-            char* iov_base = static_cast<char*>(res->iov[i].iov_base);
-            size_t copyLength = std::min(length, res->iov[i].iov_len);
-            memcpy(iov_base + offset - iovOffset, linear, copyLength);
-            VGPLOG("first word of iovbase %p: 0x%x", iov_base, *(uint32_t*)iov_base);
-            linear += copyLength;
-            offset += copyLength;
-            length -= copyLength;
-        }
-        iovOffset += res->iov[i].iov_len;
+static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, IovSyncDir dir) {
+    // precondition: format is already R8 and bpp is 1
+    if (res->args.format != VIRGL_FORMAT_R8_UNORM) {
+        VGP_FATAL("Must use R8 format");
     }
 
-    return 0;
-}
-
-static int sync_iovec_to_linear(PipeResEntry* res, uint64_t offset, const virgl_box* box) {
-    uint32_t bpp = virgl_format_to_bpp(res->args.format);
-
     VGPLOG("offset: 0x%llx box: %u %u %u %u res bpp %u size %u x %u iovs %u linearSize %zu",
             (unsigned long long)offset,
             box->x, box->y, box->w, box->h,
-            bpp, res->args.width, res->args.height,
+            1, res->args.width, res->args.height,
             res->numIovs,
             res->linearSize);
 
-    if (box->x > res->args.width || box->y > res->args.height)
-        return 0;
-    if (box->w == 0U || box->h == 0U)
-        return 0;
-    uint32_t w = std::min(box->w, res->args.width - box->x);
-    uint32_t h = std::min(box->h, res->args.height - box->y);
-    uint32_t stride = align_up(res->args.width * bpp, 16U);
-    VGPLOG("stride: %u", stride);
-    offset += box->y * stride + box->x * bpp;
-    VGPLOG("offset: %u", (uint32_t)offset);
+    if (box->x > res->args.width || box->y > res->args.height) {
+        VGP_FATAL("Box out of range of resource");
+    }
+    if (box->w == 0U || box->h == 0U) {
+        VGP_FATAL("Empty transfer");
+    }
+    if (box->x + box->w > res->args.width) {
+        VGP_FATAL("Box overflows resource width");
+    }
+
+    uint32_t w = box->w;
+    uint32_t h = box->h;
+    uint32_t stride = res->args.width;
+    size_t linearBase = box->y * stride + box->x;
+    size_t start = box->y * stride + box->x;
     // height - 1 in order to treat the (w * bpp) row specially
     // (i.e., the last row does not occupy the full stride)
-    size_t length = (h - 1U) * stride + w * bpp;
-    if (offset + length > res->linearSize)
-        return EINVAL;
+    size_t length = (h - 1U) * stride + w;
+    size_t end = start + length;
 
+    if (end > res->linearSize) {
+        VGP_FATAL("start + length overflows! linearSize %zu, start %zu length %zu (wanted %zu)",
+                  res->linearSize, start, length, start + length);
+    }
+
+    uint32_t iovIndex = 0;
+    size_t iovOffset = 0;
+    bool first = true;
+    size_t written = 0;
     char* linear = static_cast<char*>(res->linear);
-    for (uint32_t i = 0, iovOffset = 0U; length && i < res->numIovs; i++) {
-        VGPLOG("i: %u", i);
-        if (iovOffset + res->iov[i].iov_len > offset) {
-            const char* iov_base = static_cast<const char*>(res->iov[i].iov_base);
-            VGPLOG("first word of iov base %p: 0x%x iovlen: %zu",
-                    iov_base,
-                    *(uint32_t*)iov_base,
-                    (size_t)(res->iov[i].iov_len));
-            size_t copyLength = std::min(length, res->iov[i].iov_len);
-            VGPLOG("copylen: %zu off: %zu iovoff: %u. copy: %p -> %p", copyLength, offset, iovOffset,
-                    iov_base + offset - iovOffset,
-                    linear);
-            memcpy(linear, iov_base + offset - iovOffset, copyLength);
-            VGPLOG("first word of linear %p: 0x%x",
-                    linear,
-                    *(uint32_t*)linear);
-            linear += copyLength;
-            offset += copyLength;
-            length -= copyLength;
+
+    while (written < w) {
+
+        if (iovIndex >= res->numIovs) {
+            VGP_FATAL("write request overflowed numIovs");
         }
-        iovOffset += res->iov[i].iov_len;
+
+        const char* iovBase_const = static_cast<const char*>(res->iov[iovIndex].iov_base);
+        char* iovBase = static_cast<char*>(res->iov[iovIndex].iov_base);
+        size_t iovLen = res->iov[iovIndex].iov_len;
+        size_t iovOffsetEnd = iovOffset + iovLen;
+
+        auto lower_intersect = std::max(iovOffset, start);
+        auto upper_intersect = std::min(iovOffsetEnd, end);
+        if (lower_intersect < upper_intersect) {
+            size_t toWrite = upper_intersect - lower_intersect;
+            switch (dir) {
+                case IOV_TO_LINEAR:
+                    memcpy(linear + lower_intersect,
+                           iovBase_const + lower_intersect - iovOffset,
+                           toWrite);
+                    break;
+                case LINEAR_TO_IOV:
+                    memcpy(iovBase + lower_intersect - iovOffset,
+                           linear + lower_intersect,
+                           toWrite);
+                    break;
+                default:
+                    VGP_FATAL("Invalid sync dir: %d", dir);
+            }
+            written += toWrite;
+        }
+        ++iovIndex;
+        iovOffset += iovLen;
     }
 
     return 0;
@@ -290,6 +300,7 @@ public:
         VGPLOG("cookie: %p", cookie);
         mCookie = cookie;
         mVirglRendererCallbacks = *callbacks;
+        VGPLOG("done");
         return 0;
     }
 
@@ -421,6 +432,7 @@ public:
         for (auto fence : mFenceDeque) {
             VGPLOG("write fence: %u", fence);
             mVirglRendererCallbacks.write_fence(mCookie, fence);
+            VGPLOG("write fence: %u (done with callback)", fence);
         }
         mFenceDeque.clear();
         VGPLOG("end");
@@ -465,6 +477,12 @@ public:
             free(entry.linear);
             entry.linear = nullptr;
         }
+
+        if (entry.iov) {
+            free(entry.iov);
+            entry.iov = nullptr;
+            entry.numIovs = 0;
+        }
     }
 
     int attachIov(int resId, iovec* iov, int num_iovs) {
@@ -500,11 +518,13 @@ public:
 
         entry.numIovs = 0;
 
+        if (entry.iov) free(entry.iov);
+        entry.iov = nullptr;
+
         if (iov) {
             *iov = entry.iov;
         }
 
-        entry.iov = nullptr;
         allocResource(entry, entry.iov, entry.numIovs);
         VGPLOG("done");
     }
@@ -530,12 +550,13 @@ public:
 
         auto ops = ensureAndGetServiceOps();
 
-        size_t readBytes = (size_t)box->x;
+        size_t readBytes = 0;
         size_t wantedBytes = readBytes + (size_t)box->w;
 
         while (readBytes < wantedBytes) {
             GoldfishPipeBuffer buf = {
-                ((char*)entry.linear) + readBytes, wantedBytes - readBytes,
+                ((char*)entry.linear) + box->x + readBytes,
+                wantedBytes - readBytes,
             };
             auto status = ops->guest_recv(hostPipe, &buf, 1);
 
@@ -548,7 +569,7 @@ public:
 
         VGPLOG("Linear first word: %d", *(int*)(entry.linear));
 
-        auto syncRes = sync_linear_to_iovec(&entry, offset, box);
+        auto syncRes = sync_iov(&entry, offset, box, LINEAR_TO_IOV);
         mLastSubmitCmdCtxExists = true;
         mLastSubmitCmdCtx = entry.ctxId;
 
@@ -565,23 +586,27 @@ public:
         if (it == mResources.end()) return EINVAL;
 
         auto& entry = it->second;
-        auto syncRes = sync_iovec_to_linear(&entry, offset, box);
+        auto syncRes = sync_iov(&entry, offset, box, IOV_TO_LINEAR);
 
         // Do the pipe service op here, if there is an associated hostpipe.
         auto hostPipe = entry.hostPipe;
-        if (!hostPipe) return syncRes;
+        if (!hostPipe) {
+            VGPLOG("No hostPipe");
+            return syncRes;
+        }
 
         VGPLOG("resid: %d offset: 0x%llx hostpipe: %p", resId,
                (unsigned long long)offset, hostPipe);
 
         auto ops = ensureAndGetServiceOps();
 
-        size_t writtenBytes = (size_t)box->x;
-        size_t wantedBytes = writtenBytes + (size_t)box->w;
+        size_t writtenBytes = 0;
+        size_t wantedBytes = (size_t)box->w;
 
         while (writtenBytes < wantedBytes) {
             GoldfishPipeBuffer buf = {
-                ((char*)entry.linear) + writtenBytes, wantedBytes - writtenBytes,
+                ((char*)entry.linear) + box->x + writtenBytes,
+                wantedBytes - writtenBytes,
             };
             auto status = ops->guest_send(hostPipe, &buf, 1);
 
@@ -709,19 +734,17 @@ private:
 
         if (linearSize) linear = malloc(linearSize);
 
-        entry.iov = iov;
+        entry.iov = (iovec*)malloc(sizeof(*iov) * num_iovs);
         entry.numIovs = num_iovs;
+        memcpy(entry.iov, iov, num_iovs * sizeof(*iov));
         entry.linear = linear;
         entry.linearSize = linearSize;
-
-        memset(entry.linear, 0xff, entry.linearSize);
 
         virgl_box initbox;
         initbox.x = 0;
         initbox.y = 0;
         initbox.w = (uint32_t)linearSize;
         initbox.h = 1;
-        sync_linear_to_iovec(&entry, 0, &initbox);
     }
 
     void detachResourceLocked(uint32_t ctxId, uint32_t toUnrefId) {
@@ -780,48 +803,48 @@ static LazyInstance<PipeVirglRenderer> sRenderer = LAZY_INSTANCE_INIT;
 
 extern "C" {
 
-static int pipe_virgl_renderer_init(
+VG_EXPORT int pipe_virgl_renderer_init(
     void *cookie, int flags, struct virgl_renderer_callbacks *cb) {
     sRenderer->init(cookie, flags, cb);
     return 0;
 }
 
-static void pipe_virgl_renderer_poll(void) {
+VG_EXPORT void pipe_virgl_renderer_poll(void) {
     sRenderer->poll();
 }
 
-static void* pipe_virgl_renderer_get_cursor_data(
+VG_EXPORT void* pipe_virgl_renderer_get_cursor_data(
     uint32_t resource_id, uint32_t *width, uint32_t *height) {
     return 0;
 }
 
-static int pipe_virgl_renderer_resource_create(
+VG_EXPORT int pipe_virgl_renderer_resource_create(
     struct virgl_renderer_resource_create_args *args,
     struct iovec *iov, uint32_t num_iovs) {
 
     return sRenderer->createResource(args, iov, num_iovs);
 }
 
-static void pipe_virgl_renderer_resource_unref(uint32_t res_handle) {
+VG_EXPORT void pipe_virgl_renderer_resource_unref(uint32_t res_handle) {
     sRenderer->unrefResource(res_handle);
 }
 
-static int pipe_virgl_renderer_context_create(
+VG_EXPORT int pipe_virgl_renderer_context_create(
     uint32_t handle, uint32_t nlen, const char *name) {
     return sRenderer->createContext(handle, nlen, name);
 }
 
-static void pipe_virgl_renderer_context_destroy(uint32_t handle) {
+VG_EXPORT void pipe_virgl_renderer_context_destroy(uint32_t handle) {
     sRenderer->destroyContext(handle);
 }
 
-static int pipe_virgl_renderer_submit_cmd(void *buffer,
+VG_EXPORT int pipe_virgl_renderer_submit_cmd(void *buffer,
                                           int ctx_id,
                                           int bytes) {
     return sRenderer->write(ctx_id, buffer, bytes);
 }
 
-static int pipe_virgl_renderer_transfer_read_iov(
+VG_EXPORT int pipe_virgl_renderer_transfer_read_iov(
     uint32_t handle, uint32_t ctx_id,
     uint32_t level, uint32_t stride,
     uint32_t layer_stride,
@@ -831,7 +854,7 @@ static int pipe_virgl_renderer_transfer_read_iov(
     return sRenderer->transferReadIov(handle, offset, box);
 }
 
-static int pipe_virgl_renderer_transfer_write_iov(
+VG_EXPORT int pipe_virgl_renderer_transfer_write_iov(
     uint32_t handle,
     uint32_t ctx_id,
     int level,
@@ -845,39 +868,41 @@ static int pipe_virgl_renderer_transfer_write_iov(
 }
 
 // Not implemented
-static void pipe_virgl_renderer_get_cap_set(uint32_t, uint32_t*, uint32_t*) { }
-static void pipe_virgl_renderer_fill_caps(uint32_t, uint32_t, void *caps) { }
+VG_EXPORT void pipe_virgl_renderer_get_cap_set(uint32_t, uint32_t*, uint32_t*) { }
+VG_EXPORT void pipe_virgl_renderer_fill_caps(uint32_t, uint32_t, void *caps) { }
 
-static int pipe_virgl_renderer_resource_attach_iov(
+VG_EXPORT int pipe_virgl_renderer_resource_attach_iov(
     int res_handle, struct iovec *iov,
     int num_iovs) {
     return sRenderer->attachIov(res_handle, iov, num_iovs);
 }
 
-static void pipe_virgl_renderer_resource_detach_iov(
+VG_EXPORT void pipe_virgl_renderer_resource_detach_iov(
     int res_handle, struct iovec **iov, int *num_iovs) {
     return sRenderer->detachIov(res_handle, iov, num_iovs);
 }
 
-static int pipe_virgl_renderer_create_fence(
+VG_EXPORT int pipe_virgl_renderer_create_fence(
     int client_fence_id, uint32_t cmd_type) {
     sRenderer->createFence(client_fence_id, cmd_type);
     return 0;
 }
 
-static void pipe_virgl_renderer_force_ctx_0(void) { }
+VG_EXPORT void pipe_virgl_renderer_force_ctx_0(void) {
+    VGPLOG("call");
+}
 
-static void pipe_virgl_renderer_ctx_attach_resource(
+VG_EXPORT void pipe_virgl_renderer_ctx_attach_resource(
     int ctx_id, int res_handle) {
     sRenderer->attachResource(ctx_id, res_handle);
 }
 
-static void pipe_virgl_renderer_ctx_detach_resource(
+VG_EXPORT void pipe_virgl_renderer_ctx_detach_resource(
     int ctx_id, int res_handle) {
     sRenderer->detachResource(ctx_id, res_handle);
 }
 
-static int pipe_virgl_renderer_resource_get_info(
+VG_EXPORT int pipe_virgl_renderer_resource_get_info(
     int res_handle,
     struct virgl_renderer_resource_info *info) {
     return sRenderer->getResourceInfo(res_handle, info);
@@ -889,49 +914,9 @@ static struct virgl_renderer_virtio_interface s_virtio_interface = {
     LIST_VIRGLRENDERER_API(VIRGLRENDERER_API_PIPE_STRUCT_DEF)
 };
 
-static void pipe_virgl_write_fence(void *opaque, uint32_t fence)
-{
-    VGPLOG("call");
-    virgl_write_fence(opaque, fence);
-}
-
-static virgl_renderer_gl_context
-pipe_virgl_create_context(void *opaque, int scanout_idx,
-                     struct virgl_renderer_gl_ctx_param *params)
-{
-    VGPLOG("call");
-    return (virgl_renderer_gl_context)0;
-}
-
-static void pipe_virgl_destroy_context(
-    void *opaque, virgl_renderer_gl_context ctx)
-{
-    VGPLOG("call");
-}
-
-static int pipe_virgl_make_context_current(
-    void *opaque, int scanout_idx, virgl_renderer_gl_context ctx)
-{
-    VGPLOG("call");
-    return 0;
-}
-
-static struct virgl_renderer_callbacks s_pipe_3d_cbs = {
-    .version             = 1,
-    .write_fence         = pipe_virgl_write_fence,
-    .create_gl_context   = pipe_virgl_create_context,
-    .destroy_gl_context  = pipe_virgl_destroy_context,
-    .make_current        = pipe_virgl_make_context_current,
-};
-
 struct virgl_renderer_virtio_interface*
 get_goldfish_pipe_virgl_renderer_virtio_interface(void) {
     return &s_virtio_interface;
-}
-
-struct virgl_renderer_callbacks*
-get_goldfish_pipe_virgl_renderer_callbacks(void) {
-    return &s_pipe_3d_cbs;
 }
 
 void virtio_goldfish_pipe_reset(void *pipe, void *host_pipe) {

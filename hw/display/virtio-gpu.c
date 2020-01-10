@@ -1165,6 +1165,50 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
     return 0;
 }
 
+void proxy_virgl_write_fence(void *opaque, uint32_t fence) {
+    VirtIOGPU *g = opaque;
+    struct virtio_gpu_ctrl_command *cmd, *tmp;
+
+    QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
+        /*
+         * the guest can end up emitting fences out of order
+         * so we should check all fenced cmds not just the first one.
+         */
+        if (cmd->cmd_hdr.fence_id > fence) {
+            continue;
+        }
+        trace_virtio_gpu_fence_resp(cmd->cmd_hdr.fence_id);
+        virtio_gpu_ctrl_response_nodata(g, cmd, VIRTIO_GPU_RESP_OK_NODATA);
+        QTAILQ_REMOVE(&g->fenceq, cmd, next);
+        g_free(cmd);
+        g->inflight--;
+        if (virtio_gpu_stats_enabled(g->conf)) {
+            fprintf(stderr, "inflight: %3d (-)\r", g->inflight);
+        }
+    }
+}
+
+static virgl_renderer_gl_context
+proxy_virgl_create_context(void *opaque, int scanout_idx,
+                     struct virgl_renderer_gl_ctx_param *params)
+{
+    return (virgl_renderer_gl_context)0;
+}
+
+static void proxy_virgl_destroy_context(
+    void *opaque, virgl_renderer_gl_context ctx) { }
+
+static int proxy_virgl_make_context_current(
+    void *opaque, int scanout_idx, virgl_renderer_gl_context ctx) { return 0; }
+
+static struct virgl_renderer_callbacks proxy_3d_cbs = {
+    .version             = 1,
+    .write_fence         = proxy_virgl_write_fence,
+    .create_gl_context   = proxy_virgl_create_context,
+    .destroy_gl_context  = proxy_virgl_destroy_context,
+    .make_current        = proxy_virgl_make_context_current,
+};
+
 static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(qdev);
@@ -1187,7 +1231,7 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
     g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
     g->virgl_as_proxy = true;
     g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
-    g->gpu_3d_cbs = get_goldfish_pipe_virgl_renderer_callbacks();
+    g->gpu_3d_cbs = &proxy_3d_cbs;
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
         error_setg(&g->migration_blocker, "virgl is not yet migratable");

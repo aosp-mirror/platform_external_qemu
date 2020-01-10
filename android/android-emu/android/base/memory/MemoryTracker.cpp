@@ -13,7 +13,11 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-#if defined(__linux__)
+#ifndef AEMU_TCMALLOC_ENABLED
+#error "Need to know whether we enabled TCMalloc!"
+#endif
+
+#if AEMU_TCMALLOC_ENABLED && defined(__linux__)
 #include <malloc_extension_c.h>
 #include <malloc_hook.h>
 
@@ -40,7 +44,7 @@ struct FuncRange {
 
 class MemoryTracker::Impl {
 public:
-#if defined(__linux__)
+#if AEMU_TCMALLOC_ENABLED && defined(__linux__)
     Impl()
         : mData([](const FuncRange* a, const FuncRange* b) {
               return a->mAddr + a->mLength < b->mAddr + b->mLength;
@@ -206,7 +210,8 @@ private:
     static const int kStackTraceLimit = 32;
 #else
     bool addToGroup(std::string group, std::string func) {
-        E("Not implemented");
+        (void)group;
+        (void)func;
         return false;
     }
 

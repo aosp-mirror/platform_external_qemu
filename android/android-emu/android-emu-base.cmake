@@ -5,7 +5,9 @@
 prebuilt(UUID)
 prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
 prebuilt(LIBUNWIND)
-prebuilt(TCMALLOC)
+if (OPTION_TCMALLOC)
+    prebuilt(TCMALLOC)
+endif()
 
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src
@@ -140,14 +142,24 @@ target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
 target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID)
-android_target_link_libraries(android-emu-base
-                              linux-x86_64
-                              PUBLIC
-                              TCMALLOC::TCMALLOC
-                              LIBUNWIND::LIBUNWIND
-                              -ldl
-                              Threads::Threads
-                              -lrt)
+if (OPTION_TCMALLOC)
+    android_target_link_libraries(android-emu-base
+                                  linux-x86_64
+                                  PUBLIC
+                                  TCMALLOC::TCMALLOC
+                                  LIBUNWIND::LIBUNWIND
+                                  -ldl
+                                  Threads::Threads
+                                  -lrt)
+else()
+    android_target_link_libraries(android-emu-base
+                                  linux-x86_64
+                                  PUBLIC
+                                  LIBUNWIND::LIBUNWIND
+                                  -ldl
+                                  Threads::Threads
+                                  -lrt)
+endif()
 
 android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
 
@@ -164,6 +176,22 @@ android_target_compile_definitions(android-emu-base
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+if (OPTION_TCMALLOC)
+    target_compile_definitions(android-emu-base
+                               PRIVATE
+                               "-DAEMU_TCMALLOC_ENABLED=1")
+else()
+    target_compile_definitions(android-emu-base
+                               PRIVATE
+                               "-DAEMU_TCMALLOC_ENABLED=0")
+endif()
+
+if (OPTION_GFXSTREAM_BACKEND)
+    target_compile_definitions(android-emu-base
+                               PRIVATE
+                               "-DAEMU_GFXSTREAM_BACKEND=1")
+endif()
 
 android_target_compile_options(android-emu-base darwin-x86_64 PRIVATE "-Wno-deprecated-declarations")
 # Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of

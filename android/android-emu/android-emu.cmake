@@ -609,6 +609,10 @@ if(GRPC)
   target_compile_definitions(android-emu-shared PUBLIC -DANDROID_GRPC)
 endif()
 
+if (OPTION_GFXSTREAM_BACKEND)
+    android_install_shared(android-emu-shared)
+endif()
+
 set(android-mock-vm-operations_src android/emulation/testing/MockAndroidVmOperations.cpp)
 
 android_add_library(android-mock-vm-operations)
