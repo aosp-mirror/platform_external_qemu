@@ -13,11 +13,19 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/memory/SharedMemory.h"
-#include "modules/video_capture/video_capture_impl.h"
-#include "rtc_base/platform_thread.h"
-#include "VideoShareInfo.h"
-#include <vector>
+#include <modules/video_capture/video_capture_defines.h>  // for VideoCaptur...
+#include <rtc_base/criticalsection.h>                     // for CriticalSec...
+#include <stdint.h>                                       // for int32_t
+#include <memory>                                         // for unique_ptr
+#include <string>                                         // for string
+
+#include "VideoShareInfo.h"                               // for VideoShareInfo
+#include "android/base/memory/SharedMemory.h"             // for SharedMemory
+#include "modules/video_capture/video_capture_impl.h"     // for VideoCaptur...
+
+namespace rtc {
+class PlatformThread;
+}  // namespace rtc
 
 using android::base::SharedMemory;
 using ::webrtc::VideoCaptureCapability;
