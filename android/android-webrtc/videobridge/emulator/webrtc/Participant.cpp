@@ -13,16 +13,24 @@
 // limitations under the License.
 #include "Participant.h"
 
-#include <api/create_peerconnection_factory.h>
-#include <api/test/fakeconstraints.h>
-#include <emulator/webrtc/capture/VideoShareFactory.h>
-#include <rtc_base/logging.h>
+#include <absl/types/optional.h>                        // for optional
+#include <api/mediastreaminterface.h>                   // for MediaStreamTr...
+#include <api/rtcerror.h>                               // for RTCError, ToS...
+#include <emulator/webrtc/capture/VideoShareFactory.h>  // for VideoShareFac...
+#include <media/base/device.h>                          // for Device
+#include <media/base/videocapturer.h>                   // for VideoCapturer
+#include <media/engine/webrtcvideocapturer.h>           // for WebRtcVideoCa...
+#include <p2p/base/portallocator.h>                     // for PortAllocator
+#include <rtc_base/checks.h>                            // for FatalLogCall
+#include <rtc_base/copyonwritebuffer.h>                 // for CopyOnWriteBu...
+#include <rtc_base/logging.h>                           // for RTC_LOG
+#include <rtc_base/refcountedobject.h>                  // for RefCountedObject
+#include <rtc_base/rtccertificategenerator.h>           // for RTCCertificat...
+#include <utility>                                      // for move, pair
 
-#include "api/audio_codecs/builtin_audio_decoder_factory.h"
-#include "api/audio_codecs/builtin_audio_encoder_factory.h"
-#include "api/video_codecs/builtin_video_decoder_factory.h"
-#include "api/video_codecs/builtin_video_encoder_factory.h"
-#include "nlohmann/json.hpp"
+#include "emulator/webrtc/Switchboard.h"                // for Switchboard
+#include "nlohmann/json.hpp"                            // for basic_json<>:...
+#include "rtc_base/third_party/base64/base64.h"         // for Base64
 
 using json = nlohmann::json;
 using MediaStreamPair =
@@ -47,31 +55,93 @@ protected:
     ~DummySetSessionDescriptionObserver() {}
 };
 
-Participant::~Participant() {}
+EventForwarder::EventForwarder(
+        Participant* part,
+        scoped_refptr<::webrtc::DataChannelInterface> channel,
+        std::string label)
+    : mParticipant(part), mChannel(channel), mLabel(label) {
+    channel->RegisterObserver(this);
+}
 
-Participant::Participant(Switchboard* board,
-                         std::string id,
-                         std::string mem_handle,
-                         int32_t fps)
-    : mSwitchboard(board), mPeerId(id), mMemoryHandle(mem_handle), mFps(fps) {}
+EventForwarder::~EventForwarder() {
+    mChannel->UnregisterObserver();
+}
+
+void EventForwarder::OnStateChange() {}
+
+void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
+    std::string encoded;
+    rtc::Base64::EncodeFromArray(buffer.data.cdata(), buffer.data.size(),
+                                 &encoded);
+    json msg;
+    msg["msg"] = encoded;
+    msg["label"] = mLabel;
+
+    mParticipant->SendToBridge(msg);
+}
+
+Participant::~Participant() {
+    if (mPeerConnection) {
+        mPeerConnection->Close();
+    }
+}
+
+static int sId = 0;
+
+Participant::Participant(
+        Switchboard* board,
+        std::string id,
+        std::string mem_handle,
+        int32_t fps,
+        ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory)
+    : mSwitchboard(board),
+      mPeerId(id),
+      mMemoryHandle(mem_handle),
+      mFps(fps),
+      mPeerConnectionFactory(peerConnectionFactory) {
+    mId = sId++;
+}
 
 void Participant::OnIceConnectionChange(
         ::webrtc::PeerConnectionInterface::IceConnectionState new_state) {
-    RTC_LOG(INFO) << "OnIceConnectionChange: " << new_state;
-    if (new_state == ::webrtc::PeerConnectionInterface::IceConnectionState::
-                             kIceConnectionClosed ||
-        new_state == ::webrtc::PeerConnectionInterface::IceConnectionState::
-                             kIceConnectionFailed) {
-        // Boo! we are dead..
-        RTC_LOG(INFO) << "Disconnected! Time to clean up";
-        mSwitchboard->rtcConnectionDropped(mPeerId);
+    RTC_LOG(INFO) << "Participant: " << mId
+                  << ", OnIceConnectionChange: " << new_state;
+    switch (new_state) {
+        case ::webrtc::PeerConnectionInterface::kIceConnectionFailed:
+        case ::webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
+            mEventForwarders.clear();
+            mStreams.clear();
+            RTC_LOG(INFO) << "Disconnected! Time to clean up, peer: " << mId;
+            // We cannot call close from the signaling thread, lest we lock up
+            // the world.
+            // TODO(jansene): Figure out if this can directly happen on the
+            // worker thread.
+            mSwitchboard->rtcConnectionDropped(mPeerId);
+            break;
+        case ::webrtc::PeerConnectionInterface::IceConnectionState::
+                kIceConnectionClosed:
+            // Boo! we are closed, peer connection will be garbage collected on
+            // other thread, as we cannot make ourself invalid on the calling
+            // thread that is actually using us.
+            RTC_LOG(INFO) << "Closed! Time to erase peer: " << mId;
+            mSwitchboard->rtcConnectionClosed(mPeerId);
+            break;
+        default:
+                ;  // Nothing ..
+    }
+}
+
+void Participant::Close() {
+    if (mPeerConnection) {
+        mPeerConnection->Close();
     }
 }
 
 void Participant::OnIceCandidate(
         const ::webrtc::IceCandidateInterface* candidate) {
     // We discovered a candidate, now we just send it over.
-    RTC_LOG(INFO) << "candidate: " << candidate->sdp_mline_index();
+    RTC_LOG(INFO) << "participant" << mId
+                  << ", candidate: " << candidate->sdp_mline_index();
 
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
@@ -84,6 +154,10 @@ void Participant::OnIceCandidate(
     msg["sdpMLineIndex"] = candidate->sdp_mline_index();
     msg["candidate"] = sdp;
     SendMessage(msg);
+}
+
+void Participant::SendToBridge(json msg) {
+    mSwitchboard->send(Switchboard::BRIDGE_RECEIVER, msg);
 }
 
 void Participant::SendMessage(json msg) {
@@ -117,7 +191,7 @@ void Participant::HandleCandidate(const json& msg) const {
                          << "SdpParseError was: " << error.description;
         return;
     }
-    if (!peer_connection_->AddIceCandidate(candidate.get())) {
+    if (!mPeerConnection->AddIceCandidate(candidate.get())) {
         RTC_LOG(WARNING) << "Failed to apply the received candidate";
         return;
     }
@@ -145,11 +219,11 @@ void Participant::HandleOffer(const json& msg) const {
         return;
     }
     RTC_LOG(INFO) << " Received session description :" << msg;
-    peer_connection_->SetRemoteDescription(
+    mPeerConnection->SetRemoteDescription(
             DummySetSessionDescriptionObserver::Create(), session_description);
     if (session_description->type() ==
         ::webrtc::SessionDescriptionInterface::kOffer) {
-        peer_connection_->CreateAnswer(
+        mPeerConnection->CreateAnswer(
                 (::webrtc::CreateSessionDescriptionObserver*)this,
                 ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     }
@@ -157,7 +231,7 @@ void Participant::HandleOffer(const json& msg) const {
 }
 
 void Participant::OnSuccess(::webrtc::SessionDescriptionInterface* desc) {
-    peer_connection_->SetLocalDescription(
+    mPeerConnection->SetLocalDescription(
             DummySetSessionDescriptionObserver::Create(), desc);
 
     std::string sdp;
@@ -192,7 +266,7 @@ cricket::VideoCapturer* Participant::OpenVideoCaptureDevice() {
 }
 
 bool Participant::AddStreams() {
-    if (!peer_connection_->GetSenders().empty()) {
+    if (!mPeerConnection->GetSenders().empty()) {
         return true;  // Already added tracks.
     }
     // Well, we need audio at some point..
@@ -202,11 +276,11 @@ bool Participant::AddStreams() {
     }
 
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
-            peer_connection_factory_->CreateVideoTrack(
-                    kVideoLabel, peer_connection_factory_->CreateVideoSource(
+            mPeerConnectionFactory->CreateVideoTrack(
+                    kVideoLabel, mPeerConnectionFactory->CreateVideoSource(
                                          std::move(device), nullptr)));
 
-    auto result = peer_connection_->AddTrack(video_track, {kStreamLabel});
+    auto result = mPeerConnection->AddTrack(video_track, {kStreamLabel});
     if (!result.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add track to video: "
                           << result.error().message();
@@ -215,55 +289,41 @@ bool Participant::AddStreams() {
     return true;
 }
 
+void Participant::AddDataChannel(const std::string& label) {
+    auto channel = mPeerConnection->CreateDataChannel(label, nullptr);
+    mEventForwarders[label] =
+            std::make_unique<EventForwarder>(this, channel, label);
+}
+
 bool Participant::Initialize() {
-    RTC_DCHECK(peer_connection_factory_.get() == nullptr);
-    RTC_DCHECK(peer_connection_.get() == nullptr);
-
-    peer_connection_factory_ = ::webrtc::CreatePeerConnectionFactory(
-            nullptr /* network_thread */, nullptr /* worker_thread */,
-            nullptr /* signaling_thread */, nullptr /* default_adm */,
-            ::webrtc::CreateBuiltinAudioEncoderFactory(),
-            ::webrtc::CreateBuiltinAudioDecoderFactory(),
-            ::webrtc::CreateBuiltinVideoEncoderFactory(),
-            ::webrtc::CreateBuiltinVideoDecoderFactory(),
-            nullptr /* audio_mixer */, nullptr /* audio_processing */);
-
-    if (!peer_connection_factory_.get()) {
-        RTC_LOG(LS_ERROR) << "Unable to configure peer connection factory";
-        DeletePeerConnection();
-        return false;
-    }
-
     if (!CreatePeerConnection(DTLS_ON)) {
         RTC_LOG(LS_ERROR) << "Unable to create peer connection";
-        DeletePeerConnection();
+        mPeerConnection = nullptr;
     }
 
     if (!AddStreams()) {
         RTC_LOG(LS_ERROR) << "Failed to add streams";
-        DeletePeerConnection();
+        mPeerConnection = nullptr;
         return false;
     }
 
-    if (peer_connection_.get() == nullptr) {
+    if (mPeerConnection.get() == nullptr) {
         RTC_LOG(LS_ERROR) << "Failed to get peer connection";
         return false;
     }
 
+    AddDataChannel("mouse");
+    AddDataChannel("touch");
+    AddDataChannel("keyboard");
+
     RTC_LOG(INFO) << "Creating offer";
-    peer_connection_->CreateOffer(
+    mPeerConnection->CreateOffer(
             this, ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     return true;
 }
 
-void Participant::DeletePeerConnection() {
-    peer_connection_ = nullptr;
-    peer_connection_factory_ = nullptr;
-}
-
 bool Participant::CreatePeerConnection(bool dtls) {
-    RTC_DCHECK(peer_connection_factory_.get() != nullptr);
-    RTC_DCHECK(peer_connection_.get() == nullptr);
+    RTC_DCHECK(mPeerConnection.get() == nullptr);
 
     ::webrtc::PeerConnectionInterface::RTCConfiguration config;
     ::webrtc::PeerConnectionInterface::IceServer server;
@@ -272,9 +332,9 @@ bool Participant::CreatePeerConnection(bool dtls) {
     server.uri = kStunUri;
     config.servers.push_back(server);
 
-    peer_connection_ = peer_connection_factory_->CreatePeerConnection(
+    mPeerConnection = mPeerConnectionFactory->CreatePeerConnection(
             config, nullptr, nullptr, this);
-    return peer_connection_.get() != nullptr;
+    return mPeerConnection.get() != nullptr;
 }
 }  // namespace webrtc
 }  // namespace emulator
