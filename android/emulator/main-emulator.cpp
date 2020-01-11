@@ -788,6 +788,8 @@ int main(int argc, char** argv)
     }
 
     D("Found target-specific %d-bit emulator binary: %s", wantedBitness, emulatorPath);
+    const char* c_my_qemu_dir = path_dirname(emulatorPath);
+    const std::string myllvmbin = std::string(c_my_qemu_dir) + "/llvm-symbolizer";
 
     if (avdName || androidOut) {
         /* Save restart parameters before we modify argv */
@@ -800,6 +802,11 @@ int main(int argc, char** argv)
 
     /* setup launcher dir */
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", progDir);
+    if (path_exists(myllvmbin)) {
+        System::get()->envSet("ASAN_OPTIONS", "detect_odr_violation=0:symbolize=1");
+        System::get()->envSet("ASAN_SYMBOLIZER_PATH", myllvmbin.c_str());
+       D("setting llvm-symbolizer to %s", myllvmbin.c_str());
+    }
 
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
