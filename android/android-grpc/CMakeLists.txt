@@ -66,10 +66,6 @@ if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
 endif()
 
-if(WEBRTC)
-  target_link_libraries(android-grpc PRIVATE android-webrtc)
-endif()
-
 set(android-grpc_unittest_src android/emulation/control/logcat/LogcatParser_unittest.cpp
                               android/emulation/control/logcat/RingStreambuf_unittest.cpp
                               android/emulation/control/snapshot/TarStream_unittest.cpp)
