@@ -1,5 +1,10 @@
 #include "emulator/net/RtcAsyncSocketAdapter.h"
-#include <chrono>
+
+#include <rtc_base/asyncsocket.h>  // for AsyncSocket
+#include <rtc_base/socket.h>       // for Socket::CS_CONNECTED, Socket::Conn...
+#include <chrono>                  // for common_type<>::type, system_clock
+#include <ratio>                   // for ratio
+
 using rtc::AsyncSocket;
 
 namespace emulator {
