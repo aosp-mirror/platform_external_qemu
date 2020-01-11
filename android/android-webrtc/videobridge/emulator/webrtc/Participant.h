@@ -13,12 +13,28 @@
 // limitations under the License.
 #pragma once
 
-#include <api/jsep.h>
-#include <api/peerconnectioninterface.h>
-#include <emulator/net/SocketTransport.h>
+#include <api/datachannelinterface.h>     // for DataChannelInterface (ptr o...
+#include <api/jsep.h>                     // for IceCandidateInterface (ptr ...
+#include <api/peerconnectioninterface.h>  // for PeerConnectionInterface
+#include <api/scoped_refptr.h>            // for scoped_refptr
+#include <stdint.h>                       // for uint32_t
+#include <memory>                         // for unique_ptr
+#include <string>                         // for string, basic_string, opera...
+#include <unordered_map>                  // for unordered_map
+#include <unordered_set>                  // for unordered_set
+#include <vector>                         // for vector
 
-#include "Switchboard.h"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json.hpp"              // for json
+
+namespace cricket {
+class VideoCapturer;
+}  // namespace cricket
+namespace webrtc {
+class MediaStreamInterface;
+class RTCError;
+class RtpReceiverInterface;
+class VideoTrackInterface;
+}  // namespace webrtc
 
 using cricket::VideoCapturer;
 using json = nlohmann::json;
@@ -29,6 +45,7 @@ using webrtc::VideoTrackInterface;
 namespace emulator {
 namespace webrtc {
 
+class Participant;
 class Switchboard;
 
 // A default peer connection observer that does nothing
@@ -56,6 +73,25 @@ public:
     void OnIceConnectionReceivingChange(bool receiving) override {}
 };
 
+// An EventForwarder forwards mouse & keyevents to the emulator.
+
+class EventForwarder : public ::webrtc::DataChannelObserver {
+public:
+    EventForwarder(Participant* part,
+                   scoped_refptr<::webrtc::DataChannelInterface> channel,
+                   std::string label);
+    ~EventForwarder();
+    // The data channel state have changed.
+    void OnStateChange() override;
+    //  A data buffer was successfully received.
+    void OnMessage(const ::webrtc::DataBuffer& buffer) override;
+
+private:
+    scoped_refptr<::webrtc::DataChannelInterface> mChannel;
+    Participant* mParticipant;
+    std::string mLabel;
+};
+
 // A Participant in an webrtc streaming session. This class is
 // repsonsbile for driving the jsep protocol. It basically:
 //
@@ -70,7 +106,7 @@ public:
     Participant(Switchboard* board,
                 std::string id,
                 std::string mem_handle,
-                int desiredFps);
+                int desiredFps,::webrtc::PeerConnectionFactoryInterface *peerConnectionFactory);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
@@ -94,31 +130,40 @@ public:
     void IncomingMessage(json msg);
     bool Initialize();
     inline const std::string GetPeerId() const { return mPeerId; };
+    void SendToBridge(json msg);
+    void Close();
 
 private:
     void SendMessage(json msg);
     void HandleOffer(const json& msg) const;
     void HandleCandidate(const json& msg) const;
-    void DeletePeerConnection();
     bool AddStreams();
     bool CreatePeerConnection(bool dtls);
+    void AddDataChannel(const std::string& channel);
     VideoCapturer* OpenVideoCaptureDevice();
 
-    scoped_refptr<PeerConnectionInterface> peer_connection_;
-    scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
-            peer_connection_factory_;
-    std::map<std::string, scoped_refptr<::webrtc::MediaStreamInterface>>
-            active_streams_;
+    scoped_refptr<PeerConnectionInterface> mPeerConnection;
+    ::webrtc::PeerConnectionFactoryInterface *mPeerConnectionFactory;
+    std::unordered_map<std::string,
+                       scoped_refptr<::webrtc::MediaStreamInterface>>
+            mStreams;
+
+    std::unordered_map<std::string, std::unique_ptr<EventForwarder>>
+            mEventForwarders;
 
     Switchboard* mSwitchboard;
     std::string mPeerId;
     std::string mMemoryHandle;
     uint32_t mFps = 24;
+    uint32_t mId{0};
 
     const std::string kStunUri = "stun:stun.l.google.com:19302";
     const std::string kAudioLabel = "emulator_audio_stream";
     const std::string kVideoLabel = "emulator_video_stream";
     const std::string kStreamLabel = "emulator_view";
+
+    const std::unordered_set<std::string> mValidLabels{"mouse", "keyboard",
+                                                       "touch"};
 };
 }  // namespace webrtc
 }  // namespace emulator

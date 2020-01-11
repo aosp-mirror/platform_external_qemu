@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "modules/video_capture/video_capture.h"
+#include <api/video/video_rotation.h>                     // for VideoRotation
+#include <modules/video_capture/video_capture_defines.h>  // for VideoCaptur...
+#include <stdint.h>                                       // for uint32_t
+#include <string>                                         // for string
+
+#include "modules/video_capture/video_capture.h"          // for VideoCaptur...
 
 namespace emulator {
 namespace webrtc {

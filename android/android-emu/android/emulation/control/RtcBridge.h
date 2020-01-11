@@ -59,7 +59,8 @@ public:
 
 class NopRtcBridge : public RtcBridge {
 public:
-    NopRtcBridge() = default;
+    NopRtcBridge();
+    ~NopRtcBridge();
     bool connect(std::string identity) override;
     void disconnect(std::string identity) override;
     bool acceptJsepMessage(std::string identity, std::string msg) override;
@@ -70,6 +71,7 @@ public:
     bool start() override;
     BridgeState state() override;
 };
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
