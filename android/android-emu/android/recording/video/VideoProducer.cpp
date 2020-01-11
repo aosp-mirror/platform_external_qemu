@@ -83,6 +83,7 @@ public:
 
     intptr_t main() final {
         assert(mCallback);
+        mIsStopped = false;
         if (!mIsGuestMode) {
             // Force a repost
             gpu_frame_set_record_mode(true);
@@ -110,12 +111,22 @@ public:
         return 0;
     }
 
+    void pokeReceiver() {
+        mSignal.send(1);
+    }
+
+    void waitForPoke() {
+        mSignal.receive();
+    }
+
     virtual void stop() override {
         if (!mIsGuestMode) {
             gpu_frame_set_record_mode(false);
         }
+        mIsStopped = true;
         mDataQueue.stop();
         mFreeQueue.stop();
+        waitForPoke();
     }
 
 private:
@@ -124,6 +135,9 @@ private:
         int i = 0;
 
         while (true) {
+            if (mIsStopped) {
+              break;
+            }
             long long currTimeMs =
                     android::base::System::get()->getHighResTimeUs() / 1000;
 
@@ -187,6 +201,7 @@ private:
         }
 
         D("Finished sending video frames");
+        pokeReceiver();
     }
 
     uint32_t mFbWidth = 0;
@@ -209,6 +224,8 @@ private:
     static constexpr int kMaxFrames = 3;
     MessageChannel<Frame, kMaxFrames> mDataQueue;
     MessageChannel<Frame, kMaxFrames> mFreeQueue;
+    MessageChannel<int, 1> mSignal;
+    bool mIsStopped = false;
 
     // In guest mode, the frames are already triple-buffered in the readback
     // worker, so we don't need to use the messaage channel.
