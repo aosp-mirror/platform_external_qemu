@@ -13,15 +13,52 @@
 // limitations under the License.
 #include "Switchboard.h"
 
-#include "android/base/Optional.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/System.h"
-#include "rtc_base/logging.h"
+#include <api/audio/audio_mixer.h>                              // for Audio...
+#include <api/audio_codecs/audio_decoder_factory.h>             // for Audio...
+#include <api/audio_codecs/audio_encoder_factory.h>             // for Audio...
+#include <api/create_peerconnection_factory.h>                  // for Creat...
+#include <api/peerconnectioninterface.h>                        // for PeerC...
+#include <api/scoped_refptr.h>                                  // for scope...
+#include <api/video_codecs/video_decoder_factory.h>             // for Video...
+#include <api/video_codecs/video_encoder_factory.h>             // for Video...
+#include <modules/audio_device/include/audio_device.h>          // for Audio...
+#include <modules/audio_processing/include/audio_processing.h>  // for Audio...
+#include <rtc_base/criticalsection.h>                           // for CritS...
+#include <rtc_base/refcountedobject.h>                          // for RefCo...
+#include <rtc_base/thread.h>                                    // for Thread
+#include <stdio.h>                                              // for sscanf
+#include <memory>                                               // for uniqu...
+#include <string>                                               // for string
+#include <unordered_map>                                        // for unord...
+#include <vector>                                               // for vector
+
+#include "Participant.h"                                        // for Parti...
+#include "android/base/Log.h"                                   // for base
+#include "android/base/Optional.h"                              // for Optional
+#include "android/base/StringView.h"                            // for Strin...
+#include "android/base/misc/StringUtils.h"                      // for split
+#include "android/base/system/System.h"                         // for System
+#include "api/audio_codecs/builtin_audio_decoder_factory.h"     // for Creat...
+#include "api/audio_codecs/builtin_audio_encoder_factory.h"     // for Creat...
+#include "api/video_codecs/builtin_video_decoder_factory.h"     // for Creat...
+#include "api/video_codecs/builtin_video_encoder_factory.h"     // for Creat...
+#include "emulator/net/EmulatorConnection.h"                    // for Emula...
+#include "emulator/webrtc/Switchboard.h"                        // for Switc...
+#include "nlohmann/json.hpp"                                    // for basic...
+#include "rtc_base/logging.h"                                   // for RTC_LOG
+
+namespace emulator {
+namespace net {
+class AsyncSocketAdapter;
+}  // namespace net
+}  // namespace emulator
 
 using namespace android::base;
 
 namespace emulator {
 namespace webrtc {
+
+std::string Switchboard::BRIDGE_RECEIVER = "WebrtcVideoBridge";
 
 void Switchboard::stateConnectionChange(SocketTransport* connection,
                                         State current) {
@@ -54,9 +91,30 @@ Switchboard::Switchboard(const std::string handle,
                          AsyncSocketAdapter* connection,
                          net::EmulatorConnection* parent)
     : mHandle(handle),
+
+      mNetwork(rtc::Thread::CreateWithSocketServer()),
+      mWorker(rtc::Thread::Create()),
+      mSignaling(rtc::Thread::Create()),
+
       mProtocol(this),
       mTransport(&mProtocol, connection),
       mEmulator(parent) {
+    mNetwork->SetName("Sw-Network", nullptr);
+    mNetwork->Start();
+    mWorker->SetName("Sw-Worker", nullptr);
+    mWorker->Start();
+    mSignaling->SetName("Sw-Signaling", nullptr);
+    mSignaling->Start();
+    mConnectionFactory = ::webrtc::CreatePeerConnectionFactory(
+            mNetwork.get() /* network_thread */,
+            mWorker.get() /* worker_thread */,
+            mSignaling.get() /* signaling_thread */, nullptr /* default_adm */,
+            ::webrtc::CreateBuiltinAudioEncoderFactory(),
+            ::webrtc::CreateBuiltinAudioDecoderFactory(),
+            ::webrtc::CreateBuiltinVideoEncoderFactory(),
+            ::webrtc::CreateBuiltinVideoDecoderFactory(),
+            nullptr /* audio_mixer */, nullptr /* audio_processing */);
+
     split(turnConfig, " ", [this](StringView str) {
         if (!str.empty()) {
             mTurnConfig.push_back(str);
@@ -69,18 +127,33 @@ void Switchboard::rtcConnectionDropped(std::string participant) {
     mDroppedConnections.push_back(participant);
 }
 
+void Switchboard::rtcConnectionClosed(std::string participant) {
+    rtc::CritScope cs(&mCleanupClosedCS);
+    mClosedConnections.push_back(participant);
+}
+
 void Switchboard::finalizeConnections() {
-    rtc::CritScope cs(&mCleanupCS);
-    for (auto participant : mDroppedConnections) {
-        json msg;
-        msg["bye"] = "stream disconnected";
-        msg["topic"] = participant;
-        RTC_LOG(INFO) << "Sending " << msg;
-        mProtocol.write(&mTransport, msg);
-        mIdentityMap.erase(participant);
-        mConnections.erase(participant);
+    {
+        rtc::CritScope cs(&mCleanupCS);
+        for (auto participant : mDroppedConnections) {
+            json msg;
+            msg["bye"] = "stream disconnected";
+            msg["topic"] = participant;
+            RTC_LOG(INFO) << "Sending " << msg;
+            mProtocol.write(&mTransport, msg);
+            mConnections[participant]->Close();
+        }
+        mDroppedConnections.clear();
     }
-    mDroppedConnections.clear();
+
+    {
+        rtc::CritScope cs(&mCleanupClosedCS);
+        for (auto participant : mClosedConnections) {
+            mIdentityMap.erase(participant);
+            mConnections.erase(participant);
+        }
+        mClosedConnections.clear();
+    }
 }
 
 void Switchboard::received(SocketTransport* transport, const json object) {
@@ -142,8 +215,8 @@ void Switchboard::received(SocketTransport* transport, const json object) {
         send(from, start);
 
         rtc::scoped_refptr<Participant> stream(
-                new rtc::RefCountedObject<Participant>(this, from, mHandle,
-                                                       mFps));
+                new rtc::RefCountedObject<Participant>(
+                        this, from, mHandle, mFps, mConnectionFactory.get()));
         if (stream->Initialize()) {
             mConnections[from] = stream;
         }
@@ -164,10 +237,16 @@ void Switchboard::received(SocketTransport* transport, const json object) {
 }
 
 void Switchboard::send(std::string to, json message) {
-    if (!mIdentityMap.count(to)) {
+    if (to.compare(BRIDGE_RECEIVER) == 0) {
+        // Directly forward messages intended for the bridge
+        message["topic"] = BRIDGE_RECEIVER;
+        mProtocol.write(&mTransport, message);
         return;
     }
 
+    if (!mIdentityMap.count(to)) {
+        return;
+    }
     json msg;
     msg["msg"] = message.dump();
     msg["topic"] = mIdentityMap[to];
