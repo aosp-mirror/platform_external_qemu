@@ -99,7 +99,7 @@ public class EmulatorView extends JPanel {
         },
         0,
         1000 / getVideoFps(),
-        TimeUnit.MICROSECONDS);
+        TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -214,7 +214,8 @@ public class EmulatorView extends JPanel {
         Tx.translate(h / 2, w / 2); // Center back..
         Tx.rotate(mRotation * Math.PI / 2.0); // S2: rotate around anchor
         Tx.translate(-w / 2, -h / 2);
-       }
+        break;
+    }
 
     g2d.drawImage(mImage, Tx, null);
   }
