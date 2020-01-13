@@ -46,6 +46,53 @@
       "revId": "7818fe587102f2005b071b21d574bdfc063749bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "816414c9_c7ca9a3f",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-13T18:10:38Z",
+      "side": 1,
+      "message": "Please use the C++ versions of the path functions in general, because they are safer. E.g. here c_my_qemu_dir leaks memory",
+      "parentUuid": "12bc37c2_81b8a029",
+      "range": {
+        "startLine": 792,
+        "startChar": 34,
+        "endLine": 792,
+        "endChar": 80
+      },
+      "revId": "7818fe587102f2005b071b21d574bdfc063749bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d37d9d0a_cc440168",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-13T18:10:38Z",
+      "side": 1,
+      "message": "nit: c_str() isn\u0027t needed",
+      "range": {
+        "startLine": 807,
+        "startChar": 55,
+        "endLine": 807,
+        "endChar": 71
+      },
+      "revId": "7818fe587102f2005b071b21d574bdfc063749bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
