@@ -18,8 +18,8 @@
 #include <thread>
 
 #include "android/base/Log.h"
-#include "android/emulation/control/AdbConnection.h"
-#include "android/emulation/control/AdbShellStream.h"
+#include "android/emulation/control/adb/AdbConnection.h"
+#include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "grpcpp/server.h"
 #include "grpcpp/server_builder.h"

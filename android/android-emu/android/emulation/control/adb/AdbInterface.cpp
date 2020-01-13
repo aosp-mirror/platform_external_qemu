@@ -12,44 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 
-#include "android/avd/info.h"
-#include "android/avd/util.h"
-#include "android/base/ArraySize.h"
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
-#include "android/base/StringView.h"
-#include "android/base/Uuid.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketWaiter.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/AdbHostServer.h"
-#include "android/emulation/ComponentVersion.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/emulation/control/AdbConnection.h"
-#include "android/emulation/control/AdbShellStream.h"
-#include "android/globals.h"
-#include "android/utils/debug.h"
-#include "android/utils/path.h"
-#include "android/utils/sockets.h"
+#include <assert.h>                                        // for assert
+#include <stdint.h>                                        // for int64_t
+#include <algorithm>                                       // for max, copy
+#include <cstdio>                                          // for sscanf
+#include <limits>                                          // for numeric_li...
+#include <queue>                                           // for queue
+#include <fstream>                                         // for ifstream
+#include <sstream>                                         // for basic_stri...
+#include <string>                                          // for string
+#include <thread>                                          // for thread
+#include <tuple>                                           // for tie, tuple
+#include <type_traits>                                     // for decay<>::type
+#include <utility>                                         // for pair, move
 
-#include <cstdio>
-#include <fstream>
-#include <limits>
-#include <queue>
-#include <sstream>
-#include <string>
-#include <thread>
-#include <utility>
+#include "android/avd/info.h"                              // for avdInfo_ge...
+#include "android/avd/util.h"                              // for ANDROID_AV...
+#include "android/base/EnumFlags.h"                        // for operator|
+#include "android/base/Log.h"                              // for LogStream
+#include "android/base/Optional.h"                         // for Optional
+#include "android/base/StringView.h"                       // for StringView
+#include "android/base/Uuid.h"                             // for Uuid
+#include "android/base/files/PathUtils.h"                  // for PathUtils
+#include "android/base/memory/LazyInstance.h"              // for LazyInstance
+#include "android/base/memory/ScopedPtr.h"                 // for ScopedCPtr
+#include "android/base/synchronization/Lock.h"             // for Lock, Auto...
+#include "android/base/system/System.h"                    // for System
+#include "android/base/threads/Async.h"                    // for AsyncThrea...
+#include "android/base/threads/ParallelTask.h"             // for ParallelTask
+#include "android/cmdline-option.h"                        // for android_cm...
+#include "android/emulation/AdbHostServer.h"               // for AdbHostServer
+#include "android/emulation/ConfigDirs.h"                  // for ConfigDirs
+#include "android/emulation/control/adb/AdbShellStream.h"  // for AdbShellSt...
+#include "android/globals.h"                               // for android_av...
+#include "android/utils/path.h"                            // for path_delet...
+
+namespace android {
+namespace base {
+class Looper;
+class ScopedSocket;
+class SocketWaiter;
+class Version;
+}  // namespace base
+}  // namespace android
 
 using android::base::AutoLock;
 using android::base::Looper;
@@ -71,7 +78,7 @@ namespace emulation {
 // We consider adb shipped with 23.1.0 or later to be modern enough
 // to not notify people to upgrade adb. 23.1.0 ships with adb protocol 32
 static const int kMinAdbProtocol = 32;
-
+class AdbInterfaceImpl;
 class AdbDaemonImpl : public AdbDaemon {
 public:
     virtual Optional<int> getProtocolVersion() override {

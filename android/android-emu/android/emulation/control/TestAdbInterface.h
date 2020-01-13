@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include <map>
 
 namespace android {

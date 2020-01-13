@@ -14,25 +14,29 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-#include "android/base/StringView.h"
-#include "android/base/async/Looper.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/ParallelTask.h"
+#include <functional>                    // for function
+#include <iosfwd>                        // for istream
+#include <memory>                        // for unique_ptr, enable_shared_fr...
+#include <string>                        // for string
+#include <vector>                        // for vector
 
-#include <functional>
-#include <iosfwd>
-#include <memory>
-#include <string>
-#include <vector>
+#include "android/base/Compiler.h"       // for DISALLOW_COPY_ASSIGN_AND_MOVE
+#include "android/base/Optional.h"       // for Optional
+#include "android/base/StringView.h"     // for StringView
+#include "android/base/system/System.h"  // for System, System::ProcessExitCode
 
 namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+
 namespace emulation {
 
 using base::Optional;
 using base::StringView;
 
 class AdbCommand;
+
 using AdbCommandPtr = std::shared_ptr<AdbCommand>;
 
 // Encapsulates the result of running an ADB command.
@@ -137,7 +141,6 @@ public:
     static AdbInterface* getGlobal();
 };
 
-class AdbInterfaceImpl;
 
 // Representation of an asynchronously running ADB command.
 // These shouldn't be created directly, use AdbInterface::runAdbCommand.

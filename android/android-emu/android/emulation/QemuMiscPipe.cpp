@@ -13,8 +13,9 @@
 
 #include "android/base/ProcessControl.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/threads/Thread.h"
 #include "android/emulation/AndroidMessagePipe.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"

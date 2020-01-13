@@ -36,7 +36,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
-#include "android/emulation/control/AdbConnection.h"
+#include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/battery_agent.h"
