@@ -22,6 +22,30 @@
       "revId": "7818fe587102f2005b071b21d574bdfc063749bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12bc37c2_81b8a029",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-01-13T16:41:43Z",
+      "side": 1,
+      "message": "right, Frank;\nI will let Andrew to setup environment.",
+      "parentUuid": "72964b54_4425fd21",
+      "range": {
+        "startLine": 792,
+        "startChar": 34,
+        "endLine": 792,
+        "endChar": 80
+      },
+      "revId": "7818fe587102f2005b071b21d574bdfc063749bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
