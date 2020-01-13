@@ -16,6 +16,7 @@
 
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/opengl/virtio_gpu_ops.h"
 #include "android/utils/compiler.h"
 
 #ifdef __cplusplus
@@ -120,5 +121,7 @@ void android_cleanupProcGLObjects(uint64_t puid);
 #ifdef __cplusplus
 const emugl::RendererPtr& android_getOpenglesRenderer();
 #endif
+
+struct AndroidVirtioGpuOps* android_getVirtioGpuOps(void);
 
 ANDROID_END_HEADER

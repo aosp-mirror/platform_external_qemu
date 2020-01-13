@@ -204,6 +204,13 @@ public:
     HandleType createColorBuffer(
         int p_width, int p_height, GLenum p_internalFormat,
         FrameworkFormat p_frameworkFormat);
+    // Variant of createColorBuffer except with a particular
+    // handle already assigned. This is for use with
+    // virtio-gpu's RESOURCE_CREATE ioctl.
+    void createColorBufferWithHandle(
+        int p_width, int p_height, GLenum p_internalFormat,
+        FrameworkFormat p_frameworkFormat,
+        HandleType handle);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -556,6 +563,12 @@ private:
                                        int p_height,
                                        GLenum p_internalFormat,
                                        FrameworkFormat p_frameworkFormat);
+    HandleType createColorBufferWithHandleLocked(
+        int p_width,
+        int p_height,
+        GLenum p_internalFormat,
+        FrameworkFormat p_frameworkFormat,
+        HandleType handle);
     void recomputeLayout();
     void setDisplayPoseInSkinUI(int totalHeight);
     void sweepColorBuffersLocked();
