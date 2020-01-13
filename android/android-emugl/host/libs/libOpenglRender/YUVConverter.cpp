@@ -27,6 +27,10 @@
     assert(false); \
 } while(0)
 
+enum YUVInterleaveDirection {
+    YUVInterleaveDirectionVU = 0,
+    YUVInterleaveDirectionUV = 1,
+};
 
 // getYUVOffsets(), given a YUV-formatted buffer that is arranged
 // according to the spec
@@ -80,8 +84,22 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
             *alignwidthc = cStride;
         }
         break;
+    case FRAMEWORK_FORMAT_NV12:
+        align = 1;
+        yStride = width;
+        cStride = yStride;
+        cHeight = height / 2;
+        cSize = cStride * cHeight;
+        *yoff = 0;
+        *uoff = yStride * height;
+        *voff = (*uoff) + 1;
+        *alignwidth = yStride;
+        *alignwidthc = cStride / 2;
+        break;
     case FRAMEWORK_FORMAT_GL_COMPATIBLE:
-        FATAL("Input not a YUV format!");
+        FATAL("Input not a YUV format! (FRAMEWORK_FORMAT_GL_COMPATIBLE)");
+    default:
+        FATAL("Unknown format: 0x%x", format);
     }
 }
 
@@ -216,7 +234,7 @@ void main(void) {
     GLuint fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
 
     const GLint vtextLen = strlen(kVShader);
-    const GLint ftextLen = strlen(kFShader);
+    const GLint ftextLen = strlen(kFShaders);
     s_gles2.glShaderSource(vshader, 1, &kVShaders, &vtextLen);
     s_gles2.glShaderSource(fshader, 1, &kFShaders, &ftextLen);
     s_gles2.glCompileShader(vshader);
@@ -245,7 +263,8 @@ static void createYUVInterleavedGLShader(GLuint* program_out,
                                          GLint* ysamplerloc_out,
                                          GLint* vusamplerloc_out,
                                          GLint* incoordloc_out,
-                                         GLint* posloc_out) {
+                                         GLint* posloc_out,
+                                         YUVInterleaveDirection interleaveDir) {
     assert(program_out);
 
     static const char kVShader[] = R"(
@@ -275,7 +294,7 @@ void main(void) {
     // and the second byte (U) into the A component of the texture. That's
     // why we find U and V at A and R respectively in the fragment shader code.
     // Note that we could have also found V at G or B as well.
-    static const char kFShader[] = R"(
+    static const char kFShaderVu[] = R"(
 precision highp float;
 varying highp vec2 outCoord;
 uniform highp float yWidthCutoff;
@@ -302,14 +321,41 @@ void main(void) {
 }
     )";
 
+    static const char kFShaderUv[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D uvsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
+    yuv[1] = texture2D(uvsampler, cutoffCoordsC).r - 0.5;
+    yuv[2] = 0.96 * (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    highp float yscale = 1.1643835616438356;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.39176229009491365, 2.017232142857143,
+               1.5960267857142856, -0.8129676472377708,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
     const GLchar* const kFShaders =
-        static_cast<const GLchar*>(kFShader);
+        interleaveDir == YUVInterleaveDirectionVU ? kFShaderVu : kFShaderUv;
 
     GLuint vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
     GLuint fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
 
     const GLint vtextLen = strlen(kVShader);
-    const GLint ftextLen = strlen(kFShader);
+    const GLint ftextLen = strlen(kFShaders);
     s_gles2.glShaderSource(vshader, 1, &kVShaders, &vtextLen);
     s_gles2.glShaderSource(fshader, 1, &kFShaders, &ftextLen);
     s_gles2.glCompileShader(vshader);
@@ -434,9 +480,8 @@ YUVConverter::YUVConverter(int width, int height, FrameworkFormat format) : mFor
     cheight = height / 2;
 
     createYUVGLTex(GL_TEXTURE0, ywidth, height, &mYtex, false);
-    if (emugl::emugl_feature_is_enabled(
-        android::featurecontrol::YUV420888toNV21)) {
-        if (mFormat == FRAMEWORK_FORMAT_YV12) {
+    switch (mFormat) {
+        case FRAMEWORK_FORMAT_YV12:
             createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mUtex, false);
             createYUVGLTex(GL_TEXTURE2, cwidth, cheight, &mVtex, false);
             createYUVGLShader(&mProgram,
@@ -447,29 +492,45 @@ YUVConverter::YUVConverter(int width, int height, FrameworkFormat format) : mFor
                               &mVSamplerLoc,
                               &mInCoordLoc,
                               &mPosLoc);
-        } else if (mFormat == FRAMEWORK_FORMAT_YUV_420_888) {
-            createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mVUtex, true);
+            break;
+        case FRAMEWORK_FORMAT_YUV_420_888:
+            if (emugl::emugl_feature_is_enabled(
+                    android::featurecontrol::YUV420888toNV21)) {
+                createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mVUtex, true);
+                createYUVInterleavedGLShader(&mProgram,
+                                             &mYWidthCutoffLoc,
+                                             &mCWidthCutoffLoc,
+                                             &mYSamplerLoc,
+                                             &mVUSamplerLoc,
+                                             &mInCoordLoc,
+                                             &mPosLoc,
+                                             YUVInterleaveDirectionVU);
+            } else {
+                createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mUtex, false);
+                createYUVGLTex(GL_TEXTURE2, cwidth, cheight, &mVtex, false);
+                createYUVGLShader(&mProgram,
+                                  &mYWidthCutoffLoc,
+                                  &mCWidthCutoffLoc,
+                                  &mYSamplerLoc,
+                                  &mUSamplerLoc,
+                                  &mVSamplerLoc,
+                                  &mInCoordLoc,
+                                  &mPosLoc);
+            }
+            break;
+        case FRAMEWORK_FORMAT_NV12:
+            createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mUVtex, true);
             createYUVInterleavedGLShader(&mProgram,
                                          &mYWidthCutoffLoc,
                                          &mCWidthCutoffLoc,
                                          &mYSamplerLoc,
                                          &mVUSamplerLoc,
                                          &mInCoordLoc,
-                                         &mPosLoc);
-        } else {
-            FATAL("Input not a YUV format!");
-        }
-    } else {
-        createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mUtex, false);
-        createYUVGLTex(GL_TEXTURE2, cwidth, cheight, &mVtex, false);
-        createYUVGLShader(&mProgram,
-                          &mYWidthCutoffLoc,
-                          &mCWidthCutoffLoc,
-                          &mYSamplerLoc,
-                          &mUSamplerLoc,
-                          &mVSamplerLoc,
-                          &mInCoordLoc,
-                          &mPosLoc);
+                                         &mPosLoc,
+                                         YUVInterleaveDirectionUV);
+            break;
+        default:
+            FATAL("Unknown format: 0x%x", mFormat);
     }
 
     createYUVGLFullscreenQuad(&mVbuf, &mIbuf, width, ywidth);
@@ -515,6 +576,100 @@ void YUVConverter::drawConvert(int x, int y,
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
                       x, y, ywidth, height,
                       pixels + yoff, false);
+
+    switch (mFormat) {
+        case FRAMEWORK_FORMAT_YV12:
+            subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
+                              x, y, cwidth, cheight,
+                              pixels + uoff, false);
+            subUpdateYUVGLTex(GL_TEXTURE2, mVtex,
+                              x, y, cwidth, cheight,
+                              pixels + voff, false);
+            doYUVConversionDraw(mProgram,
+                                mYWidthCutoffLoc,
+                                mCWidthCutoffLoc,
+                                mYSamplerLoc,
+                                mUSamplerLoc,
+                                mVSamplerLoc,
+                                mVUSamplerLoc,
+                                mInCoordLoc,
+                                mPosLoc,
+                                mVbuf, mIbuf,
+                                width, ywidth,
+                                width / 2, cwidth,
+                                mYWidthCutoff,
+                                mCWidthCutoff,
+                                false);
+            break;
+        case FRAMEWORK_FORMAT_YUV_420_888:
+            if (emugl::emugl_feature_is_enabled(
+                android::featurecontrol::YUV420888toNV21)) {
+                subUpdateYUVGLTex(GL_TEXTURE1, mVUtex,
+                                  x, y, cwidth, cheight,
+                                  pixels + voff, true);
+                doYUVConversionDraw(mProgram,
+                                    mYWidthCutoffLoc,
+                                    mCWidthCutoffLoc,
+                                    mYSamplerLoc,
+                                    mUSamplerLoc,
+                                    mVSamplerLoc,
+                                    mVUSamplerLoc,
+                                    mInCoordLoc,
+                                    mPosLoc,
+                                    mVbuf, mIbuf,
+                                    width, ywidth,
+                                    width / 2, cwidth,
+                                    mYWidthCutoff,
+                                    mCWidthCutoff,
+                                    true);
+            } else {
+                subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
+                                  x, y, cwidth, cheight,
+                                  pixels + uoff, false);
+                subUpdateYUVGLTex(GL_TEXTURE2, mVtex,
+                                  x, y, cwidth, cheight,
+                                  pixels + voff, false);
+                doYUVConversionDraw(mProgram,
+                                    mYWidthCutoffLoc,
+                                    mCWidthCutoffLoc,
+                                    mYSamplerLoc,
+                                    mUSamplerLoc,
+                                    mVSamplerLoc,
+                                    mVUSamplerLoc,
+                                    mInCoordLoc,
+                                    mPosLoc,
+                                    mVbuf, mIbuf,
+                                    width, ywidth,
+                                    width / 2, cwidth,
+                                    mYWidthCutoff,
+                                    mCWidthCutoff,
+                                    false);
+            }
+            break;
+        case FRAMEWORK_FORMAT_NV12:
+            subUpdateYUVGLTex(GL_TEXTURE1, mUVtex,
+                              x, y, cwidth, cheight,
+                              pixels + uoff, true);
+            doYUVConversionDraw(mProgram,
+                                mYWidthCutoffLoc,
+                                mCWidthCutoffLoc,
+                                mYSamplerLoc,
+                                mUSamplerLoc,
+                                mVSamplerLoc,
+                                mVUSamplerLoc,
+                                mInCoordLoc,
+                                mPosLoc,
+                                mVbuf, mIbuf,
+                                width, ywidth,
+                                width / 2, cwidth,
+                                mYWidthCutoff,
+                                mCWidthCutoff,
+                                true);
+            break;
+        default:
+            FATAL("Unknown format: 0x%x", mFormat);
+    }
+
     if (emugl::emugl_feature_is_enabled(
         android::featurecontrol::YUV420888toNV21)) {
         if (mFormat == FRAMEWORK_FORMAT_YV12) {
@@ -599,6 +754,10 @@ void YUVConverter::updateCutoffs(float width, float ywidth,
         mYWidthCutoff = 1.0f;
         mCWidthCutoff = 1.0f;
         break;
+    case FRAMEWORK_FORMAT_NV12:
+        mYWidthCutoff = 1.0f;
+        mCWidthCutoff = 1.0f;
+        break;
     case FRAMEWORK_FORMAT_GL_COMPATIBLE:
         FATAL("Input not a YUV format!");
     }
@@ -612,4 +771,5 @@ YUVConverter::~YUVConverter() {
     if (mUtex) s_gles2.glDeleteTextures(1, &mUtex);
     if (mVtex) s_gles2.glDeleteTextures(1, &mVtex);
     if (mVUtex) s_gles2.glDeleteTextures(1, &mVUtex);
+    if (mUVtex) s_gles2.glDeleteTextures(1, &mUVtex);
 }
