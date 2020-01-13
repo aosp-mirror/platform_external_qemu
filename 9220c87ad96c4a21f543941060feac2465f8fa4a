@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "355c02c8_ff23577d",
+        "filename": "android/android-emu/android/recording/video/VideoProducer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-13T18:15:26Z",
+      "side": 1,
+      "message": "any \"return\" in the loop will miss this line and cause a hanging emulator. It may be safer to move the loop into a separate function and call pokeReceiver() when it returns",
+      "range": {
+        "startLine": 204,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 20
+      },
+      "revId": "9220c87ad96c4a21f543941060feac2465f8fa4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "823d3b00_4a45c7d1",
+        "filename": "android/android-emu/android/recording/video/VideoProducer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-01-13T18:15:26Z",
+      "side": 1,
+      "message": "this is a very unorthodox use of MessageChannel, it is worth explaining the idea in a comment",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 28
+      },
+      "revId": "9220c87ad96c4a21f543941060feac2465f8fa4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
