@@ -13,7 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#ifdef _MSC_VER
+namespace waterfall {
+namespace Waterfall {
+class Service {};
+}  // namespace Waterfall
+}  // namespace waterfall
+#else
 #include "waterfall.grpc.pb.h"
+#endif
 
 namespace android {
 namespace emulation {

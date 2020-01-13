@@ -9,14 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+
+#include <gmock/gmock.h>  // for GMOCK_PP_INTERNAL_IF_0, GMOCK_PP_INTERNAL_...
+#include <gtest/gtest.h>  // for Test, AssertionResult, Message, TestPartRe...
+#include <map>            // for multimap
+#include <memory>         // for unique_ptr, make_unique
+
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
-
-#include <gmock/gmock.h>   // for GMOCK_PP_INTERNAL_IF_0, GMOCK_PP_INTERNAL_...
-#include <gtest/gtest.h>   // for Test, AssertionResult, Message, TestPartRe...
-#include <map>             // for multimap
-#include <memory>          // for unique_ptr, make_unique
-
-#include "waterfall.pb.h"  // for Transfer
+#include "emulator_controller.pb.h"
 
 namespace android {
 namespace control {
@@ -25,6 +25,7 @@ namespace interceptor {
 using namespace testing;
 using namespace grpc;
 using namespace grpc::experimental;
+using android::emulation::control::Image;
 
 class MockInterceptorBatchMethods : public InterceptorBatchMethods {
 public:
@@ -83,9 +84,9 @@ TEST(LoggingInterceptor, LoggerForwardsTheCall) {
 }
 
 TEST(LoggingInterceptor, LoggerRecordsData) {
-    waterfall::Transfer msg;
-    msg.set_path("/a/b/c/d");
-    msg.set_success(true);
+    Image msg;
+    msg.set_width(123);
+    msg.set_height(321);
 
     MockInterceptorBatchMethods batchMethods;
 
@@ -117,10 +118,10 @@ TEST(LoggingInterceptor, LoggerRecordsData) {
 }
 
 TEST(LoggingInterceptor, LoggerDoesNotLogLargeMessages) {
-    waterfall::Transfer msg;
-    msg.set_path("/a/b/c/d");
-    msg.set_payload(std::string(8192, 'a'));
-    msg.set_success(true);
+    Image msg;
+    msg.set_width(123);
+    msg.set_image(std::string(8192, 'a'));
+    msg.set_height(321);
 
     MockInterceptorBatchMethods batchMethods;
 
@@ -147,10 +148,10 @@ TEST(LoggingInterceptor, LoggerDoesNotLogLargeMessages) {
 }
 
 TEST(LoggingInterceptor, LoggerSnipsOutLongParameters) {
-    waterfall::Transfer msg;
-    msg.set_path("/a/b/c/d");
-    msg.set_payload(std::string(512, 'a'));
-    msg.set_success(true);
+    Image msg;
+    msg.set_width(123);
+    msg.set_image(std::string(512, 'a'));
+    msg.set_height(321);
 
     MockInterceptorBatchMethods batchMethods;
 
@@ -174,19 +175,19 @@ TEST(LoggingInterceptor, LoggerSnipsOutLongParameters) {
     }
 
     EXPECT_EQ(record.response,
-              "path: \"/a/b/c/d\" payload: "
-              "\"aaaaaaaaaaaaaaaaaaaa...<truncated>...\" success: true");
+              "width: 123 height: 321 image: "
+              "\"aaaaaaaaaaaaaaaaaaaa...<truncated>...\"");
 }
 
 TEST(LoggingInterceptor, LoggerOnlyLogsFirstMsg) {
-    waterfall::Transfer msg;
-    msg.set_path("a/b");
+    Image msg;
+    msg.set_width(123);
 
-    waterfall::Transfer msg2;
-    msg2.set_path("c/d");
+    Image msg2;
+    msg2.set_width(223);
 
-    waterfall::Transfer msg3;
-    msg3.set_path("e/f");
+    Image msg3;
+    msg3.set_width(323);
 
     MockInterceptorBatchMethods batchMethods;
 
