@@ -18,6 +18,7 @@
 #include "android/base/files/Stream.h"
 #include "android/base/ring_buffer.h"
 #include "android/emulation/address_space_graphics_types.h"
+#include "android/opengl/virtio_gpu_ops.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
 
@@ -189,6 +190,8 @@ public:
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.
     virtual void cleanupProcGLObjects(uint64_t puid) = 0;
+
+    virtual struct AndroidVirtioGpuOps* getVirtioGpuOps(void) = 0;
 
     // Stops all channels and render threads. The renderer cannot be used after
     // stopped.
