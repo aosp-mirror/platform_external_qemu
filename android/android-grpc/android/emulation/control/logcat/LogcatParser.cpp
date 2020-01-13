@@ -40,7 +40,7 @@ namespace control {
             case 'W':
                 return LogcatEntry::WARN;
             case 'E':
-                return LogcatEntry::ERROR;
+                return LogcatEntry::ERR;
             case 'F':
                 return LogcatEntry::FATAL;
             case 'S':
@@ -56,7 +56,7 @@ namespace control {
         std::time_t t = std::time(nullptr);
         std::tm* tm = std::localtime(&t);
         tm->tm_isdst = -1;
-        uint msec;
+        uint64_t msec;
 
         // 10-11 11:23:29.463
         if (sscanf(timestr.c_str(), "%d-%d %d:%d:%d.%d", &tm->tm_mon, &tm->tm_mday, &tm->tm_hour,

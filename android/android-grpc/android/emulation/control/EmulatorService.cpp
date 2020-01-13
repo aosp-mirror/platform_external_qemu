@@ -14,11 +14,15 @@
 
 #include "android/emulation/control/EmulatorService.h"
 
+#ifdef _MSC_VER
+ #include "msvc-posix.h"
+ #else
+#include <sys/time.h>
+#endif
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -65,7 +69,9 @@
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
 #include "snapshot-service.grpc.pb.h"
+#ifndef _MSC_VER
 #include "waterfall.grpc.pb.h"
+#endif
 
 namespace google {
 namespace protobuf {
@@ -501,9 +507,11 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
-    builder.RegisterService(wfallforwarder.release());
     builder.RegisterService(snapshotService.release());
 
+#ifndef _MSC_VER
+    builder.RegisterService(wfallforwarder.release());
+#endif
     // Register logging & metrics interceptor.
     std::vector<std::unique_ptr<
             grpc::experimental::ServerInterceptorFactoryInterface>>
