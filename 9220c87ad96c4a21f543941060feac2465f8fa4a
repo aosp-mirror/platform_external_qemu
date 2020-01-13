@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "03158ba9_4da12559",
+        "filename": "android/android-emu/android/recording/video/VideoProducer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-01-13T18:31:59Z",
+      "side": 1,
+      "message": "thanks Yurii;\nI will put a cl to just join the thread.",
+      "parentUuid": "355c02c8_ff23577d",
+      "range": {
+        "startLine": 204,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 20
+      },
+      "revId": "9220c87ad96c4a21f543941060feac2465f8fa4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "823d3b00_4a45c7d1",
         "filename": "android/android-emu/android/recording/video/VideoProducer.cpp",
         "patchSetId": 1
