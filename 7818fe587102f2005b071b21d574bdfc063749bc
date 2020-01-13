@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72964b54_4425fd21",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-01-13T16:22:15Z",
+      "side": 1,
+      "message": "can we use android::base::pj (from PathUtils.h\") here?\n\nalso, is it better to set ASAN_SYMBOLIZER_PATH to the exact llvm-symbolizer we want to use in the beginning? That way, we don\u0027t require any code changes in the emulator",
+      "range": {
+        "startLine": 792,
+        "startChar": 34,
+        "endLine": 792,
+        "endChar": 80
+      },
+      "revId": "7818fe587102f2005b071b21d574bdfc063749bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
