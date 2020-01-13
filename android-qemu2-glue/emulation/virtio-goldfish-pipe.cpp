@@ -14,6 +14,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/android_pipe_common.h"
+#include "android/opengles.h"
 
 #include <deque>
 #include <string>
@@ -183,6 +184,42 @@ static inline uint32_t align_up(uint32_t n, uint32_t a) {
     return ((n + a - 1) / a) * a;
 }
 
+#define VIRGL_FORMAT_NV12 166
+#define VIRGL_FORMAT_YV12 163
+
+const uint32_t kGlBgra = 0x80e1;
+const uint32_t kGlRgba = 0x1908;
+const uint32_t kGlRgb565 = 0x8d62;
+const uint32_t kGlR8 = 0x8229;
+const uint32_t kGlRg8 = 0x822b;
+const uint32_t kGlLuminance = 0x1909;
+const uint32_t kGlLuminanceAlpha = 0x190a;
+const uint32_t kGlUnsignedByte = 0x1401;
+const uint32_t kGlUnsignedShort565 = 0x8363;
+
+constexpr uint32_t kFwkFormatGlCompat = 0;
+constexpr uint32_t kFwkFormatYV12 = 1;
+constexpr uint32_t kFwkFormatYUV420888 = 2;
+constexpr uint32_t kFwkFormatNV12 = 3;
+
+static inline bool virgl_format_is_yuv(uint32_t format) {
+    switch (format) {
+        case VIRGL_FORMAT_B8G8R8X8_UNORM:
+        case VIRGL_FORMAT_B8G8R8A8_UNORM:
+        case VIRGL_FORMAT_R8G8B8X8_UNORM:
+        case VIRGL_FORMAT_R8G8B8A8_UNORM:
+        case VIRGL_FORMAT_B5G6R5_UNORM:
+        case VIRGL_FORMAT_R8_UNORM:
+        case VIRGL_FORMAT_R8G8_UNORM:
+            return false;
+        case VIRGL_FORMAT_NV12:
+        case VIRGL_FORMAT_YV12:
+            return true;
+        default:
+            VGP_FATAL("Unknown virgl format: 0x%x", format);
+    }
+}
+
 static inline uint32_t virgl_format_to_bpp(uint32_t format) {
     uint32_t bpp = 4U;
 
@@ -190,10 +227,12 @@ static inline uint32_t virgl_format_to_bpp(uint32_t format) {
         case VIRGL_FORMAT_R8_UNORM:
             bpp = 1U;
             break;
+        case VIRGL_FORMAT_R8G8_UNORM:
         case VIRGL_FORMAT_B5G6R5_UNORM:
             bpp = 2U;
             break;
         case VIRGL_FORMAT_B8G8R8A8_UNORM:
+        case VIRGL_FORMAT_B8G8R8X8_UNORM:
         case VIRGL_FORMAT_R8G8B8A8_UNORM:
         case VIRGL_FORMAT_R8G8B8X8_UNORM:
         default:
@@ -204,21 +243,141 @@ static inline uint32_t virgl_format_to_bpp(uint32_t format) {
     return bpp;
 }
 
+static inline uint32_t virgl_format_to_gl(uint32_t virgl_format) {
+    switch (virgl_format) {
+        case VIRGL_FORMAT_B8G8R8X8_UNORM:
+        case VIRGL_FORMAT_B8G8R8A8_UNORM:
+            return kGlBgra;
+        case VIRGL_FORMAT_R8G8B8X8_UNORM:
+        case VIRGL_FORMAT_R8G8B8A8_UNORM:
+            return kGlRgba;
+        case VIRGL_FORMAT_B5G6R5_UNORM:
+            return kGlRgb565;
+        case VIRGL_FORMAT_R8_UNORM:
+            return kGlR8;
+        case VIRGL_FORMAT_R8G8_UNORM:
+            return kGlRg8;
+        case VIRGL_FORMAT_NV12:
+        case VIRGL_FORMAT_YV12:
+            // emulated as RGBA8888
+            return kGlRgba;
+        default:
+            return kGlRgba;
+    }
+}
+
+static inline uint32_t virgl_format_to_fwk_format(uint32_t virgl_format) {
+    switch (virgl_format) {
+        case VIRGL_FORMAT_NV12:
+            return kFwkFormatNV12;
+        case VIRGL_FORMAT_YV12:
+            return kFwkFormatYV12;
+        case VIRGL_FORMAT_R8_UNORM:
+        case VIRGL_FORMAT_R8G8_UNORM:
+        case VIRGL_FORMAT_B8G8R8X8_UNORM:
+        case VIRGL_FORMAT_B8G8R8A8_UNORM:
+        case VIRGL_FORMAT_R8G8B8X8_UNORM:
+        case VIRGL_FORMAT_R8G8B8A8_UNORM:
+        case VIRGL_FORMAT_B5G6R5_UNORM:
+        default: // kFwkFormatGlCompat: No extra conversions needed
+            return kFwkFormatGlCompat;
+    }
+}
+
+static inline uint32_t gl_format_to_natural_type(uint32_t format) {
+    switch (format) {
+        case kGlBgra:
+        case kGlRgba:
+        case kGlLuminance:
+        case kGlLuminanceAlpha:
+            return kGlUnsignedByte;
+        case kGlRgb565:
+            return kGlUnsignedShort565;
+        default:
+            return kGlUnsignedByte;
+    }
+}
+
+static inline size_t virgl_format_to_linear_base(
+    uint32_t format,
+    uint32_t totalWidth, uint32_t totalHeight,
+    uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    if (virgl_format_is_yuv(format)) {
+        return 0;
+    } else {
+        uint32_t bpp = 4;
+        switch (format) {
+            case VIRGL_FORMAT_B8G8R8X8_UNORM:
+            case VIRGL_FORMAT_B8G8R8A8_UNORM:
+            case VIRGL_FORMAT_R8G8B8X8_UNORM:
+            case VIRGL_FORMAT_R8G8B8A8_UNORM:
+                bpp = 4;
+                break;
+            case VIRGL_FORMAT_B5G6R5_UNORM:
+            case VIRGL_FORMAT_R8G8_UNORM:
+                bpp = 2;
+                break;
+            case VIRGL_FORMAT_R8_UNORM:
+                bpp = 1;
+                break;
+            default:
+                VGP_FATAL("Unknown format: 0x%x", format);
+        }
+
+        uint32_t stride = totalWidth * bpp;
+        return y * stride + x * bpp;
+    }
+    return 0;
+}
+
+static inline size_t virgl_format_to_total_xfer_len(
+    uint32_t format,
+    uint32_t totalWidth, uint32_t totalHeight,
+    uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    if (virgl_format_is_yuv(format)) {
+        uint32_t align = (format == VIRGL_FORMAT_YV12) ?  1 : 16;
+        uint32_t yStride = (totalWidth + (align - 1)) & ~(align-1);
+        uint32_t uvStride = (yStride / 2 + (align - 1)) & ~(align-1);
+        uint32_t uvHeight = totalHeight / 2;
+        uint32_t dataSize = yStride * totalHeight + 2 * (uvHeight * uvStride);
+        return dataSize;
+    } else {
+        uint32_t bpp = 4;
+        switch (format) {
+            case VIRGL_FORMAT_B8G8R8X8_UNORM:
+            case VIRGL_FORMAT_B8G8R8A8_UNORM:
+            case VIRGL_FORMAT_R8G8B8X8_UNORM:
+            case VIRGL_FORMAT_R8G8B8A8_UNORM:
+                bpp = 4;
+                break;
+            case VIRGL_FORMAT_B5G6R5_UNORM:
+            case VIRGL_FORMAT_R8G8_UNORM:
+                bpp = 2;
+                break;
+            case VIRGL_FORMAT_R8_UNORM:
+                bpp = 1;
+                break;
+            default:
+                VGP_FATAL("Unknown format: 0x%x", format);
+        }
+
+        uint32_t stride = totalWidth * bpp;
+        return (h - 1U) * stride + w * bpp;
+    }
+    return 0;
+}
+
+
 enum IovSyncDir {
     IOV_TO_LINEAR = 0,
     LINEAR_TO_IOV = 1,
 };
 
 static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, IovSyncDir dir) {
-    // precondition: format is already R8 and bpp is 1
-    if (res->args.format != VIRGL_FORMAT_R8_UNORM) {
-        VGP_FATAL("Must use R8 format");
-    }
-
-    VGPLOG("offset: 0x%llx box: %u %u %u %u res bpp %u size %u x %u iovs %u linearSize %zu",
+    VGPLOG("offset: 0x%llx box: %u %u %u %u size %u x %u iovs %u linearSize %zu",
             (unsigned long long)offset,
             box->x, box->y, box->w, box->h,
-            1, res->args.width, res->args.height,
+            res->args.width, res->args.height,
             res->numIovs,
             res->linearSize);
 
@@ -232,14 +391,19 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
         VGP_FATAL("Box overflows resource width");
     }
 
-    uint32_t w = box->w;
-    uint32_t h = box->h;
-    uint32_t stride = res->args.width;
-    size_t linearBase = box->y * stride + box->x;
-    size_t start = box->y * stride + box->x;
+    size_t linearBase = virgl_format_to_linear_base(
+        res->args.format,
+        res->args.width,
+        res->args.height,
+        box->x, box->y, box->w, box->h);
+    size_t start = linearBase;
     // height - 1 in order to treat the (w * bpp) row specially
     // (i.e., the last row does not occupy the full stride)
-    size_t length = (h - 1U) * stride + w;
+    size_t length = virgl_format_to_total_xfer_len(
+        res->args.format,
+        res->args.width,
+        res->args.height,
+        box->x, box->y, box->w, box->h);
     size_t end = start + length;
 
     if (end > res->linearSize) {
@@ -253,7 +417,7 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
     size_t written = 0;
     char* linear = static_cast<char*>(res->linear);
 
-    while (written < w) {
+    while (written < length) {
 
         if (iovIndex >= res->numIovs) {
             VGP_FATAL("write request overflowed numIovs");
@@ -300,6 +464,10 @@ public:
         VGPLOG("cookie: %p", cookie);
         mCookie = cookie;
         mVirglRendererCallbacks = *callbacks;
+        mVirtioGpuOps = android_getVirtioGpuOps();
+        if (!mVirtioGpuOps) {
+            VGP_FATAL("Could not get virtio gpu ops!");
+        }
         VGPLOG("done");
         return 0;
     }
@@ -438,11 +606,68 @@ public:
         VGPLOG("end");
     }
 
+    enum pipe_texture_target {
+        PIPE_BUFFER,
+        PIPE_TEXTURE_1D,
+        PIPE_TEXTURE_2D,
+        PIPE_TEXTURE_3D,
+        PIPE_TEXTURE_CUBE,
+        PIPE_TEXTURE_RECT,
+        PIPE_TEXTURE_1D_ARRAY,
+        PIPE_TEXTURE_2D_ARRAY,
+        PIPE_TEXTURE_CUBE_ARRAY,
+        PIPE_MAX_TEXTURE_TYPES,
+    };
+
+    /**
+     *  * Resource binding flags -- state tracker must specify in advance all
+     *   * the ways a resource might be used.
+     *    */
+#define PIPE_BIND_DEPTH_STENCIL        (1 << 0) /* create_surface */
+#define PIPE_BIND_RENDER_TARGET        (1 << 1) /* create_surface */
+#define PIPE_BIND_BLENDABLE            (1 << 2) /* create_surface */
+#define PIPE_BIND_SAMPLER_VIEW         (1 << 3) /* create_sampler_view */
+#define PIPE_BIND_VERTEX_BUFFER        (1 << 4) /* set_vertex_buffers */
+#define PIPE_BIND_INDEX_BUFFER         (1 << 5) /* draw_elements */
+#define PIPE_BIND_CONSTANT_BUFFER      (1 << 6) /* set_constant_buffer */
+#define PIPE_BIND_DISPLAY_TARGET       (1 << 7) /* flush_front_buffer */
+    /* gap */
+#define PIPE_BIND_STREAM_OUTPUT        (1 << 10) /* set_stream_output_buffers */
+#define PIPE_BIND_CURSOR               (1 << 11) /* mouse cursor */
+#define PIPE_BIND_CUSTOM               (1 << 12) /* state-tracker/winsys usages */
+#define PIPE_BIND_GLOBAL               (1 << 13) /* set_global_binding */
+#define PIPE_BIND_SHADER_BUFFER        (1 << 14) /* set_shader_buffers */
+#define PIPE_BIND_SHADER_IMAGE         (1 << 15) /* set_shader_images */
+#define PIPE_BIND_COMPUTE_RESOURCE     (1 << 16) /* set_compute_resources */
+#define PIPE_BIND_COMMAND_ARGS_BUFFER  (1 << 17) /* pipe_draw_info.indirect */
+#define PIPE_BIND_QUERY_BUFFER         (1 << 18) /* get_query_result_resource */
+
+
+    void handleCreateResourceGraphicsUsage(
+            struct virgl_renderer_resource_create_args *args,
+            struct iovec *iov, uint32_t num_iovs) {
+
+        if (args->target == PIPE_BUFFER) {
+            // Nothing to handle; this is generic pipe usage.
+            return;
+        }
+
+        // corresponds to allocation of gralloc buffer in minigbm
+        VGPLOG("w h %u %u resid %u -> rcCreateColorBufferWithHandle",
+               args->width, args->height, args->handle);
+        uint32_t glformat = virgl_format_to_gl(args->format);
+        uint32_t fwkformat = virgl_format_to_fwk_format(args->format);
+        mVirtioGpuOps->create_color_buffer_with_handle(
+            args->width, args->height, glformat, fwkformat, args->handle);
+    }
+
     int createResource(
             struct virgl_renderer_resource_create_args *args,
             struct iovec *iov, uint32_t num_iovs) {
 
         VGPLOG("handle: %u. num iovs: %u", args->handle, num_iovs);
+
+        handleCreateResourceGraphicsUsage(args, iov, num_iovs);
 
         PipeResEntry e;
         e.args = *args;
@@ -453,6 +678,11 @@ public:
         AutoLock lock(mLock);
         mResources[args->handle] = e;
         return 0;
+    }
+
+    void handleUnrefResourceGraphicsUsage(PipeResEntry* res, uint32_t resId) {
+        if (res->args.target == PIPE_BUFFER) return;
+        mVirtioGpuOps->close_color_buffer(resId);
     }
 
     void unrefResource(uint32_t toUnrefId) {
@@ -472,6 +702,8 @@ public:
         }
 
         auto& entry = it->second;
+
+        handleUnrefResourceGraphicsUsage(&entry, toUnrefId);
 
         if (entry.linear) {
             free(entry.linear);
@@ -529,6 +761,50 @@ public:
         VGPLOG("done");
     }
 
+    bool handleTransferReadGraphicsUsage(
+        PipeResEntry* res, uint64_t offset, virgl_box* box) {
+        // PIPE_BUFFER: Generic pipe usage
+        if (res->args.target == PIPE_BUFFER) return true;
+
+        // Others: Gralloc transfer read operation
+        auto glformat = virgl_format_to_gl(res->args.format);
+        auto gltype = gl_format_to_natural_type(glformat);
+
+        // We always xfer the whole thing again to GL
+        // since it's fiddly to calc / copy-out subregions
+        mVirtioGpuOps->read_color_buffer(
+            res->args.handle,
+            0, 0,
+            res->args.width, res->args.height,
+            glformat,
+            gltype,
+            res->linear);
+
+        return false;
+    }
+
+    bool handleTransferWriteGraphicsUsage(
+        PipeResEntry* res, uint64_t offset, virgl_box* box) {
+        // PIPE_BUFFER: Generic pipe usage
+        if (res->args.target == PIPE_BUFFER) return true;
+
+        // Others: Gralloc transfer read operation
+        auto glformat = virgl_format_to_gl(res->args.format);
+        auto gltype = gl_format_to_natural_type(glformat);
+
+        // We always xfer the whole thing again to GL
+        // since it's fiddly to calc / copy-out subregions
+        mVirtioGpuOps->update_color_buffer(
+            res->args.handle,
+            0, 0,
+            res->args.width, res->args.height,
+            glformat,
+            gltype,
+            res->linear);
+
+        return false;
+    }
+
     int transferReadIov(int resId, uint64_t offset, virgl_box* box) {
         AutoLock lock(mLock);
 
@@ -544,26 +820,29 @@ public:
 
         auto& entry = it->second;
 
-        // Do the pipe service op here, if there is an associated hostpipe.
-        auto hostPipe = entry.hostPipe;
-        if (!hostPipe) return -1;
+        if (handleTransferReadGraphicsUsage(
+            &entry, offset, box)) {
+            // Do the pipe service op here, if there is an associated hostpipe.
+            auto hostPipe = entry.hostPipe;
+            if (!hostPipe) return -1;
 
-        auto ops = ensureAndGetServiceOps();
+            auto ops = ensureAndGetServiceOps();
 
-        size_t readBytes = 0;
-        size_t wantedBytes = readBytes + (size_t)box->w;
+            size_t readBytes = 0;
+            size_t wantedBytes = readBytes + (size_t)box->w;
 
-        while (readBytes < wantedBytes) {
-            GoldfishPipeBuffer buf = {
-                ((char*)entry.linear) + box->x + readBytes,
-                wantedBytes - readBytes,
-            };
-            auto status = ops->guest_recv(hostPipe, &buf, 1);
+            while (readBytes < wantedBytes) {
+                GoldfishPipeBuffer buf = {
+                    ((char*)entry.linear) + box->x + readBytes,
+                    wantedBytes - readBytes,
+                };
+                auto status = ops->guest_recv(hostPipe, &buf, 1);
 
-            if (status > 0) {
-                readBytes += status;
-            } else if (status != kPipeTryAgain) {
-                return EIO;
+                if (status > 0) {
+                    readBytes += status;
+                } else if (status != kPipeTryAgain) {
+                    return EIO;
+                }
             }
         }
 
@@ -588,32 +867,34 @@ public:
         auto& entry = it->second;
         auto syncRes = sync_iov(&entry, offset, box, IOV_TO_LINEAR);
 
-        // Do the pipe service op here, if there is an associated hostpipe.
-        auto hostPipe = entry.hostPipe;
-        if (!hostPipe) {
-            VGPLOG("No hostPipe");
-            return syncRes;
-        }
+        if (handleTransferWriteGraphicsUsage(&entry, offset, box)) {
+            // Do the pipe service op here, if there is an associated hostpipe.
+            auto hostPipe = entry.hostPipe;
+            if (!hostPipe) {
+                VGPLOG("No hostPipe");
+                return syncRes;
+            }
 
-        VGPLOG("resid: %d offset: 0x%llx hostpipe: %p", resId,
-               (unsigned long long)offset, hostPipe);
+            VGPLOG("resid: %d offset: 0x%llx hostpipe: %p", resId,
+                   (unsigned long long)offset, hostPipe);
 
-        auto ops = ensureAndGetServiceOps();
+            auto ops = ensureAndGetServiceOps();
 
-        size_t writtenBytes = 0;
-        size_t wantedBytes = (size_t)box->w;
+            size_t writtenBytes = 0;
+            size_t wantedBytes = (size_t)box->w;
 
-        while (writtenBytes < wantedBytes) {
-            GoldfishPipeBuffer buf = {
-                ((char*)entry.linear) + box->x + writtenBytes,
-                wantedBytes - writtenBytes,
-            };
-            auto status = ops->guest_send(hostPipe, &buf, 1);
+            while (writtenBytes < wantedBytes) {
+                GoldfishPipeBuffer buf = {
+                    ((char*)entry.linear) + box->x + writtenBytes,
+                    wantedBytes - writtenBytes,
+                };
+                auto status = ops->guest_send(hostPipe, &buf, 1);
 
-            if (status > 0) {
-                writtenBytes += status;
-            } else if (status != kPipeTryAgain) {
-                return EIO;
+                if (status > 0) {
+                    writtenBytes += status;
+                } else if (status != kPipeTryAgain) {
+                    return EIO;
+                }
             }
         }
 
@@ -784,6 +1065,7 @@ private:
     void* mCookie = nullptr;
     int mFlags = 0;
     virgl_renderer_callbacks mVirglRendererCallbacks;
+    AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
 
     uint32_t mNextHwPipe = 1;
     const GoldfishPipeServiceOps* mServiceOps = nullptr;
