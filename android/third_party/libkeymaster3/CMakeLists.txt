@@ -65,3 +65,5 @@ endif()
 if(WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3" "-Wno-incompatible-pointer-types")
 endif()
+
+android_license(libkeymaster3 "android/third_party/libkeymaster3/NOTICE")

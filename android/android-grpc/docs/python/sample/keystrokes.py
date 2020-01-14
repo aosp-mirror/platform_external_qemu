@@ -30,7 +30,7 @@ stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
 # Let's type some text..
 for l in "Hello World":
-    textEvent = proto.emulator_controller_pb2.KeyboardEvent(text=l)
+    textEvent = proto.emulator_controller_pb2.KeyboardEvent(key="Backspace")
     print("Typing: {}".format(l))
     response = stub.sendKey(textEvent)
     time.sleep(0.2)

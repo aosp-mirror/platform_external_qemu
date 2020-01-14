@@ -21,4 +21,4 @@ else ()
     endif ()
     target_compile_definitions(emulator-libselinux PRIVATE -DHOST)
 endif ()
-
+android_license(emulator-libselinux "android/third_party/libselinux/NOTICE")
