@@ -295,7 +295,8 @@ extern "C" VG_EXPORT void init_global_state() {
                      true,                   /* no window */
                      false,                  /* blacklisted */
                      false,                  /* has guest renderer */
-                     WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+                     WINSYS_GLESBACKEND_PREFERENCE_AUTO,
+                     false                   /* force host gpu vulkan */);
 
     emuglConfig_setupEnv(&config);
 
