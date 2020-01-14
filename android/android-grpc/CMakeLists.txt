@@ -52,13 +52,17 @@ android_add_library(
       android/emulation/control/logcat/RingStreambuf.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/snapshot/TarStream.cpp
+      android/emulation/control/utils/EventWaiter.cpp
+      android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/ServiceUtils.cpp)
 target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
                                                       android-net grpc++)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
-set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
+target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage
+                                            -std=c++17)
+set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS
+                                                              OFF)
 
 if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
@@ -70,6 +74,7 @@ android_add_test(
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
       android/emulation/control/snapshot/TarStream_unittest.cpp
+      android/emulation/control/utils/EventWaiter_unittest.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++

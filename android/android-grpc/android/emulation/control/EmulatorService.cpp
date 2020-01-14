@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "android/base/Log.h"
+#include "android/base/Stopwatch.h"
 #include "android/base/Uuid.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
@@ -57,10 +58,13 @@
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/utils/EventWaiter.h"
+#include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/ServiceUtils.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
@@ -352,59 +356,94 @@ public:
         return Status::OK;
     }
 
+    Status streamScreenshot(ServerContext* context,
+                            const ImageFormat* request,
+                            ServerWriter<Image>* writer) override {
+        EventWaiter frameEvent(&gpu_register_shared_memory_callback,
+                               &gpu_unregister_shared_memory_callback);
+        bool clientAvailable = !context->IsCancelled();
+        while (clientAvailable) {
+            Image reply;
+            // We want to be able to gracefully exit, so ever so often
+            // we want to make sure the client is still there..
+            auto frame = frameEvent.next(std::chrono::milliseconds(500));
+            if (frame > 0) {
+                // TODO(jansene): Add metrics around dropped frames/timing?
+                getScreenshot(context, request, &reply);
+                clientAvailable = writer->Write(reply);
+            }
+            clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+
+        return Status::OK;
+    };
+
     Status getScreenshot(ServerContext* context,
                          const ImageFormat* request,
                          Image* reply) override {
-        auto start = System::get()->getUnixTimeUs();
-        auto desiredFormat = android::emulation::ImageFormat::PNG;
-        if (request->format() == ImageFormat::RGBA8888) {
-            desiredFormat = android::emulation::ImageFormat::RGBA8888;
+        uint32_t width, height;
+        bool enabled;
+        mAgents->emu->getMultiDisplay(request->display(), nullptr, nullptr,
+                                      &width, &height, nullptr, nullptr,
+                                      &enabled);
+        if (!enabled)
+            return Status::OK;
+
+        android::emulation::ImageFormat desiredFormat =
+                ScreenshotUtils::translate(request->format());
+
+        float xaxis = 0, yaxis = 0, zaxis = 0;
+
+        // TODO(jansene): Not clear if the rotation impacts displays other
+        // than 0.
+        if (request->display() == 0) {
+            mAgents->sensors->getPhysicalParameter(
+                    PHYSICAL_PARAMETER_ROTATION, &xaxis, &yaxis, &zaxis,
+                    PARAMETER_VALUE_TYPE_CURRENT);
         }
+        auto rotation = ScreenshotUtils::coarseRotation(zaxis);
+
+        // Calculate the disired rotation and width we should use..
+        int desiredWidth = request->width();
+        int desiredHeight = request->height();
+        SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
+
+        // User wants to use device width/height
+        if (desiredWidth == 0 || desiredHeight == 0) {
+            desiredWidth = width;
+            desiredHeight = height;
+
+            if (rotation == Rotation::LANDSCAPE ||
+                rotation == Rotation::REVERSE_LANDSCAPE) {
+                std::swap(desiredWidth, desiredHeight);
+            }
+        }
+
+        // Calculate widht and height, keeping aspect ration in mind.
+        const auto [newWidth, newHeight] =
+                ScreenshotUtils::resizeKeepAspectRatio(
+                        width, height, desiredWidth, desiredHeight);
 
         // Screenshots can come from either the gl renderer, or the guest.
         const auto& renderer = android_getOpenglesRenderer();
         android::emulation::Image img = android::emulation::takeScreenshot(
-                desiredFormat, SKIN_ROTATION_0, renderer.get(),
-                mAgents->display->getFrameBuffer);
+                desiredFormat, desiredRotation, renderer.get(),
+                mAgents->display->getFrameBuffer, request->display(), newWidth,
+                newHeight);
 
-        reply->set_height(img.getHeight());
-        reply->set_width(img.getWidth());
         reply->set_image(img.getPixelBuf(), img.getPixelCount());
+
+        // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
-        switch (img.getImageFormat()) {
-            case android::emulation::ImageFormat::PNG:
-                format->set_format(ImageFormat::PNG);
-                break;
-            case android::emulation::ImageFormat::RGB888:
-                format->set_format(ImageFormat::RGB888);
-                break;
-            case android::emulation::ImageFormat::RGBA8888:
-                format->set_format(ImageFormat::RGBA8888);
-                break;
-            default:
-                LOG(ERROR) << "Unknown format retrieved during snapshot";
-        }
+        format->set_format(ScreenshotUtils::translate(img.getImageFormat()));
         format->set_height(img.getHeight());
         format->set_width(img.getWidth());
 
-        float x = 0, y = 0, z = 0;
-        mAgents->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION, &x,
-                                               &y, &z,
-                                               PARAMETER_VALUE_TYPE_CURRENT);
-        format->mutable_rotation()->set_xaxis(x);
-        format->mutable_rotation()->set_yaxis(y);
-        format->mutable_rotation()->set_zaxis(z);
-        if (z < -90) {
-            format->mutable_rotation()->set_rotation(
-                    Rotation::REVERSE_PORTRAIT);
-        } else if (z < 0) {
-            format->mutable_rotation()->set_rotation(
-                    Rotation::REVERSE_LANDSCAPE);
-        } else if (z < 90) {
-            format->mutable_rotation()->set_rotation(Rotation::PORTRAIT);
-        } else {
-            format->mutable_rotation()->set_rotation(Rotation::LANDSCAPE);
-        }
+        auto rotation_reply = format->mutable_rotation();
+        rotation_reply->set_xaxis(xaxis);
+        rotation_reply->set_yaxis(yaxis);
+        rotation_reply->set_zaxis(zaxis);
+        rotation_reply->set_rotation(rotation);
 
         return Status::OK;
     }

@@ -25,6 +25,7 @@ std::unordered_map<std::string, std::string> getQemuConfig();
 // or calling adb.
 bool bootCompleted();
 
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
