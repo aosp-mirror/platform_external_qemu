@@ -186,7 +186,8 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool no_window,
                       bool blacklisted,
                       bool has_guest_renderer,
-                      enum WinsysPreferredGlesBackend uiPreferredBackend) {
+                      enum WinsysPreferredGlesBackend uiPreferredBackend,
+                      bool use_host_vulkan) {
     D("%s: blacklisted=%d has_guest_renderer=%d\n",
       __FUNCTION__,
       blacklisted,
@@ -256,6 +257,7 @@ bool emuglConfig_init(EmuglConfig* config,
     }
 
     config->bitness = bitness;
+    config->use_host_vulkan = use_host_vulkan;
     resetBackendList(bitness);
 
     // Check that the GPU mode is a valid value. 'auto' means determine
@@ -379,8 +381,10 @@ bool emuglConfig_init(EmuglConfig* config,
 void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
 
-    // Use Swiftshader vk icd if using swiftshader_indirect
-    if (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+    if (config->use_host_vulkan) {
+        system->envSet("ANDROID_EMU_VK_ICD", NULL);
+    } else if (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+        // Use Swiftshader vk icd if using swiftshader_indirect
         system->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
     }
 

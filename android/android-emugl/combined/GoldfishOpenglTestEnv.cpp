@@ -148,7 +148,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
                      true,                   /* no window */
                      false,                  /* blacklisted */
                      false,                  /* has guest renderer */
-                     WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+                     WINSYS_GLESBACKEND_PREFERENCE_AUTO,
+                     false);
 
     emuglConfig_setupEnv(&config);
 

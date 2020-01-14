@@ -185,6 +185,7 @@ OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" 
 #endif
 
 OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
+OPT_FLAG( use_host_vulkan, "use host for vulkan emulation regardless of 'gpu' mode")
 
 OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" )
 OPT_PARAM( camera_front, "<mode>", "set emulation mode for a camera facing front" )
