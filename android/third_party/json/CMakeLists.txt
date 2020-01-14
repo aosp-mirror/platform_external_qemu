@@ -128,3 +128,4 @@ if(JSON_Install)
         DESTINATION ${NLOHMANN_JSON_CONFIG_INSTALL_DIR}
     )
 endif()
+android_license(nlohmann_json  "android/third_party/json/NOTICE")
