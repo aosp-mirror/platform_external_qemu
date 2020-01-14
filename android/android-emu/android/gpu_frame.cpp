@@ -14,12 +14,22 @@
 
 #include "android/gpu_frame.h"
 
-#include <atomic>
+#include <atomic>         // for atomic, __atomic_base
+#include <cassert>        // for assert
+#include <cstddef>        // for NULL
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair
 
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/opengl/GpuFrameBridge.h"
-#include "android/opengles.h"
+#include "android/base/Log.h"                   // for LogMessage, DCHECK
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/opengl/GpuFrameBridge.h"      // for GpuFrameBridge
+#include "android/opengles.h"                   // for android_setPostCallback
+
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+}  // namespace android
 
 // Standard values from Khronos.
 #define GL_RGBA 0x1908
@@ -32,9 +42,16 @@ static GpuFrameBridge* sBridge = NULL;
 // path and it is not in use because glReadPixels will slow down everything.
 static bool sIsGuestMode = false;
 
+static std::unordered_map<void*, FrameAvailableCallback> sReceivers{};
+static android::base::Lock sReceiversLock;
 
-static FrameAvailableCallback sFrameReceiver;
-static void* sFrameReceiverOpaque;
+static void frameReceivedForwader(void* __ignored) {
+    android::base::AutoLock lock(sReceiversLock);
+    // Iterate over an unordered_map using range based for loop
+    for (auto fn : sReceivers) {
+        fn.second(fn.first);
+    }
+}
 
 // Used to keep track of how many recorders we have active.
 // Frame forwarding will stop if this hits 0.
@@ -43,12 +60,20 @@ static std::atomic<int> sRecordCounter(0);
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
 
-typedef void (*on_new_gpu_frame_t)(void* opaque, int width, int height,
-                                   int ydir, int format, int type,
+typedef void (*on_new_gpu_frame_t)(void* opaque,
+                                   int width,
+                                   int height,
+                                   int ydir,
+                                   int format,
+                                   int type,
                                    unsigned char* pixels);
 // Guest mode:
-static void onNewGpuFrame_guest(void* opaque, int width, int height,
-                                int ydir, int format, int type,
+static void onNewGpuFrame_guest(void* opaque,
+                                int width,
+                                int height,
+                                int ydir,
+                                int format,
+                                int type,
                                 unsigned char* pixels) {
     DCHECK(ydir == -1);
     DCHECK(format == GL_RGBA);
@@ -59,9 +84,13 @@ static void onNewGpuFrame_guest(void* opaque, int width, int height,
 }
 
 // Recording (synchronous):
-static void onNewGpuFrame_record(void* opaque, int width, int height,
-                                int ydir, int format, int type,
-                                unsigned char* pixels) {
+static void onNewGpuFrame_record(void* opaque,
+                                 int width,
+                                 int height,
+                                 int ydir,
+                                 int format,
+                                 int type,
+                                 unsigned char* pixels) {
     DCHECK(ydir == -1);
     DCHECK(format == GL_RGBA);
     DCHECK(type == GL_UNSIGNED_BYTE);
@@ -71,8 +100,12 @@ static void onNewGpuFrame_record(void* opaque, int width, int height,
 }
 
 // Recording (asynchronous):
-static void onNewGpuFrame_recordAsync(void* opaque, int width, int height,
-                                      int ydir, int format, int type,
+static void onNewGpuFrame_recordAsync(void* opaque,
+                                      int width,
+                                      int height,
+                                      int ydir,
+                                      int format,
+                                      int type,
                                       unsigned char* pixels) {
     DCHECK(ydir == -1);
     DCHECK(format == GL_RGBA);
@@ -98,17 +131,13 @@ static void gpu_frame_set_post(bool on) {
     CHECK(sBridge);
 
     if (on) {
-        android_setPostCallback(choose_on_new_gpu_frame(), sBridge, true /* BGRA readback */);
+        android_setPostCallback(choose_on_new_gpu_frame(), sBridge,
+                                true /* BGRA readback */);
     } else {
         android_setPostCallback(nullptr, nullptr, true /* BGRA readback */);
     }
 }
 
-static void frame_callback() {
-    if (sFrameReceiver) {
-        sFrameReceiver(sFrameReceiverOpaque);
-    }
-}
 void gpu_frame_set_post_callback(Looper* looper,
                                  void* context,
                                  on_post_callback_t callback) {
@@ -117,8 +146,9 @@ void gpu_frame_set_post_callback(Looper* looper,
             reinterpret_cast<android::base::Looper*>(looper), callback,
             context);
     CHECK(sBridge);
-    sBridge->setFrameReceiver(sFrameReceiver, sFrameReceiverOpaque);
-    android_setPostCallback(choose_on_new_gpu_frame(), sBridge, true /* BGRA readback */);
+    sBridge->setFrameReceiver(frameReceivedForwader, nullptr);
+    android_setPostCallback(choose_on_new_gpu_frame(), sBridge,
+                            true /* BGRA readback */);
     sIsGuestMode = true;
 }
 
@@ -139,7 +169,7 @@ bool gpu_frame_set_record_mode(bool on) {
     if (!sBridge) {
         sBridge = android::opengl::GpuFrameBridge::create(nullptr, nullptr,
                                                           nullptr);
-        sBridge->setFrameReceiver(sFrameReceiver, sFrameReceiverOpaque);
+        sBridge->setFrameReceiver(frameReceivedForwader, nullptr);
     }
     CHECK(sBridge);
 
@@ -164,11 +194,19 @@ void* gpu_frame_get_record_frame() {
     }
 }
 
-void gpu_set_shared_memory_callback(FrameAvailableCallback frameAvailable, void* opaque) {
-        sFrameReceiver = frameAvailable;
-        sFrameReceiverOpaque = opaque;
+void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
+                                         void* opaque) {
+    android::base::AutoLock lock(sReceiversLock);
+    auto cnt = sReceivers.size();
+    sReceivers[opaque] = frameAvailable;
+    gpu_frame_set_record_mode(true);
+    assert((cnt + 1) == sReceivers.size());
+}
 
-    if (sBridge) {
-        sBridge->setFrameReceiver(sFrameReceiver, sFrameReceiverOpaque);
-    }
+void gpu_unregister_shared_memory_callback(void* opaque) {
+    android::base::AutoLock lock(sReceiversLock);
+    auto cnt = sReceivers.size();
+    sReceivers.erase(opaque);
+    gpu_frame_set_record_mode(false);
+    assert((cnt - 1) == sReceivers.size());
 }
