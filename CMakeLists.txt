@@ -229,6 +229,7 @@ endif()
 # without exceptions support, then the program terminates.
 add_cxx_flag("-fno-exceptions")
 add_cxx_flag("-Wno-invalid-offsetof")
+add_cxx_flag("-Wno-implicit-int-float-conversion")
 
 # Ensure that <inttypes.h> always defines all interesting macros.
 add_definitions("-D__STDC_LIMIT_MACROS=1" "-D__STDC_FORMAT_MACROS=1")
@@ -460,7 +461,10 @@ android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
                                "-Wno-return-type"
                                "-Wno-shift-negative-value"
                                # There are a series of out of bounds issues in hvf.
-                               "-Wno-array-bounds" "-Wno-format")
+                               "-Wno-array-bounds"
+                               "-Wno-format"
+                               "-Wno-implicit-int-float-conversion"
+                               "-Wno-reorder-init-list")
 android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE "-D_DARWIN_C_SOURCE=1")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework IOKit" "-framework CoreFoundation")
 
@@ -484,7 +488,9 @@ android_target_compile_options(android-qemu-deps
                                "-Wno-address-of-packed-member"
                                "-Wno-address-of"
                                "-mms-bitfields"
-                               "-mcx16")
+                               "-mcx16"
+                               "-Wno-implicit-int-float-conversion"
+                               "-Wno-reorder-init-list")
 
 android_target_compile_options(android-qemu-deps
                                windows-x86_64
@@ -524,7 +530,9 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-initializer-overrides"
                                "-Wno-tautological-compare"
                                "-Wno-tautological-pointer-compare"
-                               "-Wno-unused-variable")
+                               "-Wno-unused-variable"
+                               "-Wno-implicit-int-float-conversion"
+                               "-Wno-reorder-init-list")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE android-emu-base)
