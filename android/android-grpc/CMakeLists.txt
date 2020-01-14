@@ -52,6 +52,8 @@ android_add_library(
       android/emulation/control/logcat/RingStreambuf.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/snapshot/TarStream.cpp
+      android/emulation/control/utils/EventWaiter.cpp
+      android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/ServiceUtils.cpp)
 target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
                                                       android-net grpc++)
@@ -70,6 +72,7 @@ android_add_test(
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
       android/emulation/control/snapshot/TarStream_unittest.cpp
+      android/emulation/control/utils/EventWaiter_unittest.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++
