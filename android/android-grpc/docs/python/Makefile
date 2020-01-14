@@ -47,6 +47,4 @@ run: protoc
 	$(PYTHON) -m sample.logcat
 
 deps:
-		$(PYTHON) -m pip install --user grpcio
-		$(PYTHON) -m pip install --user grpcio-tools
-		$(PYTHON) -m pip install --user protobuf3
+		$(PYTHON) -m pip install --user grpcio grpcio-tools PIL
