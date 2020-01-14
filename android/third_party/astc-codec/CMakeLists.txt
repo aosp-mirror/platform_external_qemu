@@ -50,6 +50,8 @@ target_compile_definitions(emulator_astc_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 target_compile_features(emulator_astc_unittests PRIVATE cxx_std_14)
 target_link_libraries(emulator_astc_unittests emulator-astc-codec gmock_main)
 
+
+android_license(emulator-astc-codec "QEMU")
 if(LINUX_X86_64)
   set_target_properties(emulator_astc_unittests
                         PROPERTIES LINK_FLAGS "-Wl,-rpath=$ORIGIN/lib64:$ORIGIN/lib:$ORIGIN/intermediates64")

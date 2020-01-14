@@ -54,3 +54,5 @@ android_target_compile_definitions(zlib
                                    -DZLIB_WINAPI
                                    -DNDEBUG
                                    -DWIN64)
+
+# No license needed

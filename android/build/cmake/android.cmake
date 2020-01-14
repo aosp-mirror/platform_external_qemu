@@ -312,6 +312,12 @@ function(android_add_interface name)
 endfunction()
 
 
+function(android_license tgt license)
+  get_filename_component(LICENSE_FILE "${license}" ABSOLUTE BASE_DIR ${ANDROID_QEMU2_TOP_DIR})
+  # get_filename_component(LICENSE_FILE "${LICENSE_FILE}" ABSOLUTE)
+  file(APPEND ${CMAKE_BINARY_DIR}/NOTICES.txt "${tgt},${license}\n")
+endfunction()
+
 function(android_add_default_test_properties name)
   # Configure the test to run with asan..
   file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
@@ -652,6 +658,9 @@ function(android_build_qemu_variant)
                                     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
     android_install_exe(${qemu_build_EXE} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
   endif()
+
+  # Add the qemu license
+  android_license(${qemu_build_EXE} "${ANDROID_QEMU2_TOP_DIR}/LICENSE")
 endfunction()
 
 # Constructs the qemu executable.

@@ -12,5 +12,4 @@ endif()
 
 # Work around some gcc/mingw issues
 android_target_compile_definitions(emulator-libdtb windows-x86_64 PRIVATE -DUSE_MINGW=1)
-
-
+android_license(libdtb  "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.GPLv2")
