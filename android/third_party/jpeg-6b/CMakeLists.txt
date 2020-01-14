@@ -55,3 +55,4 @@ target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing -msse2 -Wn
 # endif() target_compile_options(emulator-libjpeg PRIVATE -Wno-all)
 target_compile_definitions(emulator-libjpeg PRIVATE -DAVOID_TABLES -DANDROID_INTELSSE2_IDCT -DANDROID_TILE_BASED_DECODE)
 target_link_libraries(emulator-libjpeg PRIVATE android-emu-base)
+android_license(emulator-libjpeg  "android/third_party/jpeg-6b/NOTICE")
