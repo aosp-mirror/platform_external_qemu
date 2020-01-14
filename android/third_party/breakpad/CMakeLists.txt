@@ -503,3 +503,5 @@ elseif(WINDOWS_MSVC_X86_64)
   target_link_libraries(windows_client_unittests PRIVATE breakpad_client mincore::mincore gmock_main)
   android_target_compile_definitions(windows_client_unittests windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 endif()
+
+android_license(breakpad "${BREAKPAD_SRC}/../LICENSE")

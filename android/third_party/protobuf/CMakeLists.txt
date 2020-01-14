@@ -395,3 +395,5 @@ else()
   set_tests_properties(protobuf_tests PROPERTIES WORKING_DIRECTORY ${protobuf_source_dir})
   add_dependencies(protobuf_tests protobuf_test_plugin)
 endif()
+
+android_license(libprotobuf  "${protobuf_source_dir}/NOTICE")
