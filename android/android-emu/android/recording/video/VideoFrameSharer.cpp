@@ -83,11 +83,11 @@ void VideoFrameSharer::frameCallbackForwarder(void* opaque) {
 }
 
 void VideoFrameSharer::start() {
-    gpu_set_shared_memory_callback(&VideoFrameSharer::frameCallbackForwarder, this);
+    gpu_register_shared_memory_callback(&VideoFrameSharer::frameCallbackForwarder, this);
 }
 
 void VideoFrameSharer::stop() {
-    gpu_set_shared_memory_callback(nullptr, nullptr);
+    gpu_unregister_shared_memory_callback(this);
 }
 
 void VideoFrameSharer::frameAvailable() {
