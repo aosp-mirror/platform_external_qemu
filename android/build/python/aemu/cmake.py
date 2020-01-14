@@ -151,13 +151,13 @@ def main(argv=None):
     logging.info('Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}'.format(
         version, platform.platform()))
 
-    configure()
+    #configure()
     if FLAGS.build == 'config':
         print('You can now build with: %s ' % ' '.join(get_build_cmd()))
         return
 
     # Build
-    run(get_build_cmd())
+    #run(get_build_cmd())
 
     # Test.
     if FLAGS.tests:
