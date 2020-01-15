@@ -62,9 +62,11 @@ enum SuspendPolicy {
 
 template <typename _T>
 _T readValFromBuffer(const uint8_t* buffer, int bytes) {
+    // https://wiki.sei.cmu.edu/confluence/display/c/INT34-C.+Do+not+shift+an+expression+by+a+negative+number+of+bits+or+by+greater+than+or+equal+to+the+number+of+bits+that+exist+in+the+operand
+    static_assert(bytes <= sizeof(_T), "Too many bytes to fit in a _T.")
     _T val = 0;
     for (int i = 0; i < bytes; i++) {
-        val |= buffer[i] << ((bytes - i - 1) << 3);
+        val |= static_cast<_T>(buffer[i]) << ((bytes - i - 1) << 3);
     }
     return val;
 }
