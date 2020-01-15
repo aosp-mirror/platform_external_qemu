@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e819d614_fcb1e5ae",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-01-15T23:47:45Z",
+      "side": 1,
+      "message": "A bug reference would be useful.",
+      "range": {
+        "startLine": 4,
+        "startChar": 44,
+        "endLine": 4,
+        "endChar": 55
+      },
+      "revId": "e93b7de7dfcf4924c5bc8ab456011a0da1883b98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc95bfba_8eeaa3a9",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-01-15T23:47:45Z",
+      "side": 1,
+      "message": "watefall -\u003e waterfall",
+      "range": {
+        "startLine": 4,
+        "startChar": 6,
+        "endLine": 4,
+        "endChar": 14
+      },
+      "revId": "e93b7de7dfcf4924c5bc8ab456011a0da1883b98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
