@@ -1,0 +1,4 @@
+*.pyc
+proto/*
+emu_snap.egg-info/**
+venv
