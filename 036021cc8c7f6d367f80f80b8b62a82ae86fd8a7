@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf807118_7d848c35",
+        "filename": "android/android-emu/android/jdwp/Jdwp.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1114194
+      },
+      "writtenOn": "2020-01-15T18:33:11Z",
+      "side": 1,
+      "message": "The use of static_cast here means that `bytes` need to be an Integer Constant Expression.  Since this function is templated, I assume that to be the case, but if the codebase calls readValFromBuffer with a value for bytes that can\u0027t be determined at compile time, this function will fail to compile, and the static assert should be replace with a call to `assert` from `\u003ccassert\u003e`.",
+      "revId": "036021cc8c7f6d367f80f80b8b62a82ae86fd8a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
