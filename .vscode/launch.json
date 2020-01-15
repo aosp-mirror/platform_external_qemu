@@ -94,8 +94,7 @@
             "args": [
                 "@Q", // Pick the image you would like to use
                 "-grpc",
-                "5556",
-                "-wipe-data",
+                "8556",
                 "-verbose", // With some additional parameters.
             ],
             "linux": {
