@@ -21,12 +21,12 @@ using namespace android::jdwp;
 TEST(Jdwp, ReadBuffer) {
     const uint8_t kByteBuffer[8] = {0, 0, 0, 0, 0, 0, 0, 0x1};
     EXPECT_EQ(0x1, readValFromBuffer<uint32_t>(kByteBuffer + 4, 4));
-    EXPECT_EQ(0x1, readValFromBuffer<uint32_t>(kByteBuffer, 8)); // fail case
+    EXPECT_EQ(0x1, readValFromBuffer<uint64_t>(kByteBuffer, 8));
     EXPECT_EQ(0x1, uint32FromBuffer(kByteBuffer + 4));
 
     const uint8_t kByteBuffer2[8] = {0, 0, 0, 0, 0, 0, 0, 0x2};
     EXPECT_EQ(0x2, readValFromBuffer<uint32_t>(kByteBuffer2 + 4, 4));
-    EXPECT_EQ(0x2, readValFromBuffer<uint32_t>(kByteBuffer2, 8)); // fail case
+    EXPECT_EQ(0x2, readValFromBuffer<uint64_t>(kByteBuffer2, 8));
     EXPECT_EQ(0x2, uint32FromBuffer(kByteBuffer2 + 4));
 }
 
