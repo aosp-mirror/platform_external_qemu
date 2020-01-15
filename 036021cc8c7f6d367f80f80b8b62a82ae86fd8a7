@@ -16,6 +16,24 @@
       "revId": "036021cc8c7f6d367f80f80b8b62a82ae86fd8a7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c466bfab_3b75d2e2",
+        "filename": "android/android-emu/android/jdwp/Jdwp.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1114194
+      },
+      "writtenOn": "2020-01-15T18:38:48Z",
+      "side": 1,
+      "message": "Pirama points out there are non-ICE invocations: https://android-build.googleplex.com/builds/pending/P11487173/sdk_tools_mingw/latest/view/logs/build_error.log\n\nso runtime assert it is; stay tuned for v3.",
+      "parentUuid": "bf807118_7d848c35",
+      "revId": "036021cc8c7f6d367f80f80b8b62a82ae86fd8a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
