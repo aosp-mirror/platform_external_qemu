@@ -269,12 +269,9 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     switch (cb->m_frameworkFormat) {
         case FRAMEWORK_FORMAT_GL_COMPATIBLE:
             break;
-        case FRAMEWORK_FORMAT_YV12:
-        case FRAMEWORK_FORMAT_YUV_420_888:
+        default: // Any YUV format
             cb->m_yuv_converter.reset(
                     new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
-            break;
-        default:
             break;
     }
 
@@ -455,8 +452,7 @@ void ColorBuffer::subUpdate(int x,
         m_needFormatCheck = false;
     }
 
-    if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
-        m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+    if (m_frameworkFormat != FRAMEWORK_FORMAT_GL_COMPATIBLE) {
         assert(m_yuv_converter.get());
 
         // This FBO will convert the YUV frame to RGB
