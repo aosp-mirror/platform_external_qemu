@@ -189,6 +189,7 @@ public:
     void unlockMultiDisplayOnLoad(void) { }
 
     void cleanupProcGLObjects(uint64_t puid) { }
+    struct AndroidVirtioGpuOps* getVirtioGpuOps() { return nullptr; }
     void stop(bool wait) { }
     void finish() { }
     void pauseAllPreSave() { }

@@ -643,3 +643,10 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     sEgl->eglSwapBuffers(sOpt.display, sOpt.surface);
     sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
 }
+
+struct AndroidVirtioGpuOps* android_getVirtioGpuOps() {
+    if (sRenderer) {
+        return sRenderer->getVirtioGpuOps();
+    }
+    return nullptr;
+}
