@@ -233,7 +233,7 @@ std::string MetricsReporter::salt() {
     base::AutoLock lock(mSaltLock);
     if (mSalt.empty() || modTime.valueOr(0) != mSaltFileTime) {
         auto salt = studio::getAnonymizationSalt();
-        mSaltFileTime = *modTime;
+        mSaltFileTime = modTime.valueOr(0);
         mSalt = std::move(salt);
     }
     return mSalt;
