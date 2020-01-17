@@ -64,6 +64,7 @@ private:
     GLuint mUtex = 0;
     GLuint mVtex = 0;
     GLuint mVUtex = 0;
+    GLuint mUVtex = 0;
     // shader uniform locations
     GLint mYWidthCutoffLoc = -1;
     GLint mCWidthCutoffLoc = -1;

@@ -81,6 +81,10 @@ ColorBuffer::Helper::~Helper() = default;
 
 static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
     switch (format) {
+        case GL_R8:
+            return GL_RED;
+        case GL_RG8:
+            return GL_RG;
         case GL_RGB8:
         case GL_RGB565:
         case GL_RGB16F:
@@ -92,7 +96,7 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
         case GL_RGB10_A2:
         case GL_RGBA16F:
             return GL_RGBA;
-        default:
+        default: // already unsized
             return format;
     }
 }
@@ -165,6 +169,20 @@ static bool sGetFormatParameters(
             *pixelType = GL_UNSIGNED_BYTE;
             *bytesPerPixel = 4;
             *sizedInternalFormat = GL_BGRA8_EXT;
+            return true;
+        case GL_R8:
+        case GL_RED:
+            *texFormat = GL_RED;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 1;
+            *sizedInternalFormat = GL_R8;
+            return true;
+        case GL_RG8:
+        case GL_RG:
+            *texFormat = GL_RG;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 2;
+            *sizedInternalFormat = GL_RG8;
             return true;
         default:
             fprintf(stderr, "%s: Unknown format 0x%x\n",
@@ -269,12 +287,9 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     switch (cb->m_frameworkFormat) {
         case FRAMEWORK_FORMAT_GL_COMPATIBLE:
             break;
-        case FRAMEWORK_FORMAT_YV12:
-        case FRAMEWORK_FORMAT_YUV_420_888:
+        default: // Any YUV format
             cb->m_yuv_converter.reset(
                     new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
-            break;
-        default:
             break;
     }
 
@@ -455,8 +470,7 @@ void ColorBuffer::subUpdate(int x,
         m_needFormatCheck = false;
     }
 
-    if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
-        m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+    if (m_frameworkFormat != FRAMEWORK_FORMAT_GL_COMPATIBLE) {
         assert(m_yuv_converter.get());
 
         // This FBO will convert the YUV frame to RGB

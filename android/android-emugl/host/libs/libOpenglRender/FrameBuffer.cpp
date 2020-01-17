@@ -36,6 +36,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
+#include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
@@ -1025,27 +1026,59 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                    p_frameworkFormat);
 }
 
+void FrameBuffer::createColorBufferWithHandle(
+     int p_width,
+     int p_height,
+     GLenum p_internalFormat,
+     FrameworkFormat p_frameworkFormat,
+     HandleType handle) {
+
+    AutoLock mutex(m_lock);
+
+    // Check for handle collision
+    if (m_colorbuffers.count(handle) != 0) {
+        emugl::emugl_crash_reporter(
+            "FATAL: color buffer with handle %u already exists",
+            handle);
+    }
+
+    createColorBufferWithHandleLocked(
+        p_width, p_height, p_internalFormat, p_frameworkFormat,
+        handle);
+}
+
 HandleType FrameBuffer::createColorBufferLocked(int p_width,
                                                 int p_height,
                                                 GLenum p_internalFormat,
                                                 FrameworkFormat p_frameworkFormat) {
     sweepColorBuffersLocked();
 
-    HandleType ret = 0;
+    return createColorBufferWithHandleLocked(
+        p_width, p_height, p_internalFormat, p_frameworkFormat,
+        genHandle_locked());
+}
 
-    ret = genHandle_locked();
+HandleType FrameBuffer::createColorBufferWithHandleLocked(
+    int p_width,
+    int p_height,
+    GLenum p_internalFormat,
+    FrameworkFormat p_frameworkFormat,
+    HandleType handle) {
+
+    sweepColorBuffersLocked();
+
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
-                                          ret, m_colorBufferHelper,
+                                          handle, m_colorBufferHelper,
                                           m_fastBlitSupported));
     if (cb.get() != NULL) {
-        assert(m_colorbuffers.count(ret) == 0);
+        assert(m_colorbuffers.count(handle) == 0);
         // When guest feature flag RefCountPipe is on, no reference counting is
         // needed. We only memoize the mapping from handle to ColorBuffer.
         // Explicitly set refcount to 1 to avoid the colorbuffer being added to
         // m_colorBufferDelayedCloseList in FrameBuffer::onLoad().
         if (m_refCountPipeEnabled) {
-            m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
+            m_colorbuffers[handle] = { std::move(cb), 1, false, 0 };
         } else {
             // Android master default api level is 1000
             int apiLevel = 1000;
@@ -1053,23 +1086,23 @@ HandleType FrameBuffer::createColorBufferLocked(int p_width,
             // pre-O and post-O use different color buffer memory management
             // logic
             if (apiLevel > 0 && apiLevel < 26) {
-                m_colorbuffers[ret] = {std::move(cb), 1, false, 0};
+                m_colorbuffers[handle] = {std::move(cb), 1, false, 0};
 
                 RenderThreadInfo* tInfo = RenderThreadInfo::get();
                 uint64_t puid = tInfo->m_puid;
                 if (puid) {
-                    m_procOwnedColorBuffers[puid].insert(ret);
+                    m_procOwnedColorBuffers[puid].insert(handle);
                 }
 
             } else {
-                m_colorbuffers[ret] = {std::move(cb), 0, false, 0};
+                m_colorbuffers[handle] = {std::move(cb), 0, false, 0};
             }
         }
     } else {
-        ret = 0;
+        handle = 0;
         DBG("Create color buffer failed.\n");
     }
-    return ret;
+    return handle;
 }
 
 HandleType FrameBuffer::createRenderContext(int p_config,

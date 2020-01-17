@@ -1246,6 +1246,21 @@ static int rcIsSyncSignaled(uint64_t handle) {
     return fenceSync->isSignaled() ? 1 : 0;
 }
 
+static void rcCreateColorBufferWithHandle(
+    uint32_t width, uint32_t height, GLenum internalFormat, uint32_t handle)
+{
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    if (!fb) {
+        return;
+    }
+
+    fb->createColorBufferWithHandle(
+        width, height, internalFormat,
+        FRAMEWORK_FORMAT_GL_COMPATIBLE, handle);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1296,4 +1311,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
     dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
     dec->rcIsSyncSignaled = rcIsSyncSignaled;
+    dec->rcCreateColorBufferWithHandle = rcCreateColorBufferWithHandle;
 }
