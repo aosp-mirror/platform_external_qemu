@@ -21,7 +21,7 @@ else()
   android_add_library(crypto)
   android_target_compile_options(crypto windows PRIVATE "-std=c99" "-UNDEBUG")
 
-  android_yasm_compile(TARGET crypto_asm_lib SOURCES ${crypto_sources_win_x86_64})
+  android_nasm_compile(TARGET crypto_asm_lib SOURCES ${crypto_sources_win_x86_64})
   target_link_libraries(crypto PRIVATE crypto_asm_lib ws2_32::ws2_32)
 endif()
 target_include_directories(crypto PUBLIC ${BORINGSSL_ROOT}/src/include)

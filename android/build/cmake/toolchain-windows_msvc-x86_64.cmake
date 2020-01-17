@@ -108,7 +108,7 @@ else()
   add_definitions(-DWINDOWS_CROSS_COMPILE)
 endif()
 
-# And the asm type if we are compiling with yasm
-set(ANDROID_YASM_TYPE win64)
+# And the asm type if we are compiling with ASM
+set(ANDROID_ASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 
