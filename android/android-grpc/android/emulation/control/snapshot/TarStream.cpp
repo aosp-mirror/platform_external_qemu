@@ -178,8 +178,8 @@ bool TarWriter::addFileEntry(std::string name) {
         // A tar file conists of chunks of 512 bytes, so we need to
         // add some padding if we didn't write a full block..
         if (ifs.gcount() != 0 && ifs.gcount() < TARBLOCK) {
-            int left = TARBLOCK - ifs.gcount();
-            for (int i = 0; i < left; i++) {
+            int64_t left = TARBLOCK - ifs.gcount();
+            for (int64_t i = 0; i < left; i++) {
                 mDest.write(&zero, sizeof(zero));
                 if (mDest.bad()) {
                     return error("Failed to write padding for " + name +
@@ -235,7 +235,7 @@ bool TarWriter::close() {
     return true;
 }
 
-static int roundUp(int numToRound, int multiple = TARBLOCK) {
+static int64_t roundUp(int64_t numToRound, int64_t multiple = TARBLOCK) {
     assert(multiple && ((multiple & (multiple - 1)) == 0));
     return (numToRound + multiple - 1) & -multiple;
 }
@@ -388,7 +388,7 @@ bool TarReader::extract(TarInfo src) {
         };
     }
 
-    int left = src.size, rd = 0;
+    int64_t left = src.size, rd = 0;
 
     // Okay, let's create and extract a regular file..
     std::ofstream ofs(fname, std::ios_base::out | std::ios_base::binary |
@@ -415,7 +415,7 @@ bool TarReader::extract(TarInfo src) {
         }
 
         // Make sure we don't write out the padding 0 bytes.
-        ofs.write(buf, std::min<int>(left, rd));
+        ofs.write(buf, std::min<int64_t>(left, rd));
         left -= rd;
     } while (left > 0 && rd > 0);
 
