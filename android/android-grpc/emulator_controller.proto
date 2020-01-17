@@ -40,6 +40,21 @@ service EmulatorController {
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
     rpc sendRotary(RotaryEvent) returns (google.protobuf.Empty) {}
 
+    rpc streamFrames(ImageFormat) returns (stream Image) {}
+
+    // Sends a hardware event, for example, pressing a physical button.
+    rpc sendHardwareEvent(HardwareEvent) returns (google.protobuf.Empty) {}
+
+    // Queries visibility state of the Emulator's UI elements.
+    rpc getUiVisibility(google.protobuf.Empty) returns (UiVisibility) {}
+
+    // Changes visibility state of the Emulator's UI elements.
+    // Returns the visibility state that existed prior to the change.
+    rpc setUiVisibility(UiVisibility) returns (UiVisibility) {}
+
+    // Gracefully terminates the Emulator process.
+    rpc quit(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+
     rpc getStatus(google.protobuf.Empty) returns (EmulatorStatus) {}
 
     rpc getScreenshot(ImageFormat) returns (Image) {}
@@ -187,6 +202,36 @@ message VmConfiguration {
 
 message RotaryEvent {
     int32 delta = 1;
+}
+
+message HardwareEvent {
+    enum Button {
+        POWER = 0;
+        VOLUME_UP = 1;
+        VOLUME_DOWN = 2;
+        BACK = 3;
+        HOME = 4;
+        OVERVIEW = 5;
+    };
+
+    Button button = 1;
+}
+
+message UiElementVisibility {
+    enum UiElement {
+        // The main window of the Emulator.
+        DEVICE_WINDOW = 0;
+        // The "Extended controls" window.
+        EXTENDED_CONTROLS = 1;
+    };
+
+    UiElement element = 1;
+    bool visibility = 2;
+}
+
+// Visibility of Emulator UI elements.
+message UiVisibility {
+    repeated UiElementVisibility element_visibility = 1;
 }
 
 // The Touch interface represents a single contact point on a touch-sensitive
@@ -402,6 +447,11 @@ message ImageFormat {
     }
     ImgFormat format = 1;
     Rotation rotation = 2;
+
+    // If width and height are not zero, the image is scaled to fit into
+    // the given rectrangle while preserving the original aspect ratio.
+    uint32 width = 3;
+    uint32 height = 4;
 }
 
 message Image {
@@ -462,6 +512,9 @@ message EntryList {
 message EmulatorStatus {
     // The emulator version string.
     string version = 1;
+
+    // Version of the emulator's gRPC API.
+    uint32 grpc_api_version = 6;
 
     // The time the emulator has been active in .ms
     uint64 uptime = 2;
