@@ -61,45 +61,45 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
    endif()
 endfunction()
 
-# Enable the compilation of .asm files using Yasm. This will include the YASM
+# Enable the compilation of .asm files using nasm. This will include the nasm
 # project if needed to compile the assembly files.
 #
 # The following parameters are accepted
 #
 # ``TARGET`` The library target to generate.
-# ``INCLUDES`` Optional list of include paths to pass to yasm
+# ``INCLUDES`` Optional list of include paths to pass to nasm
 # ``SOURCES`` List of source files to be compiled.
 #
 # For example:
-# android_yasm_compile(TARGET foo_asm INCLUDES /tmp/foo /tmp/more_foo SOURCES /tmp/bar /tmp/z)
+# android_nasm_compile(TARGET foo_asm INCLUDES /tmp/foo /tmp/more_foo SOURCES /tmp/bar /tmp/z)
 #
-# Yasm will be compiled for the HOST platform if needed.
-function(android_yasm_compile)
+# nasm will be compiled for the HOST platform if needed.
+function(android_nasm_compile)
     # Parse arguments
     set(options)
     set(oneValueArgs TARGET)
     set(multiValueArgs INCLUDES SOURCES)
-    cmake_parse_arguments(android_yasm_compile "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    cmake_parse_arguments(android_nasm_compile "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-    # Configure yasm
-    android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXECUTABLE)
+    # Configure nasm
+    android_compile_for_host(nasm ${ANDROID_QEMU2_TOP_DIR}/android/third_party/nasm nasm_EXECUTABLE)
 
     # Setup the includes.
-    set(LIBNAME ${android_yasm_compile_TARGET})
+    set(LIBNAME ${android_nasm_compile_TARGET})
     set(ASM_INC "")
-    foreach(INCLUDE ${android_yasm_compile_INCLUDES})
+    foreach(INCLUDE ${android_nasm_compile_INCLUDES})
         set(ASM_INC ${ASM_INC} -I ${INCLUDE})
     endforeach()
 
-    # Configure the yasm compile command.
-    foreach(asm ${android_yasm_compile_SOURCES})
+    # Configure the nasm compile command.
+    foreach(asm ${android_nasm_compile_SOURCES})
         get_filename_component(asm_base ${asm} NAME_WE)
         set(DST ${CMAKE_CURRENT_BINARY_DIR}/${asm_base}.o)
         add_custom_command(OUTPUT ${DST}
-                           COMMAND ${YASM_EXECUTABLE} -f ${ANDROID_YASM_TYPE} -o ${DST} ${asm} ${ASM_INC}
+                           COMMAND ${nasm_EXECUTABLE} -f ${ANDROID_ASM_TYPE} -o ${DST} ${asm} ${ASM_INC}
                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                            VERBATIM
-                           DEPENDS ${YASM_EXECUTABLE} ${asm})
+                           DEPENDS ${nasm_EXECUTABLE} ${asm})
         list(APPEND ${LIBNAME}_asm_o ${DST})
     endforeach()
 
@@ -842,7 +842,8 @@ function(android_extract_symbols TGT)
 endfunction()
 
 # Make the compatibility layer available for every target
-if (WINDOWS_MSVC_X86_64)
+if (WINDOWS_MSVC_X86_64 AND NOT INCLUDE_MSVC_POSIX)
+  set(INCLUDE_MSVC_POSIX 1)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/msvc-posix-compat/ msvc-posix-compat)
 endif()
 
