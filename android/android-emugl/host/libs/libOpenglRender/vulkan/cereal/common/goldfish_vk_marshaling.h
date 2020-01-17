@@ -717,7 +717,17 @@ void unmarshal_VkDescriptorSetAllocateInfo(
 #define OP_vkFreeDescriptorSets 20078
 void marshal_VkDescriptorImageInfo(
     VulkanStream* vkStream,
+    const VkDescriptorImageInfo* forMarshaling,
+    const VkDescriptorType descriptorType);
+
+void marshal_VkDescriptorImageInfo(
+    VulkanStream* vkStream,
     const VkDescriptorImageInfo* forMarshaling);
+
+void unmarshal_VkDescriptorImageInfo(
+    VulkanStream* vkStream,
+    VkDescriptorImageInfo* forUnmarshaling,
+    const VkDescriptorType descriptorType);
 
 void unmarshal_VkDescriptorImageInfo(
     VulkanStream* vkStream,
@@ -725,7 +735,17 @@ void unmarshal_VkDescriptorImageInfo(
 
 void marshal_VkDescriptorBufferInfo(
     VulkanStream* vkStream,
+    const VkDescriptorBufferInfo* forMarshaling,
+    const VkDescriptorType descriptorType);
+
+void marshal_VkDescriptorBufferInfo(
+    VulkanStream* vkStream,
     const VkDescriptorBufferInfo* forMarshaling);
+
+void unmarshal_VkDescriptorBufferInfo(
+    VulkanStream* vkStream,
+    VkDescriptorBufferInfo* forUnmarshaling,
+    const VkDescriptorType descriptorType);
 
 void unmarshal_VkDescriptorBufferInfo(
     VulkanStream* vkStream,
