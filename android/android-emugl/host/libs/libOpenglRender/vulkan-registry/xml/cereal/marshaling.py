@@ -57,6 +57,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+        self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
         self.mapHandles = mapHandles
@@ -99,6 +100,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             direction=self.direction)
 
     def genHandleMappingCall(self, vulkanType, access, lenAccess):
+        if vulkanType.filterVar != None:
+            print("Needs filter: %s" % access)
         if lenAccess is None:
             lenAccess = "1"
             handle64Bytes = "8"
