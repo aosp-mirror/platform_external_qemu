@@ -16,6 +16,7 @@
 from generator import noneStr
 
 from copy import copy
+from string import whitespace
 
 # Holds information about core Vulkan objects
 # and the API calls that are used to create/destroy each one.
@@ -194,6 +195,13 @@ class VulkanType(object):
 
         self.primitiveEncodingSize = None
 
+        # Annotations
+        # Environment annotation for binding current
+        # variables to sub-structures
+        self.binds = {}
+
+        # Device memory annotations
+
         # self.deviceMemoryAttrib/Val stores
         # device memory info attributes from the XML.
         # devicememoryhandle
@@ -203,6 +211,15 @@ class VulkanType(object):
         # devicememorytypebits
         self.deviceMemoryAttrib = None
         self.deviceMemoryVal = None
+
+        # Filter annotations
+        self.filterVar = None
+        self.filterVals = None
+        self.filterFunc = None
+        self.filterOtherwise = None
+
+        # All other annotations
+        self.attribs = {}
 
     def __str__(self,):
         return ("(vulkantype %s %s paramName %s len %s optional? %s "
@@ -339,6 +356,86 @@ class VulkanType(object):
     def getStructEnumExpr(self,):
         return None
 
+# Is an S-expression w/ the following spec:
+# From https://gist.github.com/pib/240957
+class Atom(object):
+    def __init__(self, name):
+        self.name = name
+    def __repr__(self,):
+        return self.name
+
+def parse_sexp(sexp):
+    atom_end = set('()"\'') | set(whitespace)
+    stack, i, length = [[]], 0, len(sexp)
+    while i < length:
+        c = sexp[i]
+
+        reading = type(stack[-1])
+        if reading == list:
+            if   c == '(': stack.append([])
+            elif c == ')':
+                stack[-2].append(stack.pop())
+                if stack[-1][0] == ('quote',): stack[-2].append(stack.pop())
+            elif c == '"': stack.append('')
+            elif c == "'": stack.append([('quote',)])
+            elif c in whitespace: pass
+            else: stack.append(Atom(c))
+        elif reading == str:
+            if   c == '"':
+                stack[-2].append(stack.pop())
+                if stack[-1][0] == ('quote',): stack[-2].append(stack.pop())
+            elif c == '\\':
+                i += 1
+                stack[-1] += sexp[i]
+            else: stack[-1] += c
+        elif reading == Atom:
+            if c in atom_end:
+                atom = stack.pop()
+                if atom.name[0].isdigit(): stack[-1].append(eval(atom.name))
+                else: stack[-1].append(atom)
+                if stack[-1][0] == ('quote',): stack[-2].append(stack.pop())
+                continue
+            else: stack[-1] = Atom(stack[-1].name + c)
+        i += 1
+
+    return stack.pop()
+
+class FuncExprVal(object):
+    def __init__(self, val):
+        self.val = val
+    def __repr__(self,):
+        return self.val.__repr__()
+
+class FuncExpr(object):
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args
+    def __repr__(self,):
+        if len(self.args) == 0:
+            return "(%s)" % (self.name.__repr__())
+        else:
+            return "(%s %s)" % (self.name.__repr__(), " ".join(map(lambda x: x.__repr__(), self.args)))
+
+def parse_func_expr(parsed_sexp):
+    if len(parsed_sexp) != 1:
+        print("Error: parsed # expressions != 1: %" (len(parsed_sexp)))
+        raise
+
+    e = parsed_sexp[0]
+
+    def parse_one(exp):
+        if list == type(exp):
+            return FuncExpr(exp[0], list(map(parse_one, exp[1:])))
+        else:
+            return FuncExprVal(exp)
+
+    return parse_one(e)
+
+def parseFilterFuncExpr(expr):
+    res = parse_func_expr(parse_sexp(expr))
+    print("parseFilterFuncExpr: parsed %s" % res)
+    return res
+
 def makeVulkanTypeFromXMLTag(typeInfo, tag):
     res = VulkanType()
 
@@ -413,14 +510,38 @@ def makeVulkanTypeFromXMLTag(typeInfo, tag):
     res.primitiveEncodingSize = \
         typeInfo.getPrimitiveEncodingSize(res.typeName)
 
-    # it is assumed only one such key
-    # applies to any field.
+    # Annotations: Environment binds
+    if tag.attrib.get("binds") is not None:
+        bindPairs = map(lambda x: x.strip(), tag.attrib.get("binds").split(","))
+        bindPairsSplit = map(lambda p: p.split(":"), bindPairs)
+        res.binds = dict(map(lambda sp: (sp[0].strip(), sp[1].strip()), bindPairsSplit))
+
+    # Annotations: Device memory
     for k in DEVICE_MEMORY_INFO_KEYS:
         if tag.attrib.get(k) is not None:
             res.deviceMemoryAttrib = k
             res.deviceMemoryVal = \
                 tag.attrib.get(k)
             break;
+
+    # Annotations: Filters
+    if tag.attrib.get("filterVar") is not None:
+        res.filterVar = tag.attrib.get("filterVar").strip()
+
+    if tag.attrib.get("filterVals") is not None:
+        res.filterVals = \
+            list(map(lambda v: v.strip(),
+                    tag.attrib.get("filterVals").strip().split(",")))
+        print("Filtervals: %s" % res.filterVals)
+
+    if tag.attrib.get("filterFunc") is not None:
+        res.filterFunc = parseFilterFuncExpr(tag.attrib.get("filterFunc"))
+
+    if tag.attrib.get("filterOtherwise") is not None:
+        res.Otherwise = tag.attrib.get("filterOtherwise")
+
+    # store all other attribs here
+    res.attribs = dict(tag.attrib)
 
     return res
 
@@ -496,10 +617,11 @@ def initDeviceMemoryInfoParameterIndices(parameters):
 # Classes for describing aggregate types (unions, structs) and API calls.
 class VulkanCompoundType(object):
 
-    def __init__(self, name, members, isUnion=False, structEnumExpr=None, structExtendsExpr=None, feature=None):
+    def __init__(self, name, members, isUnion=False, structEnumExpr=None, structExtendsExpr=None, feature=None, initialEnv={}):
         self.name = name
         self.typeName = name
         self.members = members
+        self.environment = initialEnv
 
         self.isUnion = isUnion
         self.structEnumExpr = structEnumExpr
@@ -711,8 +833,26 @@ class VulkanTypeInfo(object):
 
             structEnumExpr = None
 
+            initialEnv = {}
+            envStr = typeinfo.elem.get("exists")
+            if envStr != None:
+                comma_separated = envStr.split(",")
+                name_type_pairs = map(lambda cs: tuple(map(lambda t: t.strip(), cs.split(":"))), comma_separated)
+                for (name, typ) in name_type_pairs:
+                    initialEnv[name] = {
+                        "type" : typ,
+                        "binding" : None,
+                        "structmember" : False,
+                    }
+
             for member in typeinfo.elem.findall(".//member"):
                 vulkanType = makeVulkanTypeFromXMLTag(self, member)
+                initialEnv[vulkanType.paramName] = {
+                    "type" : vulkanType.typeName,
+                    "binding" : vulkanType.paramName,
+                    "structmember" : True,
+                }
+                vulkanType.paramName
                 members.append(vulkanType)
                 if vulkanType.typeName == "VkStructureType" and \
                    member.get("values"):
@@ -725,7 +865,8 @@ class VulkanTypeInfo(object):
                     isUnion = self.categoryOf(typeName) == "union",
                     structEnumExpr = structEnumExpr,
                     structExtendsExpr = structExtendsExpr,
-                    feature = self.feature)
+                    feature = self.feature,
+                    initialEnv = initialEnv)
             self.structs[typeName].initCopies()
 
     def onGenGroup(self, _groupinfo, groupName, _alias=None):

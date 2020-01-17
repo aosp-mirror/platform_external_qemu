@@ -185,13 +185,15 @@ class CodeGen(object):
         if self.indentLevel > 0:
             self.indentLevel -= 1
 
-    def beginBlock(self,):
-        self.code += self.indent() + "{\n"
+    def beginBlock(self, bracketPrint=True):
+        if bracketPrint:
+            self.code += self.indent() + "{\n"
         self.indentLevel += 1
 
-    def endBlock(self,):
+    def endBlock(self,bracketPrint=True):
         self.indentLevel -= 1
-        self.code += self.indent() + "}\n"
+        if bracketPrint:
+            self.code += self.indent() + "}\n"
 
     def beginIf(self, cond):
         self.code += self.indent() + "if (" + cond + ")\n"
@@ -210,6 +212,25 @@ class CodeGen(object):
         self.endBlock()
 
     def endIf(self):
+        self.endBlock()
+
+    def beginSwitch(self, switchvar):
+        self.code += self.indent() + "switch (" + switchvar + ")\n"
+        self.beginBlock()
+
+    def switchCase(self, switchval, blocked = False):
+        self.code += self.indent() + "case %s:" % switchval
+        self.beginBlock(bracketPrint = blocked)
+
+    def switchCaseBreak(self, switchval, blocked = False):
+        self.code += self.indent() + "case %s:" % switchval
+        self.endBlock(bracketPrint = blocked)
+
+    def switchCaseDefault(self, blocked = False):
+        self.code += self.indent() + "default:" % switchval
+        self.beginBlock(bracketPrint = blocked)
+
+    def endSwitch(self):
         self.endBlock()
 
     def beginWhile(self, cond):

@@ -5069,10 +5069,17 @@ private:
     };
 
     bool isBindingFeasibleForAlloc(const DescriptorPoolInfo::PoolState& poolState, const VkDescriptorSetLayoutBinding& binding) {
-        if (poolState.type != binding.descriptorType) return false;
+        if (binding.descriptorCount && (poolState.type != binding.descriptorType)) {
+            return false;
+        }
+
         uint32_t availDescriptorCount =
             poolState.descriptorCount - poolState.used;
-        if (availDescriptorCount < binding.descriptorCount) return false;
+
+        if (availDescriptorCount < binding.descriptorCount) {
+            return false;
+        }
+
         return true;
     }
 
@@ -5101,7 +5108,9 @@ private:
         // Check the number of sets available.
         auto setsAvailable = poolInfo->maxSets - poolInfo->usedSets;
 
-        if (setsAvailable < pAllocateInfo->descriptorSetCount) return VK_ERROR_OUT_OF_POOL_MEMORY;
+        if (setsAvailable < pAllocateInfo->descriptorSetCount) {
+            return VK_ERROR_OUT_OF_POOL_MEMORY;
+        }
 
         // Perform simulated allocation and error out with
         // VK_ERROR_OUT_OF_POOL_MEMORY if it fails.
@@ -5122,7 +5131,9 @@ private:
                     break;
                 }
 
-                if (!success) return VK_ERROR_OUT_OF_POOL_MEMORY;
+                if (!success) {
+                    return VK_ERROR_OUT_OF_POOL_MEMORY;
+                }
             }
         }
         return VK_SUCCESS;
