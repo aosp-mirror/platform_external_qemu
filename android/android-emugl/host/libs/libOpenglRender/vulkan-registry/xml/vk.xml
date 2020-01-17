@@ -742,7 +742,7 @@ server.
             <member><type>VkDeviceSize</type>           <name>maxResourceSize</name><comment>max size (in bytes) of this resource type</comment></member>
         </type>
         <type category="struct" name="VkDescriptorBufferInfo">
-            <member><type>VkBuffer</type>               <name>buffer</name><comment>Buffer used for this descriptor slot when the descriptor is UNIFORM_BUFFER[_DYNAMIC] or STORAGE_BUFFER[_DYNAMIC]. VK_NULL_HANDLE otherwise.</comment></member>
+            <member ><type>VkBuffer</type>               <name>buffer</name><comment>Buffer used for this descriptor slot when the descriptor is UNIFORM_BUFFER[_DYNAMIC] or STORAGE_BUFFER[_DYNAMIC]. VK_NULL_HANDLE otherwise.</comment></member>
             <member><type>VkDeviceSize</type>           <name>offset</name><comment>Base offset from buffer start in bytes to update in the descriptor set.</comment></member>
             <member><type>VkDeviceSize</type>           <name>range</name><comment>Size in bytes of the buffer resource for this descriptor update.</comment></member>
         </type>
@@ -759,9 +759,17 @@ server.
             <member><type>uint32_t</type>               <name>dstArrayElement</name><comment>Array element within the destination binding to write</comment></member>
             <member><type>uint32_t</type>               <name>descriptorCount</name><comment>Number of descriptors to write (determines the size of the array pointed by pDescriptors)</comment></member>
             <member><type>VkDescriptorType</type>       <name>descriptorType</name><comment>Descriptor type to write (determines which members of the array pointed by pDescriptors are going to be used)</comment></member>
-            <member noautovalidity="true" len="descriptorCount">const <type>VkDescriptorImageInfo</type>* <name>pImageInfo</name><comment>Sampler, image view, and layout for SAMPLER, COMBINED_IMAGE_SAMPLER, {SAMPLED,STORAGE}_IMAGE, and INPUT_ATTACHMENT descriptor types.</comment></member>
-            <member noautovalidity="true" len="descriptorCount">const <type>VkDescriptorBufferInfo</type>* <name>pBufferInfo</name><comment>Raw buffer, size, and offset for {UNIFORM,STORAGE}_BUFFER[_DYNAMIC] descriptor types.</comment></member>
-            <member noautovalidity="true" len="descriptorCount">const <type>VkBufferView</type>*    <name>pTexelBufferView</name><comment>Buffer view to write to the descriptor for {UNIFORM,STORAGE}_TEXEL_BUFFER descriptor types.</comment></member>
+            <member noautovalidity="true" len="descriptorCount"
+                filterVar="descriptorType"
+                filterVals="VK_DESCRIPTOR_TYPE_SAMPLER,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT"
+                >const <type>VkDescriptorImageInfo</type>* <name>pImageInfo</name><comment>Sampler, image view, and layout for SAMPLER, COMBINED_IMAGE_SAMPLER, {SAMPLED,STORAGE}_IMAGE, and INPUT_ATTACHMENT descriptor types.</comment></member>
+            <member noautovalidity="true" len="descriptorCount"
+                filterVar="descriptorType"
+                filterVals="VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC"
+                >const <type>VkDescriptorBufferInfo</type>* <name>pBufferInfo</name><comment>Raw buffer, size, and offset for {UNIFORM,STORAGE}_BUFFER[_DYNAMIC] descriptor types.</comment></member>
+            <member noautovalidity="true" len="descriptorCount"
+                filterVar="descriptorType"
+                filterVals="VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER">const <type>VkBufferView</type>*    <name>pTexelBufferView</name><comment>Buffer view to write to the descriptor for {UNIFORM,STORAGE}_TEXEL_BUFFER descriptor types.</comment></member>
         </type>
         <type category="struct" name="VkCopyDescriptorSet">
             <member values="VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET"><type>VkStructureType</type> <name>sType</name></member>

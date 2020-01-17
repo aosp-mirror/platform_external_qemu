@@ -3320,9 +3320,12 @@ void marshal_VkWriteDescriptorSet(
     vkStream->putBe64(cgen_var_109);
     if (forMarshaling->pImageInfo)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+        if ((VK_DESCRIPTOR_TYPE_SAMPLER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_IMAGE == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT == forMarshaling->descriptorType))
         {
-            marshal_VkDescriptorImageInfo(vkStream, (const VkDescriptorImageInfo*)(forMarshaling->pImageInfo + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+            {
+                marshal_VkDescriptorImageInfo(vkStream, (const VkDescriptorImageInfo*)(forMarshaling->pImageInfo + i));
+            }
         }
     }
     // WARNING PTR CHECK
@@ -3330,9 +3333,12 @@ void marshal_VkWriteDescriptorSet(
     vkStream->putBe64(cgen_var_110);
     if (forMarshaling->pBufferInfo)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+        if ((VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC == forMarshaling->descriptorType))
         {
-            marshal_VkDescriptorBufferInfo(vkStream, (const VkDescriptorBufferInfo*)(forMarshaling->pBufferInfo + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+            {
+                marshal_VkDescriptorBufferInfo(vkStream, (const VkDescriptorBufferInfo*)(forMarshaling->pBufferInfo + i));
+            }
         }
     }
     // WARNING PTR CHECK
@@ -3340,12 +3346,15 @@ void marshal_VkWriteDescriptorSet(
     vkStream->putBe64(cgen_var_111);
     if (forMarshaling->pTexelBufferView)
     {
-        if (forMarshaling->descriptorCount)
+        if ((VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER == forMarshaling->descriptorType))
         {
-            uint64_t* cgen_var_112;
-            vkStream->alloc((void**)&cgen_var_112, forMarshaling->descriptorCount * 8);
-            vkStream->handleMapping()->mapHandles_VkBufferView_u64(forMarshaling->pTexelBufferView, cgen_var_112, forMarshaling->descriptorCount);
-            vkStream->write((uint64_t*)cgen_var_112, forMarshaling->descriptorCount * 8);
+            if (forMarshaling->descriptorCount)
+            {
+                uint64_t* cgen_var_112;
+                vkStream->alloc((void**)&cgen_var_112, forMarshaling->descriptorCount * 8);
+                vkStream->handleMapping()->mapHandles_VkBufferView_u64(forMarshaling->pTexelBufferView, cgen_var_112, forMarshaling->descriptorCount);
+                vkStream->write((uint64_t*)cgen_var_112, forMarshaling->descriptorCount * 8);
+            }
         }
     }
 }
@@ -3378,33 +3387,54 @@ void unmarshal_VkWriteDescriptorSet(
     forUnmarshaling->pImageInfo = (const VkDescriptorImageInfo*)(uintptr_t)vkStream->getBe64();
     if (forUnmarshaling->pImageInfo)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pImageInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorImageInfo));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+        if ((VK_DESCRIPTOR_TYPE_SAMPLER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_IMAGE == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT == forUnmarshaling->descriptorType))
         {
-            unmarshal_VkDescriptorImageInfo(vkStream, (VkDescriptorImageInfo*)(forUnmarshaling->pImageInfo + i));
+            vkStream->alloc((void**)&forUnmarshaling->pImageInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorImageInfo));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+            {
+                unmarshal_VkDescriptorImageInfo(vkStream, (VkDescriptorImageInfo*)(forUnmarshaling->pImageInfo + i));
+            }
+        }
+        else
+        {
+            forUnmarshaling->pImageInfo = 0;
         }
     }
     // WARNING PTR CHECK
     forUnmarshaling->pBufferInfo = (const VkDescriptorBufferInfo*)(uintptr_t)vkStream->getBe64();
     if (forUnmarshaling->pBufferInfo)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pBufferInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorBufferInfo));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+        if ((VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC == forUnmarshaling->descriptorType))
         {
-            unmarshal_VkDescriptorBufferInfo(vkStream, (VkDescriptorBufferInfo*)(forUnmarshaling->pBufferInfo + i));
+            vkStream->alloc((void**)&forUnmarshaling->pBufferInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorBufferInfo));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+            {
+                unmarshal_VkDescriptorBufferInfo(vkStream, (VkDescriptorBufferInfo*)(forUnmarshaling->pBufferInfo + i));
+            }
+        }
+        else
+        {
+            forUnmarshaling->pBufferInfo = 0;
         }
     }
     // WARNING PTR CHECK
     forUnmarshaling->pTexelBufferView = (const VkBufferView*)(uintptr_t)vkStream->getBe64();
     if (forUnmarshaling->pTexelBufferView)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount * sizeof(const VkBufferView));
-        if (forUnmarshaling->descriptorCount)
+        if ((VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER == forUnmarshaling->descriptorType))
         {
-            uint64_t* cgen_var_117;
-            vkStream->alloc((void**)&cgen_var_117, forUnmarshaling->descriptorCount * 8);
-            vkStream->read((uint64_t*)cgen_var_117, forUnmarshaling->descriptorCount * 8);
-            vkStream->handleMapping()->mapHandles_u64_VkBufferView(cgen_var_117, (VkBufferView*)forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount);
+            vkStream->alloc((void**)&forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount * sizeof(const VkBufferView));
+            if (forUnmarshaling->descriptorCount)
+            {
+                uint64_t* cgen_var_117;
+                vkStream->alloc((void**)&cgen_var_117, forUnmarshaling->descriptorCount * 8);
+                vkStream->read((uint64_t*)cgen_var_117, forUnmarshaling->descriptorCount * 8);
+                vkStream->handleMapping()->mapHandles_u64_VkBufferView(cgen_var_117, (VkBufferView*)forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount);
+            }
+        }
+        else
+        {
+            forUnmarshaling->pTexelBufferView = 0;
         }
     }
 }
