@@ -5192,28 +5192,26 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
-        int dns_count = 0;
-        if (android_op_dns_server) {
-            if (!qemu_android_emulation_setup_dns_servers(
-                    android_op_dns_server, &dns_count)) {
-                fprintf(stderr, "invalid -dns-server parameter '%s'\n",
-                        android_op_dns_server);
-                return 1;
-            }
-            // TODO: Find a way to pass the number of IPv6 DNS servers to
-            // the guest system.
-            if (dns_count > 1) {
-                char* combined = g_strdup_printf("%s ndns=%d",
-                                                 current_machine->kernel_cmdline,
-                                                 dns_count);
-                g_free(current_machine->kernel_cmdline);
-                current_machine->kernel_cmdline = combined;
-            }
+    int dns_count = 0;
+    if (android_op_dns_server) {
+        if (!qemu_android_emulation_setup_dns_servers(
+                android_op_dns_server, &dns_count)) {
+            fprintf(stderr, "invalid -dns-server parameter '%s'\n",
+                    android_op_dns_server);
+            return 1;
         }
-        slirp_set_cleanup_ip_on_load(feature_is_enabled(kFeature_IpDisconnectOnLoad));
-        qemu_android_emulation_init_slirp();
+        // TODO: Find a way to pass the number of IPv6 DNS servers to
+        // the guest system.
+        if (dns_count > 1) {
+            char* combined = g_strdup_printf("%s ndns=%d",
+                                             current_machine->kernel_cmdline,
+                                             dns_count);
+            g_free(current_machine->kernel_cmdline);
+            current_machine->kernel_cmdline = combined;
+        }
     }
+    slirp_set_cleanup_ip_on_load(feature_is_enabled(kFeature_IpDisconnectOnLoad));
+    qemu_android_emulation_init_slirp();
 #endif
 
     if (qemu_opts_foreach(qemu_find_opts("object"),
