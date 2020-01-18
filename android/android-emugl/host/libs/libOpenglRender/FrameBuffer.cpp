@@ -2689,7 +2689,7 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
     }
     if (*displayId == s_invalidIdMultiDisplay) {
         ERR("%s: cannot create more internaldisplays, exceeding limits %d",
-            __FUNCTION__, s_maxNumMultiDisplay - s_invalidIdMultiDisplay);
+            __FUNCTION__, s_maxNumMultiDisplay - s_displayIdInternalBegin);
         return -1;
     }
 
