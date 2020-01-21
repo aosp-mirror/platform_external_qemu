@@ -45,6 +45,64 @@
       "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6546f421_7389e276",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-21T18:51:53Z",
+      "side": 1,
+      "message": "We are free to change this .proto format. We currently have few consumers.",
+      "parentUuid": "902c991b_dafd4a9d",
+      "range": {
+        "startLine": 52,
+        "startChar": 7,
+        "endLine": 52,
+        "endChar": 69
+      },
+      "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7807fde_f0123b1e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-21T18:51:53Z",
+      "side": 1,
+      "message": "Some of these are defined as device keys in the javascript spec, and in theory should be handled already by the emulator on the keyevent endpoint. (If not we should fix it).\n\nSee:\n\n- https://www.w3.org/TR/uievents-key/#keys-device\n- https://www.w3.org/TR/uievents-key/#keys-mobile\n\nWould these keys fit all the needs of android studio?",
+      "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93cd9f9a_fda91706",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-21T18:51:53Z",
+      "side": 1,
+      "message": "We can mark these as deprecated. As far as I know the only consumer is the javascript library that we control",
+      "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
