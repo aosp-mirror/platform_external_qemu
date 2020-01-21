@@ -578,7 +578,7 @@ bool track(int pid, const char* snapshot_name) {
         // we wait for the snapshot before replying OK, to avoid any concurrency
         // issue between pipe receive and snapshots.
         if (reply.mesg.data_length > 11 &&
-            reply.data[11] == SuspendPolicy::All) {  // Thread suspend all
+            reply.data[11] != SuspendPolicy::None) {  // Thread suspend all
             // Take snapshot when AssertionError is thrown
             bool snapshot_done = false;
             base::ConditionVariable snapshot_signal;
