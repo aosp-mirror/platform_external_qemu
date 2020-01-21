@@ -78,9 +78,6 @@ VG_EXPORT void pipe_virgl_renderer_ctx_detach_resource(
 VG_EXPORT int pipe_virgl_renderer_resource_get_info(
     int res_handle,
     struct virgl_renderer_resource_info *info);
-
-VG_EXPORT void init_global_state(void);
-
 #else
 
 #define VG_EXPORT
