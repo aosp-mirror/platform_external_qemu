@@ -50,15 +50,20 @@ service SnapshotService {
 }
 
 message Snapshot {
+    enum Format {
+        TARGZ = 0;
+        TAR = 1;
+    }
     // The identifier to the snapshot.
     string snapshot_id = 1;
 
-    // A stream of bytes. Encoded as a zip file.
+    // A stream of bytes. Encoded as a tar (possibly gzipped) file.
     bytes payload = 2;
 
     // status fields.
     bool success = 3;
     bytes err = 4;
+    Format format = 5;
 }
 
 message SnapshotDetails {

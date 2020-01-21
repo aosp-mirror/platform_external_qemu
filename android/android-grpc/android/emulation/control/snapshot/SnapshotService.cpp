@@ -27,11 +27,11 @@
 #include "android/base/Log.h"
 #include "android/base/StringView.h"
 #include "android/base/Uuid.h"
+#include "android/base/files/GzipStreambuf.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
-#include "android/base/files/GzipStreambuf.h"
 #include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/PathUtils.h"
@@ -136,8 +136,15 @@ public:
                     msg.set_success(true);
                     return writer->Write(msg);
                 });
-        GzipOutputStream gzout(&csb);
-        TarWriter tw(tmpdir, gzout);
+
+
+        std::unique_ptr<std::ostream> stream;
+        if (request->format() == Snapshot::TARGZ) {
+            stream = std::make_unique<GzipOutputStream>(&csb);
+        } else {
+            stream = std::make_unique<std::ostream>(&csb);
+        }
+        TarWriter tw(tmpdir, *stream);
         result.set_success(tw.addDirectory(".") && tw.close());
         if (tw.fail()) {
             result.set_err(tw.error_msg());
@@ -165,20 +172,7 @@ public:
         reply->set_success(true);
         auto cb = [reader, &msg, &id](char** new_eback, char** new_gptr,
                                       char** new_egptr) {
-            bool incoming = true;
-
-            do {
-                incoming = reader->Read(&msg);
-
-                // First message likely only has snapshot id information and no
-                // bytes, but anyone can set the snapshot id at any time.. so...
-                if (msg.snapshot_id().size() > 0) {
-                    id = msg.snapshot_id();
-                }
-
-                // Skip empty packets, (note we also ignore success messages
-                // from the client..)
-            } while (incoming && msg.payload().size() == 0);
+            bool incoming = reader->Read(&msg);
 
             // Setup the buffer pointers.
             *new_eback = (char*)msg.payload().data();
@@ -188,9 +182,23 @@ public:
             return incoming;
         };
 
+        // First read desired format
+        auto incoming = reader->Read(&msg);
+        // First message likely only has snapshot id information and no
+        // bytes, but anyone can set the snapshot id at any time.. so...
+        if (msg.snapshot_id().size() > 0) {
+            id = msg.snapshot_id();
+        }
+
+        std::unique_ptr<std::istream> stream;
         CallbackStreambufReader csr(cb);
-        GzipInputStream gzin(&csr);
-        TarReader tr(tmpSnap, gzin);
+        if (msg.format() == Snapshot::TARGZ) {
+            stream = std::make_unique<GzipInputStream>(&csr);
+        } else {
+            stream = std::make_unique<std::istream>(&csr);
+        }
+
+        TarReader tr(tmpSnap, *stream);
         for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
             tr.extract(entry);
         }
@@ -316,7 +324,8 @@ public:
         reply->set_success(true);
 
         // This is really best effor here. We will not discover errors etc.
-        snapshot::Snapshotter::get().deleteSnapshot(request->snapshot_id().c_str());
+        snapshot::Snapshotter::get().deleteSnapshot(
+                request->snapshot_id().c_str());
         return Status::OK;
     }
 
