@@ -13,7 +13,9 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_set>
 
+#include "android/base/async/Looper.h"
 #include "android/base/files/Stream.h"
 #include "android/base/threads/Thread.h"
 #include "android/emulation/AdbProxy.h"
@@ -21,6 +23,7 @@
 #include "android/emulation/apacket_utils.h"
 
 namespace android {
+
 namespace jdwp {
 class JdwpProxy : public emulation::AdbProxy {
 public:
@@ -54,11 +57,13 @@ private:
         HandshakeSent,
         HandshakeSentOk,
         HandshakeReplied,
+        //Proxying = HandshakeReplied,
         HandshakeRepliedOk,
         Proxying = HandshakeRepliedOk,
     };
     static State nextState(State state);
     emulation::amessage buildReplyMesg();
+    static void repeaterCallback(void* opaque, base::Looper::Timer* timer);
     State mProxyState = State::Uninitialized;
     State mClientState = State::Uninitialized;
     int mHostId = 0;
@@ -67,6 +72,13 @@ private:
     int mGuestPid = 0;
 
     bool mShouldClose = false;
+    bool mShouldSendCachePacket = false;
+    bool mDebuggerActivated = false;
+    std::unique_ptr<emulation::apacket> mCachedPacket = nullptr;
+    std::unique_ptr<emulation::apacket> mloadedCachedPacket = nullptr;
+    std::unordered_set<uint32_t> mPendingGuestReplyCommands;
+    int64_t mLastSendMs = 0;
+    std::unique_ptr<base::Looper::Timer> mRepeaterTimer;
 };
 }  // namespace jdwp
 }  // namespace android

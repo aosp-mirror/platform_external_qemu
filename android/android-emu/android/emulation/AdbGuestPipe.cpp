@@ -604,6 +604,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
 
     if (mReuseFromSnapshot) {
         mState = State::ProxyingData;
+        mAdbHub->setSocket(mHostSocket.fd());
         if (mAdbHub->socketWantRead()) {
             mFdWatcher->wantRead();
         }
@@ -895,6 +896,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                     DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
                     if (needsHubTranslation()) {
                         mAdbHub.reset(new AdbHub());
+                        mAdbHub->setSocket(mHostSocket.fd());
                         mAdbHub->setWakePipeFunc(
                                 [this](int wakeFlag) { signalWake(wakeFlag); });
                         if (mAdbHub->socketWantRead()) {
@@ -958,7 +960,8 @@ bool AdbGuestPipe::shouldUseRecvBuffer() {
 }
 
 bool AdbGuestPipe::needsHubTranslation() const {
-    return mReuseFromSnapshot || mPortType == AdbPortType::Jdwp;
+    //return mReuseFromSnapshot || mPortType == AdbPortType::Jdwp;
+    return true;
 }
 
 }  // namespace emulation

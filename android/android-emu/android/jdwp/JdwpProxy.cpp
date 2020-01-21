@@ -11,12 +11,17 @@
 
 #include "android/jdwp/JdwpProxy.h"
 
+#include <sys/time.h>
+
+#include "android/base/async/Looper.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/Jdwp.h"
 
-#define DEBUG 0
+
+#define DEBUG 2
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -26,10 +31,32 @@
 #endif
 
 #if DEBUG >= 2
+
 #define DD(...) D(__VA_ARGS__)
-#else
+static void debugPrintJdwp(const char* prefix, const uint8_t* data) {
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    android::jdwp::JdwpCommandHeader jdwpCmd;
+    jdwpCmd.parseFrom(data);
+    fprintf(stderr,"%s (%ld) jdwp id %d flags %d cmd_set %d cmd %d length %d\n",
+            prefix, ms,
+            (int)jdwpCmd.id, (int)jdwpCmd.flags, (int)jdwpCmd.command_set,
+            (int)jdwpCmd.command, (int)jdwpCmd.length);
+    uint32_t printLength = jdwpCmd.length > 100 ? 100 : jdwpCmd.length;
+    fprintf(stderr, "%sjdwp data string: %s\n", prefix, data + 11);
+    fprintf(stderr, "%sjdwp data binary: ", prefix);
+    for (uint32_t i = 11; i < printLength; i ++) {
+        fprintf(stderr, "%02x", data[i]);
+    }
+    fprintf(stderr, "\n");
+}
+
+#else // DEBUG >= 2
 #define DD(...) (void)0
-#endif
+#endif // DEBUG >= 2
+
+static const int64_t kRepeaterDelayMs = 10000;
 
 namespace android {
 namespace jdwp {
@@ -52,6 +79,14 @@ JdwpProxy::JdwpProxy(android::base::Stream* stream) {
     mClientState = Uninitialized;
     mShouldClose = stream->getBe32();
     mCurrentHostId = -1;
+    mShouldSendCachePacket = stream->getByte();
+    if (mShouldSendCachePacket) {
+        mloadedCachedPacket.reset(new emulation::apacket);
+        stream->read(&(mloadedCachedPacket->mesg), sizeof(mloadedCachedPacket->mesg));
+        mloadedCachedPacket->data.resize(mloadedCachedPacket->mesg.data_length);
+        stream->read(mloadedCachedPacket->data.data(), mloadedCachedPacket->mesg.data_length);
+        
+    }
     D("Loading JdwpProxy host id %d guest id %d\n", mHostId, mGuestId);
 }
 
@@ -62,6 +97,16 @@ void JdwpProxy::onSave(android::base::Stream* stream) {
     stream->putBe32(mGuestPid);
     stream->putBe32(mProxyState);
     stream->putBe32(mShouldClose);
+    if (mloadedCachedPacket || mCachedPacket) {
+        emulation::apacket* packetToSave = mloadedCachedPacket ? mloadedCachedPacket.get()
+                : mCachedPacket.get();
+        stream->putByte(1);
+        stream->write(&(packetToSave->mesg), sizeof(packetToSave->mesg));
+        stream->write(packetToSave->data.data(),
+                packetToSave->mesg.data_length);
+    } else {
+        stream->putByte(0);
+    }
 }
 
 JdwpProxy::State JdwpProxy::nextState(State state) {
@@ -127,21 +172,37 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
             }
             break;
         case HandshakeReplied:
-            if (mesg->command != ADB_OKAY) {
-                mShouldClose = true;
-                return;
-            }
+            // No-op when connecting to jdwp the first time
+            // It should receive an ADB_OKAY, but Android Studio will mix it
+            // with other commands.
             if (clientProxyDifferent) {
                 // Leak the last ADB_OKAY to the guest, to make it consistent
                 // with icebox behavior.
                 *shouldForwardRecv = true;
                 mClientState = Proxying;
+                //if (mShouldSendCachePacket) {
+                //    printf("pushing cahced packet\n");
+                //    toSends->push(*mloadedCachedPacket.get());
+                //}
             }
             break;
         case Proxying:
+#if DEBUG >= 2
+            if (mesg->command == ADB_WRTE) {
+                debugPrintJdwp("guest recv ", data);
+            }
+#endif // DEBUG >= 2
+            if (mesg->command == ADB_WRTE && mShouldSendCachePacket) {
+                JdwpCommandHeader jdwpCmd;
+                jdwpCmd.parseFrom(data);
+                if ((jdwpCmd.flags & 0x80) == 0 && jdwpCmd.command_set < ExtensionBegin) {
+                    mPendingGuestReplyCommands.insert(jdwpCmd.id);
+                    mDebuggerActivated = true;
+                    printf("new cmd id %d, total %d\n", jdwpCmd.id, (int)mPendingGuestReplyCommands.size());
+                }
+            }
             break;
         default:
-
             mShouldClose = true;
             return;
     }
@@ -177,18 +238,71 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
             }
             break;
         case Proxying:
+#if DEBUG >= 2
+            if (mesg->command == ADB_WRTE) {
+                debugPrintJdwp("guest send ", data);
+            }
+#endif // DEBUG >= 2
             if (mesg->command == ADB_CLSE) {
                 mShouldClose = true;
                 return;
             }
+            if (mesg->command == ADB_WRTE) {
+                // Cache the last message
+                mCachedPacket.reset(new emulation::apacket);
+                mCachedPacket->mesg = *mesg;
+                if (mesg->data_length) {
+                    mCachedPacket->data.assign(data, data + mesg->data_length);
+                }
+                if (mShouldSendCachePacket) {
+                    JdwpCommandHeader jdwpCmd;
+                    jdwpCmd.parseFrom(data);
+                    if (jdwpCmd.flags & 0x80 && jdwpCmd.command_set < ExtensionBegin) {
+                        mPendingGuestReplyCommands.erase(jdwpCmd.id);
+                        printf("recv reply id %d, remaining %d\n", jdwpCmd.id, (int)mPendingGuestReplyCommands.size());
+                        if (mPendingGuestReplyCommands.size() == 0 && mDebuggerActivated) {
+                            // After a delay, automatically send the pause message to the host
+                            //struct timeval tp;
+                            //gettimeofday(&tp, NULL);
+                            //mLastSendMs = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+                            if (mRepeaterTimer) {
+                                mRepeaterTimer->stop();
+                            }
+                            mRepeaterTimer.reset(base::ThreadLooper::get()->createTimer(
+                                JdwpProxy::repeaterCallback, this));
+                            //const int64_t kTimeErrorMs = 100;
+                            mRepeaterTimer->startRelative(kRepeaterDelayMs);
+                        }
+                    }
+                }
+            }
             break;
         default:
-
             mShouldClose = true;
             return;
     }
     CHECK(mClientState == mProxyState);
     mClientState = mProxyState = nextState(mProxyState);
+}
+
+void JdwpProxy::repeaterCallback(void* opaque, base::Looper::Timer* timer) {
+    DD("Sending loaded packet to the host");
+    JdwpProxy* proxy = (JdwpProxy*)opaque;
+    CHECK(timer == proxy->mRepeaterTimer.get());
+    CHECK(proxy->mShouldSendCachePacket);
+    CHECK(proxy->mloadedCachedPacket);
+    emulation::apacket packet = *proxy->mloadedCachedPacket.get();
+    packet.mesg.arg1 = proxy->mCurrentHostId;
+#if DEBUG >= 2
+    DD("arg0 %d arg1 %d\n", packet.mesg.arg0, packet.mesg.arg1);
+    debugPrintJdwp("repeater sent ", packet.data.data());
+#endif
+    proxy->mPushToSenderQueue(std::move(packet));
+    proxy->mSendAll();
+    proxy->mShouldSendCachePacket = false;
+    proxy->mloadedCachedPacket.reset();
+    proxy->mRepeaterTimer.reset();
+    DD("Sent loaded packet to the host");
 }
 
 bool JdwpProxy::shouldClose() const {
