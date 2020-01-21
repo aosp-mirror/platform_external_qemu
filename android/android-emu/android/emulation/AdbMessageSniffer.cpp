@@ -296,9 +296,9 @@ void AdbMessageSnifferImpl::printPayload() const {
         return;
     }
     const amessage& msg = mPacket.mesg;
-    if (msg.command == ADB_OKAY) {
-        return;
-    }
+    //if (msg.command == ADB_OKAY) {
+    //    return;
+    //}
     if ((msg.command == ADB_WRTE) && (mLevel < 3)) {
         return;
     }
@@ -351,9 +351,9 @@ void AdbMessageSnifferImpl::printMessage() const {
     }
 
     const amessage& msg = mPacket.mesg;
-    if (msg.command == ADB_OKAY) {
-        return;
-    }
+    //if (msg.command == ADB_OKAY) {
+    //    return;
+    //}
     if ((msg.command == ADB_WRTE) && (mLevel < 3)) {
         return;
     }
