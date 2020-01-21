@@ -63,13 +63,27 @@ static bool sInitialized = false;
 #define VG_EXPORT __attribute__((visibility("default")))
 #endif
 
-extern "C" VG_EXPORT void init_global_state();
+#define POST_CALLBACK_DISPLAY_TYPE_X 0
+#define POST_CALLBACK_DISPLAY_TYPE_WAYLAND_SHARED_MEM 1
+#define POST_CALLBACK_DISPLAY_TYPE_WINDOWS_HWND 2
 
 struct renderer_display_info;
 typedef void (*get_pixels_t)(void*, uint32_t);
 static get_pixels_t sGetPixelsFunc = 0;
 typedef void (*post_callback_t)(void*, int, int, int, int, int, unsigned char*);
-extern "C" VG_EXPORT void set_post_callback(struct renderer_display_info* r, post_callback_t);
+
+extern "C" VG_EXPORT void gfxstream_backend_init(
+    uint32_t display_width,
+    uint32_t display_height,
+    struct renderer_display_info* r,
+    post_callback_t,
+    uint32_t display_type,
+    void* renderer_cookie,
+    int renderer_flags,
+    struct virgl_renderer_callbacks* virglrenderer_callbacks);
+
+// For reading back rendered contents to display
+extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes);
 
 static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         // guest_open()
@@ -228,8 +242,19 @@ static android::base::TestTempDir* sTestContentDir = nullptr;
 
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
-extern "C" VG_EXPORT void init_global_state() {
-    GFXS_LOG("start");
+static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type);
+
+extern "C" VG_EXPORT void gfxstream_backend_init(
+    uint32_t display_width,
+    uint32_t display_height,
+    struct renderer_display_info* display_info,
+    post_callback_t post_callback,
+    uint32_t display_type,
+    void* renderer_cookie,
+    int renderer_flags,
+    struct virgl_renderer_callbacks* virglrenderer_callbacks) {
+
+    GFXS_LOG("start. display dimensions: width %u height %u", display_width, display_height);
 
     android_avdInfo = avdInfo_newCustom(
         "goldfish_opengl_test",
@@ -277,10 +302,7 @@ extern "C" VG_EXPORT void init_global_state() {
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::HostComposition, true);
 
-    bool useHostGpu =
-            System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
-
-    emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
+    emugl::vkDispatch(false /* don't use test ICD */);
 
     android_hw->hw_gltransport_asg_writeBufferSize = 262144;
     android_hw->hw_gltransport_asg_writeStepSize = 8192;
@@ -290,7 +312,7 @@ extern "C" VG_EXPORT void init_global_state() {
     EmuglConfig config;
 
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
-                     useHostGpu ? "host" : "swiftshader_indirect", /* gpu mode, option */
+                     "host",
                      64,                     /* bitness */
                      true,                   /* no window */
                      false,                  /* blacklisted */
@@ -303,10 +325,11 @@ extern "C" VG_EXPORT void init_global_state() {
     android_initOpenglesEmulation();
     int maj;
     int min;
-    const int kWindowSize = 256;
     android_startOpenglesRenderer(
-        720, 1280, 1, 28, gQAndroidVmOperations,
-        gQAndroidEmulatorWindowAgent, &maj, &min);
+        display_width, display_height, 1, 28,
+        gQAndroidVmOperations,
+        gQAndroidEmulatorWindowAgent,
+        &maj, &min);
 
     char* vendor = nullptr;
     char* renderer = nullptr;
@@ -331,12 +354,33 @@ extern "C" VG_EXPORT void init_global_state() {
 
     sGetPixelsFunc = android_getReadPixelsFunc();
 
-    GFXS_LOG("Started renderer");
+    pipe_virgl_renderer_init(renderer_cookie, renderer_flags, virglrenderer_callbacks);
+
+    GFXS_LOG("Started renderer. Initializing post callback...");
+
+    set_post_callback(display_info, post_callback, display_type);
 }
 
-extern "C" VG_EXPORT void set_post_callback(struct renderer_display_info* r, post_callback_t func) {
-    // crosvm needs bgra readback
-    android_setPostCallback(func, r, true /* bgra readback */);
+static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type) {
+
+    // crosvm needs bgra readback depending on the display type
+    bool use_bgra_readback = false;
+    switch (display_type) {
+        case POST_CALLBACK_DISPLAY_TYPE_X:
+            GFXS_LOG("using display type: X11");
+            use_bgra_readback = true;
+            break;
+        case POST_CALLBACK_DISPLAY_TYPE_WAYLAND_SHARED_MEM:
+            GFXS_LOG("using display type: wayland shared mem");
+            break;
+        case POST_CALLBACK_DISPLAY_TYPE_WINDOWS_HWND:
+            GFXS_LOG("using display type: windows hwnd");
+            break;
+        default:
+            break;
+    }
+
+    android_setPostCallback(func, r, false);
 }
 
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {
