@@ -26,10 +26,13 @@ namespace jdwp {
 
 static const char* sJdwpHandshake = "JDWP-Handshake";
 static const int sJdwpHandshakeSize = 14;  // exclude the ending 0
+static const int sJdwpHeaderSize = 11;
+static const int sJdwpReplyFlag = 0x80;
 
 enum CommandSet {
     VirtualMachine = 0x1,
     EventRequest = 0xf,
+    ExtensionBegin = 0x80,
 };
 
 enum VirtualMachineCommand {
