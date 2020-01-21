@@ -13,6 +13,7 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_set>
 
 #include "android/base/files/Stream.h"
 #include "android/base/threads/Thread.h"
@@ -21,7 +22,9 @@
 #include "android/emulation/apacket_utils.h"
 
 namespace android {
+
 namespace jdwp {
+
 class JdwpProxy : public emulation::AdbProxy {
 public:
     JdwpProxy(int hostId, int guestId, int guestPid);
@@ -31,7 +34,9 @@ public:
                          bool* shouldForwardRecv,
                          std::queue<emulation::apacket>* toSends) override;
     void onGuestSendData(const emulation::amessage* mesg,
-                         const uint8_t* data) override;
+                         const uint8_t* data,
+                         bool* shouldForwardSend,
+                         std::queue<emulation::apacket>* extraSends) override;
     bool shouldClose() const override;
     int32_t guestId() const override;
     int32_t originHostId() const override;
@@ -39,13 +44,6 @@ public:
     void setCurrentHostId(int32_t currentHostId);
     int32_t guestPid() const;
     void onSave(android::base::Stream* stream);
-    void onGuestSendData(const AndroidPipeBuffer* buffers,
-                         int numBuffers,
-                         size_t actualSentBytes);
-    void onGuestRecvData(const AndroidPipeBuffer* buffers,
-                         int numBuffers,
-                         size_t actualRecvBytes);
-
 private:
     enum State {
         Uninitialized,
@@ -67,6 +65,14 @@ private:
     int mGuestPid = 0;
 
     bool mShouldClose = false;
+    bool mShouldSendCachePacket = false;
+    bool mDebuggerActivated = false;
+    std::unique_ptr<emulation::apacket> mCachedPacket = nullptr;
+    std::unique_ptr<emulation::apacket> mloadedCachedPacket = nullptr;
+    std::unordered_set<uint32_t> mPendingGuestReplyCommandIds;
+    int mBreakpointRequestId = 0;
+    int mBreakpointEventId = 0;
+    int64_t mLastSendMs = 0;
 };
 }  // namespace jdwp
 }  // namespace android
