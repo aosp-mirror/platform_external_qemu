@@ -56,7 +56,7 @@ public:
                            std::function<void()> onSocketClose);
     bool socketWantRead();
     bool socketWantWrite();
-
+    void setSocket(int fd);
 private:
     int sendToHost(const AndroidPipeBuffer* buffers, int numBuffers);
     int recvFromHost(AndroidPipeBuffer* buffers, int numBuffers);
@@ -92,6 +92,7 @@ private:
     WakePipeFunc mWakePipe = nullptr;
     emulation::apacket mCnxnPacket;
     bool mShouldReconnect = false;
+    int mFd = -1;
 };
 }  // namespace emulation
 }  // namespace android

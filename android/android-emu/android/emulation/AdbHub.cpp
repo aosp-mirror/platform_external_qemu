@@ -64,6 +64,7 @@ void AdbHub::onLoad(android::base::Stream* stream) {
 void AdbHub::checkRemoveProxy(
         std::unordered_map<int, AdbProxy*>::iterator proxy) {
     if (proxy != mProxies.end() && proxy->second->shouldClose()) {
+        printf("closing jdwp\n");
         jdwp::JdwpProxy* jdwpProxy = (jdwp::JdwpProxy*)proxy->second;
         mJdwpProxies.erase(jdwpProxy->guestPid());
         mProxies.erase(proxy);
@@ -344,6 +345,7 @@ int AdbHub::readSocket(int fd) {
 
 void AdbHub::pushToSendQueue(apacket&& packet) {
     mSendToHostQueue.push(std::move(packet));
+    writeSocket(mFd);
 }
 
 void AdbHub::pushToRecvQueue(apacket&& packet) {
@@ -429,6 +431,10 @@ bool AdbHub::socketWantWrite() {
     return !mSendToHostQueue.empty() ||
            (mCurrentHostSendPacketPst >= 0 &&
             mCurrentHostSendPacketPst < packetSize(mCurrentHostSendPacket));
+}
+
+void AdbHub::setSocket(int fd) {
+    mFd = fd;
 }
 
 }  // namespace emulation

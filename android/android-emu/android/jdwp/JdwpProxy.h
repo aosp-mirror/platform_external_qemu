@@ -13,6 +13,7 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_set>
 
 #include "android/base/files/Stream.h"
 #include "android/base/threads/Thread.h"
@@ -54,8 +55,9 @@ private:
         HandshakeSent,
         HandshakeSentOk,
         HandshakeReplied,
-        HandshakeRepliedOk,
-        Proxying = HandshakeRepliedOk,
+        Proxying = HandshakeReplied,
+        //HandshakeRepliedOk,
+        //Proxying = HandshakeRepliedOk,
     };
     static State nextState(State state);
     emulation::amessage buildReplyMesg();
@@ -67,6 +69,10 @@ private:
     int mGuestPid = 0;
 
     bool mShouldClose = false;
+    bool mShouldSendCachePacket = true;
+    std::unique_ptr<emulation::apacket> mCachedPacket = nullptr;
+    std::unique_ptr<emulation::apacket> mloadedCachedPacket = nullptr;
+    std::unordered_set<uint32_t> mPendingGuestReplyCommands;
 };
 }  // namespace jdwp
 }  // namespace android
