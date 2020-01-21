@@ -25,7 +25,9 @@ public:
                                  bool* shouldForwardRecv,
                                  std::queue<apacket>* toSends) = 0;
     virtual void onGuestSendData(const android::emulation::amessage* mesg,
-                                 const uint8_t* data) = 0;
+                                 const uint8_t* data,
+                                 bool* shouldModifySend,
+                                 std::queue<emulation::apacket>* modifedSends) = 0;
     virtual bool shouldClose() const = 0;
     virtual int32_t guestId() const = 0;
     virtual int32_t originHostId() const = 0;
