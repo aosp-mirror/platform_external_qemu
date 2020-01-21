@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <functional>
 #include <queue>
 
 #include "android/emulation/apacket_utils.h"
@@ -20,6 +21,14 @@ namespace emulation {
 
 class AdbProxy {
 public:
+    typedef std::function<void()> SendAll;
+    typedef std::function<void(apacket&&)> PushToSenderQueue;
+    virtual void setSendAll(SendAll sendAll) {
+        mSendAll = sendAll;
+    }
+    virtual void setPushToSenderQueue(PushToSenderQueue pushToSenderQueue) {
+        mPushToSenderQueue = pushToSenderQueue;
+    }
     virtual void onGuestRecvData(const android::emulation::amessage* mesg,
                                  const uint8_t* data,
                                  bool* shouldForwardRecv,
@@ -30,6 +39,9 @@ public:
     virtual int32_t guestId() const = 0;
     virtual int32_t originHostId() const = 0;
     virtual int32_t currentHostId() const = 0;
+protected:
+    SendAll mSendAll = nullptr;
+    PushToSenderQueue mPushToSenderQueue = nullptr;
 };
 }  // namespace emulation
 }  // namespace android

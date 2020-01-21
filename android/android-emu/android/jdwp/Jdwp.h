@@ -29,6 +29,7 @@ static const int sJdwpHandshakeSize = 14;  // exclude the ending 0
 enum CommandSet {
     VirtualMachine = 0x1,
     EventRequest = 0xf,
+    ExtensionBegin = 0x80,
 };
 
 enum VirtualMachineCommand {
