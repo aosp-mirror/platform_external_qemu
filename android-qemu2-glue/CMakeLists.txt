@@ -19,6 +19,7 @@ set(libqemu2-glue_src
     emulation/VmLock.cpp
     emulation/virtio-goldfish-pipe.cpp
     emulation/virtio-input-multi-touch.c
+    emulation/virtio-wireless.c
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
@@ -64,7 +65,8 @@ target_link_libraries(libqemu2-glue
                               GLIB2::GLIB2
                               PIXMAN::PIXMAN
                               emulator-libdtb
-                              ssl)
+                              ssl
+                              hostapd)
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 
 set(libqemu2-glue-vm-operations_src

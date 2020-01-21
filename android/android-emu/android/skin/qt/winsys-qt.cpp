@@ -627,6 +627,13 @@ extern void skin_winsys_show_virtual_scene_controls(bool show) {
     window->showVirtualSceneControls(show);
 }
 
+extern void skin_winsys_start_function(StartFunction f,
+                              int argc,
+                              char** argv) {
+    auto th = new MainLoopThread(f, argc, argv);
+    th->start();
+}
+
 extern void skin_winsys_spawn_thread(bool no_window,
                                      StartFunction f,
                                      int argc,

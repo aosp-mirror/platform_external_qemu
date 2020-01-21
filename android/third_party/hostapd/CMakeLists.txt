@@ -7,6 +7,7 @@ set(hostapd_src
         ${HOSTAPD_ROOT}/eap_register.c
         ${WPA_SUPPLICANT_ROOT}/src/drivers/drivers.c
         ${WPA_SUPPLICANT_ROOT}/src/drivers/driver_common.c
+        ${WPA_SUPPLICANT_ROOT}/src/drivers/driver_virtio_wifi.c
         ${WPA_SUPPLICANT_ROOT}/src/utils/eloop.c
         ${WPA_SUPPLICANT_ROOT}/src/utils/common.c
         ${WPA_SUPPLICANT_ROOT}/src/utils/wpa_debug.c

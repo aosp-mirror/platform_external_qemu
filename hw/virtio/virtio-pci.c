@@ -25,6 +25,7 @@
 #include "hw/virtio/virtio-scsi.h"
 #include "hw/virtio/virtio-balloon.h"
 #include "hw/virtio/virtio-input.h"
+#include "android-qemu2-glue/emulation/virtio-wireless.h"
 #include "hw/pci/pci.h"
 #include "qapi/error.h"
 #include "qemu/error-report.h"
@@ -2451,6 +2452,49 @@ static const TypeInfo virtio_net_pci_info = {
     .class_init    = virtio_net_pci_class_init,
 };
 
+/* virtio-wireless-pci */
+static void virtio_wireless_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
+{
+    DeviceState *qdev = DEVICE(vpci_dev);
+    VirtIOWirelessPCI *dev = VIRTIO_WIRELESS_PCI(vpci_dev);
+    DeviceState *vdev = DEVICE(&dev->vdev);
+    set_status(&dev->vdev, 0);
+    //virtio_net_set_netclient_name(&dev->vdev, qdev->id,
+    //                              object_get_typename(OBJECT(qdev)));
+    qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
+    object_property_set_bool(OBJECT(vdev), true, "realized", errp);
+}
+
+static void virtio_wireless_pci_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
+
+    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    k->device_id = PCI_DEVICE_ID_VIRTIO_WIRELESS;
+    k->revision = VIRTIO_PCI_ABI_VERSION;
+    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
+    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
+    vpciklass->realize = virtio_wireless_pci_realize;
+}
+
+static void virtio_wireless_pci_instance_init(Object *obj)
+{
+    VirtIOWirelessPCI *dev = VIRTIO_WIRELESS_PCI(obj);
+
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_WIRELESS);
+}
+
+static const TypeInfo virtio_wireless_pci_info = {
+    .name          = TYPE_VIRTIO_WIRELESS_PCI,
+    .parent        = TYPE_VIRTIO_PCI,
+    .instance_size = sizeof(VirtIOWirelessPCI),
+    .instance_init = virtio_wireless_pci_instance_init,
+    .class_init    = virtio_wireless_pci_class_init,
+};
+
 /* virtio-rng-pci */
 
 static void virtio_rng_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
@@ -2694,6 +2738,7 @@ static void virtio_pci_register_types(void)
     type_register_static(&virtio_balloon_pci_info);
     type_register_static(&virtio_serial_pci_info);
     type_register_static(&virtio_net_pci_info);
+    type_register_static(&virtio_wireless_pci_info);
 #ifdef CONFIG_VHOST_SCSI
     type_register_static(&vhost_scsi_pci_info);
 #endif
