@@ -24,12 +24,16 @@ namespace jdwp {
 
 // We only list those that are used
 
-static const char* sJdwpHandshake = "JDWP-Handshake";
-static const int sJdwpHandshakeSize = 14;  // exclude the ending 0
+static const char* kJdwpHandshake = "JDWP-Handshake";
+static const int kJdwpHandshakeSize = 14;  // exclude the ending 0
+static const int kJdwpHeaderSize = 11;
+static const int kJdwpReplyFlag = 0x80;
 
 enum CommandSet {
     VirtualMachine = 0x1,
     EventRequest = 0xf,
+    Event = 0x40,
+    ExtensionBegin = 0x80,
 };
 
 enum VirtualMachineCommand {
@@ -43,6 +47,10 @@ enum VirtualMachineCommand {
 
 enum EventRequestCommand {
     Set = 0x1,
+};
+
+enum EventCommand {
+    Composite = 0x64,
 };
 
 enum EventKind {
