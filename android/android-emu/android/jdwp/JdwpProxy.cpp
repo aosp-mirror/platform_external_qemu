@@ -11,12 +11,16 @@
 
 #include "android/jdwp/JdwpProxy.h"
 
+#include <sys/time.h>
+
+#include "android/base/async/Looper.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/Jdwp.h"
 
-#define DEBUG 0
+#define DEBUG 2
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -26,10 +30,33 @@
 #endif
 
 #if DEBUG >= 2
+
 #define DD(...) D(__VA_ARGS__)
-#else
+static void debugPrintJdwp(const char* prefix, const uint8_t* data) {
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    android::jdwp::JdwpCommandHeader jdwpCmd;
+    jdwpCmd.parseFrom(data);
+    fprintf(stderr,
+            "%s (%ld) jdwp id %d flags %d cmd_set %d cmd %d length %d\n",
+            prefix, ms, (int)jdwpCmd.id, (int)jdwpCmd.flags,
+            (int)jdwpCmd.command_set, (int)jdwpCmd.command,
+            (int)jdwpCmd.length);
+    uint32_t printLength = jdwpCmd.length > 100 ? 100 : jdwpCmd.length;
+    fprintf(stderr, "%sjdwp data string: %s\n", prefix, data + 11);
+    fprintf(stderr, "%sjdwp data binary: ", prefix);
+    for (uint32_t i = 11; i < printLength; i++) {
+        fprintf(stderr, "%02x", data[i]);
+    }
+    fprintf(stderr, "\n");
+}
+
+#else  // DEBUG >= 2
 #define DD(...) (void)0
-#endif
+#endif  // DEBUG >= 2
+
+static const int64_t kRepeaterDelayMs = 2000;
 
 namespace android {
 namespace jdwp {
@@ -52,6 +79,15 @@ JdwpProxy::JdwpProxy(android::base::Stream* stream) {
     mClientState = Uninitialized;
     mShouldClose = stream->getBe32();
     mCurrentHostId = -1;
+    mShouldSendCachePacket = stream->getByte();
+    if (mShouldSendCachePacket) {
+        mloadedCachedPacket.reset(new emulation::apacket);
+        stream->read(&(mloadedCachedPacket->mesg),
+                     sizeof(mloadedCachedPacket->mesg));
+        mloadedCachedPacket->data.resize(mloadedCachedPacket->mesg.data_length);
+        stream->read(mloadedCachedPacket->data.data(),
+                     mloadedCachedPacket->mesg.data_length);
+    }
     D("Loading JdwpProxy host id %d guest id %d\n", mHostId, mGuestId);
 }
 
@@ -62,6 +98,17 @@ void JdwpProxy::onSave(android::base::Stream* stream) {
     stream->putBe32(mGuestPid);
     stream->putBe32(mProxyState);
     stream->putBe32(mShouldClose);
+    if (mloadedCachedPacket || mCachedPacket) {
+        emulation::apacket* packetToSave = mloadedCachedPacket
+                                                   ? mloadedCachedPacket.get()
+                                                   : mCachedPacket.get();
+        stream->putByte(1);
+        stream->write(&(packetToSave->mesg), sizeof(packetToSave->mesg));
+        stream->write(packetToSave->data.data(),
+                      packetToSave->mesg.data_length);
+    } else {
+        stream->putByte(0);
+    }
 }
 
 JdwpProxy::State JdwpProxy::nextState(State state) {
@@ -127,10 +174,9 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
             }
             break;
         case HandshakeReplied:
-            if (mesg->command != ADB_OKAY) {
-                mShouldClose = true;
-                return;
-            }
+            // No-op when connecting to jdwp the first time
+            // It should receive an ADB_OKAY, but Android Studio will mix it
+            // with other commands.
             if (clientProxyDifferent) {
                 // Leak the last ADB_OKAY to the guest, to make it consistent
                 // with icebox behavior.
@@ -139,9 +185,27 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
             }
             break;
         case Proxying:
+#if DEBUG >= 2
+            if (mesg->command == ADB_WRTE) {
+                debugPrintJdwp("guest recv ", data);
+            }
+#endif  // DEBUG >= 2
+            if (mesg->command == ADB_WRTE && mShouldSendCachePacket) {
+                JdwpCommandHeader jdwpCmd;
+                jdwpCmd.parseFrom(data);
+                if ((jdwpCmd.flags & 0x80) == 0 &&
+                    jdwpCmd.command_set < ExtensionBegin) {
+                    if (jdwpCmd.command_set == 15 && jdwpCmd.command == 1 &&
+                        data[11] == 0x4 && data[12] != SuspendPolicy::None) {
+                        mBreakpointRequestId = jdwpCmd.id;
+                    }
+                    mPendingGuestReplyCommands.insert(jdwpCmd.id);
+                    DD("new cmd id %d, total %d\n", jdwpCmd.id,
+                       (int)mPendingGuestReplyCommands.size());
+                }
+            }
             break;
         default:
-
             mShouldClose = true;
             return;
     }
@@ -151,7 +215,10 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
 }
 
 void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
-                                const uint8_t* data) {
+                                const uint8_t* data,
+                                bool* shouldForwardSend,
+                                std::queue<emulation::apacket>* extraSends) {
+    using jdwp::sJdwpHeaderSize;
     if (mesg->command == ADB_CLSE) {
         mShouldClose = true;
     }
@@ -177,13 +244,64 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
             }
             break;
         case Proxying:
+#if DEBUG >= 2
+            if (mesg->command == ADB_WRTE) {
+                debugPrintJdwp("guest send ", data);
+            }
+#endif  // DEBUG >= 2
             if (mesg->command == ADB_CLSE) {
                 mShouldClose = true;
                 return;
             }
+            if (mesg->command == ADB_WRTE) {
+                // Cache the last message
+                mCachedPacket.reset(new emulation::apacket);
+                mCachedPacket->mesg = *mesg;
+                if (mesg->data_length) {
+                    mCachedPacket->data.assign(data, data + mesg->data_length);
+                }
+                if (mShouldSendCachePacket) {
+                    JdwpCommandHeader jdwpCmd;
+                    jdwpCmd.parseFrom(data);
+                    if (jdwpCmd.flags & 0x80 &&
+                        jdwpCmd.command_set < ExtensionBegin) {
+                        mPendingGuestReplyCommands.erase(jdwpCmd.id);
+                        // Collect the event ID.
+                        if (jdwpCmd.id == mBreakpointRequestId) {
+                            memcpy(&mBreakpointEventId, data + sJdwpHeaderSize,
+                                   4);
+                        }
+                        DD("recv reply id %d, remaining %d\n", jdwpCmd.id,
+                           (int)mPendingGuestReplyCommands.size());
+                        // If it doesn't have pending commands and the event ID
+                        // is set, send out the loaded pause message
+                        if (mPendingGuestReplyCommands.size() == 0 &&
+                            mBreakpointEventId) {
+                            *shouldForwardSend = false;
+                            extraSends->push(emulation::apacket());
+                            emulation::apacket& packet0 = extraSends->back();
+                            packet0.mesg = *mesg;
+                            packet0.data.assign(data, data + mesg->data_length);
+                            extraSends->push(*mloadedCachedPacket.get());
+                            emulation::apacket& packet1 = extraSends->back();
+                            packet1.mesg.arg1 = mCurrentHostId;
+                            // The message looks like (Hexadecimal):
+                            // 02 (suspend policy: all) 000000001 (number of
+                            // events) 02 (event kind: break point) xxxxxxxx
+                            // (request id) ... We need to override the request
+                            // id to match those known to JDI
+                            memcpy(packet1.data.data() + sJdwpHeaderSize + 6,
+                                   &mBreakpointEventId, 4);
+                            mShouldSendCachePacket = false;
+                            mDebuggerActivated = false;
+                            mloadedCachedPacket.reset();
+                            D("Pause message injected\n");
+                        }
+                    }
+                }
+            }
             break;
         default:
-
             mShouldClose = true;
             return;
     }
