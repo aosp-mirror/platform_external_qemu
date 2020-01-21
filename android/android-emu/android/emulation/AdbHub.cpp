@@ -50,6 +50,13 @@ void AdbHub::onLoad(android::base::Stream* stream) {
     int proxyCount = stream->getBe32();
     for (int i = 0; i < proxyCount; i++) {
         jdwp::JdwpProxy* proxy = new jdwp::JdwpProxy(stream);
+        proxy->setSendAll([this](){
+            int val = writeSocket();
+            printf("write socket return code %d\n", val);
+        });
+        proxy->setPushToSenderQueue([this](apacket&& packet) {
+            pushToSendQueue(std::move(packet));
+        });
         mProxies.emplace(proxy->guestId(), proxy);
         mJdwpProxies.emplace(proxy->guestPid(),
                 std::unique_ptr<jdwp::JdwpProxy>(proxy));
@@ -64,6 +71,7 @@ void AdbHub::onLoad(android::base::Stream* stream) {
 void AdbHub::checkRemoveProxy(
         std::unordered_map<int, AdbProxy*>::iterator proxy) {
     if (proxy != mProxies.end() && proxy->second->shouldClose()) {
+        printf("closing jdwp\n");
         jdwp::JdwpProxy* jdwpProxy = (jdwp::JdwpProxy*)proxy->second;
         mJdwpProxies.erase(jdwpProxy->guestPid());
         mProxies.erase(proxy);
@@ -106,7 +114,8 @@ int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
             mCurrentGuestSendPacketPst ==
                     mCurrentGuestSendPacket.data.size() + kHeaderSize) {
             // handle message
-            bool shouldPush = true;  // This is always true for existing proxies
+            bool shouldPush = true;
+            std::queue<emulation::apacket> sendDataQueue;
             amessage& mesg = mCurrentGuestSendPacket.mesg;
             if (mesg.command == ADB_CNXN) {
                 mCnxnPacket = mCurrentGuestSendPacket;
@@ -131,13 +140,19 @@ int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
                             mesg.arg1 = currentHostId;
                         }
                         proxyIte->second->onGuestSendData(
-                                &mesg, mCurrentGuestSendPacket.data.data());
+                                &mesg, mCurrentGuestSendPacket.data.data(),
+                                &shouldPush,
+                                &sendDataQueue);
                     }
                     checkRemoveProxy(proxyIte);
                 }
             }
             if (shouldPush) {
                 pushToSendQueue(std::move(mCurrentGuestSendPacket));
+            }
+            while (sendDataQueue.size()) {
+                pushToSendQueue(std::move(sendDataQueue.front()));
+                sendDataQueue.pop();
             }
             mCurrentGuestSendPacket.mesg.data_length = 0;
             mCurrentGuestSendPacket.data.resize(0);
@@ -207,21 +222,26 @@ void AdbHub::onHostSocketEvent(int fd,
                                unsigned events,
                                std::function<void()> onSocketClose) {
     DD("%s: %s", __FILE__, __func__);
-    if ((events & base::Looper::FdWatch::kEventRead) != 0) {
-        if (readSocket(fd) == PIPE_ERROR_IO) {
+    //printf("fd %d mFd %d\n", fd, mFd);
+    CHECK(fd == mFd);
+    //if ((events & base::Looper::FdWatch::kEventRead) != 0) {
+    {
+        if (readSocket() == PIPE_ERROR_IO) {
             onSocketClose();
             return;
         }
     }
-    if ((events & base::Looper::FdWatch::kEventWrite) != 0) {
-        if (writeSocket(fd) == PIPE_ERROR_IO) {
+    //if ((events & base::Looper::FdWatch::kEventWrite) != 0) {
+    {
+        if (writeSocket() == PIPE_ERROR_IO) {
             onSocketClose();
             return;
         }
     }
 }
 
-int AdbHub::writeSocket(int fd) {
+int AdbHub::writeSocket() {
+    int fd = mFd;
     D("AdbHub writeSocket started");
     while ((mCurrentHostSendPacketPst >= 0 &&
             mCurrentHostSendPacketPst < packetSize(mCurrentHostSendPacket)) ||
@@ -256,6 +276,7 @@ int AdbHub::writeSocket(int fd) {
         } else if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
             return PIPE_ERROR_AGAIN;
         } else {
+            D("AdbHub write socket error");
             return PIPE_ERROR_IO;
         }
     }
@@ -263,8 +284,9 @@ int AdbHub::writeSocket(int fd) {
     return 0;
 }
 
-int AdbHub::readSocket(int fd) {
+int AdbHub::readSocket() {
     D("AdbHub readSocket started");
+    int fd = mFd;
     while (true) {
         uint8_t* data = nullptr;
         size_t bytesToRecv = 0;
@@ -291,6 +313,7 @@ int AdbHub::readSocket(int fd) {
         } else if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
             return PIPE_ERROR_AGAIN;
         } else {
+            D("AdbHub read socket error");
             return PIPE_ERROR_IO;
         }
 
@@ -344,6 +367,7 @@ int AdbHub::readSocket(int fd) {
 
 void AdbHub::pushToSendQueue(apacket&& packet) {
     mSendToHostQueue.push(std::move(packet));
+    //writeSocket();
 }
 
 void AdbHub::pushToRecvQueue(apacket&& packet) {
@@ -377,6 +401,12 @@ AdbProxy* AdbHub::onNewConnection(const apacket& requestPacket,
     if (mJdwpProxies.count(jdwpId) == 0) {
         jdwp::JdwpProxy* proxy = new jdwp::JdwpProxy(
                 requestPacket.mesg.arg0, replyPacket.mesg.arg0, jdwpId);
+        proxy->setSendAll([this](){
+            writeSocket();
+        });
+        proxy->setPushToSenderQueue([this](apacket&& packet) {
+            pushToSendQueue(std::move(packet));
+        });
         mJdwpProxies[jdwpId].reset(proxy);
         mProxies.emplace(proxy->guestId(), proxy);
         return proxy;
@@ -429,6 +459,10 @@ bool AdbHub::socketWantWrite() {
     return !mSendToHostQueue.empty() ||
            (mCurrentHostSendPacketPst >= 0 &&
             mCurrentHostSendPacketPst < packetSize(mCurrentHostSendPacket));
+}
+
+void AdbHub::setSocket(int fd) {
+    mFd = fd;
 }
 
 }  // namespace emulation

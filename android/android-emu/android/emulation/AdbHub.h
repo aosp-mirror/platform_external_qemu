@@ -56,7 +56,7 @@ public:
                            std::function<void()> onSocketClose);
     bool socketWantRead();
     bool socketWantWrite();
-
+    void setSocket(int fd);
 private:
     int sendToHost(const AndroidPipeBuffer* buffers, int numBuffers);
     int recvFromHost(AndroidPipeBuffer* buffers, int numBuffers);
@@ -66,8 +66,8 @@ private:
     AdbProxy* tryReuseConnection(const apacket& packet);
     void pushToSendQueue(apacket&& packet);
     void pushToRecvQueue(apacket&& packet);
-    int readSocket(int fd);
-    int writeSocket(int fd);
+    int readSocket();
+    int writeSocket();
 
     // Pending connection requests, indexed by host ID
     std::unordered_map<int, apacket> mPendingConnections;
@@ -92,6 +92,7 @@ private:
     WakePipeFunc mWakePipe = nullptr;
     emulation::apacket mCnxnPacket;
     bool mShouldReconnect = false;
+    int mFd = -1;
 };
 }  // namespace emulation
 }  // namespace android
