@@ -652,6 +652,20 @@ static void enableSignalTermination() {
 
 }  // namespace
 
+extern "C" int run_hostapd_main(int argc,
+                                 const char** argv,
+                                 void (*on_main_loop_done)(void));
+
+static void enter_hostapd_main_loop(int argc, char** argv) {
+#ifndef _WIN32
+    sigset_t set;
+    sigemptyset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+    D("Starting hostapd main loop");
+    run_hostapd_main(argc, (const char**)argv, []{});
+}
+
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
                              void (*on_main_loop_done)(void));
@@ -907,6 +921,11 @@ static int startEmulatorWithMinConfig(
         }
     }
 
+    android::ParameterList args2{"hostapd"};
+    std::string hostapdConf = PathUtils::join(
+                                  System::get()->getLauncherDirectory(), "lib", "hostapd.conf");
+    args2.add(hostapdConf);
+    skin_winsys_start_function(enter_hostapd_main_loop, args2.size(), args2.array());
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
@@ -1715,8 +1734,8 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Network
-    args.add("-netdev");
-    if (opts->net_tap) {
+    //args.add("-netdev");
+    /*if (opts->net_tap) {
         const char* upScript =
                 opts->net_tap_script_up ? opts->net_tap_script_up : "no";
         const char* downScript =
@@ -1733,7 +1752,7 @@ extern "C" int main(int argc, char** argv) {
         args.add("user,id=mynet");
     }
     args.add("-device");
-    args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+    args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);*/
 
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
@@ -1746,7 +1765,10 @@ extern "C" int main(int argc, char** argv) {
     args.add("-show-cursor");
 
     initialize_virtio_input_devs(args, hw);
-
+    args.add("-netdev");
+    args.add("user,id=mynet1");
+    args.add("-device");
+    args.add("virtio-wireless-pci,netdev=mynet1");
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
@@ -2006,6 +2028,11 @@ extern "C" int main(int argc, char** argv) {
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
 
+    android::ParameterList args2{"hostapd"};
+    std::string hostapdConf = PathUtils::join(
+                                  System::get()->getLauncherDirectory(), "lib", "hostapd.conf");
+    args2.add(hostapdConf);
+    skin_winsys_start_function(enter_hostapd_main_loop, args2.size(), args2.array());
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
