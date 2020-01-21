@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7777c3d1_9f3bf163",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-01-21T19:39:07Z",
+      "side": 1,
+      "message": "I\u0027m not sure about adding width and height to ImageFormat because it would look bad if they are ignored by the getScreenshot method.",
+      "parentUuid": "4d2e5291_50bb9515",
+      "range": {
+        "startLine": 43,
+        "startChar": 21,
+        "endLine": 43,
+        "endChar": 32
+      },
+      "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "902c991b_dafd4a9d",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "We are free to change this .proto format. We currently have few consumers.",
       "parentUuid": "902c991b_dafd4a9d",
+      "range": {
+        "startLine": 52,
+        "startChar": 7,
+        "endLine": 52,
+        "endChar": 69
+      },
+      "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "595923c8_64ae23f5",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-01-21T19:39:07Z",
+      "side": 1,
+      "message": "Nice to hear.",
+      "parentUuid": "6546f421_7389e276",
       "range": {
         "startLine": 52,
         "startChar": 7,
@@ -118,6 +166,24 @@
       "writtenOn": "2020-01-21T18:51:53Z",
       "side": 1,
       "message": "We can mark these as deprecated. As far as I know the only consumer is the javascript library that we control",
+      "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a12b4fb_2b9a7a5e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-01-21T19:39:07Z",
+      "side": 1,
+      "message": "Makes sense if we we go with width and height in ImageFormat.",
+      "parentUuid": "93cd9f9a_fda91706",
       "revId": "6e612e37d06337cd9342a3c6aacbd99b17511d0f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
