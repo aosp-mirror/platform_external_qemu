@@ -1,11 +1,11 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <nlohmann/json.hpp>                    // for basic_json<>::value_type
-#include <stdio.h>                              // for sscanf
-#include <memory>                               // for shared_ptr, shared_pt...
-#include <new>                                  // for operator new
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include <stdio.h>            // for sscanf
+#include <memory>             // for shared_ptr, shared_pt...
+#include <new>                // for operator new
+#include <nlohmann/json.hpp>  // for basic_json<>::value_type
+#include <utility>            // for move
+#include <vector>             // for vector
 
 #include "android/base/CpuTime.h"               // for base
 #include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
@@ -36,7 +36,7 @@ namespace control {
 using namespace android::base;
 
 const std::string WebRtcBridge::kVideoBridgeExe = "goldfish-webrtc-bridge";
-std::string WebRtcBridge::BRIDGE_RECEIVER ="WebrtcVideoBridge";
+std::string WebRtcBridge::BRIDGE_RECEIVER = "WebrtcVideoBridge";
 
 WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
                            const AndroidConsoleAgents* const agents,
@@ -82,6 +82,7 @@ bool WebRtcBridge::connect(std::string identity) {
 
     json start;
     start["start"] = identity;
+    start["handles"] = std::vector<std::string>({mVideoModule});
     bool fwd = acceptJsepMessage(identity, start.dump());
     if (!fwd) {
         LOG(ERROR) << "json message rejected. disconnecting";

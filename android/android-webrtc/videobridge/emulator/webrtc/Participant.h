@@ -17,9 +17,9 @@
 #include <api/jsep.h>                     // for IceCandidateInterface (ptr ...
 #include <api/peerconnectioninterface.h>  // for PeerConnectionInterface
 #include <api/scoped_refptr.h>            // for scoped_refptr
-#include <stdint.h>                       // for uint32_t
+#include <stdint.h>                       // for uint32_t, uint8_t
 #include <memory>                         // for unique_ptr
-#include <string>                         // for string, basic_string, opera...
+#include <string>                         // for string, basic_string
 #include <unordered_map>                  // for unordered_map
 #include <unordered_set>                  // for unordered_set
 #include <vector>                         // for vector
@@ -33,6 +33,7 @@ namespace webrtc {
 class MediaStreamInterface;
 class RTCError;
 class RtpReceiverInterface;
+class RtpSenderInterface;
 class VideoTrackInterface;
 }  // namespace webrtc
 
@@ -103,10 +104,10 @@ private:
 class Participant : public EmptyConnectionObserver,
                     public ::webrtc::CreateSessionDescriptionObserver {
 public:
-    Participant(Switchboard* board,
-                std::string id,
-                std::string mem_handle,
-                int desiredFps,::webrtc::PeerConnectionFactoryInterface *peerConnectionFactory);
+    Participant(
+            Switchboard* board,
+            std::string id,
+            ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
@@ -128,22 +129,24 @@ public:
             ::webrtc::PeerConnectionInterface::IceConnectionState new_state)
             override;
     void IncomingMessage(json msg);
+    bool AddVideoTrack(const std::string& memoryHandle);
+    bool RemoveVideoTrack(const std::string& memoryHandle);
     bool Initialize();
     inline const std::string GetPeerId() const { return mPeerId; };
     void SendToBridge(json msg);
+    void CreateOffer();
     void Close();
 
 private:
     void SendMessage(json msg);
     void HandleOffer(const json& msg) const;
     void HandleCandidate(const json& msg) const;
-    bool AddStreams();
     bool CreatePeerConnection(bool dtls);
     void AddDataChannel(const std::string& channel);
-    VideoCapturer* OpenVideoCaptureDevice();
+    VideoCapturer* OpenVideoCaptureDevice(const std::string& memoryHandle);
 
     scoped_refptr<PeerConnectionInterface> mPeerConnection;
-    ::webrtc::PeerConnectionFactoryInterface *mPeerConnectionFactory;
+    ::webrtc::PeerConnectionFactoryInterface* mPeerConnectionFactory;
     std::unordered_map<std::string,
                        scoped_refptr<::webrtc::MediaStreamInterface>>
             mStreams;
@@ -151,12 +154,14 @@ private:
     std::unordered_map<std::string, std::unique_ptr<EventForwarder>>
             mEventForwarders;
 
+    std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
+            mActiveVideoTracks;
+
     Switchboard* mSwitchboard;
     std::string mPeerId;
-    std::string mMemoryHandle;
-    uint32_t mFps = 24;
     uint32_t mId{0};
 
+    const uint8_t kFps = 60;
     const std::string kStunUri = "stun:stun.l.google.com:19302";
     const std::string kAudioLabel = "emulator_audio_stream";
     const std::string kVideoLabel = "emulator_video_stream";
