@@ -22,6 +22,30 @@
       "revId": "6a390754e9db1af1352699a729a5de7443a766d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b7c5ffd_3ba80d1f",
+        "filename": "android-qemu2-glue/emulation/virtio-wireless.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-01-22T05:47:46Z",
+      "side": 1,
+      "message": "toDS bit is set for data frames and not set for managmenet frames as defined in https://en.wikipedia.org/wiki/802.11_Frame_Types#ToDs_and_FromDS\n\nI was trying to reuse the helper functions such as testing if toDS bit is set from hostapd. It is possible to export the hostapd library to qemu.",
+      "parentUuid": "0547bf2a_c9041c85",
+      "range": {
+        "startLine": 300,
+        "startChar": 12,
+        "endLine": 300,
+        "endChar": 37
+      },
+      "revId": "6a390754e9db1af1352699a729a5de7443a766d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
