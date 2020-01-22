@@ -91,6 +91,6 @@ endif()
 add_definitions(-D_DARWIN_C_SOURCE=1)
 
 
-# And the asm type if we are compiling with yasm
-set(ANDROID_YASM_TYPE macho64)
+# And the asm type if we are compiling with ASM
+set(ANDROID_ASM_TYPE macho64)
 # No magical includes or dependencies for darwin..

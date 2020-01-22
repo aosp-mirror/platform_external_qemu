@@ -141,18 +141,18 @@ endif()
 if(LINUX_X86_64)
   add_c_flag("-Werror")
   # And the asm type if we are compiling with yasm
-  set(ANDROID_YASM_TYPE elf64)
+  set(ANDROID_NASM_TYPE elf64)
 elseif(WINDOWS_X86_64)
   add_c_flag("-Wno-all")
   # And the asm type if we are compiling with yasm
-  set(ANDROID_YASM_TYPE win64)
+  set(ANDROID_NASM_TYPE win64)
 elseif(WINDOWS_MSVC_X86_64)
   # And the asm type if we are compiling with yasm
-  set(ANDROID_YASM_TYPE win64)
+  set(ANDROID_NASM_TYPE win64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 elseif(DARWIN_X86_64)
   # And the asm type if we are compiling with yasm
-  set(ANDROID_YASM_TYPE macho64)
+  set(ANDROID_NASM_TYPE macho64)
   # Always consider the source to be darwin.
   add_definitions(-D_DARWIN_C_SOURCE=1)
   add_c_flag("-Wno-everything")
