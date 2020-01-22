@@ -199,8 +199,10 @@ TEST(WebRtcBridge, connectSaysHi) {
 
     // Connecting will send a start message to the video bridge..
     bridge.connect("moi");
-    EXPECT_STREQ("{\"from\":\"moi\",\"msg\":\"{\\\"start\\\":\\\"moi\\\"}\"}",
-                 socket->mSend.front().c_str());
+    EXPECT_STREQ(
+            "{\"from\":\"moi\",\"msg\":\"{\\\"handles\\\":[\\\"\\\"],"
+            "\\\"start\\\":\\\"moi\\\"}\"}",
+            socket->mSend.front().c_str());
 }
 
 TEST(WebRtcBridge, disconnectNotifiesTheBridge) {

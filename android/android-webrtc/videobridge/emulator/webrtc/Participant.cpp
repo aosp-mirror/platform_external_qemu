@@ -15,7 +15,8 @@
 
 #include <absl/types/optional.h>                        // for optional
 #include <api/mediastreaminterface.h>                   // for MediaStreamTr...
-#include <api/rtcerror.h>                               // for RTCError, ToS...
+#include <api/rtcerror.h>                               // for RTCError, RTC...
+#include <api/rtpsenderinterface.h>                     // for RtpSenderInte...
 #include <emulator/webrtc/capture/VideoShareFactory.h>  // for VideoShareFac...
 #include <media/base/device.h>                          // for Device
 #include <media/base/videocapturer.h>                   // for VideoCapturer
@@ -91,13 +92,9 @@ static int sId = 0;
 Participant::Participant(
         Switchboard* board,
         std::string id,
-        std::string mem_handle,
-        int32_t fps,
         ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory)
     : mSwitchboard(board),
       mPeerId(id),
-      mMemoryHandle(mem_handle),
-      mFps(fps),
       mPeerConnectionFactory(peerConnectionFactory) {
     mId = sId++;
 }
@@ -126,8 +123,7 @@ void Participant::OnIceConnectionChange(
             RTC_LOG(INFO) << "Closed! Time to erase peer: " << mId;
             mSwitchboard->rtcConnectionClosed(mPeerId);
             break;
-        default:
-                ;  // Nothing ..
+        default:;  // Nothing ..
     }
 }
 
@@ -251,41 +247,63 @@ void Participant::OnFailure(::webrtc::RTCError error) {
     RTC_LOG(LERROR) << ToString(error.type()) << ": " << error.message();
 }
 
-cricket::VideoCapturer* Participant::OpenVideoCaptureDevice() {
+cricket::VideoCapturer* Participant::OpenVideoCaptureDevice(
+        const std::string& handle) {
     videocapturemodule::VideoShareFactory* factory =
-            new videocapturemodule::VideoShareFactory(mMemoryHandle, mFps);
+            new videocapturemodule::VideoShareFactory(handle, kFps);
     std::unique_ptr<cricket::WebRtcVideoCapturer> capturer(
             new cricket::WebRtcVideoCapturer(factory));
-    cricket::Device default_device(mMemoryHandle, 0);
+    cricket::Device default_device(handle, 0);
     if (!capturer->Init(default_device)) {
-        RTC_LOG(LERROR) << "unable to initialize device on handle: "
-                        << mMemoryHandle;
+        RTC_LOG(LERROR) << "unable to initialize device on handle: " << handle;
         return nullptr;
     }
     return capturer.release();
 }
 
-bool Participant::AddStreams() {
-    if (!mPeerConnection->GetSenders().empty()) {
-        return true;  // Already added tracks.
-    }
-    // Well, we need audio at some point..
-    std::unique_ptr<cricket::VideoCapturer> device(OpenVideoCaptureDevice());
+bool Participant::AddVideoTrack(const std::string& handle) {
+    std::unique_ptr<cricket::VideoCapturer> device(
+            OpenVideoCaptureDevice(handle));
     if (!device) {
         return false;
     }
 
+    if (mActiveVideoTracks.count(handle) != 0) {
+        RTC_LOG(LS_ERROR) << "Track " << handle
+                          << " already active, not adding again.";
+    }
+
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
             mPeerConnectionFactory->CreateVideoTrack(
-                    kVideoLabel, mPeerConnectionFactory->CreateVideoSource(
-                                         std::move(device), nullptr)));
+                    handle, mPeerConnectionFactory->CreateVideoSource(
+                                    std::move(device), nullptr)));
 
-    auto result = mPeerConnection->AddTrack(video_track, {kStreamLabel});
+    auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add track to video: "
                           << result.error().message();
         return false;
     }
+
+    mActiveVideoTracks[handle] = result.value();
+    return true;
+}
+
+void Participant::CreateOffer() {
+    RTC_LOG(INFO) << "Creating offer";
+    mPeerConnection->CreateOffer(
+            this, ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+}
+
+bool Participant::RemoveVideoTrack(const std::string& handle) {
+    if (mActiveVideoTracks.count(handle) == 0) {
+        RTC_LOG(LS_ERROR) << "Track " << handle
+                          << " not active, no need to remove.";
+        return false;
+    }
+
+    auto track = mActiveVideoTracks[handle];
+    mPeerConnection->RemoveTrack(track);
     return true;
 }
 
@@ -301,12 +319,6 @@ bool Participant::Initialize() {
         mPeerConnection = nullptr;
     }
 
-    if (!AddStreams()) {
-        RTC_LOG(LS_ERROR) << "Failed to add streams";
-        mPeerConnection = nullptr;
-        return false;
-    }
-
     if (mPeerConnection.get() == nullptr) {
         RTC_LOG(LS_ERROR) << "Failed to get peer connection";
         return false;
@@ -315,10 +327,6 @@ bool Participant::Initialize() {
     AddDataChannel("mouse");
     AddDataChannel("touch");
     AddDataChannel("keyboard");
-
-    RTC_LOG(INFO) << "Creating offer";
-    mPeerConnection->CreateOffer(
-            this, ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     return true;
 }
 
