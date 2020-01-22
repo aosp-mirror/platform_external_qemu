@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0547bf2a_c9041c85",
+        "filename": "android-qemu2-glue/emulation/virtio-wireless.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1291337
+      },
+      "writtenOn": "2020-01-22T03:04:23Z",
+      "side": 1,
+      "message": "Is the guest kernel driver using the ToDS bit as a side channel for whether the packet should go to hostapd or out to the public internet, or does it work out naturally that the ToDS bit is set for data frames and not set for frames like associations?",
+      "range": {
+        "startLine": 300,
+        "startChar": 12,
+        "endLine": 300,
+        "endChar": 37
+      },
+      "revId": "6a390754e9db1af1352699a729a5de7443a766d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
