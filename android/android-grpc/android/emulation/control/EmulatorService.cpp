@@ -14,20 +14,25 @@
 
 #include "android/emulation/control/EmulatorService.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
+#include <sys/time.h>
+#endif
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
+
 #include <chrono>
 #include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include "android/version.h"
 
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
@@ -36,9 +41,9 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
-#include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -58,14 +63,12 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/opengles.h"
 #include "android/skin/rect.h"
+#include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
-#include "grpcpp/server.h"
-#include "grpcpp/server_builder.h"
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
 #include "snapshot-service.grpc.pb.h"
-#include "waterfall.grpc.pb.h"
 
 namespace google {
 namespace protobuf {
@@ -95,19 +98,15 @@ public:
 
     EmulatorControllerServiceImpl(int port,
                                   EmulatorController::Service* service,
-                                  waterfall::Waterfall::Service* waterfall,
                                   grpc::Server* server)
         : mPort(port),
           mService(service),
-          mForwarder(waterfall),
           mServer(server) {}
 
     int port() override { return mPort; }
 
 private:
     std::unique_ptr<EmulatorController::Service> mService;
-    std::unique_ptr<waterfall::Waterfall::Service> mForwarder;
-
     std::unique_ptr<grpc::Server> mServer;
     int mPort;
 };
@@ -491,19 +490,17 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     std::unique_ptr<EmulatorController::Service> controller(
             new EmulatorControllerImpl(mAgents, mBridge));
 
-    waterfall::Waterfall::Service* waterfall;
-
-    std::unique_ptr<waterfall::Waterfall::Service> wfallforwarder(
-            getWaterfallService(mWaterfall));
     std::unique_ptr<SnapshotService::Service> snapshotService(
             getSnapshotService());
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, mCredentials);
     builder.RegisterService(controller.release());
-    builder.RegisterService(wfallforwarder.release());
     builder.RegisterService(snapshotService.release());
 
+#ifndef _MSC_VER
+    builder.RegisterService(getWaterfallService());
+#endif
     // Register logging & metrics interceptor.
     std::vector<std::unique_ptr<
             grpc::experimental::ServerInterceptorFactoryInterface>>
@@ -526,7 +523,6 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, controller.release(),
-                                              wfallforwarder.release(),
                                               service.release()));
 }
 

@@ -18,6 +18,13 @@
 #include <ostream>      // for istream, ostream
 #include <string>       // for string
 
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+using uid_t = uint32_t;
+using gid_t = uint32_t;
+#endif
+
 namespace android {
 namespace emulation {
 namespace control {
