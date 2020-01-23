@@ -313,6 +313,7 @@ static bool setup_console_and_adb_ports(int console_port,
         if (android_adb_server_init(adb_port) < 0) {
             return false;
         }
+        android::icebox::set_jdwp_port(android_get_jdwp_port());
         register_adb_service = true;
     }
     if (qemu_android_console_start(console_port, agents) < 0) {
