@@ -13,13 +13,16 @@
 // limitations under the License.
 #include "VideoShareCapture.h"
 
-#include <rtc_base/logging.h>
-#include <sys/time.h>
+#include <rtc_base/logging.h>                  // for RTC_LOG
+#include <rtc_base/platform_thread.h>          // for PlatformThread, kHighP...
+#include <stddef.h>                            // for size_t
+#include <unistd.h>                            // for usleep
+#include <algorithm>                           // for min
 
-#include "VideoShareCapture.h"
-#include "android/base/memory/SharedMemory.h"
-#include "rtc_base/criticalsection.h"
-#include "rtc_base/timeutils.h"
+#include "android/base/StringView.h"           // for StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
+#include "rtc_base/criticalsection.h"          // for CritScope
+#include "rtc_base/timeutils.h"                // for TimeMicros
 
 #define DEBUG 1
 

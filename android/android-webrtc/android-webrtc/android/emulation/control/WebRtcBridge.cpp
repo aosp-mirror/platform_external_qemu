@@ -1,22 +1,31 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <inttypes.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <nlohmann/json.hpp>                    // for basic_json<>::value_type
+#include <stdio.h>                              // for sscanf
+#include <memory>                               // for shared_ptr, shared_pt...
+#include <new>                                  // for operator new
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
-#include <memory>
-#include <nlohmann/json.hpp>
-#include "android/base/ArraySize.h"
-#include "android/base/Optional.h"
-#include "android/base/Uuid.h"
-#include "android/base/async/AsyncSocket.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/control/window_agent.h"
+#include "android/base/CpuTime.h"               // for base
+#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
+#include "android/base/Optional.h"              // for Optional
+#include "android/base/async/AsyncSocket.h"     // for AsyncSocket
+#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
+#include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
+#include "android/base/sockets/SocketUtils.h"   // for socketGetPort, socket...
+#include "android/base/system/System.h"         // for System, System::Pid
+
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+}  // namespace android
+namespace emulator {
+namespace net {
+class AsyncSocketAdapter;
+}  // namespace net
+}  // namespace emulator
 
 using nlohmann::json;
 
@@ -27,15 +36,17 @@ namespace control {
 using namespace android::base;
 
 const std::string WebRtcBridge::kVideoBridgeExe = "goldfish-webrtc-bridge";
+std::string WebRtcBridge::BRIDGE_RECEIVER ="WebrtcVideoBridge";
 
 WebRtcBridge::WebRtcBridge(AsyncSocketAdapter* socket,
-                           const QAndroidRecordScreenAgent* const screenAgent,
+                           const AndroidConsoleAgents* const agents,
                            int fps,
                            int videoBridgePort,
                            std::string turncfg)
     : mProtocol(this),
       mTransport(&mProtocol, socket),
-      mScreenAgent(screenAgent),
+      mEventDispatcher(agents),
+      mScreenAgent(agents->record),
       mFps(fps),
       mVideoBridgePort(videoBridgePort),
       mTurnConfig(turncfg) {}
@@ -145,6 +156,7 @@ bool WebRtcBridge::acceptJsepMessage(std::string identity,
     json msg;
     msg["from"] = identity;
     msg["msg"] = message;
+    LOG(INFO) << "sending " << msg.dump(2);
     return mProtocol.write(&mTransport, msg);
 }
 
@@ -162,7 +174,6 @@ void WebRtcBridge::terminate() {
 }
 
 void WebRtcBridge::received(SocketTransport* from, json object) {
-    LOG(VERBOSE) << "Received from video bridge: " << object.dump(2);
     // It's either  a message, or goodbye..
     bool message = object.count("msg") && object.count("topic");
     bool bye = object.count("bye") && object.count("topic");
@@ -172,6 +183,12 @@ void WebRtcBridge::received(SocketTransport* from, json object) {
     }
 
     std::string dest = object["topic"];
+    if (dest == BRIDGE_RECEIVER) {
+        // Handle an event..
+        mEventDispatcher.dispatchEvent(object);
+        return;
+    }
+
     if (bye) {
         // We are saying good bye..
         AutoWriteLock lock(mMapLock);
@@ -333,6 +350,12 @@ bool WebRtcBridge::start() {
 RtcBridge* WebRtcBridge::create(int port,
                                 const AndroidConsoleAgents* const consoleAgents,
                                 std::string turncfg) {
+    if (port == 0) {
+        // Find a free port.
+        android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
+        port = android::base::socketGetPort(s0.get());
+    }
+
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
     if (executable.empty()) {
@@ -342,8 +365,7 @@ RtcBridge* WebRtcBridge::create(int port,
 
     Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
-    return new WebRtcBridge(socket, consoleAgents->record, kMaxFPS, port,
-                            turncfg);
+    return new WebRtcBridge(socket, consoleAgents, kMaxFPS, port, turncfg);
 }
 }  // namespace control
 }  // namespace emulation

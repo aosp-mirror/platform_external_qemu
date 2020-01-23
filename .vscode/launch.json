@@ -96,6 +96,7 @@
                 "-grpc",
                 "8556",
                 "-verbose", // With some additional parameters.
+                "5556", // With some additional parameters.
             ],
             "linux": {
                 "env": {
@@ -128,6 +129,7 @@
                 "pro handle -p true -s false SIGUSR2"
             ],
             "cwd": "${workspaceFolder}/build",
+
         },
         {
             // You need root access to attach debugger
