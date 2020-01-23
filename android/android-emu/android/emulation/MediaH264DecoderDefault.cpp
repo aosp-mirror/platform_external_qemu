@@ -32,6 +32,61 @@
 namespace android {
 namespace emulation {
 
+template<typename T>
+class YuvConverter {
+public:
+    YuvConverter(int nWidth, int nHeight) : nWidth(nWidth), nHeight(nHeight) {
+        pQuad = new T[nWidth * nHeight / 4];
+    }
+    ~YuvConverter() {
+        delete pQuad;
+    }
+    void PlanarToUVInterleaved(T *pFrame, int nPitch = 0) {
+        if (nPitch == 0) {
+            nPitch = nWidth;
+        }
+        T *puv = pFrame + nPitch * nHeight;
+        if (nPitch == nWidth) {
+            memcpy(pQuad, puv, nWidth * nHeight / 4 * sizeof(T));
+        } else {
+            for (int i = 0; i < nHeight / 2; i++) {
+                memcpy(pQuad + nWidth / 2 * i, puv + nPitch / 2 * i, nWidth / 2 * sizeof(T));
+            }
+        }
+        T *pv = puv + (nPitch / 2) * (nHeight / 2);
+        for (int y = 0; y < nHeight / 2; y++) {
+            for (int x = 0; x < nWidth / 2; x++) {
+                puv[y * nPitch + x * 2] = pQuad[y * nWidth / 2 + x];
+                puv[y * nPitch + x * 2 + 1] = pv[y * nPitch / 2 + x];
+            }
+        }
+    }
+    void UVInterleavedToPlanar(T *pFrame, int nPitch = 0) {
+        if (nPitch == 0) {
+            nPitch = nWidth;
+        }
+        T *puv = pFrame + nPitch * nHeight,
+            *pu = puv,
+            *pv = puv + nPitch * nHeight / 4;
+        for (int y = 0; y < nHeight / 2; y++) {
+            for (int x = 0; x < nWidth / 2; x++) {
+                pu[y * nPitch / 2 + x] = puv[y * nPitch + x * 2];
+                pQuad[y * nWidth / 2 + x] = puv[y * nPitch + x * 2 + 1];
+            }
+        }
+        if (nPitch == nWidth) {
+            memcpy(pv, pQuad, nWidth * nHeight / 4 * sizeof(T));
+        } else {
+            for (int i = 0; i < nHeight / 2; i++) {
+                memcpy(pv + nPitch / 2 * i, pQuad + nWidth / 2 * i, nWidth / 2 * sizeof(T));
+            }
+        }
+    }
+
+private:
+    T *pQuad;
+    int nWidth, nHeight;
+};
 
 MediaH264DecoderDefault::~MediaH264DecoderDefault() {
     H264_DPRINT("destroyed MediaH264DecoderDefault %p", this);
@@ -97,7 +152,25 @@ void MediaH264DecoderDefault::initH264Context(unsigned int width,
 
     // standard ffmpeg codec stuff
     avcodec_register_all();
-    mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    if(0){
+        AVCodec* current_codec = NULL;
+
+        current_codec = av_codec_next(current_codec);
+        while (current_codec != NULL)
+        {
+            if (av_codec_is_decoder(current_codec))
+            {
+                H264_DPRINT("codec decoder found %s long name %s", current_codec->name, current_codec->long_name);
+            }
+            current_codec = av_codec_next(current_codec);
+        }
+    }
+
+    mCodec = avcodec_find_decoder_by_name("h264_cuvid");
+    if (!mCodec) {
+        H264_DPRINT("Cannot find hw accelerated cuda video decoder, use software decoder instead");
+        mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    }
     mCodecCtx = avcodec_alloc_context3(mCodec);
 
     avcodec_open2(mCodecCtx, mCodec, 0);
@@ -150,6 +223,7 @@ void MediaH264DecoderDefault::decodeFrame(void* ptr, const uint8_t* frame, size_
     int retframe = avcodec_receive_frame(mCodecCtx, mFrame);
     *retSzBytes = szBytes;
     *retErr = (int32_t)h264Err;
+    mIsInFlush = false;
     if (retframe != 0) {
         H264_DPRINT("decodeFrame has nonzero return value %d", retframe);
         if (retframe == AVERROR_EOF) {
@@ -159,7 +233,6 @@ void MediaH264DecoderDefault::decodeFrame(void* ptr, const uint8_t* frame, size_
             av_free(mCodecCtx);
             mCodecCtx = avcodec_alloc_context3(mCodec);
             avcodec_open2(mCodecCtx, mCodec, 0);
-            mIsInFlush = false;
         } else if (retframe == AVERROR(EAGAIN)) {
             H264_DPRINT("EAGAIN returned from decoder");
         } else {
@@ -193,11 +266,21 @@ void MediaH264DecoderDefault::copyFrame() {
     for (int i = 0; i < h; ++i) {
       memcpy(mDecodedFrame + i * w, mFrame->data[0] + i * mFrame->linesize[0], w);
     }
-    for (int i=0; i < h / 2; ++i) {
-      memcpy(w * h + mDecodedFrame + i * w/2, mFrame->data[1] + i * mFrame->linesize[1], w / 2);
-    }
-    for (int i=0; i < h / 2; ++i) {
-      memcpy(w * h + w * h / 4 + mDecodedFrame + i * w/2, mFrame->data[2] + i * mFrame->linesize[2], w / 2);
+    H264_DPRINT("format is %d and NV21 is %d  12 is %d", mFrame->format, (int)AV_PIX_FMT_NV21,
+            (int)AV_PIX_FMT_NV12);
+    if (mFrame->format == AV_PIX_FMT_NV12) {
+        for (int i=0; i < h / 2; ++i) {
+            memcpy(w * h + mDecodedFrame + i * w, mFrame->data[1] + i * mFrame->linesize[1], w);
+        }
+        YuvConverter<uint8_t> convert8(mOutputWidth, mOutputHeight);
+        convert8.UVInterleavedToPlanar(mDecodedFrame);
+    } else {
+        for (int i=0; i < h / 2; ++i) {
+            memcpy(w * h + mDecodedFrame + i * w/2, mFrame->data[1] + i * mFrame->linesize[1], w / 2);
+        }
+        for (int i=0; i < h / 2; ++i) {
+            memcpy(w * h + w * h / 4 + mDecodedFrame + i * w/2, mFrame->data[2] + i * mFrame->linesize[2], w / 2);
+        }
     }
     mColorPrimaries = mFrame->color_primaries;
     mColorRange = mFrame->color_range;
@@ -280,6 +363,7 @@ void MediaH264DecoderDefault::getImage(void* ptr) {
 
     uint8_t* dst =  getDst(ptr);
     memcpy(dst, mDecodedFrame, mOutBufferSize);
+
     mImageReady = false;
     *retErr = mOutBufferSize;
 }
