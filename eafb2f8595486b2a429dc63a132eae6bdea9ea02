@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a30ce3a4_020bed81",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/Participant.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-23T00:29:35Z",
+      "side": 1,
+      "message": "did you actually use max in the header? would you move it into the cpp instead of the header?",
+      "range": {
+        "startLine": 21,
+        "startChar": 49,
+        "endLine": 21,
+        "endChar": 52
+      },
+      "revId": "eafb2f8595486b2a429dc63a132eae6bdea9ea02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
