@@ -45,6 +45,7 @@ protected:
     MediaH264Decoder() = default;
 
 private:
+    /*
     virtual void initH264Context(unsigned int width,
                                  unsigned int height,
                                  unsigned int outWidth,
@@ -54,6 +55,7 @@ private:
     virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) = 0;
     virtual void flush(void* ptr) = 0;
     virtual void getImage(void* ptr) = 0;
+    */
 };
 
 }  // namespace emulation
