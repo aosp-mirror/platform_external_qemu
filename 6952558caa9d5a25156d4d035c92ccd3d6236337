@@ -70,6 +70,30 @@
       "revId": "6952558caa9d5a25156d4d035c92ccd3d6236337",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "889c9a42_26753472",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1845,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-24T23:55:10Z",
+      "side": 1,
+      "message": "Manually unpack an R image to ~/Android/Sdk/system-images/android-R/google_apis, then create an avd from AS.\n\nhow do you usually create the avd? we should test it in your settings as well.",
+      "parentUuid": "12380d19_148d9e7d",
+      "range": {
+        "startLine": 1840,
+        "startChar": 3,
+        "endLine": 1845,
+        "endChar": 0
+      },
+      "revId": "6952558caa9d5a25156d4d035c92ccd3d6236337",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
