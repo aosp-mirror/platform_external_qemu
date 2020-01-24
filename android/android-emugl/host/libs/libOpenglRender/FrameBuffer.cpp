@@ -2430,8 +2430,6 @@ bool FrameBuffer::onLoad(Stream* stream,
 
             performDelayedColorBufferCloseLocked(true);
 
-            lock.unlock();
-
             for (auto colorBufferHandle : colorBuffersToCleanup) {
                 goldfish_vk::teardownVkColorBuffer(colorBufferHandle);
             }
@@ -2439,8 +2437,6 @@ bool FrameBuffer::onLoad(Stream* stream,
             for (auto cb : cleanupCallbacks) {
                 cb();
             }
-
-            lock.lock();
         }
         m_colorBufferDelayedCloseList.clear();
         assert(m_contexts.empty());
