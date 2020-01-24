@@ -22,6 +22,30 @@
       "revId": "6952558caa9d5a25156d4d035c92ccd3d6236337",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da5ffdc0_99097cfe",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1845,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-24T23:44:17Z",
+      "side": 1,
+      "message": "oh this code doesn\u0027t look at ro properties. It parses the avd config and get the level 1000 for R. If we set it to \u003e\u003d30, it will work now, and it will continue to work when we officially mark it as API30.",
+      "parentUuid": "cd38ff51_fdc4ff18",
+      "range": {
+        "startLine": 1840,
+        "startChar": 3,
+        "endLine": 1845,
+        "endChar": 0
+      },
+      "revId": "6952558caa9d5a25156d4d035c92ccd3d6236337",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
