@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2dc8188f_52a77126",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2433,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-24T01:06:58Z",
+      "side": 0,
+      "message": "lfy@, will it cause any issue if we just remove it from here?",
+      "range": {
+        "startLine": 2433,
+        "startChar": 12,
+        "endLine": 2433,
+        "endChar": 26
+      },
+      "revId": "bc7854f98d751bde65305dcb9e57c03e3b53926a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
