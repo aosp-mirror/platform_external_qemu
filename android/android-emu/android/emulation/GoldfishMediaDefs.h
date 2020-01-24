@@ -31,5 +31,6 @@ enum class MediaOperation : uint8_t {
     DecodeImage = 2,
     GetImage = 3,
     Flush = 4,
-    Max = 5,
+    Reset = 5,
+    Max = 6,
 };
