@@ -31,30 +31,49 @@ extern "C" {
 #include <libavutil/timestamp.h>
 }
 
+#include <map>
 #include <stddef.h>
 
 namespace android {
 namespace emulation {
 
+class MediaH264DecoderDefaultImpl;
+
 class MediaH264DecoderDefault : public MediaH264Decoder {
 public:
-    MediaH264DecoderDefault();
-    virtual ~MediaH264DecoderDefault();
+    MediaH264DecoderDefault() = default;
+    virtual ~MediaH264DecoderDefault() = default;
 
     // This is the entry point
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
 private:
-    virtual void initH264Context(unsigned int width,
+    std::map<void*, MediaH264DecoderDefaultImpl*> mDecoders;
+    void removeDecoder(void* ptr);
+    void addDecoder(void* key, MediaH264DecoderDefaultImpl* val);
+    MediaH264DecoderDefaultImpl* getDecoder(void*ptr);
+
+};
+
+class MediaH264DecoderDefaultImpl {
+public:
+    MediaH264DecoderDefaultImpl();
+    ~MediaH264DecoderDefaultImpl();
+
+    using PixelFormat = MediaH264Decoder::PixelFormat;
+    using Err = MediaH264Decoder::Err;
+private:
+    void initH264Context(unsigned int width,
                                  unsigned int height,
                                  unsigned int outWidth,
                                  unsigned int outHeight,
-                                 PixelFormat pixFmt) override;
-    virtual void destroyH264Context() override;
-    virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) override;
-    virtual void flush(void* ptr) override;
-    virtual void getImage(void* ptr) override;
+                                 PixelFormat pixFmt);
+    void destroyH264Context();
+    void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t inputPts);
+    void flush(void* ptr);
+    void getImage(void* ptr);
 
+    friend MediaH264DecoderDefault;
 private:
     // image props
     bool mImageReady = false;
