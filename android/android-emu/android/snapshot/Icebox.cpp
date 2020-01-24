@@ -514,45 +514,13 @@ bool track(int pid, const char* snapshot_name) {
         // The first several commands have the same size
         const int kInitBufferSize = 200;
         apacket reply;
-        JdwpEventRequestSet set_request;
-        set_request.event_kind = EventKind::ClassPrepare;
-        set_request.suspend_policy = SuspendPolicy::None;
         JdwpCommandHeader jdwp_header;
-        packet_out.data.resize(kInitBufferSize);
-        jdwp_header.length =
-                11 + set_request.writeToBuffer(packet_out.data.data() + 11);
-        assert(kInitBufferSize >= jdwp_header.length);
         jdwp_header.id = jdwp_id++;
         jdwp_header.flags = 0;
         jdwp_header.command_set = CommandSet::EventRequest;
         jdwp_header.command = EventRequestCommand::Set;
-        packet_out.mesg.data_length = jdwp_header.length;
-        packet_out.data.resize(packet_out.mesg.data_length);
-        jdwp_header.writeToBuffer(packet_out.data.data());
-        _SEND_PACKET_OK(packet_out);
-        _RECV_PACKET_OK(reply);
 
-        set_request.event_kind = EventKind::ClassUnload;
-        set_request.writeToBuffer(packet_out.data.data() + 11);
-        jdwp_header.id = jdwp_id++;
-        jdwp_header.writeToBuffer(packet_out.data.data());
-        _SEND_PACKET_OK(packet_out);
-        _RECV_PACKET_OK(reply);
-
-        set_request.event_kind = EventKind::ThreadStart;
-        set_request.writeToBuffer(packet_out.data.data() + 11);
-        jdwp_header.id = jdwp_id++;
-        jdwp_header.writeToBuffer(packet_out.data.data());
-        _SEND_PACKET_OK(packet_out);
-        _RECV_PACKET_OK(reply);
-
-        set_request.event_kind = EventKind::ThreadDeath;
-        set_request.writeToBuffer(packet_out.data.data() + 11);
-        jdwp_header.id = jdwp_id++;
-        jdwp_header.writeToBuffer(packet_out.data.data());
-        _SEND_PACKET_OK(packet_out);
-        _RECV_PACKET_OK(reply);
-
+        JdwpEventRequestSet set_request;
         set_request.event_kind = EventKind::Exception;
         set_request.suspend_policy = SuspendPolicy::All;
         for (const auto& id : exception_reference_type_ids) {
@@ -562,7 +530,7 @@ bool track(int pid, const char* snapshot_name) {
                                                    id, &id_size);
             jdwp_header.id = jdwp_id++;
             jdwp_header.writeToBuffer(packet_out.data.data());
-            assert(kInitBufferSize >= jdwp_header.length);
+            CHECK(kInitBufferSize >= jdwp_header.length);
             packet_out.mesg.data_length = jdwp_header.length;
             packet_out.data.resize(packet_out.mesg.data_length);
             _SEND_PACKET_OK(packet_out);
