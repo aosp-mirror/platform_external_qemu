@@ -22,6 +22,30 @@
       "revId": "e43d558cd25534baa14d73877182c0ae3d81d86b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0917e20d_7bd1381e",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-01-24T23:22:40Z",
+      "side": 0,
+      "message": "They are leftover from the previous refactoring. So I removed them.",
+      "parentUuid": "58401d3c_53b5180c",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 0
+      },
+      "revId": "e43d558cd25534baa14d73877182c0ae3d81d86b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
