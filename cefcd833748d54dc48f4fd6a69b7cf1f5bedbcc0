@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f52b087_88ba5f3e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-24T23:12:05Z",
+      "side": 1,
+      "message": "Please correct me if I read your code wrong. It seems to me that you capture the last breakpoint hit event in onGuestRecvData and save it in onSave. Then, next time onGuestSendData is called, you check the saved event and append the breakpoint hit event?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 55
+      },
+      "revId": "cefcd833748d54dc48f4fd6a69b7cf1f5bedbcc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94abd17a_7ceffb10",
+        "filename": "android/android-emu/android/emulation/AdbProxy.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-24T23:12:05Z",
+      "side": 1,
+      "message": "Could you add comments for this function and define the expected behavior? It\u0027s not clear what are the expected returning values in shouldForwardSend and extraSends to me.",
+      "range": {
+        "startLine": 30,
+        "startChar": 12,
+        "endLine": 31,
+        "endChar": 54
+      },
+      "revId": "cefcd833748d54dc48f4fd6a69b7cf1f5bedbcc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff9e48e9_f4b10d28",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-24T23:12:05Z",
+      "side": 1,
+      "message": "Is it possible to define more constant value and reduce magic numbers?",
+      "range": {
+        "startLine": 190,
+        "startChar": 16,
+        "endLine": 193,
+        "endChar": 51
+      },
+      "revId": "cefcd833748d54dc48f4fd6a69b7cf1f5bedbcc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
