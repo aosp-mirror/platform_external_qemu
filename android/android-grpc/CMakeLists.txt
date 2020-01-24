@@ -1,5 +1,6 @@
 # Let's bring the grpc module.
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../grpc/emulator grpc)
+android_license(android-grpc ${ANDROID_QEMU2_TOP_DIR}/../grpc/NOTICE.txt)
 
 # Add waterfall only for posix, as there are some issues around stderr/stdout/stdin in the gRPC compiler.
 # See b/148079576 for details.

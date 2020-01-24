@@ -64,6 +64,7 @@ endif()
 add_subdirectory(boringssl)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
+android_license(picosha2  "android/third_party/picosha2/LICENSE")
 
 if(WINDOWS)
   add_subdirectory(mman-win32)

@@ -18,3 +18,4 @@ set(lz4_src
 
 android_add_library(lz4)
 target_include_directories(lz4 PUBLIC ${LIBLZ4_SRC})
+android_license(lz4  "${LIBLZ4_SRC}/../NOTICE")

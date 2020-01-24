@@ -21,6 +21,7 @@ import re
 import shutil
 import zipfile
 
+from collections import defaultdict
 from absl import logging
 
 from aemu.definitions import get_qemu_root
@@ -37,23 +38,23 @@ zip_sets = {
         "code-coverage-{target}.zip": [("{build_dir}", r".*(gcda|gcno)", "/")],
         # Look for all files under {out}/distribution
         "sdk-repo-{target}-emulator-full-debug-{sdk_build_number}.zip": [
-            ("{build_dir}/distribution", r".*", '/')
+            ("{build_dir}/distribution", r".*", "/")
         ],
     },
     "release": {
         "sdk-repo-{target}-debug-emulator-{sdk_build_number}.zip": [
             # Look for all files under {out}/build/debug_info/
-            ("{build_dir}/build/debug_info", r".*", '/'),
-            ("{build_dir}/lib64", r".*", '/tests/lib64/'),
-            ("{build_dir}/lib", r".*", '/tests/lib/'),
-            ("{build_dir}/testdata", r".*", '/tests/testdata/'),
+            ("{build_dir}/build/debug_info", r".*", "/"),
+            ("{build_dir}/lib64", r".*", "/tests/lib64/"),
+            ("{build_dir}/lib", r".*", "/tests/lib/"),
+            ("{build_dir}/testdata", r".*", "/tests/testdata/"),
         ],
         "sdk-repo-{target}-grpc-samples-{sdk_build_number}.zip": [
-            ("{src_dir}/android/android-grpc/docs/grpc-samples/", r".*", '/')
+            ("{src_dir}/android/android-grpc/docs/grpc-samples/", r".*", "/")
         ],
         # Look for all files under {out}/distribution
         "sdk-repo-{target}-emulator-{sdk_build_number}.zip": [
-            ("{build_dir}/distribution", r".*", '/')
+            ("{build_dir}/distribution", r".*", "/")
         ],
     },
 }
@@ -69,15 +70,51 @@ def recursive_glob(dir, regex):
                 yield fname
 
 
-def _construct_notice_file(files, aosp):
+def _construct_notice_file(build_dir):
     """Constructs a notice file for all the given individual files."""
-    notice = "===========================================================\n"
-    notice += "Notices for file(s):\n"
-    notice += "\n".join(files)
-    notice += "\n"
-    notice += "===========================================================\n"
-    with open(os.path.join(aosp, "external", "qemu", "NOTICE"), "r") as nfile:
-        notice += nfile.read()
+    dist_dir = os.path.join(build_dir, "distribution", "emulator")
+    license_dict = defaultdict(set)
+    with open(os.path.join(build_dir, "NOTICES.txt")) as nt:
+        for x in nt.readlines():
+            lib, lic = x.split(",")
+            license_dict[lic.strip()].add(lib.strip())
+
+    license_txt = {}
+    for lic in license_dict:
+        fname = lic
+        if not os.path.exists(fname):
+            fname = os.path.join(get_qemu_root(), lic)
+
+        with open(fname, "r") as lic_text:
+            license_txt[lic] = lic_text.read()
+
+    notice = ""
+    # Or license from path.
+    qemu_list = list(recursive_glob(dist_dir, "(.*qemu-system.*|.*qemu-img.*)")) + list(
+        recursive_glob(
+            dist_dir,
+            "(.*emulator$|.*emulator64-crash-service$|.*emulator-check$|.*goldfish-webrtc-bridge)",
+        )
+    )
+
+    for lic in license_dict:
+        lib = license_dict[lic]
+        fnames = set()
+        for fn in lib:
+            file_list = list(recursive_glob(dist_dir, ".*{}.*".format(fn)))
+            if not file_list:
+                file_list = qemu_list
+            for f in file_list:
+                fnames.add(f)
+
+        notice += "===========================================================\n"
+        notice += "Notices for file(s):\n"
+        notice += "\n".join(fnames)
+        notice += "\n"
+        notice += "The notices is included for the library/exectuables: {}\n\n".format(",".join(lib))
+        notice += "===========================================================\n"
+        notice += license_txt[lic]
+        notice += "\n\n"
 
     return notice
 
@@ -89,6 +126,9 @@ def create_distribution(dist_dir, build_dir, data):
 
     # Let's find the set of
     zip_set = zip_sets[data["config"]]
+
+    # add a notice file.
+    notice = _construct_notice_file(build_dir)
 
     # First we create the individual zip sets using the regular expressions.
     for zip_fname, params in zip_set.iteritems():
@@ -105,11 +145,9 @@ def create_distribution(dist_dir, build_dir, data):
                     start_dir.format(build_dir=build_dir, src_dir=get_qemu_root())
                 )
                 for fname in recursive_glob(search_dir, regex.format(data)):
-                    arcname = os.path.relpath(fname[len(search_dir):], '/')
+                    arcname = os.path.relpath(fname[len(search_dir) :], "/")
                     arcname = os.path.join(dest, arcname)
                     files.append(arcname)
                     zipf.write(fname, arcname)
 
-            # add a notice file.
-            notice = _construct_notice_file(files, data["aosp"])
             zipf.writestr("emulator/NOTICE.txt", notice)

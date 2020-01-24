@@ -35,12 +35,17 @@ if(WINDOWS)
       e2fsck.exe
       resize2fs.exe
       tune2fs.exe)
+
+  android_license(tune2fs.exe "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
+  android_license(resize2fs.exe "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
+  android_license(e2fsck.exe "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
   foreach(EXT_FILE ${E2FSPROGS_FILES})
     set(E2FSPROGS_DEPENDENCIES "${E2FSPROGS_DEPENDENCIES};${PREBUILT_ROOT}/sbin/${EXT_FILE}>${DST_DIR}/${EXT_FILE}")
   endforeach()
 else()
   set(E2FSPROGS_FILES e2fsck fsck.ext4 mkfs.ext4 resize2fs tune2fs)
   foreach(EXT_FILE ${E2FSPROGS_FILES})
+    android_license(${EXT_FILE} "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
     set(E2FSPROGS_DEPENDENCIES "${E2FSPROGS_DEPENDENCIES};${PREBUILT_ROOT}/sbin/${EXT_FILE}>${DST_DIR}/${EXT_FILE}")
   endforeach()
 endif()
