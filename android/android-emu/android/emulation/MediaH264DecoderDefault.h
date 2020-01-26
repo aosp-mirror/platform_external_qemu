@@ -32,28 +32,61 @@ extern "C" {
 }
 
 #include <stddef.h>
+#include <mutex>
+#include <unordered_map>
 
 namespace android {
 namespace emulation {
 
+class MediaH264DecoderDefaultImpl;
+
 class MediaH264DecoderDefault : public MediaH264Decoder {
 public:
-    MediaH264DecoderDefault();
-    virtual ~MediaH264DecoderDefault();
+    MediaH264DecoderDefault() = default;
+    virtual ~MediaH264DecoderDefault() = default;
 
     // This is the entry point
     virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
 private:
-    virtual void initH264Context(unsigned int width,
-                                 unsigned int height,
-                                 unsigned int outWidth,
-                                 unsigned int outHeight,
-                                 PixelFormat pixFmt) override;
-    virtual void destroyH264Context() override;
-    virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) override;
-    virtual void flush(void* ptr) override;
-    virtual void getImage(void* ptr) override;
+    std::mutex mIdLock{};
+    std::mutex mMapLock{};
+    uint64_t mId = 0;
+    std::unordered_map<uint64_t, MediaH264DecoderDefaultImpl*> mDecoders;
+    uint64_t readId(void* ptr);  // read id from the address
+    void removeDecoder(uint64_t id);
+    uint64_t createId();
+    void addDecoder(uint64_t key,
+                    MediaH264DecoderDefaultImpl* val);  // this just add
+    void updateDecoder(
+            uint64_t key,
+            MediaH264DecoderDefaultImpl* val);  // this will overwrite
+    MediaH264DecoderDefaultImpl* getDecoder(uint64_t key);
+};
+
+class MediaH264DecoderDefaultImpl {
+public:
+    MediaH264DecoderDefaultImpl();
+    ~MediaH264DecoderDefaultImpl();
+
+    using PixelFormat = MediaH264Decoder::PixelFormat;
+    using Err = MediaH264Decoder::Err;
+
+private:
+    void initH264Context(unsigned int width,
+                         unsigned int height,
+                         unsigned int outWidth,
+                         unsigned int outHeight,
+                         PixelFormat pixFmt);
+    void destroyH264Context();
+    void decodeFrame(void* ptr,
+                     const uint8_t* frame,
+                     size_t szBytes,
+                     uint64_t inputPts);
+    void flush(void* ptr);
+    void getImage(void* ptr);
+
+    friend MediaH264DecoderDefault;
 
 private:
     // image props
@@ -94,7 +127,7 @@ private:
 private:
     void copyFrame();
 
-}; // MediaH264DecoderDefault
+};  // MediaH264DecoderDefault
 
 }  // namespace emulation
 }  // namespace android

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264DecoderDefault.h"
+#include "android/base/system/System.h"
 
 #include <cstdint>
 #include <string>
@@ -88,53 +89,16 @@ private:
     int nWidth, nHeight;
 };
 
-MediaH264DecoderDefault::~MediaH264DecoderDefault() {
-    H264_DPRINT("destroyed MediaH264DecoderDefault %p", this);
+MediaH264DecoderDefaultImpl::~MediaH264DecoderDefaultImpl() {
+    H264_DPRINT("destroyed MediaH264DecoderDefaultImpl %p", this);
     destroyH264Context();
 }
 
-void MediaH264DecoderDefault::handlePing(MediaCodecType type, MediaOperation op, void* ptr) {
-    switch (op) {
-        case MediaOperation::InitContext:
-        {
-            uint8_t* xptr = (uint8_t*)ptr;
-            unsigned int width = *(unsigned int*)(xptr);
-            unsigned int height = *(unsigned int*)(xptr + 8);
-            unsigned int outWidth = *(unsigned int*)(xptr + 16);
-            unsigned int outHeight = *(unsigned int*)(xptr + 24);
-            PixelFormat pixFmt = static_cast<PixelFormat>(*(uint8_t*)(xptr + 30));
-            initH264Context(width, height, outWidth, outHeight, pixFmt);
-            break;
-        }
-        case MediaOperation::DestroyContext:
-            destroyH264Context();
-            break;
-        case MediaOperation::DecodeImage:
-        {
-            uint64_t offset = *(uint64_t*)(ptr);
-            const uint8_t* img = (const uint8_t*)ptr + offset;
-            size_t szBytes = *(size_t*)((uint8_t*)ptr + 8);
-            mInputPts = *(size_t*)((uint8_t*)ptr + 16);
-            decodeFrame(ptr, img, szBytes);
-            break;
-        }
-        case MediaOperation::Flush:
-            flush(ptr);
-            break;
-        case MediaOperation::GetImage:
-            getImage(ptr);
-            break;
-        default:
-            H264_DPRINT("Unknown command %u\n", (unsigned int)op);
-            break;
-    }
-}
-
-void MediaH264DecoderDefault::initH264Context(unsigned int width,
-                             unsigned int height,
-                             unsigned int outWidth,
-                             unsigned int outHeight,
-                             PixelFormat outPixFmt) {
+void MediaH264DecoderDefaultImpl::initH264Context(unsigned int width,
+                                                  unsigned int height,
+                                                  unsigned int outWidth,
+                                                  unsigned int outHeight,
+                                                  PixelFormat outPixFmt) {
     H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
                 __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
     mOutputWidth = outWidth;
@@ -166,10 +130,20 @@ void MediaH264DecoderDefault::initH264Context(unsigned int width,
         }
     }
 
-    mCodec = avcodec_find_decoder_by_name("h264_cuvid");
+    mCodec = NULL;
+    auto useCuvidEnv = android::base::System::getEnvironmentVariable(
+            "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
+    if (useCuvidEnv != "") {
+        mCodec = avcodec_find_decoder_by_name("h264_cuvid");
+        if (mCodec) {
+            H264_DPRINT("Found h264_cuvid decoder, using it");
+        } else {
+            H264_DPRINT("Cannot find h264_cuvid decoder");
+        }
+    }
     if (!mCodec) {
-        H264_DPRINT("Cannot find hw accelerated cuda video decoder, use software decoder instead");
         mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+        H264_DPRINT("Using default software h264 decoder");
     }
     mCodecCtx = avcodec_alloc_context3(mCodec);
 
@@ -179,10 +153,10 @@ void MediaH264DecoderDefault::initH264Context(unsigned int width,
     H264_DPRINT("Successfully created software h264 decoder context %p", mCodecCtx);
 }
 
-MediaH264DecoderDefault::MediaH264DecoderDefault() {
-    H264_DPRINT("allocated MediaH264DecoderDefault %p", this);
+MediaH264DecoderDefaultImpl::MediaH264DecoderDefaultImpl() {
+    H264_DPRINT("allocated MediaH264DecoderDefaultImpl %p", this);
 }
-void MediaH264DecoderDefault::destroyH264Context() {
+void MediaH264DecoderDefaultImpl::destroyH264Context() {
     H264_DPRINT("Destroy context %p", this);
     if (mCodecCtx) {
         avcodec_close(mCodecCtx);
@@ -205,7 +179,10 @@ static void* getReturnAddress(void* ptr) {
     return pint;
 }
 
-void MediaH264DecoderDefault::decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) {
+void MediaH264DecoderDefaultImpl::decodeFrame(void* ptr,
+                                              const uint8_t* frame,
+                                              size_t szBytes,
+                                              uint64_t inputPts) {
     H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
     Err h264Err = Err::NoErr;
     // TODO: move this somewhere else
@@ -218,7 +195,7 @@ void MediaH264DecoderDefault::decodeFrame(void* ptr, const uint8_t* frame, size_
     av_init_packet(&mPacket);
     mPacket.data = (unsigned char*)frame;
     mPacket.size = szBytes;
-    mPacket.pts = mInputPts;
+    mPacket.pts = inputPts;
     avcodec_send_packet(mCodecCtx, &mPacket);
     int retframe = avcodec_receive_frame(mCodecCtx, mFrame);
     *retSzBytes = szBytes;
@@ -258,7 +235,7 @@ void MediaH264DecoderDefault::decodeFrame(void* ptr, const uint8_t* frame, size_
     mImageReady = true;
 }
 
-void MediaH264DecoderDefault::copyFrame() {
+void MediaH264DecoderDefaultImpl::copyFrame() {
     int w = mFrame->width;
     int h = mFrame->height;
     H264_DPRINT("w %d h %d Y line size %d U line size %d V line size %d", w, h,
@@ -291,20 +268,21 @@ void MediaH264DecoderDefault::copyFrame() {
             mFrame->color_range, mFrame->color_trc, mFrame->colorspace);
 }
 
-void MediaH264DecoderDefault::flush(void* ptr) {
+void MediaH264DecoderDefaultImpl::flush(void* ptr) {
     H264_DPRINT("Flushing...");
     mIsInFlush = true;
     H264_DPRINT("Flushing done");
 }
 
 static uint8_t* getDst(void* ptr) {
-    // Guest will pass us the offset from the start address for where to write the image data.
+    // Guest will pass us the offset from the start address + 8 for where to
+    // write the image data.
     uint8_t* xptr = (uint8_t*)ptr;
-    uint64_t offset = *(uint64_t*)(xptr);
+    uint64_t offset = *(uint64_t*)(xptr + 8);
     return (uint8_t*)ptr + offset;
 }
 
-void MediaH264DecoderDefault::getImage(void* ptr) {
+void MediaH264DecoderDefaultImpl::getImage(void* ptr) {
     H264_DPRINT("getImage %p", ptr);
     uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
     int* retErr = (int*)(retptr);
@@ -340,6 +318,14 @@ void MediaH264DecoderDefault::getImage(void* ptr) {
                 return;
             }
 
+            if (retframe != 0) {
+                char tmp[1024];
+                av_strerror(retframe, tmp, sizeof(tmp));
+                H264_DPRINT("WARNING: some unknown error %d: %s", retframe,
+                            tmp);
+                *retErr = static_cast<int>(Err::NoDecodedFrame);
+                return;
+            }
             H264_DPRINT("%s: got frame in flush mode retrun code %d", __func__, retframe);
             //now copy to mDecodedFrame
             copyFrame();
@@ -366,6 +352,162 @@ void MediaH264DecoderDefault::getImage(void* ptr) {
 
     mImageReady = false;
     *retErr = mOutBufferSize;
+}
+
+uint64_t MediaH264DecoderDefault::readId(void* ptr) {
+    if (nullptr == ptr)
+        return 0;
+    uint64_t key = (*reinterpret_cast<uint64_t*>(ptr));
+    return key;
+}
+
+MediaH264DecoderDefaultImpl* MediaH264DecoderDefault::getDecoder(uint64_t key) {
+    {
+        std::lock_guard<std::mutex> g(mMapLock);
+        auto iter = mDecoders.find(key);
+        if (iter != mDecoders.end()) {
+            return iter->second;
+        }
+    }
+    H264_DPRINT("Error: cannot find decoder with key %" PRIx64 "", key);
+    return nullptr;
+}
+
+uint64_t MediaH264DecoderDefault::createId() {
+    std::lock_guard<std::mutex> g(mIdLock);
+    return ++mId;
+}
+
+void MediaH264DecoderDefault::addDecoder(uint64_t key,
+                                         MediaH264DecoderDefaultImpl* val) {
+    {
+        std::lock_guard<std::mutex> g(mMapLock);
+        if (mDecoders.find(key) == mDecoders.end()) {
+            mDecoders[key] = val;
+            H264_DPRINT("added decoder key %" PRIx64 " val: %p", key, val);
+            return;
+        }
+    }
+    H264_DPRINT("cannot add: already exist");
+}
+
+void MediaH264DecoderDefault::updateDecoder(uint64_t key,
+                                            MediaH264DecoderDefaultImpl* val) {
+    std::lock_guard<std::mutex> g(mMapLock);
+    if (mDecoders.find(key) == mDecoders.end()) {
+        H264_DPRINT("error: decoder with key %" PRIx64 " does not exist", key);
+    } else {
+        mDecoders[key] = val;
+        H264_DPRINT("updated key %" PRIx64 " with new decoder %p", key, val);
+    }
+}
+
+void MediaH264DecoderDefault::removeDecoder(uint64_t key) {
+    {
+        std::lock_guard<std::mutex> g(mMapLock);
+        auto iter = mDecoders.find(key);
+        if (iter != mDecoders.end()) {
+            H264_DPRINT("removed decoder key %" PRIx64 ", val: %p", key,
+                        mDecoders[key]);
+            mDecoders.erase(iter);
+            return;
+        }
+    }
+    H264_DPRINT("error: cannot remove decoder, not in map");
+}
+
+void MediaH264DecoderDefault::handlePing(MediaCodecType type,
+                                         MediaOperation op,
+                                         void* ptr) {
+    switch (op) {
+        case MediaOperation::InitContext: {
+            uint8_t* xptr = (uint8_t*)ptr;
+            uint32_t version = *(uint32_t*)xptr;
+            H264_DPRINT(
+                    "handle init decoder context request from guest version %u",
+                    version);
+            unsigned int width = *(unsigned int*)(xptr + 8);
+            unsigned int height = *(unsigned int*)(xptr + 16);
+            unsigned int outWidth = *(unsigned int*)(xptr + 24);
+            unsigned int outHeight = *(unsigned int*)(xptr + 32);
+            PixelFormat pixFmt =
+                    static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
+            MediaH264DecoderDefaultImpl* mydecoder =
+                    new MediaH264DecoderDefaultImpl();
+            uint64_t myid = createId();
+            addDecoder(myid, mydecoder);
+            mydecoder->initH264Context(width, height, outWidth, outHeight,
+                                       pixFmt);
+            uint64_t* ret = static_cast<uint64_t*>(getReturnAddress(ptr));
+            *ret = myid;
+            break;
+        }
+        case MediaOperation::DestroyContext: {
+            H264_DPRINT("handle destroy request from guest %p", ptr);
+            MediaH264DecoderDefaultImpl* mydecoder = getDecoder(readId(ptr));
+            if (!mydecoder)
+                return;
+
+            mydecoder->destroyH264Context();
+            delete mydecoder;
+            removeDecoder(readId(ptr));
+            break;
+        }
+        case MediaOperation::DecodeImage: {
+            H264_DPRINT("handle decodeimage request from guest %p", ptr);
+            MediaH264DecoderDefaultImpl* mydecoder = getDecoder(readId(ptr));
+            if (nullptr == mydecoder)
+                return;
+            uint64_t offset = *(uint64_t*)((uint8_t*)ptr + 8);
+            const uint8_t* img = (const uint8_t*)ptr + offset;
+            size_t szBytes = *(size_t*)((uint8_t*)ptr + 16);
+            uint64_t inputPts = *(size_t*)((uint8_t*)ptr + 24);
+            mydecoder->decodeFrame(ptr, img, szBytes, inputPts);
+            break;
+        }
+        case MediaOperation::Flush: {
+            H264_DPRINT("handle flush request from guest %p", ptr);
+            MediaH264DecoderDefaultImpl* mydecoder = getDecoder(readId(ptr));
+            if (nullptr == mydecoder)
+                return;
+            mydecoder->flush(ptr);
+            break;
+        }
+        case MediaOperation::GetImage: {
+            H264_DPRINT("handle getimage request from guest %p", ptr);
+            MediaH264DecoderDefaultImpl* mydecoder = getDecoder(readId(ptr));
+            if (nullptr == mydecoder)
+                return;
+            mydecoder->getImage(ptr);
+            break;
+        }
+        case MediaOperation::Reset: {
+            H264_DPRINT("handle reset request from guest %p", ptr);
+            uint64_t oldId = readId(ptr);
+            MediaH264DecoderDefaultImpl* olddecoder = getDecoder(oldId);
+            if (nullptr == olddecoder) {
+                H264_DPRINT("error, cannot reset on nullptr");
+                return;
+            }
+            delete olddecoder;
+            uint8_t* xptr = (uint8_t*)ptr;
+            unsigned int width = *(unsigned int*)(xptr + 8);
+            unsigned int height = *(unsigned int*)(xptr + 16);
+            unsigned int outWidth = *(unsigned int*)(xptr + 24);
+            unsigned int outHeight = *(unsigned int*)(xptr + 32);
+            PixelFormat pixFmt =
+                    static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
+            MediaH264DecoderDefaultImpl* mydecoder =
+                    new MediaH264DecoderDefaultImpl();
+            mydecoder->initH264Context(width, height, outWidth, outHeight,
+                                       pixFmt);
+            updateDecoder(oldId, mydecoder);
+            break;
+        }
+        default:
+            H264_DPRINT("Unknown command %u\n", (unsigned int)op);
+            break;
+    }
 }
 
 }  // namespace emulation
