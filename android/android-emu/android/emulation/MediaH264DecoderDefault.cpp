@@ -89,9 +89,51 @@ private:
     int nWidth, nHeight;
 };
 
+extern "C" {
+static enum AVPixelFormat mycodec_get_format(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts)
+{
+    const enum AVPixelFormat *p;
+
+    H264_DPRINT("caLLING this function");
+    for (p = pix_fmts; *p != -1; p++) {
+        H264_DPRINT("comparing current format %d to toolbox format %d none %d",
+                *p, AV_PIX_FMT_VIDEOTOOLBOX, AV_PIX_FMT_NONE);
+        if ((int)(*p) == (int)(AV_PIX_FMT_VIDEOTOOLBOX)) {
+            H264_DPRINT("OK, found p is %d", *p);
+            return *p;
+        } else if (*p == 0) {
+            H264_DPRINT("OK, found p is %d", *p);
+            return *p;
+        }
+    }
+
+    fprintf(stderr, "Failed to get my HW surface format.\n");
+    return AV_PIX_FMT_NONE;
+}
+}
+
 MediaH264DecoderDefaultImpl::~MediaH264DecoderDefaultImpl() {
     H264_DPRINT("destroyed MediaH264DecoderDefaultImpl %p", this);
     destroyH264Context();
+}
+
+bool MediaH264DecoderDefaultImpl::create_video_tool_box_decoder() {
+    int err = av_hwdevice_ctx_create(&mVideotoolboxDeviceContext, AV_HWDEVICE_TYPE_VIDEOTOOLBOX, NULL, NULL, 0);
+    if (err) {
+        H264_DPRINT("cannot create videotoolbox decoder ctx");
+        return false;
+    }
+
+    mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    if (!mCodec) {
+        H264_DPRINT("cannot create h264 decoder");
+        return false;
+    }
+    mCodecCtx = avcodec_alloc_context3(mCodec);
+    mCodecCtx->hw_device_ctx = av_buffer_ref(mVideotoolboxDeviceContext);
+    mCodecCtx->get_format = mycodec_get_format;
+    H264_DPRINT("successfull create videotoolbox decoder ctx");
+    return true;
 }
 
 void MediaH264DecoderDefaultImpl::initH264Context(unsigned int width,
@@ -131,21 +173,36 @@ void MediaH264DecoderDefaultImpl::initH264Context(unsigned int width,
     }
 
     mCodec = NULL;
+
+    // try cuvid on linux/windows
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
     if (useCuvidEnv != "") {
         mCodec = avcodec_find_decoder_by_name("h264_cuvid");
         if (mCodec) {
             H264_DPRINT("Found h264_cuvid decoder, using it");
+            mCodecCtx = avcodec_alloc_context3(mCodec);
         } else {
             H264_DPRINT("Cannot find h264_cuvid decoder");
         }
     }
+
+    // try on mac
+    auto useVideotoolboxEnv = android::base::System::getEnvironmentVariable(
+            "ANDROID_EMU_CODEC_USE_VIDEO_TOOL_BOX_DECODER");
+    if (!mCodec && useVideotoolboxEnv != "") {
+        if (create_video_tool_box_decoder()) {
+            H264_DPRINT("Found h264 video tool box decoder, using it");
+        } else {
+            H264_DPRINT("Cannot find h264 video tool box decoder");
+        }
+    }
+
     if (!mCodec) {
         mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+        mCodecCtx = avcodec_alloc_context3(mCodec);
         H264_DPRINT("Using default software h264 decoder");
     }
-    mCodecCtx = avcodec_alloc_context3(mCodec);
 
     avcodec_open2(mCodecCtx, mCodec, 0);
     mFrame = av_frame_alloc();

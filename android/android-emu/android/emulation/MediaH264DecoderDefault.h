@@ -25,6 +25,7 @@ extern "C" {
 #include <libavutil/error.h>                    // for av_make_error_string
 #include <libavutil/frame.h>                    // for AVFrame, av_frame_alloc
 #include <libavutil/log.h>                      // for av_log_set_callback
+#include <libavutil/hwcontext.h>                // for hwaccel
 #include <libavutil/pixfmt.h>                   // for AVPixelFormat, AV_PIX...
 #include <libavutil/rational.h>                 // for AVRational
 #include <libavutil/samplefmt.h>                // for AVSampleFormat
@@ -86,6 +87,8 @@ private:
     void flush(void* ptr);
     void getImage(void* ptr);
 
+    bool create_video_tool_box_decoder();
+
     friend MediaH264DecoderDefault;
 
 private:
@@ -120,6 +123,7 @@ private:
 
     // ffmpeg stuff
     AVCodec *mCodec = nullptr;;
+    AVBufferRef *mVideotoolboxDeviceContext = nullptr;
     AVCodecContext *mCodecCtx = nullptr;
     AVFrame *mFrame = nullptr;
     AVPacket mPacket;
