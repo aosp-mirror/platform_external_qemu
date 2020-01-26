@@ -106,6 +106,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" \
                 --extra-cflags=\"-I$PREBUILTS_DIR/common/libvpx/$SYSTEM/include\" \
                 --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\" \
+                --extra-cflags=-g \
                 --enable-static \
                 --disable-doc \
                 --disable-programs \
@@ -113,6 +114,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-asm \
                 --disable-yasm \
                 --disable-avdevice \
+                --disable-stripping \
                 --enable-avresample \
                 --enable-pic \
                 --enable-libx264 \
