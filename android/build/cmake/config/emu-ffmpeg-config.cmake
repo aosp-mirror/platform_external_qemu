@@ -50,4 +50,15 @@ set(
   PACKAGE_EXPORT
   "FFMPEG_INCLUDE_DIR;FFMPEG_INCLUDE_DIRS;FFMPEG_LIBRARIES;FFMPEG_CLIENT_LIBRARIES;FFMPEG_FOUND;FFMPEG_LIBAVUTIL;FFMPEG_LIBAVFORMAT;FFMPEG_LIBAVCODEC"
   )
-  android_license("FFMPEG" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.FFMPEG")
+  android_license(TARGET
+                FFMPEG::FFMPEG
+                LIBNAME
+                ffmpeg
+                URL
+                "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/ffmpeg-3.4.5.tar.xz"
+                SPDX
+                "GPL-2.0-or-later"
+                LICENSE
+                "https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.FFMPEG")

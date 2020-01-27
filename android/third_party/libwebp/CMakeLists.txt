@@ -111,4 +111,15 @@ if (WINDOWS_MSVC_X86_64)
     # clang whining about not enabling sse41 support
     android_target_compile_options(emulator-libwebp Clang PRIVATE -msse4.1)
 endif ()
-android_license(libwebp  "android/third_party/libwebp/third_party/chromium_headless/libwebp/LICENSE")
+android_license(TARGET
+                emulator-libwebp
+                LIBNAME
+                libwebp
+                URL
+                "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/libwebp/third_party/chromium_headless/libwebp"
+                SPDX
+                "BSD-3-Clause"
+                LICENSE
+                "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/libwebp/third_party/chromium_headless/libwebp/LICENSE"
+                LOCAL
+                "{ANDROID_QEMU2_TOP_DIR}/android/third_party/libwebp/third_party/chromium_headless/libwebp/LICENSE")

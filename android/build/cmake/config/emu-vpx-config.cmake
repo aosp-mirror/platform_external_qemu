@@ -27,5 +27,15 @@ if(NOT TARGET VPX::VPX)
 endif()
 
 set(PACKAGE_EXPORT "VPX_INCLUDE_DIR;VPX_INCLUDE_DIRS;VPX_LIBRARIES;VPX_FOUND")
-android_license("LIBVPX" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.WEBM")
-
+android_license(TARGET
+                VPX::VPX
+                LIBNAME
+                libvpx
+                URL
+                "https://chromium.googlesource.com/webm/libvpx/"
+                SPDX
+                "BSD-3-Clause"
+                LICENSE
+                "https://chromium.googlesource.com/webm/libvpx/+/refs/heads/master/LICENSE"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.WEBM")

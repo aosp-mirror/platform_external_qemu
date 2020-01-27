@@ -69,11 +69,26 @@ function(add_qt_shared_lib target link target_deps)
                                      "${link}"
                                      INTERFACE_COMPILE_DEFINITIONS
                                      "QT5_STATICLIB")
+
+    android_license(
+      TARGET
+      Qt5::${target}
+      LIBNAME
+      "Qt ${target}"
+      URL
+      "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/qt-everywhere-src-5.12.1.tar.xz"
+      SPDX
+      "LGPL-3.0-only"
+      LICENSE
+      "https://doc.qt.io/qt-5.12/qt${target}-index.html#licenses-and-attributions"
+      LOCAL
+      "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv3")
     # Update the dependencies
     foreach(dep ${target_deps})
       target_link_libraries(Qt5::${target} INTERFACE ${dep})
     endforeach()
   endif()
+
 endfunction()
 
 set(QT5_INCLUDE_DIRS
@@ -167,15 +182,14 @@ if(DARWIN_X86_64)
     QT5_SHARED_PROPERTIES
     "INSTALL_RPATH>=@loader_path/lib64/qt/libexec;INSTALL_RPATH>=@loader_path/lib64/qt/lib;INSTALL_RPATH>=@loader_path/lib64/qt/plugins"
     )
-  set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5NetworkAndroidEmu -lQt5WebChannelAndroidEmu -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSockets)
+  set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5NetworkAndroidEmu -lQt5WebChannelAndroidEmu -lQt5WebEngineWidgetsAndroidEmu
+                    -lQt5WebSockets)
 elseif(WINDOWS_MSVC_X86_64)
-  # On Windows, Qt provides us with a qtmain.lib which helps us write a cross-platform main() function (because WinMain() is the entry point
-  # to a GUI application on Windows). Exactly how qtmain does this is it defines WinMain() for us, and inside WinMain(), it calls a function
-  # that we provide. For mingw, this function is qMain(), and for msvc, it's just main() (see qt-src/.../qtmain_lib.cpp for more info).
-  # So, in short, for msvc,
-  #     qtmain.lib --> WinMain() --> main() --> qt_main()
-  # and for mingw,
-  #     qtmain.a --> WinMain() --> qMain() --> qt_main()
+  # On Windows, Qt provides us with a qtmain.lib which helps us write a cross-platform main() function (because
+  # WinMain() is the entry point to a GUI application on Windows). Exactly how qtmain does this is it defines WinMain()
+  # for us, and inside WinMain(), it calls a function that we provide. For mingw, this function is qMain(), and for
+  # msvc, it's just main() (see qt-src/.../qtmain_lib.cpp for more info). So, in short, for msvc, qtmain.lib -->
+  # WinMain() --> main() --> qt_main() and for mingw, qtmain.a --> WinMain() --> qMain() --> qt_main()
   #
   # Clang/VS doesn't support linking directly to dlls. We linking to the import libraries instead (.lib).
   set(QT5_LIBRARIES ${PREBUILT_ROOT}/lib/qtmain.lib)
@@ -219,7 +233,8 @@ elseif(WINDOWS_MSVC_X86_64)
   add_qt_shared_lib(WebEngineCore "${PREBUILT_ROOT}/lib/Qt5WebEngineCoreAndroidEmu.lib" "Qt5::Network")
   add_qt_shared_lib(WebChannel "${PREBUILT_ROOT}/lib/Qt5WebChannelAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
   add_qt_shared_lib(WebSockets "${PREBUILT_ROOT}/lib/Qt5WebSocketsAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
-  add_qt_shared_lib(WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgetsAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
+  add_qt_shared_lib(WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgetsAndroidEmu.lib"
+                    "Qt5::WebEngineCore;Qt5::Qml")
 
   list(
     APPEND
@@ -240,8 +255,7 @@ elseif(WINDOWS_MSVC_X86_64)
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/bin/qtwebengine_resources_200p.pak
       # BUG: 143948083
       # WebEngine expects the locales directory to not be under translations
-      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/qtwebengine_locales
-    )
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/qtwebengine_locales)
 
 elseif(WINDOWS_X86_64)
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
@@ -313,13 +327,14 @@ elseif(LINUX_X86_64)
     ABSOLUTE)
 
   if(QTWEBENGINE)
-      add_qt_shared_lib(Network "-lQt5NetworkAndroidEmu" "Qt5::Core")
-      add_qt_shared_lib(Qml "-lQt5QmlAndroidEmu" "Qt5::Network")
-      add_qt_shared_lib(WebChannel "-lQt5WebChannelAndroidEmu" "Qt5::Qml")
-      add_qt_shared_lib(WebSockets "-lQt5WebSocketsAndroidEmu" "Qt5::Qml")
-      add_qt_shared_lib(WebEngineWidgets "-lQt5WebEngineWidgetsAndroidEmu" "Qt5::Qml")
+    add_qt_shared_lib(Network "-lQt5NetworkAndroidEmu" "Qt5::Core")
+    add_qt_shared_lib(Qml "-lQt5QmlAndroidEmu" "Qt5::Network")
+    add_qt_shared_lib(WebChannel "-lQt5WebChannelAndroidEmu" "Qt5::Qml")
+    add_qt_shared_lib(WebSockets "-lQt5WebSocketsAndroidEmu" "Qt5::Qml")
+    add_qt_shared_lib(WebEngineWidgets "-lQt5WebEngineWidgetsAndroidEmu" "Qt5::Qml")
 
-    list(APPEND QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WebChannelAndroidEmu -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSocketsAndroidEmu)
+    list(APPEND QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WebChannelAndroidEmu -lQt5WebEngineWidgetsAndroidEmu
+                -lQt5WebSocketsAndroidEmu)
     list(
       APPEND
         QT5_SHARED_DEPENDENCIES
@@ -351,25 +366,23 @@ elseif(LINUX_X86_64)
     list(APPEND QT5_SHARED_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
   endif()
 
-  list(
-      APPEND
-        QT5_SHARED_DEPENDENCIES
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0.0.0;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
-        ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfontconfig.so.1.12.0>lib64/qt/lib/libfontconfig.so.1)
+  list(APPEND QT5_SHARED_DEPENDENCIES
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0.0.0;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
+              ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfontconfig.so.1.12.0>lib64/qt/lib/libfontconfig.so.1)
 
 endif()
 
@@ -391,5 +404,3 @@ set(PACKAGE_EXPORT
     QT5_SHARED_DEPENDENCIES
     QT5_SHARED_PROPERTIES
     QT_VERSION_MINOR)
-
-android_license("qt" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.QT-LICENSE-AGREEMENT-4.0")

@@ -64,7 +64,19 @@ endif()
 add_subdirectory(boringssl)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
-android_license(picosha2  "android/third_party/picosha2/LICENSE")
+
+android_license(TARGET
+                picosha2
+                LIBNAME
+                picosha2
+                URL
+                "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/picosha2/"
+                SPDX
+                "MIT"
+                LICENSE
+                "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/picosha2/LICENSE"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/android/third_party/picosha2/LICENSE")
 
 if(WINDOWS)
   add_subdirectory(mman-win32)

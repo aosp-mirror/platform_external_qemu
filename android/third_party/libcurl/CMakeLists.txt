@@ -171,4 +171,15 @@ target_include_directories(curl
 target_include_directories(curl PUBLIC ${CURL_SRC_DIR}/../include)
 target_link_libraries(curl PRIVATE ssl zlib)
 android_target_link_libraries(curl windows_msvc-x86_64 PRIVATE wldap32::wldap32 gdi32::gdi32 normaliz::normaliz crypt32::crypt32)
-android_license(curl  "${CURL_SRC_DIR}/../NOTICE")
+android_license(TARGET
+                curl
+                LIBNAME
+                libcurl
+                URL
+                "https://android.googlesource.com/platform/external/curl/+/refs/heads/emu-master-dev"
+                SPDX
+                "curl"
+                LICENSE
+                "https://android.googlesource.com/platform/external/curl/+/refs/heads/emu-master-dev/NOTICE"
+                LOCAL
+                "${CURL_SRC_DIR}/../NOTICE")

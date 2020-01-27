@@ -1,9 +1,8 @@
 # Let's bring the grpc module.
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../grpc/emulator grpc)
-android_license(android-grpc ${ANDROID_QEMU2_TOP_DIR}/../grpc/NOTICE.txt)
 
-# Add waterfall only for posix, as there are some issues around stderr/stdout/stdin in the gRPC compiler.
-# See b/148079576 for details.
+# Add waterfall only for posix, as there are some issues around stderr/stdout/stdin in the gRPC compiler. See
+# b/148079576 for details.
 if(NOT WINDOWS_MSVC_X86_64)
   protobuf_generate_grpc_cpp(SOURCE_DIR
                              ${CMAKE_CURRENT_LIST_DIR}
@@ -88,3 +87,29 @@ set(grpc_benchmark_src android/emulation/control/keyboard/KeytranslatePerf.cpp
                        android/emulation/control/logcat/RingStreamPerf.cpp)
 android_add_executable(grpc_benchmark)
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base emulator-gbench)
+
+android_license(TARGET
+                grpc grpc++
+                LIBNAME
+                grpc
+                URL
+                "https://android.googlesource.com/platform/external/grpc-grpc/+/refs/heads/emu-master-dev"
+                SPDX
+                "Apache-2.0"
+                LICENSE
+                "https://android.googlesource.com/platform/external/grpc-grpc/+/refs/heads/emu-master-dev/LICENSE"
+                LOCAL
+                ${ANDROID_QEMU2_TOP_DIR}/../grpc/NOTICE.txt)
+
+android_license(TARGET
+                cares
+                LIBNAME
+                c-ares
+                URL
+                "https://android.googlesource.com/platform/external/c-ares/+/refs/heads/emu-master-dev"
+                SPDX
+                "MIT"
+                LICENSE
+                "https://android.googlesource.com/platform/external/c-ares/+/refs/heads/emu-master-dev/NOTICE"
+                LOCAL
+                ${ANDROID_QEMU2_TOP_DIR}/../cares/NOTICE)

@@ -202,6 +202,7 @@ function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
       endif()
     endforeach()
   endif()
+  android_install_license(${INSTALL_DEPENDENCIES} "${INSTALL_DEPENDENCIES}")
 endfunction()
 
 function(android_install_dependency_force_exec TARGET_TAG INSTALL_DEPENDENCIES)
@@ -219,6 +220,7 @@ function(android_install_dependency_force_exec TARGET_TAG INSTALL_DEPENDENCIES)
       endif()
     endforeach()
   endif()
+  android_install_license(${INSTALL_DEPENDENCIES} "${INSTALL_DEPENDENCIES}")
 endfunction()
 
 # Binplaces the given source file to the given destination as part of the target

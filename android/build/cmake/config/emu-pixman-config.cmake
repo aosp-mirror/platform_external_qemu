@@ -20,4 +20,17 @@ set(PIXMAN_FOUND TRUE)
 android_add_prebuilt_library(PIXMAN PIXMAN "${PREBUILT_ROOT}/lib/libpixman-1" "${PREBUILT_ROOT}/include/pixman-1" "" "")
 
 set(PACKAGE_EXPORT "PIXMAN_INCLUDE_DIR;PIXMAN_INCLUDE_DIRS;PIXMAN_LIBRARIES;PIXMAN_FOUND")
-android_license("pixman-1" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.PIXMAN")
+
+
+android_license(TARGET
+    PIXMAN::PIXMAN
+    LIBNAME
+    pixman-1
+    URL
+    "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/pixman-0.34.0.tar.gz"
+    SPDX
+    "MIT"
+    LICENSE
+    "https://gitlab.freedesktop.org/pixman/pixman/blob/master/COPYING"
+    LOCAL
+    "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.PIXMAN")

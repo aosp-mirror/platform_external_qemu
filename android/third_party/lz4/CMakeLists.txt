@@ -18,4 +18,15 @@ set(lz4_src
 
 android_add_library(lz4)
 target_include_directories(lz4 PUBLIC ${LIBLZ4_SRC})
-android_license(lz4  "${LIBLZ4_SRC}/../NOTICE")
+android_license(TARGET
+                lz4
+                LIBNAME
+                lz4
+                URL
+                "https://android.googlesource.com/platform/external/lz4/+/refs/heads/emu-master-dev"
+                SPDX
+                "BSD-2-Clause"
+                LICENSE
+                "https://android.googlesource.com/platform/external/lz4/+/refs/heads/emu-master-dev/NOTICE"
+                LOCAL
+                "${LIBLZ4_SRC}/../NOTICE")

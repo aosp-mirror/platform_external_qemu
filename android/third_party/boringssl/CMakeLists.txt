@@ -7,7 +7,7 @@ android_add_library(ssl)
 target_include_directories(ssl PUBLIC ${BORINGSSL_ROOT}/src/include)
 target_include_directories(ssl PRIVATE ${BORINGSSL_ROOT}/src/ssl)
 android_target_compile_definitions(ssl windows-x86_64 PUBLIC "-DWIN32_LEAN_AND_MEAN=1")
-android_target_compile_options(ssl windows PRIVATE  "-UNDEBUG")
+android_target_compile_options(ssl windows PRIVATE "-UNDEBUG")
 
 # Setup the crypto libraries:
 if(LINUX_X86_64)
@@ -27,22 +27,32 @@ endif()
 target_include_directories(crypto PUBLIC ${BORINGSSL_ROOT}/src/include)
 target_link_libraries(ssl PUBLIC crypto)
 
-
-android_license(boringssl "${BORINGSSL_ROOT}/NOTICE")
+android_license(TARGET
+                ssl crypto
+                LIBNAME
+                boringssl
+                URL
+                "https://android.googlesource.com/platform/external/boringssl/+/refs/heads/master"
+                SPDX
+                "OpenSSL"
+                LICENSE
+                "https://android.googlesource.com/platform/external/boringssl/+/refs/heads/master/NOTICE"
+                LOCAL
+                "${BORINGSSL_ROOT}/NOTICE")
 # Tests
-if (NOT WINDOWS) # BUG: 147893224: clang 10 results in a flaky failure in ABITest.SanityCheck on Windows
-    set(boringssl_test_support_src ${test_support_sources})
-    android_add_library(boringssl_test_support)
-    target_link_libraries(boringssl_test_support PRIVATE ssl)
+if(NOT WINDOWS) # BUG: 147893224: clang 10 results in a flaky failure in ABITest.SanityCheck on Windows
+  set(boringssl_test_support_src ${test_support_sources})
+  android_add_library(boringssl_test_support)
+  target_link_libraries(boringssl_test_support PRIVATE ssl)
 
-    set(boringssl_ssl_unittests_src ${ssl_test_sources})
+  set(boringssl_ssl_unittests_src ${ssl_test_sources})
 
-    android_add_test(boringssl_ssl_unittests)
-    target_link_libraries(boringssl_ssl_unittests PRIVATE gmock_main ssl crypto boringssl_test_support)
+  android_add_test(boringssl_ssl_unittests)
+  target_link_libraries(boringssl_ssl_unittests PRIVATE gmock_main ssl crypto boringssl_test_support)
 
-    set(boringssl_crypto_unittests_src ${crypto_test_sources})
+  set(boringssl_crypto_unittests_src ${crypto_test_sources})
 
-    android_add_test(boringssl_crypto_unittests)
-    target_link_libraries(boringssl_crypto_unittests PRIVATE gmock_main crypto boringssl_test_support)
-    android_target_link_libraries(boringssl_test_support windows PRIVATE ws2_32::ws2_32 dbghelp::dbghelp)
+  android_add_test(boringssl_crypto_unittests)
+  target_link_libraries(boringssl_crypto_unittests PRIVATE gmock_main crypto boringssl_test_support)
+  android_target_link_libraries(boringssl_test_support windows PRIVATE ws2_32::ws2_32 dbghelp::dbghelp)
 endif()

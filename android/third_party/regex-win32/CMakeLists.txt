@@ -10,3 +10,16 @@ android_add_library(emulator-regex-win32)
 
 target_include_directories(emulator-regex-win32 PUBLIC include)
 target_include_directories(emulator-regex-win32 PRIVATE compat)
+
+android_license(TARGET
+                emulator-regex-win32
+                LIBNAME
+                regex
+                URL
+                "https://android.googlesource.com/platform/external/qemu.git/+/refs/heads/emu-master-dev/android/third_party/regex-win32/"
+                SPDX
+                "BSD-4-Clause"
+                LICENSE
+                "https://github.com/garyhouston/regex/blob/master/COPYRIGHT"
+                LOCAL
+                "{ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.WINREG")

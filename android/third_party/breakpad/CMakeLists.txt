@@ -504,4 +504,15 @@ elseif(WINDOWS_MSVC_X86_64)
   android_target_compile_definitions(windows_client_unittests windows PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 endif()
 
-android_license(breakpad "${BREAKPAD_SRC}/../LICENSE")
+android_license(TARGET
+                breakpad_common breakpad_processor breakpad_server breakpad_client breakpad_disasm
+                LIBNAME
+                breakpad
+                URL
+                "https://android.googlesource.com/platform/external/google-breakpad/+/refs/heads/emu-master-dev"
+                SPDX
+                "Google"
+                LICENSE
+                "https://android.googlesource.com/platform/external/google-breakpad/+/refs/heads/emu-master-dev/LICENSE"
+                LOCAL
+                "${BREAKPAD_SRC}/../LICENSE")
