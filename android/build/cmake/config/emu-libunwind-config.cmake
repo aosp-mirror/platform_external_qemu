@@ -31,3 +31,18 @@ set(LIBUNWIND_FOUND TRUE)
 
 set(PACKAGE_EXPORT
     "LIBUNWIND_INCLUDE_DIR;LIBUNWIND_INCLUDE_DIRS;LIBUNWIND_LIBRARIES;LIBUNWIND_FOUND")
+
+
+android_license(TARGET
+    LIBUNWIND::LIBUNWIND
+    LIBNAME
+    libunwind
+    URL
+    # Fix when we host it internally (b/148256090)
+    "https://github.com/libunwind/libunwind/releases/tag/v1.3.1"
+    SPDX
+    "MIT"
+    LICENSE
+    "https://github.com/libunwind/libunwind/blob/master/COPYING"
+    LOCAL
+    "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LIBUNWIND")

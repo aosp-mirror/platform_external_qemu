@@ -29,5 +29,18 @@ if(NOT TARGET ANGLE::ANGLE)
 endif()
 
 set(ANGLE_FOUND TRUE)
-android_license("angle" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
 set(PACKAGE_EXPORT "ANGLE_INCLUDE_DIR;ANGLE_INCLUDE_DIRS;ANGLE_LIBRARIES;ANGLE_FOUND")
+
+
+android_license(TARGET
+                ANGLE::ANGLE
+                LIBNAME
+                angle
+                URL
+                "https://chromium.googlesource.com/angle/angle"
+                SPDX
+                "BSD-3-Clause"
+                LICENSE
+                "https://chromium.googlesource.com/angle/angle/LICENSE"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")

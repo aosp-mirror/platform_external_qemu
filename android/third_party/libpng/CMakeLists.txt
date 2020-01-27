@@ -207,4 +207,15 @@ target_link_libraries(pngimage PRIVATE png)
 png_add_test(NAME pngimage-quick COMMAND pngimage OPTIONS --list-combos --log FILES ${PNGSUITE_PNGS})
 png_add_test(NAME pngimage-full COMMAND pngimage OPTIONS --exhaustive --list-combos --log FILES ${PNGSUITE_PNGS})
 
-android_license(libpng "${PNG_SRC_DIR}/LICENSE")
+android_license(TARGET
+                png
+                LIBNAME
+                libpng
+                URL
+                "https://android.googlesource.com/platform/external/libpng/+/refs/heads/emu-master-dev"
+                SPDX
+                "Libpng"
+                LICENSE
+                "https://android.googlesource.com/platform/external/libpng/+/refs/heads/emu-master-dev/LICENSE"
+                LOCAL
+                "${PNG_SRC_DIR}/LICENSE")

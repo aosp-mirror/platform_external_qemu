@@ -396,4 +396,15 @@ else()
   add_dependencies(protobuf_tests protobuf_test_plugin)
 endif()
 
-android_license(libprotobuf  "${protobuf_source_dir}/NOTICE")
+android_license(TARGET
+                libprotobuf
+                LIBNAME
+                protobuf
+                URL
+                "https://android.googlesource.com/platform/external/protobuf/+/refs/heads/emu-master-dev"
+                SPDX
+                "BSD-3-Clause"
+                LICENSE
+                "https://android.googlesource.com/platform/external/protobuf/+/refs/heads/emu-master-dev/NOTICE"
+                LOCAL
+                "${protobuf_source_dir}/NOTICE")

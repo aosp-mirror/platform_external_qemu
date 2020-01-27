@@ -23,3 +23,15 @@ if(NOT EXISTS "${PREBUILT_ROOT}/include/common_types.h")
   endif()
 endif()
 android_add_prebuilt_library(WebRTC WebRTC "${PREBUILT_ROOT}/lib/libwebrtc" "${PREBUILT_ROOT}/include" "" "")
+android_license(TARGET
+                WebRTC::WebRTC
+                LIBNAME
+                webrtc
+                URL
+                "https://chromium.googlesource.com/external/webrtc/+/refs/heads/master/"
+                SPDX
+                "BSD-3-Clause"
+                LICENSE
+                "https://chromium.googlesource.com/external/webrtc/+/refs/heads/master/LICENSE"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.WEBRTC")

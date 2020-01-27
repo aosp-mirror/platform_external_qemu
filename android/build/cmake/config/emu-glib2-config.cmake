@@ -39,4 +39,16 @@ if(WINDOWS_MSVC_X86_64)
   set(GLIB2_WINDOWS_DEPENDENCIES ${PREBUILT_ROOT}/lib/glib-2-vs11.dll>lib64/glib-2-vs11.dll)
 endif()
 set(PACKAGE_EXPORT "GLIB2_INCLUDE_DIR;GLIB2_WINDOWS_DEPENDENCIES;GLIB2_INCLUDE_DIRS;GLIB2_LIBRARIES;GLIB2_FOUND;RUNTIME_OS_DEPENDENCIES")
-android_license("GLIB2" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv21")
+
+android_license(TARGET
+                GLIB2::GLIB2
+                LIBNAME
+                glib-2.0
+                URL
+                "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/glib-2.38.2.tar.xz"
+                SPDX
+                "LGPL-2.1-only"
+                LICENSE
+                "https://gitlab.gnome.org/GNOME/glib/blob/master/COPYING"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv21")

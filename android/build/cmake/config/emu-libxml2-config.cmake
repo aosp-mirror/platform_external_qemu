@@ -22,3 +22,16 @@ set(LIBXML2_FOUND TRUE)
 android_add_prebuilt_library(LibXml2 LibXml2 "${PREBUILT_ROOT}/lib/libxml2" "${PREBUILT_ROOT}/include" "LIBXML_STATIC")
 
 set(PACKAGE_EXPORT "LIBXML2_INCLUDE_DIR;LIBXML2_INCLUDE_DIRS;LIBXML2_LIBRARIES;LIBXML2_FOUND;LIBXML2_DEFINITIONS")
+
+android_license(TARGET
+    LibXml2::LibXml2
+    LIBNAME
+    LibXml2
+    URL
+    "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/libxml2-2.9.2.tar.gz"
+    SPDX
+    "MIT"
+    LICENSE
+    "https://github.com/GNOME/libxml2/blob/mainline/Copyright"
+    LOCAL
+    "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LIBXML2")

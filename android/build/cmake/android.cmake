@@ -312,10 +312,44 @@ function(android_add_interface name)
 endfunction()
 
 
-function(android_license tgt license)
-  get_filename_component(LICENSE_FILE "${license}" ABSOLUTE BASE_DIR ${ANDROID_QEMU2_TOP_DIR})
-  # get_filename_component(LICENSE_FILE "${LICENSE_FILE}" ABSOLUTE)
-  file(APPEND ${CMAKE_BINARY_DIR}/NOTICES.txt "${tgt},${license}\n")
+
+# Registers the license and license type. This will be used by the post
+# processor to calculate a proper licensing notice file
+#
+# LIBNAME The name of the library, this is how it is usually known in the world.
+#         for example libpng
+# TARGET List of targets that are contained in this library
+# URL Location of the source code.
+# SPDX The spdx license identifier. (See https://spdx.org/)
+# LICENSE URL to the actual license.
+# EXECUTABLES Set of executables covering this license (can be empty)
+# LOCAL Local location in the current
+#
+# (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
+function(android_license)
+  # Parse arguments
+  set(options)
+  set(oneValueArgs LIBNAME URL SPDX LICENSE LOCAL)
+  set(multiValueArgs TARGET EXECUTABLES)
+  cmake_parse_arguments(args "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  file(APPEND ${CMAKE_BINARY_DIR}/LICENSES.LST "${args_TARGET}|${args_LIBNAME}|${args_URL}|${args_SPDX}|${args_LICENSE}|${args_LOCAL}|${args_EXECUTABLES}\n")
+endfunction()
+
+# Creates the target_deps file that can be used to calculate the license dependencies.
+function(android_license_dependencies ALL_TARGETS)
+  foreach(tgt ${ALL_TARGETS})
+    get_target_property(target_type "${tgt}" TYPE)
+    set(DEPS "")
+      if (NOT target_type STREQUAL "INTERFACE_LIBRARY")
+        get_target_property(DEPS ${tgt} LINK_LIBRARIES)
+      endif()
+      file(APPEND ${CMAKE_BINARY_DIR}/TARGET_DEPS.LST "${tgt}|${target_type}|${DEPS}\n")
+  endforeach()
+endfunction()
+
+# Creates the dependency
+function(android_install_license tgt targetname)
+  file(APPEND ${CMAKE_BINARY_DIR}/INSTALL_TARGETS.LST "${tgt}, ${targetname}\n")
 endfunction()
 
 function(android_add_default_test_properties name)
@@ -400,7 +434,6 @@ function(android_add_executable name)
   android_clang_tidy(${name})
   android_target_dependency(${name} all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(${name} all "${RUNTIME_OS_PROPERTIES}")
-
   if(ANDROID_CODE_COVERAGE)
     # TODO Clean out existing .gcda files.
   endif()
@@ -658,9 +691,6 @@ function(android_build_qemu_variant)
                                     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
     android_install_exe(${qemu_build_EXE} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
   endif()
-
-  # Add the qemu license
-  android_license(${qemu_build_EXE} "${ANDROID_QEMU2_TOP_DIR}/LICENSE")
 endfunction()
 
 # Constructs the qemu executable.
@@ -787,6 +817,7 @@ function(android_install_exe TGT DST)
   # Make it available on the build server
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
+  android_install_license(${TGT} ${TGT}${CMAKE_EXECUTABLE_SUFFIX})
 endfunction()
 
 # Installs the given shared library. The shared library will end up in ../lib64 Symbols will be extracted during build,
@@ -797,6 +828,7 @@ function(android_install_shared TGT)
           LIBRARY DESTINATION lib64)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
+  android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
 # Strips the given prebuilt executable during install..

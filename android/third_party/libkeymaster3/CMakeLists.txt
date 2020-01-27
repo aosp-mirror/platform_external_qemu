@@ -66,4 +66,15 @@ if(WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3" "-Wno-incompatible-pointer-types")
 endif()
 
-android_license(ext4_utils "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
+android_license(TARGET
+                emulator-libkeymaster3
+                LIBNAME
+                keymaster-3
+                URL
+                "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/libkeymaster3"
+                SPDX
+                "Apache-2.0"
+                LICENSE
+                "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/libkeymaster3/NOTICE"
+                LOCAL
+                "android/third_party/libkeymaster3/NOTICE")

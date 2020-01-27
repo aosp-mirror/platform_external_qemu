@@ -31,4 +31,15 @@ else()
   endif()
 endif()
 set(PACKAGE_EXPORT "FDT_INCLUDE_DIR;FDT_INCLUDE_DIRS;FDT_LIBRARIES;FDT_FOUND")
-android_license("LIBFDT" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.GPLv2")
+android_license(TARGET
+                FDT
+                LIBNAME
+                fdt
+                URL
+                "https://android.googlesource.com/platform/external/dtc/+/refs/heads/master"
+                SPDX
+                "BSD-2-Clause"
+                LICENSE
+                "https://android.googlesource.com/platform/external/dtc/+/refs/heads/master/README.license"
+                LOCAL
+                "LICENSES/LICENSE.FDT")

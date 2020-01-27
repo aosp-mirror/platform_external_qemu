@@ -41,4 +41,15 @@ target_compile_definitions(emulator_make_ext4fs PRIVATE -DHOST)
 android_target_link_libraries(emulator_make_ext4fs windows PUBLIC emulator-libmman-win32)
 android_target_compile_definitions(emulator_make_ext4fs windows PRIVATE -DUSE_MINGW=1)
 
-android_license(ext4_utils "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
+android_license(TARGET
+                emulator-libext4_utils
+                LIBNAME
+                ext4_utils
+                URL
+                "https://android.googlesource.com/platform/system/extras/+/master/ext4_utils/"
+                SPDX
+                "Apache-2.0"
+                LICENSE
+                "https://android.googlesource.com/platform/system/extras/+/master/ext4_utils/NOTICE"
+                LOCAL
+                "LICENSES/LICENSE.APACHE2")
