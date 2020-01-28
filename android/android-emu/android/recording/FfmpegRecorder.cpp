@@ -46,6 +46,7 @@
 extern "C" {
 #include "libavformat/avformat.h"               // for AVStream, AVFormatCon...
 #include "libavutil/avassert.h"                 // for av_assert0
+#include "libavcodec/avcodec.h"                 // for av_assert0
 #include "libavutil/mathematics.h"              // for av_rescale_rnd, AV_RO...
 #include "libavutil/timestamp.h"                // for av_ts_make_string
 #include "libswresample/swresample.h"           // for SwrContext, swr_alloc
@@ -58,7 +59,8 @@ class PathUtils;
 }  // namespace android
 struct SwsContext;
 }
-
+#define CODEC_CAP_VARIABLE_FRAME_SIZE 0x10000
+#define 	AVFMT_RAWPICTURE   0x0020
 #include <assert.h>                             // for assert
 #include <libavcodec/avcodec.h>                 // for AVCodecContext, AVPacket
 #include <libavformat/avio.h>                   // for avio_open, AVIO_FLAG_...

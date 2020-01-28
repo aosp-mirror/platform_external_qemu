@@ -21,7 +21,7 @@ extern "C" {
 #include <libavutil/rational.h>        // for AVRational
 #include <libswresample/swresample.h>  // for swr_init, SwrContext
 }
-
+#define 	CODEC_CAP_EXPERIMENTAL   AV_CODEC_CAP_EXPERIMENTAL
 #include "android/base/Log.h"          // for LOG, LogMessage, LogStream
 
 namespace android {

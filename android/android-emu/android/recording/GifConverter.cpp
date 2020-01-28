@@ -54,7 +54,7 @@ extern "C" {
 #include <libswscale/swscale.h>             // for sws_getContext, sws_scale
 struct SwsContext;
 }
-
+#define 	CODEC_CAP_EXPERIMENTAL   AV_CODEC_CAP_EXPERIMENTAL
 #include <memory>                           // for unique_ptr
 
 static constexpr int SCALE_FLAGS = SWS_BICUBIC;

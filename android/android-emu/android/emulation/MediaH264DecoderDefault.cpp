@@ -301,11 +301,22 @@ void MediaH264DecoderDefaultImpl::copyFrame() {
     int h = mFrame->height;
     H264_DPRINT("w %d h %d Y line size %d U line size %d V line size %d", w, h,
             mFrame->linesize[0], mFrame->linesize[1], mFrame->linesize[2]);
+    H264_DPRINT("format is %d and NV21 is %d  12 is %d", mFrame->format, (int)AV_PIX_FMT_NV21,
+            (int)AV_PIX_FMT_NV12);
+     AVFrame *sw_frame = NULL;
+
+     if (mFrame->format == AV_PIX_FMT_VIDEOTOOLBOX) {
+         sw_frame = av_frame_alloc();
+          if (av_hwframe_transfer_data(sw_frame, mFrame, 0) < 0) {
+                fprintf(stderr, "Error transferring the data to system memory\n");
+                exit(1);
+            }
+          av_frame_free(&mFrame);
+          mFrame = sw_frame;
+     }
     for (int i = 0; i < h; ++i) {
       memcpy(mDecodedFrame + i * w, mFrame->data[0] + i * mFrame->linesize[0], w);
     }
-    H264_DPRINT("format is %d and NV21 is %d  12 is %d", mFrame->format, (int)AV_PIX_FMT_NV21,
-            (int)AV_PIX_FMT_NV12);
     if (mFrame->format == AV_PIX_FMT_NV12) {
         for (int i=0; i < h / 2; ++i) {
             memcpy(w * h + mDecodedFrame + i * w, mFrame->data[1] + i * mFrame->linesize[1], w);

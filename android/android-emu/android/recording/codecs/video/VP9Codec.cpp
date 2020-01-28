@@ -24,7 +24,7 @@ extern "C" {
 #include <libswscale/swscale.h>          // for sws_getContext, SWS_BICUBIC
 struct SwsContext;
 }
-
+#define 	CODEC_CAP_EXPERIMENTAL   AV_CODEC_CAP_EXPERIMENTAL
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
 

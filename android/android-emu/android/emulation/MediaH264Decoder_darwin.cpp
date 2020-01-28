@@ -40,16 +40,18 @@
 
 namespace android {
 namespace emulation {
-
+/*
 namespace {
 
-class MediaH264DecoderImpl : public MediaH264Decoder {
+class MediaH264DecoderImpl{
+    using Err = MediaH264DecoderImpl:Err;
+    using PixelFormat = MediaH264DecoderImpl:PixelFormat;
 public:
     MediaH264DecoderImpl() = default;
     virtual ~MediaH264DecoderImpl();
 
     // This is the entry point
-    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
+    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) ;
 
 private:
     // Passes the Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) to the
@@ -80,11 +82,11 @@ private:
                                  unsigned int height,
                                  unsigned int outWidth,
                                  unsigned int outHeight,
-                                 PixelFormat pixFmt) override;
-    virtual void destroyH264Context() override;
-    virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) override;
-    virtual void flush(void* ptr) override;
-    virtual void getImage(void* ptr) override;
+                                 PixelFormat pixFmt) ;
+    virtual void destroyH264Context() ;
+    virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes) ;
+    virtual void flush(void* ptr) ;
+    virtual void getImage(void* ptr) ;
     
     void handleIDRFrame(const uint8_t* ptr, size_t szBytes);
     void handleNonIDRFrame(const uint8_t* ptr, size_t szBytes);
@@ -696,5 +698,6 @@ MediaH264Decoder* MediaH264Decoder::create() {
     return new MediaH264DecoderImpl();
 }
 
+*/
 }  // namespace emulation
 }  // namespace android
