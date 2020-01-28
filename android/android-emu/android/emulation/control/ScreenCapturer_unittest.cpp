@@ -202,11 +202,19 @@ public:
     }
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) { }
     void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) {
+        unsigned int* height, std::vector<unsigned char>& pixels,
+        int displayId, int desiredWidth, int desiredHeight,
+        SkinRotation desiredRotation) {
         if (mHasValidScreenshot) {
-            *width = kWidth;
-            *height = kHeight;
-            pixels.assign(*width * *height * nChannels, 0);
+            if (desiredWidth == 0 && desiredHeight == 0) {
+                *width = kWidth;
+                *height = kHeight;
+                pixels.assign(*width * *height * nChannels, 0);
+            } else {
+                *width = desiredWidth;
+                *height = desiredHeight;
+                pixels.assign(*width * *height * nChannels, 0);
+            }
         } else {
             *width = 0;
             *height = 0;
@@ -417,4 +425,14 @@ TEST_F(ScreenCapturerTest, pbFileSuccess) {
     EXPECT_THAT(image.data(), testing::Not(testing::IsEmpty()));
 
     remove(tmp_file.c_str());  // Cleanup temporary file.
+}
+
+TEST_F(ScreenCapturerTest, scaleSuccess) {
+    MockRenderer renderer(true);
+
+    // Capture the screenshot.
+    Image image = takeScreenshot(ImageFormat::RAW, SKIN_ROTATION_0, &renderer, nullptr,
+                                 0, 600, 800);
+    EXPECT_TRUE(image.getWidth() == 600);
+    EXPECT_TRUE(image.getHeight() == 800);
 }

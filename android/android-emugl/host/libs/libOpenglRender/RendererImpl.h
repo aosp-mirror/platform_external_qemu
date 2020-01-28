@@ -98,7 +98,9 @@ public:
               const android::snapshot::ITextureLoaderPtr& textureLoader) final;
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) final;
     void getScreenshot(unsigned int nChannels, unsigned int* width,
-            unsigned int* height, std::vector<unsigned char>& pixels) final;
+            unsigned int* height, std::vector<unsigned char>& pixels,
+            int displayId, int desiredWidth, int desiredHeight,
+            SkinRotation desiredRotation) final;
     void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) final;

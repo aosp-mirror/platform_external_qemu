@@ -2210,8 +2210,16 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
 }
 
 void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) {
+        unsigned int* height, std::vector<unsigned char>& pixels, int displayId,
+        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
     AutoLock mutex(m_lock);
+    if (displayId != 0 && m_displays.find(displayId) == m_displays.end()) {
+        fprintf(stderr, "Screenshot of invalid display %d", displayId);
+        *width = 0;
+        *height = 0;
+        pixels.resize(0);
+        return;
+    }
     if (nChannels != 3 && nChannels != 4) {
         fprintf(stderr, "Screenshot only support 3(RGB) or 4(RGBA) channels");
         *width = 0;
@@ -2219,20 +2227,27 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
         pixels.resize(0);
         return;
     }
-    ColorBufferMap::iterator c(m_colorbuffers.find(m_lastPostedColorBuffer));
+
+    uint32_t cb = (displayId == 0) ? m_lastPostedColorBuffer : m_displays[displayId].cb;
+    ColorBufferMap::iterator c(m_colorbuffers.find(cb));
     if (c == m_colorbuffers.end()) {
+        fprintf(stderr, "Screenshot failed to find cb %d\n", cb);
         *width = 0;
         *height = 0;
         pixels.resize(0);
         return;
     }
 
-    *width = m_framebufferWidth;
-    *height = m_framebufferHeight;
-    pixels.resize(4 * m_framebufferWidth * m_framebufferHeight);
-    c->second.cb->readPixels(0, 0, *width, *height,
+    *width = (desiredWidth == 0) ? m_displays[displayId].width : desiredWidth;
+    *height = (desiredHeight == 0) ? m_displays[displayId].height : desiredHeight;
+    if (desiredRotation == SKIN_ROTATION_90 || desiredRotation == SKIN_ROTATION_270) {
+        std::swap(*width, *height);
+    }
+    pixels.resize(4 * (*width) * (*height));
+    c->second.cb->readPixelsScaled(*width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
-            pixels.data());
+            desiredRotation, pixels.data());
+
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {

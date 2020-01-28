@@ -331,6 +331,10 @@ ColorBuffer::~ColorBuffer() {
         s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
     }
 
+    if (m_scaleRotationFbo) {
+        s_gles2.glDeleteFramebuffers(1, &m_scaleRotationFbo);
+    }
+
     m_yuv_converter.reset();
 
     GLuint tex[2] = {m_tex, m_blitTex};
@@ -362,6 +366,29 @@ void ColorBuffer::readPixels(int x,
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
         s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
+        unbindFbo();
+    }
+}
+
+void ColorBuffer::readPixelsScaled(int width,
+                                   int height,
+                                   GLenum p_format,
+                                   GLenum p_type,
+                                   SkinRotation rotation,
+                                   void* pixels) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    p_format = sGetUnsizedColorBufferFormat(p_format);
+    touch();
+    GLuint tex = m_resizer->update(m_tex, width, height, rotation);
+    if (bindFbo(&m_scaleRotationFbo, tex)) {
+        GLint prevAlignment = 0;
+        s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        s_gles2.glReadPixels(0, 0, width, height, p_format, p_type, pixels);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
     }

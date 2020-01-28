@@ -21,6 +21,7 @@
 #include "android/opengl/virtio_gpu_ops.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
+#include "android/skin/rect.h"
 
 #include <functional>
 #include <memory>
@@ -214,7 +215,9 @@ public:
     // Fill GLES usage protobuf
     virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) = 0;
     virtual void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) = 0;
+        unsigned int* height, std::vector<unsigned char>& pixels, int displayId = 0,
+        int desiredWidth = 0, int desiredHeight = 0,
+        SkinRotation desiredRotation = SKIN_ROTATION_0) = 0;
     virtual void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) = 0;
