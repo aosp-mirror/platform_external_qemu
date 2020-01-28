@@ -736,10 +736,12 @@ public:
                                     &timeout);
 
             if (!kevent_ret) { // timed out
+                close(kq);
                 return WaitExitResult::Timeout;
             }
 
             if (result.fflags & NOTE_EXIT) {
+                close(kq);
                 return WaitExitResult::Exited;
             }
         }
@@ -764,6 +766,7 @@ public:
 #else // linux
         uint64_t remainingMs = timeoutMs;
         const uint64_t pollMs = 100;
+        errno = 0;
 
         int ret = HANDLE_EINTR(kill(pid, 0));
         if (ret < 0 && errno == ESRCH) {
