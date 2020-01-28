@@ -367,6 +367,29 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
+void ColorBuffer::readPixelsScaled(int width,
+                                   int height,
+                                   GLenum p_format,
+                                   GLenum p_type,
+                                   SkinRotation rotation,
+                                   void* pixels) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    p_format = sGetUnsizedColorBufferFormat(p_format);
+    touch();
+    GLuint tex = m_resizer->update(m_tex, width, height, rotation);
+    if (bindFbo(&m_fbo, tex)) {
+        GLint prevAlignment = 0;
+        s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        s_gles2.glReadPixels(0, 0, width, height, p_format, p_type, pixels);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
+        unbindFbo();
+    }
+}
+
 void ColorBuffer::readPixelsYUVCached(int x,
                                       int y,
                                       int width,
