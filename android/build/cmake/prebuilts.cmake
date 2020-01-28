@@ -11,45 +11,45 @@
 
 # This contains a set of definitions to make working with prebuilts easier and manageable.
 
-set(PREBUILT_COMMON "BLUEZ;LZ4")
-if(NOT WINDOWS_MSVC_X86_64)
-  list(APPEND PREBUILT_COMMON "X264")
-endif()
+function(android_add_prebuilt_library)
+  set(options NODISTRIBUTE SHARED)
+  set(oneValueArgs
+      PACKAGE
+      MODULE
+      LOCATION
+      INCLUDES
+      DEFINITIONS
+      LIBNAME
+      URL
+      LICENSE
+      LOCAL
+      NOTICE)
+  cmake_parse_arguments(pre "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-function(android_add_prebuilt_library PKG MODULE LOCATION INCLUDES DEFINTIONS)
-  if(NOT TARGET ${PKG}::${MODULE})
-    add_library(${PKG}::${MODULE} STATIC IMPORTED GLOBAL)
-    set_target_properties(${PKG}::${MODULE}
-                          PROPERTIES IMPORTED_LOCATION
-                                     "${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                                     INTERFACE_INCLUDE_DIRECTORIES
-                                     "${INCLUDES}"
-                                     INTERFACE_COMPILE_DEFINITIONS
-                                     "${DEFINTIONS}")
+  if(NOT TARGET ${pre_PACKAGE}::${pre_MODULE})
+    add_library(${pre_PACKAGE}::${pre_MODULE} STATIC IMPORTED GLOBAL)
 
-    android_log("set_target_properties(${PKG}::${MODULE} PROPERTIES
-        IMPORTED_LOCATION '${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}'
-        INTERFACE_INCLUDE_DIRECTORIES '${INCLUDES}'
-        INTERFACE_COMPILE_DEFINITIONS '${DEFINTIONS}'
-    )")
+    set(SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
+    if(pre_SHARED)
+      set(SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
+    endif()
+    set_target_properties(
+      ${pre_PACKAGE}::${pre_MODULE}
+      PROPERTIES IMPORTED_LOCATION "${pre_LOCATION}${SUFFIX}"
+                 INTERFACE_INCLUDE_DIRECTORIES "${pre_INCLUDES}"
+                 INTERFACE_COMPILE_DEFINITIONS "${pre_DEFINTIONS}")
+
+    if(NOT pre_NODISTRIBUTE)
+      if(NOT DEFINED pre_LIBNAME OR NOT DEFINED pre_URL OR NOT DEFINED pre_LICENSE OR NOT DEFINED pre_NOTICE)
+        message(
+          FATAL_ERROR "You need to define LIBNAME URL LICENSE NOTICE, or NODISTRIBUTE for the prebuilt: ${pre_PACKAGE} "
+        )
+      endif()
+
+      android_license(TARGET ${pre_PACKAGE}::${pre_MODULE} LIBNAME ${pre_LIBNAME} URL "${pre_URL}" SPDX "${pre_LICENSE}"
+                      LICENSE "${pre_NOTICE}" LOCAL "${pre_LOCAL}")
+    endif()
   endif()
-endfunction()
-
-# Internal function for simple packages.
-function(simple_prebuilt Package)
-  # A simple common package..
-  string(TOLOWER ${Package} pkg)
-  string(TOUPPER ${Package} PKG)
-  get_filename_component(
-    PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/${pkg}/${ANDROID_TARGET_TAG}"
-    ABSOLUTE)
-
-  android_add_prebuilt_library("${PKG}" "${PKG}" "${PREBUILT_ROOT}/lib/lib${pkg}" "${PREBUILT_ROOT}/include" "" "")
-  set(${PKG}_INCLUDE_DIRS "${PREBUILT_ROOT}/include" PARENT_SCOPE)
-  set(${PKG}_INCLUDE_DIR "${PREBUILT_ROOT}/include" PARENT_SCOPE)
-  set(${PKG}_LIBRARIES "${PREBUILT_ROOT}/lib/lib${pkg}${CMAKE_STATIC_LIBRARY_SUFFIX}" PARENT_SCOPE)
-  set(${PKG}_FOUND TRUE PARENT_SCOPE)
-  set(PACKAGE_EXPORT "${PKG}_INCLUDE_DIR;${PKG}_INCLUDE_DIRS;${PKG}_LIBRARIES;${PKG}_FOUND" PARENT_SCOPE)
 endfunction()
 
 # This function is to be used as a replacement for find_package it will discover the internal prebuilts needed to
@@ -72,25 +72,21 @@ function(prebuilt Package)
     return()
   endif()
   if(DEFINED ANDROID_QEMU2_TOP_DIR AND DEFINED ANDROID_TARGET_TAG)
-    if(${PKG} IN_LIST PREBUILT_COMMON)
-      simple_prebuilt(${Package})
-    else()
-      get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../.." ABSOLUTE)
+    get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../.." ABSOLUTE)
 
-      # We make sure we use our internal cmake directory to resolve packages
-      get_filename_component(ANDROID_TOOLS_DIRECTORY "${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/config" ABSOLUTE)
-      set(${Package}_DIR "${ANDROID_TOOLS_DIRECTORY}")
+    # We make sure we use our internal cmake directory to resolve packages
+    get_filename_component(ANDROID_TOOLS_DIRECTORY "${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/config" ABSOLUTE)
+    set(${Package}_DIR "${ANDROID_TOOLS_DIRECTORY}")
 
-      # This will cause cmake to look for emu-${pkg}-config.cmake in the directory above.
-      find_package(${Package} REQUIRED NAMES "emu-${pkg}")
+    # This will cause cmake to look for emu-${pkg}-config.cmake in the directory above.
+    find_package(${Package} REQUIRED NAMES "emu-${pkg}")
 
-      # Oh oh, this could be bad.. (But usually isn't)
-      foreach(LIB ${${PKG}_LIBRARIES})
-        if(NOT ${LIB} MATCHES "-l.*|-L.*|${PREBUILT_ROOT}.*")
-          android_log("Discovered ${Package} lib  ${LIB}  which is outside of tree ${PREBUILT_ROOT}!")
-        endif()
-      endforeach()
-    endif()
+    # Oh oh, this could be bad.. (But usually isn't)
+    foreach(LIB ${${PKG}_LIBRARIES})
+      if(NOT ${LIB} MATCHES "-l.*|-L.*|${PREBUILT_ROOT}.*")
+        android_log("Discovered ${Package} lib  ${LIB}  which is outside of tree ${PREBUILT_ROOT}!")
+      endif()
+    endforeach()
     foreach(INC ${${PKG}_INCLUDE_DIRS})
       if(NOT EXISTS ${INC})
         message(FATAL_ERROR "The include directory ${INC} of ${Package} does not exist..")
@@ -111,7 +107,7 @@ function(prebuilt Package)
 endfunction(prebuilt pkg)
 
 # Installs the given src file into the given destination
-function(internal_android_install_file SRC DST_DIR)
+function(internal_android_install_file SRC DST_DIR INSTALL_DEPENDENCIES)
   # src could be a symlink, so let's resolve it.
   get_filename_component(REAL_SRC "${SRC}" REALPATH)
 
@@ -121,37 +117,36 @@ function(internal_android_install_file SRC DST_DIR)
 
   # Okay, we now need to determine if REAL_SRC is an executable, or file
   set(PYTHON_SCRIPT "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)")
-  execute_process(COMMAND python -c "${PYTHON_SCRIPT}"
-                  WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
-                  RESULT_VARIABLE SUCCESS
-                  OUTPUT_VARIABLE STD_OUT
-                  ERROR_VARIABLE STD_ERR)
+  execute_process(COMMAND python -c "${PYTHON_SCRIPT}" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
+                  RESULT_VARIABLE SUCCESS OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
   string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
   if(STD_OUT)
     android_log(STATUS "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
     install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
     android_strip_prebuilt("${DST_DIR}/${FNAME}")
-    # Check if we have a symlink, gradle doesn't support symlinks, so we are
-    # copying it 2x
+    android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME}")
+    # Check if we have a symlink, gradle doesn't support symlinks, so we are copying it 2x
     if(NOT ${SRC} STREQUAL ${REAL_SRC})
       android_log("${SRC} ==> ${REAL_SRC}")
       install(PROGRAMS ${REAL_SRC} DESTINATION ${DST_DIR})
       android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
+      android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME_REAL}")
     endif()
   else()
     install(FILES ${SRC} DESTINATION ${DST_DIR})
     # Let's see if it is a shared library
-    if (${SRC} MATCHES ".+${CMAKE_SHARED_LIBRARY_SUFFIX}(\\.[0-9]+)$")
-        # Note we should eventually remove this: b/1381606
-        android_strip_prebuilt("${DST_DIR}/${FNAME}")
+    if(${SRC} MATCHES ".+${CMAKE_SHARED_LIBRARY_SUFFIX}(\\.[0-9]+)*$")
+      # Note we should eventually remove this: b/1381606
+      android_strip_prebuilt("${DST_DIR}/${FNAME}")
+      android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME}")
     endif()
     if(NOT ${SRC} STREQUAL ${REAL_SRC})
       android_log("${SRC} ==> ${REAL_SRC}")
       install(FILES ${REAL_SRC} DESTINATION ${DST_DIR})
-      # Check if we have a symlink, gradle doesn't support symlinks, so we are
-      # copying it 2x
-      if (${REAL_SRC} MATCHES ".+${CMAKE_SHARED_LIBRARY_SUFFIX}(\\.[0-9]+)$")
-          android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
+      # Check if we have a symlink, gradle doesn't support symlinks, so we are copying it 2x
+      if(${REAL_SRC} MATCHES ".+${CMAKE_SHARED_LIBRARY_SUFFIX}(\\.[0-9]+)*$")
+        android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
+        android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME_REAL}")
       endif()
     endif()
   endif()
@@ -168,21 +163,19 @@ function(internal_android_install_file_force_exec SRC DST_DIR)
 
   # Okay, we now need to determine if REAL_SRC is an executable, or file
   set(PYTHON_SCRIPT "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)")
-  execute_process(COMMAND python -c "${PYTHON_SCRIPT}"
-                  WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
-                  RESULT_VARIABLE SUCCESS
-                  OUTPUT_VARIABLE STD_OUT
-                  ERROR_VARIABLE STD_ERR)
+  execute_process(COMMAND python -c "${PYTHON_SCRIPT}" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
+                  RESULT_VARIABLE SUCCESS OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
   string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
   android_log(STATUS "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
   install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
   android_strip_prebuilt("${DST_DIR}/${FNAME}")
-  # Check if we have a symlink, gradle doesn't support symlinks, so we are
-  # copying it 2x
+  android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME}")
+  # Check if we have a symlink, gradle doesn't support symlinks, so we are copying it 2x
   if(NOT ${SRC} STREQUAL ${REAL_SRC})
     android_log("${SRC} ==> ${REAL_SRC}")
     install(PROGRAMS ${REAL_SRC} DESTINATION ${DST_DIR})
     android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
+    android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME_REAL}")
   endif()
 endfunction()
 
@@ -198,7 +191,7 @@ function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
       if(NOT FNAME MATCHES ".*dummy.c")
         string(REPLACE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/" "" DST_FILE ${FNAME})
         get_filename_component(DST_DIR "${DST_FILE}" DIRECTORY)
-        internal_android_install_file(${FNAME} ${DST_DIR})
+        internal_android_install_file(${FNAME} ${DST_DIR} ${INSTALL_DEPENDENCIES})
       endif()
     endforeach()
   endif()
@@ -215,7 +208,7 @@ function(android_install_dependency_force_exec TARGET_TAG INSTALL_DEPENDENCIES)
       if(NOT FNAME MATCHES ".*dummy.c")
         string(REPLACE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/" "" DST_FILE ${FNAME})
         get_filename_component(DST_DIR "${DST_FILE}" DIRECTORY)
-        internal_android_install_file_force_exec(${FNAME} ${DST_DIR})
+        internal_android_install_file_force_exec(${FNAME} ${DST_DIR} ${INSTALL_DEPENDENCIES})
       endif()
     endforeach()
   endif()
@@ -286,7 +279,7 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
           message(
             FATAL_ERROR
               "The target ${RUN_TARGET} depends on a dependency: [${SRC}]/[${GLOBBED}] that does not exist. Full list ${RUN_TARGET_DEPENDENCIES}!"
-            )
+          )
         endif()
 
         # Let's calculate the destination directory, so we can use this as our generated sources parameters.

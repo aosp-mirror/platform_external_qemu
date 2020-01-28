@@ -1,19 +1,19 @@
 prebuilt(ANGLE)
-set(GLES_V2_translator_src
-    GLESv2Imp.cpp
-    GLESv2Context.cpp
-    GLESv2Validate.cpp
-    SamplerData.cpp
-    ShaderParser.cpp
-    ShaderValidator.cpp
-    TransformFeedbackData.cpp
-    ProgramData.cpp
-    ANGLEShaderParser.cpp)
-android_add_shared_library(GLES_V2_translator)
+android_add_library(TARGET GLES_V2_translator
+                    LICENSE Apache-2.0
+                    SHARED
+                    SRC GLESv2Imp.cpp
+                        GLESv2Context.cpp
+                        GLESv2Validate.cpp
+                        SamplerData.cpp
+                        ShaderParser.cpp
+                        ShaderValidator.cpp
+                        TransformFeedbackData.cpp
+                        ProgramData.cpp
+                        ANGLEShaderParser.cpp)
 target_compile_options(GLES_V2_translator PRIVATE -fvisibility=hidden)
 target_link_libraries(GLES_V2_translator
-                              PRIVATE
-                              GLcommon
+                      PRIVATE GLcommon
                               OpenglCodecCommon
                               emugl_common
                               android-emu

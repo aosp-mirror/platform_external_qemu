@@ -43,7 +43,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS test.proto)
 set(hello_base_src  ${PROTO_SRCS} ${PROTO_HDRS})
 
 # and declare the library
-android_add_shared_library(hello_base)
+android_add_library(TARGET hello_base SHARED LICENSE Apache-2.0 SRC ${hello_base_src})
 
 # The library needs to link against the protobuf libraries
 # Note that this brings in the protobuf dependency, including all the
