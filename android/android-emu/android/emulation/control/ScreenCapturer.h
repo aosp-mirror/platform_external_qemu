@@ -58,6 +58,8 @@ private:
 };
 
 // Capture a screenshot using the Render (if set) or framebuffer callback.
+// if desiredWidth and desiredHeight are 0, the wide and height of the
+// screen colorbuffer will be used.
 Image takeScreenshot(
         ImageFormat desiredFormat,
         SkinRotation rotation,
@@ -66,7 +68,11 @@ Image takeScreenshot(
                            int* h,
                            int* lineSize,
                            int* bytesPerPixel,
-                           uint8_t** frameBufferData)> getFrameBuffer);
+                           uint8_t** frameBufferData)> getFrameBuffer,
+        int displayId = 0,
+        int desiredWidth = 0,
+        int desiredHeight = 0
+        );
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
@@ -83,7 +89,8 @@ bool captureScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         SkinRotation rotation,
         android::base::StringView outputDirectoryPath,
-        std::string* outputFilepath = NULL);
+        std::string* outputFilepath = nullptr,
+        int displayId = 0);
 
 }  // namespace emulation
 }  // namespace android
