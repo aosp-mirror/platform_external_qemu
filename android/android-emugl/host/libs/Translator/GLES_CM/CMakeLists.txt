@@ -1,10 +1,11 @@
-set(GLES_CM_translator_src
-    CoreProfileEngine.cpp
-    GLEScmImp.cpp
-    GLEScmUtils.cpp
-    GLEScmContext.cpp
-    GLEScmValidate.cpp)
-android_add_shared_library(GLES_CM_translator)
+android_add_library(TARGET GLES_CM_translator
+                    SHARED
+                    LICENSE Apache-2.0
+                    SRC CoreProfileEngine.cpp
+                        GLEScmImp.cpp
+                        GLEScmUtils.cpp
+                        GLEScmContext.cpp
+                        GLEScmValidate.cpp)
 target_compile_options(GLES_CM_translator PRIVATE -fvisibility=hidden)
 target_link_libraries(GLES_CM_translator PUBLIC GLcommon android-emu emugl_common)
 target_link_libraries(GLES_CM_translator PRIVATE emugl_base)

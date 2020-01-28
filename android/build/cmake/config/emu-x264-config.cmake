@@ -18,8 +18,13 @@ set(X264_INCLUDE_DIRS "${X264_INCLUDE_DIR}")
 set(X264_LIBRARIES "${PREBUILT_ROOT}/lib/libx264${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(X264_FOUND TRUE)
 
-android_add_prebuilt_library(X264 X264 "${PREBUILT_ROOT}/lib/libvpx" "${PREBUILT_ROOT}/include" "" "")
+android_add_prebuilt_library(PACKAGE X264
+                             MODULE X264 LOCATION "${PREBUILT_ROOT}/lib/libvpx"
+                             INCLUDES "${PREBUILT_ROOT}/include"
+                             LIBNAME libx264
+                             URL "https://code.videolan.org/videolan/x264/blob/master/"
+                             LICENSE "GPL-2.0-only"
+                             NOTICE "https://code.videolan.org/videolan/x264/blob/master/COPYING"
+                             LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.GPLv2")
 
 set(PACKAGE_EXPORT "X264_INCLUDE_DIR;X264_INCLUDE_DIRS;X264_LIBRARIES;X264_FOUND")
-android_license("libx264" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.GPLv2")
-

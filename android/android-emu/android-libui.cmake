@@ -173,8 +173,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/recording/video/VideoProducer.cpp
     android/recording/video/VideoFrameSharer.cpp)
 
-# Note, these are separated for historical reasons only, the
-# uic compiler will find this automatically
+# Note, these are separated for historical reasons only, the uic compiler will find this automatically
 set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended.ui
     android/skin/qt/common-controls/cc-list-item.ui
@@ -270,69 +269,48 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
 set(ANDROID_SKIN_QT_DYNAMIC_RESOURCES android/skin/qt/resources.qrc)
 set(ANDROID_SKIN_QT_UI_SRC_FILES android/skin/qt/static_resources.qrc)
 
-set(ANDROID_SKIN_SOURCES
-    android/skin/qt/event-qt.cpp
-    android/skin/qt/init-qt.cpp
-    android/skin/qt/surface-qt.cpp
-    android/skin/qt/winsys-qt.cpp
-    android/skin/qt/QtLogger.cpp)
+set(ANDROID_SKIN_SOURCES android/skin/qt/event-qt.cpp android/skin/qt/init-qt.cpp android/skin/qt/surface-qt.cpp
+                         android/skin/qt/winsys-qt.cpp android/skin/qt/QtLogger.cpp)
 
 # Set the target specific sources.
-if (NOT QTWEBENGINE)
-  message(STATUS "Webengine disabled." )
-  set(emulator-libui_darwin-x86_64_src
-      android/skin/qt/mac-native-window.mm
-      android/skin/qt/mac-native-event-filter.mm
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
-  set(emulator-libui_windows-x86_64_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
-  set(emulator-libui_windows_msvc-x86_64_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
-  set(emulator-libui_linux-x86_64_src
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
-else ()
+if(NOT QTWEBENGINE)
+  message(STATUS "Webengine disabled.")
+  set(emulator-libui_darwin-x86_64_src android/skin/qt/mac-native-window.mm android/skin/qt/mac-native-event-filter.mm
+                                       android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows-x86_64_src android/skin/qt/windows-native-window.cpp
+                                        android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows_msvc-x86_64_src android/skin/qt/windows-native-window.cpp
+                                             android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_linux-x86_64_src android/skin/qt/extended-pages/location-page_noMaps.ui)
+else()
   message(STATUS "Webengine enabled")
   set(emulator-libui_darwin-x86_64_src
-      android/skin/qt/mac-native-window.mm
-      android/skin/qt/mac-native-event-filter.mm
-      android/skin/qt/websockets/websocketclientwrapper.cpp
-      android/skin/qt/websockets/websockettransport.cpp
+      android/skin/qt/mac-native-window.mm android/skin/qt/mac-native-event-filter.mm
+      android/skin/qt/websockets/websocketclientwrapper.cpp android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
-  set(emulator-libui_windows-x86_64_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows-x86_64_src android/skin/qt/windows-native-window.cpp
+                                        android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/websockets/websocketclientwrapper.cpp
-      android/skin/qt/websockets/websockettransport.cpp
-      android/skin/qt/extended-pages/location-page.ui)
+      android/skin/qt/windows-native-window.cpp android/skin/qt/websockets/websocketclientwrapper.cpp
+      android/skin/qt/websockets/websockettransport.cpp android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_linux-x86_64_src
-      android/skin/qt/websockets/websocketclientwrapper.cpp
-      android/skin/qt/websockets/websockettransport.cpp
+      android/skin/qt/websockets/websocketclientwrapper.cpp android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
 endif()
 
 # Set the sources
-set(emulator-libui_src
-    ${ANDROID_LIBUI_SRC_FILES}
-    ${ANDROID_SKIN_QT_DYNAMIC_RESOURCES}
-    ${ANDROID_SKIN_QT_MOC_SRC_FILES}
-    ${ANDROID_SKIN_QT_UI_SRC_FILES}
-    ${ANDROID_SKIN_SOURCES})
+set(emulator-libui_src ${ANDROID_LIBUI_SRC_FILES} ${ANDROID_SKIN_QT_DYNAMIC_RESOURCES} ${ANDROID_SKIN_QT_MOC_SRC_FILES}
+                       ${ANDROID_SKIN_QT_UI_SRC_FILES} ${ANDROID_SKIN_SOURCES})
 
-android_add_library(emulator-libui)
+android_add_library(
+  TARGET emulator-libui LICENSE Apache-2.0 SRC ${emulator-libui_src} DARWIN ${emulator-libui_darwin-x86_64_src}
+  LINUX ${emulator-libui_linux-x86_64_src} MSVC ${emulator-libui_windows_msvc-x86_64_src}
+  MINGW ${emulator-libui_windows-x86_64_src})
 
-# TODO: Remove this and the "USE_WEBENGINE" defines once we have:
-# --no-window mode has no dependency on Qt
-if (QTWEBENGINE AND NOT WINDOWS_X86_64)
-    target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
-    target_link_libraries(emulator-libui PRIVATE
-                          Qt5::Network
-                          Qt5::WebEngineWidgets
-                          Qt5::WebChannel
-                          Qt5::WebSockets)
+# TODO: Remove this and the "USE_WEBENGINE" defines once we have: --no-window mode has no dependency on Qt
+if(QTWEBENGINE AND NOT WINDOWS_X86_64)
+  target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
+  target_link_libraries(emulator-libui PRIVATE Qt5::Network Qt5::WebEngineWidgets Qt5::WebChannel Qt5::WebSockets)
 endif()
 
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
@@ -342,40 +320,41 @@ target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
 # Linux compiler settings
-android_target_compile_options(emulator-libui
-                               linux-x86_64
-                               PRIVATE
-                               "-Wno-reserved-user-defined-literal"
-                               "-Wno-pointer-bool-conversion"
-                               "-Wno-deprecated-declarations"
-                               "-Wno-inconsistent-missing-override"
-                               "-Wno-return-type-c-linkage"
-                               "-Wno-invalid-constexpr")
+android_target_compile_options(
+  emulator-libui
+  linux-x86_64
+  PRIVATE
+  "-Wno-reserved-user-defined-literal"
+  "-Wno-pointer-bool-conversion"
+  "-Wno-deprecated-declarations"
+  "-Wno-inconsistent-missing-override"
+  "-Wno-return-type-c-linkage"
+  "-Wno-invalid-constexpr")
 
 # Mac Os compiler settings
-android_target_compile_options(emulator-libui
-                               darwin-x86_64
-                               PRIVATE
-                               "-Wno-reserved-user-defined-literal"
-                               "-Wno-pointer-bool-conversion"
-                               "-Wno-deprecated-declarations"
-                               "-Wno-inconsistent-missing-override"
-                               "-Wno-return-type-c-linkage"
-                               "-Wno-invalid-constexpr")
+android_target_compile_options(
+  emulator-libui
+  darwin-x86_64
+  PRIVATE
+  "-Wno-reserved-user-defined-literal"
+  "-Wno-pointer-bool-conversion"
+  "-Wno-deprecated-declarations"
+  "-Wno-inconsistent-missing-override"
+  "-Wno-return-type-c-linkage"
+  "-Wno-invalid-constexpr")
 
 # dependencies will remain internal, we should not be leaking out internal headers and defines.
-target_link_libraries(emulator-libui
-                              PRIVATE
-                              android-emu
-                              emulator-libyuv
-                              FFMPEG::FFMPEG
-                              Qt5::Core
-                              Qt5::Widgets
-                              Qt5::Gui
-                              Qt5::Svg
-                              zlib
-                              android-hw-config)
-
+target_link_libraries(
+  emulator-libui
+  PRIVATE android-emu
+          emulator-libyuv
+          FFMPEG::FFMPEG
+          Qt5::Core
+          Qt5::Widgets
+          Qt5::Gui
+          Qt5::Svg
+          zlib
+          android-hw-config)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
 # libX11.so
@@ -384,26 +363,23 @@ android_target_link_libraries(emulator-libui darwin-x86_64 PRIVATE "-framework C
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator-libui windows_msvc-x86_64 PUBLIC dirent-win32)
 
-set(emulator-libui_unittests_src
-    android/mp4/MP4Dataset_test.cpp
-    android/mp4/MP4Demuxer_test.cpp
-    android/mp4/VideoMetadataProvider_test.cpp
-    android/mp4/SensorLocationEventProvider_test.cpp
-    android/skin/keycode_unittest.cpp
-    android/skin/keycode-buffer_unittest.cpp
-    android/skin/qt/native-keyboard-event-handler_unittest.cpp
-    android/skin/qt/qtmain_dummy_test.cpp
-    android/skin/rect_unittest.cpp
-    android/recording/test/DummyAudioProducer.cpp
-    android/recording/test/DummyVideoProducer.cpp
-    android/recording/FfmpegRecorder.cpp
-    android/recording/test/FfmpegRecorder_unittest.cpp
-)
+list(APPEND android-libui-testdata testdata/mp4/video.mp4)
 
-list(APPEND android-libui-testdata
-            testdata/mp4/video.mp4)
-
-android_add_test(emulator-libui_unittests)
+android_add_test(
+  TARGET emulator-libui_unittests
+  SRC android/mp4/MP4Dataset_test.cpp
+      android/mp4/MP4Demuxer_test.cpp
+      android/mp4/VideoMetadataProvider_test.cpp
+      android/mp4/SensorLocationEventProvider_test.cpp
+      android/skin/keycode_unittest.cpp
+      android/skin/keycode-buffer_unittest.cpp
+      android/skin/qt/native-keyboard-event-handler_unittest.cpp
+      android/skin/qt/qtmain_dummy_test.cpp
+      android/skin/rect_unittest.cpp
+      android/recording/test/DummyAudioProducer.cpp
+      android/recording/test/DummyVideoProducer.cpp
+      android/recording/FfmpegRecorder.cpp
+      android/recording/test/FfmpegRecorder_unittest.cpp)
 
 android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}" testdata)
 
@@ -419,62 +395,57 @@ android_target_compile_options(emulator-libui_unittests linux-x86_64 PRIVATE "-W
 # Mac Os compiler settings
 android_target_compile_options(emulator-libui_unittests darwin-x86_64 PRIVATE "-Wno-reserved-user-defined-literal")
 
-
-android_target_dependency(emulator-libui_unittests all  QT5_SHARED_DEPENDENCIES)
+android_target_dependency(emulator-libui_unittests all QT5_SHARED_DEPENDENCIES)
 android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}")
 
 # Make sure we disable rtti in gtest
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG)
+target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations
+                                                       OpenGLESDispatch FFMPEG::FFMPEG)
 
 android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64 PUBLIC dirent-win32)
 
 # Version of libui without Qt
-
-set(emulator-libui-headless_src
-    ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
-
-android_add_library(emulator-libui-headless)
+set(emulator-libui-headless_src ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
+android_add_library(TARGET emulator-libui-headless LICENSE Apache-2.0
+SRC ${emulator-libui-headless_src} DARWIN ${emulator-libui-headless_darwin-x86_64_src}
+LINUX ${emulator-libui-headless_linux-x86_64_src} MSVC ${emulator-libui-headless_windows_msvc-x86_64_src}
+MINGW ${emulator-libui-headless_windows-x86_64_src})
 
 target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
-
 target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
 if(NOT MSVC)
-  android_target_compile_options(emulator-libui-headless windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+  android_target_compile_options(emulator-libui-headless windows PRIVATE
+                                 "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 endif()
 
 # Linux compiler settings
-android_target_compile_options(emulator-libui-headless
-                               linux-x86_64
-                               PRIVATE
-                               "-Wno-reserved-user-defined-literal"
-                               "-Wno-pointer-bool-conversion"
-                               "-Wno-deprecated-declarations"
-                               "-Wno-inconsistent-missing-override"
-                               "-Wno-return-type-c-linkage"
-                               "-Wno-invalid-constexpr")
+android_target_compile_options(
+  emulator-libui-headless
+  linux-x86_64
+  PRIVATE
+  "-Wno-reserved-user-defined-literal"
+  "-Wno-pointer-bool-conversion"
+  "-Wno-deprecated-declarations"
+  "-Wno-inconsistent-missing-override"
+  "-Wno-return-type-c-linkage"
+  "-Wno-invalid-constexpr")
 
 # Mac Os compiler settings
-android_target_compile_options(emulator-libui-headless
-                               darwin-x86_64
-                               PRIVATE
-                               "-Wno-reserved-user-defined-literal"
-                               "-Wno-pointer-bool-conversion"
-                               "-Wno-deprecated-declarations"
-                               "-Wno-inconsistent-missing-override"
-                               "-Wno-return-type-c-linkage"
-                               "-Wno-invalid-constexpr")
+android_target_compile_options(
+  emulator-libui-headless
+  darwin-x86_64
+  PRIVATE
+  "-Wno-reserved-user-defined-literal"
+  "-Wno-pointer-bool-conversion"
+  "-Wno-deprecated-declarations"
+  "-Wno-inconsistent-missing-override"
+  "-Wno-return-type-c-linkage"
+  "-Wno-invalid-constexpr")
 
 # dependencies will remain internal, we should not be leaking out internal headers and defines.
-target_link_libraries(emulator-libui-headless
-                              PRIVATE
-                              android-emu
-                              emulator-libyuv
-                              FFMPEG::FFMPEG
-                              zlib
-                              android-hw-config)
-
+target_link_libraries(emulator-libui-headless PRIVATE android-emu emulator-libyuv FFMPEG::FFMPEG zlib android-hw-config)

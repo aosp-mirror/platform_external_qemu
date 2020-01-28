@@ -39,7 +39,7 @@ else()
     set(BREAKPAD_MINIDUMP_STACKWALK_EXE "${HOST_PREBUILT_ROOT}/bin/minidump_stackwalk")
   endif()
   set(BREAKPAD_LIBRARIES ${PREBUILT_ROOT}/lib/libbreakpad${CMAKE_STATIC_LIBRARY_SUFFIX}
-      ${PREBUILT_ROOT}/lib/libdisasm${CMAKE_STATIC_LIBRARY_SUFFIX})
+                         ${PREBUILT_ROOT}/lib/libdisasm${CMAKE_STATIC_LIBRARY_SUFFIX})
   set(BREAKPAD_CLIENT_LIBRARIES ${PREBUILT_ROOT}/lib/libbreakpad_client${CMAKE_STATIC_LIBRARY_SUFFIX})
 endif()
 set(BREAKPAD_FOUND TRUE)
@@ -47,13 +47,23 @@ set(BREAKPAD_FOUND TRUE)
 set(BREAKPAD_UPLOAD_EXE "${HOST_PREBUILT_ROOT}/bin/sym_upload")
 
 if(NOT TARGET breakpad_server)
-  add_library(breakpad_server INTERFACE IMPORTED GLOBAL)
+  add_library(breakpad_server
+              INTERFACE
+              IMPORTED
+              GLOBAL)
   set_target_properties(breakpad_server
-                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${BREAKPAD_INCLUDE_DIRS}" INTERFACE_LINK_LIBRARIES
+                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                   "${BREAKPAD_INCLUDE_DIRS}"
+                                   INTERFACE_LINK_LIBRARIES
                                    "${BREAKPAD_LIBRARIES}")
-  add_library(breakpad_client INTERFACE IMPORTED GLOBAL)
+  add_library(breakpad_client
+              INTERFACE
+              IMPORTED
+              GLOBAL)
   set_target_properties(breakpad_client
-                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${BREAKPAD_INCLUDE_DIRS}" INTERFACE_LINK_LIBRARIES
+                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                   "${BREAKPAD_INCLUDE_DIRS}"
+                                   INTERFACE_LINK_LIBRARIES
                                    "${BREAKPAD_CLIENT_LIBRARIES}")
 
   add_executable(dump_syms IMPORTED GLOBAL)
