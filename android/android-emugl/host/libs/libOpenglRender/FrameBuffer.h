@@ -495,7 +495,9 @@ public:
     // nChannels should be 3 (RGB) or 4 (RGBA).
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
-            unsigned int* height, std::vector<unsigned char>& pixels);
+            unsigned int* height, std::vector<unsigned char>& pixels,
+            int displayId, int desiredWidth, int desiredHeight,
+            SkinRotation desiredRotation);
     void onLastColorBufferRef(uint32_t handle);
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
