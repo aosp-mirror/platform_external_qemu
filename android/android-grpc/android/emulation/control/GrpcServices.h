@@ -16,23 +16,25 @@
 
 #include <memory>  // for unique_ptr
 #include <string>
-#include "android/console.h"                      // for AndroidConsoleAgents
+
+#include "android/console.h"  // for AndroidConsoleAgents
+#include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/RtcBridge.h"  // for RtcBridge
 
 namespace android {
 namespace emulation {
 
 namespace control {
-class EmulatorControllerService;
 class RtcBridge;
 
 class GrpcServices {
 public:
-    // Returns the port or -1 if the service didn't start.
-    static int setup(int port,
-                     const AndroidConsoleAgents* const consoleAgents,
-                     RtcBridge* rtcBridge,
-                     const char* waterfall);
+    // Returns the active service, or nullptr if none was constructed.
+    static EmulatorControllerService* setup(
+            int port,
+            const AndroidConsoleAgents* const consoleAgents,
+            RtcBridge* rtcBridge,
+            const char* waterfall);
 
     static void teardown();
 

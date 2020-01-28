@@ -41,9 +41,9 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
-#include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -97,18 +97,19 @@ public:
     }
 
     EmulatorControllerServiceImpl(int port,
+                                  std::string cert,
                                   EmulatorController::Service* service,
                                   grpc::Server* server)
-        : mPort(port),
-          mService(service),
-          mServer(server) {}
+        : mPort(port), mCert(cert), mService(service), mServer(server) {}
 
     int port() override { return mPort; }
+    std::string publicCert() override { return mCert; }
 
 private:
     std::unique_ptr<EmulatorController::Service> mService;
     std::unique_ptr<grpc::Server> mServer;
     int mPort;
+    std::string mCert;
 };
 
 // Logic and data behind the server's behavior.
@@ -452,6 +453,7 @@ Builder& Builder::withCertAndKey(std::string certfile,
                         "publicly accessible!";
         return *this;
     }
+    mCertfile = certfile;
 
     std::ifstream key_file(privateKeyFile);
     std::string key((std::istreambuf_iterator<char>(key_file)),
@@ -476,6 +478,7 @@ Builder& Builder::withPort(int port) {
         android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
         port = android::base::socketGetPort(s0.get());
     }
+
     mPort = port;
     return *this;
 }
@@ -522,8 +525,8 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
-            new EmulatorControllerServiceImpl(mPort, controller.release(),
-                                              service.release()));
+            new EmulatorControllerServiceImpl(
+                    mPort, mCertfile, controller.release(), service.release()));
 }
 
 }  // namespace control
