@@ -21,6 +21,7 @@
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
 #include "android/base/files/Stream.h"
+#include "android/skin/rect.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
 #include "FrameworkFormats.h"
@@ -161,6 +162,13 @@ public:
                     GLenum p_type,
                     void* pixels);
 
+    void readPixelsScaled(int width,
+                          int height,
+                          GLenum p_format,
+                          GLenum p_type,
+                          SkinRotation rotation,
+                          void* pixels);
+
     // Read cached YUV pixel values into host memory.
     void readPixelsYUVCached(int x,
                              int y,
@@ -291,6 +299,7 @@ private:
     TextureResize* m_resizer = nullptr;
     FrameworkFormat m_frameworkFormat;
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
+    GLuint m_scaleRotationFbo = 0;  // FBO to read scaled rotation pixels
     std::unique_ptr<YUVConverter> m_yuv_converter;
     std::vector<uint8_t> m_yuv_buf;
     HandleType mHndl;
