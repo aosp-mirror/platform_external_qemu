@@ -1,5 +1,11 @@
 add_subdirectory(googletest)
-add_library(emulator-tinyobjloader ../../../tinyobjloader/tiny_obj_loader.cc)
+android_add_library(TARGET emulator-tinyobjloader
+                    LIBNAME tinyobjloader URL
+                            "https://android.googlesource.com/platform/external/tinyobjloader/+/refs/heads/master"
+                    REPO "${ANDROID_QEMU2_TOP_DIR}/../tinyobjloader"
+                    NOTICE "REPO/LICENSE"
+                    LICENSE "MIT"
+                    SRC ${ANDROID_QEMU2_TOP_DIR}/../tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(emulator-tinyobjloader PUBLIC ../../../tinyobjloader)
 
 # We cannot run the the tests when we are cross compiling
@@ -11,6 +17,12 @@ endif()
 # astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did the same for googletest.
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/base astc-codec-base)
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/decoder astc-codec-decoder)
+android_license(TARGET astc-codec astc_utils footprint base
+                LIBNAME astc-codec
+                SPDX Apache-2.0
+                URL https://android.googlesource.com/platform/external/astc-codec/+/refs/heads/master
+                LICENSE https://android.googlesource.com/platform/external/astc-codec/+/refs/heads/master/LICENSE
+                LOCAL ${ANDROID_QEMU2_TOP_DIR}/../astc-codec/LICENSE)
 
 # Our magical toolchain will likely not create runnable executables due to libc++ dependencies. So we must make sure we
 # set the runtime_os_properties.
@@ -53,8 +65,7 @@ add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
 
-# Old windows & linux version will use old breakpad version
-# We are stuck when trying to generate crashes under linux
+# Old windows & linux version will use old breakpad version We are stuck when trying to generate crashes under linux
 if(WINDOWS_X86_64)
   prebuilt(BREAKPAD)
 else()
@@ -64,7 +75,16 @@ endif()
 add_subdirectory(boringssl)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
-android_license(picosha2  "android/third_party/picosha2/LICENSE")
+
+android_license(
+  TARGET picosha2
+  LIBNAME picosha2
+  URL
+    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/picosha2/"
+  SPDX "MIT"
+  LICENSE
+    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/picosha2/LICENSE"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/android/third_party/picosha2/LICENSE")
 
 if(WINDOWS)
   add_subdirectory(mman-win32)

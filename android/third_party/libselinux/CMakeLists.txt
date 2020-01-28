@@ -21,4 +21,15 @@ else ()
     endif ()
     target_compile_definitions(emulator-libselinux PRIVATE -DHOST)
 endif ()
-android_license(emulator-libselinux "android/third_party/libselinux/NOTICE")
+android_license(TARGET
+                emulator-libselinux
+                LIBNAME
+                libselinux
+                URL
+                "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/libselinux"
+                SPDX
+                "CC-PDDC OR UNKNOWN"
+                LICENSE
+                "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/libselinux/NOTICE"
+                LOCAL
+                "${ANDROID_QEMU2_TOP_DIR}/android/third_party/libselinux/NOTICE")

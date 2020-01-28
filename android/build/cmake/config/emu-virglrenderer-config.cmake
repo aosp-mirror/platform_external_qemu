@@ -13,7 +13,13 @@ get_filename_component(
   PREBUILT_ROOT
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/virglrenderer/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
-android_add_interface(virglrenderer-headers)
+android_add_interface(TARGET virglrenderer-headers
+                      LIBNAME virglrenderer
+                      URL "https://android.googlesource.com/platform/external/virglrenderer/+/refs/heads/emu-master-dev"
+                      REPO "${ANDROID_QEMU2_TOP_DIR}/../virglrenderer"
+                      NOTICE "REPO/NOTICE"
+                      LICENSE "MIT"
+)
 
 set(VIRGLRENDERER_INCLUDE_DIR "${PREBUILT_ROOT}/include/virgl")
 set(VIRGLRENDERER_INCLUDE_DIRS "${VIRGLRENDERER_INCLUDE_DIR}")
