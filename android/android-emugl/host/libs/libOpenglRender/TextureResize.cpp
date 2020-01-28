@@ -132,6 +132,26 @@ const char kFragmentShaderSource[] =
     "  gl_FragColor = vec4(sum.rgb, 1.0);\n"
     "}\n";
 
+// Vertex shader for anti-aliasing - doesn't do anything special.
+const char kGenericVertexShaderSource[] = R"(
+    attribute vec2 position;
+    attribute vec2 inCoord;
+    varying vec2 outCoord;
+    void main(void) {
+        gl_Position = vec4(position.x, position.y, 0.0, 1.0);
+        outCoord = inCoord;
+    })";
+
+// Fragment shader
+const char kGenericFragmentShaderSource[] = R"(
+    precision mediump float;
+    uniform sampler2D texture;
+    varying vec2 outCoord;
+    void main(void) {
+        gl_FragColor = texture2D(texture, outCoord);
+    }
+)";
+
 static const float kVertexData[] = {-1, -1, 3, -1, -1, 3};
 
 static void detachShaders(GLuint program) {
@@ -316,6 +336,13 @@ GLuint TextureResize::update(GLuint texture) {
     return mFBHeight.texture;
 }
 
+GLuint TextureResize::update(GLuint texture, int width, int height, SkinRotation rotation) {
+    if (mGenericResizer.get() == nullptr) {
+        mGenericResizer.reset(new TextureResize::GenericResizer());
+    }
+    return mGenericResizer->draw(texture, width, height, rotation);
+}
+
 void TextureResize::setupFramebuffers(unsigned int factor) {
     if (factor == mFactor) {
         // The factor hasn't changed, no need to update the framebuffers.
@@ -401,3 +428,193 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glDisableVertexAttribArray(mFBWidth.aPosition);
     s_gles2.glDisableVertexAttribArray(mFBHeight.aPosition);
 }
+
+struct Vertex {
+    float pos[2];
+    float coord[2];
+};
+
+TextureResize::GenericResizer::GenericResizer() :
+        mProgram(0),
+        mVertexBuffer(0),
+        mIndexBuffer(0),
+        mWidth(0),
+        mHeight(0) {
+    GLuint vertex_shader =
+            createShader(GL_VERTEX_SHADER, {kGenericVertexShaderSource});
+    GLuint fragment_shader =
+            createShader(GL_FRAGMENT_SHADER, {kGenericFragmentShaderSource});
+
+    mProgram = s_gles2.glCreateProgram();
+    s_gles2.glAttachShader(mProgram, vertex_shader);
+    s_gles2.glAttachShader(mProgram, fragment_shader);
+    s_gles2.glLinkProgram(mProgram);
+
+    // Shader objects no longer needed.
+    s_gles2.glDeleteShader(vertex_shader);
+    s_gles2.glDeleteShader(fragment_shader);
+
+    // Check for errors.
+    GLint success;
+    s_gles2.glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+    if (success == GL_FALSE) {
+        GLchar infolog[256];
+        s_gles2.glGetProgramInfoLog(mProgram, sizeof(infolog), 0, infolog);
+        fprintf(stderr, "Could not create/link program: %s\n", infolog);
+        return;
+    }
+
+    // Get all the attributes and uniforms.
+    mPositionAttribLocation =
+            s_gles2.glGetAttribLocation(mProgram, "position");
+    mInCoordAttribLocation =
+            s_gles2.glGetAttribLocation(mProgram, "inCoord");
+    mInputUniformLocation =
+            s_gles2.glGetUniformLocation(mProgram, "texture");
+
+    // Create vertex buffers.
+    static const Vertex kVertices[] = {
+        // 0 degree
+        {{ +1, -1 }, { +1, +0 }},
+        {{ +1, +1 }, { +1, +1 }},
+        {{ -1, +1 }, { +0, +1 }},
+        {{ -1, -1 }, { +0, +0 }},
+        // 90 degree clock-wise
+        {{ +1, -1 }, { +0, +0 }},
+        {{ +1, +1 }, { +1, +0 }},
+        {{ -1, +1 }, { +1, +1 }},
+        {{ -1, -1 }, { +0, +1 }},
+        // 180 degree clock-wise
+        {{ +1, -1 }, { +0, +1 }},
+        {{ +1, +1 }, { +0, +0 }},
+        {{ -1, +1 }, { +1, +0 }},
+        {{ -1, -1 }, { +1, +1 }},
+        // 270 degree clock-wise
+        {{ +1, -1 }, { +1, +1 }},
+        {{ +1, +1 }, { +0, +1 }},
+        {{ -1, +1 }, { +0, +0 }},
+        {{ -1, -1 }, { +1, +0 }},
+    };
+    s_gles2.glGenBuffers(1, &mVertexBuffer);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+    s_gles2.glBufferData(GL_ARRAY_BUFFER,
+                         sizeof(kVertices),
+                         kVertices,
+                         GL_STATIC_DRAW);
+
+    // indices for predefined rotation angles.
+    static const GLubyte kIndices[] = {
+        0, 1, 2, 2, 3, 0,      // 0
+        4, 5, 6, 6, 7, 4,      // 90
+        8, 9, 10, 10, 11, 8,   // 180
+        12, 13, 14, 14, 15, 12, // 270
+    };
+    s_gles2.glGenBuffers(1, &mIndexBuffer);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+    s_gles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         sizeof(kIndices),
+                         kIndices,
+                         GL_STATIC_DRAW);
+
+    s_gles2.glGenTextures(1, &mFrameBuffer.texture);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, mFrameBuffer.texture);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    s_gles2.glGenFramebuffers(1, &mFrameBuffer.framebuffer);
+
+    // Clear bindings.
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+GLuint TextureResize::GenericResizer::draw(GLuint texture, int width, int height,
+                                           SkinRotation rotation) {
+    if (mWidth != width || mHeight != height) {
+        // update the framebuffer to match the new resolution
+        mWidth = width;
+        mHeight = height;
+        s_gles2.glBindTexture(GL_TEXTURE_2D, mFrameBuffer.texture);
+        s_gles2.glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB,
+            GL_UNSIGNED_BYTE, nullptr);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+
+    }
+
+    // Store the viewport.
+    GLint vport[4] = { 0, };
+    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffer.framebuffer);
+    s_gles2.glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFrameBuffer.texture, 0);
+    s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    s_gles2.glViewport(0, 0, mWidth, mHeight);
+    s_gles2.glUseProgram(mProgram);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+    s_gles2.glEnableVertexAttribArray(mPositionAttribLocation);
+    s_gles2.glVertexAttribPointer(mPositionAttribLocation,
+                                  2, // components per attrib
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  sizeof(Vertex), // stride
+                                  0); // offset
+    s_gles2.glEnableVertexAttribArray(mInCoordAttribLocation);
+    s_gles2.glVertexAttribPointer(mInCoordAttribLocation,
+                                  2,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  sizeof(Vertex),
+                                  reinterpret_cast<GLvoid*>(sizeof(float) * 2));
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+    s_gles2.glActiveTexture(GL_TEXTURE0);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+    s_gles2.glUniform1i(mInputUniformLocation, 0);
+    intptr_t indexShift;
+    switch(rotation) {
+    case SKIN_ROTATION_0:
+        indexShift = 0;
+        break;
+    case SKIN_ROTATION_90:
+        indexShift = 6;
+        break;
+    case SKIN_ROTATION_180:
+        indexShift = 12;
+        break;
+    case SKIN_ROTATION_270:
+        indexShift = 18;
+        break;
+    }
+    s_gles2.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (const GLvoid*)indexShift);
+
+    // Clear the bindings.
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    s_gles2.glDisableVertexAttribArray(mPositionAttribLocation);
+    s_gles2.glDisableVertexAttribArray(mInCoordAttribLocation);
+
+    // Restore the viewport.
+    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+
+    return mFrameBuffer.texture;
+}
+
+TextureResize::GenericResizer::~GenericResizer() {
+    s_gles2.glDeleteFramebuffers(1, &mFrameBuffer.framebuffer);
+    s_gles2.glDeleteTextures(1, &mFrameBuffer.texture);
+    detachShaders(mProgram);
+    s_gles2.glUseProgram(0);
+    s_gles2.glDeleteProgram(mProgram);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    s_gles2.glDeleteBuffers(1, &mVertexBuffer);
+    s_gles2.glDeleteBuffers(1, &mIndexBuffer);
+}
+
+

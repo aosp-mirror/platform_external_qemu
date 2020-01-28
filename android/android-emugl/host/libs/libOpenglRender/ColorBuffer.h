@@ -21,6 +21,7 @@
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
 #include "android/base/files/Stream.h"
+#include "android/skin/rect.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
 #include "FrameworkFormats.h"
@@ -160,6 +161,13 @@ public:
                     GLenum p_format,
                     GLenum p_type,
                     void* pixels);
+
+    void readPixelsScaled(int width,
+                          int height,
+                          GLenum p_format,
+                          GLenum p_type,
+                          SkinRotation rotation,
+                          void* pixels);
 
     // Read cached YUV pixel values into host memory.
     void readPixelsYUVCached(int x,
