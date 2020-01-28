@@ -23,7 +23,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -43,7 +42,6 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
-#include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -58,6 +56,7 @@
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/utils/ServiceUtils.h"
+#include "android/emulation/control/utils/StudioDiscovery.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
@@ -99,9 +98,7 @@ public:
     EmulatorControllerServiceImpl(int port,
                                   EmulatorController::Service* service,
                                   grpc::Server* server)
-        : mPort(port),
-          mService(service),
-          mServer(server) {}
+        : mPort(port), mService(service), mServer(server) {}
 
     int port() override { return mPort; }
 
@@ -452,6 +449,7 @@ Builder& Builder::withCertAndKey(std::string certfile,
                         "publicly accessible!";
         return *this;
     }
+    mCertfile = certfile;
 
     std::ifstream key_file(privateKeyFile);
     std::string key((std::istreambuf_iterator<char>(key_file)),
@@ -476,8 +474,30 @@ Builder& Builder::withPort(int port) {
         android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
         port = android::base::socketGetPort(s0.get());
     }
+
+    if (port < 0) {
+        // Find first available port after -port
+        port = -port;
+        int maxScan = 1000;
+        android::base::ScopedSocket s0(socketTcp4LoopbackServer(port));
+        while (!s0.valid() && maxScan > 0) {
+            port++;
+            maxScan--;
+            s0.reset(socketTcp4LoopbackServer(port));
+        }
+
+        if (s0.valid())
+            port = android::base::socketGetPort(s0.get());
+    }
+
     mPort = port;
     return *this;
+}
+
+void Builder::writeGrpcConfig() {
+    StudioDiscovery discover({{"grpc.port=", std::to_string(mPort)},
+                              {"grpc.certificate=", mCertfile}});
+    discover.write();
 }
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {
@@ -520,6 +540,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     if (!service)
         return nullptr;
 
+    writeGrpcConfig();
     fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, controller.release(),

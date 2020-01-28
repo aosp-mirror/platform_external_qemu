@@ -53,7 +53,8 @@ android_add_library(
       android/emulation/control/logcat/RingStreambuf.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/snapshot/TarStream.cpp
-      android/emulation/control/utils/ServiceUtils.cpp)
+      android/emulation/control/utils/ServiceUtils.cpp
+      android/emulation/control/utils/StudioDiscovery.cpp)
 target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
                                                       android-net grpc++)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
@@ -66,18 +67,27 @@ if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
 endif()
 
+android_add_executable(
+  NODISTRIBUTE TARGET studio_discovery_tester
+  SRC # cmake-format: sortable
+      android/emulation/control/utils/StudioRunner_unittest.cpp)
+target_link_libraries(studio_discovery_tester PRIVATE android-grpc)
+
 android_add_test(
   TARGET android-grpc_unittest
   SRC # cmake-format: sortable
-      android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
+      android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/snapshot/TarStream_unittest.cpp
+      android/emulation/control/utils/StudioDiscovery_unittest.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++
                                                     gmock_main)
 android_target_dependency(android-grpc_unittest linux-x86_64
                           TCMALLOC_OS_DEPENDENCIES)
+
+add_dependencies(android-grpc_unittest studio_discovery_tester)
 
 # Lets distribute the proto file
 install(
@@ -89,8 +99,7 @@ install(
 
 # Add the benchmark
 android_add_executable(
-  TARGET grpc_benchmark
-  NODISTRIBUTE
+  TARGET grpc_benchmark NODISTRIBUTE
   SRC # cmake-format: sortable
       android/emulation/control/keyboard/KeytranslatePerf.cpp
       android/emulation/control/logcat/RingStreamPerf.cpp)

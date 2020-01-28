@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>                                // for unique_ptr, shared_ptr
-#include <string>                                // for string
+#include <memory>  // for unique_ptr, shared_ptr
+#include <string>  // for string
 
-#include "android/console.h"                     // for AndroidConsoleAgents
-#include "grpcpp/security/server_credentials.h"  // for ServerCredentials
+#include "android/console.h"  // for AndroidConsoleAgents
 #include "android/emulation/control/waterfall/WaterfallService.h"
+#include "grpcpp/security/server_credentials.h"  // for ServerCredentials
 
 namespace android {
 namespace emulation {
@@ -39,21 +39,28 @@ public:
     Builder& withConsoleAgents(const AndroidConsoleAgents* const consoleAgents);
     Builder& withCertAndKey(std::string certfile, std::string privateKeyFile);
 
+    // Bind to the given port:
+    // if the value = 0, let the OS pick an available port.
+    // if the value < 0, try to bind to the first available port after -port,
+    // will try at most 1000 ports.
     Builder& withPort(int port);
     Builder& withRtcBridge(RtcBridge* bridge);
     Builder& withWaterfall(const char* mode);
 
     // Returns the fully configured and running service, or nullptr if
-    // construction failed.
+    // construction failed. Once the service has been started
+    // the grpc configuration will be written to disk.
     std::unique_ptr<EmulatorControllerService> build();
     int port();
 
 private:
+    void writeGrpcConfig();
     const AndroidConsoleAgents* mAgents;
     int mPort{5556};
     WaterfallProvider mWaterfall{WaterfallProvider::adb};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
     std::string mBindAddress{"0.0.0.0"};
+    std::string mCertfile;
 
     RtcBridge* mBridge{nullptr};
 };
