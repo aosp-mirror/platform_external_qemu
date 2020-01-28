@@ -112,6 +112,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-gpl \
                 --disable-asm \
                 --disable-yasm \
+                --enable-cuvid \
                 --disable-avdevice \
                 --enable-avresample \
                 --enable-pic \

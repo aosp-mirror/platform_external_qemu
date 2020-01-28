@@ -79,7 +79,7 @@ bool VorbisCodec::configAndOpenEncoder(const AVFormatContext* oc,
         c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    if (mCodec->capabilities & CODEC_CAP_EXPERIMENTAL) {
+    if (mCodec->capabilities & AV_CODEC_CAP_EXPERIMENTAL) {
         c->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
     }
 

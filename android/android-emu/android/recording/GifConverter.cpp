@@ -191,7 +191,7 @@ bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
 
     AVCodecContext* enc_ctx = mOutputStream->codec;
 
-    if ((encoder->capabilities & CODEC_CAP_EXPERIMENTAL) != 0) {
+    if ((encoder->capabilities & AV_CODEC_CAP_EXPERIMENTAL) != 0) {
         enc_ctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
     }
 

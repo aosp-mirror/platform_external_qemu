@@ -115,20 +115,24 @@ void MediaH264DecoderDefaultImpl::initH264Context(unsigned int width,
     mDecodedFrame = new uint8_t[mOutBufferSize];
 
     // standard ffmpeg codec stuff
-    avcodec_register_all();
-    if(0){
-        AVCodec* current_codec = NULL;
+    //avcodec_register_all();
+    //av_register_all();
+    
+    if(1){
+        const AVCodec* current_codec = NULL;
+        void* opaque= NULL;
 
-        current_codec = av_codec_next(current_codec);
+        current_codec = av_codec_iterate(&opaque);//av_codec_next(current_codec);
         while (current_codec != NULL)
         {
             if (av_codec_is_decoder(current_codec))
             {
                 H264_DPRINT("codec decoder found %s long name %s", current_codec->name, current_codec->long_name);
             }
-            current_codec = av_codec_next(current_codec);
+            current_codec = av_codec_iterate(&opaque);
         }
     }
+   
 
     mCodec = NULL;
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(

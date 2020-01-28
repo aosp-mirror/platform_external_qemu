@@ -570,7 +570,7 @@ _shu_builder_prepare_for_host () {
     done
     log "$_SHU_BUILDER_CURRENT_TEXT Using toolchain build prefix: $_SHU_BUILDER_TOOLCHAIN_PREFIX"
 
-    _SHU_BUILDER_PKG_CONFIG_PATH=$_SHU_BUILDER_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH
+    _SHU_BUILDER_PKG_CONFIG_PATH=$_SHU_BUILDER_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 
     TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
 

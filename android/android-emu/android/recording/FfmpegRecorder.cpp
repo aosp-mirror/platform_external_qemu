@@ -44,6 +44,7 @@
 #include "android/utils/debug.h"                // for VERBOSE_record, VERBO...
 
 extern "C" {
+#include "libavcodec/avcodec.h"               // for AVStream, AVFormatCon...
 #include "libavformat/avformat.h"               // for AVStream, AVFormatCon...
 #include "libavutil/avassert.h"                 // for av_assert0
 #include "libavutil/mathematics.h"              // for av_rescale_rnd, AV_RO...
@@ -62,6 +63,7 @@ struct SwsContext;
 #include <assert.h>                             // for assert
 #include <libavcodec/avcodec.h>                 // for AVCodecContext, AVPacket
 #include <libavformat/avio.h>                   // for avio_open, AVIO_FLAG_...
+#include <libavformat/avformat.h>                   // for avio_open, AVIO_FLAG_...
 #include <libavutil/avutil.h>                   // for AVMediaType, AVMEDIA_...
 #include <libavutil/dict.h>                     // for AVDictionary
 #include <libavutil/error.h>                    // for av_make_error_string
@@ -81,6 +83,7 @@ struct SwsContext;
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
+#define AVFMT_RAWPICTURE    0x0020
 namespace android {
 namespace recording {
 
@@ -519,7 +522,7 @@ bool FfmpegRecorderImpl::addAudioTrack(
                  << ", ost->st->time_base.den=" << ost->stream->time_base.den;
 
     uint32_t nbSamples;
-    if (codec->getCodec()->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
+    if (codec->getCodec()->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE) {
         nbSamples = 10000;
     } else {
         VLOG(record) << "setting nbSamples=" << c->frame_size;
