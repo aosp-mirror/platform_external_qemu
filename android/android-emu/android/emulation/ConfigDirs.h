@@ -68,6 +68,15 @@ struct ConfigDirs {
     //   binary.
     static std::string getSdkRootDirectory();
 
+
+    // Returns the <user-specific_tmp_directory>/avd/running directory
+    // used by android studio to detect running emulator. This directory
+    // will be created if it does not exist, with 0700 permissions.
+    //
+    // The user-specific_tmp_directory is $XDG_RUNTIME_DIR on Linux,
+    // ~/Library/Caches/TemporaryItems on Mac and %LOCALAPPDATA%/Temp on Windows.
+    static std::string getDiscoveryDirectory();
+
 private:
     // Check if the specified path is a valid AVD root path.
     // It is considered valid if it has an 'avd' subdirectory
