@@ -16,7 +16,9 @@
 #ifndef _LIBRENDER_TEXTURERESIZE_H
 #define _LIBRENDER_TEXTURERESIZE_H
 
+#include "android/skin/rect.h"
 #include <GLES2/gl2.h>
+#include <memory>
 
 class TextureResize {
 public:
@@ -26,6 +28,7 @@ public:
     // Scales the given texture for the current viewport and returns the scaled
     // texture. May return the input if no scaling is required.
     GLuint update(GLuint texture);
+    GLuint update(GLuint texture, int width, int height, SkinRotation rotation);
 
     struct Framebuffer {
         GLuint texture;
@@ -33,6 +36,27 @@ public:
         GLuint program;
         GLuint aPosition;
         GLuint uTexture;
+    };
+
+    class GenericResizer {
+    public:
+        GenericResizer();
+        ~GenericResizer();
+
+        // Renders the contents of 2D |input_texture| on screen
+        // |width| and |height| are the dimensions of the texture.
+        GLuint draw(GLuint texture, int width, int height, SkinRotation rotation);
+
+    private:
+        GLuint mProgram;
+        GLuint mVertexBuffer;
+        GLuint mIndexBuffer;
+        GLuint mInputUniformLocation;
+        GLuint mPositionAttribLocation;
+        GLuint mInCoordAttribLocation;
+        Framebuffer mFrameBuffer;
+        int mWidth;
+        int mHeight;
     };
 
 private:
@@ -48,6 +72,7 @@ private:
     GLuint mVertexBuffer;
     GLenum mTextureDataType;
     GLenum mTextureFilteringMode = GL_LINEAR;
+    std::unique_ptr<GenericResizer> mGenericResizer;
 };
 
 #endif
