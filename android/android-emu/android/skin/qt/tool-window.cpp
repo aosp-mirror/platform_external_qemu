@@ -1116,6 +1116,9 @@ void ToolWindow::on_more_button_clicked() {
         mExtendedWindow.get()->show();
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
+        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+            mExtendedWindow.get()->showPane(PANE_IDX_CAR);
+        }
     }
 }
 
