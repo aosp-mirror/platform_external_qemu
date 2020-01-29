@@ -89,6 +89,7 @@ set(android-emu-common
     android/emulation/address_space_host_media.cpp
     android/emulation/MediaVpxDecoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
+    android/emulation/MediaH264DecoderFfmpeg.cpp
     android/emulation/MediaH264Decoder.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
