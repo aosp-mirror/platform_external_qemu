@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c330e51c_d6255b97",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-01-29T18:43:16Z",
+      "side": 1,
+      "message": "This would make the \"Car Data\" pane be shown every time you click on the \"...\" button, even if you moved to a different tab before. \n\nWouldn\u0027t be better to actually change the default tab during ExtendedWindow construction rather than during ToolWindow::on_more_button_clicked()? Somewhere like: https://android.googlesource.com/platform/external/qemu/+/a4311b08074351c2a6c6ccdd7a16bbf9491b9a99/android/android-emu/android/skin/qt/extended-window.cpp#244",
+      "revId": "201649d13e823127b32cae7d3bbc72b3c16af909",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
