@@ -16,6 +16,24 @@
       "revId": "201649d13e823127b32cae7d3bbc72b3c16af909",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd3a89ea_2af4bce3",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-01-29T20:40:32Z",
+      "side": 1,
+      "message": "Tried to set the currentIndex to the location extended-window.cpp, but not working.\nFound that change UI directly meet your requirement.",
+      "parentUuid": "c330e51c_d6255b97",
+      "revId": "201649d13e823127b32cae7d3bbc72b3c16af909",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
