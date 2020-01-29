@@ -342,6 +342,55 @@ font-family: &quot;Roboto&quot;</string>
        <number>0</number>
       </property>
       <item>
+       <widget class="QPushButton" name="carDataButton">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Car data</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/android_auto</normaloff>:/light/android_auto</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>android_auto</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="locationButton">
         <property name="font">
          <font>
@@ -903,55 +952,6 @@ padding: 10px 0px 10px 16px;</string>
         </property>
         <property name="ColorGroup" stdset="0">
          <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="carDataButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Car data</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/android_auto</normaloff>:/light/android_auto</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>android_auto</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
         </property>
        </widget>
       </item>
