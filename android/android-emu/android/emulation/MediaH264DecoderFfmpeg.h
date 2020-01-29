@@ -74,6 +74,7 @@ public:
 
 private:
     // image props
+    int mNumDecodedFrame = 0;
     bool mImageReady = false;
     bool mIsInFlush = false;
     bool mFrameFormatChanged = false;
@@ -110,6 +111,8 @@ private:
 
 private:
     void copyFrame();
+    void resetDecoder();
+    bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
 
 };  // MediaH264DecoderFfmpeg
 
