@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264DecoderFfmpeg.h"
+#include "android/emulation/H264NaluParser.h"
 #include "android/base/system/System.h"
 
 #include <cstdint>
@@ -144,6 +145,7 @@ void MediaH264DecoderFfmpeg::initH264Context(unsigned int width,
     if (useCuvidEnv != "") {
         mCodec = avcodec_find_decoder_by_name("h264_cuvid");
         if (mCodec) {
+            mIsSoftwareDecoder = false;
             H264_DPRINT("Found h264_cuvid decoder, using it");
         } else {
             H264_DPRINT("Cannot find h264_cuvid decoder");
@@ -187,6 +189,51 @@ static void* getReturnAddress(void* ptr) {
     return pint;
 }
 
+void MediaH264DecoderFfmpeg::resetDecoder() {
+    mNumDecodedFrame = 0;
+    avcodec_close(mCodecCtx);
+    av_free(mCodecCtx);
+    mCodecCtx = avcodec_alloc_context3(mCodec);
+    avcodec_open2(mCodecCtx, mCodec, 0);
+}
+
+bool MediaH264DecoderFfmpeg::checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes) {
+    // get frame type
+    // if the frame is none SPS/PPS, return false
+    // otherwise, check both SPS/PPS and return true
+    const uint8_t* currNalu = H264NaluParser::getNextStartCodeHeader(frame, szBytes);
+    if (currNalu == nullptr) {
+        // should not happen
+        H264_DPRINT("Found bad frame");
+        return false;
+    }
+
+    size_t remaining = szBytes - (currNalu - frame);
+    size_t currNaluSize = remaining;
+    H264NaluParser::H264NaluType currNaluType = H264NaluParser::getFrameNaluType(currNalu, currNaluSize, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::SPS) {
+        return false;
+    }
+
+    H264_DPRINT("found SPS\n");
+
+    const uint8_t* nextNalu = H264NaluParser::getNextStartCodeHeader(currNalu + 3, remaining - 3);
+
+    if (nextNalu == nullptr) {
+        // only one nalu, cannot have configuration change
+        H264_DPRINT("frame has only one Nalu unit, cannot be configuration change\n");
+        return false;
+    }
+
+    if (mNumDecodedFrame == 0) {
+        H264_DPRINT("have not decoded anything yet, cannot be config change");
+        return false;
+    }
+    // pretty sure it is config change
+    H264_DPRINT("\n\nDetected stream configuration change !!!\n\n");
+    return true;
+}
+
 void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
                                               const uint8_t* frame,
                                               size_t szBytes,
@@ -200,6 +247,12 @@ void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
     uint64_t* retSzBytes = (uint64_t*)retptr;
     int32_t* retErr = (int32_t*)(retptr + 8);
 
+    if (!mIsSoftwareDecoder) {
+        bool configChanged = checkWhetherConfigChanged(frame, szBytes);
+        if (configChanged) {
+            resetDecoder();
+        }
+    }
     av_init_packet(&mPacket);
     mPacket.data = (unsigned char*)frame;
     mPacket.size = szBytes;
@@ -214,10 +267,7 @@ void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
         if (retframe == AVERROR_EOF) {
             H264_DPRINT("EOF returned from decoder");
             H264_DPRINT("EOF returned from decoder reset context now");
-            avcodec_close(mCodecCtx);
-            av_free(mCodecCtx);
-            mCodecCtx = avcodec_alloc_context3(mCodec);
-            avcodec_open2(mCodecCtx, mCodec, 0);
+            resetDecoder();
         } else if (retframe == AVERROR(EAGAIN)) {
             H264_DPRINT("EAGAIN returned from decoder");
         } else {
@@ -229,7 +279,8 @@ void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
                 mFrame->width, mFrame->height,
                 mOutputWidth, mOutputHeight);
     mFrameFormatChanged = false;
-    if (mFrame->width != mOutputWidth || mFrame->height != mOutputHeight) {
+    if(mIsSoftwareDecoder) {
+        if (mFrame->width != mOutputWidth || mFrame->height != mOutputHeight) {
         mOutputHeight = mFrame->height;
         mOutputWidth = mFrame->width;
         mFrameFormatChanged = true;
@@ -237,6 +288,8 @@ void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
         *retErr = static_cast<int>(Err::DecoderRestarted);
         return;
     }
+    }
+    ++mNumDecodedFrame;
     copyFrame();
     mOutputPts = mFrame->pts;
     H264_DPRINT("%s: got frame in decode mode", __func__);
@@ -246,6 +299,13 @@ void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
 void MediaH264DecoderFfmpeg::copyFrame() {
     int w = mFrame->width;
     int h = mFrame->height;
+    if (w != mOutputWidth || h != mOutputHeight) {
+        mOutputWidth = w;
+        mOutputHeight= h;
+        delete [] mDecodedFrame;
+        mOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
+        mDecodedFrame = new uint8_t[mOutBufferSize];
+    }
     H264_DPRINT("w %d h %d Y line size %d U line size %d V line size %d", w, h,
             mFrame->linesize[0], mFrame->linesize[1], mFrame->linesize[2]);
     for (int i = 0; i < h; ++i) {

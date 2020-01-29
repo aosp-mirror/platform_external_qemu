@@ -74,7 +74,9 @@ public:
 
 private:
     // image props
+    int mNumDecodedFrame = 0;
     bool mImageReady = false;
+    bool mIsSoftwareDecoder = true;
     bool mIsInFlush = false;
     bool mFrameFormatChanged = false;
     static constexpr int kBPP = 2; // YUV420 is 2 bytes per pixel
@@ -110,6 +112,8 @@ private:
 
 private:
     void copyFrame();
+    void resetDecoder();
+    bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
 
 };  // MediaH264DecoderFfmpeg
 
