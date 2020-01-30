@@ -87,8 +87,10 @@ set(android-emu-common
     android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
+    android/emulation/H264NaluParser.cpp
     android/emulation/MediaVpxDecoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
+    android/emulation/MediaH264DecoderFfmpeg.cpp
     android/emulation/MediaH264Decoder.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
@@ -311,6 +313,7 @@ set(android-emu_windows_src
 # Mac specific sources, these will only be included when building for darwin
 set(android-emu_darwin-x86_64_src
     android/camera/camera-capture-mac.m
+    android/emulation/MediaH264DecoderVideoToolBox.cpp
     android/opengl/NativeGpuInfo_darwin.cpp
     android/snapshot/MemoryWatch_darwin.cpp
     android/opengl/macTouchOpenGL.m
@@ -486,6 +489,7 @@ set(android-emu-shared_darwin-x86_64_src
     android/opengl/NativeGpuInfo_darwin.cpp
     android/snapshot/MemoryWatch_darwin.cpp
     android/opengl/macTouchOpenGL.m
+    android/emulation/MediaH264DecoderVideoToolBox.cpp
     android/snapshot/MacSegvHandler.cpp
     android/crashreport/CrashReporter_darwin.cpp)
 
