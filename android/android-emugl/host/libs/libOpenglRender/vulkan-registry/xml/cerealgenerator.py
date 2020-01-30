@@ -123,8 +123,7 @@ class CerealGenerator(OutputGenerator):
         self.codegen = cereal.CodeGen()
 
         self.host_cmake_generator = lambda cppFiles: """%s
-set(OpenglRender_vulkan_cereal_src %s)
-android_add_library(OpenglRender_vulkan_cereal)
+android_add_library(TARGET OpenglRender_vulkan_cereal LICENSE Apache-2.0 SRC %s)
 target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
 android_target_compile_definitions(OpenglRender_vulkan_cereal windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC OpenglRender_vulkan_cereal_proto PRIVATE emugl_base)

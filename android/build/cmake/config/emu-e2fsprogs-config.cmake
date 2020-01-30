@@ -14,9 +14,10 @@ if(ANDROID_TARGET_TAG MATCHES "windows.*")
   set(TARGET_TAG "windows-x86")
 endif()
 
-get_filename_component(PREBUILT_ROOT
-                       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${TARGET_TAG}"
-                       ABSOLUTE)
+get_filename_component(
+  PREBUILT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${TARGET_TAG}"
+  ABSOLUTE)
 
 # binplace in bin64
 set(DST_DIR "bin64")
@@ -36,18 +37,35 @@ if(WINDOWS)
       resize2fs.exe
       tune2fs.exe)
 
-  android_license(tune2fs.exe "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
-  android_license(resize2fs.exe "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
-  android_license(e2fsck.exe "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
+  android_license(
+    TARGET E2FSPROGS_DEPENDENCIES
+    LIBNAME e2fs
+    EXECUTABLES tune2fs.exe resize2fs.exe e2fsck.exe
+    URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/e2fsprogs-1.42.13-patches.tar.xz"
+    SPDX "GPL-2.0-only"
+    LICENSE "http://www.linfo.org/e2fsprogs.html"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
   foreach(EXT_FILE ${E2FSPROGS_FILES})
-    set(E2FSPROGS_DEPENDENCIES "${E2FSPROGS_DEPENDENCIES};${PREBUILT_ROOT}/sbin/${EXT_FILE}>${DST_DIR}/${EXT_FILE}")
+    set(E2FSPROGS_DEPENDENCIES
+        "${E2FSPROGS_DEPENDENCIES};${PREBUILT_ROOT}/sbin/${EXT_FILE}>${DST_DIR}/${EXT_FILE}"
+    )
   endforeach()
 else()
   set(E2FSPROGS_FILES e2fsck fsck.ext4 mkfs.ext4 resize2fs tune2fs)
   foreach(EXT_FILE ${E2FSPROGS_FILES})
-    android_license(${EXT_FILE} "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
-    set(E2FSPROGS_DEPENDENCIES "${E2FSPROGS_DEPENDENCIES};${PREBUILT_ROOT}/sbin/${EXT_FILE}>${DST_DIR}/${EXT_FILE}")
+    set(E2FSPROGS_DEPENDENCIES
+        "${E2FSPROGS_DEPENDENCIES};${PREBUILT_ROOT}/sbin/${EXT_FILE}>${DST_DIR}/${EXT_FILE}"
+    )
   endforeach()
+
+  android_license(
+    TARGET E2FSPROGS_DEPENDENCIES
+    LIBNAME e2fs
+    EXECUTABLES ${E2FSPROGS_FILES}
+    URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/e2fsprogs-1.42.13-patches.tar.xz"
+    SPDX "GPL-2.0-only"
+    LICENSE "http://www.linfo.org/e2fsprogs.html"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.E2FS")
 endif()
 
 set(E2FSPROGS_FOUND TRUE)

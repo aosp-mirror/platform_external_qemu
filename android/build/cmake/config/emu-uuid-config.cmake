@@ -10,27 +10,47 @@
 # specific language governing permissions and limitations under the License.
 
 get_filename_component(
-  PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${ANDROID_TARGET_TAG}"
+  PREBUILT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
 if(DARWIN_X86_64)
-  # Apple does its own thing, the headers should be on the path, so no need to set them explicitly.
+  # Apple does its own thing, the headers should be on the path, so no need to
+  # set them explicitly.
+  android_license(TARGET UUID::UUID LIBNAME uuid SPDX None LICENSE None
+                  LOCAL None)
 elseif(LINUX_X86_64)
   set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
   set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
-  set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(UUID_LIBRARIES
+      "${PREBUILT_ROOT}/lib/libuuid${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+  android_add_prebuilt_library(
+    PACKAGE UUID
+    MODULE UUID LOCATION "${PREBUILT_ROOT}/lib/libuuid"
+    INCLUDES "${UUID_INCLUDE_DIR}"
+    LIBNAME uuid
+    URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/libuuid1-2.25.2-2.tar.xz"
+    LICENSE "BSD-3-Clause"
+    NOTICE "https://spdx.org/licenses/BSD-3-Clause.html"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.UUID")
 elseif(WINDOWS)
-  if (WINDOWS_MSVC_X86_64)
+  if(WINDOWS_MSVC_X86_64)
     set(UUID_LIBRARIES "rpcrt4")
   else()
     set(UUID_LIBRARIES "-lrpcrt4")
   endif()
+  android_license(TARGET UUID::UUID LIBNAME uuid SPDX None LICENSE None
+                  LOCAL None)
 endif()
 if(NOT TARGET UUID::UUID)
   add_library(UUID::UUID INTERFACE IMPORTED GLOBAL)
-  set_target_properties(UUID::UUID PROPERTIES
-                                   INTERFACE_INCLUDE_DIRECTORIES "${UUID_INCLUDE_DIRS}"
-                                   INTERFACE_LINK_LIBRARIES "${UUID_LIBRARIES}")
+  set_target_properties(
+    UUID::UUID
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${UUID_INCLUDE_DIRS}"
+
+               INTERFACE_LINK_LIBRARIES "${UUID_LIBRARIES}")
 endif()
-set(PACKAGE_EXPORT "UUID_INCLUDE_DIR;UUID_INCLUDE_DIRS;UUID_LIBRARIES;UUID_FOUND")
+set(PACKAGE_EXPORT
+    "UUID_INCLUDE_DIR;UUID_INCLUDE_DIRS;UUID_LIBRARIES;UUID_FOUND")
 set(UUID_FOUND TRUE)

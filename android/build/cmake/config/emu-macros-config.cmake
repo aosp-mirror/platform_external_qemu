@@ -9,7 +9,10 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common" ABSOLUTE)
+get_filename_component(
+  PREBUILT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common"
+  ABSOLUTE)
 set(EMULATOR_MACROS_DEPENDENCIES
     ${PREBUILT_ROOT}/automation/macros/Walk_to_image_room>resources/macros/Walk_to_image_room;
     ${PREBUILT_ROOT}/automation/macros/Reset_position>resources/macros/Reset_position;
@@ -20,4 +23,7 @@ set(EMULATOR_MACROS_DEPENDENCIES
     ${PREBUILT_ROOT}/automation/macroPreviews/Track_horizontal_plane.mp4>resources/macroPreviews/Track_horizontal_plane.mp4;
     ${PREBUILT_ROOT}/automation/macroPreviews/Track_vertical_plane.mp4>resources/macroPreviews/Track_vertical_plane.mp4;
 )
+android_license(TARGET "EMULATOR_MACROS_DEPENDENCIES" LIBNAME None SPDX None
+                LICENSE None LOCAL None)
+
 set(PACKAGE_EXPORT "EMULATOR_MACROS_DEPENDENCIES")
