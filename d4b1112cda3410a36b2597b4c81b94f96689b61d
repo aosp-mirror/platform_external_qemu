@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13a8ac11_fab02355",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-30T19:15:52Z",
+      "side": 1,
+      "message": "width and height",
+      "revId": "d4b1112cda3410a36b2597b4c81b94f96689b61d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4783aeb9_e79104b3",
+        "filename": "android/android-emu/android/loadpng.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-01-30T19:15:52Z",
+      "side": 1,
+      "message": "Can we use a debug macro or remove this?",
+      "revId": "d4b1112cda3410a36b2597b4c81b94f96689b61d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
