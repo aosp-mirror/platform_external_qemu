@@ -2,22 +2,24 @@ cmake_minimum_required(VERSION 3.5)
 
 set(src "${ANDROID_QEMU2_TOP_DIR}/../google-benchmark/src")
 
-set(emulator-gbench_src
-    ${src}/benchmark.cc
-    ${src}/colorprint.cc
-    ${src}/commandlineflags.cc
-    ${src}/complexity.cc
-    ${src}/console_reporter.cc
-    ${src}/csv_reporter.cc
-    ${src}/json_reporter.cc
-    ${src}/log.cc
-    ${src}/reporter.cc
-    ${src}/re_posix.cc
-    ${src}/sleep.cc
-    ${src}/string_util.cc
-    ${src}/sysinfo.cc
-    ${src}/walltime.cc)
-android_add_library(emulator-gbench)
+android_add_library(
+  TARGET emulator-gbench
+  NODISTRIBUTE
+  SRC # cmake-format: sortable
+      ${src}/benchmark.cc
+      ${src}/colorprint.cc
+      ${src}/commandlineflags.cc
+      ${src}/complexity.cc
+      ${src}/console_reporter.cc
+      ${src}/csv_reporter.cc
+      ${src}/json_reporter.cc
+      ${src}/log.cc
+      ${src}/reporter.cc
+      ${src}/re_posix.cc
+      ${src}/sleep.cc
+      ${src}/string_util.cc
+      ${src}/sysinfo.cc
+      ${src}/walltime.cc)
 
 target_include_directories(emulator-gbench PUBLIC ${src}/../include)
 # NOTE HAVE_STD_REGEX doesn't seem to work with our toolchains.

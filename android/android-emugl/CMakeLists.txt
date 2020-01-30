@@ -3,7 +3,7 @@ set(GOLDFISH_EMUGL_DIR ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-op
 
 # We start of defining an interface library that defines all the compiler settings we wish to use for all libs. please
 # keep this at a bare minimum!
-android_add_interface(emugl_base)
+android_add_interface(TARGET emugl_base LICENSE Apache-2.0)
 target_compile_definitions(emugl_base INTERFACE "-DEMUGL_BUILD=1")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(emugl_base INTERFACE "-DEMUGL_DEBUG=1")
@@ -13,19 +13,23 @@ endif()
 android_compile_for_host(emugen ${CMAKE_CURRENT_LIST_DIR}/host/tools/emugen EMUGEN_EXE)
 
 # This will generate the source files by executing the emugen builder.
-function(generate_emugen SRC NAME)
+function(generate_emugen SRC # cmake-format: sortable
+         NAME)
   get_filename_component(DIR "${CMAKE_CURRENT_SOURCE_DIR}/${SRC}" ABSOLUTE)
 
-  list(APPEND GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_dec.cpp)
-  list(APPEND GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_dec.h)
-  list(APPEND GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_opcodes.h)
-  list(APPEND GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_server_context.h)
-  list(APPEND GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_server_context.cpp)
+  list(APPEND GENERATED_SRC # cmake-format: sortable
+       ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_dec.cpp)
+  list(APPEND GENERATED_SRC # cmake-format: sortable
+       ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_dec.h)
+  list(APPEND GENERATED_SRC # cmake-format: sortable
+       ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_opcodes.h)
+  list(APPEND GENERATED_SRC # cmake-format: sortable
+       ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_server_context.h)
+  list(APPEND GENERATED_SRC # cmake-format: sortable
+       ${CMAKE_CURRENT_BINARY_DIR}/${NAME}_server_context.cpp)
 
-  add_custom_command(PRE_BUILD
-                     OUTPUT ${GENERATED_SRC}
-                     COMMAND ${EMUGEN_EXE} -D ${CMAKE_CURRENT_BINARY_DIR} -i ${DIR} ${NAME}
-                     DEPENDS ${EMUGEN_EXE})
+  add_custom_command(PRE_BUILD OUTPUT ${GENERATED_SRC} COMMAND ${EMUGEN_EXE} -D ${CMAKE_CURRENT_BINARY_DIR} -i ${DIR}
+                                                               ${NAME} DEPENDS ${EMUGEN_EXE})
 
   set(${NAME}-SOURCES ${GENERATED_SRC} PARENT_SCOPE)
 endfunction()
@@ -33,15 +37,11 @@ endfunction()
 # Creates the library by generating the sources.
 function(generate_emugen_lib LIBNAME LOCATION NAME SOURCES)
   generate_emugen(${LOCATION} ${NAME})
-  set(${LIBNAME}_src ${${NAME}-SOURCES} ${SOURCES})
-  android_add_library(${LIBNAME})
-  target_include_directories(${LIBNAME}
-                             PUBLIC ${LOCATION}
-                                    host/include/OpenGLESDispatch
-                                    host/include/
-                                    host/libs/libGLSnapshot
-                                    shared/OpenglCodecCommon
-                                    ${CMAKE_CURRENT_BINARY_DIR})
+  android_add_library(TARGET ${LIBNAME} LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                               ${${NAME}-SOURCES} ${SOURCES})
+  target_include_directories(
+    ${LIBNAME} PUBLIC ${LOCATION} host/include/OpenGLESDispatch host/include/ host/libs/libGLSnapshot
+                      shared/OpenglCodecCommon ${CMAKE_CURRENT_BINARY_DIR})
   target_compile_options(${LIBNAME} PRIVATE -fvisibility=hidden)
   target_link_libraries(${LIBNAME} PUBLIC android-emu GLSnapshot)
   target_link_libraries(${LIBNAME} PRIVATE emugl_base)

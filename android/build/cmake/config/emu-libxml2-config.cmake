@@ -19,6 +19,18 @@ set(LIBXML2_LIBRARIES "${PREBUILT_ROOT}/lib/libxml2${CMAKE_STATIC_LIBRARY_SUFFIX
 set(LIBXML2_DEFINITIONS "-DLIBXML_STATIC")
 set(LIBXML2_FOUND TRUE)
 
-android_add_prebuilt_library(LibXml2 LibXml2 "${PREBUILT_ROOT}/lib/libxml2" "${PREBUILT_ROOT}/include" "LIBXML_STATIC")
+android_add_prebuilt_library(
+  PACKAGE LibXml2
+  MODULE LibXml2 LOCATION "${PREBUILT_ROOT}/lib/libxml2"
+  INCLUDES "${PREBUILT_ROOT}/include"
+  DEFINITIONS "LIBXML_STATIC"
+  LIBNAME LibXml2
+  URL
+    "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/libxml2-2.9.2.tar.gz"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LIBXML2"
+  NOTICE "https://github.com/GNOME/libxml2/blob/mainline/Copyright"
+  LICENSE MIT)
 
 set(PACKAGE_EXPORT "LIBXML2_INCLUDE_DIR;LIBXML2_INCLUDE_DIRS;LIBXML2_LIBRARIES;LIBXML2_FOUND;LIBXML2_DEFINITIONS")
+
+#

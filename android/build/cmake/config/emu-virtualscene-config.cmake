@@ -8,4 +8,5 @@ set(VIRTUAL_SCENE_DEPENDENCIES
     ${PREBUILT_ROOT}/virtualscene/Toren1BD/Toren1BD_Main.png>resources/Toren1BD_Main.png;
     ${PREBUILT_ROOT}/virtualscene/Toren1BD/poster.png>resources/poster.png;
 )
+android_license(TARGET "VIRTUAL_SCENE_DEPENDENCIES" LIBNAME None SPDX None LICENSE None LOCAL None)
 set(PACKAGE_EXPORT "VIRTUAL_SCENE_DEPENDENCIES")

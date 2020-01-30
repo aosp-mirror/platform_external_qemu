@@ -20,4 +20,6 @@ set(EMULATOR_MACROS_DEPENDENCIES
     ${PREBUILT_ROOT}/automation/macroPreviews/Track_horizontal_plane.mp4>resources/macroPreviews/Track_horizontal_plane.mp4;
     ${PREBUILT_ROOT}/automation/macroPreviews/Track_vertical_plane.mp4>resources/macroPreviews/Track_vertical_plane.mp4;
 )
+android_license(TARGET "EMULATOR_MACROS_DEPENDENCIES" LIBNAME None SPDX None LICENSE None LOCAL None)
+
 set(PACKAGE_EXPORT "EMULATOR_MACROS_DEPENDENCIES")
