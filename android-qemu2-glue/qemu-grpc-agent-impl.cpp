@@ -27,7 +27,7 @@ extern const AndroidConsoleAgents* getConsoleAgents();
 int start_grpc(int port, const char* turncfg) {
     android::emulation::control::RtcBridge* rtc_bridge = nullptr;
 #ifdef ANDROID_WEBRTC
-    char* turn = nullptr;
+    std::string turn = "";
     if (android_cmdLineOptions->turncfg) {
         turn = android_cmdLineOptions->turncfg;
     }
