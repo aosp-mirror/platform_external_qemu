@@ -307,6 +307,9 @@ set(android-emu_windows_src
     android/opengl/NativeGpuInfo_windows.cpp
     android/snapshot/MemoryWatch_windows.cpp
     android/windows_installer.cpp
+    android/emulation/MediaH264DecoderCuvid.cpp
+    android/emulation/dynlink_cuda.cpp
+    android/emulation/dynlink_nvcuvid.cpp
     android/camera/camera-capture-windows.cpp
     android/crashreport/CrashReporter_windows.cpp)
 
@@ -322,6 +325,9 @@ set(android-emu_darwin-x86_64_src
 
 # Linux specific sources.
 set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
+    android/emulation/MediaH264DecoderCuvid.cpp
+    android/emulation/dynlink_cuda.cpp
+    android/emulation/dynlink_nvcuvid.cpp
     android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
 
 android_add_library(android-emu)
@@ -482,6 +488,9 @@ set(android-emu-shared_src ${android-emu-common} stubs/stubs.cpp)
 
 # Windows specific sources
 set(android-emu-shared_windows_src android/opengl/NativeGpuInfo_windows.cpp android/snapshot/MemoryWatch_windows.cpp
+    android/emulation/MediaH264DecoderCuvid.cpp
+    android/emulation/dynlink_cuda.cpp
+    android/emulation/dynlink_nvcuvid.cpp
     android/windows_installer.cpp android/crashreport/CrashReporter_windows.cpp)
 
 # Mac specific sources, these will only be included when building for darwin
@@ -495,6 +504,9 @@ set(android-emu-shared_darwin-x86_64_src
 
 # Linux specific sources.
 set(android-emu-shared_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
+    android/emulation/MediaH264DecoderCuvid.cpp
+    android/emulation/dynlink_cuda.cpp
+    android/emulation/dynlink_nvcuvid.cpp
     android/crashreport/CrashReporter_linux.cpp)
 
 android_add_shared_library(android-emu-shared)
