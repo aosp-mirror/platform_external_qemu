@@ -171,3 +171,10 @@ elseif(WINDOWS)
       ${VULKAN_COMMON_DEPENDENCIES})
 endif()
 set(PACKAGE_EXPORT "VULKAN_DEPENDENCIES;VULKAN_TEST_DEPENDENCIES;VULKAN_FOUND")
+android_license(
+  TARGET VULKAN_DEPENDENCIES
+  LIBNAME "vulkan-sdk"
+  URL "https://vulkan.lunarg.com/sdk/home"
+  SPDX "Apache-2.0"
+  LICENSE "https://vulkan.lunarg.com/software/license/vulkan-1.2.131.1-linux-license-summary.txt"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.VULKAN")

@@ -5,39 +5,34 @@ prebuilt(E2FSPROGS)
 prebuilt(MACROS)
 prebuilt(MSVC)
 set(WINDOWS_ICON ../images/emulator_icon.rc)
-set(emulator_src main-emulator.cpp ${WINDOWS_ICON})
-android_add_executable(emulator)
+android_add_executable(TARGET emulator INSTALL . LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                                        main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator PRIVATE android-emu)
-# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though
-# we are not using them..
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+# The mingw debug build somehow requires us to link against the vm operations in debug builds, even though we are not
+# using them..
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   android_target_link_libraries(emulator windows-x86_64 PRIVATE android-mock-vm-operations android-emu)
-endif ()
+endif()
 
-
-target_compile_definitions(emulator
-                           PRIVATE
-                           "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+target_compile_definitions(
+  emulator PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}" "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
+                   "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 # Make sure we have the qemu dependencies available
-if (OPTION_MINBUILD)
-  add_dependencies(emulator
-                   qemu-system-x86_64
-                   qemu-system-aarch64
-                   qemu-system-x86_64-headless
+if(OPTION_MINBUILD)
+  add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64 qemu-system-x86_64-headless
                    qemu-system-aarch64-headless)
 else()
-  add_dependencies(emulator
-                   qemu-system-i386
-                   qemu-system-x86_64
-                   qemu-system-armel
-                   qemu-system-aarch64
-                   qemu-system-armel-headless
-                   qemu-system-x86_64-headless
-                   qemu-system-aarch64-headless
-                   emulator-crash-service)
+  add_dependencies(
+    emulator
+    qemu-system-i386
+    qemu-system-x86_64
+    qemu-system-armel
+    qemu-system-aarch64
+    qemu-system-armel-headless
+    qemu-system-x86_64-headless
+    qemu-system-aarch64-headless
+    emulator-crash-service)
 endif()
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")
@@ -77,16 +72,15 @@ android_target_dependency(emulator all VIRTUAL_SCENE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_MACROS_DEPENDENCIES)
 android_target_dependency(emulator all VULKAN_DEPENDENCIES)
 android_target_dependency(emulator linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
-android_target_dependency(emulator linux-x86_64 DARWINN_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # And install them for a release.
-# TODO(b/141205876): prebuilt executables are losing their execute permission on installation.
-# Once this issue is fixed, remove all of these "android_install_dependency_force_exec()" calls.
+# TODO(b/141205876): prebuilt executables are losing their execute permission on installation. Once this issue is fixed,
+# remove all of these "android_install_dependency_force_exec()" calls.
 android_install_dependency_force_exec(all QT5_SHARED_DEPENDENCIES)
-if (NOT OPTION_MINBUILD)
+if(NOT OPTION_MINBUILD)
   android_install_dependency(all MESA_DEPENDENCIES)
 endif()
 android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
@@ -101,13 +95,14 @@ android_install_dependency(all VIRTUAL_SCENE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_MACROS_DEPENDENCIES)
 android_install_dependency(all VULKAN_DEPENDENCIES)
 android_install_dependency(linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
-android_install_dependency(linux-x86_64 DARWINN_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 MSVC_DEPENDENCIES)
 android_install_dependency(windows-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 
-# These are usually nops, but some code generators will not automatically binplace these (Xcode!)
+# Bug b/148548657 android_target_dependency(emulator linux-x86_64 DARWINN_DEPENDENCIES)
+# android_install_dependency(linux-x86_64 DARWINN_DEPENDENCIES) These are usually nops, but some code generators will
+# not automatically binplace these (Xcode!)
 android_copy_shared_lib(emulator EGL_translator EGL_translator)
 android_copy_shared_lib(emulator GLES_V2_translator GLES_V2_translator)
 android_copy_shared_lib(emulator GLES_CM_translator GLES_CM_translator)
@@ -117,7 +112,6 @@ android_copy_shared_lib(emulator OpenglRender OpenglRender)
 # And set the os specific properties
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 
-android_install_exe(emulator .)
-
 # Install files we need.
 install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
+install(FILES ${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2 DESTINATION . RENAME LICENSE)

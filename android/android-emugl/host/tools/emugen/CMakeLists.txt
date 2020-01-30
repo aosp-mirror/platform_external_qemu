@@ -22,13 +22,14 @@ if(NOT TARGET gmock_main)
 endif()
 
 # Emugen executable (note not unicode safe!)
-set(emugen_src ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp TypeFactory.cpp)
-android_add_executable(emugen)
+android_add_executable(
+  TARGET emugen LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                       ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp TypeFactory.cpp)
 target_include_directories(emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
 
 # The unit tests
-set(emugen_unittests_src Parser.cpp Parser_unittest.cpp)
-android_add_test(emugen_unittests)
+android_add_test(TARGET emugen_unittests SRC # cmake-format: sortable
+                                             Parser.cpp Parser_unittest.cpp)
 target_link_libraries(emugen_unittests PRIVATE gmock_main)
 
 # Shell based tests, only possible if we have a shell runner
@@ -38,7 +39,6 @@ find_program(BASH_PROGRAM bash)
 if(BASH_PROGRAM AND NOT WIN32)
   add_test(NAME emugen_shell_tests
            COMMAND ${BASH_PROGRAM} ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/tools/emugen/tests/run-tests.sh
-                   --emugen=$<TARGET_FILE:emugen>
-           WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
+                   --emugen=$<TARGET_FILE:emugen> WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
 
 endif()
