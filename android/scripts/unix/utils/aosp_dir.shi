@@ -144,9 +144,6 @@ aosp_prebuilt_toolchain_subdir_for () {
             local CLANG_VERSION="$(aosp_clang_version)"
             printf "prebuilts/clang/host/darwin-x86/$CLANG_VERSION"
             ;;
-        windows*)
-            printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
-            ;;
     esac
 }
 
@@ -173,9 +170,6 @@ aosp_prebuilt_toolchain_sysroot_subdir_for () {
             # We use the developer machine's system SDK.
             printf ""
             ;;
-        windows*)
-            printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/x86_64-w64-mingw32"
-            ;;
     esac
 }
 
@@ -190,9 +184,6 @@ aosp_prebuilt_toolchain_prefix_for () {
             ;;
         darwin*)
             printf ""
-            ;;
-        windows*)
-            printf "x86_64-w64-mingw32-"
             ;;
     esac
 }
