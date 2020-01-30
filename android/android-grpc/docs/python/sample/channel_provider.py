@@ -20,9 +20,9 @@ def getEmulatorChannel():
   if os.path.exists(cert):
     with open(cert, 'rb') as f:
       creds = grpc.ssl_channel_credentials(f.read())
-      channel = grpc.secure_channel('localhost:5556', creds)
+      channel = grpc.secure_channel('localhost:8556', creds)
   else:
     # Let's go insecure..
-    channel = grpc.insecure_channel('localhost:5556')
+    channel = grpc.insecure_channel('localhost:8556')
 
   return channel

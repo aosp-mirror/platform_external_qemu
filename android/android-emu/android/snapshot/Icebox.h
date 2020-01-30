@@ -13,14 +13,15 @@
 // limitations under the License.
 
 #pragma once
+#include <string>
 
 namespace android {
 namespace icebox {
 // Start tracking pid for exceptions. Save a snapshot under
 // snapshot_name if unexpected error happens.
-extern bool track(int pid, const char* snapshot_name);
-extern bool run_async(const char* cmd);
-extern bool track_async(int pid, const char* snapshot_name);
+extern bool track(int pid, const std::string snapshot_name);
+extern bool run_async(const std::string cmd);
+extern bool track_async(int pid, const std::string snapshot_name);
 extern void set_jdwp_port(int adb_port);
 }  // namespace icebox
 }  // namespace android
