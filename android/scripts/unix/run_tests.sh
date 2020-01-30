@@ -265,45 +265,6 @@ if [ "$TARGET_OS" = "linux-x86_64" ]; then
     fi
 fi
 
-
-if [ "$TARGET_OS" = "windows-x86_64" ]; then
-   log "Checking that all the .dll dependencies are met"
-   if [ -d $OPT_OUT/gradle-release ]; then
-        log "Checking that windows binaries have all dependencies available"
-        # Make sure we can load all dependencies of every dylib/executable we have.
-        echo files=find $OPT_OUT/gradle-release -name '*.exe'-or -name '*.dll'
-        files=$(find $OPT_OUT/gradle-release -name '*.exe' -or -name '*.dll')
-        for file in $files; do
-            if [ -f $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump ]; then
-                $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep -q CodeView || warn " !!! No CodeView entry in $file, breakpad traces will be incomplete. !!!"
-            fi
-
-            log "Checking $file for dependencies"
-            needed=$($OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep "DLL Name" | awk '{ print $3 }')
-            cache="KERNEL32.DLL KERNEL32.dll msvcrt.dll PSAPI.DLL SHELL32.DLL SHELL32.dll USER32.DLL ntdll.dll USER32.dll NETAPI32.dll "
-            cache="${cache} ADVAPI32.dll WS2_32.dll GDI32.dll dbghelp.dll RPCRT4.dll OLEAUT32.dll IPHLPAPI.DLL imagehelp.dll WINMM.dll WTSAPI32.dll "
-            cache="${cache} d3d9.dll IMM32.dll VERSION.dll imagehlp.dll UxTheme.dll dwmapi.dll USERENV.dll ole32.dll OPENGL32.dll MPR.dll"
-            for need in $needed; do
-                libs=$(find $OPT_OUT/gradle-release -name $need);
-                if [ "$libs" ]; then
-                  log2 "  Found $need in our release"
-                else
-                    ldpath=$(contains "$cache" $need)
-                    if [ $ldpath = "True" ]; then
-                        log2 "  -- Found $need in windows (os dependency)"
-                    else
-                        panic "Unable to locate $need, needed by $file"
-                    fi
-                fi
-            done
-
-        done
-        log "Dependencies are looking good!"
-    else
-        warn "No release found in $OPT_OUT, not validating dependencies."
-    fi
-fi
-
 # Check the gen-entries.py script.
 if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     log "Running gen-entries.py test suite."
