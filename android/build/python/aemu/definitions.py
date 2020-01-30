@@ -188,7 +188,6 @@ class Toolchain(ArgEnum):
     windows = 'toolchain-windows_msvc-x86_64.cmake'
     linux = 'toolchain-linux-x86_64.cmake'
     darwin = 'toolchain-darwin-x86_64.cmake'
-    mingw = 'toolchain-windows-x86_64.cmake'
 
     def to_cmd(self):
         return ['-DCMAKE_TOOLCHAIN_FILE=%s' % os.path.join(get_qemu_root(), 'android', 'build', 'cmake', self.value)]

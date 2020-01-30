@@ -174,8 +174,6 @@ def main(argv=None):
                 'sdk_build_number': FLAGS.sdk_build_number,
                 'config': FLAGS.config
                 }
-        if FLAGS.target == 'mingw':
-            data['target'] = 'windows'
 
         create_distribution(FLAGS.dist, FLAGS.out, data)
 

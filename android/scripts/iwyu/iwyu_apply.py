@@ -15,7 +15,7 @@ import subprocess
 import os
 
 FLAGS = flags.FLAGS
-flags.DEFINE_list('builds', ['objs', 'build-msvc', 'build-mingw'],
+flags.DEFINE_list('builds', ['objs', 'build-msvc'],
                   'Directories to build for validation')
 flags.DEFINE_string('rev', None, 'From revision')
 
