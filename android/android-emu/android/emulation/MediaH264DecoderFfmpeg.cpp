@@ -141,7 +141,7 @@ void MediaH264DecoderFfmpeg::initH264Context(unsigned int width,
 
     mCodec = NULL;
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(
-            "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
+            "ANDROID_EMU_CODEC_USE_FFMPEG_CUVID_DECODER");
     if (useCuvidEnv != "") {
         mCodec = avcodec_find_decoder_by_name("h264_cuvid");
         if (mCodec) {
