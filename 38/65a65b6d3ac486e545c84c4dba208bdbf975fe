@@ -1,0 +1,8 @@
+Code-Review+1: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Yahan Zhou <yahan@google.com>
+Presubmit-Ready+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Bo Hu <bohu@google.com>
+Submitted-at: Thu, 30 Jan 2020 21:12:42 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1222823
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
