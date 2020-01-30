@@ -11,12 +11,15 @@
 
 get_filename_component(
   PREBUILT_ROOT
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}"
+  ABSOLUTE)
 
 set(PNG_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(PNG_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(PNG_LIBRARIES "${PREBUILT_ROOT}/lib/libpng${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(PNG_FOUND TRUE)
 
-android_add_prebuilt_library(PNG PNG "${PREBUILT_ROOT}/lib/libpng" "${PNG_INCLUDE_DIR}" "" "")
+android_add_prebuilt_library(
+  PACKAGE PNG MODULE PNG LOCATION "${PREBUILT_ROOT}/lib/libpng"
+  INCLUDES "${PNG_INCLUDE_DIR}")
 set(PACKAGE_EXPORT "PNG_INCLUDE_DIR;PNG_INCLUDE_DIRS;PNG_LIBRARIES;PNG_FOUND")

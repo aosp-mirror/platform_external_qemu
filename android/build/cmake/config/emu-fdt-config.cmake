@@ -11,7 +11,8 @@
 
 get_filename_component(
   PREBUILT_ROOT
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}"
+  ABSOLUTE)
 
 set(FDT_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(FDT_INCLUDE_DIRS "${FDT_INCLUDE_DIR}")
@@ -20,9 +21,11 @@ set(FDT_FOUND TRUE)
 
 if(WINDOWS_MSVC_X86_64)
   add_library(FDT STATIC IMPORTED GLOBAL)
-  set_target_properties(FDT
-                        PROPERTIES IMPORTED_LOCATION "${PREBUILT_ROOT}/lib/libfdt${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                                   INTERFACE_INCLUDE_DIRECTORIES "${FDT_INCLUDE_DIRS}")
+  set_target_properties(
+    FDT
+    PROPERTIES IMPORTED_LOCATION
+               "${PREBUILT_ROOT}/lib/libfdt${CMAKE_STATIC_LIBRARY_SUFFIX}"
+               INTERFACE_INCLUDE_DIRECTORIES "${FDT_INCLUDE_DIRS}")
 else()
   if(NOT TARGET FDT)
     add_library(FDT INTERFACE)
@@ -31,4 +34,11 @@ else()
   endif()
 endif()
 set(PACKAGE_EXPORT "FDT_INCLUDE_DIR;FDT_INCLUDE_DIRS;FDT_LIBRARIES;FDT_FOUND")
-android_license("LIBFDT" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.GPLv2")
+android_license(
+  TARGET FDT
+  LIBNAME fdt
+  URL "https://android.googlesource.com/platform/external/dtc/+/refs/heads/master"
+  SPDX "BSD-2-Clause"
+  LICENSE
+    "https://android.googlesource.com/platform/external/dtc/+/refs/heads/master/README.license"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.FDT")
