@@ -128,4 +128,9 @@ if(JSON_Install)
         DESTINATION ${NLOHMANN_JSON_CONFIG_INSTALL_DIR}
     )
 endif()
-android_license(nlohmann_json  "android/third_party/json/NOTICE")
+android_license(TARGET nlohmann_json::nlohmann_json
+                LIBNAME nlohmann_json
+                URL "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/json/"
+                SPDX "MIT"
+                LICENSE "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/json/NOTICE"
+                LOCAL "${ANDROID_QEMU2_TOP_DIR}/android/third_party/json/NOTICE")

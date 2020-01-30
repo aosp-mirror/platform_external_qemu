@@ -54,4 +54,16 @@ if (WINDOWS_X86_64)
     # Work around some gcc/mingw issues
     target_compile_definitions(emulator-libyuv PRIVATE -DLIBYUV_DISABLE_X86)
 endif ()
-android_license(emulator-libyuv "${src}/../LICENSE")
+
+android_license(TARGET
+                emulator-libyuv
+                LIBNAME
+                libyuv
+                URL
+                "https://android.googlesource.com/platform/external/chromium_org/third_party/libyuv/+/refs/heads/master/"
+                SPDX
+                "BSD-3-Clause"
+                LICENSE
+                "https://android.googlesource.com/platform/external/chromium_org/third_party/libyuv/+/refs/heads/master/LICENSE"
+                LOCAL
+                "${src}/../LICENSE")
