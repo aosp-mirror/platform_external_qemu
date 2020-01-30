@@ -124,7 +124,7 @@ aosp_dir_parse_option
 # Handle --host option.
 if [ "$OPT_HOST" ]; then
     case $OPT_HOST in
-        linux-x86_64|linux-aarch64|darwin-x86_64|windows-x86_64|windows_msvc-x86_64)
+        linux-x86_64|linux-aarch64|darwin-x86_64|windows_msvc-x86_64)
             ;;
         *)
             panic "Invalid --host value: $OPT_HOST"
@@ -214,8 +214,8 @@ gen_wrapper_program ()
             clang-tidy)
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
-            ar)
-                DST_PROG=llvm-ar
+            ar|ranlib|nm|objcopy|objdump|strings)
+                DST_PROG=llvm-$PROG
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
         esac
@@ -318,8 +318,8 @@ gen_wrapper_toolchain () {
     local PROG
     case "$CURRENT_HOST" in
         windows_msvc*)
-          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar"
-          local PROGRAMS="as ranlib strings nm objdump objcopy dlltool"
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy"
+          local PROGRAMS="dlltool"
           ;;
         *)
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
@@ -333,16 +333,9 @@ gen_wrapper_toolchain () {
         SRC_PREFIX=${SRC_PREFIX%%-}-
     fi
 
-    case $SRC_PREFIX in
-        *mingw*)
-            PROGRAMS="$PROGRAMS windres"
-            ;;
-        *)
-            # We are doing clang on a posix system.. So lets
-            # Symlink symbolizer, asan really wants this to be named llvm-symbolizer..
-            ln -sf ${CLANG_BINDIR}/llvm-symbolizer ${DST_DIR}/llvm-symbolizer
-            ;;
-    esac
+    # We are doing clang on a posix system.. So lets
+    # Symlink symbolizer, asan really wants this to be named llvm-symbolizer..
+    ln -sf ${CLANG_BINDIR}/llvm-symbolizer ${DST_DIR}/llvm-symbolizer
 
     case "$CURRENT_HOST" in
         windows_msvc*)
@@ -372,7 +365,7 @@ gen_wrapper_toolchain () {
     # Setup additional host specific things
     if [ -z "$OPT_NOSTRIP" ]; then
       case "$CURRENT_HOST" in
-        windows-x86_64|linux-x86_64)
+        linux-x86_64)
           gen_dbg_splitter "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
           ;;
         darwin-x86_64)
@@ -564,25 +557,6 @@ prepare_build_for_linux_aarch64() {
     # aarch64 use host toolchain.  no prefix needed.
     DST_PREFIX=
 }
-
-prepare_build_for_windows () {
-    local GCC_LINK_FLAGS="-Wno-missing-braces -Wno-aggressive-loop-optimizations -w"
-
-    case $CURRENT_HOST in
-      windows-x86_64)
-          GNU_CONFIG_HOST=x86_64-w64-mingw32
-          EXTRA_CFLAGS="-m64"
-          EXTRA_CXXFLAGS="-m64"
-          ;;
-    esac
-
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
-    fi
-
-    var_append EXTRA_CFLAGS ${GCC_LINK_FLAGS}
-    var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
- }
 
 configure_google_storage() {
     local DEPOT_TOOLS=$(aosp_depot_tools_dir)
@@ -848,8 +822,6 @@ prepare_build_for_host () {
             fi
             prepare_build_for_windows_msvc
             ;;
-        windows-*)
-            prepare_build_for_windows
     esac
 
 
