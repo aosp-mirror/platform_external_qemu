@@ -6,10 +6,18 @@ target_include_directories(emulator-libdtb PUBLIC include)
 target_include_directories(emulator-libdtb PRIVATE .)
 target_compile_definitions(emulator-libdtb PRIVATE -DHOST)
 
-if (NOT WINDOWS_MSVC_X86_64)
+if(NOT WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libdtb PRIVATE -Wno-error)
 endif()
 
 # Work around some gcc/mingw issues
-android_target_compile_definitions(emulator-libdtb windows-x86_64 PRIVATE -DUSE_MINGW=1)
-android_license(libdtb  "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.GPLv2")
+android_target_compile_definitions(emulator-libdtb windows-x86_64 PRIVATE
+                                   -DUSE_MINGW=1)
+android_license(
+  TARGET emulator-libdtb
+  LIBNAME dtc
+  URL "https://kernel.googlesource.com/pub/scm/utils/dtc/dtc.git/+/refs/heads/master/"
+  SPDX "GPL-2.0-or-later"
+  LICENSE
+    "https://kernel.googlesource.com/pub/scm/utils/dtc/dtc.git/+/refs/heads/master/README.license"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/LICENSE")

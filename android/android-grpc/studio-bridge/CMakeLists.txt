@@ -1,4 +1,3 @@
-
 set(studio-bridge_src
     ${EMULATOR_GRPC_SRC}
     android/emulation/control/EmulatorService.cpp
@@ -11,7 +10,9 @@ set(studio-bridge_src
     android/emulation/control/waterfall/WaterfallService.cpp)
 
 # Let's add in the library
-android_add_shared_library(studio-bridge)
+android_add_library(
+  TARGET studio-bridge SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                     ${studio-bridge_src})
 target_link_libraries(studio-bridge PRIVATE android-emu)
 target_compile_definitions(studio-bridge PUBLIC -DANDROID_GRPC)
 
