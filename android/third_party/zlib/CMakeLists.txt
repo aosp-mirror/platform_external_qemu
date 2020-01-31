@@ -38,16 +38,6 @@ android_target_compile_definitions(zlib darwin-x86_64 PRIVATE
                                    -D_LARGEFILE64_SOURCE=1)
 android_target_compile_definitions(
   zlib
-  windows-x86_64
-  PRIVATE
-  -D_CRT_SECURE_NO_DEPRECATE
-  -D_CRT_NONSTDC_NO_DEPRECATE
-  -DNO_FSEEKO
-  -D_WIN32 # Make sure we define widechar for unicode translation and usage of
-           # _wopen vs non unicode variant.
-)
-android_target_compile_definitions(
-  zlib
   windows_msvc-x86_64
   PRIVATE
   -DWIN32
