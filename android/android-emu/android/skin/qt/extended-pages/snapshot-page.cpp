@@ -1162,12 +1162,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         QString logicalName(fileName);
         QDateTime snapshotDate;
         if (protobuf) {
-            if (protobuf->has_logical_name()) {
-                logicalName = protobuf->logical_name().c_str();
-            }
-            if (protobuf->has_creation_time()) {
-                snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
-            }
+            logicalName = protobuf->logical_name().c_str();
+            snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
         }
 
         // Create a top-level item.

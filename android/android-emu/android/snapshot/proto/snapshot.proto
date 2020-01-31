@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+syntax = "proto3";
 
 // This file must be synchronized between
 //    Emulator (branch aosp/emu-master-dev):
@@ -43,16 +43,16 @@ message Image {
         IMAGE_TYPE_ENCRYPTION_KEY = 11;
     }
 
-    optional Type type = 1;
-    optional string path = 2;
-    optional bool present = 3;
-    optional int64 size = 4;
-    optional int64 modification_time = 5;
+    Type type = 1;
+    string path = 2;
+    bool present = 3;
+    int64 size = 4;
+    int64 modification_time = 5;
 }
 
 message Host {
-    optional string gpu_driver = 4;
-    optional int32 hypervisor = 5;
+    string gpu_driver = 4;
+    int32 hypervisor = 5;
 }
 
 message Config {
@@ -63,21 +63,21 @@ message Config {
     repeated int32 enabled_features = 1;
 
     // This holds the renderer; int32 for the same reason as |enabled_features|.
-    optional int32 selected_renderer = 2;
+    int32 selected_renderer = 2;
 
-    optional int32 cpu_core_count = 3;
-    optional int64 ram_size_bytes = 4;
+    int32 cpu_core_count = 3;
+    int64 ram_size_bytes = 4;
 }
 
 message SaveStats {
     // Type of save
     // 0: non-incremental
     // 1: incremental
-    optional uint32 incremental = 1;
+    uint32 incremental = 1;
     // Time taken to save.
-    optional uint64 duration = 2;
+    uint64 duration = 2;
     // How many changed bytes in RAM.
-    optional uint64 ram_changed_bytes = 3;
+    uint64 ram_changed_bytes = 3;
 }
 
 message Snapshot {
@@ -86,27 +86,27 @@ message Snapshot {
     // NOTE: if the old code is fine with just skipping the new fields or not
     //       getting the meaning of new values, |version| should remain
     //       unchanged.
-    optional int32 version = 1;
+    int32 version = 1;
 
     // Purely informative: when this snapshot was created, Unix timestamp.
-    optional int64 creation_time = 2;
+    int64 creation_time = 2;
 
     // List of mounted disk images used during the snapshot creation.
     repeated Image images = 3;
 
     // Description of the host machine properties needed to load this snapshot.
-    optional Host host = 4;
+    Host host = 4;
 
     // Description of the emulator configuration needed for this snapshot.
     // NOTE: try not to duplicate the configuration that's already in
     //       hardware-qemu.ini; only add what's either not there or what
     //       could've been overridden during process initialization.
-    optional Config config = 5;
+    Config config = 5;
 
     // Set if the snapshot failed to load during the last attempt.
     // Code is up to the application to define, with 0 meaning 'not failed' just
     // in case.
-    optional int64 failed_to_load_reason_code = 7;
+    int64 failed_to_load_reason_code = 7;
 
     // Set if data image is mounted.
     // User build and userdebug build mount data partition at different time.
@@ -114,33 +114,33 @@ message Snapshot {
     // to be true.
     // We snapshot it here just in case someday we support snapshot during
     // booting.
-    optional bool guest_data_partition_mounted = 8;
+    bool guest_data_partition_mounted = 8;
 
     // Emulator rotation angle, in right angles (e.g. 1 is 90 degrees, 2 is 180
     // etc).
-    optional int32 rotation = 9;
+    int32 rotation = 9;
 
     // Number of invalid loads / crashes that happened under this snapshot.
-    optional int32 invalid_loads = 10;
+    int32 invalid_loads = 10;
 
     // Number of successful loads.
-    optional int32 successful_loads = 11;
+    int32 successful_loads = 11;
 
     // The name given to the snapshot by the user. Independent of the
     // file name.
-    optional string logical_name = 12;
+    string logical_name = 12;
 
     // The file name of this snapshot's parent. The parent is the
     // snapshot that was loaded into the AVD prior to this snapshot
     // being taken
-    optional string parent = 13;
+    string parent = 13;
 
     // Arbitrary description added by the user
-    optional string description = 14;
+    string description = 14;
 
     // Record of save stats.
     repeated SaveStats save_stats = 15;
 
     // Folded state.
-    optional bool folded = 16;
+    bool folded = 16;
 }

@@ -94,7 +94,7 @@ static bool verifyImageInfo(pb::Image::Type type,
     if (in.type() != type) {
         return false;
     }
-    const bool savedPresent = in.has_present() && in.present();
+    const bool savedPresent = in.present();
     const bool realPresent = !path.empty() && path_is_regular(c_str(path));
     if (savedPresent != realPresent) {
         return false;
@@ -103,11 +103,11 @@ static bool verifyImageInfo(pb::Image::Type type,
     static_assert(sizeof(st.st_size >= sizeof(uint64_t)),
                   "Bad size member in struct stat, fix build options");
     if (android_stat(c_str(path), &st) != 0) {
-        if (in.has_size() || in.has_modification_time()) {
+        if (in.size() || in.modification_time()) {
             return false;
         }
     } else {
-        if (!in.has_size() || in.size() != st.st_size) {
+        if (!in.size() || in.size() != st.st_size) {
             return false;
         }
     }
@@ -204,7 +204,7 @@ static Optional<std::string> currentGpuDriverString() {
 bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
+    if (host.hypervisor() != vmConfig.hypervisorType) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchHostHypervisor);
         return false;
@@ -215,12 +215,12 @@ bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
         return true;
     }
     if (auto gpuString = currentGpuDriverString()) {
-        if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
+        if (host.gpu_driver() != *gpuString) {
             if (writeFailure)
                 saveFailure(FailureReason::ConfigMismatchHostGpu);
             return false;
         }
-    } else if (host.has_gpu_driver()) {
+    } else if (!host.gpu_driver().empty()) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchHostGpu);
         return false;
@@ -286,19 +286,19 @@ bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
 bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    if (config.has_cpu_core_count() &&
+    if (config.cpu_core_count() &&
         config.cpu_core_count() != vmConfig.numberOfCpuCores) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
-    if (config.has_ram_size_bytes() &&
+    if (config.ram_size_bytes() &&
         config.ram_size_bytes() != vmConfig.ramSizeBytes) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
-    if (config.has_selected_renderer() &&
+    if (config.selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
 #ifdef ALLOW_CHANGE_RENDERER
         fprintf(stderr, "WARNING: change of renderer detected.\n");
@@ -342,7 +342,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 49;
+static constexpr int kVersion = 50;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
@@ -351,7 +351,7 @@ base::StringView Snapshot::dataDir(const char* name) {
 
 base::Optional<std::string> Snapshot::parent() {
     auto info = getGeneralInfo();
-    if (!info || !info->has_parent())
+    if (!info || info->parent().empty())
         return base::kNullopt;
     auto parentName = info->parent();
     if (parentName == "")
@@ -479,7 +479,7 @@ bool Snapshot::saveFailure(FailureReason reason) {
         return true;
     }
     mSnapshotPb.set_failed_to_load_reason_code(int64_t(reason));
-    if (!mSnapshotPb.has_version()) {
+    if (!mSnapshotPb.version()) {
         mSnapshotPb.set_version(kVersion);
     }
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
@@ -498,7 +498,7 @@ static bool isUnrecoverableReason(FailureReason reason) {
 }
 
 void Snapshot::loadProtobufOnce() {
-    if (mSnapshotPb.has_version()) {
+    if (mSnapshotPb.version()) {
         return;
     }
     const auto file =
@@ -526,12 +526,12 @@ void Snapshot::loadProtobufOnce() {
         saveFailure(FailureReason::BadSnapshotPb);
         return;
     }
-    if (mSnapshotPb.has_failed_to_load_reason_code() &&
+    if (mSnapshotPb.failed_to_load_reason_code() &&
         isUnrecoverableReason(
                 FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
         return;
     }
-    if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
+    if (!mSnapshotPb.version() || mSnapshotPb.version() != kVersion) {
         saveFailure(FailureReason::IncompatibleVersion);
         return;
     }
@@ -545,7 +545,7 @@ void Snapshot::loadProtobufOnce() {
 bool Snapshot::preload() {
     loadProtobufOnce();
 
-    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+    return mSnapshotPb.version() == kVersion;
 }
 
 const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
@@ -568,12 +568,10 @@ const bool Snapshot::checkValid(bool writeFailure) {
         return true;
     }
 
-    if (mSnapshotPb.has_host() &&
-        !verifyHost(mSnapshotPb.host(), writeFailure)) {
+    if (!verifyHost(mSnapshotPb.host(), writeFailure)) {
         return false;
     }
-    if (mSnapshotPb.has_config() &&
-        !verifyConfig(mSnapshotPb.config(), writeFailure)) {
+    if (!verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
     if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
@@ -589,7 +587,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
         const auto it = std::find_if(
                 mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
                 [type](const pb::Image& im) {
-                    return im.has_type() && im.type() == type;
+                    return im.type() == type;
                 });
         if (it != mSnapshotPb.images().end()) {
             if (!verifyImageInfo(image.type, path.get(), *it)) {
@@ -653,17 +651,8 @@ const bool Snapshot::checkValid(bool writeFailure) {
         return false;
     }
 
-    if (mSnapshotPb.has_invalid_loads()) {
-        mInvalidLoads = mSnapshotPb.invalid_loads();
-    } else {
-        mInvalidLoads = 0;
-    }
-
-    if (mSnapshotPb.has_successful_loads()) {
-        mSuccessfulLoads = mSnapshotPb.successful_loads();
-    } else {
-        mSuccessfulLoads = 0;
-    }
+    mInvalidLoads = mSnapshotPb.invalid_loads();
+    mSuccessfulLoads = mSnapshotPb.successful_loads();
 
     if (isUnrecoverableReason(
                 FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
@@ -684,20 +673,16 @@ bool Snapshot::load() {
         return false;
     }
 
-    if (mSnapshotPb.has_guest_data_partition_mounted()) {
-        guest_data_partition_mounted =
-                mSnapshotPb.guest_data_partition_mounted();
-    }
+    guest_data_partition_mounted =
+            mSnapshotPb.guest_data_partition_mounted();
 
-    if (mSnapshotPb.has_rotation() &&
-        Snapshotter::get().windowAgent().getRotation() !=
+    if (Snapshotter::get().windowAgent().getRotation() !=
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
     }
 
-    if (mSnapshotPb.has_folded() &&
-        Snapshotter::get().windowAgent().isFolded() != mSnapshotPb.folded()) {
+    if (Snapshotter::get().windowAgent().isFolded() != mSnapshotPb.folded()) {
         Snapshotter::get().windowAgent().fold(mSnapshotPb.folded());
     }
 
@@ -707,7 +692,7 @@ bool Snapshot::load() {
 void Snapshot::incrementInvalidLoads() {
     ++mInvalidLoads;
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
-    if (!mSnapshotPb.has_version()) {
+    if (!mSnapshotPb.version()) {
         mSnapshotPb.set_version(kVersion);
     }
     writeSnapshotToDisk();
@@ -792,7 +777,7 @@ bool Snapshot::fixImport() {
 void Snapshot::incrementSuccessfulLoads() {
     ++mSuccessfulLoads;
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
-    if (!mSnapshotPb.has_version()) {
+    if (!mSnapshotPb.version()) {
         mSnapshotPb.set_version(kVersion);
     }
     writeSnapshotToDisk();
@@ -833,7 +818,7 @@ bool Snapshot::shouldInvalidate() const {
 }
 
 base::Optional<FailureReason> Snapshot::failureReason() const {
-    return mSnapshotPb.has_failed_to_load_reason_code()
+    return mSnapshotPb.failed_to_load_reason_code()
                    ? base::makeOptional(FailureReason(
                              mSnapshotPb.failed_to_load_reason_code()))
                    : base::kNullopt;
