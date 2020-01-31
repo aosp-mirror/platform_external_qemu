@@ -777,6 +777,7 @@ set(android-emu_unittests_src
     android/gps/KmlParser_unittest.cpp
     android/hw-lcd_unittest.cpp
     android/jdwp/Jdwp_unittest.cpp
+    android/jdwp/JdwpProxy_unittest.cpp
     android/kernel/kernel_utils_unittest.cpp
     android/location/MapsKey_unittest.cpp
     android/location/MapsKeyFileParser_unittest.cpp

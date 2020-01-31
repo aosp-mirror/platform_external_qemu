@@ -106,7 +106,8 @@ int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
             mCurrentGuestSendPacketPst ==
                     mCurrentGuestSendPacket.data.size() + kHeaderSize) {
             // handle message
-            bool shouldPush = true;  // This is always true for existing proxies
+            bool shouldPush = true;
+            std::queue<emulation::apacket> sendDataQueue;
             amessage& mesg = mCurrentGuestSendPacket.mesg;
             if (mesg.command == ADB_CNXN) {
                 mCnxnPacket = mCurrentGuestSendPacket;
@@ -131,13 +132,18 @@ int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
                             mesg.arg1 = currentHostId;
                         }
                         proxyIte->second->onGuestSendData(
-                                &mesg, mCurrentGuestSendPacket.data.data());
+                                &mesg, mCurrentGuestSendPacket.data.data(),
+                                &shouldPush, &sendDataQueue);
                     }
                     checkRemoveProxy(proxyIte);
                 }
             }
             if (shouldPush) {
                 pushToSendQueue(std::move(mCurrentGuestSendPacket));
+            }
+            while (sendDataQueue.size()) {
+                pushToSendQueue(std::move(sendDataQueue.front()));
+                sendDataQueue.pop();
             }
             mCurrentGuestSendPacket.mesg.data_length = 0;
             mCurrentGuestSendPacket.data.resize(0);
