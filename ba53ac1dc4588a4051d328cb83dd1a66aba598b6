@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca643506_6de94d06",
+        "filename": "android/android-emu/android/emulation/AdbProxy.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-31T03:37:46Z",
+      "side": 1,
+      "message": "Thank you very much for writing the doc! This is really useful to understand the code.",
+      "range": {
+        "startLine": 23,
+        "startChar": 5,
+        "endLine": 23,
+        "endChar": 6
+      },
+      "revId": "ba53ac1dc4588a4051d328cb83dd1a66aba598b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39b01258_60148a11",
+        "filename": "android/android-emu/android/emulation/AdbProxy.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-31T03:37:46Z",
+      "side": 1,
+      "message": "onGuestSendData",
+      "range": {
+        "startLine": 43,
+        "startChar": 7,
+        "endLine": 43,
+        "endChar": 22
+      },
+      "revId": "ba53ac1dc4588a4051d328cb83dd1a66aba598b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "420d6c3c_523b37f9",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-31T03:37:46Z",
+      "side": 1,
+      "message": "unused variable?",
+      "range": {
+        "startLine": 53,
+        "startChar": 21,
+        "endLine": 53,
+        "endChar": 37
+      },
+      "revId": "ba53ac1dc4588a4051d328cb83dd1a66aba598b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f45c02c7_185df688",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-31T03:37:46Z",
+      "side": 1,
+      "message": "optional: maybe better to use reinterpret_cast\nmBreakpointEventId \u003d *reinterpret_cast\u003cint*\u003e(data + kJdwpHeaderSize)",
+      "range": {
+        "startLine": 267,
+        "startChar": 28,
+        "endLine": 268,
+        "endChar": 38
+      },
+      "revId": "ba53ac1dc4588a4051d328cb83dd1a66aba598b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cda0d9e_c7cda203",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-31T03:37:46Z",
+      "side": 1,
+      "message": ".empty()",
+      "range": {
+        "startLine": 274,
+        "startChar": 55,
+        "endLine": 274,
+        "endChar": 66
+      },
+      "revId": "ba53ac1dc4588a4051d328cb83dd1a66aba598b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a3d947c_4a3576f5",
+        "filename": "android/android-emu/android/jdwp/JdwpProxy.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-01-31T03:37:46Z",
+      "side": 1,
+      "message": "How about mPendingGuestReplyCommandIds?",
+      "range": {
+        "startLine": 72,
+        "startChar": 33,
+        "endLine": 72,
+        "endChar": 59
+      },
+      "revId": "ba53ac1dc4588a4051d328cb83dd1a66aba598b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
