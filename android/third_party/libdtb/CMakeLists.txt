@@ -10,9 +10,6 @@ if(NOT WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libdtb PRIVATE -Wno-error)
 endif()
 
-# Work around some gcc/mingw issues
-android_target_compile_definitions(emulator-libdtb windows-x86_64 PRIVATE
-                                   -DUSE_MINGW=1)
 android_license(
   TARGET emulator-libdtb
   LIBNAME dtc

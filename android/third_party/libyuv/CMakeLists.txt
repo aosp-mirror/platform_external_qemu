@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 set(src "${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/source")
 
 add_library(
-   # cmake-format: sortable
+  # cmake-format: sortable
   emulator-libyuv
   ${src}/compare.cc
   ${src}/compare_common.cc
@@ -50,11 +50,6 @@ add_library(
 
 target_include_directories(emulator-libyuv PUBLIC ${src}/../include)
 target_compile_options(emulator-libyuv PRIVATE -fno-strict-aliasing)
-
-if(WINDOWS_X86_64)
-  # Work around some gcc/mingw issues
-  target_compile_definitions(emulator-libyuv PRIVATE -DLIBYUV_DISABLE_X86)
-endif()
 
 android_license(
   TARGET emulator-libyuv

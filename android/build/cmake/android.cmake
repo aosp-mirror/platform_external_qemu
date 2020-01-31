@@ -26,7 +26,6 @@ set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
 function(_check_target_tag TAG)
   set(VALID_TARGETS
       windows
-      windows-x86_64
       windows_msvc-x86_64
       linux-x86_64
       darwin-x86_64
@@ -221,7 +220,7 @@ endfunction()
 function(_register_target)
   set(options NODISTRIBUTE)
   set(oneValueArgs TARGET LICENSE LIBNAME REPO URL NOTICE)
-  set(multiValueArgs SRC LINUX MSVC WINDOWS MINGW DARWIN)
+  set(multiValueArgs SRC LINUX MSVC WINDOWS DARWIN)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(NOT DEFINED build_TARGET)
@@ -235,8 +234,6 @@ function(_register_target)
     list(APPEND src ${build_DARWIN})
   elseif(WINDOWS_MSVC_X86_64 AND (build_MSVC OR build_WINDOWS))
     list(APPEND src ${build_MSVC} ${build_WINDOWS})
-  elseif(WINDOWS_X86_64 AND (build_MINGW OR build_WINDOWS))
-    list(APPEND src ${build_MINGW} ${build_WINDOWS})
   endif()
 
   set(REGISTERED_SRC ${src} PARENT_SCOPE)
@@ -545,14 +542,6 @@ function(android_add_test)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
-  # We cannot run tests when we are cross compiling, and for mingw it is very
-  # expensive.
-  if(WINDOWS_X86_64)
-    # Only build them when user explicitly asks for it.
-    set_target_properties(${build_TARGET} PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    return()
-  endif()
-
   add_test(
     NAME ${build_TARGET}
     COMMAND
@@ -661,27 +650,7 @@ endfunction()
 
 # For adding big proto files that mingw can't handle.
 function(android_add_big_protobuf name protofiles)
-  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
-  android_add_library(TARGET ${name} LICENSE Apache-2.0 SRC ${PROTO_SRCS}
-                                                            ${PROTO_HDRS})
-  target_link_libraries(${name} PUBLIC libprotobuf)
-  target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  # Disable generation of information about every class with virtual functions
-  # for use by the C++ runtime type identification features (dynamic_cast and
-  # typeid). If you don't use those parts of the language, you can save some
-  # space by using this flag. Note that exception handling uses the same
-  # information, but it will generate it as needed. The  dynamic_cast operator
-  # can still be used for casts that do not require runtime type information,
-  # i.e. casts to void * or to unambiguous base classes.
-  if(WINDOWS_X86_64)
-    target_compile_options(${name} PRIVATE -fno-rtti "-Wa,-mbig-obj")
-  else()
-    target_compile_options(${name} PRIVATE -fno-rtti)
-  endif()
-
-  # This needs to be public, as we don't want the headers to start exposing
-  # exceptions.
-  target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
+  android_add_protobuf(name protofiles)
 endfunction()
 
 # This function generates the hw config file. It translates android-
