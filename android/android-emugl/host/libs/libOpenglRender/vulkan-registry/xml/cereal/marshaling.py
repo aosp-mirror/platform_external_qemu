@@ -17,7 +17,7 @@ from copy import copy
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator, Atom, FuncExpr, FuncExprVal
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import VULKAN_STREAM_VAR_NAME
@@ -41,7 +41,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                  forApiOutput = False,
                  dynAlloc = False,
                  mapHandles = True,
-                 handleMapOverwrites = False):
+                 handleMapOverwrites = False,
+                 doFiltering = True):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -57,10 +58,12 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+        self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
         self.mapHandles = mapHandles
         self.handleMapOverwrites = handleMapOverwrites
+        self.doFiltering = doFiltering
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -99,6 +102,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             direction=self.direction)
 
     def genHandleMappingCall(self, vulkanType, access, lenAccess):
+
         if lenAccess is None:
             lenAccess = "1"
             handle64Bytes = "8"
@@ -222,10 +226,103 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             self.cgen.endIf()
             self.checked = False
 
+    def genFilterFunc(self, filterfunc, env):
+
+        def loop(expr):
+            def do_func(expr):
+                fnamestr = expr.name.name
+                if "not" == fnamestr:
+                    return "!(%s)" % (loop(expr.args[0]))
+                if "eq" == fnamestr:
+                    return "(%s == %s)" % (loop(expr.args[0]), loop(expr.args[1]))
+                print("Unknown function: %s" % fnamestr)
+                raise
+
+            def do_expratom(atomname):
+                enventry = env.get(atomname, None)
+                if None != enventry:
+                    return self.getEnvAccessExpr(atomname)
+                return atomname
+
+            def do_exprval(expr):
+                expratom = expr.val
+
+                if Atom == type(expratom):
+                    return do_expratom(expratom.name)
+
+                return "%s" % expratom
+
+            if FuncExpr == type(expr):
+                return do_func(expr)
+            elif FuncExprVal == type(expr):
+                return do_exprval(expr)
+
+        return loop(filterfunc)
+
+    def beginFilterGuard(self, vulkanType):
+        if vulkanType.filterVar == None:
+            return
+
+        if self.doFiltering == False:
+            return
+
+        filterVarAccess = self.getEnvAccessExpr(vulkanType.filterVar)
+
+        filterValsExpr = None
+        filterFuncExpr = None
+        filterExpr = None
+
+        if None != vulkanType.filterVals:
+            filterValsExpr = " || ".join(map(lambda filterval: "(%s == %s)" % (filterval, filterVarAccess), vulkanType.filterVals))
+
+        if None != vulkanType.filterFunc:
+            filterFuncExpr = self.genFilterFunc(vulkanType.filterFunc, self.currentStructInfo.environment)
+
+        if None != filterValsExpr and None != filterFuncExpr:
+            filterExpr = "%s || %s" % (filterValsExpr, filterFuncExpr)
+        elif None == filterValsExpr and None == filterFuncExpr:
+            return
+        elif None != filterValsExpr:
+            self.cgen.beginIf(filterValsExpr)
+        elif None != filterFuncExpr:
+            self.cgen.beginIf(filterFuncExpr)
+
+    def endFilterGuard(self, vulkanType, cleanupExpr=None):
+        if vulkanType.filterVar == None:
+            return
+
+        if self.doFiltering == False:
+            return
+
+        if cleanupExpr == None:
+            self.cgen.endIf()
+        else:
+            self.cgen.endIf()
+            self.cgen.beginElse()
+            self.cgen.stmt(cleanupExpr)
+            self.cgen.endElse()
+
+    def getEnvAccessExpr(self, varName):
+        parentEnvEntry = self.currentStructInfo.environment.get(varName, None)
+
+        if parentEnvEntry != None:
+            isParentMember = parentEnvEntry["structmember"]
+
+            if isParentMember:
+                envAccess = self.exprValueAccessor(list(filter(lambda member: member.paramName == varName, self.currentStructInfo.members))[0])
+            else:
+                envAccess = varName
+            return envAccess
+
+        return None
+
+
     def onCompoundType(self, vulkanType):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+
+        self.beginFilterGuard(vulkanType)
 
         if vulkanType.pointerIndirectionLevels > 0:
             self.doAllocSpace(vulkanType)
@@ -241,11 +338,21 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         accessWithCast = "%s(%s)" % (self.makeCastExpr(
             self.getTypeForStreaming(vulkanType)), access)
 
+        callParams = [self.streamVarName, accessWithCast]
+
+        for (bindName, localName) in vulkanType.binds.items():
+            callParams.append(self.getEnvAccessExpr(localName))
+
         self.cgen.funcCall(None, self.marshalPrefix + vulkanType.typeName,
-                           [self.streamVarName, accessWithCast])
+                           callParams)
 
         if lenAccess is not None:
             self.cgen.endFor()
+
+        if self.direction == "read":
+            self.endFilterGuard(vulkanType, "%s = 0" % self.exprAccessor(vulkanType))
+        else:
+            self.endFilterGuard(vulkanType)
 
     def onString(self, vulkanType):
 
@@ -336,7 +443,11 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         lenAccess = self.lenAccessor(vulkanType)
 
+        self.beginFilterGuard(vulkanType)
         self.doAllocSpace(vulkanType)
+
+        if vulkanType.filterVar != None:
+            print("onPointer Needs filter: %s filterVar %s" % (access, vulkanType.filterVar))
 
         if vulkanType.isHandleType() and self.mapHandles:
             self.genHandleMappingCall(vulkanType, access, lenAccess)
@@ -357,9 +468,18 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                         self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
                 self.genStreamCall(vulkanType, access, finalLenExpr)
 
+        if self.direction == "read":
+            self.endFilterGuard(vulkanType, "%s = 0" % access)
+        else:
+            self.endFilterGuard(vulkanType)
+
     def onValue(self, vulkanType):
+        self.beginFilterGuard(vulkanType)
+
         if vulkanType.isHandleType() and self.mapHandles:
             access = self.exprAccessor(vulkanType)
+            if vulkanType.filterVar != None:
+                print("onValue Needs filter: %s filterVar %s" % (access, vulkanType.filterVar))
             self.genHandleMappingCall(
                 vulkanType.getForAddressAccess(), access, "1")
         elif self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
@@ -368,6 +488,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         else:
             access = self.exprAccessor(vulkanType)
             self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
+
+        self.endFilterGuard(vulkanType)
 
 class VulkanMarshaling(VulkanWrapperGenerator):
 
@@ -446,18 +568,42 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
             marshalParams = self.marshalingParams + \
                 [makeVulkanTypeSimple(True, name, 1, MARSHAL_INPUT_VAR_NAME)]
+
+            freeParams = []
+
+            for (envname, bindingInfo) in list(sorted(structInfo.environment.items(), key = lambda kv: kv[0])):
+                if None == bindingInfo["binding"]:
+                    freeParams.append(makeVulkanTypeSimple(True, bindingInfo["type"], 0, envname))
+
             marshalPrototype = \
+                VulkanAPI(API_PREFIX_MARSHAL + name,
+                          STREAM_RET_TYPE,
+                          marshalParams + freeParams)
+
+            marshalPrototypeNoFilter = \
                 VulkanAPI(API_PREFIX_MARSHAL + name,
                           STREAM_RET_TYPE,
                           marshalParams)
 
             def structMarshalingDef(cgen):
                 self.writeCodegen.cgen = cgen
+                self.writeCodegen.currentStructInfo = structInfo
                 if category == "struct":
                     for member in structInfo.members:
                         iterateVulkanType(self.typeInfo, member, self.writeCodegen)
                 if category == "union":
                     iterateVulkanType(self.typeInfo, structInfo.members[0], self.writeCodegen)
+
+            def structMarshalingDefNoFilter(cgen):
+                self.writeCodegen.cgen = cgen
+                self.writeCodegen.currentStructInfo = structInfo
+                self.writeCodegen.doFiltering = False
+                if category == "struct":
+                    for member in structInfo.members:
+                        iterateVulkanType(self.typeInfo, member, self.writeCodegen)
+                if category == "union":
+                    iterateVulkanType(self.typeInfo, structInfo.members[0], self.writeCodegen)
+                self.writeCodegen.doFiltering = True
 
             self.module.appendHeader(
                 self.cgenHeader.makeFuncDecl(marshalPrototype))
@@ -465,24 +611,55 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 self.cgenImpl.makeFuncImpl(
                     marshalPrototype, structMarshalingDef))
 
+            if freeParams != []:
+                self.module.appendHeader(
+                    self.cgenHeader.makeFuncDecl(marshalPrototypeNoFilter))
+                self.module.appendImpl(
+                    self.cgenImpl.makeFuncImpl(
+                        marshalPrototypeNoFilter, structMarshalingDefNoFilter))
+
             unmarshalPrototype = \
+                VulkanAPI(API_PREFIX_UNMARSHAL + name,
+                          STREAM_RET_TYPE,
+                          self.marshalingParams + [makeVulkanTypeSimple(False, name, 1, UNMARSHAL_INPUT_VAR_NAME)] + freeParams)
+
+            unmarshalPrototypeNoFilter = \
                 VulkanAPI(API_PREFIX_UNMARSHAL + name,
                           STREAM_RET_TYPE,
                           self.marshalingParams + [makeVulkanTypeSimple(False, name, 1, UNMARSHAL_INPUT_VAR_NAME)])
 
             def structUnmarshalingDef(cgen):
                 self.readCodegen.cgen = cgen
+                self.readCodegen.currentStructInfo = structInfo
                 if category == "struct":
                     for member in structInfo.members:
                         iterateVulkanType(self.typeInfo, member, self.readCodegen)
                 if category == "union":
                     iterateVulkanType(self.typeInfo, structInfo.members[0], self.readCodegen)
 
+            def structUnmarshalingDefNoFilter(cgen):
+                self.readCodegen.cgen = cgen
+                self.readCodegen.currentStructInfo = structInfo
+                self.readCodegen.doFiltering = False
+                if category == "struct":
+                    for member in structInfo.members:
+                        iterateVulkanType(self.typeInfo, member, self.readCodegen)
+                if category == "union":
+                    iterateVulkanType(self.typeInfo, structInfo.members[0], self.readCodegen)
+                self.readCodegen.doFiltering = True
+
             self.module.appendHeader(
                 self.cgenHeader.makeFuncDecl(unmarshalPrototype))
             self.module.appendImpl(
                 self.cgenImpl.makeFuncImpl(
                     unmarshalPrototype, structUnmarshalingDef))
+
+            if freeParams != []:
+                self.module.appendHeader(
+                    self.cgenHeader.makeFuncDecl(unmarshalPrototypeNoFilter))
+                self.module.appendImpl(
+                    self.cgenImpl.makeFuncImpl(
+                        unmarshalPrototypeNoFilter, structUnmarshalingDefNoFilter))
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
