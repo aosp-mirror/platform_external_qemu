@@ -43,7 +43,6 @@ set(OPTION_CLANG_TIDY
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-
 if(LINUX_X86_64)
   set(WEBRTC
       TRUE
@@ -94,7 +93,7 @@ else()
   message(STATUS "Uploading symbols to ${OPTION_CRASHUPLOAD}")
 endif()
 
-if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE AND NOT WINDOWS_X86_64)
+if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
   message(
     WARNING
       "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling."
@@ -172,7 +171,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
   set(CMAKE_INSTALL_DO_STRIP TRUE)
   add_definitions("-DNDEBUG=1")
-  if(WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64)
+  if(WINDOWS_MSVC_X86_64)
     # clang-cl takes msvc based parameters, so -O3 is a nop
     add_c_flag("-O2")
   else()
@@ -187,10 +186,6 @@ if(LINUX_X86_64)
   add_c_flag("-Werror")
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE elf64)
-elseif(WINDOWS_X86_64)
-  add_c_flag("-Wno-all")
-  # And the asm type if we are compiling with yasm
-  set(ANDROID_NASM_TYPE win64)
 elseif(WINDOWS_MSVC_X86_64)
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE win64)
@@ -357,7 +352,7 @@ android_license(
     "https://android.googlesource.com/platform/external/swiftshader/+/refs/heads/emu-master-dev/LICENSE.txt"
   LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
 
-if(WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64)
+if(WINDOWS_MSVC_X86_64)
   set(ANGLE_RENDERER_DEPENDENCIES
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/dx/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/dx/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
@@ -534,14 +529,6 @@ android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
                               "-framework IOKit" "-framework CoreFoundation")
 
 # Windows x86 definitions
-set(ANDROID_QEMU_arm_DEVICES_windows-x86
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
-set(ANDROID_QEMU_i386_DEVICES_windows-x86
-    "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
-set(ANDROID_QEMU_arm_DEVICES_windows-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
-set(ANDROID_QEMU_i386_DEVICES_windows-x86_64
-    "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64
     "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64
@@ -564,16 +551,6 @@ android_target_compile_options(
   "-Wno-implicit-int-float-conversion"
   "-Wno-reorder-init-list")
 
-android_target_compile_options(
-  android-qemu-deps
-  windows-x86_64
-  INTERFACE
-  "-Werror=implicit-function-declaration"
-  "-mms-bitfields"
-  "-Wno-unused-variable"
-  "-Wno-unused-but-set-variable"
-  "-Wno-maybe-uninitialized"
-  "-mcx16")
 android_target_compile_definitions(
   android-qemu-deps
   windows

@@ -66,12 +66,6 @@ target_include_directories(emulator-libkeymaster3 PUBLIC .)
 target_include_directories(emulator-libkeymaster3 PRIVATE src include)
 target_link_libraries(emulator-libkeymaster3 PRIVATE android-emu-base ssl
                                                      crypto)
-
-if(WINDOWS_X86_64)
-  # Workaround some gcc/mingw issues
-  target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
-endif()
-
 if(WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libkeymaster3
                          PRIVATE "-mssse3" "-Wno-incompatible-pointer-types")

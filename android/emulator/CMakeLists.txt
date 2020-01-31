@@ -10,13 +10,6 @@ android_add_executable(
   SRC # cmake-format: sortable
       main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator PRIVATE android-emu)
-# The mingw debug build somehow requires us to link against the vm operations in
-# debug builds, even though we are not using them..
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  android_target_link_libraries(emulator windows-x86_64
-                                PRIVATE android-mock-vm-operations android-emu)
-endif()
-
 target_compile_definitions(
   emulator
   PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
@@ -92,7 +85,6 @@ android_target_dependency(emulator windows_msvc-x86_64
                           GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64
                           ANGLE_RENDERER_DEPENDENCIES)
-android_target_dependency(emulator windows-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # And install them for a release.
 # TODO(b/141205876): prebuilt executables are losing their execute permission on
@@ -117,7 +109,6 @@ android_install_dependency(linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 MSVC_DEPENDENCIES)
-android_install_dependency(windows-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 
 # Text files have no licenses.
 android_license(TARGET "EMULATOR_KEYMAP_DEPENDENCIES" LIBNAME None SPDX None

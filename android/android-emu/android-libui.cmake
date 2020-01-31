@@ -289,9 +289,6 @@ if(NOT QTWEBENGINE)
       android/skin/qt/mac-native-window.mm
       android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/extended-pages/location-page_noMaps.ui)
-  set(emulator-libui_windows-x86_64_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
@@ -306,10 +303,6 @@ else()
       android/skin/qt/mac-native-window.mm
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp)
-  set(emulator-libui_windows-x86_64_src
-      # cmake-format: sortable
-      android/skin/qt/extended-pages/location-page_noMaps.ui
-      android/skin/qt/windows-native-window.cpp)
   set(emulator-libui_windows_msvc-x86_64_src
       # cmake-format: sortable
       android/skin/qt/extended-pages/location-page.ui
@@ -336,12 +329,11 @@ android_add_library(
       ${emulator-libui_src}
   DARWIN ${emulator-libui_darwin-x86_64_src}
   LINUX ${emulator-libui_linux-x86_64_src}
-  MSVC ${emulator-libui_windows_msvc-x86_64_src}
-  MINGW ${emulator-libui_windows-x86_64_src})
+  MSVC ${emulator-libui_windows_msvc-x86_64_src})
 
 # TODO: Remove this and the "USE_WEBENGINE" defines once we have: --no-window
 # mode has no dependency on Qt
-if(QTWEBENGINE AND NOT WINDOWS_X86_64)
+if(QTWEBENGINE)
   target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
   target_link_libraries(
     emulator-libui PRIVATE Qt5::Network Qt5::WebEngineWidgets Qt5::WebChannel
@@ -455,8 +447,7 @@ android_add_library(
       ${emulator-libui-headless_src}
   DARWIN ${emulator-libui-headless_darwin-x86_64_src}
   LINUX ${emulator-libui-headless_linux-x86_64_src}
-  MSVC ${emulator-libui-headless_windows_msvc-x86_64_src}
-  MINGW ${emulator-libui-headless_windows-x86_64_src})
+  MSVC ${emulator-libui-headless_windows_msvc-x86_64_src})
 
 target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
 target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
