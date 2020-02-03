@@ -201,3 +201,15 @@ typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, IOSurfaceRef* pIO
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+#ifdef __cplusplus
+
+template<class T, typename F>
+bool arrayany(T* arr, uint32_t begin, uint32_t end, F func) {
+    for (uint32_t i = begin; i < end; ++i) {
+        if (func(arr[i])) return true;
+    }
+    return false;
+}
+
+#endif
