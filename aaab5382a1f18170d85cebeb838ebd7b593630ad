@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39758ed9_11b5e32f",
+        "filename": "android/android-emu/android/emulation/YuvConverter.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-03T14:39:05Z",
+      "side": 1,
+      "message": "theres already a YUVConverter in android-emugl; it can be confusing. Should this be YUVPlanarInterleavedConverter instead, and/or change the YUVConverter in android-emugl to YUVRGBConverter?",
+      "revId": "aaab5382a1f18170d85cebeb838ebd7b593630ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
