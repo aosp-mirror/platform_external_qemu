@@ -1,0 +1,149 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include "android/emulation/GoldfishMediaDefs.h"
+#include "android/emulation/H264NaluParser.h"
+#include "android/emulation/MediaCodec.h"
+#include "android/emulation/MediaH264DecoderPlugin.h"
+
+#include <cstdint>
+#include <list>
+#include <mutex>
+#include <string>
+#include <vector>
+
+extern "C" {
+#include "android/emulation/dynlink_cuda.h"
+#include "android/emulation/dynlink_nvcuvid.h"
+}
+#include <stdio.h>
+#include <string.h>
+
+#include <stddef.h>
+
+namespace android {
+namespace emulation {
+
+class MediaH264DecoderCuvid : public MediaH264DecoderPlugin {
+public:
+    virtual void initH264Context(unsigned int width,
+                                 unsigned int height,
+                                 unsigned int outWidth,
+                                 unsigned int outHeight,
+                                 PixelFormat pixFmt) override;
+    virtual void reset(unsigned int width,
+                       unsigned int height,
+                       unsigned int outWidth,
+                       unsigned int outHeight,
+                       PixelFormat pixFmt) override;
+    virtual void destroyH264Context() override;
+    virtual void decodeFrame(void* ptr,
+                             const uint8_t* frame,
+                             size_t szBytes,
+                             uint64_t pts) override;
+    virtual void flush(void* ptr) override;
+    virtual void getImage(void* ptr) override;
+
+    MediaH264DecoderCuvid() = default;
+    virtual ~MediaH264DecoderCuvid();
+
+private:
+    // void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes,
+    // uint64_t pts, size_t consumedSzBytes);
+    // We should move these shared memory calls elsewhere, as vpx decoder is
+    // also using the same/similar functions
+    static void* getReturnAddress(void* ptr);
+    static uint8_t* getDst(void* ptr);
+
+    uint64_t mOutputPts = 0;
+    std::vector<uint8_t> mSPS;  // sps NALU
+    std::vector<uint8_t> mPPS;  // pps NALU
+
+    bool mIsInFlush = false;
+
+public:
+    // cuda related methods
+    static bool initCudaDrivers();
+    static bool s_isCudaInitialized;
+
+private:
+    // cuda call back
+    static int CUDAAPI HandleVideoSequenceProc(void* pUserData,
+                                               CUVIDEOFORMAT* pVideoFormat) {
+        return ((MediaH264DecoderCuvid*)pUserData)
+                ->HandleVideoSequence(pVideoFormat);
+    }
+    static int CUDAAPI HandlePictureDecodeProc(void* pUserData,
+                                               CUVIDPICPARAMS* pPicParams) {
+        return ((MediaH264DecoderCuvid*)pUserData)
+                ->HandlePictureDecode(pPicParams);
+    }
+    static int CUDAAPI
+    HandlePictureDisplayProc(void* pUserData, CUVIDPARSERDISPINFO* pDispInfo) {
+        return ((MediaH264DecoderCuvid*)pUserData)
+                ->HandlePictureDisplay(pDispInfo);
+    }
+
+    int HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat);
+
+    int HandlePictureDecode(CUVIDPICPARAMS* pPicParams);
+
+    int HandlePictureDisplay(CUVIDPARSERDISPINFO* pDispInfo);
+
+    void doFlush();
+
+private:
+    // image props
+    bool mImageReady = false;
+    static constexpr int kBPP = 2;  // YUV420 is 2 bytes per pixel
+    unsigned int mHeight = 0;
+    unsigned int mWidth = 0;
+    unsigned int mOutputHeight = 0;
+    unsigned int mOutputWidth = 0;
+    unsigned int mSurfaceHeight = 0;
+    unsigned int mBPP = 0;
+    unsigned int mSurfaceWidth = 0;
+    unsigned int mLumaWidth = 0;
+    unsigned int mLumaHeight = 0;
+    unsigned int mChromaHeight = 0;
+    PixelFormat mOutPixFmt;
+    unsigned int mOutBufferSize = 0;
+
+    unsigned int mColorPrimaries = 2;
+    unsigned int mColorRange = 0;
+    unsigned int mColorTransfer = 2;
+    unsigned int mColorSpace = 2;
+
+    // right now, decoding command only passes the input address;
+    // and output address is only available in getImage().
+    // TODO: this should be set to the output address to avoid
+    // extra copying
+    uint8_t* mDecodedFrame = nullptr;
+    std::list<int> mSavedW;
+    std::list<int> mSavedH;
+    std::list<uint64_t> mSavedPts;
+    std::list<std::vector<uint8_t>> mSavedFrames;
+    std::mutex mFrameLock;
+
+    // cuda stuff
+    CUcontext mCudaContext = nullptr;
+    CUvideoctxlock mCtxLock;
+    CUvideoparser mCudaParser = nullptr;
+    CUvideodecoder mCudaDecoder = nullptr;
+
+};  // MediaH264DecoderCuvid
+}  // namespace emulation
+}  // namespace android
