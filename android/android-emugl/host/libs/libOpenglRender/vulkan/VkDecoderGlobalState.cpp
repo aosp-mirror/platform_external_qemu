@@ -2836,6 +2836,8 @@ public:
         *pAddress = (uint64_t)(uintptr_t)(info->ptr);
         *pSize = (uint64_t)(uintptr_t)(info->size);
 
+        fprintf(stderr, "%s: hva, size: %p 0x%llx\n", __func__,
+                info->ptr, (unsigned long long)(info->size));
         return VK_SUCCESS;
     }
 

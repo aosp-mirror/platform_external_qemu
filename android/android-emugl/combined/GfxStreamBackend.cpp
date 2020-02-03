@@ -303,6 +303,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::HostComposition, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanIgnoredHandles, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VirtioGpuNext, true);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
