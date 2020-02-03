@@ -675,7 +675,9 @@ public:
             }
 
             if (!emugl::emugl_feature_is_enabled(
-                        android::featurecontrol::GLDirectMem)) {
+                        android::featurecontrol::GLDirectMem) &&
+                !emugl::emugl_feature_is_enabled(
+                        android::featurecontrol::VirtioGpuNext)) {
                 pMemoryProperties->memoryTypes[i].propertyFlags =
                     pMemoryProperties->memoryTypes[i].propertyFlags &
                     ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -729,7 +731,9 @@ public:
             }
 
             if (!emugl::emugl_feature_is_enabled(
-                        android::featurecontrol::GLDirectMem)) {
+                        android::featurecontrol::GLDirectMem) &&
+                !emugl::emugl_feature_is_enabled(
+                        android::featurecontrol::VirtioGpuNext)) {
                 pMemoryProperties->memoryProperties.memoryTypes[i].propertyFlags =
                     pMemoryProperties->memoryProperties.memoryTypes[i].propertyFlags &
                     ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -2318,7 +2322,9 @@ public:
             uint64_t physAddr) {
 
         if (!emugl::emugl_feature_is_enabled(
-                    android::featurecontrol::GLDirectMem)) {
+                    android::featurecontrol::GLDirectMem) &&
+            !emugl::emugl_feature_is_enabled(
+                    android::featurecontrol::VirtioGpuNext)) {
             emugl::emugl_crash_reporter(
                     "FATAL: Tried to use direct mapping "
                     "while GLDirectMem is not enabled!");
@@ -2655,7 +2661,9 @@ public:
 
     bool usingDirectMapping() const {
         return emugl::emugl_feature_is_enabled(
-                android::featurecontrol::GLDirectMem);
+                android::featurecontrol::GLDirectMem) ||
+               emugl::emugl_feature_is_enabled(
+                android::featurecontrol::VirtioGpuNext);
     }
 
     HostFeatureSupport getHostFeatureSupport() const {
@@ -2839,6 +2847,8 @@ public:
         // so the guest doesn't have to know the HVA
         *pHostmemId = 0;
 
+        fprintf(stderr, "%s: hva, size: %p 0x%llx\n", __func__,
+                info->ptr, (unsigned long long)(info->size));
         return VK_SUCCESS;
     }
 
