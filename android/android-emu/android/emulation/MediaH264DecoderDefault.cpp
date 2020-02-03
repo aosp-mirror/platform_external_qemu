@@ -15,7 +15,7 @@
 #include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/MediaH264DecoderFfmpeg.h"
 #ifdef __APPLE__
-#include "android/emulation/MediaH264DecoderVideoToolBox.h"
+#include "android/emulation/MediaH264DecoderVideoToolBoxProxy.h"
 #else
 // for Linux and Window, Cuvid is available
 #include "android/emulation/MediaH264DecoderCuvid.h"
@@ -47,7 +47,7 @@ MediaH264DecoderPlugin* makeDecoderPlugin() {
     auto useVideoToolBox = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_VIDEOTOOLBOX_DECODER");
     if (useVideoToolBox != "") {
-        return new MediaH264DecoderVideoToolBox();
+        return new MediaH264DecoderVideoToolBoxProxy();
     }
 #else
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(

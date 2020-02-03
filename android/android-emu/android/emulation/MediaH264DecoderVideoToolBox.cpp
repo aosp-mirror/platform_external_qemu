@@ -356,7 +356,7 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
             // resolution change.
             if (mDecoderSession != nullptr) {
                 H264_DPRINT("Decoder session is restarting");
-                h264Err = Err::DecoderRestarted;
+                //h264Err = Err::DecoderRestarted;
             }
             recreateDecompressionSession();
             break;
@@ -384,10 +384,12 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
     *retSzBytes = currentNaluSize + consumedSzBytes;
     *retErr = (int32_t)h264Err;
 
-    if (currentNalu) {
-        decodeFrameInternal(ptr, currentNalu, remaining, pts, consumedSzBytes + currentNaluSize);
-        H264_DPRINT("calling decodeFrameInternal recursively");
-    }
+    H264_DPRINT("calling decodeFrameInternal recursively");
+    // disable recursive decoding due to the possibility of session creation failure
+    // keep it simple for now
+    //if (currentNalu) {
+    //    decodeFrameInternal(ptr, currentNalu, remaining, pts, consumedSzBytes + currentNaluSize);
+    //}
 }
 
 void MediaH264DecoderVideoToolBox::handleIDRFrame(const uint8_t* ptr, size_t szBytes, uint64_t pts) {
@@ -613,6 +615,8 @@ void MediaH264DecoderVideoToolBox::recreateDecompressionSession() {
         CFRelease(bufAttr);
     }
 
+    mIsInFlush = false;
+    mState = DecoderState::BAD_STATE;
     switch (status) {
         case kVTVideoDecoderNotAvailableNowErr:
             H264_DPRINT("VideoToolbox session not available");
@@ -628,12 +632,12 @@ void MediaH264DecoderVideoToolBox::recreateDecompressionSession() {
             return;
         case 0:
             H264_DPRINT("VideoToolbox session created");
+            mState = DecoderState::GOOD_STATE;
             return;
         default:
             H264_DPRINT("Unknown VideoToolbox session creation error %d", status);
             return;
     }
-    mIsInFlush = false;
 }
 
 }  // namespace emulation

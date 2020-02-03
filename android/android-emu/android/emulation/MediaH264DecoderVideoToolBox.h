@@ -60,7 +60,18 @@ public:
     MediaH264DecoderVideoToolBox();
     virtual ~MediaH264DecoderVideoToolBox();
 
+public:
+    enum class DecoderState {
+        BAD_STATE = 0,
+        GOOD_STATE = 1,
+    };
+
+    DecoderState getState() const {return mState;}
+    std::vector<uint8_t> getSPS() const { return mSPS; }
+    std::vector<uint8_t> getPPS() const { return mPPS; }
 private:
+    DecoderState mState = DecoderState::GOOD_STATE;
+
     void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes);
     // Passes the Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) to the
     // videotoolbox decoder
