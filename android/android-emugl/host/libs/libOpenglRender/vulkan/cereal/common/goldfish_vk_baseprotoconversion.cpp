@@ -2829,8 +2829,16 @@ void to_proto_VkGraphicsPipelineCreateInfo(
     {
         to_proto_VkPipelineShaderStageCreateInfo(handleMapping, input->pStages + i, output->add_pstages());
     }
-    to_proto_VkPipelineVertexInputStateCreateInfo(handleMapping, input->pVertexInputState, output->mutable_pvertexinputstate());
-    to_proto_VkPipelineInputAssemblyStateCreateInfo(handleMapping, input->pInputAssemblyState, output->mutable_pinputassemblystate());
+    // WARNING PTR CHECK
+    if (input->pVertexInputState)
+    {
+        to_proto_VkPipelineVertexInputStateCreateInfo(handleMapping, input->pVertexInputState, output->mutable_pvertexinputstate());
+    }
+    // WARNING PTR CHECK
+    if (input->pInputAssemblyState)
+    {
+        to_proto_VkPipelineInputAssemblyStateCreateInfo(handleMapping, input->pInputAssemblyState, output->mutable_pinputassemblystate());
+    }
     // WARNING PTR CHECK
     if (input->pTessellationState)
     {
@@ -2841,7 +2849,11 @@ void to_proto_VkGraphicsPipelineCreateInfo(
     {
         to_proto_VkPipelineViewportStateCreateInfo(handleMapping, input->pViewportState, output->mutable_pviewportstate());
     }
-    to_proto_VkPipelineRasterizationStateCreateInfo(handleMapping, input->pRasterizationState, output->mutable_prasterizationstate());
+    // WARNING PTR CHECK
+    if (input->pRasterizationState)
+    {
+        to_proto_VkPipelineRasterizationStateCreateInfo(handleMapping, input->pRasterizationState, output->mutable_prasterizationstate());
+    }
     // WARNING PTR CHECK
     if (input->pMultisampleState)
     {
@@ -2897,10 +2909,18 @@ void from_proto_VkGraphicsPipelineCreateInfo(
     {
         from_proto_VkPipelineShaderStageCreateInfo(pool, handleMapping, input->mutable_pstages(i), (VkPipelineShaderStageCreateInfo*)(output->pStages + i));
     }
-    *(void**)&output->pVertexInputState = pool->alloc(sizeof(const VkPipelineVertexInputStateCreateInfo));
-    from_proto_VkPipelineVertexInputStateCreateInfo(pool, handleMapping, input->mutable_pvertexinputstate(), (VkPipelineVertexInputStateCreateInfo*)(output->pVertexInputState));
-    *(void**)&output->pInputAssemblyState = pool->alloc(sizeof(const VkPipelineInputAssemblyStateCreateInfo));
-    from_proto_VkPipelineInputAssemblyStateCreateInfo(pool, handleMapping, input->mutable_pinputassemblystate(), (VkPipelineInputAssemblyStateCreateInfo*)(output->pInputAssemblyState));
+    // WARNING PTR CHECK
+    if (input->has_pvertexinputstate())
+    {
+        *(void**)&output->pVertexInputState = pool->alloc(sizeof(const VkPipelineVertexInputStateCreateInfo));
+        from_proto_VkPipelineVertexInputStateCreateInfo(pool, handleMapping, input->mutable_pvertexinputstate(), (VkPipelineVertexInputStateCreateInfo*)(output->pVertexInputState));
+    }
+    // WARNING PTR CHECK
+    if (input->has_pinputassemblystate())
+    {
+        *(void**)&output->pInputAssemblyState = pool->alloc(sizeof(const VkPipelineInputAssemblyStateCreateInfo));
+        from_proto_VkPipelineInputAssemblyStateCreateInfo(pool, handleMapping, input->mutable_pinputassemblystate(), (VkPipelineInputAssemblyStateCreateInfo*)(output->pInputAssemblyState));
+    }
     // WARNING PTR CHECK
     if (input->has_ptessellationstate())
     {
@@ -2913,8 +2933,12 @@ void from_proto_VkGraphicsPipelineCreateInfo(
         *(void**)&output->pViewportState = pool->alloc(sizeof(const VkPipelineViewportStateCreateInfo));
         from_proto_VkPipelineViewportStateCreateInfo(pool, handleMapping, input->mutable_pviewportstate(), (VkPipelineViewportStateCreateInfo*)(output->pViewportState));
     }
-    *(void**)&output->pRasterizationState = pool->alloc(sizeof(const VkPipelineRasterizationStateCreateInfo));
-    from_proto_VkPipelineRasterizationStateCreateInfo(pool, handleMapping, input->mutable_prasterizationstate(), (VkPipelineRasterizationStateCreateInfo*)(output->pRasterizationState));
+    // WARNING PTR CHECK
+    if (input->has_prasterizationstate())
+    {
+        *(void**)&output->pRasterizationState = pool->alloc(sizeof(const VkPipelineRasterizationStateCreateInfo));
+        from_proto_VkPipelineRasterizationStateCreateInfo(pool, handleMapping, input->mutable_prasterizationstate(), (VkPipelineRasterizationStateCreateInfo*)(output->pRasterizationState));
+    }
     // WARNING PTR CHECK
     if (input->has_pmultisamplestate())
     {

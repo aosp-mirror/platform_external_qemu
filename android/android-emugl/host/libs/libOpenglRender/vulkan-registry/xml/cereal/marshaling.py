@@ -17,7 +17,7 @@ from copy import copy
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator, Atom, FuncExpr, FuncExprVal
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator, Atom, FuncExpr, FuncExprVal, FuncLambda
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import VULKAN_STREAM_VAR_NAME
@@ -170,10 +170,20 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                     (self.streamVarName,
                      access, bytesExpr))
 
+    def getOptionalStringFeatureExpr(self, vulkanType):
+        if vulkanType.optionalStr is not None:
+            if vulkanType.optionalStr.startswith("streamFeature:"):
+                splitted = vulkanType.optionalStr.split(":")
+                featureExpr = "%s->getFeatureBits() & %s" % (self.streamVarName, splitted[1])
+                return featureExpr
+        return None
+
     def onCheck(self, vulkanType):
 
         if self.forApiOutput:
             return
+
+        featureExpr = self.getOptionalStringFeatureExpr(vulkanType);
 
         self.checked = True
 
@@ -195,13 +205,22 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             sizeExpr = self.cgen.sizeofExpr(vulkanType)
             needConsistencyCheck = True
 
+        if featureExpr is not None:
+            self.cgen.beginIf(featureExpr)
+
         self.genPrimitiveStreamCall(
             vulkanType,
             checkAccess)
 
-        self.cgen.beginIf(access)
+        if featureExpr is not None:
+            self.cgen.endIf()
 
-        if needConsistencyCheck:
+        if featureExpr is not None:
+            self.cgen.beginIf("(!(%s) || %s)" % (featureExpr, access))
+        else:
+            self.cgen.beginIf(access)
+
+        if needConsistencyCheck and featureExpr is None:
             self.cgen.beginIf("!(%s)" % checkName)
             self.cgen.stmt(
                 "fprintf(stderr, \"fatal: %s inconsistent between guest and host\\n\")" % (access))
@@ -228,32 +247,73 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
     def genFilterFunc(self, filterfunc, env):
 
-        def loop(expr):
+        def loop(expr, lambdaEnv={}):
             def do_func(expr):
                 fnamestr = expr.name.name
                 if "not" == fnamestr:
-                    return "!(%s)" % (loop(expr.args[0]))
+                    return "!(%s)" % (loop(expr.args[0], lambdaEnv))
                 if "eq" == fnamestr:
-                    return "(%s == %s)" % (loop(expr.args[0]), loop(expr.args[1]))
-                print("Unknown function: %s" % fnamestr)
-                raise
+                    return "(%s == %s)" % (loop(expr.args[0], lambdaEnv), loop(expr.args[1], lambdaEnv))
+                if "and" == fnamestr:
+                    return "(%s && %s)" % (loop(expr.args[0], lambdaEnv), loop(expr.args[1], lambdaEnv))
+                if "or" == fnamestr:
+                    return "(%s || %s)" % (loop(expr.args[0], lambdaEnv), loop(expr.args[1], lambdaEnv))
+                if "getfield" == fnamestr:
+                    ptrlevels = get_ptrlevels(expr.args[0].val.name)
+                    if ptrlevels == 0:
+                        return "%s.%s" % (loop(expr.args[0], lambdaEnv), expr.args[1].val)
+                    else:
+                        return "(%s(%s)).%s" % ("*" * ptrlevels, loop(expr.args[0], lambdaEnv), expr.args[1].val)
 
-            def do_expratom(atomname):
+                if "if" == fnamestr:
+                    return "((%s) ? (%s) : (%s))" % (loop(expr.args[0], lambdaEnv), loop(expr.args[1], lambdaEnv), loop(expr.args[2], lambdaEnv))
+
+                return "%s(%s)" % (fnamestr, ", ".join(map(lambda e: loop(e, lambdaEnv), expr.args)))
+
+            def do_expratom(atomname, lambdaEnv= {}):
+                if lambdaEnv.get(atomname, None) is not None:
+                    return atomname
+
                 enventry = env.get(atomname, None)
                 if None != enventry:
                     return self.getEnvAccessExpr(atomname)
                 return atomname
 
-            def do_exprval(expr):
+            def get_ptrlevels(atomname, lambdaEnv= {}):
+                if lambdaEnv.get(atomname, None) is not None:
+                    return 0
+
+                enventry = env.get(atomname, None)
+                if None != enventry:
+                    return self.getPointerIndirectionLevels(atomname)
+
+                return 0
+
+            def do_exprval(expr, lambdaEnv= {}):
                 expratom = expr.val
 
                 if Atom == type(expratom):
-                    return do_expratom(expratom.name)
+                    return do_expratom(expratom.name, lambdaEnv)
 
                 return "%s" % expratom
 
+            def do_lambda(expr, lambdaEnv= {}):
+                params = expr.vs
+                body = expr.body
+                newEnv = {}
+
+                for (k, v) in lambdaEnv.items():
+                    newEnv[k] = v
+
+                for p in params:
+                    newEnv[p.name] = p.typ
+
+                return "[](%s) { return %s; }" % (", ".join(list(map(lambda p: "%s %s" % (p.typ, p.name), params))), loop(body, lambdaEnv=newEnv))
+
             if FuncExpr == type(expr):
                 return do_func(expr)
+            if FuncLambda == type(expr):
+                return do_lambda(expr)
             elif FuncExprVal == type(expr):
                 return do_exprval(expr)
 
@@ -283,7 +343,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         if None != filterValsExpr and None != filterFuncExpr:
             filterExpr = "%s || %s" % (filterValsExpr, filterFuncExpr)
         elif None == filterValsExpr and None == filterFuncExpr:
-            return
+            # Assume is bool
+            self.cgen.beginIf(filterVarAccess)
         elif None != filterValsExpr:
             self.cgen.beginIf("(!(%s) || (%s))" % (filterFeature, filterValsExpr))
         elif None != filterFuncExpr:
@@ -317,6 +378,20 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             return envAccess
 
         return None
+
+    def getPointerIndirectionLevels(self, varName):
+        parentEnvEntry = self.currentStructInfo.environment.get(varName, None)
+
+        if parentEnvEntry != None:
+            isParentMember = parentEnvEntry["structmember"]
+
+            if isParentMember:
+                return list(filter(lambda member: member.paramName == varName, self.currentStructInfo.members))[0].pointerIndirectionLevels
+            else:
+                return 0
+            return 0
+
+        return 0
 
 
     def onCompoundType(self, vulkanType):
@@ -493,6 +568,21 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         self.endFilterGuard(vulkanType)
 
+    def streamLetParameter(self, structInfo, letParamInfo):
+        filterFeature = "%s->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT" % self.streamVarName
+        self.cgen.stmt("%s %s = 1" % (letParamInfo.typeName, letParamInfo.paramName))
+
+        self.cgen.beginIf(filterFeature)
+
+        if self.direction == "write":
+            bodyExpr = self.currentStructInfo.environment[letParamInfo.paramName]["body"]
+            self.cgen.stmt("%s = %s" % (letParamInfo.paramName, self.genFilterFunc(bodyExpr, self.currentStructInfo.environment)))
+
+        self.genPrimitiveStreamCall(letParamInfo, letParamInfo.paramName)
+
+        self.cgen.endIf()
+
+
 class VulkanMarshaling(VulkanWrapperGenerator):
 
     def __init__(self, module, typeInfo, variant="host"):
@@ -572,10 +662,14 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 [makeVulkanTypeSimple(True, name, 1, MARSHAL_INPUT_VAR_NAME)]
 
             freeParams = []
+            letParams = []
 
             for (envname, bindingInfo) in list(sorted(structInfo.environment.items(), key = lambda kv: kv[0])):
                 if None == bindingInfo["binding"]:
                     freeParams.append(makeVulkanTypeSimple(True, bindingInfo["type"], 0, envname))
+                else:
+                    if not bindingInfo["structmember"]:
+                        letParams.append(makeVulkanTypeSimple(True, bindingInfo["type"], 0, envname))
 
             marshalPrototype = \
                 VulkanAPI(API_PREFIX_MARSHAL + name,
@@ -590,7 +684,12 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             def structMarshalingDef(cgen):
                 self.writeCodegen.cgen = cgen
                 self.writeCodegen.currentStructInfo = structInfo
+
                 if category == "struct":
+                    # marshal 'let' parameters first
+                    for letp in letParams:
+                        self.writeCodegen.streamLetParameter(self.typeInfo, letp)
+
                     for member in structInfo.members:
                         iterateVulkanType(self.typeInfo, member, self.writeCodegen)
                 if category == "union":
@@ -601,6 +700,10 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 self.writeCodegen.currentStructInfo = structInfo
                 self.writeCodegen.doFiltering = False
                 if category == "struct":
+                    # marshal 'let' parameters first
+                    for letp in letParams:
+                        self.writeCodegen.streamLetParameter(self.typeInfo, letp)
+
                     for member in structInfo.members:
                         iterateVulkanType(self.typeInfo, member, self.writeCodegen)
                 if category == "union":
@@ -634,6 +737,10 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 self.readCodegen.cgen = cgen
                 self.readCodegen.currentStructInfo = structInfo
                 if category == "struct":
+                    # unmarshal 'let' parameters first
+                    for letp in letParams:
+                        self.readCodegen.streamLetParameter(self.typeInfo, letp)
+
                     for member in structInfo.members:
                         iterateVulkanType(self.typeInfo, member, self.readCodegen)
                 if category == "union":
@@ -644,6 +751,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 self.readCodegen.currentStructInfo = structInfo
                 self.readCodegen.doFiltering = False
                 if category == "struct":
+                    # unmarshal 'let' parameters first
+                    for letp in letParams:
+                        iterateVulkanType(self.typeInfo, letp, self.readCodegen)
                     for member in structInfo.members:
                         iterateVulkanType(self.typeInfo, member, self.readCodegen)
                 if category == "union":

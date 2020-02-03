@@ -184,6 +184,7 @@ class VulkanType(object):
 
         self.lenExpr = None
         self.isOptional = False
+        self.optionalStr = None
 
         self.isConst = False
 
@@ -416,6 +417,20 @@ class FuncExpr(object):
         else:
             return "(%s %s)" % (self.name.__repr__(), " ".join(map(lambda x: x.__repr__(), self.args)))
 
+class FuncLambda(object):
+    def __init__(self, vs, body):
+        self.vs = vs
+        self.body = body
+    def __repr__(self,):
+        return "(L (%s) %s)" % (" ".join(map(lambda x: x.__repr__(), self.vs)), self.body.__repr__())
+
+class FuncLambdaParam(object):
+    def __init__(self, name, typ):
+        self.name = name
+        self.typ = typ
+    def __repr__(self,):
+        return "%s : %s" % (self.name, self.typ)
+
 def parse_func_expr(parsed_sexp):
     if len(parsed_sexp) != 1:
         print("Error: parsed # expressions != 1: %" (len(parsed_sexp)))
@@ -423,9 +438,15 @@ def parse_func_expr(parsed_sexp):
 
     e = parsed_sexp[0]
 
+    def parse_lambda_param(e):
+        return FuncLambdaParam(e[0].name, e[1].name)
+
     def parse_one(exp):
         if list == type(exp):
-            return FuncExpr(exp[0], list(map(parse_one, exp[1:])))
+            if "lambda" == exp[0].__repr__():
+                return FuncLambda(list(map(parse_lambda_param, exp[1])), parse_one(exp[2]))
+            else:
+                return FuncExpr(exp[0], list(map(parse_one, exp[1:])))
         else:
             return FuncExprVal(exp)
 
@@ -434,6 +455,11 @@ def parse_func_expr(parsed_sexp):
 def parseFilterFuncExpr(expr):
     res = parse_func_expr(parse_sexp(expr))
     print("parseFilterFuncExpr: parsed %s" % res)
+    return res
+
+def parseLetBodyExpr(expr):
+    res = parse_func_expr(parse_sexp(expr))
+    print("parseLetBodyExpr: parsed %s" % res)
     return res
 
 def makeVulkanTypeFromXMLTag(typeInfo, tag):
@@ -493,6 +519,7 @@ def makeVulkanTypeFromXMLTag(typeInfo, tag):
     # Calculate optionality (based on validitygenerator.py)
     if tag.attrib.get("optional") is not None:
         res.isOptional = True
+        res.optionalStr = tag.attrib.get("optional")
 
     # If no validity is being generated, it usually means that
     # validity is complex and not absolute, so let's say yes.
@@ -843,6 +870,19 @@ class VulkanTypeInfo(object):
                         "type" : typ,
                         "binding" : None,
                         "structmember" : False,
+                        "body" : None,
+                    }
+
+            letenvStr = typeinfo.elem.get("let")
+            if letenvStr != None:
+                comma_separated = letenvStr.split(",")
+                name_body_pairs = map(lambda cs: tuple(map(lambda t: t.strip(), cs.split(":"))), comma_separated)
+                for (name, body) in name_body_pairs:
+                    initialEnv[name] = {
+                        "type" : "uint32_t",
+                        "binding" : name,
+                        "structmember" : False,
+                        "body" : parseLetBodyExpr(body)
                     }
 
             for member in typeinfo.elem.findall(".//member"):
@@ -851,6 +891,7 @@ class VulkanTypeInfo(object):
                     "type" : vulkanType.typeName,
                     "binding" : vulkanType.paramName,
                     "structmember" : True,
+                    "body" : None,
                 }
                 vulkanType.paramName
                 members.append(vulkanType)
