@@ -956,6 +956,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::VirtioInput, true);
                 fc::setIfNotOverriden(fc::RefCountPipe, true);
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
+                fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
