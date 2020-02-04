@@ -129,6 +129,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             android::featurecontrol::VulkanSnapshots, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanNullOptionalStrings, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanIgnoredHandles, true);
 
     bool useHostGpu =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";

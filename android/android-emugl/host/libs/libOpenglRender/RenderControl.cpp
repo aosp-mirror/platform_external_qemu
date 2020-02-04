@@ -198,6 +198,8 @@ static constexpr android::base::StringView kYUVCache = "ANDROID_EMU_YUV_Cache";
 
 // GL protocol v2
 static constexpr android::base::StringView kAsyncUnmapBuffer = "ANDROID_EMU_async_unmap_buffer";
+// Vulkan: Correct marshaling for ignored handles
+static constexpr android::base::StringView kVulkanIgnoredHandles = "ANDROID_EMU_vulkan_ignored_handles";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -409,6 +411,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool YUVCacheEnabled =
         emugl_feature_is_enabled(android::featurecontrol::YUVCache);
     bool AsyncUnmapBufferEnabled = true;
+    bool vulkanIgnoredHandlesEnabled =
+        shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -484,6 +488,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (AsyncUnmapBufferEnabled && name == GL_EXTENSIONS) {
         glStr += kAsyncUnmapBuffer;
+        glStr += " ";
+    }
+
+    if (vulkanIgnoredHandlesEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanIgnoredHandles;
         glStr += " ";
     }
 
