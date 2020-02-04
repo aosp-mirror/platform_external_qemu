@@ -90,13 +90,6 @@ void MediaH264DecoderCuvid::initH264Context(unsigned int width,
     mOutPixFmt = outPixFmt;
     mOutBufferSize = outWidth * outHeight * 3 / 2;
 
-    if (mDecodedFrame) {
-        delete[] mDecodedFrame;
-        mDecodedFrame = nullptr;
-    }
-
-    mDecodedFrame = new uint8_t[mOutBufferSize];
-
     // cudat stuff
     const int gpuIndex = 0;
     const int cudaFlags = 0;
@@ -139,11 +132,6 @@ void MediaH264DecoderCuvid::initH264Context(unsigned int width,
 
 void MediaH264DecoderCuvid::destroyH264Context() {
     H264_DPRINT("destroyH264Context calling");
-
-    if (mDecodedFrame) {
-        delete[] mDecodedFrame;
-        mDecodedFrame = nullptr;
-    }
 
     if (mCudaContext != nullptr) {
         NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
@@ -245,11 +233,6 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
 
     static int numbers = 0;
     H264_DPRINT("calling getImage %d", numbers++);
-    if (!mDecodedFrame) {
-        H264_DPRINT("%s: frame is null", __func__);
-        *retErr = static_cast<int>(Err::NoDecodedFrame);
-        return;
-    }
     doFlush();
     uint8_t* dst = getDst(ptr);
     int myOutputWidth = mOutputWidth;
@@ -303,8 +286,18 @@ bool MediaH264DecoderCuvid::initCudaDrivers() {
     typedef void* CUDADRIVER;
 #endif
     CUDADRIVER hHandleDriver = 0;
-    cuInit(0, __CUDA_API_VERSION, hHandleDriver);
-    cuvidInit(0);
+    if (CUDA_SUCCESS != cuInit(0, __CUDA_API_VERSION, hHandleDriver)) {
+        fprintf(stderr,
+                "Failed to call cuInit, cannot use nvidia cuvid decoder for "
+                "h264 stream\n");
+        return false;
+    }
+    if (CUDA_SUCCESS != cuvidInit(0)) {
+        fprintf(stderr,
+                "Failed to call cuvidInit, cannot use nvidia cuvid decoder for "
+                "h264 stream\n");
+        return false;
+    }
 
     int numGpuCards = 0;
     CUresult myres = cuDeviceGetCount(&numGpuCards);
@@ -402,9 +395,6 @@ int MediaH264DecoderCuvid::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
         unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
         if (mOutBufferSize < newOutBufferSize) {
             mOutBufferSize = newOutBufferSize;
-            delete[] mDecodedFrame;
-            mDecodedFrame = nullptr;
-            mDecodedFrame = new uint8_t[mOutBufferSize];
         }
     }
 
@@ -458,7 +448,6 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
 
     unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
     std::vector<uint8_t> myFrame(newOutBufferSize);
-    // uint8_t* pDecodedFrame = mDecodedFrame;
     uint8_t* pDecodedFrame = &(myFrame[0]);
 
     NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
@@ -489,9 +478,6 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     NVDEC_API_CALL(cuvidUnmapVideoFrame(mCudaDecoder, dpSrcFrame));
     {
         std::lock_guard<std::mutex> g(mFrameLock);
-        //        unsigned int newOutBufferSize = mOutputWidth * mOutputHeight *
-        //        3 / 2; myFrame.assign(mDecodedFrame, mDecodedFrame +
-        //        newOutBufferSize);
         mSavedFrames.push_back(myFrame);
         mSavedPts.push_back(myOutputPts);
         mSavedW.push_back(mOutputWidth);
