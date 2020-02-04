@@ -131,7 +131,6 @@ private:
     // and output address is only available in getImage().
     // TODO: this should be set to the output address to avoid
     // extra copying
-    uint8_t* mDecodedFrame = nullptr;
     std::list<int> mSavedW;
     std::list<int> mSavedH;
     std::list<uint64_t> mSavedPts;
