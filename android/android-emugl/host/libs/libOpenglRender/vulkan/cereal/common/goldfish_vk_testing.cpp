@@ -1347,13 +1347,21 @@ void checkEqual_VkGraphicsPipelineCreateInfo(
             }
         }
     }
-    if ((a->pVertexInputState) && (b->pVertexInputState))
+    if (!((!(a->pVertexInputState) && !(b->pVertexInputState)) || ((a->pVertexInputState) && (b->pVertexInputState)))) { onFail("a->pVertexInputState (Error: Mismatch in optional field)"); };
+    if (a->pVertexInputState && b->pVertexInputState)
     {
-        checkEqual_VkPipelineVertexInputStateCreateInfo(a->pVertexInputState, b->pVertexInputState, onFail);
+        if ((a->pVertexInputState) && (b->pVertexInputState))
+        {
+            checkEqual_VkPipelineVertexInputStateCreateInfo(a->pVertexInputState, b->pVertexInputState, onFail);
+        }
     }
-    if ((a->pInputAssemblyState) && (b->pInputAssemblyState))
+    if (!((!(a->pInputAssemblyState) && !(b->pInputAssemblyState)) || ((a->pInputAssemblyState) && (b->pInputAssemblyState)))) { onFail("a->pInputAssemblyState (Error: Mismatch in optional field)"); };
+    if (a->pInputAssemblyState && b->pInputAssemblyState)
     {
-        checkEqual_VkPipelineInputAssemblyStateCreateInfo(a->pInputAssemblyState, b->pInputAssemblyState, onFail);
+        if ((a->pInputAssemblyState) && (b->pInputAssemblyState))
+        {
+            checkEqual_VkPipelineInputAssemblyStateCreateInfo(a->pInputAssemblyState, b->pInputAssemblyState, onFail);
+        }
     }
     if (!((!(a->pTessellationState) && !(b->pTessellationState)) || ((a->pTessellationState) && (b->pTessellationState)))) { onFail("a->pTessellationState (Error: Mismatch in optional field)"); };
     if (a->pTessellationState && b->pTessellationState)
@@ -1371,9 +1379,13 @@ void checkEqual_VkGraphicsPipelineCreateInfo(
             checkEqual_VkPipelineViewportStateCreateInfo(a->pViewportState, b->pViewportState, onFail);
         }
     }
-    if ((a->pRasterizationState) && (b->pRasterizationState))
+    if (!((!(a->pRasterizationState) && !(b->pRasterizationState)) || ((a->pRasterizationState) && (b->pRasterizationState)))) { onFail("a->pRasterizationState (Error: Mismatch in optional field)"); };
+    if (a->pRasterizationState && b->pRasterizationState)
     {
-        checkEqual_VkPipelineRasterizationStateCreateInfo(a->pRasterizationState, b->pRasterizationState, onFail);
+        if ((a->pRasterizationState) && (b->pRasterizationState))
+        {
+            checkEqual_VkPipelineRasterizationStateCreateInfo(a->pRasterizationState, b->pRasterizationState, onFail);
+        }
     }
     if (!((!(a->pMultisampleState) && !(b->pMultisampleState)) || ((a->pMultisampleState) && (b->pMultisampleState)))) { onFail("a->pMultisampleState (Error: Mismatch in optional field)"); };
     if (a->pMultisampleState && b->pMultisampleState)

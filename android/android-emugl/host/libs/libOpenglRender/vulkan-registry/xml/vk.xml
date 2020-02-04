@@ -1146,20 +1146,20 @@ server.
             <member><type>float</type>                  <name>minDepthBounds</name></member>
             <member><type>float</type>                  <name>maxDepthBounds</name></member>
         </type>
-        <type category="struct" name="VkGraphicsPipelineCreateInfo">
+        <type category="struct" name="VkGraphicsPipelineCreateInfo" let="hasTessellation : (arrayany pStages 0 stageCount (lambda ((s VkPipelineShaderStageCreateInfo)) (or (eq (getfield s stage) VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT) (eq (getfield s stage) VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)))),hasRasterization : (if (eq 0 pRasterizationState) 0 (not (getfield pRasterizationState rasterizerDiscardEnable)))">
             <member values="VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*            <name>pNext</name></member>
             <member optional="true"><type>VkPipelineCreateFlags</type>  <name>flags</name><comment>Pipeline creation flags</comment></member>
             <member><type>uint32_t</type>               <name>stageCount</name></member>
             <member len="stageCount">const <type>VkPipelineShaderStageCreateInfo</type>* <name>pStages</name><comment>One entry for each active shader stage</comment></member>
-            <member>const <type>VkPipelineVertexInputStateCreateInfo</type>* <name>pVertexInputState</name></member>
-            <member>const <type>VkPipelineInputAssemblyStateCreateInfo</type>* <name>pInputAssemblyState</name></member>
-            <member noautovalidity="true" optional="true">const <type>VkPipelineTessellationStateCreateInfo</type>* <name>pTessellationState</name></member>
-            <member noautovalidity="true" optional="true">const <type>VkPipelineViewportStateCreateInfo</type>* <name>pViewportState</name></member>
-            <member>const <type>VkPipelineRasterizationStateCreateInfo</type>* <name>pRasterizationState</name></member>
-            <member noautovalidity="true" optional="true">const <type>VkPipelineMultisampleStateCreateInfo</type>* <name>pMultisampleState</name></member>
-            <member noautovalidity="true" optional="true">const <type>VkPipelineDepthStencilStateCreateInfo</type>* <name>pDepthStencilState</name></member>
-            <member noautovalidity="true" optional="true">const <type>VkPipelineColorBlendStateCreateInfo</type>* <name>pColorBlendState</name></member>
+            <member noautovalidity="true" optional="streamFeature:VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT">const <type>VkPipelineVertexInputStateCreateInfo</type>* <name>pVertexInputState</name></member>
+            <member noautovalidity="true" optional="streamFeature:VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT">const <type>VkPipelineInputAssemblyStateCreateInfo</type>* <name>pInputAssemblyState</name></member>
+            <member noautovalidity="true" optional="true" filterVar="hasTessellation">const <type>VkPipelineTessellationStateCreateInfo</type>* <name>pTessellationState</name></member>
+            <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineViewportStateCreateInfo</type>* <name>pViewportState</name></member>
+            <member noautovalidity="true" optional="streamFeature:VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT">const <type>VkPipelineRasterizationStateCreateInfo</type>* <name>pRasterizationState</name></member>
+            <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineMultisampleStateCreateInfo</type>* <name>pMultisampleState</name></member>
+            <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineDepthStencilStateCreateInfo</type>* <name>pDepthStencilState</name></member>
+            <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineColorBlendStateCreateInfo</type>* <name>pColorBlendState</name></member>
             <member optional="true">const <type>VkPipelineDynamicStateCreateInfo</type>* <name>pDynamicState</name></member>
             <member><type>VkPipelineLayout</type>       <name>layout</name><comment>Interface layout of the pipeline</comment></member>
             <member><type>VkRenderPass</type>           <name>renderPass</name></member>
