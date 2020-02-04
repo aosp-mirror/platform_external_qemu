@@ -17,7 +17,7 @@
 
 #include "android/emulation/H264NaluParser.h"
 
-#define H264_DEBUG 1
+#define H264_DEBUG 0
 
 #if H264_DEBUG
 #define RED   "\x1B[31m"
