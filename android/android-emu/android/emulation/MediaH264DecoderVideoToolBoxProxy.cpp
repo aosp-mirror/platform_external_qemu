@@ -23,7 +23,7 @@
 
 #include <stddef.h>
 
-#define MEDIA_H264_DEBUG 1
+#define MEDIA_H264_DEBUG 0
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt,...) fprintf(stderr, "h264-videotoolbox-proxy-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
