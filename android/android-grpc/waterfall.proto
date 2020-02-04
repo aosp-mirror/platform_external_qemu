@@ -57,7 +57,7 @@ message Cmd {
   // Whether to pipe stdin to the command
   bool pipeIn = 4;
 
-  // Enviroment to use
+  // Environment to use
   map<string, string> env = 5;
 
 }
@@ -99,7 +99,7 @@ message ForwardMessage {
   string addr = 3;
   // Data to be pushed to connection established on addr.
   bytes payload = 4;
-  // Wheter or not to rebind the port
+  // Whether or not to rebind the port.
   bool rebind = 5;
 }
 
@@ -117,7 +117,7 @@ service Waterfall {
   // Pull file/dir from device to host.
   rpc Pull(Transfer) returns (stream Transfer);
 
-  // Exec executes cmd in the device and foward stdout and stderr to client
+  // Exec executes cmd in the device and forward stdout and stderr to client
   // Exec expects a single initial CmdProgress message if stdin is not
   // being redirected. Otherwise Exec will read std from the stream.
   rpc Exec(stream CmdProgress) returns (stream CmdProgress);
