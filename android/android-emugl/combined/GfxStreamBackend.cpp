@@ -301,6 +301,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::VulkanNullOptionalStrings, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::HostComposition, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanIgnoredHandles, true);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 

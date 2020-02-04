@@ -272,6 +272,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         filterFuncExpr = None
         filterExpr = None
 
+        filterFeature = "%s->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT" % self.streamVarName
+
         if None != vulkanType.filterVals:
             filterValsExpr = " || ".join(map(lambda filterval: "(%s == %s)" % (filterval, filterVarAccess), vulkanType.filterVals))
 
@@ -283,9 +285,9 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         elif None == filterValsExpr and None == filterFuncExpr:
             return
         elif None != filterValsExpr:
-            self.cgen.beginIf(filterValsExpr)
+            self.cgen.beginIf("(!(%s) || (%s))" % (filterFeature, filterValsExpr))
         elif None != filterFuncExpr:
-            self.cgen.beginIf(filterFuncExpr)
+            self.cgen.beginIf("(!(%s) || (%s))" % (filterFeature, filterFuncExpr))
 
     def endFilterGuard(self, vulkanType, cleanupExpr=None):
         if vulkanType.filterVar == None:
