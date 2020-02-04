@@ -39,6 +39,9 @@ public:
         if (emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings)) {
             mFeatureBits |= VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT;
         }
+        if (emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles)) {
+            mFeatureBits |= VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT;
+        }
     }
 
     ~Impl() { }
