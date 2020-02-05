@@ -88,6 +88,7 @@ typedef VkResult (VKAPI_PTR *PFN_vkQueueSignalReleaseImageANDROID)(VkQueue queue
 #define VK_GOOGLE_address_space 1
 
 typedef VkResult (VKAPI_PTR *PFN_vkMapMemoryIntoAddressSpaceGOOGLE)(VkDevice device, VkDeviceMemory memory, uint64_t* pAddress);
+typedef VkResult (VKAPI_PTR *PFN_vkGetMemoryHostAddressInfoGOOGLE)(VkDevice device, VkDeviceMemory memory, uint64_t* pAddress, uint64_t* pSize);
 
 #define VK_GOOGLE_color_buffer 1
 #define VK_GOOGLE_COLOR_BUFFER_EXTENSION_NUMBER 219

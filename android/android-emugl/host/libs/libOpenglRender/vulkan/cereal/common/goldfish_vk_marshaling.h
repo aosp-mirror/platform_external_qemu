@@ -3352,6 +3352,7 @@ void unmarshal_VkCheckpointDataNV(
 #endif
 #ifdef VK_GOOGLE_address_space
 #define OP_vkMapMemoryIntoAddressSpaceGOOGLE 20317
+#define OP_vkGetMemoryHostAddressInfoGOOGLE 20318
 #endif
 #ifdef VK_GOOGLE_color_buffer
 void marshal_VkImportColorBufferGOOGLE(
@@ -3370,21 +3371,21 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
     VulkanStream* vkStream,
     VkImportPhysicalAddressGOOGLE* forUnmarshaling);
 
-#define OP_vkRegisterImageColorBufferGOOGLE 20318
-#define OP_vkRegisterBufferColorBufferGOOGLE 20319
+#define OP_vkRegisterImageColorBufferGOOGLE 20319
+#define OP_vkRegisterBufferColorBufferGOOGLE 20320
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
-#define OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE 20320
+#define OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE 20321
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
-#define OP_vkBeginCommandBufferAsyncGOOGLE 20321
-#define OP_vkEndCommandBufferAsyncGOOGLE 20322
-#define OP_vkResetCommandBufferAsyncGOOGLE 20323
-#define OP_vkCommandBufferHostSyncGOOGLE 20324
+#define OP_vkBeginCommandBufferAsyncGOOGLE 20322
+#define OP_vkEndCommandBufferAsyncGOOGLE 20323
+#define OP_vkResetCommandBufferAsyncGOOGLE 20324
+#define OP_vkCommandBufferHostSyncGOOGLE 20325
 #endif
 #ifdef VK_GOOGLE_create_resources_with_requirements
-#define OP_vkCreateImageWithRequirementsGOOGLE 20325
-#define OP_vkCreateBufferWithRequirementsGOOGLE 20326
+#define OP_vkCreateImageWithRequirementsGOOGLE 20326
+#define OP_vkCreateBufferWithRequirementsGOOGLE 20327
 #endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
