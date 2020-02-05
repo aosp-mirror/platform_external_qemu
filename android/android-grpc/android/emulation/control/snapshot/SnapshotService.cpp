@@ -18,7 +18,6 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <iterator>
 #include <regex>
 #include <string>
 #include <vector>
@@ -31,20 +30,18 @@
 #include "android/base/files/GzipStreambuf.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/LineConsumer.h"
-#include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
 #include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
-#include "android/snapshot/Icebox.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/path.h"
 #include "grpcpp/server.h"
 #include "grpcpp/server_builder.h"
-#include "snapshot-service.grpc.pb.h"
-#include "snapshot-service.pb.h"
+#include "snapshot_service.grpc.pb.h"
+#include "snapshot_service.pb.h"
 #include "snapshot.pb.h"
 
 namespace google {
@@ -85,7 +82,7 @@ private:
 
 class SnapshotServiceImpl final : public SnapshotService::Service {
 public:
-    Status pullSnapshot(ServerContext* context,
+    Status PullSnapshot(ServerContext* context,
                         const Snapshot* request,
                         ServerWriter<Snapshot>* writer) override {
         Snapshot result;
@@ -157,7 +154,7 @@ public:
         return Status::OK;
     }
 
-    Status pushSnapshot(ServerContext* context,
+    Status PushSnapshot(ServerContext* context,
                         ::grpc::ServerReader<Snapshot>* reader,
                         Snapshot* reply) override {
         Snapshot msg;
@@ -250,7 +247,7 @@ public:
         return Status::OK;
     }
 
-    Status listSnapshots(ServerContext* context,
+    Status ListSnapshots(ServerContext* context,
                          const ::google::protobuf::Empty* request,
                          SnapshotList* reply) override {
         for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
@@ -266,7 +263,7 @@ public:
         return Status::OK;
     }
 
-    Status loadSnapshot(ServerContext* context,
+    Status LoadSnapshot(ServerContext* context,
                         const Snapshot* request,
                         Snapshot* reply) override {
         reply->set_snapshot_id(request->snapshot_id());
@@ -293,7 +290,7 @@ public:
         return Status::OK;
     }
 
-    Status saveSnapshot(ServerContext* context,
+    Status SaveSnapshot(ServerContext* context,
                         const Snapshot* request,
                         Snapshot* reply) override {
         reply->set_snapshot_id(request->snapshot_id());
@@ -320,7 +317,7 @@ public:
         return Status::OK;
     }
 
-    Status deleteSnapshot(ServerContext* context,
+    Status DeleteSnapshot(ServerContext* context,
                           const Snapshot* request,
                           Snapshot* reply) override {
         reply->set_snapshot_id(request->snapshot_id());
@@ -332,7 +329,7 @@ public:
         return Status::OK;
     }
 
-    Status trackProcess(ServerContext* context,
+    Status TrackProcess(ServerContext* context,
                         const IceboxTarget* request,
                         IceboxTarget* reply) override {
         int pid = request->pid();
