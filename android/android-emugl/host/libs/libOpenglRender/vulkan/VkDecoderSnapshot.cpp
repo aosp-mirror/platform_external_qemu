@@ -4302,6 +4302,19 @@ void vkMapMemoryIntoAddressSpaceGOOGLE(
         mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle);
     }
 }
+void vkGetMemoryHostAddressInfoGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkDeviceMemory memory,
+    uint64_t* pAddress,
+    uint64_t* pSize,
+    uint64_t* pHostmemId)
+{
+    // TODO: Implement
+}
 #endif
 #ifdef VK_GOOGLE_color_buffer
 void vkRegisterImageColorBufferGOOGLE(
@@ -8610,6 +8623,21 @@ void VkDecoderSnapshot::vkMapMemoryIntoAddressSpaceGOOGLE(
     uint64_t* pAddress)
 {
     mImpl->vkMapMemoryIntoAddressSpaceGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAddress);
+}
+#endif
+#ifdef VK_GOOGLE_address_space
+void VkDecoderSnapshot::vkGetMemoryHostAddressInfoGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkDeviceMemory memory,
+    uint64_t* pAddress,
+    uint64_t* pSize,
+    uint64_t* pHostmemId)
+{
+    mImpl->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAddress, pSize, pHostmemId);
 }
 #endif
 #ifdef VK_GOOGLE_color_buffer

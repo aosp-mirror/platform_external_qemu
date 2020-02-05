@@ -28,6 +28,7 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/hostdevices/HostAddressSpace.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
+#include "android/emulation/HostmemIdMapping.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
@@ -131,6 +132,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             android::featurecontrol::VulkanNullOptionalStrings, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanIgnoredHandles, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VirtioGpuNext, false);
 
     bool useHostGpu =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
@@ -338,6 +341,9 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         fprintf(stderr, "goldfish-opengl vm ops: is snapshot save skipped\n");
         return false;
     },
+    .hostmemRegister = android_emulation_hostmem_register,
+    .hostmemUnregister = android_emulation_hostmem_unregister,
+    .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =

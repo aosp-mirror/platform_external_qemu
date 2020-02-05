@@ -639,6 +639,7 @@ PFN_vkGetQueueCheckpointDataNV vkGetQueueCheckpointDataNV;
 #endif
 #ifdef VK_GOOGLE_address_space
 PFN_vkMapMemoryIntoAddressSpaceGOOGLE vkMapMemoryIntoAddressSpaceGOOGLE;
+PFN_vkGetMemoryHostAddressInfoGOOGLE vkGetMemoryHostAddressInfoGOOGLE;
 #endif
 #ifdef VK_GOOGLE_color_buffer
 PFN_vkRegisterImageColorBufferGOOGLE vkRegisterImageColorBufferGOOGLE;
