@@ -32,7 +32,7 @@ endif()
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
   INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
-  SOURCES emulator_controller.proto snapshot-service.proto
+  SOURCES emulator_controller.proto snapshot_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
   GENERATED EMULATOR_GRPC_SRC)
 
@@ -83,7 +83,7 @@ android_target_dependency(android-grpc_unittest linux-x86_64
 install(
   FILES
     emulator_controller.proto
-    snapshot-service.proto
+    snapshot_service.proto
     ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto
   DESTINATION lib)
 
