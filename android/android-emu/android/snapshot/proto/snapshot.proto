@@ -25,7 +25,7 @@ syntax = "proto2";
 
 package emulator_snapshot;
 
-option java_package = "com.android.emulator";
+option java_package = "com.android.emulator.snapshot";
 
 message Image {
     enum Type {
