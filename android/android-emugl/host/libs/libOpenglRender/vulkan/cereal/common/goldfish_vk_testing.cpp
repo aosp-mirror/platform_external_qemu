@@ -6294,6 +6294,8 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_create_resources_with_requirements
 #endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,

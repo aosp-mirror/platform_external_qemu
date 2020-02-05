@@ -14,6 +14,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/android_pipe_common.h"
+#include "android/emulation/HostmemIdMapping.h"
 #include "android/opengles.h"
 
 #include <deque>
@@ -152,6 +153,7 @@ extern "C" {
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
+using android::emulation::HostmemIdMapping;
 
 using VirglCtxId = uint32_t;
 using VirglResId = uint32_t;
@@ -178,6 +180,10 @@ struct PipeResEntry {
     size_t linearSize;
     GoldfishHostPipe* hostPipe;
     VirglCtxId ctxId;
+    uint64_t hva;
+    uint64_t hvaSize;
+    uint64_t hvaId;
+    uint32_t hvSlot;
 };
 
 static inline uint32_t align_up(uint32_t n, uint32_t a) {
@@ -468,6 +474,10 @@ public:
         if (!mVirtioGpuOps) {
             VGP_FATAL("Could not get virtio gpu ops!");
         }
+        mReadPixelsFunc = android_getReadPixelsFunc();
+        if (!mReadPixelsFunc) {
+            VGP_FATAL("Could not get read pixels func!");
+        }
         VGPLOG("done");
         return 0;
     }
@@ -673,6 +683,10 @@ public:
         e.args = *args;
         e.linear = 0;
         e.hostPipe = 0;
+        e.hva = 0;
+        e.hvaSize = 0;
+        e.hvaId = 0;
+        e.hvSlot = 0;
         allocResource(e, iov, num_iovs);
 
         AutoLock lock(mLock);
@@ -715,6 +729,15 @@ public:
             entry.iov = nullptr;
             entry.numIovs = 0;
         }
+
+        if (entry.hvaId) {
+            HostmemIdMapping::get()->remove(entry.hvaId);
+        }
+
+        entry.hva = 0;
+        entry.hvaSize = 0;
+        entry.hvaId = 0;
+        entry.hvSlot = 0;
     }
 
     int attachIov(int resId, iovec* iov, int num_iovs) {
@@ -997,6 +1020,78 @@ public:
         return 0;
     }
 
+    void flushResourceAndReadback(
+        uint32_t res_handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height,
+        void* pixels, uint32_t max_bytes) {
+        (void)x;
+        (void)y;
+        (void)width;
+        (void)height;
+        mVirtioGpuOps->post_color_buffer(res_handle);
+        mReadPixelsFunc(pixels, max_bytes);
+    }
+
+    void createResourceV2(uint32_t res_handle, uint64_t hvaId) {
+        PipeResEntry e;
+        struct virgl_renderer_resource_create_args args = {
+            res_handle,
+            PIPE_BUFFER,
+            VIRGL_FORMAT_R8_UNORM,
+            PIPE_BIND_COMMAND_ARGS_BUFFER,
+            0, 1, 1,
+            0, 0, 0, 0
+        };
+        e.args = args;
+        e.hostPipe = 0;
+
+        auto entry = HostmemIdMapping::get()->get(hvaId);
+
+        e.hva = entry.hva;
+        e.hvaSize = entry.size;
+        e.args.width = entry.size;
+        e.hvaId = hvaId;
+        e.hvSlot = 0;
+        e.iov = nullptr;
+        e.numIovs = 0;
+        e.linear = 0;
+        e.linearSize = 0;
+
+        AutoLock lock(mLock);
+        mResources[res_handle] = e;
+    }
+
+    uint64_t getResourceHva(uint32_t res_handle) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return 0;
+        const auto& entry = it->second;
+        return entry.hva;
+    }
+
+    uint64_t getResourceHvaSize(uint32_t res_handle) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return 0;
+        const auto& entry = it->second;
+        return entry.hvaSize;
+    }
+
+    void setResourceHvSlot(uint32_t res_handle, uint32_t slot) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return;
+        auto& entry = it->second;
+        entry.hvSlot = slot;
+    }
+
+    uint32_t getResourceHvSlot(uint32_t res_handle) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return 0;
+        const auto& entry = it->second;
+        return entry.hvSlot;
+    }
+
 private:
     void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs) {
         VGPLOG("entry linear: %p", entry.linear);
@@ -1066,6 +1161,7 @@ private:
     int mFlags = 0;
     virgl_renderer_callbacks mVirglRendererCallbacks;
     AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
+    ReadPixelsFunc mReadPixelsFunc = nullptr;
 
     uint32_t mNextHwPipe = 1;
     const GoldfishPipeServiceOps* mServiceOps = nullptr;
@@ -1188,6 +1284,33 @@ VG_EXPORT int pipe_virgl_renderer_resource_get_info(
     int res_handle,
     struct virgl_renderer_resource_info *info) {
     return sRenderer->getResourceInfo(res_handle, info);
+}
+
+VG_EXPORT void stream_renderer_flush_resource_and_readback(
+    uint32_t res_handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height,
+    void* pixels, uint32_t max_bytes) {
+    sRenderer->flushResourceAndReadback(res_handle, x, y, width, height, pixels, max_bytes);
+}
+
+VG_EXPORT void stream_renderer_resource_create_v2(
+    uint32_t res_handle, uint64_t hvaId) {
+    sRenderer->createResourceV2(res_handle, hvaId);
+}
+
+VG_EXPORT uint64_t stream_renderer_resource_get_hva(uint32_t res_handle) {
+    return sRenderer->getResourceHva(res_handle);
+}
+
+VG_EXPORT uint64_t stream_renderer_resource_get_hva_size(uint32_t res_handle) {
+    return sRenderer->getResourceHvaSize(res_handle);
+}
+
+VG_EXPORT void stream_renderer_resource_set_hv_slot(uint32_t res_handle, uint32_t slot) {
+    sRenderer->setResourceHvSlot(res_handle, slot);
+}
+
+VG_EXPORT uint32_t stream_renderer_resource_get_hv_slot(uint32_t res_handle) {
+    return sRenderer->getResourceHvSlot(res_handle);
 }
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,

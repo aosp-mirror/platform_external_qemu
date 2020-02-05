@@ -17315,6 +17315,99 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_address_space_info
+            case OP_vkGetMemoryHostAddressInfoGOOGLE:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                uint64_t* pAddress;
+                uint64_t* pSize;
+                uint64_t* pHostmemId;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_837;
+                vkReadStream->read((uint64_t*)&cgen_var_837, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_837, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                uint64_t cgen_var_838;
+                vkReadStream->read((uint64_t*)&cgen_var_838, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_838, (VkDeviceMemory*)&memory, 1);
+                // Begin manual dispatchable handle unboxing for pAddress;
+                vkReadStream->unsetHandleMapping();
+                // WARNING PTR CHECK
+                pAddress = (uint64_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pAddress)
+                {
+                    vkReadStream->alloc((void**)&pAddress, sizeof(uint64_t));
+                    vkReadStream->read((uint64_t*)pAddress, sizeof(uint64_t));
+                }
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pAddress;
+                // Begin manual dispatchable handle unboxing for pSize;
+                vkReadStream->unsetHandleMapping();
+                // WARNING PTR CHECK
+                pSize = (uint64_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pSize)
+                {
+                    vkReadStream->alloc((void**)&pSize, sizeof(uint64_t));
+                    vkReadStream->read((uint64_t*)pSize, sizeof(uint64_t));
+                }
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pSize;
+                // Begin manual dispatchable handle unboxing for pHostmemId;
+                vkReadStream->unsetHandleMapping();
+                // WARNING PTR CHECK
+                pHostmemId = (uint64_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pHostmemId)
+                {
+                    vkReadStream->alloc((void**)&pHostmemId, sizeof(uint64_t));
+                    vkReadStream->read((uint64_t*)pHostmemId, sizeof(uint64_t));
+                }
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pHostmemId;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMemoryHostAddressInfoGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pAddress, (unsigned long long)pSize, (unsigned long long)pHostmemId);
+                }
+                VkResult vkGetMemoryHostAddressInfoGOOGLE_VkResult_return = (VkResult)0;
+                vkGetMemoryHostAddressInfoGOOGLE_VkResult_return = m_state->on_vkGetMemoryHostAddressInfoGOOGLE(&m_pool, device, memory, pAddress, pSize, pHostmemId);
+                vkStream->unsetHandleMapping();
+                // WARNING PTR CHECK
+                uint64_t cgen_var_842 = (uint64_t)(uintptr_t)pAddress;
+                vkStream->putBe64(cgen_var_842);
+                if (pAddress)
+                {
+                    vkStream->write((uint64_t*)pAddress, sizeof(uint64_t));
+                }
+                // WARNING PTR CHECK
+                uint64_t cgen_var_843 = (uint64_t)(uintptr_t)pSize;
+                vkStream->putBe64(cgen_var_843);
+                if (pSize)
+                {
+                    vkStream->write((uint64_t*)pSize, sizeof(uint64_t));
+                }
+                // WARNING PTR CHECK
+                uint64_t cgen_var_844 = (uint64_t)(uintptr_t)pHostmemId;
+                vkStream->putBe64(cgen_var_844);
+                if (pHostmemId)
+                {
+                    vkStream->write((uint64_t*)pHostmemId, sizeof(uint64_t));
+                }
+                vkStream->write(&vkGetMemoryHostAddressInfoGOOGLE_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostAddressInfoGOOGLE_VkResult_return, device, memory, pAddress, pSize, pHostmemId);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;

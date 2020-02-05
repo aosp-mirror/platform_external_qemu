@@ -4,6 +4,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     SHARED
     LICENSE
       Apache-2.0
+    SRC
       ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp
       GfxStreamBackend.cpp
       window-agent-mock-impl.cpp)

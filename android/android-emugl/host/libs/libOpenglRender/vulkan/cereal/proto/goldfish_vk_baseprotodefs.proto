@@ -8181,6 +8181,19 @@ message vkCreateBufferWithRequirementsGOOGLE
     // Original field: struct VkMemoryRequirements pMemoryRequirements. stringarray? 0 string? 0 hasLenInfo? 0
     optional VkMemoryRequirements pMemoryRequirements = 5;
 }
+message vkGetMemoryHostAddressInfoGOOGLE
+{
+    // Original field: handle VkDevice device. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 device = 1;
+    // Original field: handle VkDeviceMemory memory. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 memory = 2;
+    // Original field: None uint64_t pAddress. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 pAddress = 3;
+    // Original field: None uint64_t pSize. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 pSize = 4;
+    // Original field: None uint64_t pHostmemId. stringarray? 0 string? 0 hasLenInfo? 0
+    optional uint64 pHostmemId = 5;
+}
 message VkExtensionStruct
 {
     oneof struct
@@ -8629,5 +8642,6 @@ message VkApiCall
         vkCommandBufferHostSyncGOOGLE api_vkCommandBufferHostSyncGOOGLE = 325;
         vkCreateImageWithRequirementsGOOGLE api_vkCreateImageWithRequirementsGOOGLE = 326;
         vkCreateBufferWithRequirementsGOOGLE api_vkCreateBufferWithRequirementsGOOGLE = 327;
+        vkGetMemoryHostAddressInfoGOOGLE api_vkGetMemoryHostAddressInfoGOOGLE = 328;
     }
 }

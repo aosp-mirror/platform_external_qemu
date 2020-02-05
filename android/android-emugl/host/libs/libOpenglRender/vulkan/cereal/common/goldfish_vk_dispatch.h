@@ -657,6 +657,9 @@ PFN_vkCommandBufferHostSyncGOOGLE vkCommandBufferHostSyncGOOGLE;
 PFN_vkCreateImageWithRequirementsGOOGLE vkCreateImageWithRequirementsGOOGLE;
 PFN_vkCreateBufferWithRequirementsGOOGLE vkCreateBufferWithRequirementsGOOGLE;
 #endif
+#ifdef VK_GOOGLE_address_space_info
+PFN_vkGetMemoryHostAddressInfoGOOGLE vkGetMemoryHostAddressInfoGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk

@@ -469,6 +469,13 @@ public:
         VkDevice device,
         VkDeviceMemory memory,
         uint64_t* pAddress);
+    VkResult on_vkGetMemoryHostAddressInfoGOOGLE(
+        android::base::Pool* pool,
+        VkDevice device,
+        VkDeviceMemory memory,
+        uint64_t* pAddress,
+        uint64_t* pSize,
+        uint64_t* pHostmemId);
 
     // VK_GOOGLE_color_buffer
     VkResult on_vkRegisterImageColorBufferGOOGLE(

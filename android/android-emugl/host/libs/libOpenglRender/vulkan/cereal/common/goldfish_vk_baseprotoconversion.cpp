@@ -13982,6 +13982,8 @@ void from_proto_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_create_resources_with_requirements
 #endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
 VkStructureType extension_proto_to_struct_type(
     const goldfish_vk_proto::VkExtensionStruct* input)
 {

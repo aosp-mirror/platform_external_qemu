@@ -15,6 +15,7 @@
 #include "android/emulation/testing/MockAndroidVmOperations.h"
 #include "android/base/Log.h"
 #include "android/emulation/hostdevices/HostAddressSpace.h"
+#include "android/emulation/HostmemIdMapping.h"
 
 using android::HostAddressSpaceDevice;
 
@@ -94,6 +95,9 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .isRealAudioAllowed = nullptr,  // Not currently mocked.
         .setSkipSnapshotSave = [](bool skip) { sSkipSnapshotSave = skip; },
         .isSnapshotSaveSkipped = []() -> bool { return sSkipSnapshotSave; },
+        .hostmemRegister = android_emulation_hostmem_register,
+        .hostmemUnregister = android_emulation_hostmem_unregister,
+        .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =

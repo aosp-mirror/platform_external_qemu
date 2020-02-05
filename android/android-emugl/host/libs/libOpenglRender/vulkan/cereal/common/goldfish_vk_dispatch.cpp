@@ -288,6 +288,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_create_resources_with_requirements
 #endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -775,6 +777,9 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateBufferWithRequirementsGOOGLE");
+#endif
+#ifdef VK_GOOGLE_address_space_info
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)dlSymFunc(lib, "vkGetMemoryHostAddressInfoGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1291,6 +1296,9 @@ void init_vulkan_dispatch_from_instance(
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateBufferWithRequirementsGOOGLE");
 #endif
+#ifdef VK_GOOGLE_address_space_info
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetMemoryHostAddressInfoGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1777,6 +1785,9 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateBufferWithRequirementsGOOGLE");
+#endif
+#ifdef VK_GOOGLE_address_space_info
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostAddressInfoGOOGLE");
 #endif
 }
 
