@@ -499,6 +499,7 @@ custom_decodes = {
 
     # VK_GOOGLE_address_space
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkGetMemoryHostAddressInfoGOOGLE" : emit_global_state_wrapped_decoding,
 
     # VK_GOOGLE_color_buffer
     "vkRegisterImageColorBufferGOOGLE" : emit_global_state_wrapped_decoding,

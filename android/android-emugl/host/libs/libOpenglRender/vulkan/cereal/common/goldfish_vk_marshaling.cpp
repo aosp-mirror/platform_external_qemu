@@ -17189,6 +17189,10 @@ const char* api_opcode_to_string(
         {
             return "OP_vkMapMemoryIntoAddressSpaceGOOGLE";
         }
+        case OP_vkGetMemoryHostAddressInfoGOOGLE:
+        {
+            return "OP_vkGetMemoryHostAddressInfoGOOGLE";
+        }
 #endif
 #ifdef VK_GOOGLE_color_buffer
         case OP_vkRegisterImageColorBufferGOOGLE:

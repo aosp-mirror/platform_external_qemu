@@ -675,7 +675,9 @@ public:
             }
 
             if (!emugl::emugl_feature_is_enabled(
-                        android::featurecontrol::GLDirectMem)) {
+                        android::featurecontrol::GLDirectMem) &&
+                !emugl::emugl_feature_is_enabled(
+                        android::featurecontrol::VirtioGpuNext)) {
                 pMemoryProperties->memoryTypes[i].propertyFlags =
                     pMemoryProperties->memoryTypes[i].propertyFlags &
                     ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -729,7 +731,9 @@ public:
             }
 
             if (!emugl::emugl_feature_is_enabled(
-                        android::featurecontrol::GLDirectMem)) {
+                        android::featurecontrol::GLDirectMem) &&
+                !emugl::emugl_feature_is_enabled(
+                        android::featurecontrol::VirtioGpuNext)) {
                 pMemoryProperties->memoryProperties.memoryTypes[i].propertyFlags =
                     pMemoryProperties->memoryProperties.memoryTypes[i].propertyFlags &
                     ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -2318,7 +2322,9 @@ public:
             uint64_t physAddr) {
 
         if (!emugl::emugl_feature_is_enabled(
-                    android::featurecontrol::GLDirectMem)) {
+                    android::featurecontrol::GLDirectMem) &&
+            !emugl::emugl_feature_is_enabled(
+                    android::featurecontrol::VirtioGpuNext)) {
             emugl::emugl_crash_reporter(
                     "FATAL: Tried to use direct mapping "
                     "while GLDirectMem is not enabled!");
@@ -2563,6 +2569,13 @@ public:
                     info->sizeToPage);
         }
 
+        if (info->virtioGpuMapped) {
+            VKDGS_LOG("unmap hostmem %p id 0x%llx\n",
+                      info->ptr,
+                      (unsigned long long)info->hostmemId);
+            get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
+        }
+
         if (info->ptr) {
             vk->vkUnmapMemory(device, memory);
         }
@@ -2655,7 +2668,9 @@ public:
 
     bool usingDirectMapping() const {
         return emugl::emugl_feature_is_enabled(
-                android::featurecontrol::GLDirectMem);
+                android::featurecontrol::GLDirectMem) ||
+               emugl::emugl_feature_is_enabled(
+                android::featurecontrol::VirtioGpuNext);
     }
 
     HostFeatureSupport getHostFeatureSupport() const {
@@ -2816,6 +2831,41 @@ public:
 
         *pAddress = (uint64_t)(uintptr_t)info->ptr;
 
+        return VK_SUCCESS;
+    }
+
+    VkResult on_vkGetMemoryHostAddressInfoGOOGLE(
+            android::base::Pool* pool,
+            VkDevice boxed_device, VkDeviceMemory memory,
+            uint64_t* pAddress, uint64_t* pSize, uint64_t* pHostmemId) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) return VK_ERROR_OUT_OF_HOST_MEMORY;
+
+        uint64_t hva = (uint64_t)(uintptr_t)(info->ptr);
+        uint64_t size = (uint64_t)(uintptr_t)(info->size);
+
+        auto id =
+            get_emugl_vm_operations().hostmemRegister(
+                    (uint64_t)(uintptr_t)(info->ptr),
+                    (uint64_t)(uintptr_t)(info->size));
+
+        *pAddress = hva & (0xfff); // Don't expose exact hva to guest
+        *pSize = size;
+        *pHostmemId = id;
+
+        info->virtioGpuMapped = true;
+        info->hostmemId = id;
+
+        fprintf(stderr, "%s: hva, size: %p 0x%llx id 0x%llx\n", __func__,
+                info->ptr, (unsigned long long)(info->size),
+                (unsigned long long)(*pHostmemId));
         return VK_SUCCESS;
     }
 
@@ -4929,9 +4979,11 @@ private:
         VkDeviceSize size;
         // GLDirectMem info
         bool directMapped = false;
+        bool virtioGpuMapped = false;
         uint64_t guestPhysAddr = 0;
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
+        uint64_t hostmemId = 0;
         VkDevice device = VK_NULL_HANDLE;
         IOSurfaceRef ioSurface = nullptr;
     };
@@ -5876,6 +5928,13 @@ VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
     VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
     return mImpl->on_vkMapMemoryIntoAddressSpaceGOOGLE(
         pool, device, memory, pAddress);
+}
+VkResult VkDecoderGlobalState::on_vkGetMemoryHostAddressInfoGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device, VkDeviceMemory memory,
+    uint64_t* pAddress, uint64_t* pSize, uint64_t* pHostmemId) {
+    return mImpl->on_vkGetMemoryHostAddressInfoGOOGLE(
+        pool, device, memory, pAddress, pSize, pHostmemId);
 }
 
 // VK_GOOGLE_color_buffer
