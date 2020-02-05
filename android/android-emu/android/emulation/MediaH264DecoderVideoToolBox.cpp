@@ -43,8 +43,13 @@ namespace emulation {
 
 using H264NaluType = H264NaluParser::H264NaluType;
 
-MediaH264DecoderVideoToolBox::MediaH264DecoderVideoToolBox() {
+MediaH264DecoderVideoToolBox::MediaH264DecoderVideoToolBox(uint32_t version)
+    : mVersion(version) {
     H264_DPRINT("created MediaH264DecoderVideoToolBox %p", this);
+}
+
+MediaH264DecoderPlugin* MediaH264DecoderVideoToolBox::clone() {
+    return new MediaH264DecoderVideoToolBox(mVersion);
 }
 
 MediaH264DecoderVideoToolBox::~MediaH264DecoderVideoToolBox() {

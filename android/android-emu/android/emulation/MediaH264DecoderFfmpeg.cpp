@@ -108,8 +108,16 @@ void MediaH264DecoderFfmpeg::initH264Context(unsigned int width,
     H264_DPRINT("Successfully created software h264 decoder context %p", mCodecCtx);
 }
 
-MediaH264DecoderFfmpeg::MediaH264DecoderFfmpeg() {
-    H264_DPRINT("allocated MediaH264DecoderFfmpeg %p", this);
+MediaH264DecoderPlugin* MediaH264DecoderFfmpeg::clone() {
+    H264_DPRINT("clone MediaH264DecoderFfmpeg %p with version %d", this,
+                (int)mVersion);
+    return new MediaH264DecoderFfmpeg(mVersion);
+}
+
+MediaH264DecoderFfmpeg::MediaH264DecoderFfmpeg(uint32_t version)
+    : mVersion(version) {
+    H264_DPRINT("allocated MediaH264DecoderFfmpeg %p with version %d", this,
+                (int)mVersion);
 }
 void MediaH264DecoderFfmpeg::destroyH264Context() {
     H264_DPRINT("Destroy context %p", this);

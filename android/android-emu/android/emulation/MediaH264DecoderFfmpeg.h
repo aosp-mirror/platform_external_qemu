@@ -62,17 +62,19 @@ public:
                                  unsigned int outWidth,
                                  unsigned int outHeight,
                                  PixelFormat pixFmt) override;
+    virtual MediaH264DecoderPlugin* clone() override;
     virtual void destroyH264Context() override;
     virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
-    MediaH264DecoderFfmpeg();
+    explicit MediaH264DecoderFfmpeg(uint32_t version);
     virtual ~MediaH264DecoderFfmpeg();
 
     friend MediaH264DecoderDefault;
 
 private:
+    uint32_t mVersion = 100;
     // image props
     int mNumDecodedFrame = 0;
     bool mImageReady = false;
