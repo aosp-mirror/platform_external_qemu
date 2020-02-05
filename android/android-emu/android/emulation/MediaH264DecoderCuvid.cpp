@@ -55,6 +55,13 @@ extern "C" {
 namespace android {
 namespace emulation {
 
+MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint32_t version)
+    : mVersion(version){};
+
+MediaH264DecoderPlugin* MediaH264DecoderCuvid::clone() {
+    return new MediaH264DecoderCuvid(mVersion);
+};
+
 MediaH264DecoderCuvid::~MediaH264DecoderCuvid() {
     destroyH264Context();
 }
