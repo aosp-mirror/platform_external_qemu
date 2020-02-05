@@ -23,6 +23,7 @@
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/HostmemIdMapping.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
@@ -75,8 +76,6 @@ typedef void (*post_callback_t)(void*, int, int, int, int, int, unsigned char*);
 extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_width,
     uint32_t display_height,
-    struct renderer_display_info* r,
-    post_callback_t,
     uint32_t display_type,
     void* renderer_cookie,
     int renderer_flags,
@@ -244,11 +243,21 @@ extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type);
 
+static void default_post_callback(
+    void* context, int width, int height, int ydir, int format, int frame_type, unsigned char* pixels) {
+    (void)context;
+    (void)width;
+    (void)height;
+    (void)ydir;
+    (void)format;
+    (void)frame_type;
+    (void)pixels;
+    // no-op
+}
+
 extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_width,
     uint32_t display_height,
-    struct renderer_display_info* display_info,
-    post_callback_t post_callback,
     uint32_t display_type,
     void* renderer_cookie,
     int renderer_flags,
@@ -303,6 +312,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::HostComposition, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanIgnoredHandles, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VirtioGpuNext, true);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
@@ -358,9 +369,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     pipe_virgl_renderer_init(renderer_cookie, renderer_flags, virglrenderer_callbacks);
 
-    GFXS_LOG("Started renderer. Initializing post callback...");
+    GFXS_LOG("Started renderer");
 
-    set_post_callback(display_info, post_callback, display_type);
+    set_post_callback(nullptr, default_post_callback, display_type);
 }
 
 static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type) {
@@ -461,6 +472,9 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         fprintf(stderr, "goldfish-opengl vm ops: is snapshot save skipped\n");
         return false;
     },
+    .hostmemRegister = android_emulation_hostmem_register,
+    .hostmemUnregister = android_emulation_hostmem_unregister,
+    .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =

@@ -494,6 +494,9 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
             handle, x, y, width, height,
             pixels, pixels_size);
     },
+    .post_color_buffer = [](uint32_t handle) {
+        FrameBuffer::getFB()->post(handle);
+    },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

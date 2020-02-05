@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/emulation/control/callbacks.h"
+#include "android/emulation/control/structs.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -178,6 +179,11 @@ typedef struct QAndroidVmOperations {
 
     // Retrieve the state of whether snapshotting is skipped.
     bool (*isSnapshotSaveSkipped)(void);
+
+    // Create/register/getinfo for host memory Id's
+    uint64_t (*hostmemRegister)(uint64_t hva, uint64_t size);
+    void (*hostmemUnregister)(uint64_t id);
+    struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
 
 } QAndroidVmOperations;
 
