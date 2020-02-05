@@ -34,7 +34,7 @@ protobuf_generate_grpc_cpp(SOURCE_DIR
                            ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
                            SOURCES
                            emulator_controller.proto
-                           snapshot-service.proto
+                           snapshot_service.proto
                            OUTPUT_DIR
                            ${CMAKE_CURRENT_BINARY_DIR}
                            GENERATED
@@ -79,7 +79,7 @@ target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++ gmock_ma
 android_target_dependency(android-grpc_unittest linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
 
 # Lets distribute the proto file
-install(FILES emulator_controller.proto snapshot-service.proto
+install(FILES emulator_controller.proto snapshot_service.proto
               ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto
         DESTINATION lib)
 
