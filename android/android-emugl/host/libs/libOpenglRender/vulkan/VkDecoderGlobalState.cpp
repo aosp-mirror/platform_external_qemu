@@ -2819,6 +2819,29 @@ public:
         return VK_SUCCESS;
     }
 
+    VkResult on_vkGetMemoryHostAddressInfoGOOGLE(
+            android::base::Pool* pool,
+            VkDevice boxed_device, VkDeviceMemory memory,
+            uint64_t* pAddress, uint64_t* pSize, uint64_t* pHostmemId) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) return VK_ERROR_OUT_OF_HOST_MEMORY;
+
+        *pAddress = (uint64_t)(uintptr_t)(info->ptr);
+        *pSize = (uint64_t)(uintptr_t)(info->size);
+        // TODO: Have some scheme for generating hostmem ID objects
+        // so the guest doesn't have to know the HVA
+        *pHostmemId = 0;
+
+        return VK_SUCCESS;
+    }
+
     VkResult on_vkRegisterImageColorBufferGOOGLE(
             android::base::Pool* pool,
             VkDevice device, VkImage image, uint32_t colorBuffer) {
@@ -5876,6 +5899,13 @@ VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
     VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
     return mImpl->on_vkMapMemoryIntoAddressSpaceGOOGLE(
         pool, device, memory, pAddress);
+}
+VkResult VkDecoderGlobalState::on_vkGetMemoryHostAddressInfoGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device, VkDeviceMemory memory,
+    uint64_t* pAddress, uint64_t* pSize, uint64_t* pHostmemId) {
+    return mImpl->on_vkGetMemoryHostAddressInfoGOOGLE(
+        pool, device, memory, pAddress, pSize, pHostmemId);
 }
 
 // VK_GOOGLE_color_buffer
