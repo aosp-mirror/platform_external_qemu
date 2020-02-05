@@ -78,6 +78,13 @@ VG_EXPORT void pipe_virgl_renderer_ctx_detach_resource(
 VG_EXPORT int pipe_virgl_renderer_resource_get_info(
     int res_handle,
     struct virgl_renderer_resource_info *info);
+
+VG_EXPORT void stream_renderer_resource_create_v2(
+    uint32_t res_handle, uint64_t hva, uint64_t size, uint64_t hvaId);
+VG_EXPORT uint64_t stream_renderer_resource_get_hva(uint32_t res_handle);
+VG_EXPORT uint64_t stream_renderer_resource_get_hva_size(uint32_t res_handle);
+VG_EXPORT void stream_renderer_resource_set_hv_slot(uint32_t res_handle, uint32_t slot);
+VG_EXPORT uint32_t stream_renderer_resource_get_hv_slot(uint32_t res_handle);
 #else
 
 #define VG_EXPORT

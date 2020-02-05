@@ -88,6 +88,7 @@ set(android-emu-common
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
+    android/emulation/HostmemIdMapping.cpp
     android/emulation/MediaVpxDecoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
     android/emulation/MediaH264DecoderFfmpeg.cpp
@@ -765,6 +766,7 @@ set(android-emu_unittests_src
     android/emulation/control/LineConsumer_unittest.cpp
     android/emulation/CpuAccelerator_unittest.cpp
     android/emulation/CrossSessionSocket_unittest.cpp
+    android/emulation/HostmemIdMapping_unittest.cpp
     android/emulation/HostMemoryService_unittest.cpp
     android/emulation/Hypervisor_unittest.cpp
     android/emulation/hostdevices/HostAddressSpace_unittest.cpp
