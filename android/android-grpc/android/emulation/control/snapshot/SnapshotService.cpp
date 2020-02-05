@@ -18,7 +18,6 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <iterator>
 #include <regex>
 #include <string>
 #include <vector>
@@ -43,8 +42,8 @@
 #include "android/utils/path.h"
 #include "grpcpp/server.h"
 #include "grpcpp/server_builder.h"
-#include "snapshot-service.grpc.pb.h"
-#include "snapshot-service.pb.h"
+#include "snapshot_service.grpc.pb.h"
+#include "snapshot_service.pb.h"
 #include "snapshot.pb.h"
 
 namespace google {
@@ -67,9 +66,9 @@ namespace control {
 
 class SnapshotLineConsumer : public LineConsumer {
 public:
-    SnapshotLineConsumer(Snapshot* status) : mStatus(status) {}
+    SnapshotLineConsumer(SnapshotPackage* status) : mStatus(status) {}
 
-    Snapshot* error() {
+    SnapshotPackage* error() {
         mStatus->set_success(false);
         std::string errMsg;
         for (const auto& line : lines()) {
@@ -80,15 +79,15 @@ public:
     }
 
 private:
-    Snapshot* mStatus;
+    SnapshotPackage* mStatus;
 };
 
 class SnapshotServiceImpl final : public SnapshotService::Service {
 public:
-    Status pullSnapshot(ServerContext* context,
-                        const Snapshot* request,
-                        ServerWriter<Snapshot>* writer) override {
-        Snapshot result;
+    Status PullSnapshot(ServerContext* context,
+                        const SnapshotPackage* request,
+                        ServerWriter<SnapshotPackage>* writer) override {
+        SnapshotPackage result;
         auto snapshot =
                 snapshot::Snapshot::getSnapshotById(request->snapshot_id());
 
@@ -134,7 +133,7 @@ public:
         // Stream the tmpdir out as a tar.gz..
         CallbackStreambufWriter csb(
                 k256KB, [writer](char* bytes, std::size_t len) {
-                    Snapshot msg;
+                    SnapshotPackage msg;
                     msg.set_payload(std::string(bytes, len));
                     msg.set_success(true);
                     return writer->Write(msg);
@@ -142,7 +141,7 @@ public:
 
 
         std::unique_ptr<std::ostream> stream;
-        if (request->format() == Snapshot::TARGZ) {
+        if (request->format() == SnapshotPackage::TARGZ) {
             stream = std::make_unique<GzipOutputStream>(&csb);
         } else {
             stream = std::make_unique<std::ostream>(&csb);
@@ -157,10 +156,10 @@ public:
         return Status::OK;
     }
 
-    Status pushSnapshot(ServerContext* context,
-                        ::grpc::ServerReader<Snapshot>* reader,
-                        Snapshot* reply) override {
-        Snapshot msg;
+    Status PushSnapshot(ServerContext* context,
+                        ::grpc::ServerReader<SnapshotPackage>* reader,
+                        SnapshotPackage* reply) override {
+        SnapshotPackage msg;
 
         // Create a temporary directory for the snapshot..
         std::string id = Uuid::generate().toString();
@@ -195,7 +194,7 @@ public:
 
         std::unique_ptr<std::istream> stream;
         CallbackStreambufReader csr(cb);
-        if (msg.format() == Snapshot::TARGZ) {
+        if (msg.format() == SnapshotPackage::TARGZ) {
             stream = std::make_unique<GzipInputStream>(&csr);
         } else {
             stream = std::make_unique<std::istream>(&csr);
@@ -250,7 +249,7 @@ public:
         return Status::OK;
     }
 
-    Status listSnapshots(ServerContext* context,
+    Status ListSnapshots(ServerContext* context,
                          const ::google::protobuf::Empty* request,
                          SnapshotList* reply) override {
         for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
@@ -266,9 +265,9 @@ public:
         return Status::OK;
     }
 
-    Status loadSnapshot(ServerContext* context,
-                        const Snapshot* request,
-                        Snapshot* reply) override {
+    Status LoadSnapshot(ServerContext* context,
+                        const SnapshotPackage* request,
+                        SnapshotPackage* reply) override {
         reply->set_snapshot_id(request->snapshot_id());
 
         auto snapshot =
@@ -293,9 +292,9 @@ public:
         return Status::OK;
     }
 
-    Status saveSnapshot(ServerContext* context,
-                        const Snapshot* request,
-                        Snapshot* reply) override {
+    Status SaveSnapshot(ServerContext* context,
+                        const SnapshotPackage* request,
+                        SnapshotPackage* reply) override {
         reply->set_snapshot_id(request->snapshot_id());
 
         auto snapshot =
@@ -303,7 +302,7 @@ public:
         if (snapshot) {
             // Nope, the snapshot already exists.
             reply->set_success(false);
-            reply->set_err("Snapshot with " + request->snapshot_id() +
+            reply->set_err("SnapshotPackage with " + request->snapshot_id() +
                            " already exists!");
             return Status::OK;
         }
@@ -320,9 +319,9 @@ public:
         return Status::OK;
     }
 
-    Status deleteSnapshot(ServerContext* context,
-                          const Snapshot* request,
-                          Snapshot* reply) override {
+    Status DeleteSnapshot(ServerContext* context,
+                          const SnapshotPackage* request,
+                          SnapshotPackage* reply) override {
         reply->set_snapshot_id(request->snapshot_id());
         reply->set_success(true);
 
@@ -332,18 +331,18 @@ public:
         return Status::OK;
     }
 
-    Status trackProcess(ServerContext* context,
+    Status TrackProcess(ServerContext* context,
                         const IceboxTarget* request,
                         IceboxTarget* reply) override {
         int pid = request->pid();
-        if (!request->packagename().empty()) {
-            AdbShellStream getPid("pidof " + request->packagename());
+        if (!request->package_name().empty()) {
+            AdbShellStream getPid("pidof " + request->package_name());
             std::vector<char> sout;
             std::vector<char> serr;
             if (getPid.readAll(sout, serr) == 0 && sout.size() > 0) {
                 sscanf(sout.data(), "%d", &pid);
             }
-          }
+        }
 
         if (pid == 0) {
             reply->set_err("Pid cannot be found..");
@@ -355,7 +354,7 @@ public:
         icebox::track_async(pid, snapshotName);
 
         reply->set_pid(pid);
-        reply->set_snapshotid(snapshotName);
+        reply->set_snapshot_id(snapshotName);
         return Status::OK;
     }
 
