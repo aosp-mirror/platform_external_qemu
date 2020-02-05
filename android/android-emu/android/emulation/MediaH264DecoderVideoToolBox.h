@@ -52,12 +52,13 @@ public:
                                  unsigned int outWidth,
                                  unsigned int outHeight,
                                  PixelFormat pixFmt) override;
+    virtual MediaH264DecoderPlugin* clone() override;
     virtual void destroyH264Context() override;
     virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
-    MediaH264DecoderVideoToolBox();
+    explicit MediaH264DecoderVideoToolBox(uint32_t version);
     virtual ~MediaH264DecoderVideoToolBox();
 
 public:
@@ -70,6 +71,7 @@ public:
     std::vector<uint8_t> getSPS() const { return mSPS; }
     std::vector<uint8_t> getPPS() const { return mPPS; }
 private:
+    uint32_t mVersion = 100;
     DecoderState mState = DecoderState::GOOD_STATE;
 
     void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes);

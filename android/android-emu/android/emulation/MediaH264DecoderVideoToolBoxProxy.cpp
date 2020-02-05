@@ -35,8 +35,14 @@
 namespace android {
 namespace emulation {
 
-MediaH264DecoderVideoToolBoxProxy::MediaH264DecoderVideoToolBoxProxy() {
+MediaH264DecoderVideoToolBoxProxy::MediaH264DecoderVideoToolBoxProxy(
+        uint32_t version)
+    : mVersion(version), mFfmpegDecoder(version), mVideoToolBoxDecoder(version) {
     mCurrentDecoder = &mVideoToolBoxDecoder;
+}
+
+MediaH264DecoderPlugin* MediaH264DecoderVideoToolBoxProxy::clone() {
+    return new MediaH264DecoderVideoToolBoxProxy(mVersion);
 }
 
 MediaH264DecoderVideoToolBoxProxy::~MediaH264DecoderVideoToolBoxProxy() {
