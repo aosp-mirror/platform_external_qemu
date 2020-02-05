@@ -10,18 +10,27 @@
 # specific language governing permissions and limitations under the License.
 
 get_filename_component(
-  PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libusb/${ANDROID_TARGET_TAG}"
+  PREBUILT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libusb/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
 # No usb support on windows!
 if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
-set(USB_INCLUDE_DIR "${PREBUILT_ROOT}/include/libusb-1.0")
-set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIR}")
-set(USB_LIBRARIES "${PREBUILT_ROOT}/lib/libusb-1.0${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(USB_FOUND TRUE)
+  set(USB_INCLUDE_DIR "${PREBUILT_ROOT}/include/libusb-1.0")
+  set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIR}")
+  set(USB_LIBRARIES
+      "${PREBUILT_ROOT}/lib/libusb-1.0${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(USB_FOUND TRUE)
 
-android_add_prebuilt_library(USB USB "${PREBUILT_ROOT}/lib/libusb-1.0" "${PREBUILT_ROOT}/include/libusb-1.0" "" "")
+  android_add_prebuilt_library(
+    PACKAGE USB
+    MODULE USB LOCATION "${PREBUILT_ROOT}/lib/libusb-1.0"
+    INCLUDES "${PREBUILT_ROOT}/include/libusb-1.0"
+    LIBNAME libusb
+    URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/libusb-1.0.21.tar.bz2"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv21"
+    NOTICE "https://github.com/libusb/libusb/blob/master/COPYING"
+    LICENSE LGPL-2.1-only)
 
 endif()
 set(PACKAGE_EXPORT "USB_INCLUDE_DIR;USB_INCLUDE_DIRS;USB_LIBRARIES;USB_FOUND")
-android_license("LIBUSB" "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv21")

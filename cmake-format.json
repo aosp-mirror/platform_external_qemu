@@ -1,33 +1,171 @@
 {
-  "line_width": 120,
+  "autosort": true,
+  "line_width": 80,
   "dangle_parens": false,
   "first_comment_is_literal": true,
-  "algorithm_order": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5
-  ],
   "command_case": "lower",
   "additional_commands": {
-    "foo": {
+    "protobuf_generate_grpc_cpp": {
+      "flags": [],
+      "kwargs": {
+        "SOURCE_DIR": "*",
+        "INCLUDES": "*",
+        "SOURCES": "*",
+        "OUTPUT_DIR": "*",
+        "GENERATED": "*"
+      }
+    },
+    "png_add_test": {
+      "flags": [],
+      "kwargs": {
+        "NAME": "*",
+        "COMMAND": "*",
+        "OPTIONS": "*",
+        "FILES": "*"
+      }
+    },
+    "android_add_library": {
       "flags": [
-        "BAR",
-        "BAZ"
+        "NODISTRIBUTE",
+        "SHARED"
       ],
       "kwargs": {
-        "HEADERS": "*",
-        "DEPENDS": "*",
-        "SOURCES": "*"
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*",
+        "DARWIN": "*",
+        "WINDOWS": "*",
+        "MSVC": "*",
+        "MINGW": "*",
+        "LINUX": "*",
+        "SRC": "*"
+      }
+    },
+    "android_nasm_compile": {
+      "flags": [
+        "NODISTRIBUTE"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*",
+        "DARWIN": "*",
+        "WINDOWS": "*",
+        "MSVC": "*",
+        "MINGW": "*",
+        "LINUX": "*",
+        "SRC": "*"
+      }
+    },
+    "android_add_interface": {
+      "flags": [
+        "NODISTRIBUTE",
+        "SHARED"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*"
+      }
+    },
+    "android_license": {
+      "flags": [],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "EXECUTABLES": "*",
+        "URL": "*",
+        "SPDX": "*",
+        "LICENSE": "*",
+        "LOCAL": "*"
+      }
+    },
+    "android_add_test": {
+      "flags": [],
+      "kwargs": {
+        "TARGET": "*",
+        "DARWIN": "*",
+        "WINDOWS": "*",
+        "MSVC": "*",
+        "MINGW": "*",
+        "LINUX": "*",
+        "SRC": "*"
+      }
+    },
+    "android_build_qemu_variant": {
+      "flags": [
+        "INSTALL"
+      ],
+      "kwargs": {
+        "EXE": "*",
+        "CPU": "*",
+        "SOURCES": "*",
+        "DEFINITIONS": "*",
+        "LIBRARIES": "*"
+      }
+    },
+    "android_add_prebuilt_library": {
+      "flags": [],
+      "kwargs": {
+        "INCLUDES": "*",
+        "PACKAGE": "*",
+        "MODULE": "*",
+        "LICENSE": "*",
+        "LIBNAME": "*",
+        "LOCAL": "*",
+        "URL": "*",
+        "NOTICE": "*",
+        "DEFINITIONS": "*"
+      }
+    },
+    "android_target_compile_options": {
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": "*",
+        "PRIVATE": "*"
+      }
+    },
+    "android_target_link_libraries": {
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": "*",
+        "PRIVATE": "*"
+      }
+    },
+    "android_add_executable": {
+      "flags": [
+        "NODISTRIBUTE"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*",
+        "DARWIN": "*",
+        "WINDOWS": "*",
+        "MSVC": "*",
+        "MINGW": "*",
+        "LINUX": "*",
+        "SRC": "*"
       }
     }
   },
   "separate_fn_name_with_space": false,
   "always_wrap": [],
   "separate_ctrl_name_with_space": false,
-  "max_subargs_per_line": 5,
+  "max_subgroups_hwrap": 10,
+  "max-pargs-hwrap": 10,
   "fence_pattern": "^\\s*([`~]{3}[`~]*)(.*)$",
   "enable_markup": true,
   "enable_sort": true,

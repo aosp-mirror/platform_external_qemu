@@ -10,12 +10,15 @@
 # specific language governing permissions and limitations under the License.
 
 get_filename_component(
-  PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/${ANDROID_TARGET_TAG}"
+  PREBUILT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
 set(VULKAN_FOUND TRUE)
 
-set(VULKAN_SHADER_SRC_PATH "${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/libs/libOpenglRender/vulkan/")
+set(VULKAN_SHADER_SRC_PATH
+    "${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/libs/libOpenglRender/vulkan/"
+)
 set(VULKAN_SHADER_DST_PATH "lib64/vulkan/shaders/")
 
 set(VULKAN_COMMON_DEPENDENCIES
@@ -40,7 +43,7 @@ set(VULKAN_COMMON_DEPENDENCIES
     "${VULKAN_SHADER_SRC_PATH}/EacRG11Unorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Unorm_3D.spv"
     "${VULKAN_SHADER_SRC_PATH}/EacRG11Snorm_3D.spv>${VULKAN_SHADER_DST_PATH}/EacRG11Snorm_3D.spv"
     "${VULKAN_SHADER_SRC_PATH}/Astc_3D.spv>${VULKAN_SHADER_DST_PATH}/Astc_3D.spv"
-    )
+)
 
 if(LINUX_X86_64)
   set(VULKAN_DEPENDENCIES
@@ -89,8 +92,7 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
       # for translating shaders to SPIRV
       "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
-      # On mac we need these on our load path
-      # MoltenVK
+      # On mac we need these on our load path MoltenVK
       "${PREBUILT_ROOT}/libvulkan.dylib>lib64/vulkan/libvulkan.dylib"
       "${PREBUILT_ROOT}/icds/libMoltenVK.dylib>lib64/vulkan/libMoltenVK.dylib"
       "${PREBUILT_ROOT}/icds/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json"
@@ -122,9 +124,10 @@ elseif(DARWIN_X86_64)
       # shaders
       ${VULKAN_COMMON_DEPENDENCIES})
 elseif(WINDOWS)
-  get_filename_component(PREBUILT_ROOT
-                         "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
-                         ABSOLUTE)
+  get_filename_component(
+    PREBUILT_ROOT
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
+    ABSOLUTE)
   set(VULKAN_DEPENDENCIES
       # Swiftshader
       "${PREBUILT_ROOT}/icds/vk_swiftshader.dll>lib64/vulkan/vk_swiftshader.dll"
@@ -171,3 +174,11 @@ elseif(WINDOWS)
       ${VULKAN_COMMON_DEPENDENCIES})
 endif()
 set(PACKAGE_EXPORT "VULKAN_DEPENDENCIES;VULKAN_TEST_DEPENDENCIES;VULKAN_FOUND")
+android_license(
+  TARGET VULKAN_DEPENDENCIES
+  LIBNAME "vulkan-sdk"
+  URL "https://vulkan.lunarg.com/sdk/home"
+  SPDX "Apache-2.0"
+  LICENSE
+    "https://vulkan.lunarg.com/software/license/vulkan-1.2.131.1-linux-license-summary.txt"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.VULKAN")

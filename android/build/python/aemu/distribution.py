@@ -21,10 +21,11 @@ import re
 import shutil
 import zipfile
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from absl import logging
 
 from aemu.definitions import get_qemu_root
+from aemu.licensing import Licensing
 
 # These are the set of zip files that will be generated in the distribution directory.
 # You can add additional zip sets here if you need. A file will be added to the given zipfile
@@ -70,65 +71,15 @@ def recursive_glob(dir, regex):
                 yield fname
 
 
-def _construct_notice_file(build_dir):
-    """Constructs a notice file for all the given individual files."""
-    dist_dir = os.path.join(build_dir, "distribution", "emulator")
-    license_dict = defaultdict(set)
-    with open(os.path.join(build_dir, "NOTICES.txt")) as nt:
-        for x in nt.readlines():
-            lib, lic = x.split(",")
-            license_dict[lic.strip()].add(lib.strip())
-
-    license_txt = {}
-    for lic in license_dict:
-        fname = lic
-        if not os.path.exists(fname):
-            fname = os.path.join(get_qemu_root(), lic)
-
-        with open(fname, "r") as lic_text:
-            license_txt[lic] = lic_text.read()
-
-    notice = ""
-    # Or license from path.
-    qemu_list = list(recursive_glob(dist_dir, "(.*qemu-system.*|.*qemu-img.*)")) + list(
-        recursive_glob(
-            dist_dir,
-            "(.*emulator$|.*emulator64-crash-service$|.*emulator-check$|.*goldfish-webrtc-bridge)",
-        )
-    )
-
-    for lic in license_dict:
-        lib = license_dict[lic]
-        fnames = set()
-        for fn in lib:
-            file_list = list(recursive_glob(dist_dir, ".*{}.*".format(fn)))
-            if not file_list:
-                file_list = qemu_list
-            for f in file_list:
-                fnames.add(f)
-
-        notice += "===========================================================\n"
-        notice += "Notices for file(s):\n"
-        notice += "\n".join(fnames)
-        notice += "\n"
-        notice += "The notices is included for the library/exectuables: {}\n\n".format(",".join(lib))
-        notice += "===========================================================\n"
-        notice += license_txt[lic]
-        notice += "\n\n"
-
-    return notice
-
-
 def create_distribution(dist_dir, build_dir, data):
     """Creates a release by copying files needed for the given platform."""
     if not os.path.exists(dist_dir):
         os.makedirs(dist_dir)
 
+    licensing = Licensing(build_dir, get_qemu_root())
+
     # Let's find the set of
     zip_set = zip_sets[data["config"]]
-
-    # add a notice file.
-    notice = _construct_notice_file(build_dir)
 
     # First we create the individual zip sets using the regular expressions.
     for zip_fname, params in zip_set.iteritems():
@@ -139,6 +90,10 @@ def create_distribution(dist_dir, build_dir, data):
         with zipfile.ZipFile(
             zip_fname, "w", zipfile.ZIP_DEFLATED, allowZip64=True
         ) as zipf:
+            # Include the notice files
+            zipf.writestr("emulator/NOTICE.txt", licensing.notice_file())
+            zipf.writestr("emulator/NOTICE.csv", licensing.to_csv())
+
             for param in params:
                 start_dir, regex, dest = param
                 search_dir = os.path.normpath(
@@ -150,4 +105,3 @@ def create_distribution(dist_dir, build_dir, data):
                     files.append(arcname)
                     zipf.write(fname, arcname)
 
-            zipf.writestr("emulator/NOTICE.txt", notice)

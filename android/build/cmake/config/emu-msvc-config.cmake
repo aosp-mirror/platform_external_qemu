@@ -10,7 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 get_filename_component(
-  PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/msvc/"
+  PREBUILT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/msvc/"
   ABSOLUTE)
 set(MSVC_FOUND TRUE)
 set(MSVC_DEPENDENCIES
@@ -19,3 +20,12 @@ set(MSVC_DEPENDENCIES
     "${PREBUILT_ROOT}/msvcp140.dll>lib64/msvcp140.dll"
     "${PREBUILT_ROOT}/vcruntime140.dll>lib64/vcruntime140.dll")
 set(PACKAGE_EXPORT "MSVC_DEPENDENCIES;MSVC_FOUND")
+android_license(
+  TARGET MSVC_DEPENDENCIES
+  LIBNAME vcredist
+  EXECUTABLES msvcp140.dll vcruntime140.dll msvcp140.dll vcruntime140.dll
+  URL "https://docs.microsoft.com/en-us/visualstudio/productinfo/2017-redistribution-vs"
+  SPDX "2017-redistribution-vs"
+  LICENSE
+    "https://marketplace.visualstudio.com/items/VisualStudioProductTeam.VisualStudioProjectSystemExtensibilityPreview/license"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.VSREDIST")
