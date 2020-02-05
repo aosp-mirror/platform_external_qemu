@@ -91,6 +91,7 @@ set(android-emu-common
     android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
     android/emulation/H264PingInfoParser.cpp
+    android/emulation/HostmemIdMapping.cpp
     android/emulation/MediaVpxDecoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
     android/emulation/MediaH264DecoderFfmpeg.cpp
@@ -644,6 +645,220 @@ target_include_directories(android-mock-vm-operations
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
+<<<<<<< HEAD
+=======
+# The unit tests
+set(android-emu_unittests_src
+    android/automation/AutomationController_unittest.cpp
+    android/automation/AutomationEventSink_unittest.cpp
+    android/avd/util_unittest.cpp
+    android/avd/util_wrapper_unittest.cpp
+    android/base/ArraySize_unittest.cpp
+    android/base/AlignedBuf_unittest.cpp
+    android/base/ContiguousRangeMapper_unittest.cpp
+    android/base/async/Looper_unittest.cpp
+    android/base/async/AsyncSocketServer_unittest.cpp
+    android/base/async/RecurrentTask_unittest.cpp
+    android/base/async/ScopedSocketWatch_unittest.cpp
+    android/base/async/SubscriberList_unittest.cpp
+    android/base/containers/BufferQueue_unittest.cpp
+    android/base/containers/CircularBuffer_unittest.cpp
+    android/base/containers/EntityManager_unittest.cpp
+    android/base/containers/Lookup_unittest.cpp
+    android/base/containers/SmallVector_unittest.cpp
+    android/base/containers/StaticMap_unittest.cpp
+    android/base/EintrWrapper_unittest.cpp
+    android/base/files/FileShareOpen_unittest.cpp
+    android/base/files/GzipStreambuf_unittest.cpp
+    android/base/files/IniFile_unittest.cpp
+    android/base/files/InplaceStream_unittest.cpp
+    android/base/files/MemStream_unittest.cpp
+    android/base/files/PathUtils_unittest.cpp
+    android/base/files/ScopedFd_unittest.cpp
+    android/base/files/ScopedStdioFile_unittest.cpp
+    android/base/files/Stream_unittest.cpp
+    android/base/files/StreamSerializing_unittest.cpp
+    android/base/FunctionView_unittest.cpp
+    android/base/JsonWriter_unittest.cpp
+    android/base/Log_unittest.cpp
+    android/base/LayoutResolver_unittest.cpp
+    android/base/memory/LazyInstance_unittest.cpp
+    android/base/memory/MemoryHints_unittest.cpp
+    android/base/memory/MallocUsableSize_unittest.cpp
+    android/base/memory/OnDemand_unittest.cpp
+    android/base/memory/ScopedPtr_unittest.cpp
+    android/base/memory/SharedMemory_unittest.cpp
+    android/base/misc/FileUtils_unittest.cpp
+    android/base/misc/HttpUtils_unittest.cpp
+    android/base/misc/IpcPipe_unittest.cpp
+    android/base/misc/StringUtils_unittest.cpp
+    android/base/misc/Utf8Utils_unittest.cpp
+    android/base/network/Dns_unittest.cpp
+    android/base/network/IpAddress_unittest.cpp
+    android/base/network/NetworkUtils_unittest.cpp
+    android/base/Optional_unittest.cpp
+    android/base/perflogger/Benchmark_unittest.cpp
+    android/base/Pool_unittest.cpp
+    android/base/ProcessControl_unittest.cpp
+    android/base/Result_unittest.cpp
+    android/base/ring_buffer_unittest.cpp
+    android/base/sockets/ScopedSocket_unittest.cpp
+    android/base/sockets/SocketDrainer_unittest.cpp
+    android/base/sockets/SocketUtils_unittest.cpp
+    android/base/sockets/SocketWaiter_unittest.cpp
+    android/base/StringFormat_unittest.cpp
+    android/base/StringParse_unittest.cpp
+    android/base/StringView_unittest.cpp
+    android/base/SubAllocator_unittest.cpp
+    android/base/synchronization/ConditionVariable_unittest.cpp
+    android/base/synchronization/Lock_unittest.cpp
+    android/base/synchronization/ReadWriteLock_unittest.cpp
+    android/base/synchronization/MessageChannel_unittest.cpp
+    android/base/system/System_unittest.cpp
+    android/base/testing/MockUtils_unittest.cpp
+    android/base/testing/ProtobufMatchers.cpp
+    android/base/testing/TestEvent_unittest.cpp
+    android/base/threads/Async_unittest.cpp
+    android/base/threads/FunctorThread_unittest.cpp
+    android/base/threads/ParallelTask_unittest.cpp
+    android/base/threads/Thread_unittest.cpp
+    android/base/threads/ThreadStore_unittest.cpp
+    android/base/TypeTraits_unittest.cpp
+    android/base/Uri_unittest.cpp
+    android/base/Uuid_unittest.cpp
+    android/base/Version_unittest.cpp
+    android/camera/CameraFormatConverters_unittest.cpp
+    android/cmdline-option_unittest.cpp
+    android/CommonReportedInfo_unittest.cpp
+    android/console_auth_unittest.cpp
+    android/console_unittest.cpp
+    android/emulation/AdbDebugPipe_unittest.cpp
+    android/emulation/AdbGuestPipe_unittest.cpp
+    android/emulation/AdbHostListener_unittest.cpp
+    android/emulation/AdbHostServer_unittest.cpp
+    android/emulation/AdbHub_unittest.cpp
+    android/emulation/AdbMessageSniffer_unittest.cpp
+    android/emulation/address_space_graphics_unittests.cpp
+    android/emulation/address_space_host_memory_allocator_unittests.cpp
+    android/emulation/android_pipe_pingpong_unittest.cpp
+    android/emulation/android_pipe_zero_unittest.cpp
+    android/emulation/AndroidAsyncMessagePipe_unittest.cpp
+    android/emulation/bufprint_config_dirs_unittest.cpp
+    android/emulation/ComponentVersion_unittest.cpp
+    android/emulation/ConfigDirs_unittest.cpp
+    android/emulation/DeviceContextRunner_unittest.cpp
+    android/emulation/DmaMap_unittest.cpp
+    android/emulation/control/adb/AdbConnection_unittest.cpp
+    android/emulation/control/adb/adbkey_unittest.cpp
+    android/emulation/control/adb/AdbInterface_unittest.cpp
+    android/emulation/control/ApkInstaller_unittest.cpp
+    android/emulation/control/FilePusher_unittest.cpp
+    android/emulation/control/GooglePlayServices_unittest.cpp
+    android/emulation/control/ScreenCapturer_unittest.cpp
+    android/emulation/control/LineConsumer_unittest.cpp
+    android/emulation/CpuAccelerator_unittest.cpp
+    android/emulation/CrossSessionSocket_unittest.cpp
+    android/emulation/HostmemIdMapping_unittest.cpp
+    android/emulation/HostMemoryService_unittest.cpp
+    android/emulation/Hypervisor_unittest.cpp
+    android/emulation/hostdevices/HostAddressSpace_unittest.cpp
+    android/emulation/hostdevices/HostGoldfishPipe_unittest.cpp
+    android/emulation/ParameterList_unittest.cpp
+    android/emulation/RefcountPipe_unittest.cpp
+    android/emulation/serial_line_unittest.cpp
+    android/emulation/SetupParameters_unittest.cpp
+    android/emulation/testing/TestAndroidPipeDevice.cpp
+    android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
+    android/emulation/VmLock_unittest.cpp
+    android/error-messages_unittest.cpp
+    android/featurecontrol/FeatureControl_unittest.cpp
+    android/featurecontrol/HWMatching_unittest.cpp
+    android/featurecontrol/testing/FeatureControlTest.cpp
+    android/filesystems/ext4_resize_unittest.cpp
+    android/filesystems/ext4_utils_unittest.cpp
+    android/filesystems/fstab_parser_unittest.cpp
+    android/filesystems/partition_config_unittest.cpp
+    android/filesystems/partition_types_unittest.cpp
+    android/filesystems/ramdisk_extractor_unittest.cpp
+    android/filesystems/testing/TestSupport.cpp
+    android/gps/GpxParser_unittest.cpp
+    android/gps/KmlParser_unittest.cpp
+    android/hw-lcd_unittest.cpp
+    android/jdwp/Jdwp_unittest.cpp
+    android/jdwp/JdwpProxy_unittest.cpp
+    android/kernel/kernel_utils_unittest.cpp
+    android/location/MapsKey_unittest.cpp
+    android/location/MapsKeyFileParser_unittest.cpp
+    android/location/Point_unittest.cpp
+    android/location/Route_unittest.cpp
+    android/network/control_unittest.cpp
+    android/network/constants_unittest.cpp
+    android/offworld/OffworldPipe_unittest.cpp
+    android/opengl/EmuglBackendList_unittest.cpp
+    android/opengl/EmuglBackendScanner_unittest.cpp
+    android/opengl/emugl_config_unittest.cpp
+    android/opengl/GpuFrameBridge_unittest.cpp
+    android/opengl/gpuinfo_unittest.cpp
+    android/physics/AmbientEnvironment_unittest.cpp
+    android/physics/InertialModel_unittest.cpp
+    android/physics/PhysicalModel_unittest.cpp
+    android/proxy/proxy_common_unittest.cpp
+    android/proxy/ProxyUtils_unittest.cpp
+    android/qt/qt_path_unittest.cpp
+    android/qt/qt_setup_unittest.cpp
+    android/snapshot/RamLoader_unittest.cpp
+    android/snapshot/RamSaver_unittest.cpp
+    android/snapshot/RamSnapshot_unittest.cpp
+    android/snapshot/Snapshot_unittest.cpp
+    android/telephony/gsm_unittest.cpp
+    android/telephony/modem_unittest.cpp
+    android/telephony/sms_unittest.cpp
+    android/telephony/SimAccessRules_unittest.cpp
+    android/telephony/TagLengthValue_unittest.cpp
+    android/update-check/UpdateChecker_unittest.cpp
+    android/update-check/VersionExtractor_unittest.cpp
+    android/utils/aconfig-file_unittest.cpp
+    android/utils/bufprint_unittest.cpp
+    android/utils/dirscanner_unittest.cpp
+    android/utils/dns_unittest.cpp
+    android/utils/eintr_wrapper_unittest.cpp
+    android/utils/file_data_unittest.cpp
+    android/utils/filelock_unittest.cpp
+    android/utils/format_unittest.cpp
+    android/utils/host_bitness_unittest.cpp
+    android/utils/path_unittest.cpp
+    android/utils/property_file_unittest.cpp
+    android/utils/Random_unittest.cpp
+    android/utils/string_unittest.cpp
+    android/utils/sockets_unittest.cpp
+    android/utils/x86_cpuid_unittest.cpp
+    android/verified-boot/load_config_unittest.cpp
+    android/videoinjection/VideoInjectionController_unittest.cpp
+    android/virtualscene/TextureUtils_unittest.cpp
+    android/wear-agent/PairUpWearPhone_unittest.cpp
+    android/wear-agent/testing/WearAgentTestUtils.cpp
+    android/wear-agent/WearAgent_unittest.cpp)
+
+# Windows specific unit tests
+set(android-emu_unittests_windows_src
+    android/base/files/ScopedFileHandle_unittest.cpp
+    android/base/files/ScopedRegKey_unittest.cpp
+    android/base/system/Win32UnicodeString_unittest.cpp
+    android/base/system/Win32Utils_unittest.cpp
+    android/utils/win32_cmdline_quote_unittest.cpp
+    android/windows_installer_unittest.cpp)
+
+# msvc specific unittests
+set(android-emu_unittests_windows_msvc-x86_64_src android/base/system/WinMsvcSystem_unittest.cpp)
+
+# Darwin & Linux only tests
+set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp
+                                            android/emulation/control/adb/AdbShellStream_unittest.cpp)
+
+set(android-emu_unittests_linux-x86_64_src android/emulation/nand_limits_unittest.cpp
+                                           android/emulation/control/adb/AdbShellStream_unittest.cpp)
+
+>>>>>>> 5a9bb3458f5... virtio-gpu: resource create v2 for gfxstream
 # And declare the test
 android_add_test(
   TARGET android-emu_unittests
