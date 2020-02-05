@@ -49,6 +49,7 @@ public:
                        unsigned int outWidth,
                        unsigned int outHeight,
                        PixelFormat pixFmt) override;
+    virtual MediaH264DecoderPlugin* clone() override;
     virtual void destroyH264Context() override;
     virtual void decodeFrame(void* ptr,
                              const uint8_t* frame,
@@ -57,10 +58,12 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
-    MediaH264DecoderCuvid() = default;
+    explicit MediaH264DecoderCuvid(uint32_t version);
     virtual ~MediaH264DecoderCuvid();
 
 private:
+    uint32_t mVersion = 100;
+
     // void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes,
     // uint64_t pts, size_t consumedSzBytes);
     // We should move these shared memory calls elsewhere, as vpx decoder is

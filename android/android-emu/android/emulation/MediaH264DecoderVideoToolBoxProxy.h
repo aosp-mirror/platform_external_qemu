@@ -48,17 +48,19 @@ public:
                                  unsigned int outWidth,
                                  unsigned int outHeight,
                                  PixelFormat pixFmt) override;
+    virtual MediaH264DecoderPlugin* clone() override;
     virtual void destroyH264Context() override;
     virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
-    MediaH264DecoderVideoToolBoxProxy();
+    explicit MediaH264DecoderVideoToolBoxProxy(uint32_t version);
     virtual ~MediaH264DecoderVideoToolBoxProxy();
 
 private:
     using DecoderState = MediaH264DecoderVideoToolBox::DecoderState;
 
+    uint32_t mVersion = 100;
     unsigned int mWidth;
     unsigned int mHeight;
     unsigned int mOutputWidth;

@@ -41,22 +41,22 @@ namespace android {
 namespace emulation {
 
 namespace {
-MediaH264DecoderPlugin* makeDecoderPlugin() {
+MediaH264DecoderPlugin* makeDecoderPlugin(uint32_t version) {
 #ifdef __APPLE__
     auto useVideoToolBox = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_VIDEOTOOLBOX_DECODER");
     if (useVideoToolBox != "") {
-        return new MediaH264DecoderVideoToolBoxProxy();
+        return new MediaH264DecoderVideoToolBoxProxy(version);
     }
 #else
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
     if (useCuvidEnv != "") {
         H264_DPRINT("Using Cuvid decoder on Linux/Windows");
-        return new MediaH264DecoderCuvid();
+        return new MediaH264DecoderCuvid(version);
     }
 #endif
-    return new MediaH264DecoderFfmpeg();
+    return new MediaH264DecoderFfmpeg(version);
 }
 
 }; // anon namespace
@@ -147,7 +147,7 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             unsigned int outHeight = *(unsigned int*)(xptr + 32);
             PixelFormat pixFmt =
                     static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
-            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin();
+            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin(version);
             uint64_t myid = createId();
             addDecoder(myid, mydecoder);
             mydecoder->initH264Context(width, height, outWidth, outHeight,
@@ -204,6 +204,7 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
                 H264_DPRINT("error, cannot reset on nullptr");
                 return;
             }
+            MediaH264DecoderPlugin* mydecoder = olddecoder->clone();
             delete olddecoder;
             uint8_t* xptr = (uint8_t*)ptr;
             unsigned int width = *(unsigned int*)(xptr + 8);
@@ -212,7 +213,6 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             unsigned int outHeight = *(unsigned int*)(xptr + 32);
             PixelFormat pixFmt =
                     static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
-            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin();
             mydecoder->initH264Context(width, height, outWidth, outHeight,
                                        pixFmt);
             updateDecoder(oldId, mydecoder);
