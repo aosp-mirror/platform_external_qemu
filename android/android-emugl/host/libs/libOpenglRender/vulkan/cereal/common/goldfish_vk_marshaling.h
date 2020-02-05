@@ -3386,6 +3386,9 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #define OP_vkCreateImageWithRequirementsGOOGLE 20325
 #define OP_vkCreateBufferWithRequirementsGOOGLE 20326
 #endif
+#ifdef VK_GOOGLE_address_space_info
+#define OP_vkGetMemoryHostAddressInfoGOOGLE 20327
+#endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
 

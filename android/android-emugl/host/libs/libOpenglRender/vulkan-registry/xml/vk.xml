@@ -6364,6 +6364,14 @@ server.
             <param><type>VkBuffer</type>* <name>pBuffer</name></param>
             <param><type>VkMemoryRequirements</type>* <name>pMemoryRequirements</name></param>
         </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY">
+            <proto><type>VkResult</type> <name>vkGetMemoryHostAddressInfoGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pAddress</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pSize</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pHostmemId</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9219,6 +9227,14 @@ server.
                 <enum value="&quot;VK_GOOGLE_create_resources_with_requirements&quot;"            name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMNTS_EXTENSION_NAME"/>
                 <command name="vkCreateImageWithRequirementsGOOGLE"/>
                 <command name="vkCreateBufferWithRequirementsGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_address_space_info" number="223" author="GOOGLE" contact="Roman Kiryanov @rkir,Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ADDRESS_SPACE_INFO_SPEC_VERSION"/>
+                <enum value="223"                                           name="VK_GOOGLE_ADDRESS_SPACE_INFO_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_address_space_info&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_INFO_EXTENSION_NAME"/>
+                <command name="vkGetMemoryHostAddressInfoGOOGLE"/>
             </require>
         </extension>
     </extensions>

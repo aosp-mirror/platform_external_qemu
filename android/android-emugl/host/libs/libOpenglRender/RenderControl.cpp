@@ -201,6 +201,9 @@ static constexpr android::base::StringView kAsyncUnmapBuffer = "ANDROID_EMU_asyn
 // Vulkan: Correct marshaling for ignored handles
 static constexpr android::base::StringView kVulkanIgnoredHandles = "ANDROID_EMU_vulkan_ignored_handles";
 
+// virtio-gpu-next
+static constexpr android::base::StringView kVirtioGpuNext = "ANDROID_EMU_virtio_gpu_next";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -413,6 +416,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool AsyncUnmapBufferEnabled = true;
     bool vulkanIgnoredHandlesEnabled =
         shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles);
+    bool virtioGpuNextEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNext);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -493,6 +498,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanIgnoredHandlesEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanIgnoredHandles;
+        glStr += " ";
+    }
+
+    if (virtioGpuNextEnabled && name == GL_EXTENSIONS) {
+        glStr += kVirtioGpuNext;
         glStr += " ";
     }
 

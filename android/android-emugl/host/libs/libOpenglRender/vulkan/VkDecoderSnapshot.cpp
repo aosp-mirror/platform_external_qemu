@@ -4434,6 +4434,21 @@ void vkCreateBufferWithRequirementsGOOGLE(
     mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pBuffer, 1);
 }
 #endif
+#ifdef VK_GOOGLE_address_space_info
+void vkGetMemoryHostAddressInfoGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkDeviceMemory memory,
+    uint64_t* pAddress,
+    uint64_t* pSize,
+    uint64_t* pHostmemId)
+{
+    // TODO: Implement
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8731,6 +8746,21 @@ void VkDecoderSnapshot::vkCreateBufferWithRequirementsGOOGLE(
     VkMemoryRequirements* pMemoryRequirements)
 {
     mImpl->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
+}
+#endif
+#ifdef VK_GOOGLE_address_space_info
+void VkDecoderSnapshot::vkGetMemoryHostAddressInfoGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkDeviceMemory memory,
+    uint64_t* pAddress,
+    uint64_t* pSize,
+    uint64_t* pHostmemId)
+{
+    mImpl->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAddress, pSize, pHostmemId);
 }
 #endif
 

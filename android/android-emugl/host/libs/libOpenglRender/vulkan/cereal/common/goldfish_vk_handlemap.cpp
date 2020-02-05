@@ -4750,6 +4750,8 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_create_resources_with_requirements
 #endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
 void handlemap_extension_struct(
     VulkanHandleMapping* handlemap,
     void* structExtension_out)

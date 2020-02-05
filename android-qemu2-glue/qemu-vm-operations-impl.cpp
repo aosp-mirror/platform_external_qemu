@@ -19,6 +19,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/emulation/HostmemIdMapping.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
@@ -939,6 +940,9 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .isRealAudioAllowed = is_real_audio_allowed,
         .setSkipSnapshotSave = set_skip_snapshot_save,
         .isSnapshotSaveSkipped = is_snapshot_save_skipped,
+        .hostmemRegister = android_emulation_hostmem_register,
+        .hostmemUnregister = android_emulation_hostmem_unregister,
+        .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =

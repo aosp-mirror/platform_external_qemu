@@ -33,6 +33,7 @@ typedef void (*read_color_buffer_t)(
 typedef void (*read_color_buffer_yuv_t)(
     uint32_t handle, int x, int y, int width, int height,
     void* pixels, uint32_t pixels_size);
+typedef void (*post_color_buffer_t)(uint32_t handle);
 
 struct AndroidVirtioGpuOps {
     create_color_buffer_with_handle_t create_color_buffer_with_handle;
@@ -41,6 +42,7 @@ struct AndroidVirtioGpuOps {
     update_color_buffer_t update_color_buffer;
     read_color_buffer_t read_color_buffer;
     read_color_buffer_yuv_t read_color_buffer_yuv;
+    post_color_buffer_t post_color_buffer;
 };
 
 #endif // ANDROID_VIRTIO_GPU_OPS
