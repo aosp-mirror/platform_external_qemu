@@ -2866,6 +2866,16 @@ public:
         VkDevice device,
         VkDeviceMemory memory,
         uint64_t* pAddress);
+    void vkGetMemoryHostAddressInfoGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        VkDeviceMemory memory,
+        uint64_t* pAddress,
+        uint64_t* pSize,
+        uint64_t* pHostmemId);
 #endif
 #ifdef VK_GOOGLE_color_buffer
     void vkRegisterImageColorBufferGOOGLE(

@@ -11,9 +11,9 @@ set(emugl_common_src
     sync_device.cpp)
 
 if(OPTION_GFXSTREAM_BACKEND)
-  android_add_library(emugl_common)
+    android_add_library(TARGET emugl_common STATIC LICENSE Apache-2.0 SRC ${emugl_common_src})
 else()
-  android_add_library(
+   android_add_library(
     TARGET emugl_common SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
                                                       ${emugl_common_src})
 endif()

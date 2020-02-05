@@ -758,6 +758,7 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_address_space
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlSymFunc(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)dlSymFunc(lib, "vkGetMemoryHostAddressInfoGOOGLE");
 #endif
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterImageColorBufferGOOGLE");
@@ -1273,6 +1274,7 @@ void init_vulkan_dispatch_from_instance(
 #endif
 #ifdef VK_GOOGLE_address_space
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetMemoryHostAddressInfoGOOGLE");
 #endif
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterImageColorBufferGOOGLE");
@@ -1760,6 +1762,7 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_GOOGLE_address_space
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetDeviceProcAddr(device, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostAddressInfoGOOGLE");
 #endif
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterImageColorBufferGOOGLE");
