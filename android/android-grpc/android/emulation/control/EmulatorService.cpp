@@ -431,9 +431,12 @@ Builder& Builder::withRtcBridge(RtcBridge* bridge) {
 }
 
 Builder& Builder::withWaterfall(const char* mode) {
-    if (mode != nullptr && strcmp("adb", mode) == 0)
+    if (mode == nullptr)
+        return *this;
+
+    if (strcmp("adb", mode) == 0)
         mWaterfall = WaterfallProvider::adb;
-    else
+    if (strcmp("forward", mode) == 0)
         mWaterfall = WaterfallProvider::forward;
 
     return *this;
@@ -467,25 +470,34 @@ Builder& Builder::withCertAndKey(std::string certfile,
     grpc::SslServerCredentialsOptions ssl_opts;
     ssl_opts.pem_key_cert_pairs.push_back(keycert);
     mCredentials = grpc::SslServerCredentials(ssl_opts);
-
-    // We installed tls, so we are going public with this!
     return *this;
 }
 
-Builder& Builder::withPort(int port) {
-    if (port == 0) {
+Builder& Builder::withAddress(std::string address) {
+    mBindAddress = address;
+    return *this;
+}
+
+Builder& Builder::withPortRange(int start, int end) {
+    assert(end > start);
+    int port = start;
+    bool found = false;
+    for(port = start; !found && port < end; port++) {
         // Find a free port.
-        android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
-        port = android::base::socketGetPort(s0.get());
+        android::base::ScopedSocket s0(socketTcp4LoopbackServer(port));
+        if (s0.valid()) {
+            mPort = android::base::socketGetPort(s0.get());
+            found = true;
+        }
     }
 
-    mPort = port;
     return *this;
-}
+}  // namespace control
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {
-    if (mAgents == nullptr) {
-        // Excuse me?
+    if (mAgents == nullptr || mPort == -1) {
+        // No agents, or no port was found.
+        LOG(INFO) << "No agents, or valid port was found";
         return nullptr;
     }
 
@@ -502,7 +514,9 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     builder.RegisterService(snapshotService.release());
 
 #ifndef _MSC_VER
-    builder.RegisterService(getWaterfallService());
+    auto wfall = getWaterfallService(mWaterfall);
+    if (wfall)
+        builder.RegisterService(wfall);
 #endif
     // Register logging & metrics interceptor.
     std::vector<std::unique_ptr<

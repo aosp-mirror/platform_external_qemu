@@ -125,6 +125,8 @@ waterfall::Waterfall::Service* getWaterfallService(WaterfallProvider variant) {
             return getAdbWaterfallService();
         case WaterfallProvider::forward:
             return getWaterfallService();
+        default:
+            return nullptr;
     }
 }
 
