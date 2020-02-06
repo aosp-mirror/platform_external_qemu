@@ -40,9 +40,10 @@ public:
     Builder& withConsoleAgents(const AndroidConsoleAgents* const consoleAgents);
     Builder& withCertAndKey(std::string certfile, std::string privateKeyFile);
 
-    Builder& withPort(int port);
+    Builder& withPortRange(int start, int end);
     Builder& withRtcBridge(RtcBridge* bridge);
     Builder& withWaterfall(const char* mode);
+    Builder& withAddress(std::string address);
 
     // Returns the fully configured and running service, or nullptr if
     // construction failed. Once the service has been started
@@ -52,10 +53,10 @@ public:
 
 private:
     const AndroidConsoleAgents* mAgents;
-    int mPort{5556};
+    int mPort{-1};
     WaterfallProvider mWaterfall{WaterfallProvider::adb};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
-    std::string mBindAddress{"0.0.0.0"};
+    std::string mBindAddress{"127.0.0.1"};
     std::string mCertfile;
 
     RtcBridge* mBridge{nullptr};

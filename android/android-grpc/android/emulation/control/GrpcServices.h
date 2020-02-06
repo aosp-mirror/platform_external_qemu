@@ -31,7 +31,9 @@ class GrpcServices {
 public:
     // Returns the active service, or nullptr if none was constructed.
     static EmulatorControllerService* setup(
-            int port,
+            int startPort,
+            int endPort,
+            std::string address,
             const AndroidConsoleAgents* const consoleAgents,
             RtcBridge* rtcBridge,
             const char* waterfall);
