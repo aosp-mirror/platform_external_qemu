@@ -248,9 +248,7 @@ void GLESv2Context::postLoadRestoreCtx() {
         if (vaoIte.first != 0) {
             genVAOName(vaoIte.first, false);
         }
-        if (m_glesMajorVersion >= 3) {
-            dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
-        }
+        dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
             GLESpointer* glesPointer =
                 (GLESpointer*)(vaoIte.second.vertexAttribInfo.data() + i);
@@ -263,7 +261,7 @@ void GLESv2Context::postLoadRestoreCtx() {
             // attribute 0 are bound right before draw, no need to bind it here
             if (glesPointer->getAttribType() == GLESpointer::VALUE
                     && i == 0) {
-                break;
+                continue;
             }
             switch (glesPointer->getAttribType()) {
                 case GLESpointer::BUFFER: {
@@ -324,8 +322,8 @@ void GLESv2Context::postLoadRestoreCtx() {
             }
         }
     }
+    dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
     if (m_glesMajorVersion >= 3) {
-        dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
         auto bindBufferRangeFunc =
                 [this](GLenum target,
                     const std::vector<BufferBinding>& bufferBindings) {
