@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e13aeac4_6d1efdb3",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/SnapshotService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-06T17:52:12Z",
+      "side": 0,
+      "message": "You want to remove all this?",
+      "revId": "cef7a06ad7ea6dd89ae1eb9c3ac938866d54ee48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
