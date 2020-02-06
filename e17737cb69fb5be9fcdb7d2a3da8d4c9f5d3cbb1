@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57b098ae_5749a6fe",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T22:01:38Z",
+      "side": 1,
+      "message": "While at it can you also address b/148890540?",
+      "range": {
+        "startLine": 75,
+        "startChar": 2,
+        "endLine": 75,
+        "endChar": 28
+      },
+      "revId": "e17737cb69fb5be9fcdb7d2a3da8d4c9f5d3cbb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
