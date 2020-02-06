@@ -18,6 +18,7 @@
 #include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/MediaH264DecoderPlugin.h"
 
+#include "android/opengles.h"
 
 
 extern "C" {
@@ -116,6 +117,10 @@ private:
     void copyFrame();
     void resetDecoder();
     bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
+
+      AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
+
+    void renderToHostColorBuffer(uint32_t bufferId);
 
 };  // MediaH264DecoderFfmpeg
 
