@@ -303,6 +303,13 @@ static uint8_t* getDst(void* ptr) {
     return (uint8_t*)ptr + offset;
 }
 
+static uint32_t getHostColorBufferId(void* ptr) {
+    // Guest will pass us the hsot color buffer id to send decoded frame to
+    uint8_t* xptr = (uint8_t*)ptr;
+    uint32_t colorBufferId = *(uint32_t*)(xptr + 16);
+    return colorBufferId;
+}
+
 void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     H264_DPRINT("getImage %p", ptr);
     uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
@@ -368,8 +375,14 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     *retColorSpace = mColorSpace;
 
 
-    uint8_t* dst =  getDst(ptr);
-    memcpy(dst, mDecodedFrame, mOutBufferSize);
+    if (mVersion == 100) {
+      uint8_t* dst =  getDst(ptr);
+      memcpy(dst, mDecodedFrame, mOutBufferSize);
+    } else if (mVersion == 200) {
+        mRenderer.renderToHostColorBuffer(getHostColorBufferId(ptr),
+                                          mOutputWidth, mOutputHeight,
+                                          mDecodedFrame);
+    }
 
     mImageReady = false;
     *retErr = mOutBufferSize;
