@@ -195,6 +195,13 @@ uint8_t* MediaH264DecoderVideoToolBox::getDst(void* ptr) {
     return (uint8_t*)ptr + offset;
 }
 
+static uint32_t getHostColorBufferId(void* ptr) {
+    // Guest will pass us the hsot color buffer id to send decoded frame to
+    uint8_t* xptr = (uint8_t*)ptr;
+    uint32_t colorBufferId = *(uint32_t*)(xptr + 16);
+    return colorBufferId;
+}
+
 void MediaH264DecoderVideoToolBox::createCMFormatDescription() {
     uint8_t*  parameterSets[2] = {mSPS.data(), mPPS.data()};
     size_t parameterSetSizes[2] = {mSPS.size(), mPPS.size()};
@@ -560,6 +567,12 @@ void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
         memcpy(dst, data, imageSize);
     }
     CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
+
+    if (mVersion == 200) {
+        mRenderer.renderToHostColorBuffer(getHostColorBufferId(ptr),
+                                          mOutputWidth, mOutputHeight,
+                                          getDst(ptr));
+    }
 
     *retErr = imageSize;
 

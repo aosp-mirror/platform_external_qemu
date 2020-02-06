@@ -18,6 +18,7 @@
 #include "android/emulation/H264NaluParser.h"
 #include "android/emulation/MediaCodec.h"
 #include "android/emulation/MediaH264DecoderPlugin.h"
+#include "android/emulation/MediaHostRenderer.h"
 
 #include <VideoToolbox/VideoToolbox.h>
 
@@ -72,6 +73,7 @@ public:
     std::vector<uint8_t> getPPS() const { return mPPS; }
 private:
     uint32_t mVersion = 100;
+    MediaHostRenderer mRenderer;
     DecoderState mState = DecoderState::GOOD_STATE;
 
     void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes);
