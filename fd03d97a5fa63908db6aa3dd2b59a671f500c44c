@@ -22,6 +22,30 @@
       "revId": "fd03d97a5fa63908db6aa3dd2b59a671f500c44c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5a3b66e_111a0dec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-02-06T22:37:04Z",
+      "side": 1,
+      "message": "I can change snapshot.proto. But waterfall is from the devX so we would need their approval.",
+      "parentUuid": "ea0b5917_ea71720c",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 10
+      },
+      "revId": "fd03d97a5fa63908db6aa3dd2b59a671f500c44c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
