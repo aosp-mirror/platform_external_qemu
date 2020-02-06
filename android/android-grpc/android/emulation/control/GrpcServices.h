@@ -27,15 +27,34 @@ namespace emulation {
 namespace control {
 class RtcBridge;
 
+// A Factory that can produce and a functioning gRPC service to control the
+// emulator. You should call teardown when the emulator shuts down to properly
+// close all active connections.
 class GrpcServices {
 public:
-    // Returns the active service, or nullptr if none was constructed.
+    // Enables the gRPC service that binds on the given address on the first
+    // port available in the port range [startPart, endPort).
+    //
+    // - |startPort| The beginning port range
+    // - |endPort| The last range in the port. The service will NOT bind to this
+    // port, should be > startPort.
+    // - |address| The ip address to bind to. For example: "127.0.0.1",
+    // "0.0.0.0".
+    // -  |consoleAgents| The emulator console agents, used to communicate with
+    // the emulator engine. |rtcBridge| The RTC bridge used to establish WebRTC
+    // streams. |waterfall| The named waterfall mode to use, if any. Unavailable
+    // on windows platforms.
     static EmulatorControllerService* setup(
-            int port,
+            int startPort,
+            int endPort,
+            std::string address,
             const AndroidConsoleAgents* const consoleAgents,
             RtcBridge* rtcBridge,
             const char* waterfall);
 
+    // Call this on emulator shut down to gracefully close down active gRPC
+    // connections. Closing of connections is not instanteanous and can take up
+    // to a second.
     static void teardown();
 
 private:
