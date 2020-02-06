@@ -569,6 +569,12 @@ void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
     }
     CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
 
+    if (mParser.version() == 200) {
+        mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+                                          mOutputWidth, mOutputHeight,
+                                          param.pDecodedFrame);
+    }
+
     *retErr = imageSize;
 
     *retPts = mOutputPts;
