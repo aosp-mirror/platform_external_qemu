@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e5b40a28_98296a3f",
+        "filename": "android/android-emu/android/emulation/MediaH264DecoderFfmpeg.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-06T01:24:53Z",
+      "side": 1,
+      "message": "nit: remove?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 2
+      },
+      "revId": "f3bff6eb95ca54b57d46b22e262a4d3338afc435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c1224d8_05164b0c",
+        "filename": "android/android-emu/android/emulation/MediaH264DecoderFfmpeg.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-06T01:24:53Z",
+      "side": 1,
+      "message": "should be 0 or 1?",
+      "revId": "f3bff6eb95ca54b57d46b22e262a4d3338afc435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "061ee6f7_624a94f6",
+        "filename": "android/android-emu/android/emulation/MediaH264DecoderFfmpeg.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-06T01:24:53Z",
+      "side": 1,
+      "message": "we should consider making the void* ptr a struct that is portable across guest and host 32/64, so it\u0027s easier to read and we dont have magic numbers for the offset",
+      "revId": "f3bff6eb95ca54b57d46b22e262a4d3338afc435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8026afcf_394b36de",
+        "filename": "android/android-emu/android/emulation/MediaH264DecoderFfmpeg.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-06T01:24:53Z",
+      "side": 1,
+      "message": "nit: remove comments?",
+      "revId": "f3bff6eb95ca54b57d46b22e262a4d3338afc435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77d616f5_559d9e64",
+        "filename": "android/android-emu/android/emulation/MediaH264DecoderFfmpeg.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-06T01:24:53Z",
+      "side": 1,
+      "message": "move the member to the bottom and put at same indent level as the methods?",
+      "revId": "f3bff6eb95ca54b57d46b22e262a4d3338afc435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
