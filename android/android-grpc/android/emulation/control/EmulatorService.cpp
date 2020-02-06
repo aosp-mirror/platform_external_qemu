@@ -467,25 +467,34 @@ Builder& Builder::withCertAndKey(std::string certfile,
     grpc::SslServerCredentialsOptions ssl_opts;
     ssl_opts.pem_key_cert_pairs.push_back(keycert);
     mCredentials = grpc::SslServerCredentials(ssl_opts);
-
-    // We installed tls, so we are going public with this!
     return *this;
 }
 
-Builder& Builder::withPort(int port) {
-    if (port == 0) {
+Builder& Builder::withAddress(std::string address) {
+    mBindAddress = address;
+    return *this;
+}
+
+Builder& Builder::withPortRange(int start, int end) {
+    assert(end > start);
+    int port = start;
+    bool found = false;
+    for(port = start; !found && port < end; port++) {
         // Find a free port.
-        android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
-        port = android::base::socketGetPort(s0.get());
+        android::base::ScopedSocket s0(socketTcp4LoopbackServer(port));
+        if (s0.valid()) {
+            mPort = android::base::socketGetPort(s0.get());
+            found = true;
+        }
     }
 
-    mPort = port;
     return *this;
 }
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {
-    if (mAgents == nullptr) {
-        // Excuse me?
+    if (mAgents == nullptr || mPort == -1) {
+        // No agents, or no port was found.
+        LOG(INFO) << "No agents, or valid port was found";
         return nullptr;
     }
 
