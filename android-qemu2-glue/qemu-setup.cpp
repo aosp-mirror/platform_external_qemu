@@ -23,16 +23,17 @@
 #include "msvc-posix.h"
 #endif
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/errno.h>
 #include <algorithm>
 #include <functional>
 #include <memory>
 #include <random>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
@@ -70,8 +71,8 @@
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/EmulatorAdvertisement.h"
+#include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
-#include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
@@ -82,17 +83,22 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
+#include "android-qemu2-glue/qemu-control-impl.h"
 extern "C" {
-
-#include "qemu-common.h"
 #include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "qemu/osdep.h"
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
-#include "sysemu/ranchu.h"
-#include "sysemu/rng-random-generic.h"
 #include "sysemu/sysemu.h"
+
+namespace android {
+namespace emulation {
+namespace control {
+class RtcBridge;
+}  // namespace control
+}  // namespace emulation
+}  // namespace android
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -263,28 +269,39 @@ static android::emulation::control::RtcBridge* qemu_setup_rtc_bridge() {
 }
 
 static void qemu_setup_grpc() {
-    int grpc = -1;
     EmulatorProperties props{
             {"serial.port", std::to_string(android_serial_number_port)},
             {"adb.port", std::to_string(android_adb_port)},
             {"avd.name", avdInfo_getName(android_avdInfo)},
             {"avd.id", avdInfo_getId(android_avdInfo)}};
 
+    int grpc_start = android_serial_number_port + 3000;
+    int grpc_end = grpc_start + 1000;
+    std::string address = "127.0.0.1";
+
     if (android_cmdLineOptions->grpc &&
-        sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-        // Go bridge go!
-        auto service = android::emulation::control::GrpcServices::setup(
-                grpc, getConsoleAgents(), qemu_setup_rtc_bridge(),
-                android_cmdLineOptions->waterfall);
-        if (service) {
-            props["grpc.port"] = std::to_string(service->port());
-            props["grpc.certificate"] = service->publicCert();
-        }
+        sscanf(android_cmdLineOptions->grpc, "%d", &grpc_start) == 1) {
+        grpc_end = grpc_start + 1;
+        address = "0.0.0.0";
+    }
+
+    auto service = android::emulation::control::GrpcServices::setup(
+            grpc_start, grpc_end, address, getConsoleAgents(),
+            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
+
+    if (service) {
+        props["grpc.port"] = std::to_string(service->port());
+        props["grpc.certificate"] = service->publicCert();
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();
     advertiser->write();
+
+    // Go bridge go!
+    android::emulation::control::GrpcServices::setup(
+            grpc_start, grpc_end, address, getConsoleAgents(),
+            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
 }
 
 bool qemu_android_emulation_setup() {

@@ -18,7 +18,9 @@ std::unique_ptr<EmulatorControllerService> GrpcServices::g_controler_service =
 std::unique_ptr<RtcBridge> GrpcServices::g_rtc_bridge = nullptr;
 
 EmulatorControllerService* GrpcServices::setup(
-        int port,
+        int startPort,
+        int endPort,
+        std::string address,
         const AndroidConsoleAgents* const consoleAgents,
         RtcBridge* rtcBridge,
         const char* waterfall) {
@@ -40,7 +42,8 @@ EmulatorControllerService* GrpcServices::setup(
                             base::PathUtils::join(
                                     android::ConfigDirs::getUserDirectory(),
                                     kPrivateKeyFileName))
-                    .withPort(port)
+                    .withPortRange(startPort, endPort)
+                    .withAddress(address)
                     .withWaterfall(waterfall)
                     .withRtcBridge(g_rtc_bridge.get());
 
