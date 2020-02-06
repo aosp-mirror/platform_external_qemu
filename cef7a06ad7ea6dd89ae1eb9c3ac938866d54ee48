@@ -34,6 +34,24 @@
       "revId": "cef7a06ad7ea6dd89ae1eb9c3ac938866d54ee48",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1af8dbb5_cb8bbb24",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/SnapshotService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-02-06T21:57:45Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "e435e9de_42ee9148",
+      "revId": "cef7a06ad7ea6dd89ae1eb9c3ac938866d54ee48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
