@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <algorithm>
 #include <functional>
 #include <memory>
@@ -84,6 +83,7 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
+#include "android-qemu2-glue/qemu-control-impl.h"
 extern "C" {
 
 #include "qemu/abort.h"
@@ -270,28 +270,39 @@ static android::emulation::control::RtcBridge* qemu_setup_rtc_bridge() {
 }
 
 static void qemu_setup_grpc() {
-    int grpc = -1;
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", avdInfo_getName(android_avdInfo)},
             {"avd.id", avdInfo_getId(android_avdInfo)}};
 
+    int grpc_start = android_serial_number_port + 3000;
+    int grpc_end = grpc_start + 1000;
+    std::string address = "127.0.0.1";
+
     if (android_cmdLineOptions->grpc &&
-        sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-        // Go bridge go!
-        auto service = android::emulation::control::GrpcServices::setup(
-                grpc, getConsoleAgents(), qemu_setup_rtc_bridge(),
-                android_cmdLineOptions->waterfall);
-        if (service) {
-            props["grpc.port"] = std::to_string(service->port());
-            props["grpc.certificate"] = service->publicCert();
-        }
+        sscanf(android_cmdLineOptions->grpc, "%d", &grpc_start) == 1) {
+        grpc_end = grpc_start + 1;
+        address = "0.0.0.0";
+    }
+
+    auto service = android::emulation::control::GrpcServices::setup(
+            grpc_start, grpc_end, address, getConsoleAgents(),
+            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
+
+    if (service) {
+        props["grpc.port"] = std::to_string(service->port());
+        props["grpc.certificate"] = service->publicCert();
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();
     advertiser->write();
+
+    // Go bridge go!
+    android::emulation::control::GrpcServices::setup(
+            grpc_start, grpc_end, address, getConsoleAgents(),
+            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
 }
 
 bool qemu_android_emulation_setup() {
