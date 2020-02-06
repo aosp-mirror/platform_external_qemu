@@ -53,9 +53,8 @@ target_include_directories(
   PRIVATE .. ../include ../qemu2-auto-generated ../slirp
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
-if(GRPC)
-  target_link_libraries(libqemu2-glue PRIVATE android-grpc)
-endif()
+
+target_link_libraries(libqemu2-glue PRIVATE android-grpc)
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()

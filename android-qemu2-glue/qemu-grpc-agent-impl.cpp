@@ -19,7 +19,6 @@
 #include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
 #endif
 
-#ifdef ANDROID_GRPC
 #include "android/emulation/control/GrpcServices.h"
 
 extern const AndroidConsoleAgents* getConsoleAgents();
@@ -39,12 +38,6 @@ int start_grpc(int port, const char* turncfg) {
     return android::emulation::control::GrpcServices::setup(
             port, getConsoleAgents(), rtc_bridge, "forward");
 }
-#else
-int start_grpc(int port, const char* turncfg) {
-    printf("GRPC endpoint not available\n");
-    return -1;
-}
-#endif
 
 static const QGrpcAgent grpcAgent = {
         .start = start_grpc,

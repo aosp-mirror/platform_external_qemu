@@ -69,6 +69,7 @@
 #include "android/emulation/VmLock.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
+#include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -80,9 +81,6 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
-#ifdef ANDROID_GRPC
-#include "android/emulation/control/GrpcServices.h"
-#endif
 
 extern "C" {
 
@@ -262,7 +260,6 @@ qemu_setup_rtc_bridge() {
 }
 
 static void qemu_setup_grpc() {
-#ifdef ANDROID_GRPC
     int grpc = -1;
     if (android_cmdLineOptions->grpc &&
         sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
@@ -271,7 +268,6 @@ static void qemu_setup_grpc() {
                 grpc, getConsoleAgents(), qemu_setup_rtc_bridge(),
                 android_cmdLineOptions->waterfall);
     }
-#endif
 }
 
 bool qemu_android_emulation_setup() {
@@ -345,8 +341,5 @@ void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
     androidSnapshot_finalize();
     android_emulation_teardown();
-
-#ifdef ANDROID_GRPC
     android::emulation::control::GrpcServices::teardown();
-#endif
 }

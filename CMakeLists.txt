@@ -43,21 +43,7 @@ set(OPTION_CLANG_TIDY
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-if(WINDOWS_X86_64)
-  set(GRPC
-      FALSE
-      CACHE
-        BOOL
-        "True if the emulator should be build with GRPC support. Defaults off for MingW."
-  )
-else()
-  set(GRPC
-      TRUE
-      CACHE
-        BOOL
-        "True if the emulator should be build with GRPC support. Defaults on for Linux/Mac/Msvc."
-  )
-endif()
+
 if(LINUX_X86_64)
   set(WEBRTC
       TRUE
@@ -96,11 +82,6 @@ string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
-
-if(WEBRTC AND NOT GRPC)
-  message(FATAL_ERROR "You need to enable GRPC if you wish to use WEBRTC")
-endif()
-
 set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Symbol extraction is not supported when cross compiling.
