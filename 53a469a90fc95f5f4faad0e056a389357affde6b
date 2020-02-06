@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77da3241_348b5125",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T18:49:24Z",
+      "side": 1,
+      "message": "It probably makes sense to include two other ports and the AVD id.",
+      "range": {
+        "startLine": 484,
+        "startChar": 31,
+        "endLine": 484,
+        "endChar": 50
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb6f4040_c132c5e6",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T18:49:24Z",
+      "side": 1,
+      "message": "For human friendliness it makes sense to add \".txt\" or similar suffix to the file name. Adding \"pid_\" prefix would relieve a curious user from guessing what the number means.",
+      "range": {
+        "startLine": 66,
+        "startChar": 11,
+        "endLine": 66,
+        "endChar": 51
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e40ea3f5_ba510eab",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T18:49:24Z",
+      "side": 1,
+      "message": "Rename to PortConfig or something like that. Describe semantics of the map.",
+      "range": {
+        "startLine": 24,
+        "startChar": 6,
+        "endLine": 24,
+        "endChar": 18
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5be8a0b0_5ef33d92",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T18:49:24Z",
+      "side": 1,
+      "message": "This name will become misleading as soon as some other program starts using this discovery mechanism. Also we are discovering Emulator not Studio. Consider something like EmulatorAdvertisement.",
+      "range": {
+        "startLine": 26,
+        "startChar": 6,
+        "endLine": 26,
+        "endChar": 21
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a141ebf_77d05260",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T18:49:24Z",
+      "side": 1,
+      "message": "Describe all public methods.",
+      "range": {
+        "startLine": 33,
+        "startChar": 16,
+        "endLine": 33,
+        "endChar": 26
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "91f828a7_39cf9e35",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-06T18:49:24Z",
+      "side": 1,
+      "message": "Safer to enclose in parentheses.",
+      "range": {
+        "startLine": 39,
+        "startChar": 23,
+        "endLine": 39,
+        "endChar": 38
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
