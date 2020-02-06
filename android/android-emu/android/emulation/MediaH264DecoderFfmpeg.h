@@ -17,7 +17,7 @@
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/MediaH264DecoderDefault.h"
 #include "android/emulation/MediaH264DecoderPlugin.h"
-
+#include "android/emulation/MediaHostRenderer.h"
 
 
 extern "C" {
@@ -75,6 +75,7 @@ public:
 
 private:
     uint32_t mVersion = 100;
+    MediaHostRenderer mRenderer;
     // image props
     int mNumDecodedFrame = 0;
     bool mImageReady = false;
