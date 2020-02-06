@@ -27,7 +27,7 @@ namespace android {
 namespace emulation {
 namespace control {
 
-enum class WaterfallProvider { adb, forward };
+enum class WaterfallProvider { none, adb, forward };
 
 waterfall::Waterfall::Service* getAdbWaterfallService();
 waterfall::Waterfall::Service* getWaterfallService();
