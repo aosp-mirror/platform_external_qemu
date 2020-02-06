@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "9d9e18ec_a74fde68",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-06T19:56:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "eb6f4040_c132c5e6",
+      "range": {
+        "startLine": 66,
+        "startChar": 11,
+        "endLine": 66,
+        "endChar": 51
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e40ea3f5_ba510eab",
         "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
         "patchSetId": 2
@@ -68,6 +92,30 @@
       "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d93b232f_d0e04e64",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-06T19:56:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e40ea3f5_ba510eab",
+      "range": {
+        "startLine": 24,
+        "startChar": 6,
+        "endLine": 24,
+        "endChar": 18
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "44725517_21472d82",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-06T19:56:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5be8a0b0_5ef33d92",
+      "range": {
+        "startLine": 26,
+        "startChar": 6,
+        "endLine": 26,
+        "endChar": 21
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a141ebf_77d05260",
         "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
         "patchSetId": 2
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "aa0900eb_d6ca49f4",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-06T19:56:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1a141ebf_77d05260",
+      "range": {
+        "startLine": 33,
+        "startChar": 16,
+        "endLine": 33,
+        "endChar": 26
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91f828a7_39cf9e35",
         "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery_unittest.cpp",
         "patchSetId": 2
@@ -137,6 +233,30 @@
       "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55877438_97c6c46e",
+        "filename": "android/android-grpc/android/emulation/control/utils/StudioDiscovery_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-06T19:56:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "91f828a7_39cf9e35",
+      "range": {
+        "startLine": 39,
+        "startChar": 23,
+        "endLine": 39,
+        "endChar": 38
+      },
+      "revId": "53a469a90fc95f5f4faad0e056a389357affde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
