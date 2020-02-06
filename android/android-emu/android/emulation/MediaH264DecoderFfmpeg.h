@@ -117,6 +117,8 @@ private:
     void resetDecoder();
     bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
 
+    void renderToHostColorBuffer(uint32_t bufferId);
+
 };  // MediaH264DecoderFfmpeg
 
 

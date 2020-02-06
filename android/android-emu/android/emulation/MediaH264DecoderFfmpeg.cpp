@@ -16,6 +16,14 @@
 #include "android/base/system/System.h"
 #include "android/emulation/H264NaluParser.h"
 #include "android/emulation/YuvConverter.h"
+//#include "android/android-emugl/renderControl_dec.h"
+/*
+extern int rcUpdateColorBuffer(uint32_t colorBuffer,
+                               GLint x, GLint y,
+                               GLint width, GLint height,
+                               GLenum format, GLenum type, void* pixels);
+
+*/
 
 #include <cstdint>
 #include <string>
@@ -24,7 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt,...) fprintf(stderr, "h264-ffmpeg-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -303,6 +311,13 @@ static uint8_t* getDst(void* ptr) {
     return (uint8_t*)ptr + offset;
 }
 
+static uint32_t getHostColorBufferId(void* ptr) {
+    // Guest will pass us the hsot color buffer id to send decoded frame to
+    uint8_t* xptr = (uint8_t*)ptr;
+    uint32_t colorBufferId = *(uint32_t*)(xptr + 16);
+    return colorBufferId;
+}
+
 void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     H264_DPRINT("getImage %p", ptr);
     uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
@@ -368,12 +383,22 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     *retColorSpace = mColorSpace;
 
 
-    uint8_t* dst =  getDst(ptr);
-    memcpy(dst, mDecodedFrame, mOutBufferSize);
+    if (mVersion == 100) {
+      uint8_t* dst =  getDst(ptr);
+      memcpy(dst, mDecodedFrame, mOutBufferSize);
+    } else if (mVersion == 200) {
+      renderToHostColorBuffer(getHostColorBufferId(ptr));
+    }
 
     mImageReady = false;
     *retErr = mOutBufferSize;
 }
+
+void MediaH264DecoderFfmpeg::renderToHostColorBuffer(uint32_t bufferId) {
+  H264_DPRINT("NOT IMPLEMENTED Calling %s at %d", __func__, __LINE__);
+  //need to call rcUpdateColorBuffer, but I cannot, it is in emugl lib
+}
+
 
 }  // namespace emulation
 }  // namespace android
