@@ -38,29 +38,23 @@ class MediaH264DecoderVideoToolBoxProxy : public MediaH264DecoderPlugin {
 public:
 
 
-    virtual void initH264Context(unsigned int width,
-                                 unsigned int height,
-                                 unsigned int outWidth,
-                                 unsigned int outHeight,
-                                 PixelFormat pixFmt) override;
-    virtual void reset(unsigned int width,
-                                 unsigned int height,
-                                 unsigned int outWidth,
-                                 unsigned int outHeight,
-                                 PixelFormat pixFmt) override;
     virtual MediaH264DecoderPlugin* clone() override;
     virtual void destroyH264Context() override;
-    virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) override;
+    virtual void decodeFrame(void* ptr) override;
     virtual void flush(void* ptr) override;
+    virtual void initH264Context(void* ptr) override;
+    virtual void reset(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
-    explicit MediaH264DecoderVideoToolBoxProxy(uint32_t version);
+    explicit MediaH264DecoderVideoToolBoxProxy(uint64_t id,
+                                               H264PingInfoParser parser);
     virtual ~MediaH264DecoderVideoToolBoxProxy();
 
 private:
     using DecoderState = MediaH264DecoderVideoToolBox::DecoderState;
 
-    uint32_t mVersion = 100;
+    uint64_t mId = 0;
+    H264PingInfoParser mParser;
     unsigned int mWidth;
     unsigned int mHeight;
     unsigned int mOutputWidth;
