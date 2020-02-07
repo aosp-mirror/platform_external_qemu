@@ -22,6 +22,30 @@
       "revId": "337bc3f5043dbe518d528d3cd40de90bab6e227e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40d972d0_76a43719",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-02-07T23:04:39Z",
+      "side": 1,
+      "message": "I think I am confused. Do you prefer to put them into the same java_package or not?\n\nsnapshot_service.proto and snapshot.proto belongs to different packages (\"control\" vs \"snapshot\"). If we want all of them to have the same java package then they should all go under com.android.emulator. Otherwise we probably want snapshot.proto to stay in \"com.android.emulator.snapshot\", and snapshot_service.proto in \"com.android.emulator.control\".",
+      "parentUuid": "2e5049a5_f9a00e16",
+      "range": {
+        "startLine": 22,
+        "startChar": 23,
+        "endLine": 22,
+        "endChar": 51
+      },
+      "revId": "337bc3f5043dbe518d528d3cd40de90bab6e227e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
