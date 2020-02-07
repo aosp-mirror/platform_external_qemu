@@ -35,14 +35,22 @@
 namespace android {
 namespace emulation {
 
+using InitContextParam = H264PingInfoParser::InitContextParam;
+using DecodeFrameParam = H264PingInfoParser::DecodeFrameParam;
+using ResetParam = H264PingInfoParser::ResetParam;
+using GetImageParam = H264PingInfoParser::GetImageParam;
 MediaH264DecoderVideoToolBoxProxy::MediaH264DecoderVideoToolBoxProxy(
-        uint32_t version)
-    : mVersion(version), mFfmpegDecoder(version), mVideoToolBoxDecoder(version) {
+        uint64_t id,
+        H264PingInfoParser parser)
+    : mId(id),
+      mParser(parser),
+      mFfmpegDecoder(id, parser),
+      mVideoToolBoxDecoder(id, parser) {
     mCurrentDecoder = &mVideoToolBoxDecoder;
 }
 
 MediaH264DecoderPlugin* MediaH264DecoderVideoToolBoxProxy::clone() {
-    return new MediaH264DecoderVideoToolBoxProxy(mVersion);
+    return new MediaH264DecoderVideoToolBoxProxy(mId, mParser);
 }
 
 MediaH264DecoderVideoToolBoxProxy::~MediaH264DecoderVideoToolBoxProxy() {
@@ -50,34 +58,13 @@ MediaH264DecoderVideoToolBoxProxy::~MediaH264DecoderVideoToolBoxProxy() {
     mCurrentDecoder = nullptr;
 }
 
-void MediaH264DecoderVideoToolBoxProxy::initH264Context(unsigned int width,
-                                           unsigned int height,
-                                           unsigned int outWidth,
-                                           unsigned int outHeight,
-                                           PixelFormat outPixFmt) {
-    H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
-                __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
-    mWidth = width;
-    mHeight = height;
-    mOutputWidth = outWidth;
-    mOutputHeight = outHeight;
-    mOutputPixelFormat = outPixFmt;
-    mCurrentDecoder->initH264Context(width, height, outWidth, outHeight, outPixFmt);
+void MediaH264DecoderVideoToolBoxProxy::initH264Context(void* ptr) {
+    mVideoToolBoxDecoder.initH264Context(ptr);
+    mFfmpegDecoder.initH264Context(ptr);
 }
 
-void MediaH264DecoderVideoToolBoxProxy::reset(unsigned int width,
-                                           unsigned int height,
-                                           unsigned int outWidth,
-                                           unsigned int outHeight,
-                                           PixelFormat outPixFmt) {
-    H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
-                __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
-    mWidth = width;
-    mHeight = height;
-    mOutputWidth = outWidth;
-    mOutputHeight = outHeight;
-    mOutputPixelFormat = outPixFmt;
-    mCurrentDecoder->reset(width, height, outWidth, outHeight, outPixFmt);
+void MediaH264DecoderVideoToolBoxProxy::reset(void* ptr) {
+    mCurrentDecoder->reset(ptr);
 }
 
 std::vector<uint8_t> MediaH264DecoderVideoToolBoxProxy::prefixNaluHeader(std::vector<uint8_t> data) {
@@ -86,24 +73,22 @@ std::vector<uint8_t> MediaH264DecoderVideoToolBoxProxy::prefixNaluHeader(std::ve
     return result;
 }
 
-void MediaH264DecoderVideoToolBoxProxy::decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) {
+void MediaH264DecoderVideoToolBoxProxy::decodeFrame(void* ptr) {
     if (mIsVideoToolBoxDecoderInGoodState) {
-        mVideoToolBoxDecoder.decodeFrame(ptr, frame, szBytes, pts);
+        mVideoToolBoxDecoder.decodeFrame(ptr);
         if (mVideoToolBoxDecoder.getState() == DecoderState::BAD_STATE) {
             mSPS = prefixNaluHeader(mVideoToolBoxDecoder.getSPS());
             mPPS = prefixNaluHeader(mVideoToolBoxDecoder.getPPS());
             // right now, the only place that videotoolbox can fail is when it gets SPS and PPS, and
             // failed to create decoding session
-            assert(szBytes == mPPS.size());
             mVideoToolBoxDecoder.destroyH264Context();
             mIsVideoToolBoxDecoderInGoodState = false;
-            mFfmpegDecoder.initH264Context(mWidth, mHeight, mOutputWidth, mOutputHeight, mOutputPixelFormat);
-            mFfmpegDecoder.decodeFrame(ptr, &(mSPS[0]), mSPS.size(), 0);
-            mFfmpegDecoder.decodeFrame(ptr, &(mPPS[0]), mPPS.size(), 0);
+            mFfmpegDecoder.decodeFrameDirect(ptr, &(mSPS[0]), mSPS.size(), 0);
+            mFfmpegDecoder.decodeFrameDirect(ptr, &(mPPS[0]), mPPS.size(), 0);
             mCurrentDecoder = &mFfmpegDecoder;
         }
     } else {
-        mFfmpegDecoder.decodeFrame(ptr, frame, szBytes, pts);
+        mFfmpegDecoder.decodeFrame(ptr);
     }
 }
 

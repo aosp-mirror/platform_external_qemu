@@ -16,6 +16,7 @@
 
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/H264NaluParser.h"
+#include "android/emulation/H264PingInfoParser.h"
 #include "android/emulation/MediaCodec.h"
 #include "android/emulation/MediaH264DecoderPlugin.h"
 
@@ -39,30 +40,25 @@ namespace emulation {
 
 class MediaH264DecoderCuvid : public MediaH264DecoderPlugin {
 public:
-    virtual void initH264Context(unsigned int width,
-                                 unsigned int height,
-                                 unsigned int outWidth,
-                                 unsigned int outHeight,
-                                 PixelFormat pixFmt) override;
-    virtual void reset(unsigned int width,
-                       unsigned int height,
-                       unsigned int outWidth,
-                       unsigned int outHeight,
-                       PixelFormat pixFmt) override;
+    virtual void reset(void* ptr) override;
+    virtual void initH264Context(void* ptr) override;
     virtual MediaH264DecoderPlugin* clone() override;
     virtual void destroyH264Context() override;
-    virtual void decodeFrame(void* ptr,
-                             const uint8_t* frame,
-                             size_t szBytes,
-                             uint64_t pts) override;
+    virtual void decodeFrame(void* ptr) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
-    explicit MediaH264DecoderCuvid(uint32_t version);
+    explicit MediaH264DecoderCuvid(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderCuvid();
 
 private:
-    uint32_t mVersion = 100;
+    void initH264ContextInternal(unsigned int width,
+                                 unsigned int height,
+                                 unsigned int outWidth,
+                                 unsigned int outHeight,
+                                 PixelFormat pixFmt);
+    uint32_t mId = 0;
+    H264PingInfoParser mParser;
 
     // void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes,
     // uint64_t pts, size_t consumedSzBytes);

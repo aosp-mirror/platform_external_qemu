@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264DecoderDefault.h"
+#include "android/emulation/H264PingInfoParser.h"
 #include "android/emulation/MediaH264DecoderFfmpeg.h"
 #ifdef __APPLE__
 #include "android/emulation/MediaH264DecoderVideoToolBoxProxy.h"
@@ -41,22 +42,23 @@ namespace android {
 namespace emulation {
 
 namespace {
-MediaH264DecoderPlugin* makeDecoderPlugin(uint32_t version) {
+MediaH264DecoderPlugin* makeDecoderPlugin(uint64_t pluginid,
+                                          H264PingInfoParser parser) {
 #ifdef __APPLE__
     auto useVideoToolBox = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_VIDEOTOOLBOX_DECODER");
     if (useVideoToolBox != "") {
-        return new MediaH264DecoderVideoToolBoxProxy(version);
+        return new MediaH264DecoderVideoToolBoxProxy(pluginid, parser);
     }
 #else
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
     if (useCuvidEnv != "") {
         H264_DPRINT("Using Cuvid decoder on Linux/Windows");
-        return new MediaH264DecoderCuvid(version);
+        return new MediaH264DecoderCuvid(pluginid, parser);
     }
 #endif
-    return new MediaH264DecoderFfmpeg(version);
+    return new MediaH264DecoderFfmpeg(pluginid, parser);
 }
 
 }; // anon namespace
@@ -65,7 +67,7 @@ MediaH264DecoderPlugin* makeDecoderPlugin(uint32_t version) {
 uint64_t MediaH264DecoderDefault::readId(void* ptr) {
     if (nullptr == ptr)
         return 0;
-    uint64_t key = (*reinterpret_cast<uint64_t*>(ptr));
+    uint64_t key = H264PingInfoParser::parseHostDecoderId(ptr);
     return key;
 }
 
@@ -134,26 +136,24 @@ static void* getReturnAddress(void* ptr) {
 void MediaH264DecoderDefault::handlePing(MediaCodecType type,
                                          MediaOperation op,
                                          void* ptr) {
+    using InitContextParam = H264PingInfoParser::InitContextParam;
+    using DecodeFrameParam = H264PingInfoParser::DecodeFrameParam;
+    using ResetParam = H264PingInfoParser::ResetParam;
+    using GetImageParam = H264PingInfoParser::GetImageParam;
+
     switch (op) {
         case MediaOperation::InitContext: {
-            uint8_t* xptr = (uint8_t*)ptr;
-            uint32_t version = *(uint32_t*)xptr;
+            H264PingInfoParser parser{ptr};
+            InitContextParam param{};
+            parser.parseInitContextParams(ptr, param);
             H264_DPRINT(
                     "handle init decoder context request from guest version %u",
-                    version);
-            unsigned int width = *(unsigned int*)(xptr + 8);
-            unsigned int height = *(unsigned int*)(xptr + 16);
-            unsigned int outWidth = *(unsigned int*)(xptr + 24);
-            unsigned int outHeight = *(unsigned int*)(xptr + 32);
-            PixelFormat pixFmt =
-                    static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
-            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin(version);
+                    parser.version());
             uint64_t myid = createId();
+            MediaH264DecoderPlugin* mydecoder = makeDecoderPlugin(myid, parser);
             addDecoder(myid, mydecoder);
-            mydecoder->initH264Context(width, height, outWidth, outHeight,
-                                       pixFmt);
-            uint64_t* ret = static_cast<uint64_t*>(getReturnAddress(ptr));
-            *ret = myid;
+            mydecoder->initH264Context(ptr);
+            *(param.pHostDecoderId) = myid;
             H264_DPRINT("done handling InitContext");
             break;
         }
@@ -173,11 +173,7 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             MediaH264DecoderPlugin* mydecoder = getDecoder(readId(ptr));
             if (nullptr == mydecoder)
                 return;
-            uint64_t offset = *(uint64_t*)((uint8_t*)ptr + 8);
-            const uint8_t* img = (const uint8_t*)ptr + offset;
-            size_t szBytes = *(size_t*)((uint8_t*)ptr + 16);
-            uint64_t inputPts = *(size_t*)((uint8_t*)ptr + 24);
-            mydecoder->decodeFrame(ptr, img, szBytes, inputPts);
+            mydecoder->decodeFrame(ptr);
             break;
         }
         case MediaOperation::Flush: {
@@ -206,15 +202,7 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             }
             MediaH264DecoderPlugin* mydecoder = olddecoder->clone();
             delete olddecoder;
-            uint8_t* xptr = (uint8_t*)ptr;
-            unsigned int width = *(unsigned int*)(xptr + 8);
-            unsigned int height = *(unsigned int*)(xptr + 16);
-            unsigned int outWidth = *(unsigned int*)(xptr + 24);
-            unsigned int outHeight = *(unsigned int*)(xptr + 32);
-            PixelFormat pixFmt =
-                    static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
-            mydecoder->initH264Context(width, height, outWidth, outHeight,
-                                       pixFmt);
+            mydecoder->reset(ptr);
             updateDecoder(oldId, mydecoder);
             break;
         }
