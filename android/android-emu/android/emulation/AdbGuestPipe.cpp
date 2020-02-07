@@ -657,16 +657,22 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
         });
         // TODO: track PIPE_ERROR_AGAIN
         if (mState != State::ClosedByHost) {
+            int wakeFlags = 0;
             // AdbHub might want to send/recv packets
             if (mAdbHub->socketWantRead()) {
                 mFdWatcher->wantRead();
+                wakeFlags |= PIPE_WAKE_READ;
             } else {
                 mFdWatcher->dontWantRead();
             }
             if (mAdbHub->socketWantWrite()) {
                 mFdWatcher->wantWrite();
+                wakeFlags |= PIPE_WAKE_WRITE;
             } else {
                 mFdWatcher->dontWantWrite();
+            }
+            if (wakeFlags) {
+                signalWake(wakeFlags);
             }
         }
     } else {
