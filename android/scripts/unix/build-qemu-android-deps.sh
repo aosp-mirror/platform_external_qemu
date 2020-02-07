@@ -371,7 +371,8 @@ build_qemu_android_deps () {
                 --disable-man \
                 --disable-selinux \
                 --disable-xattr \
-                --disable-compile-warnings
+                --disable-compile-warnings \
+                --verbose \
             ;;
     esac
 

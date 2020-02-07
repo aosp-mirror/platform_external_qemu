@@ -84,7 +84,6 @@ package_builder_register_options () {
 }
 
 _shu_builder_cleanup_temp_dir () {
-    rm -rf "$TEMP_DIR"
     exit $1
 }
 
@@ -516,7 +515,7 @@ _shu_builder_prepare_for_host () {
             _SHU_BUILDER_GNU_CONFIG_HOST=i686-linux
             ;;
         linux-aarch64)
-            _SHU_BUILDER_GNU_CONFIG_HOST=aarch64-linux
+            _SHU_BUILDER_GNU_CONFIG_HOST=aarch64-linux-gnu
             ;;
         windows-x86_64)
             _SHU_BUILDER_GNU_CONFIG_HOST=x86_64-w64-mingw32
@@ -731,6 +730,7 @@ builder_unpack_package_source () {
     ARCHIVE_DIR=${2:-$(builder_archive_dir)}
     SRC_DIR=$(builder_src_dir)
     TIMESTAMP=$SRC_DIR/timestamp-$PKG_NAME
+    log "builder_unpack_package_source firstarg $1 name $PKG_NAME dir $SRC_DIR archive $ARCHIVE_DIR"
     if [ ! -f "$TIMESTAMP" -o "$OPT_FORCE" ]; then
         package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$SRC_DIR"
         touch $TIMESTAMP
@@ -748,6 +748,7 @@ builder_build_autotools_package_full_install () {
     local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
     local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
     local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+    log "builder_build_autotools_package_full_install $PKG_NAME $PKG_SRC_DIR $PKG_BUILD_DIR"
 
     shift; shift;
 
@@ -780,6 +781,10 @@ builder_build_autotools_package_full_install () {
         export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
         export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
         export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        if [ $_SHU_BUILDER_GNU_CONFIG_HOST == "aarch64-linux-gnu" ]; then
+            log "Exporting CONFIG_SITE for arm64"
+            export CONFIG_SITE=/usr/local/google/home/lfy/emu/external/qemu/android/scripts/unix/cross-config.arm64
+        fi
         run "$PKG_SRC_DIR"/configure \
             --prefix=$_SHU_BUILDER_PREFIX \
             $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
