@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc41d455_f9be69e8",
+        "filename": "android/android-emu/android/emulation/H264PingInfoParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-07T16:59:22Z",
+      "side": 1,
+      "message": "the code here still has lots of + number; can we cast xptr to InitContextParam (and others below)? Then we don\u0027t need the magic offset numbers and can make most parsing commands a few lines:  memcpy(\u0026param, xptr, ...); param.pHostDecoderId \u003d getReturnAddress(ptr). with a packed struct type we can eliminate the + number\u0027s",
+      "revId": "b0a071e55ba64f2485ba5a8c1e03493a9db8eb48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eecd0edf_31a3e145",
+        "filename": "android/android-emu/android/emulation/H264PingInfoParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-07T16:59:22Z",
+      "side": 1,
+      "message": "let\u0027s introduce a new struct type that makes the 16 offset obvious, and cast ptr to that type",
+      "revId": "b0a071e55ba64f2485ba5a8c1e03493a9db8eb48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a94216fc_d6e8ac54",
+        "filename": "android/android-emu/android/emulation/H264PingInfoParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-07T16:59:22Z",
+      "side": 1,
+      "message": "let\u0027s introduce a new struct type that makes the 256 offset obvious, and cast ptr to that type",
+      "revId": "b0a071e55ba64f2485ba5a8c1e03493a9db8eb48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c895602e_983b36c6",
+        "filename": "android/android-emu/android/emulation/H264PingInfoParser.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-07T16:59:22Z",
+      "side": 1,
+      "message": "may want to make all struct fields explicit sized, and specify that they are packed (and use the same definition in the guest)",
+      "revId": "b0a071e55ba64f2485ba5a8c1e03493a9db8eb48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
