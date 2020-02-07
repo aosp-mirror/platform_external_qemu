@@ -430,6 +430,7 @@ package_list_unpack_and_patch () {
     local DST_DIR="$3"
     local PKG_VERSION PKG_PACKAGE PKG_PATCHES_DIR PKG_PATCHES_PACKAGE
     local PKG_DIR PKG_DST_DIR PATCH PKG_FULLNAME PKG_FILENAME
+    log "package_list_unpack_and_patch $PKG_NAME $SRC_DIR $DST_DIR"
     PKG_VERSION=$(package_list_get_version $PKG_NAME)
     if [ -z "$PKG_VERSION" ]; then
         panic "Cannot find version for package $PKG_NAME!"
@@ -438,6 +439,7 @@ package_list_unpack_and_patch () {
     dump "Extracting $PKG_FULLNAME"
     PKG_FILE=$(package_list_get_filename $PKG_NAME)
     mkdir -p "$DST_DIR" &&
+    log "unpack_archive $SRC_DIR/$PKG_FILE $DST_DIR"
     unpack_archive "$SRC_DIR/$PKG_FILE" "$DST_DIR" ||
             panic "Could not unpack $PKG_FULLNAME"
     PKG_FILENAME="$(package_list_get_unpack_src_dir $PKG_NAME)"
