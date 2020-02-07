@@ -29,19 +29,11 @@ public:
     using PixelFormat = MediaH264Decoder::PixelFormat;
     using Err = MediaH264Decoder::Err;
 
-    virtual void initH264Context(unsigned int width,
-                                 unsigned int height,
-                                 unsigned int outWidth,
-                                 unsigned int outHeight,
-                                 PixelFormat pixFmt) = 0;
-    virtual void reset(unsigned int width,
-                       unsigned int height,
-                       unsigned int outWidth,
-                       unsigned int outHeight,
-                       PixelFormat pixFmt) = 0;
+    virtual void initH264Context(void* ptr) = 0;
+    virtual void reset(void* ptr) = 0;
     virtual MediaH264DecoderPlugin* clone() = 0;
     virtual void destroyH264Context() = 0;
-    virtual void decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) = 0;
+    virtual void decodeFrame(void* ptr) = 0;
     virtual void flush(void* ptr) = 0;
     virtual void getImage(void* ptr) = 0;
 
