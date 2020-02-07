@@ -55,30 +55,42 @@ extern "C" {
 namespace android {
 namespace emulation {
 
-MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint32_t version)
-    : mVersion(version){};
+using InitContextParam = H264PingInfoParser::InitContextParam;
+using DecodeFrameParam = H264PingInfoParser::DecodeFrameParam;
+using ResetParam = H264PingInfoParser::ResetParam;
+using GetImageParam = H264PingInfoParser::GetImageParam;
+MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint64_t id,
+                                             H264PingInfoParser parser)
+    : mId(id), mParser(parser){};
 
 MediaH264DecoderPlugin* MediaH264DecoderCuvid::clone() {
-    return new MediaH264DecoderCuvid(mVersion);
+    return new MediaH264DecoderCuvid(mId, mParser);
 };
 
 MediaH264DecoderCuvid::~MediaH264DecoderCuvid() {
     destroyH264Context();
 }
 
-void MediaH264DecoderCuvid::reset(unsigned int width,
-                                  unsigned int height,
-                                  unsigned int outWidth,
-                                  unsigned int outHeight,
-                                  PixelFormat outPixFmt) {
-    H264_DPRINT("NOT IMPLEMENTED");
+void MediaH264DecoderCuvid::reset(void* ptr) {
+    destroyH264Context();
+    ResetParam param{};
+    mParser.parseResetParams(ptr, param);
+    initH264ContextInternal(param.width, param.height, param.outputWidth,
+                            param.outputHeight, param.outputPixelFormat);
 }
 
-void MediaH264DecoderCuvid::initH264Context(unsigned int width,
-                                            unsigned int height,
-                                            unsigned int outWidth,
-                                            unsigned int outHeight,
-                                            PixelFormat outPixFmt) {
+void MediaH264DecoderCuvid::initH264Context(void* ptr) {
+    InitContextParam param{};
+    mParser.parseInitContextParams(ptr, param);
+    initH264ContextInternal(param.width, param.height, param.outputWidth,
+                            param.outputHeight, param.outputPixelFormat);
+}
+
+void MediaH264DecoderCuvid::initH264ContextInternal(unsigned int width,
+                                                    unsigned int height,
+                                                    unsigned int outWidth,
+                                                    unsigned int outHeight,
+                                                    PixelFormat outPixFmt) {
     if (!initCudaDrivers()) {
         H264_DPRINT("Failed to initH264Context because driver is not working");
         return;
@@ -171,10 +183,14 @@ void* MediaH264DecoderCuvid::getReturnAddress(void* ptr) {
     return pint;
 }
 
-void MediaH264DecoderCuvid::decodeFrame(void* ptr,
-                                        const uint8_t* frame,
-                                        size_t szBytes,
-                                        uint64_t pts) {
+void MediaH264DecoderCuvid::decodeFrame(void* ptr) {
+    DecodeFrameParam param{};
+    mParser.parseDecodeFrameParams(ptr, param);
+
+    const uint8_t* frame = param.pData;
+    size_t szBytes = param.size;
+    uint64_t inputPts = param.pts;
+
     mIsInFlush = false;
     static int numbers = 0;
     // H264_DPRINT("calling decodeframe %d for %d bytes", numbers++,
@@ -184,15 +200,14 @@ void MediaH264DecoderCuvid::decodeFrame(void* ptr,
     // TODO: move this somewhere else
     // First return parameter is the number of bytes processed,
     // Second return parameter is the error code
-    uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
-    uint64_t* retSzBytes = (uint64_t*)retptr;
-    int32_t* retErr = (int32_t*)(retptr + 8);
+    uint64_t* retSzBytes = param.pConsumedBytes;
+    int32_t* retErr = param.pDecoderErrorCode;
 
     CUVIDSOURCEDATAPACKET packet = {0};
     packet.payload = frame;
     packet.payload_size = szBytes;
     packet.flags = CUVID_PKT_TIMESTAMP;
-    packet.timestamp = pts;
+    packet.timestamp = inputPts;
     if (!frame || szBytes == 0) {
         packet.flags |= CUVID_PKT_ENDOFSTREAM;
     }
