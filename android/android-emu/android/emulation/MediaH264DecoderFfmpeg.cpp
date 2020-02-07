@@ -15,6 +15,7 @@
 #include "android/emulation/MediaH264DecoderFfmpeg.h"
 #include "android/base/system/System.h"
 #include "android/emulation/H264NaluParser.h"
+#include "android/emulation/H264PingInfoParser.h"
 #include "android/emulation/YuvConverter.h"
 
 #include <cstdint>
@@ -35,24 +36,35 @@
 namespace android {
 namespace emulation {
 
+using InitContextParam = H264PingInfoParser::InitContextParam;
+using DecodeFrameParam = H264PingInfoParser::DecodeFrameParam;
+using ResetParam = H264PingInfoParser::ResetParam;
+using GetImageParam = H264PingInfoParser::GetImageParam;
 MediaH264DecoderFfmpeg::~MediaH264DecoderFfmpeg() {
     H264_DPRINT("destroyed MediaH264DecoderFfmpeg %p", this);
     destroyH264Context();
 }
 
-void MediaH264DecoderFfmpeg::reset(unsigned int width,
-                                                  unsigned int height,
-                                                  unsigned int outWidth,
-                                                  unsigned int outHeight,
-                                                  PixelFormat outPixFmt) {
-    H264_DPRINT("TODO: %s %d %p", __func__, __LINE__, this);
+void MediaH264DecoderFfmpeg::reset(void* ptr) {
+    destroyH264Context();
+    ResetParam param{};
+    mParser.parseResetParams(ptr, param);
+    initH264ContextInternal(param.width, param.height, param.outputWidth,
+                            param.outputHeight, param.outputPixelFormat);
 }
 
-void MediaH264DecoderFfmpeg::initH264Context(unsigned int width,
-                                                  unsigned int height,
-                                                  unsigned int outWidth,
-                                                  unsigned int outHeight,
-                                                  PixelFormat outPixFmt) {
+void MediaH264DecoderFfmpeg::initH264Context(void* ptr) {
+    InitContextParam param{};
+    mParser.parseInitContextParams(ptr, param);
+    initH264ContextInternal(param.width, param.height, param.outputWidth,
+                            param.outputHeight, param.outputPixelFormat);
+}
+
+void MediaH264DecoderFfmpeg::initH264ContextInternal(unsigned int width,
+                                                     unsigned int height,
+                                                     unsigned int outWidth,
+                                                     unsigned int outHeight,
+                                                     PixelFormat outPixFmt) {
     H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
                 __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
     mOutputWidth = outWidth;
@@ -111,13 +123,14 @@ void MediaH264DecoderFfmpeg::initH264Context(unsigned int width,
 MediaH264DecoderPlugin* MediaH264DecoderFfmpeg::clone() {
     H264_DPRINT("clone MediaH264DecoderFfmpeg %p with version %d", this,
                 (int)mVersion);
-    return new MediaH264DecoderFfmpeg(mVersion);
+    return new MediaH264DecoderFfmpeg(mId, mParser);
 }
 
-MediaH264DecoderFfmpeg::MediaH264DecoderFfmpeg(uint32_t version)
-    : mVersion(version) {
+MediaH264DecoderFfmpeg::MediaH264DecoderFfmpeg(uint64_t id,
+                                               H264PingInfoParser parser)
+    : mId(id), mParser(parser) {
     H264_DPRINT("allocated MediaH264DecoderFfmpeg %p with version %d", this,
-                (int)mVersion);
+                (int)mParser.version());
 }
 void MediaH264DecoderFfmpeg::destroyH264Context() {
     H264_DPRINT("Destroy context %p", this);
@@ -134,12 +147,6 @@ void MediaH264DecoderFfmpeg::destroyH264Context() {
       delete [] mDecodedFrame;
       mDecodedFrame = nullptr;
     }
-}
-
-static void* getReturnAddress(void* ptr) {
-    uint8_t* xptr = (uint8_t*)ptr;
-    void* pint = (void*)(xptr + 256);
-    return pint;
 }
 
 void MediaH264DecoderFfmpeg::resetDecoder() {
@@ -187,18 +194,36 @@ bool MediaH264DecoderFfmpeg::checkWhetherConfigChanged(const uint8_t* frame, siz
     return true;
 }
 
-void MediaH264DecoderFfmpeg::decodeFrame(void* ptr,
-                                              const uint8_t* frame,
-                                              size_t szBytes,
-                                              uint64_t inputPts) {
+void MediaH264DecoderFfmpeg::decodeFrameDirect(void* ptr,
+                                               const uint8_t* frame,
+                                               size_t szBytes,
+                                               uint64_t pts) {
+    DecodeFrameParam param{};
+    mParser.parseDecodeFrameParams(ptr, param);
+    param.pData = (uint8_t*)frame;
+    param.pts = pts;
+    param.size = szBytes;
+    decodeFrameInternal(param);
+}
+
+void MediaH264DecoderFfmpeg::decodeFrame(void* ptr) {
+    DecodeFrameParam param{};
+    mParser.parseDecodeFrameParams(ptr, param);
+    decodeFrameInternal(param);
+}
+
+void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
+    const uint8_t* frame = param.pData;
+    size_t szBytes = param.size;
+    uint64_t inputPts = param.pts;
+
     H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
     Err h264Err = Err::NoErr;
     // TODO: move this somewhere else
     // First return parameter is the number of bytes processed,
     // Second return parameter is the error code
-    uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
-    uint64_t* retSzBytes = (uint64_t*)retptr;
-    int32_t* retErr = (int32_t*)(retptr + 8);
+    size_t* retSzBytes = param.pConsumedBytes;
+    int32_t* retErr = param.pDecoderErrorCode;
 
     if (!mIsSoftwareDecoder) {
         bool configChanged = checkWhetherConfigChanged(frame, szBytes);
@@ -295,32 +320,19 @@ void MediaH264DecoderFfmpeg::flush(void* ptr) {
     H264_DPRINT("Flushing done");
 }
 
-static uint8_t* getDst(void* ptr) {
-    // Guest will pass us the offset from the start address + 8 for where to
-    // write the image data.
-    uint8_t* xptr = (uint8_t*)ptr;
-    uint64_t offset = *(uint64_t*)(xptr + 8);
-    return (uint8_t*)ptr + offset;
-}
-
-static uint32_t getHostColorBufferId(void* ptr) {
-    // Guest will pass us the hsot color buffer id to send decoded frame to
-    uint8_t* xptr = (uint8_t*)ptr;
-    uint32_t colorBufferId = *(uint32_t*)(xptr + 16);
-    return colorBufferId;
-}
-
 void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     H264_DPRINT("getImage %p", ptr);
-    uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
-    int* retErr = (int*)(retptr);
-    uint32_t* retWidth = (uint32_t*)(retptr + 8);
-    uint32_t* retHeight = (uint32_t*)(retptr + 16);
-    uint32_t* retPts = (uint32_t*)(retptr + 24);
-    uint32_t* retColorPrimaries = (uint32_t*)(retptr + 32);
-    uint32_t* retColorRange = (uint32_t*)(retptr + 40);
-    uint32_t* retColorTransfer = (uint32_t*)(retptr + 48);
-    uint32_t* retColorSpace = (uint32_t*)(retptr + 56);
+    GetImageParam param{};
+    mParser.parseGetImageParams(ptr, param);
+
+    int* retErr = param.pDecoderErrorCode;
+    uint32_t* retWidth = param.pRetWidth;
+    uint32_t* retHeight = param.pRetHeight;
+    uint32_t* retPts = param.pRetPts;
+    uint32_t* retColorPrimaries = param.pRetColorPrimaries;
+    uint32_t* retColorRange = param.pRetColorRange;
+    uint32_t* retColorTransfer = param.pRetColorTransfer;
+    uint32_t* retColorSpace = param.pRetColorSpace;
 
     static int numbers=0;
     //H264_DPRINT("calling getImage %d", numbers++);
@@ -374,14 +386,12 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     *retColorTransfer = mColorTransfer;
     *retColorSpace = mColorSpace;
 
-
-    if (mVersion == 100) {
-      uint8_t* dst =  getDst(ptr);
-      memcpy(dst, mDecodedFrame, mOutBufferSize);
-    } else if (mVersion == 200) {
-        mRenderer.renderToHostColorBuffer(getHostColorBufferId(ptr),
-                                          mOutputWidth, mOutputHeight,
-                                          mDecodedFrame);
+    if (mParser.version() == 100) {
+        uint8_t* dst = param.pDecodedFrame;
+        memcpy(dst, mDecodedFrame, mOutBufferSize);
+    } else if (mParser.version() == 200) {
+        mRenderer.renderToHostColorBuffer(param.hostColorBufferId, mOutputWidth,
+                                          mOutputHeight, mDecodedFrame);
     }
 
     mImageReady = false;

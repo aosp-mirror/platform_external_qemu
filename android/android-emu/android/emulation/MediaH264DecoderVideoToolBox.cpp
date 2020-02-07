@@ -41,15 +41,21 @@
 namespace android {
 namespace emulation {
 
+using InitContextParam = H264PingInfoParser::InitContextParam;
+using DecodeFrameParam = H264PingInfoParser::DecodeFrameParam;
+using ResetParam = H264PingInfoParser::ResetParam;
+using GetImageParam = H264PingInfoParser::GetImageParam;
 using H264NaluType = H264NaluParser::H264NaluType;
 
-MediaH264DecoderVideoToolBox::MediaH264DecoderVideoToolBox(uint32_t version)
-    : mVersion(version) {
+MediaH264DecoderVideoToolBox::MediaH264DecoderVideoToolBox(
+        uint64_t id,
+        H264PingInfoParser parser)
+    : mId(id), mParser(parser) {
     H264_DPRINT("created MediaH264DecoderVideoToolBox %p", this);
 }
 
 MediaH264DecoderPlugin* MediaH264DecoderVideoToolBox::clone() {
-    return new MediaH264DecoderVideoToolBox(mVersion);
+    return new MediaH264DecoderVideoToolBox(mId, mParser);
 }
 
 MediaH264DecoderVideoToolBox::~MediaH264DecoderVideoToolBox() {
@@ -186,15 +192,6 @@ void* MediaH264DecoderVideoToolBox::getReturnAddress(void* ptr) {
     return pint;
 }
 
-// static
-uint8_t* MediaH264DecoderVideoToolBox::getDst(void* ptr) {
-    // Guest will pass us the offset from the start address for where to write the image data.
-    uint8_t* xptr = (uint8_t*)ptr;
-    uint64_t offset = *(uint64_t*)(xptr + 8);
-    H264_DPRINT("start=%p dst=%p offset=%llu", xptr, xptr + offset, offset);
-    return (uint8_t*)ptr + offset;
-}
-
 void MediaH264DecoderVideoToolBox::createCMFormatDescription() {
     uint8_t*  parameterSets[2] = {mSPS.data(), mPPS.data()};
     size_t parameterSetSizes[2] = {mSPS.size(), mPPS.size()};
@@ -224,11 +221,19 @@ CFDataRef MediaH264DecoderVideoToolBox::createVTDecoderConfig() {
     return data;
 }
 
-void MediaH264DecoderVideoToolBox::initH264Context(unsigned int width,
-                                           unsigned int height,
-                                           unsigned int outWidth,
-                                           unsigned int outHeight,
-                                           PixelFormat outPixFmt) {
+void MediaH264DecoderVideoToolBox::initH264Context(void* ptr) {
+    InitContextParam param{};
+    mParser.parseInitContextParams(ptr, param);
+    initH264ContextInternal(param.width, param.height, param.outputWidth,
+                            param.outputHeight, param.outputPixelFormat);
+}
+
+void MediaH264DecoderVideoToolBox::initH264ContextInternal(
+        unsigned int width,
+        unsigned int height,
+        unsigned int outWidth,
+        unsigned int outHeight,
+        PixelFormat outPixFmt) {
     H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
                 __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
     mOutputWidth = outWidth;
@@ -237,17 +242,12 @@ void MediaH264DecoderVideoToolBox::initH264Context(unsigned int width,
     mOutBufferSize = outWidth * outHeight * 3 / 2;
 }
 
-void MediaH264DecoderVideoToolBox::reset(unsigned int width,
-                                           unsigned int height,
-                                           unsigned int outWidth,
-                                           unsigned int outHeight,
-                                           PixelFormat outPixFmt) {
-    H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
-                __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
-    mOutputWidth = outWidth;
-    mOutputHeight = outHeight;
-    mOutPixFmt = outPixFmt;
-    mOutBufferSize = outWidth * outHeight * 3 / 2;
+void MediaH264DecoderVideoToolBox::reset(void* ptr) {
+    destroyH264Context();
+    ResetParam param{};
+    mParser.parseResetParams(ptr, param);
+    initH264ContextInternal(param.width, param.height, param.outputWidth,
+                            param.outputHeight, param.outputPixelFormat);
 }
 
 void MediaH264DecoderVideoToolBox::destroyH264Context() {
@@ -285,7 +285,14 @@ static void dumpBytes(const uint8_t* img, size_t szBytes, bool all = false) {
 #endif
 }
 
-void MediaH264DecoderVideoToolBox::decodeFrame(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts) {
+void MediaH264DecoderVideoToolBox::decodeFrame(void* ptr) {
+    DecodeFrameParam param{};
+    mParser.parseDecodeFrameParams(ptr, param);
+
+    const uint8_t* frame = param.pData;
+    size_t szBytes = param.size;
+    uint64_t pts = param.pts;
+
     decodeFrameInternal(ptr, frame, szBytes, pts, 0);
 }
 
@@ -462,16 +469,17 @@ void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
     // 1) either size of the image (> 0) or error code (<= 0).
     // 2) image width
     // 3) image height
-    uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
-    int* retErr = (int*)(retptr);
-    uint32_t* retWidth = (uint32_t*)(retptr + 8);
-    uint32_t* retHeight = (uint32_t*)(retptr + 16);
-    uint32_t* retPts = (uint32_t*)(retptr + 24);
-    uint32_t* retColorPrimaries = (uint32_t*)(retptr + 32);
-    uint32_t* retColorRange = (uint32_t*)(retptr + 40);
-    uint32_t* retColorTransfer = (uint32_t*)(retptr + 48);
-    uint32_t* retColorSpace = (uint32_t*)(retptr + 56);
+    GetImageParam param{};
+    mParser.parseGetImageParams(ptr, param);
 
+    int* retErr = param.pDecoderErrorCode;
+    uint32_t* retWidth = param.pRetWidth;
+    uint32_t* retHeight = param.pRetHeight;
+    uint32_t* retPts = param.pRetPts;
+    uint32_t* retColorPrimaries = param.pRetColorPrimaries;
+    uint32_t* retColorRange = param.pRetColorRange;
+    uint32_t* retColorTransfer = param.pRetColorTransfer;
+    uint32_t* retColorSpace = param.pRetColorSpace;
 
     if (!mDecodedFrame) {
         H264_DPRINT("%s: frame is null", __func__);
@@ -509,7 +517,7 @@ void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
     H264_DPRINT("copying size=%d dimension=[%dx%d] stride=%d", imageSize, imgWidth, imgHeight, stride);
 
     // Copies the image data to the guest.
-    uint8_t* dst =  getDst(ptr);
+    uint8_t* dst = param.pDecodedFrame;
 
     CVPixelBufferLockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
     if (CVPixelBufferIsPlanar(mDecodedFrame)) {
