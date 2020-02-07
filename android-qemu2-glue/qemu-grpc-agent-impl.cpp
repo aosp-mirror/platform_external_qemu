@@ -35,8 +35,9 @@ int start_grpc(int port, const char* turncfg) {
 #else
     rtc_bridge = new android::emulation::control::NopRtcBridge();
 #endif
-    return android::emulation::control::GrpcServices::setup(
+    auto service = android::emulation::control::GrpcServices::setup(
             port, getConsoleAgents(), rtc_bridge, "forward");
+    return service ? service->port() : -1;
 }
 
 static const QGrpcAgent grpcAgent = {

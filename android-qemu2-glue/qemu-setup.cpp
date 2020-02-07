@@ -14,7 +14,6 @@
 
 #include "android-qemu2-glue/qemu-setup.h"
 
-
 // We need to include this first due to msvc-posix defining some magical macros
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
@@ -24,15 +23,18 @@
 #include "msvc-posix.h"
 #endif
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+
 #include <algorithm>
 #include <functional>
 #include <memory>
 #include <random>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
@@ -69,9 +71,10 @@
 #include "android/emulation/VmLock.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
+#include "android/emulation/control/EmulatorAdvertisement.h"
+#include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
@@ -81,18 +84,22 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
-
 extern "C" {
 
-#include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "qemu/abort.h"
 #include "qemu/main-loop.h"
+#include "qemu/osdep.h"
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
-#include "sysemu/ranchu.h"
-#include "sysemu/rng-random-generic.h"
 #include "sysemu/sysemu.h"
+
+namespace android {
+namespace emulation {
+namespace control {
+class RtcBridge;
+}  // namespace control
+}  // namespace emulation
+}  // namespace android
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -101,6 +108,8 @@ extern char* op_http_proxy;
 
 using android::DmaMap;
 using android::VmLock;
+using android::emulation::control::EmulatorAdvertisement;
+using android::emulation::control::EmulatorProperties;
 
 extern "C" void ranchu_device_tree_setup(void* fdt) {
     /* fstab */
@@ -220,6 +229,8 @@ bool qemu_android_emulation_early_setup() {
     return true;
 }
 
+static std::unique_ptr<EmulatorAdvertisement> advertiser;
+
 const AndroidConsoleAgents* getConsoleAgents() {
     // Initialize UI/console agents.
     static const AndroidConsoleAgents consoleAgents = {
@@ -245,8 +256,7 @@ bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
 }
 
-static android::emulation::control::RtcBridge*
-qemu_setup_rtc_bridge() {
+static android::emulation::control::RtcBridge* qemu_setup_rtc_bridge() {
 #ifdef ANDROID_WEBRTC
     std::string turn;
     if (android_cmdLineOptions->turncfg) {
@@ -261,13 +271,27 @@ qemu_setup_rtc_bridge() {
 
 static void qemu_setup_grpc() {
     int grpc = -1;
+    EmulatorProperties props{
+            {"port.serial", std::to_string(android_serial_number_port)},
+            {"port.adb", std::to_string(android_adb_port)},
+            {"avd.name", avdInfo_getName(android_avdInfo)},
+            {"avd.id", avdInfo_getId(android_avdInfo)}};
+
     if (android_cmdLineOptions->grpc &&
         sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
         // Go bridge go!
-        android::emulation::control::GrpcServices::setup(
+        auto service = android::emulation::control::GrpcServices::setup(
                 grpc, getConsoleAgents(), qemu_setup_rtc_bridge(),
                 android_cmdLineOptions->waterfall);
+        if (service) {
+            props["grpc.port"] = std::to_string(service->port());
+            props["grpc.certificate"] = service->publicCert();
+        }
     }
+
+    advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
+    advertiser->garbageCollect();
+    advertiser->write();
 }
 
 bool qemu_android_emulation_setup() {
@@ -285,13 +309,15 @@ bool qemu_android_emulation_setup() {
     qemu_setup_grpc();
 
     // We are sharing video, time to launch the shared memory recorder.
-    // Note, the webrtc module could have started the shared memory module with
-    // a differrent fps suggestion. (Fps is mainly used by clients as a
+    // Note, the webrtc module could have started the shared memory module
+    // with a differrent fps suggestion. (Fps is mainly used by clients as a
     // suggestion on how often to check for new frames)
     if (android_cmdLineOptions->share_vid) {
         if (!getConsoleAgents()->record->startSharedMemoryModule(60)) {
-            dwarning("Unable to setup a shared memory handler, last errno: %d",
-                     errno);
+            dwarning(
+                    "Unable to setup a shared memory handler, last errno: "
+                    "%d",
+                    errno);
         }
     }
 
@@ -323,14 +349,16 @@ bool qemu_android_emulation_setup() {
                                 new android::crashreport::HeartBeatDetector(
                                         get_guest_heart_beat_count,
                                         &guest_boot_completed)),
-                        "The guest is not sending heartbeat update, probably "
+                        "The guest is not sending heartbeat update, "
+                        "probably "
                         "stalled.")
                 .addPredicateCheck(
                         [] {
                             return gQAndroidUserEventAgent->eventsDropped() >
                                    kMaxEventsDropped;
                         },
-                        "The goldfish event queue is overflowing, the system "
+                        "The goldfish event queue is overflowing, the "
+                        "system "
                         "is no longer responding.");
     }
 
@@ -342,4 +370,6 @@ void qemu_android_emulation_teardown() {
     androidSnapshot_finalize();
     android_emulation_teardown();
     android::emulation::control::GrpcServices::teardown();
+    if (advertiser)
+        advertiser->remove();
 }

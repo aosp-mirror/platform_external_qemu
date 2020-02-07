@@ -14,15 +14,19 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/System.h"
+#include <assert.h>     // for assert
 
-#include <assert.h>
+#include <vector>  // for vector
+
+#include "android/base/Log.h"              // for LogStream, LOG, LogMessage
+#include "android/base/files/PathUtils.h"  // for PathUtils, pj
+#include "android/base/system/System.h"    // for System
+#include "android/utils/path.h"            // for path_mkdir_if_needed
 
 namespace android {
 
 using ::android::base::PathUtils;
+using ::android::base::pj;
 using ::android::base::System;
 
 // Name of the Android configuration directory under $HOME.
@@ -66,13 +70,13 @@ std::string ConfigDirs::getAvdRootDirectory() {
     // different AVDs. Or one may find an AVD when the other doesn't.
 
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
-    if ( !avdRoot.empty() && system->pathIsDir(avdRoot) ) {
+    if (!avdRoot.empty() && system->pathIsDir(avdRoot)) {
         return avdRoot;
     }
 
     // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
     avdRoot = system->envGet("ANDROID_SDK_HOME");
-    if ( !avdRoot.empty() ) {
+    if (!avdRoot.empty()) {
         // ANDROID_SDK_HOME is defined
         if (isValidAvdRoot(avdRoot)) {
             // ANDROID_SDK_HOME is good
@@ -87,21 +91,21 @@ std::string ConfigDirs::getAvdRootDirectory() {
         // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
         // $HOME. We'll do the same.
         avdRoot = system->envGet("TEST_TMPDIR");
-        if ( !avdRoot.empty() ) {
+        if (!avdRoot.empty()) {
             avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
             if (isValidAvdRoot(avdRoot)) {
                 return PathUtils::join(avdRoot, kAvdSubDir);
             }
         }
         avdRoot = system->envGet("USER_HOME");
-        if ( !avdRoot.empty() ) {
+        if (!avdRoot.empty()) {
             avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
             if (isValidAvdRoot(avdRoot)) {
                 return PathUtils::join(avdRoot, kAvdSubDir);
             }
         }
         avdRoot = system->envGet("HOME");
-        if ( !avdRoot.empty() ) {
+        if (!avdRoot.empty()) {
             avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
             if (isValidAvdRoot(avdRoot)) {
                 return PathUtils::join(avdRoot, kAvdSubDir);
@@ -120,7 +124,7 @@ std::string ConfigDirs::getSdkRootDirectoryByEnv() {
     auto system = System::get();
 
     std::string sdkRoot = system->envGet("ANDROID_HOME");
-    if ( isValidSdkRoot(sdkRoot) ) {
+    if (isValidSdkRoot(sdkRoot)) {
         return sdkRoot;
     }
 
@@ -148,7 +152,7 @@ std::string ConfigDirs::getSdkRootDirectoryByPath() {
     PathUtils::simplifyComponents(&parts);
 
     std::string sdkRoot = PathUtils::recompose(parts);
-    if ( isValidSdkRoot(sdkRoot) ) {
+    if (isValidSdkRoot(sdkRoot)) {
         return sdkRoot;
     }
     return std::string();
@@ -171,15 +175,15 @@ bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
         return false;
     }
     System* system = System::get();
-    if ( !system->pathIsDir(rootPath) || !system->pathCanRead(rootPath) ) {
+    if (!system->pathIsDir(rootPath) || !system->pathCanRead(rootPath)) {
         return false;
     }
     std::string platformsPath = PathUtils::join(rootPath, "platforms");
-    if ( !system->pathIsDir(platformsPath) ) {
+    if (!system->pathIsDir(platformsPath)) {
         return false;
     }
     std::string platformToolsPath = PathUtils::join(rootPath, "platform-tools");
-    if ( !system->pathIsDir(platformToolsPath) ) {
+    if (!system->pathIsDir(platformToolsPath)) {
         return false;
     }
 
@@ -192,15 +196,45 @@ bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
         return false;
     }
     System* system = System::get();
-    if ( !system->pathIsDir(avdPath) || !system->pathCanRead(avdPath) ) {
+    if (!system->pathIsDir(avdPath) || !system->pathCanRead(avdPath)) {
         return false;
     }
     std::string avdAvdPath = PathUtils::join(avdPath, "avd");
-    if ( !system->pathIsDir(avdAvdPath) ) {
+    if (!system->pathIsDir(avdAvdPath)) {
         return false;
     }
 
     return true;
+}
+
+typedef struct discovery_dir {
+    const char* root_env;
+    const char* subdir;
+} discovery_dir;
+
+#if defined(_WIN32)
+discovery_dir discovery{"LOCALAPPDATA", "Temp"};
+#elif defined(__linux__)
+discovery_dir discovery{"XDG_RUNTIME_DIR", ""};
+#elif defined(__APPLE__)
+discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
+#else
+#error This platform is not supported.
+#endif
+
+std::string ConfigDirs::getDiscoveryDirectory() {
+    auto root = System::get()->getEnvironmentVariable(discovery.root_env);
+    auto desired_directory = pj(root, discovery.subdir, "avd", "running");
+    auto path = PathUtils::decompose(desired_directory);
+    PathUtils::simplifyComponents(&path);
+    auto recomposed = PathUtils::recompose(path);
+    if (!System::get()->pathExists(recomposed)) {
+        if (path_mkdir_if_needed(recomposed.c_str(), 0700) == -1) {
+            LOG(ERROR) << "Unable to create " << recomposed << " due to "
+                       << errno << ": " << strerror(errno);
+        }
+    }
+    return desired_directory;
 }
 
 }  // namespace android

@@ -5,7 +5,6 @@
 #include "android/emulation/control/EmulatorService.h"  // for EmulatorContr...
 #include "android/emulation/control/RtcBridge.h"        // for RtcBridge
 
-
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::GrpcServices;
 using android::emulation::control::NopRtcBridge;
@@ -18,13 +17,14 @@ std::unique_ptr<EmulatorControllerService> GrpcServices::g_controler_service =
         nullptr;
 std::unique_ptr<RtcBridge> GrpcServices::g_rtc_bridge = nullptr;
 
-int GrpcServices::setup(int port,
-                        const AndroidConsoleAgents* const consoleAgents,
-                        RtcBridge* rtcBridge,
-                        const char* waterfall) {
-    // Return the active port if we are already running.
+EmulatorControllerService* GrpcServices::setup(
+        int port,
+        const AndroidConsoleAgents* const consoleAgents,
+        RtcBridge* rtcBridge,
+        const char* waterfall) {
+    // Return the active service
     if (g_controler_service) {
-        return g_controler_service->port();
+        return g_controler_service.get();
     }
 
     g_rtc_bridge.reset(rtcBridge);
@@ -44,9 +44,8 @@ int GrpcServices::setup(int port,
                     .withWaterfall(waterfall)
                     .withRtcBridge(g_rtc_bridge.get());
 
-                            g_controler_service = builder.build();
-
-    return (g_controler_service) ? builder.port() : -1;
+    g_controler_service = builder.build();
+    return g_controler_service ? g_controler_service.get() : nullptr;
 }
 
 void GrpcServices::teardown() {

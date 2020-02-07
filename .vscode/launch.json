@@ -11,7 +11,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "--gtest_break_on_failure"
-             ,"--gtest_filter=PlaystoreMetricsWriterTest.noCallBeforeTime"
+             ,"--gtest_filter=StudioDiscoveryTest.pid_file_is_written"
              ,"--gtest_repeat=-1"
             ],
             "stopAtEntry": false,
@@ -63,6 +63,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--verbose"
+                "--gtest_repeat=-1", "--gtest_break_on_failure", "--gtest_filter=StudioDiscoveryTest.pid_file_is_cleaned_in_shared_dir"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -96,7 +97,6 @@
                 "-grpc",
                 "8556",
                 "-verbose", // With some additional parameters.
-                "5556", // With some additional parameters.
             ],
             "linux": {
                 "env": {

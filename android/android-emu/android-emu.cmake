@@ -73,6 +73,7 @@ set(android-emu-common
     android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/adb/adbkey.cpp
     android/emulation/control/ApkInstaller.cpp
+    android/emulation/control/EmulatorAdvertisement.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/LineConsumer.cpp
@@ -641,6 +642,7 @@ android_target_compile_options(android-mock-vm-operations Clang
 target_include_directories(android-mock-vm-operations
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
+
 # And declare the test
 android_add_test(
   TARGET android-emu_unittests
@@ -742,6 +744,7 @@ android_add_test(
       android/emulation/bufprint_config_dirs_unittest.cpp
       android/emulation/ComponentVersion_unittest.cpp
       android/emulation/ConfigDirs_unittest.cpp
+      android/emulation/control/EmulatorAdvertisement_unittest.cpp
       android/emulation/DeviceContextRunner_unittest.cpp
       android/emulation/DmaMap_unittest.cpp
       android/emulation/control/adb/AdbConnection_unittest.cpp
@@ -864,6 +867,15 @@ android_target_compile_options(android-emu_unittests darwin-x86_64
 target_link_libraries(
   android-emu_unittests PRIVATE android-emu android-mock-vm-operations gtest
                                 gmock gtest_main)
+
+
+android_add_executable(
+  NODISTRIBUTE TARGET studio_discovery_tester
+  SRC # cmake-format: sortable
+      android/emulation/control/StudioDiscoveryTester.cpp)
+target_link_libraries(studio_discovery_tester PRIVATE android-grpc)
+add_dependencies(android-emu_unittests studio_discovery_tester)
+
 
 list(
   APPEND
