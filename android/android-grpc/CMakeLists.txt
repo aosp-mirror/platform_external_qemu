@@ -21,7 +21,6 @@ if(NOT WINDOWS_MSVC_X86_64)
   target_include_directories(
     android-waterfall PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                              ${CMAKE_CURRENT_SOURCE_DIR})
-  target_compile_definitions(android-waterfall PUBLIC -DANDROID_GRPC)
   target_compile_options(android-waterfall PRIVATE -Wno-return-type-c-linkage)
   set_target_properties(android-waterfall PROPERTIES CXX_STANDARD 17)
 
@@ -58,7 +57,6 @@ target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
                                                       android-net grpc++)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(android-grpc PUBLIC -DANDROID_GRPC)
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 

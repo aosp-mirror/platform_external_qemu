@@ -14,7 +14,6 @@ android_add_library(
   TARGET studio-bridge SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
                                                      ${studio-bridge_src})
 target_link_libraries(studio-bridge PRIVATE android-emu)
-target_compile_definitions(studio-bridge PUBLIC -DANDROID_GRPC)
 
 # Lets distribute the proto file
 install(studio-bridge DESTINATION lib)
