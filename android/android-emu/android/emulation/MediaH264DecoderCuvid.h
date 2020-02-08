@@ -19,6 +19,7 @@
 #include "android/emulation/H264PingInfoParser.h"
 #include "android/emulation/MediaCodec.h"
 #include "android/emulation/MediaH264DecoderPlugin.h"
+#include "android/emulation/MediaHostRenderer.h"
 
 #include <cstdint>
 #include <list>
@@ -59,6 +60,7 @@ private:
                                  PixelFormat pixFmt);
     uint32_t mId = 0;
     H264PingInfoParser mParser;
+    MediaHostRenderer mRenderer;
 
     // void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes,
     // uint64_t pts, size_t consumedSzBytes);

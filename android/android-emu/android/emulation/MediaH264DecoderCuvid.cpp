@@ -177,12 +177,6 @@ void MediaH264DecoderCuvid::destroyH264Context() {
     }
 }
 
-void* MediaH264DecoderCuvid::getReturnAddress(void* ptr) {
-    uint8_t* xptr = (uint8_t*)ptr;
-    void* pint = (void*)(xptr + 256);
-    return pint;
-}
-
 void MediaH264DecoderCuvid::decodeFrame(void* ptr) {
     DecodeFrameParam param{};
     mParser.parseDecodeFrameParams(ptr, param);
@@ -234,29 +228,24 @@ void MediaH264DecoderCuvid::flush(void* ptr) {
     doFlush();
 }
 
-uint8_t* MediaH264DecoderCuvid::getDst(void* ptr) {
-    // Guest will pass us the offset from the start address for where to write
-    // the image data.
-    uint8_t* xptr = (uint8_t*)ptr;
-    uint64_t offset = *(uint64_t*)(xptr + 8);
-    return (uint8_t*)ptr + offset;
-}
-
 void MediaH264DecoderCuvid::getImage(void* ptr) {
-    uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
-    int* retErr = (int*)(retptr);
-    uint32_t* retWidth = (uint32_t*)(retptr + 8);
-    uint32_t* retHeight = (uint32_t*)(retptr + 16);
-    uint32_t* retPts = (uint32_t*)(retptr + 24);
-    uint32_t* retColorPrimaries = (uint32_t*)(retptr + 32);
-    uint32_t* retColorRange = (uint32_t*)(retptr + 40);
-    uint32_t* retColorTransfer = (uint32_t*)(retptr + 48);
-    uint32_t* retColorSpace = (uint32_t*)(retptr + 56);
+    H264_DPRINT("getImage %p", ptr);
+    GetImageParam param{};
+    mParser.parseGetImageParams(ptr, param);
+
+    int* retErr = param.pDecoderErrorCode;
+    uint32_t* retWidth = param.pRetWidth;
+    uint32_t* retHeight = param.pRetHeight;
+    uint32_t* retPts = param.pRetPts;
+    uint32_t* retColorPrimaries = param.pRetColorPrimaries;
+    uint32_t* retColorRange = param.pRetColorRange;
+    uint32_t* retColorTransfer = param.pRetColorTransfer;
+    uint32_t* retColorSpace = param.pRetColorSpace;
 
     static int numbers = 0;
     H264_DPRINT("calling getImage %d", numbers++);
     doFlush();
-    uint8_t* dst = getDst(ptr);
+    uint8_t* dst = param.pDecodedFrame;
     int myOutputWidth = mOutputWidth;
     int myOutputHeight = mOutputHeight;
     {
@@ -285,6 +274,12 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
 
     YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
     convert8.UVInterleavedToPlanar(dst);
+
+    if (mParser.version() == 200) {
+        mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+                                          myOutputWidth, myOutputHeight, dst);
+    }
+
     mImageReady = false;
     *retErr = myOutputHeight * myOutputWidth * 3 / 2;
     *retPts = mOutputPts;
