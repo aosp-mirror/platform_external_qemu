@@ -123,6 +123,7 @@ aosp_dir_parse_option
 
 # Handle --host option.
 if [ "$OPT_HOST" ]; then
+    log "Detected OPT_HOST $OPT_HOST"
     case $OPT_HOST in
         linux-x86_64|linux-aarch64|darwin-x86_64|windows_msvc-x86_64)
             ;;
@@ -131,6 +132,10 @@ if [ "$OPT_HOST" ]; then
             ;;
     esac
     HOST=$OPT_HOST
+    if [[ $OPT_HOST == "linux-aarch64" ]]; then
+        log "Setting BUILD_ARCH to aarch64"
+        BUILD_ARCH="aarch64"
+    fi
 else
     HOST=$BUILD_BUILD_TARGET_TAG
     log "Auto-config: --host=$HOST"
@@ -321,6 +326,10 @@ gen_wrapper_toolchain () {
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy"
           local PROGRAMS="dlltool"
           ;;
+        linux-aarch64)
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
+          local PROGRAMS="as ar ranlib strings nm objdump objcopy aarch64-linux-gnu-dlltool"
+          ;;
         *)
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
           local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool"
@@ -509,9 +518,11 @@ prepare_build_for_linux_x86_64() {
 
 prepare_build_for_linux_aarch64() {
     GCC_DIR="/usr/"
+    # aarch64 cross compile is not present in host aosp toolchain, use
+    # system cross compiler /usr/bin/aarch64-linux-gnu-*
     CLANG_BINDIR=
     CLANG_DIR=
-    GNU_CONFIG_HOST=aarch64-linux
+    GNU_CONFIG_HOST=
     CLANG_VERSION=
     SYSROOT="/"
 
@@ -555,7 +566,7 @@ prepare_build_for_linux_aarch64() {
     var_append POST_LDFLAGS "-ldl"
 
     # aarch64 use host toolchain.  no prefix needed.
-    DST_PREFIX=
+    DST_PREFIX=/usr/bin/aarch64-linux-gnu-
 }
 
 configure_google_storage() {
@@ -808,7 +819,7 @@ prepare_build_for_host () {
 
     case $CURRENT_HOST in
         linux-*)
-            prepare_build_for_linux_$(get_build_arch)
+            prepare_build_for_linux_$BUILD_ARCH
             ;;
         darwin-*)
             prepare_build_for_darwin
@@ -824,6 +835,8 @@ prepare_build_for_host () {
             ;;
     esac
 
+
+    log "Exited prepare build. compiler bindir: $CLANG_BINDIR"
 
     if [ "$OPT_BINPREFIX" ]; then
         BINPREFIX=${OPT_BINPREFIX%%-}

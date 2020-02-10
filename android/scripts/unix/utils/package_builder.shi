@@ -84,7 +84,6 @@ package_builder_register_options () {
 }
 
 _shu_builder_cleanup_temp_dir () {
-    rm -rf "$TEMP_DIR"
     exit $1
 }
 
@@ -516,7 +515,7 @@ _shu_builder_prepare_for_host () {
             _SHU_BUILDER_GNU_CONFIG_HOST=i686-linux
             ;;
         linux-aarch64)
-            _SHU_BUILDER_GNU_CONFIG_HOST=aarch64-linux
+            _SHU_BUILDER_GNU_CONFIG_HOST=aarch64-linux-gnu
             ;;
         windows-x86_64)
             _SHU_BUILDER_GNU_CONFIG_HOST=x86_64-w64-mingw32
@@ -748,6 +747,7 @@ builder_build_autotools_package_full_install () {
     local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
     local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
     local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+    log "builder_build_autotools_package_full_install $PKG_NAME $PKG_SRC_DIR $PKG_BUILD_DIR"
 
     shift; shift;
 

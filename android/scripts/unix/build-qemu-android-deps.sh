@@ -285,6 +285,13 @@ do_dtc_package () {
 build_qemu_android_deps () {
     builder_prepare_for_host "$1" "$AOSP_DIR"
 
+    # When building aarch64, we may be in a cross build. If so,
+    # export CONFIG_SITE to point to cross-config.arm64
+    if [ "$1" == "linux-aarch64" ]; then
+        log "Building linux-aarch64; using CONFIG_SITE for arm64"
+        export CONFIG_SITE=$(dirname "$0")/cross-config.arm64
+    fi
+
     if [ -z "$OPT_FORCE" ]; then
         if timestamp_check \
                 "$INSTALL_DIR/$(builder_host)" qemu-android-deps; then
