@@ -727,6 +727,22 @@ static bool replace(std::string& src,
     return false;
 }
 
+static bool createEmptyQcow() {
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    auto dst_img = android::base::pj(android::snapshot::getAvdDir(), "empty.qcow2");
+    if (!System::get()->pathExists(dst_img)) {
+        // TODO(jansene): replace with internal functions, vs calling qemu-img.
+        // See qemu-img.c: static int img_create(int argc, char **argv)
+        auto res = android::base::System::get()->runCommandWithResult(
+                {qemu_img, "create", "-f", "qcow2", dst_img, "0"});
+        if (!res) {
+            LOG(ERROR)  << "Could not create empty qcow2: " << dst_img;
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Snapshot::fixImport() {
     // We do 2 things, we fix up hw.ini, and update the protobuf
     const std::string sdk = "android.sdk.root";
@@ -786,7 +802,7 @@ bool Snapshot::fixImport() {
         return false;
     }
 
-    return true;
+    return createEmptyQcow();
 }
 
 void Snapshot::incrementSuccessfulLoads() {
