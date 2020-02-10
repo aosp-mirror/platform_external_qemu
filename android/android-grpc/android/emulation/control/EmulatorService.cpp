@@ -68,7 +68,7 @@
 #include "emulator_controller.pb.h"
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
-#include "snapshot-service.grpc.pb.h"
+#include "snapshot_service.grpc.pb.h"
 
 namespace google {
 namespace protobuf {
