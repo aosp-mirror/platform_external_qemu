@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3466925f_33287960",
+        "filename": "android/scripts/unix/utils/package_builder.shi",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1581779
+      },
+      "writtenOn": "2020-02-10T20:36:20Z",
+      "side": 0,
+      "message": "I think you should keep this line.\nIf you want to be able to inspect the output directory, you just need to specify a custom output directory.",
+      "revId": "cef7a06ad7ea6dd89ae1eb9c3ac938866d54ee48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf9f2981_346d95d2",
+        "filename": "android/scripts/unix/cross-config.cache",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1581779
+      },
+      "writtenOn": "2020-02-10T20:36:20Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "1b19a438eb5398147c900ebc4f148c77ee30277d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
