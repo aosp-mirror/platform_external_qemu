@@ -232,6 +232,7 @@ hvf_slot* hvf_next_free_slot() {
             return mem;
         }
     }
+
     return mem;
 }
 
@@ -240,6 +241,10 @@ int __hvf_set_memory_with_flags_locked(hvf_slot *slot, hv_memory_flags_t flags);
 
 int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
     pthread_rwlock_wrlock(&mem_lock);
+    DPRINTF("%s: hva: [%p 0x%llx] gpa: [0x%llx 0x%llx]\n", __func__,
+            hva, (unsigned long long)(uintptr_t)(((char*)hva) + size),
+            (unsigned long long)gpa,
+            (unsigned long long)gpa + size);
 
     hvf_slot *mem;
     mem = hvf_find_overlap_slot(gpa, gpa + size);
@@ -273,13 +278,14 @@ int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
     }
 
     mem = hvf_next_free_slot();
+
+    if (mem->size) {
+        qemu_abort("%s: no free slots\n", __func__);
+    }
+
     mem->mem = (uint8_t*)hva;
     mem->start = gpa;
     mem->size = size;
-
-    if (!mem) {
-        qemu_abort("%s: no free slots", __func__);
-    }
 
     int res = __hvf_set_memory_with_flags_locked(mem, (hv_memory_flags_t)flags);
 
@@ -288,6 +294,9 @@ int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
 }
 
 int hvf_unmap_safe(uint64_t gpa, uint64_t size) {
+    DPRINTF("%s: gpa: [0x%llx 0x%llx]\n", __func__,
+            (unsigned long long)gpa,
+            (unsigned long long)gpa + size);
     pthread_rwlock_wrlock(&mem_lock);
 
     hvf_slot *mem;
@@ -1294,7 +1303,7 @@ static int hvf_accel_init(MachineState *ms) {
     struct hvf_accel_state* s =
         (struct hvf_accel_state*)g_malloc0(sizeof(struct hvf_accel_state));
 
-    s->num_slots = 32;
+    s->num_slots = HVF_MAX_SLOTS;
     for (x = 0; x < s->num_slots; ++x) {
         s->slots[x].size = 0;
         s->slots[x].slot_id = x;
