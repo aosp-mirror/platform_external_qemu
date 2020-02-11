@@ -85,8 +85,8 @@ Git might not be configured properly to handle symlinks well on windows. Make
 sure you have the following settings set:
 
   ```bat
-  C:\> git config --system core.symlink true
-  C:\> git config --global core.symlink true
+  C:\> git config --system core.symlinks true
+  C:\> git config --global core.symlinks true
   ```
 
 ## Obtaining repo for windows
