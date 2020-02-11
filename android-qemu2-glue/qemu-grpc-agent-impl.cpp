@@ -9,17 +9,27 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android-qemu2-glue/qemu-control-impl.h"
+#include <string>  // for string
 
-#include <stdio.h>
-#include "android/cmdline-option.h"
-#include "android/emulation/control/grpc_agent.h"
+#include "android-qemu2-glue/qemu-control-impl.h"       // IWYU pragma: keep
+#include "android/cmdline-option.h"                     // for AndroidOptions
+#include "android/console.h"                            // for AndroidConsol...
+#include "android/emulation/control/EmulatorService.h"  // for EmulatorContr...
+#include "android/emulation/control/grpc_agent.h"       // for QGrpcAgent
 
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
 #endif
 
-#include "android/emulation/control/GrpcServices.h"
+#include "android/emulation/control/GrpcServices.h"  // for GrpcServices
+
+namespace android {
+namespace emulation {
+namespace control {
+class RtcBridge;
+}  // namespace control
+}  // namespace emulation
+}  // namespace android
 
 extern const AndroidConsoleAgents* getConsoleAgents();
 
@@ -36,7 +46,8 @@ int start_grpc(int port, const char* turncfg) {
     rtc_bridge = new android::emulation::control::NopRtcBridge();
 #endif
     auto service = android::emulation::control::GrpcServices::setup(
-            port, getConsoleAgents(), rtc_bridge, "forward");
+            port, port + 1, "0.0.0.0", getConsoleAgents(), rtc_bridge,
+            "forward");
     return service ? service->port() : -1;
 }
 

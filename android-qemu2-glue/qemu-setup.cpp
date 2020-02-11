@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android-qemu2-glue/qemu-setup.h"
 
 // We need to include this first due to msvc-posix defining some magical macros
@@ -84,6 +83,7 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
+
 extern "C" {
 
 #include "qemu/abort.h"
@@ -100,6 +100,8 @@ class RtcBridge;
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
+
+extern char* android_op_ports;
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -270,23 +272,29 @@ static android::emulation::control::RtcBridge* qemu_setup_rtc_bridge() {
 }
 
 static void qemu_setup_grpc() {
-    int grpc = -1;
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", avdInfo_getName(android_avdInfo)},
             {"avd.id", avdInfo_getId(android_avdInfo)}};
 
+    int grpc_start = android_serial_number_port + 3000;
+    int grpc_end = grpc_start + 1000;
+    std::string address = "127.0.0.1";
+
     if (android_cmdLineOptions->grpc &&
-        sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-        // Go bridge go!
-        auto service = android::emulation::control::GrpcServices::setup(
-                grpc, getConsoleAgents(), qemu_setup_rtc_bridge(),
-                android_cmdLineOptions->waterfall);
-        if (service) {
-            props["grpc.port"] = std::to_string(service->port());
-            props["grpc.certificate"] = service->publicCert();
-        }
+        sscanf(android_cmdLineOptions->grpc, "%d", &grpc_start) == 1) {
+        grpc_end = grpc_start + 1;
+        address = "0.0.0.0";
+    }
+
+    auto service = android::emulation::control::GrpcServices::setup(
+            grpc_start, grpc_end, address, getConsoleAgents(),
+            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
+
+    if (service) {
+        props["grpc.port"] = std::to_string(service->port());
+        props["grpc.certificate"] = service->publicCert();
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
@@ -305,8 +313,12 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    // Setup the gRPC bridge if needed.
-    qemu_setup_grpc();
+    // Only enable the grpc port if:
+    // 1. The user specifically requests it with the -grpc flag.
+    // 2. There is no explicit adb/serial port configuration.
+    if (!android_op_ports || android_cmdLineOptions->grpc) {
+        qemu_setup_grpc();
+    }
 
     // We are sharing video, time to launch the shared memory recorder.
     // Note, the webrtc module could have started the shared memory module
