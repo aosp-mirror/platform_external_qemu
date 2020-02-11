@@ -14,14 +14,6 @@ target_include_directories(emulator-libsparse PRIVATE src)
 target_link_libraries(emulator-libsparse PRIVATE zlib)
 android_target_link_libraries(emulator-libsparse windows
                               PRIVATE emulator-libmman-win32)
-
-if(WINDOWS)
-  # Work around some gcc/mingw issues
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_compile_definitions(emulator-libsparse PRIVATE -DUSE_MINGW=1)
-  endif()
-endif()
-
 target_compile_options(emulator-libsparse PRIVATE -Wno-error)
 
 android_add_executable(

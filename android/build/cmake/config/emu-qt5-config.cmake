@@ -275,39 +275,6 @@ elseif(WINDOWS_MSVC_X86_64)
     # translations
     ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/qtwebengine_locales
   )
-
-elseif(WINDOWS_X86_64)
-  # On Windows, linking to mingw32 is required. The library is provided by the
-  # toolchain, and depends on a main() function provided by qtmain which itself
-  # depends on qMain(). These must appear in emulator-libui_unittests LDFLAGS
-  # and not LDLIBS since qMain() is provided by object/libraries that appear
-  # after these in the link command-line.
-  set(QT5_LIBRARIES
-      -L${PREBUILT_ROOT}/bin;-lmingw32;${PREBUILT_ROOT}/lib/libqtmainAndroidEmu.a
-  )
-  # Obtained by running ListDlls.exe from sysinternals tool
-  set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/bin/Qt5SvgAndroidEmu.dll>lib64/qt/lib/Qt5SvgAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5CoreAndroidEmu.dll>lib64/qt/lib/Qt5CoreAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5GuiAndroidEmu.dll>lib64/qt/lib/Qt5GuiAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5WidgetsAndroidEmu.dll>lib64/qt/lib/Qt5WidgetsAndroidEmu.dll;
-      ${PREBUILT_ROOT}/plugins/bearer/qgenericbearer.dll>lib64/qt/plugins/bearer/qgenericbearer.dll;
-      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
-      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt/plugins/imageformats/qicns.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt/plugins/imageformats/qico.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt/plugins/imageformats/qjpeg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt/plugins/imageformats/qsvg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt/plugins/imageformats/qtga.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt/plugins/imageformats/qtiff.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;
-  )
-  add_qt_shared_lib(Core "-lQt5CoreAndroidEmu" "${QT5_LIBRARIES}")
-  add_qt_shared_lib(Gui "-lQt5GuiAndroidEmu" "Qt5::Core")
-  add_qt_shared_lib(Widgets "-lQt5WidgetsAndroidEmu" "Qt5::Gui")
-  add_qt_shared_lib(Svg "-lQt5SvgAndroidEmu" "Qt5::Widgets")
 elseif(LINUX_X86_64)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init

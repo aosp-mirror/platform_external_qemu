@@ -102,11 +102,6 @@ target_include_directories(emulator-libwebp PRIVATE .)
 # Forget about warnings for this code.
 target_compile_options(emulator-libwebp PRIVATE -w)
 
-if(WINDOWS_X86_64)
-  # Work around some gcc/mingw issues
-  target_compile_definitions(emulator-libwebp PRIVATE -DUSE_MINGW=1)
-endif()
-
 if(WINDOWS_MSVC_X86_64)
   # clang whining about not enabling sse41 support
   android_target_compile_options(emulator-libwebp Clang PRIVATE -msse4.1)
