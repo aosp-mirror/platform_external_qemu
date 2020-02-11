@@ -28,6 +28,7 @@
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/control/sensors_agent.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -52,6 +53,7 @@ ANDROID_BEGIN_HEADER
     X(QAndroidLibuiAgent, libui)          \
     X(QCarDataAgent, car)                 \
     X(QGrpcAgent, grpc)                   \
+    X(QAndroidSensorsAgent, sensors)      \
 
 
 

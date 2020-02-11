@@ -1054,6 +1054,8 @@ extern int android_physical_model_get(
 extern int android_physical_model_set(
         int physical_parameter, float a, float b, float c,
         int interpolation_mode) {
+
+    fprintf(stderr, "Set %d -> (%f, %f, %f) : %d\n", physical_parameter, a, b, c, interpolation_mode);
     HwSensors* hw = _sensorsState;
 
     if (physical_parameter < 0 || physical_parameter >= MAX_PHYSICAL_PARAMETERS)
@@ -1065,7 +1067,6 @@ extern int android_physical_model_set(
 
     _hwSensors_setPhysicalParameterValue(hw, physical_parameter, a, b, c,
             interpolation_mode);
-
     return PHYSICAL_PARAMETER_STATUS_OK;
 }
 

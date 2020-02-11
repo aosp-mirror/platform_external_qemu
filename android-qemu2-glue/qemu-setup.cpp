@@ -250,6 +250,7 @@ const AndroidConsoleAgents* getConsoleAgents() {
             gQAndroidLibuiAgent,
             gQCarDataAgent,
             gQGrpcAgent,
+            gQAndroidSensorsAgent
     };
     return &consoleAgents;
 }
