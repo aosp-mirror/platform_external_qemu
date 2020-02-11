@@ -367,9 +367,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   list(APPEND breakpad_processor_unittests fast_source_line_resolver_unittest)
 endif()
 
-foreach(tst ${breakpad_processor_unittests})
-  add_proc_test(${tst})
-endforeach()
+# b/149265836
+if (NOT WINDOWS_MSVC_X86_64)
+  foreach(tst ${breakpad_processor_unittests})
+    add_proc_test(${tst})
+  endforeach()
+endif()
 
 android_add_executable(
   TARGET minidump_dump NODISTRIBUTE
