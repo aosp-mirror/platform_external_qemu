@@ -131,7 +131,7 @@ struct MessageCallback : QEMUMessageCallback {
     void operator=(const MessageCallback&) = delete;
 
     operator const QEMUMessageCallback*() const {
-        return (const QEMUMessageCallback*)this;
+        return static_cast<const QEMUMessageCallback*>(this);
     }
 
 private:
