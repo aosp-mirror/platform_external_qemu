@@ -265,9 +265,7 @@ if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL
 endif()
 
 # Unit tests, only active when we are not cross compiling
-if(WINDOWS_MSVC_X86_64)
-  message(STATUS "Disabling protobuf tests on MSVC! b/149265836")
-elseif(NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG OR NOT TARGET gmock_main)
+if(NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG OR NOT TARGET gmock_main)
   message(STATUS "Disabling protobuf tests when cross compiling")
 else()
   set(lite_test_protos
