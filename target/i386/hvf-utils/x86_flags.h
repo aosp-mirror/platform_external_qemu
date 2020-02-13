@@ -64,7 +64,8 @@ typedef struct lazy_flags {
     addr_t temp = ((lf_carries) & (LF_MASK_AF)) | \
     (((lf_carries) >> (size - 2)) << LF_BIT_PO); \
     cpu->hvf_x86->lflags.result = (addr_t)(int##size##_t)(lf_result); \
-    if ((size) == 32) temp = ((lf_carries) & ~(LF_MASK_PDB | LF_MASK_SD)); \
+    if ((size) == 64) temp = ((lf_carries) & ~(LF_MASK_PDB | LF_MASK_SD)); \
+    else if ((size) == 32) temp = ((lf_carries) & ~(LF_MASK_PDB | LF_MASK_SD)); \
     else if ((size) == 16) temp = ((lf_carries) & (LF_MASK_AF)) | ((lf_carries) << 16); \
     else if ((size) == 8)  temp = ((lf_carries) & (LF_MASK_AF)) | ((lf_carries) << 24); \
     else VM_PANIC("unimplemented");                                                    \
@@ -78,6 +79,8 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAPC_SIZE(16, carries, result)
 #define SET_FLAGS_OSZAPC_32(carries, result) \
     SET_FLAGS_OSZAPC_SIZE(32, carries, result)
+#define SET_FLAGS_OSZAPC_64(carries, result) \
+    SET_FLAGS_OSZAPC_SIZE(64, carries, result)
 
 /* result */
 #define SET_FLAGS_OSZAPC_LOGIC_8(result_8) \
@@ -86,8 +89,11 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAPC_16(0, (result_16))
 #define SET_FLAGS_OSZAPC_LOGIC_32(result_32) \
     SET_FLAGS_OSZAPC_32(0, (result_32))
+#define SET_FLAGS_OSZAPC_LOGIC_64(result_64) \
+    SET_FLAGS_OSZAPC_64(0, (result_64))
 #define SET_FLAGS_OSZAPC_LOGIC_SIZE(size, result) {             \
-    if (32 == size) {SET_FLAGS_OSZAPC_LOGIC_32(result);}        \
+    if (64 == size) {SET_FLAGS_OSZAPC_LOGIC_64(result);}        \
+    esle if (32 == size) {SET_FLAGS_OSZAPC_LOGIC_32(result);}   \
     else if (16 == size) {SET_FLAGS_OSZAPC_LOGIC_16(result);}   \
     else if (8 == size) {SET_FLAGS_OSZAPC_LOGIC_8(result);}     \
     else VM_PANIC("unimplemented");                            \

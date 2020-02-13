@@ -82,6 +82,16 @@ void hvf_handle_io(uint16_t port, void *data, int direction, int size, uint32_t 
         FLAGS_FUNC##_32(diff);                      \
         break;                                      \
     }                                               \
+    case 8:                                        \
+    {                                               \
+        uint64_t v1 = (uint64_t)decode->op[0].val;  \
+        uint64_t v2 = (uint64_t)decode->op[1].val;  \
+        uint64_t diff = v1 cmd v2;                  \
+        if (save_res)                               \
+            write_val_ext(cpu, decode->op[0].ptr, diff, 8); \
+        FLAGS_FUNC##_64(diff);                      \
+        break;                                      \
+    }                                               \
     default:                                        \
         VM_PANIC("bad size\n");                    \
     }                                                   \
