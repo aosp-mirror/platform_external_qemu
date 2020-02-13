@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import sys
 
@@ -39,9 +39,9 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('sdk_revision', None,
                     '## DEPRECATED ##, it will automatically use the one defined in source.properties')
 flags.DEFINE_string('sdk_build_number', None, 'The emulator sdk build number.')
-flags.DEFINE_enum('config', 'release', BuildConfig.values(),
+flags.DEFINE_enum('config', 'release', list(BuildConfig.values()),
                   'Whether we are building a release or debug configuration.')
-flags.DEFINE_enum('crash', 'none', Crash.values(),
+flags.DEFINE_enum('crash', 'none', list(Crash.values()),
                   'Which crash server to use or none if you do not want crash uploads.'
                   'enabling this will result in symbol processing and uploading during install.')
 flags.DEFINE_string('out', os.path.abspath('objs'),
@@ -53,13 +53,13 @@ flags.DEFINE_integer('test_jobs', multiprocessing.cpu_count(),
                      'Specifies  the number of tests to run simultaneously')
 flags.DEFINE_list(
     'sanitizer', [], 'List of sanitizers ([address, thread]) to enable in the built binaries.')
-flags.DEFINE_enum('generator', 'ninja', Generator.values(),
+flags.DEFINE_enum('generator', 'ninja', list(Generator.values()),
                   'CMake generator to use.')
-flags.DEFINE_enum('target',  platform.system().lower(), Toolchain.values(),
+flags.DEFINE_enum('target',  platform.system().lower(), list(Toolchain.values()),
                   'Which platform to target. '
                   'This will attempt to cross compile '
                   'if the target does not match the current platform (%s)' % platform.system().lower())
-flags.DEFINE_enum('build', 'check', Make.values(),
+flags.DEFINE_enum('build', 'check', list(Make.values()),
                   'Target that should be build after configuration. '
                   'The config target will only configure the build, '
                   'no symbol processing or testing will take place.')
