@@ -22,6 +22,30 @@
       "revId": "31207bfb4017d9b79e6da26bc900750db282d6b3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8612aec_eff27ec8",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-13T18:40:30Z",
+      "side": 1,
+      "message": "We do :-). I can make it part of this change, or part of the actual implementation of the streaming/screenshot interface.",
+      "parentUuid": "dfd6f314_549053cd",
+      "range": {
+        "startLine": 86,
+        "startChar": 20,
+        "endLine": 86,
+        "endChar": 31
+      },
+      "revId": "31207bfb4017d9b79e6da26bc900750db282d6b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
