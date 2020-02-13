@@ -8,7 +8,7 @@ import grpc
 from google.protobuf import empty_pb2
 
 from proto.snapshot_service_pb2_grpc import SnapshotServiceStub
-from proto.snapshot_service_pb2 import Snapshot
+from proto.snapshot_service_pb2 import SnapshotPackage
 from snaptool.channel_provider import getEmulatorChannel
 from tqdm import tqdm
 
@@ -43,10 +43,10 @@ class SnapshotService(object):
 
         return False
 
-    def pull(self, snap_id, dest, fmt=Snapshot.Format.TAR):
+    def pull(self, snap_id, dest, fmt=SnapshotPackage.Format.TAR):
         """Pulls a snapshot with the given id to the given destination dir as id.tar.gz."""
         fn = snap_id + ".tar"
-        if fmt == Snapshot.Format.TARGZ:
+        if fmt == SnapshotPackage.Format.TARGZ:
             fn += ".gz"
         fname = os.path.join(dest, fn)
         self.logger.debug("Pulling %s -> %s", snap_id, fname)
@@ -54,7 +54,7 @@ class SnapshotService(object):
         total_size = sum([img.size for img in snap.details.images if img.present])
 
         try:
-            it = self.stub.pullSnapshot(Snapshot(snapshot_id=snap_id, format=fmt))
+            it = self.stub.pullSnapshot(SnapshotPackage(snapshot_id=snap_id, format=fmt))
             with open(fname, "wb") as fn:
                 with tqdm(fn, total=total_size, unit="B", unit_scale=True) as t:
                     for msg in it:
@@ -90,20 +90,20 @@ class SnapshotService(object):
             1. A message containing only the id.
             2. A stream of byte objects from the tar (.gz) file.
             """
-            fmt = Snapshot.Format.TAR
+            fmt = SnapshotPackage.Format.TAR
             if fname.endswith(".tar.gz"):
-                fmt = Snapshot.Format.TARGZ
+                fmt = SnapshotPackage.Format.TARGZ
 
 
             total_size = os.path.getsize(fname)
             snap_id = os.path.basename(fname).replace(".gz", "").replace(".tar", "")
 
             with tqdm(total=total_size, unit="B", unit_scale=True) as t:
-                yield Snapshot(snapshot_id=snap_id, format=fmt)
+                yield SnapshotPackage(snapshot_id=snap_id, format=fmt)
                 with open(fname, "rb") as snap:
                     for chunk in read_in_chunks(snap):
                         t.update(len(chunk))
-                        yield Snapshot(payload=chunk)
+                        yield SnapshotPackage(payload=chunk)
 
         return self._exec_unary_grpc("pushSnapshot", push_snap_iterator(src))
 
@@ -123,12 +123,12 @@ class SnapshotService(object):
 
     def load(self, snap_id):
         """Loads a snapshot inside the emulator."""
-        return self._exec_unary_grpc("loadSnapshot", Snapshot(snapshot_id=snap_id))
+        return self._exec_unary_grpc("loadSnapshot", SnapshotPackage(snapshot_id=snap_id))
 
     def save(self, snap_id):
         """Saves a snapshot inside the emulator."""
-        return self._exec_unary_grpc("saveSnapshot", Snapshot(snapshot_id=snap_id))
+        return self._exec_unary_grpc("saveSnapshot", SnapshotPackage(snapshot_id=snap_id))
 
     def delete(self, snap_id):
         """Deletes the given snapshot from the emulator."""
-        return self._exec_unary_grpc("deleteSnapshot", Snapshot(snapshot_id=snap_id))
+        return self._exec_unary_grpc("deleteSnapshot", SnapshotPackage(snapshot_id=snap_id))
