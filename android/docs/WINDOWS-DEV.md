@@ -60,7 +60,7 @@ type Win-R key then type "cmd"):
 ```bat
 C:\> @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 
-C:> choco install -y python2 visualstudio2017community visualstudio2017-workload-vctools visualstudio2017-workload-nativedesktop cmake
+C:> choco install -y python3 visualstudio2019community visualstudio2019-workload-vctools visualstudio2019-workload-nativedesktop cmake
 
 ```
 
@@ -78,6 +78,26 @@ Once you have installed everything you can validate that you have what you need 
   C:\Program Files\Git\cmd\git.exe
   C:\python_27_amd64\files\python.exe
   ```
+
+## Automated install using setup script
+
+We now have an automated installation script that you can download here:
+[setup_windows_build_env.py](https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/scripts/setup_windows_build_env.py)
+
+
+Next you can run it from an elevated prompt:
+
+```bat
+C:\> setup_windows_build_env.py C:\development\emu-master-dev
+```
+
+This will install the enlistment in C:\development\emu-master-dev.
+
+Make sure to add `%USERPROFILE%\bin` to your PATH.
+
+```bat
+C:\> PATH=%PATH%;%USERPROFILE%\bin
+```
 
 ## Configure git
 
@@ -103,10 +123,10 @@ There are 2 advantages running with Windows native tools:
 From a PowerShell window (i.e. type Win-R key then type "Powershell"):
 
   ```PS
-  PS C:\Users\hacker> md "$env:USERPROFILE\bin\"
-  PS C:\Users\hacker> $wc = New-Object Net.WebClient
-  PS C:\Users\hacker> $wc.DownloadFile('http://storage.googleapis.com/git-repo-downloads/repo', "$env:USERPROFILE\bin\repo")
-  PS C:\Users\hacker> '@call python %~dp0repo %*' | Out-File -FilePath "$env:USERPROFILE\bin\repo.cmd"
+   md "$env:USERPROFILE\bin\";
+   $wc = New-Object Net.WebClient;
+   $wc.DownloadFile('http://storage.googleapis.com/git-repo-downloads/repo', "$env:USERPROFILE\bin\repo");
+   '@call python %~dp0repo %*' | Out-File -FilePath "$env:USERPROFILE\bin\repo.cmd"
   ```
 
 Make sure to add `"$env:USERPROFILE\bin"` to the `PATH`, otherwise you will not

@@ -103,7 +103,11 @@ def fixup_windows_clang():
         if clang_ver.startswith('clang') and os.path.isdir(os.path.join(clang_base_dir, clang_ver)):
             clang_dir = os.path.join(clang_base_dir, clang_ver, 'bin')
             clang_cl = os.path.join(clang_dir, 'clang-cl.exe')
-            if not os.path.exists(clang_cl):
+            clang_exe = os.path.join(clang_dir, 'clang.exe')
+            if not os.path.islink(clang_cl) and os.path.exists(clang_exe):
+                # Hmm, this shouldn't happen..
+                if os.path.exists(clang_cl):
+                    os.remove(clang_cl)
                 logging.info("Setting symlink for %s", clang_cl)
                 aemu.process.run(
                     ['mklink', clang_cl, os.path.join(clang_dir, 'clang.exe')])

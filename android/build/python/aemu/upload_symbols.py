@@ -13,13 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
+
 
 import json
 import os
 import sys
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import requests
 from absl import app, flags, logging
@@ -123,7 +123,7 @@ class SymbolFileServer(object):
             # Make sure we don't leak secret keys by accident.
             if not self.use_classic_api():
                 resp.url = resp.url.replace(
-                    urllib.quote(self.api_key), 'XX-HIDDEN-XX')
+                    urllib.parse.quote(self.api_key), 'XX-HIDDEN-XX')
             logging.error('Url: %s, Status: %s, response: "%s", in: %s',
                           resp.url, resp.status_code, resp.text, resp.elapsed)
             resp.raise_for_status()
