@@ -55,7 +55,9 @@
 #endif
 
 /* Camera service version 1 */
-#define V1 (avdInfo_getApiLevel(android_avdInfo) > 29)
+// #define V1 (avdInfo_getApiLevel(android_avdInfo) > 29)
+// bug: 149440912 camera protocol v1 crashes on windows
+#define V1 false
 
 /* Defines name of the camera service. */
 #define SERVICE_NAME    "camera"
