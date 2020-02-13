@@ -56,7 +56,7 @@ public:
                            std::function<void()> onSocketClose);
     bool socketWantRead();
     bool socketWantWrite();
-
+    int pipeWakeFlags();
 private:
     int sendToHost(const AndroidPipeBuffer* buffers, int numBuffers);
     int recvFromHost(AndroidPipeBuffer* buffers, int numBuffers);

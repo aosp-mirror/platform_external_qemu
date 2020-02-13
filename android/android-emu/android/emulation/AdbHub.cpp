@@ -437,5 +437,15 @@ bool AdbHub::socketWantWrite() {
             mCurrentHostSendPacketPst < packetSize(mCurrentHostSendPacket));
 }
 
+int AdbHub::pipeWakeFlags() {
+    int wakeFlags = PIPE_WAKE_WRITE;
+    if (!mRecvFromHostQueue.empty() ||
+        (mCurrentGuestRecvPacketPst >= 0 &&
+            mCurrentGuestRecvPacketPst < packetSize(mCurrentGuestRecvPacket))) {
+        wakeFlags |= PIPE_WAKE_READ;
+    }
+    return wakeFlags;
+}
+
 }  // namespace emulation
 }  // namespace android

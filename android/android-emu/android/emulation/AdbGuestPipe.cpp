@@ -668,6 +668,10 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
             } else {
                 mFdWatcher->dontWantWrite();
             }
+            int wakeFlags = mAdbHub->pipeWakeFlags();
+            if (wakeFlags) {
+                signalWake(wakeFlags);
+            }
         }
     } else {
         int wakeFlags = 0;
