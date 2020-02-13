@@ -134,7 +134,7 @@ static struct virtio_input_config multi_touch_config[] = {
                 .subsel = 0,
                 .size = 1, // INPUT_PROP_CNT is at most 32 bits
                 .u.bitmap = {
-                    const_le32(INPUT_PROP_DIRECT),
+                    const_le32(BIT(INPUT_PROP_DIRECT)),
                 },
         },
         {
