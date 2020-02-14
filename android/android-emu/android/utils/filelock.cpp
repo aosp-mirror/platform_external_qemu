@@ -308,9 +308,13 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
     /* now attempt to link the temp file to the lock file */
     for (;;) {
-        // The return value of link() is buggy on NFS, so ignore it.
-        // and use lstat() to look at the result.
         rc = HANDLE_EINTR(link(lock->temp, lock->lock));
+        if (rc == 0) {
+            /* The link() operation suceeded */
+            lock->locked = 1;
+            rc = HANDLE_EINTR(unlink(lock->temp));
+            return 0;
+        }
 
         struct stat st_lock;
         rc = HANDLE_EINTR(lstat(lock->lock, &st_lock));
@@ -319,15 +323,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
             continue;
         }
 
-        if (st_temp.st_rdev == st_lock.st_rdev &&
-            st_temp.st_ino  == st_lock.st_ino  ) {
-            /* The link() operation suceeded */
-            lock->locked = 1;
-            rc = HANDLE_EINTR(unlink(lock->temp));
-            return 0;
-        }
-
-        if (S_ISDIR(st_lock.st_mode)) {
+       if (S_ISDIR(st_lock.st_mode)) {
             char *win_pid;
             int win_pid_len;
             // The .lock file is a directory. This can only happen
