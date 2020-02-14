@@ -77,6 +77,9 @@ flags.DEFINE_boolean(
 flags.DEFINE_boolean(
     'minbuild', False, 'Minimize the build to only support x86_64/aarch64.')
 
+flags.DEFINE_boolean(
+    'gfxstream', False, 'Build only gfxstream libs/tests.')
+
 def configure():
     """Configures the cmake project."""
 
@@ -122,6 +125,9 @@ def configure():
 
     if FLAGS.minbuild:
         cmake_cmd += ['-DOPTION_MINBUILD=%s' % FLAGS.minbuild]
+
+    if FLAGS.gfxstream:
+        cmake_cmd += ['-DGFXSTREAM=%s' % FLAGS.gfxstream]
 
     cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
     cmake_cmd += [get_qemu_root()]
