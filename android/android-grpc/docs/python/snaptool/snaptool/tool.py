@@ -28,7 +28,7 @@ import click
 import time
 from snaptool.snapshot import SnapshotService
 from proto.snapshot_pb2 import Image
-from proto.snapshot_service_pb2 import Snapshot
+from proto.snapshot_service_pb2 import SnapshotPackage
 
 
 def epoch_fmt(epoch):
@@ -104,9 +104,9 @@ def info(snapshotService, name, all):
 @click.argument("dest", default=".")
 @click.option("--compress/--no-compress", default=False)
 def pull(snapshotService, name, dest, compress):
-    fmt = Snapshot.Format.TAR
+    fmt = SnapshotPackage.Format.TAR
     if compress:
-        fmt = Snapshot.Format.TARGZ
+        fmt = SnapshotPackage.Format.TARGZ
     msg, fname = snapshotService.pull(name, dest, fmt)
 
 
