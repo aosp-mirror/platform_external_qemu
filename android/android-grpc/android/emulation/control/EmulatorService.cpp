@@ -61,7 +61,9 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/hw-sensors.h"
 #include "android/opengles.h"
+#include "android/physics/Physics.h"
 #include "android/skin/rect.h"
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
@@ -174,35 +176,18 @@ public:
         return Status::OK;
     }
 
-    Status setRotation(ServerContext* context,
-                       const Rotation* request,
-                       Rotation* reply) override {
-        mAgents->emu->rotate((SkinRotation)request->rotation());
-        return getRotation(context, nullptr, reply);
-        return Status::OK;
-    }
-
-    Status getRotation(ServerContext* context,
-                       const ::google::protobuf::Empty* request,
-                       Rotation* reply) override {
-        reply->set_rotation((Rotation_SkinRotation)mAgents->emu->getRotation());
-        return Status::OK;
-    }
-
     Status setBattery(ServerContext* context,
                       const BatteryState* request,
-                      BatteryState* reply) override {
+                      ::google::protobuf::Empty* reply) override {
         auto battery = mAgents->battery;
         battery->setHasBattery(request->hasbattery());
         battery->setIsBatteryPresent(request->ispresent());
-        battery->setIsCharging(
-                request->status() ==
-                BatteryState_BatteryStatus_BATTERY_STATUS_CHARGING);
+        battery->setIsCharging(request->status() == BatteryState::CHARGING);
         battery->setCharger((BatteryCharger)request->charger());
         battery->setChargeLevel(request->chargelevel());
         battery->setHealth((BatteryHealth)request->health());
         battery->setStatus((BatteryStatus)request->status());
-        return getBattery(context, nullptr, reply);
+        return Status::OK;
     }
 
     Status getBattery(ServerContext* context,
@@ -220,7 +205,7 @@ public:
 
     Status setGps(ServerContext* context,
                   const GpsState* request,
-                  GpsState* reply) override {
+                  ::google::protobuf::Empty* reply) override {
         auto location = mAgents->location;
         struct timeval tVal;
         memset(&tVal, 0, sizeof(tVal));
@@ -228,9 +213,9 @@ public:
 
         location->gpsSetPassiveUpdate(request->passiveupdate());
         location->gpsSendLoc(request->latitude(), request->longitude(),
-                             request->elevation(), request->speed(),
-                             request->heading(), request->satellites(), &tVal);
-        return getGps(context, nullptr, reply);
+                             request->altitude(), request->speed(),
+                             request->bearing(), request->satellites(), &tVal);
+        return Status::OK;
     }
 
     Status getGps(ServerContext* context,
@@ -247,14 +232,73 @@ public:
         reply->set_latitude(lat);
         reply->set_longitude(lon);
         reply->set_speed(speed);
-        reply->set_heading(heading);
-        reply->set_elevation(elevation);
+        reply->set_bearing(heading);
+        reply->set_altitude(elevation);
         reply->set_satellites(count);
         return Status::OK;
     }
 
+    Status setPhysicalModel(ServerContext* context,
+                            const PhysicalModelValue* request,
+                            ::google::protobuf::Empty* reply) override {
+        auto values = request->value();
+        int size = values.data().size();
+        float a = size > 0 ? values.data(0) : 0;
+        float b = size > 1 ? values.data(1) : 0;
+        float c = size > 2 ? values.data(2) : 0;
+
+        mAgents->sensors->setPhysicalParameterTarget(
+                (int)request->target(), a, b, c,
+                PhysicalInterpolation::PHYSICAL_INTERPOLATION_SMOOTH);
+        return Status::OK;
+    }
+
+    Status getPhysicalModel(ServerContext* context,
+                            const PhysicalModelValue* request,
+                            PhysicalModelValue* reply) override {
+        float a = 0, b = 0, c = 0;
+        int state = mAgents->sensors->getPhysicalParameter(
+                (int)request->target(), &a, &b, &c,
+                PARAMETER_VALUE_TYPE_CURRENT);
+        auto value = reply->mutable_value();
+        value->add_data(a);
+        value->add_data(b);
+        value->add_data(c);
+        reply->set_status((PhysicalModelValue_State)state);
+        reply->set_target(request->target());
+        return Status::OK;
+    }
+
+    Status setSensor(ServerContext* context,
+                     const SensorValue* request,
+                     ::google::protobuf::Empty* reply) override {
+        auto values = request->value();
+        int size = values.data().size();
+        float a = size > 0 ? values.data(0) : 0;
+        float b = size > 1 ? values.data(1) : 0;
+        float c = size > 2 ? values.data(2) : 0;
+
+        mAgents->sensors->setSensorOverride((int)request->target(), a, b, c);
+        return Status::OK;
+    }
+
+    Status getSensor(ServerContext* context,
+                     const SensorValue* request,
+                     SensorValue* reply) override {
+        float a = 0, b = 0, c = 0;
+        int state =
+                mAgents->sensors->getSensor((int)request->target(), &a, &b, &c);
+        auto value = reply->mutable_value();
+        value->add_data(a);
+        value->add_data(b);
+        value->add_data(c);
+        reply->set_status((SensorValue_State)state);
+        reply->set_target(request->target());
+        return Status::OK;
+    }
+
     Status sendFingerprint(ServerContext* context,
-                           const FingerprintEvent* request,
+                           const Fingerprint* request,
                            ::google::protobuf::Empty* reply) override {
         mAgents->finger->setTouch(request->istouching(), request->touchid());
         return Status::OK;
@@ -279,13 +323,6 @@ public:
                      const TouchEvent* request,
                      ::google::protobuf::Empty* reply) override {
         mTouchEventSender.send(request);
-        return Status::OK;
-    }
-
-    Status sendRotary(ServerContext* context,
-                      const RotaryEvent* request,
-                      ::google::protobuf::Empty* reply) override {
-        mAgents->user_event->sendRotaryEvent(request->delta());
         return Status::OK;
     }
 
@@ -320,8 +357,8 @@ public:
                          Image* reply) override {
         auto start = System::get()->getUnixTimeUs();
         auto desiredFormat = android::emulation::ImageFormat::PNG;
-        if (request->format() == ImageFormat_ImgFormat_RAW) {
-            desiredFormat = android::emulation::ImageFormat::RAW;
+        if (request->format() == ImageFormat::RGBA8888) {
+            desiredFormat = android::emulation::ImageFormat::RGBA8888;
         }
 
         // Screenshots can come from either the gl renderer, or the guest.
@@ -333,38 +370,54 @@ public:
         reply->set_height(img.getHeight());
         reply->set_width(img.getWidth());
         reply->set_image(img.getPixelBuf(), img.getPixelCount());
-        reply->mutable_format()->mutable_rotation()->set_rotation(
-                ::android::emulation::control::
-                        Rotation_SkinRotation_SKIN_ROTATION_0);
+        auto format = reply->mutable_format();
         switch (img.getImageFormat()) {
             case android::emulation::ImageFormat::PNG:
-                reply->mutable_format()->set_format(ImageFormat_ImgFormat_PNG);
+                format->set_format(ImageFormat::PNG);
                 break;
             case android::emulation::ImageFormat::RGB888:
-                reply->mutable_format()->set_format(
-                        ImageFormat_ImgFormat_RGB888);
+                format->set_format(ImageFormat::RGB888);
                 break;
             case android::emulation::ImageFormat::RGBA8888:
-                reply->mutable_format()->set_format(
-                        ImageFormat_ImgFormat_RGBA8888);
+                format->set_format(ImageFormat::RGBA8888);
                 break;
             default:
                 LOG(ERROR) << "Unknown format retrieved during snapshot";
         }
+        format->set_height(img.getHeight());
+        format->set_width(img.getWidth());
+
+        float x = 0, y = 0, z = 0;
+        mAgents->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION, &x,
+                                               &y, &z,
+                                               PARAMETER_VALUE_TYPE_CURRENT);
+        format->mutable_rotation()->set_xaxis(x);
+        format->mutable_rotation()->set_yaxis(y);
+        format->mutable_rotation()->set_zaxis(z);
+        if (z < -90) {
+            format->mutable_rotation()->set_rotation(
+                    Rotation::REVERSE_PORTRAIT);
+        } else if (z < 0) {
+            format->mutable_rotation()->set_rotation(
+                    Rotation::REVERSE_LANDSCAPE);
+        } else if (z < 90) {
+            format->mutable_rotation()->set_rotation(Rotation::PORTRAIT);
+        } else {
+            format->mutable_rotation()->set_rotation(Rotation::LANDSCAPE);
+        }
+
         return Status::OK;
     }
 
-    Status usePhone(ServerContext* context,
-                    const TelephoneOperation* request,
-                    TelephoneResponse* reply) override {
+    Status sendPhone(ServerContext* context,
+                     const PhoneCall* request,
+                     PhoneResponse* reply) override {
         // We assume that the int mappings are consistent..
         TelephonyOperation operation = (TelephonyOperation)request->operation();
         std::string phoneNr = request->number();
         TelephonyResponse response =
                 mAgents->telephony->telephonyCmd(operation, phoneNr.c_str());
-        reply->set_response(
-                (::android::emulation::control::TelephoneResponse_Response)
-                        response);
+        reply->set_response((PhoneResponse_Response)response);
         return Status::OK;
     }
 
@@ -482,7 +535,7 @@ Builder& Builder::withPortRange(int start, int end) {
     assert(end > start);
     int port = start;
     bool found = false;
-    for(port = start; !found && port < end; port++) {
+    for (port = start; !found && port < end; port++) {
         // Find a free port.
         android::base::ScopedSocket s0(socketTcp4LoopbackServer(port));
         if (s0.valid()) {
@@ -533,6 +586,10 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     // This is a work around until we have a proper solution.
     builder.SetSyncServerOption(ServerBuilder::MAX_POLLERS, 1024);
 
+    // Allow large messages, as raw screenshots can take up a significant amount
+    // of memory.
+    const int megaByte = 1024 * 1024;
+    builder.SetMaxSendMessageSize(16 * megaByte);
     auto service = builder.BuildAndStart();
     if (!service)
         return nullptr;
