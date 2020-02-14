@@ -34,10 +34,10 @@ def read_in_chunks(file_object, chunk_size=(128*1024)):
 
 def push_snapshot(fname):
     snap_id  = os.path.basename(fname).replace('.tar.gz', '')
-    yield proto.snapshot_service_pb2.Snapshot(snapshot_id=snap_id)
+    yield proto.snapshot_service_pb2.SnapshotPackage(snapshot_id=snap_id)
     with open(fname, 'rb') as snap:
         for chunk in read_in_chunks(snap):
-            yield proto.snapshot_service_pb2.Snapshot(payload=chunk)
+            yield proto.snapshot_service_pb2.SnapshotPackage(payload=chunk)
 
 
 channel = getEmulatorChannel()

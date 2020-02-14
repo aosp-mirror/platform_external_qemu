@@ -28,7 +28,7 @@ import click
 import time
 from snaptool.snapshot import SnapshotService
 from proto.snapshot_pb2 import Image
-from proto.snapshot_service_pb2 import Snapshot
+from proto.snapshot_service_pb2 import SnapshotPackage
 
 
 def epoch_fmt(epoch):
