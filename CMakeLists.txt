@@ -75,7 +75,19 @@ set(OPTION_TCMALLOC
       "True if we should use TCMalloc on its supported platforms (currently, linux)."
 )
 set(OPTION_GFXSTREAM_BACKEND FALSE
-    CACHE BOOL "True if we should build the gfxstream backend.")
+    CACHE BOOL "True if we should build the gfxstream backend (plus everything else).")
+
+set(GFXSTREAM FALSE
+    CACHE BOOL "True if we should build only gfxstream and its accompanying libraries/tests.")
+
+set(OPTION_AEMU_LIBS_ONLY FALSE
+    CACHE BOOL "True if we should build only AEMU libraries and their tests.")
+
+if (GFXSTREAM)
+    set(OPTION_AEMU_LIBS_ONLY TRUE)
+    set(OPTION_GFXSTREAM_BACKEND TRUE)
+    set(OPTION_TCMALLOC FALSE)
+endif()
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
@@ -618,127 +630,131 @@ target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
-# Not allowed to have libraries without source files.
-android_add_library(
-  TARGET headless-paaudio
-  LICENSE "GPL-2.0-only"
-  LIBNAME
-    qemu
-    URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
-  NOTICE "REPO/LICENSE"
-  SRC # cmake-format: sortable
-      audio/paaudio-headless-impl-placeholder.c
-  LINUX audio/paaudio-headless-impl.c)
+if (NOT OPTION_AEMU_LIBS_ONLY)
 
-android_add_interface(
-  TARGET android-qemu-deps-headful
-  LICENSE "GPL-2.0-only"
-  LIBNAME
-    qemu
-    URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
-  NOTICE "REPO/LICENSE")
-android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE
-                              "-lpulse")
-
-android_add_interface(
-  TARGET android-qemu-deps-headless
-  LICENSE "GPL-2.0-only"
-  LIBNAME
-    qemu
-    URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
-  NOTICE "REPO/LICENSE")
-android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
-                              headless-paaudio)
-
-android_add_library(
-  TARGET libqemu2-util
-  LICENSE "GPL-2.0-only"
-  LIBNAME
-    qemu
-    URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
-  NOTICE "REPO/LICENSE"
-  SRC # cmake-format: sortable
-      ${libqemuutil_sources} ${libqemuutil_generated_sources})
-target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
-android_target_link_libraries(libqemu2-util windows
-                              PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
-target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
-
-android_add_library(
-  TARGET libqemustub
-  LICENSE "GPL-2.0-only"
-  LIBNAME
-    qemu
-    URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
-  NOTICE "REPO/LICENSE"
-  SRC # cmake-format: sortable
-      ${libqemustub_sources} ${libqemuutil_generated_sources})
-target_link_libraries(libqemustub PRIVATE android-qemu-deps)
-target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
-
-# Qemu-img
-android_add_executable(
-  TARGET qemu-img INSTALL .
-  LICENSE GPL-2.0-only
-  LIBNAME
-    qemu
-    URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
-  NOTICE "REPO/LICENSE"
-  SRC # cmake-format: sortable
-      ${qemu-img_sources} block/qcow2-bitmap.c
-  LINUX scsi/pr-manager.c)
-target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub
-                                       android-qemu-deps android-emu-base)
-
-# Create the qemu targets.
-android_add_qemu_executable(
-  x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-android_add_qemu_executable(aarch64
-                            "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-android_add_qemu_headless_executable(
-  x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-android_add_qemu_headless_executable(
-  aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-
-if(NOT OPTION_MINBUILD)
+  # Not allowed to have libraries without source files.
+  android_add_library(
+    TARGET headless-paaudio
+    LICENSE "GPL-2.0-only"
+    LIBNAME
+      qemu
+      URL
+      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+    REPO "${ANDROID_QEMU2_TOP_DIR}"
+    NOTICE "REPO/LICENSE"
+    SRC # cmake-format: sortable
+        audio/paaudio-headless-impl-placeholder.c
+    LINUX audio/paaudio-headless-impl.c)
+  
+  android_add_interface(
+    TARGET android-qemu-deps-headful
+    LICENSE "GPL-2.0-only"
+    LIBNAME
+      qemu
+      URL
+      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+    REPO "${ANDROID_QEMU2_TOP_DIR}"
+    NOTICE "REPO/LICENSE")
+  android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE
+                                "-lpulse")
+  
+  android_add_interface(
+    TARGET android-qemu-deps-headless
+    LICENSE "GPL-2.0-only"
+    LIBNAME
+      qemu
+      URL
+      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+    REPO "${ANDROID_QEMU2_TOP_DIR}"
+    NOTICE "REPO/LICENSE")
+  android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
+                                headless-paaudio)
+  
+  android_add_library(
+    TARGET libqemu2-util
+    LICENSE "GPL-2.0-only"
+    LIBNAME
+      qemu
+      URL
+      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+    REPO "${ANDROID_QEMU2_TOP_DIR}"
+    NOTICE "REPO/LICENSE"
+    SRC # cmake-format: sortable
+        ${libqemuutil_sources} ${libqemuutil_generated_sources})
+  target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
+  android_target_link_libraries(libqemu2-util windows
+                                PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
+  target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
+  
+  android_add_library(
+    TARGET libqemustub
+    LICENSE "GPL-2.0-only"
+    LIBNAME
+      qemu
+      URL
+      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+    REPO "${ANDROID_QEMU2_TOP_DIR}"
+    NOTICE "REPO/LICENSE"
+    SRC # cmake-format: sortable
+        ${libqemustub_sources} ${libqemuutil_generated_sources})
+  target_link_libraries(libqemustub PRIVATE android-qemu-deps)
+  target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
+  
+  # Qemu-img
+  android_add_executable(
+    TARGET qemu-img INSTALL .
+    LICENSE GPL-2.0-only
+    LIBNAME
+      qemu
+      URL
+      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+    REPO "${ANDROID_QEMU2_TOP_DIR}"
+    NOTICE "REPO/LICENSE"
+    SRC # cmake-format: sortable
+        ${qemu-img_sources} block/qcow2-bitmap.c
+    LINUX scsi/pr-manager.c)
+  target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub
+                                         android-qemu-deps android-emu-base)
+  
+  # Create the qemu targets.
   android_add_qemu_executable(
-    i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_executable(
-    armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_headless_executable(
-    i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_headless_executable(
-    armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-endif()
-
-# and the upstream qemu targets, if desired.
-if(QEMU_UPSTREAM)
-  message(STATUS "Building upstream qemu.")
-  android_add_qemu_upstream_executable(
-    i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_upstream_executable(
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_upstream_executable(
+  android_add_qemu_executable(aarch64
+                              "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_headless_executable(
+    x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_headless_executable(
     aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_upstream_executable(
-    armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-endif()
-
-# The tests currently work on linux only.
-if(ANDROID_TARGET_TAG MATCHES "linux.*")
-  include(qemu-test.cmake)
+  
+  if(NOT OPTION_MINBUILD)
+    android_add_qemu_executable(
+      i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_executable(
+      armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_headless_executable(
+      i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_headless_executable(
+      armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  endif()
+  
+  # and the upstream qemu targets, if desired.
+  if(QEMU_UPSTREAM)
+    message(STATUS "Building upstream qemu.")
+    android_add_qemu_upstream_executable(
+      i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_upstream_executable(
+      x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_upstream_executable(
+      aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_upstream_executable(
+      armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  endif()
+  
+  # The tests currently work on linux only.
+  if(ANDROID_TARGET_TAG MATCHES "linux.*")
+    include(qemu-test.cmake)
+  endif()
+  
 endif()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/target.tag "${ANDROID_TARGET_TAG}")
