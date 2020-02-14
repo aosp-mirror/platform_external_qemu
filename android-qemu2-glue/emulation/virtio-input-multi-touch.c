@@ -130,14 +130,6 @@ VIRTIO_INPUT_MT_CONFIG(11)
 
 static struct virtio_input_config multi_touch_config[] = {
         {
-                .select = VIRTIO_INPUT_CFG_PROP_BITS,
-                .subsel = 0,
-                .size = 1, // INPUT_PROP_CNT is at most 32 bits
-                .u.bitmap = {
-                    const_le32(BIT(INPUT_PROP_DIRECT)),
-                },
-        },
-        {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
                 .subsel = ABS_X,
                 .size = sizeof(virtio_input_absinfo),
