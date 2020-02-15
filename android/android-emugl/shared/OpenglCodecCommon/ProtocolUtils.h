@@ -65,6 +65,13 @@ inline T Unpack(const void* ptr) {
     return UnpackerT<T, S>::unpack(ptr);
 }
 
+template <typename T, typename S>
+inline T Unpack(const void* ptr, const void* end) {
+    if (ptr >= end) return (T)0;
+    if ((char*)ptr + sizeof(S) >= end) return (T)0;
+    return UnpackerT<T, S>::unpack(ptr);
+}
+
 // Helper classes GenericInputBuffer and GenericOutputBuffer used to ensure
 // input and output buffers passed to EGL/GL functions are properly aligned
 // (preventing crashes with some backends).
@@ -96,7 +103,15 @@ class GenericInputBuffer {
                   "Bad alignment parameter");
 
 public:
-    GenericInputBuffer(const void* input, size_t size) : mOrigBuff(input) {
+    GenericInputBuffer(const void* input, size_t size, const void* end) : mOrigBuff(input) {
+        constexpr size_t kMaxSize = (100 * 1048576);
+        if (size > kMaxSize || input >= end || (char*)input + size >= end) {
+            mBad = true;
+            return;
+        } else {
+            mBad = false;
+        }
+
         if (((uintptr_t)input & (Align - 1U)) == 0) {
             mPtr = const_cast<void*>(input);
         } else {
@@ -109,7 +124,11 @@ public:
         }
     }
 
+    bool bad() const { return mBad; }
+
     ~GenericInputBuffer() {
+        if (mBad) return;
+
         if (mPtr != mOrigBuff && mPtr != &mArray[0]) {
             free(mPtr);
         }
@@ -118,6 +137,7 @@ public:
     const void* get() const { return mPtr; }
 
 private:
+    bool mBad;
     // A pointer to the aligned buffer, might point either to mOrgBuf, to mArray
     // start or to a heap-allocated chunk of data.
     void* mPtr;
