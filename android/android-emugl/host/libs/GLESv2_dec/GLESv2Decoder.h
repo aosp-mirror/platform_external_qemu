@@ -22,6 +22,7 @@
 #include "emugl/common/shared_library.h"
 
 #include "GLSnapshot.h"
+#include "ProtocolUtils.h"
 
 typedef void (gles2_APIENTRY *glVertexAttribPointerWithDataSize_server_proc_t) (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*, GLsizei);
 typedef void (gles2_APIENTRY *glVertexAttribIPointerWithDataSize_server_proc_t) (GLuint, GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
@@ -52,20 +53,20 @@ private:
 
     static void *s_getProc(const char *name, void *userData);
     static void gles2_APIENTRY s_glGetCompressedTextureFormats(void *self, int count, GLint *formats);
-    static void gles2_APIENTRY s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type,
-                                      GLboolean normalized, GLsizei stride,  void * data, GLuint datalen);
+    static void gles2_APIENTRY s_glVertexAttribPointerData(void *ctx, GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, void* data, size_t encSize_data, GLuint datalen);
     static void gles2_APIENTRY s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint size, GLenum type,
                                         GLboolean normalized, GLsizei stride,  GLuint offset);
 
     static void gles2_APIENTRY s_glDrawElementsOffset(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset);
-    static void gles2_APIENTRY s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawElementsData(void *ctx, GLenum mode, GLsizei count, GLenum type, void* data, size_t encSize_data, GLuint datalen);
     static void gles2_APIENTRY s_glDrawElementsOffsetNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset);
-    static void gles2_APIENTRY s_glDrawElementsDataNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawElementsDataNullAEMU(void *ctx, GLenum mode, GLsizei count, GLenum type, void* data, size_t encSize_data, GLuint datalen);
     static int  gles2_APIENTRY s_glFinishRoundTrip(void *self);
 
     static void gles2_APIENTRY s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped);
-    static void gles2_APIENTRY s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res);
-    static void gles2_APIENTRY s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer);
+    static void gles2_APIENTRY s_glUnmapBufferAEMU(void *ctx, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, size_t encSize_guest_buffer, GLboolean* out_res);
+    static void gles2_APIENTRY s_glUnmapBufferAsyncAEMU(void *ctx, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, size_t encSize_guest_buffer, GLboolean* out_res, size_t encSize_out_res);
+    static void gles2_APIENTRY s_glFlushMappedBufferRangeAEMU(void *ctx, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, size_t encSize_guest_buffer);
 
     static void gles2_APIENTRY s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr);
     static void gles2_APIENTRY s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, GLboolean* out_res);
@@ -79,7 +80,7 @@ private:
     static void gles2_APIENTRY s_glTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLuint offset);
     static void gles2_APIENTRY s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset);
 
-    static void gles2_APIENTRY s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen);
+    static void gles2_APIENTRY s_glVertexAttribIPointerDataAEMU(void *ctx, GLuint index, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen);
     static void gles2_APIENTRY s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride,  GLuint offset);
 
     static void gles2_APIENTRY s_glTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLuint offset);
@@ -87,16 +88,16 @@ private:
     static void gles2_APIENTRY s_glCompressedTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLuint offset);
     static void gles2_APIENTRY s_glCompressedTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLuint offset);
     static void gles2_APIENTRY s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode, GLsizei count, GLenum type, GLuint offset, GLsizei primcount);
-    static void gles2_APIENTRY s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen);
+    static void gles2_APIENTRY s_glDrawElementsInstancedDataAEMU(void *ctx, GLenum mode, GLsizei count, GLenum type, const void* indices, size_t encSize_indices, GLsizei primcount, GLsizei datalen);
 
     static void gles2_APIENTRY s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset);
 
-    static GLuint gles2_APIENTRY s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen);
+    static GLuint gles2_APIENTRY s_glCreateShaderProgramvAEMU(void *ctx, GLenum type, GLsizei count, const char* packedStrings, size_t encSize_packedStrings, GLuint packedLen);
 
-    static void gles2_APIENTRY s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawArraysIndirectDataAEMU(void *ctx, GLenum mode, const void* indirect, size_t encSize_indirect, GLuint datalen);
     static void gles2_APIENTRY s_glDrawArraysIndirectOffsetAEMU(void* self, GLenum mode, GLuint offset);
 
-    static void gles2_APIENTRY s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawElementsIndirectDataAEMU(void *ctx, GLenum mode, GLenum type, const void* indirect, size_t encSize_indirect, GLuint datalen);
     static void gles2_APIENTRY s_glDrawElementsIndirectOffsetAEMU(void* self, GLenum mode, GLenum type, GLuint offset);
 
     static uint64_t gles2_APIENTRY s_glFenceSyncAEMU(void* self, GLenum condition, GLbitfield flags);
@@ -152,7 +153,7 @@ private:
     static void gles2_APIENTRY s_glDeleteProgramPipelines(void* self, GLsizei n, const GLuint *pipelines);
 
     // Shaders and programs=======================================
-    static void gles2_APIENTRY s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len);
+    static void gles2_APIENTRY s_glShaderString(void *ctx, GLuint shader, const GLchar* string, size_t encSize_string, GLsizei len);
     static void gles2_APIENTRY s_glCompileShader(void* self, GLuint shader);
     static void gles2_APIENTRY s_glAttachShader(void* self, GLuint program, GLuint shader);
     static void gles2_APIENTRY s_glDetachShader(void* self, GLuint program, GLuint shader);
@@ -184,7 +185,7 @@ private:
 
     static void gles2_APIENTRY s_glUniformBlockBinding(void* self, GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding);
     static GLuint gles2_APIENTRY s_glGetUniformBlockIndex(void* self, GLuint program, const GLchar* uniformBlockName);
-    static void gles2_APIENTRY s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices);
+    static void gles2_APIENTRY s_glGetUniformIndicesAEMU(void *ctx, GLuint program, GLsizei uniformCount, const GLchar* packedUniformNames, size_t encSize_packedUniformNames, GLsizei packedLen, GLuint* uniformIndices);
 
     static void gles2_APIENTRY s_glGetActiveUniformBlockiv(void* self, GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint *params);
     static void gles2_APIENTRY s_glGetActiveUniformBlockName(void* self, GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei *length, GLchar *uniformBlockName);
@@ -193,7 +194,7 @@ private:
     static void gles2_APIENTRY s_glGetActiveUniformsiv(void* self, GLuint program, GLsizei uniformCount, const GLuint *uniformIndices, GLenum pname, GLint *params);
 
     static void gles2_APIENTRY s_glTransformFeedbackVaryings(void* self, GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode);
-    static void gles2_APIENTRY s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program, GLsizei count, const char* packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode);
+    static void gles2_APIENTRY s_glTransformFeedbackVaryingsAEMU(void *ctx, GLuint program, GLsizei count, const char* packedVaryings, size_t encSize_packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode);
     static void gles2_APIENTRY s_glGetTransformFeedbackVarying(void* self, GLuint program, GLuint index, GLsizei bufSize, GLsizei * length, GLsizei * size, GLenum * type, char * name);
 
     static void gles2_APIENTRY s_glProgramParameteri(void* self, GLuint program, GLenum pname, GLint value);
