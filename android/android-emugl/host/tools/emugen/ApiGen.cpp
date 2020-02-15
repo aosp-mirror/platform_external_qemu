@@ -732,7 +732,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         }
         fprintf(fp, " + %u * 4;\n", (unsigned int)npointers);
         // Size of checksum
-        fprintf(fp, "\t const size_t checksumSize = checksumCalculator->checksumByteSize();\n");
+        fprintf(fp, "\t const size_t checksumSize = checksumCalculator ? checksumCalculator->checksumByteSize() : 0;\n");
         // Size of the whole thing
         fprintf(fp, "\t const size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
 
@@ -997,20 +997,23 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 \tconst unsigned char* const end = (const unsigned char*)buf + len;\n");
     if (!changesChecksum) {
         fprintf(fp,
-R"(    const size_t checksumSize = checksumCalc->checksumByteSize();
+R"(    const size_t checksumSize = checksumCalc ? checksumCalc->checksumByteSize() : 0;
     const bool useChecksum = checksumSize > 0;
 )");
     }
     fprintf(fp,
 "\twhile (end - ptr >= 8) {\n\
+\t\tif (ptr >= end) return 0; \n\
+\t\tconstexpr size_t kMaxTmpOutputArgSize = (30 * 1048576);\n\
+\t\tsize_t toRead = end - ptr;   \n\
 \t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
 \t\tint32_t packetLen = *(int32_t *)(ptr + 4);\n\
-\t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n");
+\t\tif (packetLen <= 0 || (ptr + packetLen >= end) || end - ptr < packetLen) return ptr - (unsigned char*)buf;\n");
     if (changesChecksum) {
         fprintf(fp,
 R"(        // Do this on every iteration, as some commands may change the checksum
         // calculation parameters.
-        const size_t checksumSize = checksumCalc->checksumByteSize();
+        const size_t checksumSize = checksumCalc ? checksumCalc->checksumByteSize() : 0;
         const bool useChecksum = checksumSize > 0;
 )");
     }
@@ -1045,6 +1048,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
         fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts0);\n");
 #endif
         bool totalTmpBuffExist = false;
+        size_t inputBuffCount = 0;
         std::string totalTmpBuffOffset = "0";
         std::string *tmpBufOffset = new std::string[e->vars().size()];
 
@@ -1117,7 +1121,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (v->isPointer() && v->isDMA()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
-                                "\t\t\tuint64_t var_%s_guest_paddr = Unpack<uint64_t,uint64_t>(ptr + %s);\n"
+                                "\t\t\tuint64_t var_%s_guest_paddr = Unpack<uint64_t,uint64_t>(ptr + %s, end);\n"
                                 "\t\t\t%s var_%s = stream->getDmaForReading(var_%s_guest_paddr);\n",
                                 var_name,
                                 varoffset.c_str(),
@@ -1135,7 +1139,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (!v->isPointer()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
-                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
+                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s, end);\n",
                                 var_type_name,
                                 var_name,
                                 var_type_name,
@@ -1153,7 +1157,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
                 if (pass == PASS_VariableDeclarations) {
                     fprintf(fp,
-                            "\t\t\tuint32_t size_%s __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + %s);\n",
+                            "\t\t\tuint32_t size_%s __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + %s, end);\n",
                             var_name,
                             varoffset.c_str());
                 }
@@ -1163,7 +1167,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                         if (pass == PASS_VariableDeclarations) {
     #if USE_ALIGNED_BUFFERS
                             fprintf(fp,
-                                    "\t\t\tInputBuffer inptr_%s(ptr + %s + 4, size_%s);\n",
+                                    "\t\t\tInputBuffer inptr_%s(ptr + %s + 4, size_%s, end);\n",
                                     var_name,
                                     varoffset.c_str(),
                                     var_name);
@@ -1175,6 +1179,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                     v->unpackExpression().c_str());
                             }
 
+                            fprintf(fp, "if (!inptr_%s.bad()) { // bad check for InputBuffer on %s\n", var_name, var_name);
+                            ++inputBuffCount;
                         }
                         if (pass == PASS_FunctionCall &&
                             v->pointerDir() == Var::POINTER_IN) {
@@ -1241,12 +1247,18 @@ R"(        // Do this on every iteration, as some commands may change the checks
                         if (pass == PASS_TmpBuffAlloc) {
                             if (!totalTmpBuffExist) {
                                 fprintf(fp,
+                                        "\t\t\tbool badSize = false;\n");
+                                fprintf(fp,
                                         "\t\t\tsize_t totalTmpSize = size_%s;\n",
                                         var_name);
+                                fprintf(fp,
+                                        "\t\t\tbadSize |= size_%s > kMaxTmpOutputArgSize;\n", var_name);
                             } else {
                                 fprintf(fp,
                                         "\t\t\ttotalTmpSize += size_%s;\n",
                                         var_name);
+                                fprintf(fp,
+                                        "\t\t\tbadSize |= size_%s > kMaxTmpOutputArgSize;\n", var_name);
                             }
                             tmpBufOffset[j] = totalTmpBuffOffset;
                             totalTmpBuffOffset += " + size_";
@@ -1255,24 +1267,24 @@ R"(        // Do this on every iteration, as some commands may change the checks
                         } else if (pass == PASS_MemAlloc) {
     #if USE_ALIGNED_BUFFERS
                             fprintf(fp,
-                                    "\t\t\tOutputBuffer outptr_%s(&tmpBuf[%s], size_%s);\n",
+                                    "\t\t\t\tOutputBuffer outptr_%s(&tmpBuf[%s], size_%s);\n",
                                     var_name,
                                     tmpBufOffset[j].c_str(),
                                     var_name);
                             // If both input and output variable, initialize with the input.
                             if (v->pointerDir() == Var::POINTER_INOUT) {
                                 fprintf(fp,
-                                        "\t\t\tmemcpy(outptr_%s.get(), inptr_%s.get(), size_%s);\n",
+                                        "\t\t\t\tmemcpy(outptr_%s.get(), inptr_%s.get(), size_%s);\n",
                                         var_name,
                                         var_name,
                                         var_name);
                             }
 
                             if (v->hostPackExpression() != "") {
-                                fprintf(fp, "\t\t\tvoid* forPacking_%s = nullptr;\n", var_name);
+                                fprintf(fp, "\t\t\t\tvoid* forPacking_%s = nullptr;\n", var_name);
                             }
                             if (v->hostPackTmpAllocExpression() != "") {
-                                fprintf(fp, "\t\t\t%s;\n", v->hostPackTmpAllocExpression().c_str());
+                                fprintf(fp, "\t\t\t\t%s;\n", v->hostPackTmpAllocExpression().c_str());
                             }
                         } else if (pass == PASS_FunctionCall) {
                             if (v->hostPackExpression() != "") {
@@ -1310,7 +1322,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                         v->hostPackExpression().c_str());
                             }
                             fprintf(fp,
-                                    "\t\t\toutptr_%s.flush();\n",
+                                    "\t\t\t\toutptr_%s.flush();\n",
                                     var_name);
                         }
     #else  // !USE_ALIGNED_BUFFERS
@@ -1390,21 +1402,25 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
             if (pass == PASS_TmpBuffAlloc) {
                 if (!e->retval().isVoid() && !e->retval().isPointer()) {
-                    if (!totalTmpBuffExist)
+                    if (!totalTmpBuffExist) {
+                        fprintf(fp,
+                                "\t\t\tbool badSize = false;\n");
                         fprintf(fp,
                                 "\t\t\tsize_t totalTmpSize = sizeof(%s);\n",
                                 retvalType.c_str());
-                    else
+                    } else {
                         fprintf(fp,
                                 "\t\t\ttotalTmpSize += sizeof(%s);\n",
                                 retvalType.c_str());
+                    }
 
                     totalTmpBuffExist = true;
                 }
                 if (totalTmpBuffExist) {
                     fprintf(fp,
                             "\t\t\ttotalTmpSize += checksumSize;\n"
-                            "\t\t\tunsigned char *tmpBuf = stream->alloc(totalTmpSize);\n");
+                            "\t\t\tunsigned char *tmpBuf = badSize ? nullptr : stream->alloc(totalTmpSize);\n");
+                    fprintf(fp, "\t\t\tif (tmpBuf) { // guard tmp buf processing\n");
                 }
             }
 
@@ -1418,6 +1434,11 @@ R"(        // Do this on every iteration, as some commands may change the checks
                             "&tmpBuf[totalTmpSize - checksumSize], checksumSize);\n"
                             "\t\t\t}\n"
                             "\t\t\tstream->flush();\n");
+                            fprintf(fp, "} // end tmp buf alloc guard\n");
+                }
+
+                for (size_t i = 0; i < inputBuffCount; ++i) {
+                    fprintf(fp, "} // end input buf guard\n");
                 }
             }
         } // pass;

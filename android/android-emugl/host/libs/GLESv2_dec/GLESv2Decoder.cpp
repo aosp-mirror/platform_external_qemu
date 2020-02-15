@@ -291,9 +291,13 @@ void GLESv2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint
     }
 }
 
+static const size_t kMaxVertexPointerLen = 10 * 1048576;
+
 void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type,
                                              GLboolean normalized, GLsizei stride,  void * data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     if (ctx->m_contextData != NULL) {
         ctx->m_contextData->storePointerData(indx, data, datalen);
@@ -319,6 +323,8 @@ void GLESv2Decoder::s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint
 
 void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElements(mode, count, type, data);
 }
@@ -332,6 +338,8 @@ void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei coun
 
 void GLESv2Decoder::s_glDrawElementsDataNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsNullAEMU(mode, count, type, data);
 }
@@ -514,12 +522,33 @@ void GLESv2Decoder::s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint
 
 static const char* const kNameDelimiter = ";";
 
+static const size_t kMaxStringLen = 10 * 1048576;
+
+size_t safe_strlen(const char *str, size_t max_len, bool* maxed) {
+    const char * end = (const char *)memchr(str, '\0', max_len);
+    if (end == NULL) {
+        fprintf(stderr, "%s: maxed\n", __func__);
+        *maxed = true;
+        return max_len;
+    } else {
+        fprintf(stderr, "%s: Not maxed, %zu\n", __func__, end - str);
+        *maxed = false;
+        return end - str;
+	}
+}
+
 static std::vector<std::string> sUnpackVarNames(GLsizei count, const char* packedNames) {
+
+    bool maxed = false;
+    safe_strlen(packedNames, kMaxStringLen, &maxed);
     std::vector<std::string> unpacked;
+    if (maxed) return unpacked;
+
     GLsizei current = 0;
 
     while (current < count) {
         const char* delimPos = strstr(packedNames, kNameDelimiter);
+        if (!delimPos) return unpacked;
         size_t nameLen = delimPos - packedNames;
         std::string next;
         next.resize(nameLen);
@@ -551,6 +580,8 @@ void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsize
 
 void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     if (ctx->m_contextData != NULL) {
         ctx->m_contextData->storePointerData(indx, data, datalen);
@@ -613,6 +644,7 @@ void GLESv2Decoder::s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode,
 }
 
 void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen) {
+    if (datalen > kMaxVertexPointerLen) return;
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
@@ -629,6 +661,7 @@ GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsi
 }
 
 void GLESv2Decoder::s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen) {
+    if (datalen > kMaxVertexPointerLen) return;
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawArraysIndirect(mode, indirect);
 }
@@ -639,6 +672,7 @@ void GLESv2Decoder::s_glDrawArraysIndirectOffsetAEMU(void* self, GLenum mode, GL
 }
 
 void GLESv2Decoder::s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen) {
+    if (datalen > kMaxVertexPointerLen) return;
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsIndirect(mode, type, indirect);
 }
@@ -863,9 +897,14 @@ rettype GLESv2Decoder::s_##funcname argtypes  { \
     return ctx-> funcname args; \
 } \
 
-
 void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
 {
+    bool maxed = false;
+    if (len > kMaxStringLen) return;
+
+    safe_strlen(string, kMaxStringLen, &maxed);
+    if (maxed) return;
+
     SNAPSHOT_PROGRAM_NAME(shader);
 
     ctx->glShaderSource(shader, 1, &string, NULL);
