@@ -162,3 +162,9 @@ int main(int argc, char *argv[])
 #endif
 
 }
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+    (void)Data;
+    (void)Size;
+    return 0;
+}

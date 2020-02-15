@@ -188,7 +188,7 @@ void GLESv1Decoder::s_glMatrixIndexPointerOffset(void * self, GLint size, GLenum
         return; \
     }
 
-void GLESv1Decoder::s_glVertexPointerData(void *self, GLint size, GLenum type, GLsizei stride, void *data, GLuint datalen)
+void GLESv1Decoder::s_glVertexPointerData(void *self, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
 
@@ -205,7 +205,7 @@ void GLESv1Decoder::s_glVertexPointerData(void *self, GLint size, GLenum type, G
     }
 }
 
-void GLESv1Decoder::s_glColorPointerData(void *self, GLint size, GLenum type, GLsizei stride, void *data, GLuint datalen)
+void GLESv1Decoder::s_glColorPointerData(void *self, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
 
@@ -222,7 +222,7 @@ void GLESv1Decoder::s_glColorPointerData(void *self, GLint size, GLenum type, GL
     }
 }
 
-void GLESv1Decoder::s_glTexCoordPointerData(void *self, GLint unit, GLint size, GLenum type, GLsizei stride, void *data, GLuint datalen)
+void GLESv1Decoder::s_glTexCoordPointerData(void *self, GLint unit, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
     STORE_POINTER_DATA_OR_ABORT((GLDecoderContextData::PointerDataLocation)
@@ -241,7 +241,7 @@ void GLESv1Decoder::s_glTexCoordPointerData(void *self, GLint unit, GLint size, 
     }
 }
 
-void GLESv1Decoder::s_glNormalPointerData(void *self, GLenum type, GLsizei stride, void *data, GLuint datalen)
+void GLESv1Decoder::s_glNormalPointerData(void *self, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
 
@@ -258,7 +258,7 @@ void GLESv1Decoder::s_glNormalPointerData(void *self, GLenum type, GLsizei strid
     }
 }
 
-void GLESv1Decoder::s_glPointSizePointerData(void *self, GLenum type, GLsizei stride, void *data, GLuint datalen)
+void GLESv1Decoder::s_glPointSizePointerData(void *self, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
 
@@ -267,7 +267,7 @@ void GLESv1Decoder::s_glPointSizePointerData(void *self, GLenum type, GLsizei st
     ctx->glPointSizePointerOES(type, 0, ctx->m_contextData->pointerData(GLDecoderContextData::POINTSIZE_LOCATION));
 }
 
-void GLESv1Decoder::s_glWeightPointerData(void * self, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
+void GLESv1Decoder::s_glWeightPointerData(void *self, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
 
@@ -276,7 +276,7 @@ void GLESv1Decoder::s_glWeightPointerData(void * self, GLint size, GLenum type, 
     ctx->glWeightPointerOES(size, type, 0, ctx->m_contextData->pointerData(GLDecoderContextData::WEIGHT_LOCATION));
 }
 
-void GLESv1Decoder::s_glMatrixIndexPointerData(void * self, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
+void GLESv1Decoder::s_glMatrixIndexPointerData(void *self, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
 
@@ -291,7 +291,7 @@ void GLESv1Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei coun
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
 }
 
-void GLESv1Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
+void GLESv1Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void* data, size_t encSize_data, GLuint datalen)
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
     ctx->glDrawElements(mode, count, type, data);

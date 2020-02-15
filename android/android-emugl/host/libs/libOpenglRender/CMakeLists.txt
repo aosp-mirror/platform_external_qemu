@@ -180,8 +180,7 @@ target_include_directories(
   PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common
          vulkan ${ANDROID_EMUGL_DIR}/host/include/vulkan)
 
-# Note! We build the test but are not registering it, as the darwin build has
-# some concurrency issues with these tests.
+# OpenglRender functional tests
 android_add_test(
   TARGET OpenglRender_unittests
   SRC # cmake-format: sortable
@@ -325,3 +324,38 @@ target_link_libraries(
          OpenglRender_vulkan
          OSWindow)
 add_opengl_dependencies(HelloVulkan)
+
+# OpenglRender common libraries for fuzzing
+android_add_library(
+  TARGET OpenglRender_fuzzing_common
+  LICENSE Apache-2.0
+  SRC FrameBufferTestEnv.cpp)
+target_link_libraries(
+    OpenglRender_fuzzing_common PRIVATE android-emu-base
+    OpenglRender_standalone_common)
+android_target_compile_definitions(OpenglRender_fuzzing_common windows PRIVATE
+    -DVK_USE_PLATFORM_WIN32_KHR)
+
+# Fuzz GLES (2.0, 3.0, 3.1)  decoder
+if (OPTION_GFXSTREAM_BACKEND)
+  android_add_executable(
+    TARGET OpenglRender_fuzz_gles
+    LICENSE Apache-2.0
+    SRC fuzz/OpenglRender_fuzz_gles.cpp)
+  target_compile_options(OpenglRender_fuzz_gles PRIVATE -fsanitize=address,fuzzer)
+  set_target_properties(OpenglRender_fuzz_gles PROPERTIES LINK_FLAGS -fsanitize=address,fuzzer)
+  target_link_libraries(
+    OpenglRender_fuzz_gles
+    PUBLIC OpenglRender_fuzzing_common
+           OpenglRender_standalone_common
+           OpenglCodecCommon
+           android-emu-base
+           emugl_common
+           OpenglRender
+           GLESv1_dec
+           GLESv2_dec
+           renderControl_dec
+           OpenglRender_vulkan
+           OSWindow)
+  add_opengl_dependencies(OpenglRender_fuzz_gles)
+endif()
