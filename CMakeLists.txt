@@ -321,9 +321,7 @@ if(OPTION_ASAN AND (LINUX_X86_64 OR DARWIN_X86_64))
   message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
   add_c_flag("-fsanitize=${OPTION_ASAN}")
   add_c_flag("-g3")
-  if(OPTION_ASAN STREQUAL "address")
-    add_c_flag("-fno-omit-frame-pointer")
-  endif()
+  add_c_flag("-fno-omit-frame-pointer")
 endif()
 
 # Toolchain file can get loaded multiple times, resulting in this variable being

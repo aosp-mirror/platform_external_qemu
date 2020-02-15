@@ -120,6 +120,7 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glFinishRoundTrip = s_glFinishRoundTrip;
     glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
     glUnmapBufferAEMU = s_glUnmapBufferAEMU;
+    glUnmapBufferAsyncAEMU = s_glUnmapBufferAsyncAEMU;
     glMapBufferRangeDMA = s_glMapBufferRangeDMA;
     glUnmapBufferDMA = s_glUnmapBufferDMA;
     glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
@@ -291,9 +292,12 @@ void GLESv2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint
     }
 }
 
-void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type,
-                                             GLboolean normalized, GLsizei stride,  void * data, GLuint datalen)
+static const size_t kMaxVertexPointerLen = 10 * 1048576;
+
+void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     if (ctx->m_contextData != NULL) {
         ctx->m_contextData->storePointerData(indx, data, datalen);
@@ -317,8 +321,10 @@ void GLESv2Decoder::s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint
 }
 
 
-void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
+void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void* data, size_t encSize_data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElements(mode, count, type, data);
 }
@@ -330,8 +336,10 @@ void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei coun
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
 }
 
-void GLESv2Decoder::s_glDrawElementsDataNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
+void GLESv2Decoder::s_glDrawElementsDataNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, void* data, size_t encSize_data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsNullAEMU(mode, count, type, data);
 }
@@ -366,7 +374,7 @@ void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr o
     }
 }
 
-void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
+void GLESv2Decoder::s_glUnmapBufferAEMU(void *self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, size_t encSize_guest_buffer, GLboolean* out_res)
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     *out_res = GL_TRUE;
@@ -380,6 +388,22 @@ void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offs
         }
         memcpy(gpu_ptr, guest_buffer, length);
         *out_res = ctx->glUnmapBuffer(target);
+    }
+}
+
+void GLESv2Decoder::s_glUnmapBufferAsyncAEMU(void *self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, size_t encSize_guest_buffer, GLboolean* out_res, size_t encSize_out_res)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+
+    if (access & GL_MAP_WRITE_BIT) {
+        if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+        if (!gpu_ptr) {
+            fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+            return;
+        }
+        memcpy(gpu_ptr, guest_buffer, length);
+        ctx->glUnmapBuffer(target);
     }
 }
 
@@ -473,7 +497,7 @@ void GLESv2Decoder::s_glUnmapBufferDirect(void* self, GLenum target, GLintptr of
     *out_res = res;
 }
 
-void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer) {
+void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void *self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, size_t encSize_guest_buffer) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
     void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
@@ -514,12 +538,31 @@ void GLESv2Decoder::s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint
 
 static const char* const kNameDelimiter = ";";
 
-static std::vector<std::string> sUnpackVarNames(GLsizei count, const char* packedNames) {
+static const size_t kMaxStringLen = 10 * 1048576;
+
+size_t safe_strlen(const char *str, size_t max_len, bool* maxed) {
+    const char * end = (const char *)memchr(str, '\0', max_len);
+    if (end == NULL) {
+        *maxed = true;
+        return max_len;
+    } else {
+        *maxed = false;
+        return end - str;
+	}
+}
+
+static std::vector<std::string> sUnpackVarNames(GLsizei count, const char* packedNames, size_t maxSafeSize) {
+
+    bool maxed = false;
+    safe_strlen(packedNames, maxSafeSize, &maxed);
     std::vector<std::string> unpacked;
+    if (maxed) return unpacked;
+
     GLsizei current = 0;
 
     while (current < count) {
         const char* delimPos = strstr(packedNames, kNameDelimiter);
+        if (!delimPos) return unpacked;
         size_t nameLen = delimPos - packedNames;
         std::string next;
         next.resize(nameLen);
@@ -532,10 +575,10 @@ static std::vector<std::string> sUnpackVarNames(GLsizei count, const char* packe
     return unpacked;
 }
 
-void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices) {
+void GLESv2Decoder::s_glGetUniformIndicesAEMU(void *self, GLuint program, GLsizei uniformCount, const GLchar* packedUniformNames, size_t encSize_packedUniformNames, GLsizei packedLen, GLuint* uniformIndices) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
 
-    std::vector<std::string> unpacked = sUnpackVarNames(uniformCount, packedNames);
+    std::vector<std::string> unpacked = sUnpackVarNames(uniformCount, packedUniformNames, encSize_packedUniformNames);
 
     GLchar** unpackedArray = new GLchar*[unpacked.size()];
     GLsizei i = 0;
@@ -549,19 +592,21 @@ void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsize
     delete [] unpackedArray;
 }
 
-void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
+void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint index, GLint size, GLenum type, GLsizei stride, void* data, size_t encSize_data, GLuint datalen)
 {
+    if (datalen > kMaxVertexPointerLen) return;
+
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     if (ctx->m_contextData != NULL) {
-        ctx->m_contextData->storePointerData(indx, data, datalen);
+        ctx->m_contextData->storePointerData(index, data, datalen);
         // note - the stride of the data is always zero when it comes out of the codec.
         // See gl2.attrib for the packing function call.
         if ((void*)ctx->glVertexAttribIPointerWithDataSize != gles2_unimplemented) {
-            ctx->glVertexAttribIPointerWithDataSize(indx, size, type, 0,
-                ctx->m_contextData->pointerData(indx), datalen);
+            ctx->glVertexAttribIPointerWithDataSize(index, size, type, 0,
+                ctx->m_contextData->pointerData(index), datalen);
         } else {
-            ctx->glVertexAttribIPointer(indx, size, type, 0,
-                ctx->m_contextData->pointerData(indx));
+            ctx->glVertexAttribIPointer(index, size, type, 0,
+                ctx->m_contextData->pointerData(index));
         }
     }
 }
@@ -572,11 +617,11 @@ void GLESv2Decoder::s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, 
     ctx->glVertexAttribIPointer(indx, size, type, stride, SafePointerFromUInt(data));
 }
 
-void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program, GLsizei count, const char* packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode) {
+void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void *self, GLuint program, GLsizei count, const char* packedVaryings, size_t encSize_packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode) {
 
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
 
-    std::vector<std::string> unpacked = sUnpackVarNames(count, packedVaryings);
+    std::vector<std::string> unpacked = sUnpackVarNames(count, packedVaryings, encSize_packedVaryings);
 
     char** unpackedArray = new char*[unpacked.size()];
     GLsizei i = 0;
@@ -612,7 +657,8 @@ void GLESv2Decoder::s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode,
     ctx->glDrawElementsInstanced(mode, count, type, SafePointerFromUInt(offset), primcount);
 }
 
-void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen) {
+void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void *self, GLenum mode, GLsizei count, GLenum type, const void* indices, size_t encSize_indices, GLsizei primcount, GLsizei datalen) {
+    if (datalen > kMaxVertexPointerLen) return;
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
@@ -622,13 +668,14 @@ void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsiz
     ctx->glReadPixels(x, y, width, height, format, type, SafePointerFromUInt(offset));
 }
 
-GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
+GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void *self, GLenum type, GLsizei count, const char* packedStrings, size_t encSize_packedStrings, GLuint packedLen) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
     // TODO: Snapshot names
 }
 
-void GLESv2Decoder::s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen) {
+void GLESv2Decoder::s_glDrawArraysIndirectDataAEMU(void *self, GLenum mode, const void* indirect, size_t encSize_indirect, GLuint datalen) {
+    if (datalen > kMaxVertexPointerLen) return;
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawArraysIndirect(mode, indirect);
 }
@@ -638,7 +685,8 @@ void GLESv2Decoder::s_glDrawArraysIndirectOffsetAEMU(void* self, GLenum mode, GL
     ctx->glDrawArraysIndirect(mode, SafePointerFromUInt(offset));
 }
 
-void GLESv2Decoder::s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen) {
+void GLESv2Decoder::s_glDrawElementsIndirectDataAEMU(void *self, GLenum mode, GLenum type, const void* indirect, size_t encSize_indirect, GLuint datalen) {
+    if (datalen > kMaxVertexPointerLen) return;
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsIndirect(mode, type, indirect);
 }
@@ -863,9 +911,14 @@ rettype GLESv2Decoder::s_##funcname argtypes  { \
     return ctx-> funcname args; \
 } \
 
-
-void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
+void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, size_t encSize_string, GLsizei len)
 {
+    bool maxed = false;
+    if (len > kMaxStringLen) return;
+
+    safe_strlen(string, encSize_string, &maxed);
+    if (maxed) return;
+
     SNAPSHOT_PROGRAM_NAME(shader);
 
     ctx->glShaderSource(shader, 1, &string, NULL);
