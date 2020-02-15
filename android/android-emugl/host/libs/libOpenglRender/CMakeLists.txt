@@ -187,8 +187,7 @@ target_include_directories(
   PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common
          vulkan ${ANDROID_EMUGL_DIR}/host/include/vulkan)
 
-# Note! We build the test but are not registering it, as the darwin build has
-# some concurrency issues with these tests.
+# OpenglRender functional tests
 android_add_test(
   TARGET OpenglRender_unittests
   SRC # cmake-format: sortable
@@ -332,3 +331,14 @@ target_link_libraries(
          OpenglRender_vulkan
          OSWindow)
 add_opengl_dependencies(HelloVulkan)
+
+# OpenglRender common libraries for fuzzing
+android_add_library(
+  TARGET OpenglRender_fuzzing_common
+  LICENSE Apache-2.0
+  SRC tests/FrameBufferTestEnv.cpp)
+target_link_libraries(
+    OpenglRender_fuzzing_common PRIVATE android-emu-base gmock_main
+    OpenglRender_standalone_common)
+android_target_compile_definitions(OpenglRender_fuzzing_common windows PRIVATE
+    -DVK_USE_PLATFORM_WIN32_KHR)
