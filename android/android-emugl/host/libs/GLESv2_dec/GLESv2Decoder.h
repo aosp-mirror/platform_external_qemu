@@ -22,6 +22,7 @@
 #include "emugl/common/shared_library.h"
 
 #include "GLSnapshot.h"
+#include "ProtocolUtils.h"
 
 typedef void (gles2_APIENTRY *glVertexAttribPointerWithDataSize_server_proc_t) (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*, GLsizei);
 typedef void (gles2_APIENTRY *glVertexAttribIPointerWithDataSize_server_proc_t) (GLuint, GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
