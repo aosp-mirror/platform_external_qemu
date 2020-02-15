@@ -150,6 +150,7 @@ protected:
         if (mFb) {
             delete mFb;  // destructor calls finalize
         }
+
         delete mRenderThreadInfo;
         EXPECT_EQ(EGL_SUCCESS, LazyLoadedEGLDispatch::get()->eglGetError())
                 << "FrameBufferTest TearDown found EGL error";
