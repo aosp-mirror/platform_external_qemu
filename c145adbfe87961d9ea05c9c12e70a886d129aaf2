@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc0f5d2b_f671d711",
+        "filename": "android/android-grpc/android/emulation/control/utils/ScreenshotUtils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-15T00:55:41Z",
+      "side": 1,
+      "message": "Sorry for not noticing this earlier. Shouldn\u0027t the boundaries between screen orientations be at -135, -45, 45 and 135 degrees?",
+      "range": {
+        "startLine": 79,
+        "startChar": 16,
+        "endLine": 79,
+        "endChar": 19
+      },
+      "revId": "c145adbfe87961d9ea05c9c12e70a886d129aaf2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c56f2cb_0874d6f0",
+        "filename": "android/android-grpc/docs/python/sample/screenshot.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-15T00:55:41Z",
+      "side": 1,
+      "message": "\" !\u003d 0\" is redundant",
+      "range": {
+        "startLine": 89,
+        "startChar": 27,
+        "endLine": 89,
+        "endChar": 32
+      },
+      "revId": "c145adbfe87961d9ea05c9c12e70a886d129aaf2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b02e8fc_122ea9f8",
+        "filename": "android/android-grpc/docs/python/sample/screenshot.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-02-15T00:55:41Z",
+      "side": 1,
+      "message": "nit: extra period",
+      "range": {
+        "startLine": 90,
+        "startChar": 67,
+        "endLine": 90,
+        "endChar": 68
+      },
+      "revId": "c145adbfe87961d9ea05c9c12e70a886d129aaf2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
