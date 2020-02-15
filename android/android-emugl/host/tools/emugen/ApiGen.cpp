@@ -732,7 +732,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         }
         fprintf(fp, " + %u * 4;\n", (unsigned int)npointers);
         // Size of checksum
-        fprintf(fp, "\t const size_t checksumSize = checksumCalculator->checksumByteSize();\n");
+        fprintf(fp, "\t const size_t checksumSize = checksumCalculator ? checksumCalculator->checksumByteSize() : 0;\n");
         // Size of the whole thing
         fprintf(fp, "\t const size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
 
@@ -997,12 +997,13 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 \tconst unsigned char* const end = (const unsigned char*)buf + len;\n");
     if (!changesChecksum) {
         fprintf(fp,
-R"(    const size_t checksumSize = checksumCalc->checksumByteSize();
+R"(    const size_t checksumSize = checksumCalc ? checksumCalc->checksumByteSize() : 0;
     const bool useChecksum = checksumSize > 0;
 )");
     }
     fprintf(fp,
 "\twhile (end - ptr >= 8) {\n\
+\t\tsize_t toRead = end - ptr;   \n\
 \t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
 \t\tint32_t packetLen = *(int32_t *)(ptr + 4);\n\
 \t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n");
@@ -1010,7 +1011,7 @@ R"(    const size_t checksumSize = checksumCalc->checksumByteSize();
         fprintf(fp,
 R"(        // Do this on every iteration, as some commands may change the checksum
         // calculation parameters.
-        const size_t checksumSize = checksumCalc->checksumByteSize();
+        const size_t checksumSize = checksumCalc ? checksumCalc->checksumByteSize() : 0;
         const bool useChecksum = checksumSize > 0;
 )");
     }
@@ -1117,7 +1118,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (v->isPointer() && v->isDMA()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
-                                "\t\t\tuint64_t var_%s_guest_paddr = Unpack<uint64_t,uint64_t>(ptr + %s);\n"
+                                "\t\t\tuint64_t var_%s_guest_paddr = Unpack<uint64_t,uint64_t>(ptr + %s, end);\n"
                                 "\t\t\t%s var_%s = stream->getDmaForReading(var_%s_guest_paddr);\n",
                                 var_name,
                                 varoffset.c_str(),
@@ -1135,7 +1136,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (!v->isPointer()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
-                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
+                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s, end);\n",
                                 var_type_name,
                                 var_name,
                                 var_type_name,
@@ -1153,7 +1154,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
                 if (pass == PASS_VariableDeclarations) {
                     fprintf(fp,
-                            "\t\t\tuint32_t size_%s __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + %s);\n",
+                            "\t\t\tuint32_t size_%s __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + %s, end);\n",
                             var_name,
                             varoffset.c_str());
                 }

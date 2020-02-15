@@ -65,6 +65,13 @@ inline T Unpack(const void* ptr) {
     return UnpackerT<T, S>::unpack(ptr);
 }
 
+template <typename T, typename S>
+inline T Unpack(const void* ptr, const void* end) {
+    if (ptr >= end) return (T)0;
+    if ((char*)ptr + sizeof(S) >= end) return (T)0;
+    return UnpackerT<T, S>::unpack(ptr);
+}
+
 // Helper classes GenericInputBuffer and GenericOutputBuffer used to ensure
 // input and output buffers passed to EGL/GL functions are properly aligned
 // (preventing crashes with some backends).
@@ -97,6 +104,28 @@ class GenericInputBuffer {
 
 public:
     GenericInputBuffer(const void* input, size_t size) : mOrigBuff(input) {
+        if (((uintptr_t)input & (Align - 1U)) == 0) {
+            mPtr = const_cast<void*>(input);
+        } else {
+            if (size <= StackSize) {
+                mPtr = &mArray[0];
+            } else {
+                mPtr = malloc(size);
+            }
+            memcpy(mPtr, input, size);
+        }
+    }
+
+    GenericInputBuffer(const void* input, size_t size, const void* end) : mOrigBuff(input) {
+        // About to read off the end
+        if ((char*)input >= (char*)end ||
+            (char*)input + size >= (char*)end) {
+            fprintf(stderr, "%s: warning: about to read off the end. input %p size %zu end %p wanted range [%p %p)\n", __func__,
+                    input, size, end, input, (char*)input + size);
+            mPtr = malloc(size);
+            return;
+        }
+
         if (((uintptr_t)input & (Align - 1U)) == 0) {
             mPtr = const_cast<void*>(input);
         } else {
