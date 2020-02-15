@@ -1424,16 +1424,19 @@ glUnmapBufferDMA
     flag not_api
 
 glMapBufferRangeDirect
+    flag unsupported
     flag custom_decoder
     flag not_api
 
 glUnmapBufferDirect
+    flag unsupported
     dir out_res out
     len out_res (sizeof(GLboolean))
     flag custom_decoder
     flag not_api
 
 glFlushMappedBufferRangeDirect
+    flag unsupported
     flag custom_decoder
     flag not_api
 
@@ -1470,7 +1473,6 @@ glUnmapBufferAsyncAEMU
     len out_res (sizeof(GLboolean))
     flag custom_decoder
     flag not_api
-    custom_host_api glUnmapBufferAEMU
 
 glFlushMappedBufferRangeAEMU2
     dir guest_buffer in
