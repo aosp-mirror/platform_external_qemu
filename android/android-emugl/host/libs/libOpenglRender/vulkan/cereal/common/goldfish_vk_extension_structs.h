@@ -294,5 +294,7 @@ size_t goldfish_vk_extension_struct_size(
 #endif
 #ifdef VK_GOOGLE_create_resources_with_requirements
 #endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
 
 } // namespace goldfish_vk

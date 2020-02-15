@@ -152,6 +152,8 @@ private:
                 android::featurecontrol::GLDirectMem, true);
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::Vulkan, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VirtioGpuNext, false);
 
         android_hw->hw_gltransport_asg_writeBufferSize = 262144;
         android_hw->hw_gltransport_asg_writeStepSize = 8192;

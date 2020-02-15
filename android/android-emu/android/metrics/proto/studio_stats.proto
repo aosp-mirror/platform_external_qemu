@@ -1423,7 +1423,8 @@ message EmulatorFeatureFlagState {
     YUV_Cache = 52;
     KEYCODE_FORWARDING = 53;
     VULKAN_IGNORED_HANDLES = 54;
-    // Next tag: 55
+    VIRTIO_GPU_NEXT = 55;
+    // Next tag: 56
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
