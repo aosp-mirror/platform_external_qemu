@@ -963,10 +963,6 @@ bool AdbGuestPipe::shouldUseRecvBuffer() {
 
 bool AdbGuestPipe::needsHubTranslation() const {
     auto res = mReuseFromSnapshot || mPortType == AdbPortType::Jdwp;
-    if (res) {
-        fprintf(stderr, "%s: using AdbHub translation (reusing snapshot: %d Jdwp interception: %d)\n",
-                __func__, mReuseFromSnapshot, mPortType == AdbPortType::Jdwp);
-    }
     return res;
 }
 
