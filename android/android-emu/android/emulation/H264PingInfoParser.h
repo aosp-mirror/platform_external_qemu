@@ -66,7 +66,7 @@ public:
     struct GetImageParam {
         // input
         uint64_t hostDecoderId;
-        uint32_t hostColorBufferId;
+        int32_t hostColorBufferId;
 
         // output
         int32_t* pDecoderErrorCode;
@@ -98,7 +98,7 @@ public:
     uint32_t version() const { return mVersion; }
 
 private:
-    uint32_t parseHostColorBufferId(void* ptr);
+    int32_t parseHostColorBufferId(void* ptr);
     void* getReturnAddress(void* ptr);
     uint32_t mVersion = 100;
 };
