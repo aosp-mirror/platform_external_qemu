@@ -276,8 +276,10 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     convert8.UVInterleavedToPlanar(dst);
 
     if (mParser.version() == 200) {
-        mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
-                                          myOutputWidth, myOutputHeight, dst);
+        if (param.hostColorBufferId >= 0) {
+            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth,
+                                          myOutputHeight, dst);
+        }
     }
 
     mImageReady = false;

@@ -90,10 +90,10 @@ void H264PingInfoParser::parseResetParams(void* ptr, ResetParam& param) {
     param.outputPixelFormat = static_cast<PixelFormat>(*(uint8_t*)(xptr + 40));
 }
 
-uint32_t H264PingInfoParser::parseHostColorBufferId(void* ptr) {
+int32_t H264PingInfoParser::parseHostColorBufferId(void* ptr) {
     // Guest will pass us the hsot color buffer id to send decoded frame to
     uint8_t* xptr = (uint8_t*)ptr;
-    uint32_t colorBufferId = *(uint32_t*)(xptr + 16);
+    int32_t colorBufferId = *(int32_t*)(xptr + 16);
     return colorBufferId;
 }
 
