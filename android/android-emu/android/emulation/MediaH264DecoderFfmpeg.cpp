@@ -122,7 +122,7 @@ void MediaH264DecoderFfmpeg::initH264ContextInternal(unsigned int width,
 
 MediaH264DecoderPlugin* MediaH264DecoderFfmpeg::clone() {
     H264_DPRINT("clone MediaH264DecoderFfmpeg %p with version %d", this,
-                (int)mVersion);
+                (int)mParser.version());
     return new MediaH264DecoderFfmpeg(mId, mParser);
 }
 
@@ -217,7 +217,7 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
     size_t szBytes = param.size;
     uint64_t inputPts = param.pts;
 
-    H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
+    H264_DPRINT("%s(frame=%p, sz=%zu pts %lld)", __func__, frame, szBytes, (long long)inputPts);
     Err h264Err = Err::NoErr;
     // TODO: move this somewhere else
     // First return parameter is the number of bytes processed,
@@ -257,16 +257,6 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
                 mFrame->width, mFrame->height,
                 mOutputWidth, mOutputHeight);
     mFrameFormatChanged = false;
-    if(mIsSoftwareDecoder) {
-        if (mFrame->width != mOutputWidth || mFrame->height != mOutputHeight) {
-        mOutputHeight = mFrame->height;
-        mOutputWidth = mFrame->width;
-        mFrameFormatChanged = true;
-        H264_DPRINT("%s: does not got frame in decode mode, format changed", __func__);
-        *retErr = static_cast<int>(Err::DecoderRestarted);
-        return;
-    }
-    }
     ++mNumDecodedFrame;
     copyFrame();
     mOutputPts = mFrame->pts;
@@ -390,8 +380,13 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
         uint8_t* dst = param.pDecodedFrame;
         memcpy(dst, mDecodedFrame, mOutBufferSize);
     } else if (mParser.version() == 200) {
-        mRenderer.renderToHostColorBuffer(param.hostColorBufferId, mOutputWidth,
+        if (param.hostColorBufferId >= 0) {
+            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, mOutputWidth,
                                           mOutputHeight, mDecodedFrame);
+        } else {
+            uint8_t* dst = param.pDecodedFrame;
+            memcpy(dst, mDecodedFrame, mOutBufferSize);
+        }
     }
 
     mImageReady = false;
