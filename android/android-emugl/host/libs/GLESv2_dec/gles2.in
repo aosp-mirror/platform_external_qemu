@@ -585,3 +585,73 @@ GL_ENTRY(void, glDrawElementsDataNullAEMU, GLenum mode, GLsizei count, GLenum ty
 # Async UnmapBuffer (also distinguishes sending arbitrary length buffer)
 GL_ENTRY(void, glUnmapBufferAsyncAEMU, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
 GL_ENTRY(void, glFlushMappedBufferRangeAEMU2, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer)
+
+# ANGLE_robust_client_memory
+GL_ENTRY(void, glGetBooleanvRobustANGLE, GLenum pname, GLsizei bufSize, GLsizei *length, GLboolean *data);
+GL_ENTRY(void, glGetBufferParameterivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetFloatvRobustANGLE, GLenum pname, GLsizei bufSize, GLsizei *length, float *data);
+GL_ENTRY(void, glGetFramebufferAttachmentParameterivRobustANGLE, GLenum target, GLenum attachment, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetIntegervRobustANGLE, GLenum pname, GLsizei bufSize, GLsizei *length, int *data);
+GL_ENTRY(void, glGetProgramivRobustANGLE, GLuint program, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetRenderbufferParameterivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetShaderivRobustANGLE, GLuint shader, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetTexParameterfvRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+GL_ENTRY(void, glGetTexParameterivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetUniformfvRobustANGLE, GLuint program, int location, GLsizei bufSize, GLsizei *length, float *params);
+GL_ENTRY(void, glGetUniformivRobustANGLE, GLuint program, int location, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetVertexAttribfvRobustANGLE, GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+GL_ENTRY(void, glGetVertexAttribivRobustANGLE, GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetVertexAttribPointervRobustANGLE, GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, void **pointer);
+GL_ENTRY(void, glReadPixelsRobustANGLE, int x, int y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLsizei *length, GLsizei *columns, GLsizei *rows, void *pixels);
+GL_ENTRY(void, glTexImage2DRobustANGLE, GLenum target, int level, int internalformat, GLsizei width, GLsizei height, int border, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+GL_ENTRY(void, glTexParameterfvRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, const GLfloat *params);
+GL_ENTRY(void, glTexParameterivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, const GLint *params);
+GL_ENTRY(void, glTexSubImage2DRobustANGLE, GLenum target, int level, int xoffset, int yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+GL_ENTRY(void, glCompressedTexImage2DRobustANGLE, GLenum target, int level, GLenum internalformat, GLsizei width, GLsizei height, int border, GLsizei imageSize, GLsizei bufSize, const void* data);
+GL_ENTRY(void, glCompressedTexSubImage2DRobustANGLE, GLenum target, int level, int xoffset, int yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLsizei bufSize, const void* data);
+GL_ENTRY(void, glCompressedTexImage3DRobustANGLE, GLenum target, int level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, int border, GLsizei imageSize, GLsizei bufSize, const void* data);
+GL_ENTRY(void, glCompressedTexSubImage3DRobustANGLE, GLenum target, int level, int xoffset, int yoffset, int zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLsizei bufSize, const void* data);
+
+GL_ENTRY(void, glTexImage3DRobustANGLE, GLenum target, int level, int internalformat, GLsizei width, GLsizei height, GLsizei depth, int border, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+GL_ENTRY(void, glTexSubImage3DRobustANGLE, GLenum target, int level, int xoffset, int yoffset, int zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+GL_ENTRY(void, glGetQueryivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetQueryObjectuivRobustANGLE, GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+GL_ENTRY(void, glGetBufferPointervRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, void **params);
+GL_ENTRY(void, glGetIntegeri_vRobustANGLE, GLenum target, GLuint index, GLsizei bufSize, GLsizei *length, int *data);
+GL_ENTRY(void, glGetInternalformativRobustANGLE, GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetVertexAttribIivRobustANGLE, GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetVertexAttribIuivRobustANGLE, GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+GL_ENTRY(void, glGetUniformuivRobustANGLE, GLuint program, int location, GLsizei bufSize, GLsizei *length, GLuint *params);
+GL_ENTRY(void, glGetActiveUniformBlockivRobustANGLE, GLuint program, GLuint uniformBlockIndex, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetInteger64vRobustANGLE, GLenum pname, GLsizei bufSize, GLsizei *length, GLint64 *data);
+GL_ENTRY(void, glGetInteger64i_vRobustANGLE, GLenum target, GLuint index, GLsizei bufSize, GLsizei *length, GLint64 *data);
+GL_ENTRY(void, glGetBufferParameteri64vRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, GLint64 *params);
+GL_ENTRY(void, glSamplerParameterivRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, const GLint *param);
+GL_ENTRY(void, glSamplerParameterfvRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, const GLfloat *param);
+GL_ENTRY(void, glGetSamplerParameterivRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetSamplerParameterfvRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+
+GL_ENTRY(void, glGetFramebufferParameterivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetProgramInterfaceivRobustANGLE, GLuint program, GLenum programInterface, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetBooleani_vRobustANGLE, GLenum target, GLuint index, GLsizei bufSize, GLsizei *length, GLboolean *data);
+GL_ENTRY(void, glGetMultisamplefvRobustANGLE, GLenum pname, GLuint index, GLsizei bufSize, GLsizei *length, float *val);
+GL_ENTRY(void, glGetTexLevelParameterivRobustANGLE, GLenum target, int level, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetTexLevelParameterfvRobustANGLE, GLenum target, int level, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+
+GL_ENTRY(void, glGetPointervRobustANGLE, GLenum pname, GLsizei bufSize, GLsizei *length, void **params);
+GL_ENTRY(void, glReadnPixelsRobustANGLE, int x, int y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLsizei *length, GLsizei *columns, GLsizei *rows, void *data);
+GL_ENTRY(void, glGetnUniformfvRobustANGLE, GLuint program, int location, GLsizei bufSize, GLsizei *length, float *params);
+GL_ENTRY(void, glGetnUniformivRobustANGLE, GLuint program, int location, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetnUniformuivRobustANGLE, GLuint program, int location, GLsizei bufSize, GLsizei *length, GLuint *params);
+GL_ENTRY(void, glTexParameterIivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, const GLint *params);
+GL_ENTRY(void, glTexParameterIuivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, const GLuint *params);
+GL_ENTRY(void, glGetTexParameterIivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetTexParameterIuivRobustANGLE, GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+GL_ENTRY(void, glSamplerParameterIivRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, const GLint *param);
+GL_ENTRY(void, glSamplerParameterIuivRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, const GLuint *param);
+GL_ENTRY(void, glGetSamplerParameterIivRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetSamplerParameterIuivRobustANGLE, GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+
+GL_ENTRY(void, glGetQueryObjectivRobustANGLE, GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+GL_ENTRY(void, glGetQueryObjecti64vRobustANGLE, GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, GLint64 *params);
+GL_ENTRY(void, glGetQueryObjectui64vRobustANGLE, GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint64 *params);
