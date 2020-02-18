@@ -163,6 +163,7 @@ glGetAttribLocation
 glGetBooleanv
     dir params out
     len params (glUtilsParamSize(pname) * sizeof(GLboolean))
+    custom_host_call glGetBooleanvRobustANGLE(var_pname, size_params, nullptr, (GLboolean*)(outptr_params.get()))
 
 #void glGetBufferParameteriv(GLenum target, GLenum pname, GLint *params)
 glGetBufferParameteriv
@@ -1481,3 +1482,200 @@ glFlushMappedBufferRangeAEMU2
     flag custom_decoder
     flag not_api
     custom_host_api glFlushMappedBufferRangeAEMU
+
+# ANGLE_robust_client_memory
+glGetBooleanvRobustANGLE
+    flag unsupported
+
+glGetBufferParameterivRobustANGLE
+    flag unsupported
+
+glGetFloatvRobustANGLE
+    flag unsupported
+
+glGetFramebufferAttachmentParameterivRobustANGLE
+    flag unsupported
+
+glGetIntegervRobustANGLE
+    flag unsupported
+
+glGetProgramivRobustANGLE
+    flag unsupported
+
+glGetRenderbufferParameterivRobustANGLE
+    flag unsupported
+
+glGetShaderivRobustANGLE
+    flag unsupported
+
+glGetTexParameterfvRobustANGLE
+    flag unsupported
+
+glGetTexParameterivRobustANGLE
+    flag unsupported
+
+glGetUniformfvRobustANGLE
+    flag unsupported
+
+glGetUniformivRobustANGLE
+    flag unsupported
+
+glGetVertexAttribfvRobustANGLE
+    flag unsupported
+
+glGetVertexAttribivRobustANGLE
+    flag unsupported
+
+glGetVertexAttribPointervRobustANGLE
+    flag unsupported
+
+glReadPixelsRobustANGLE
+    flag unsupported
+
+glTexImage2DRobustANGLE
+    flag unsupported
+
+glTexParameterfvRobustANGLE
+    flag unsupported
+
+glTexParameterivRobustANGLE
+    flag unsupported
+
+glTexSubImage2DRobustANGLE
+    flag unsupported
+
+glCompressedTexImage2DRobustANGLE
+    flag unsupported
+
+glCompressedTexSubImage2DRobustANGLE
+    flag unsupported
+
+glCompressedTexImage3DRobustANGLE
+    flag unsupported
+
+glCompressedTexSubImage3DRobustANGLE
+    flag unsupported
+
+
+glTexImage3DRobustANGLE
+    flag unsupported
+
+glTexSubImage3DRobustANGLE
+    flag unsupported
+
+glGetQueryivRobustANGLE
+    flag unsupported
+
+glGetQueryObjectuivRobustANGLE
+    flag unsupported
+
+glGetBufferPointervRobustANGLE
+    flag unsupported
+
+glGetIntegeri_vRobustANGLE
+    flag unsupported
+
+glGetInternalformativRobustANGLE
+    flag unsupported
+
+glGetVertexAttribIivRobustANGLE
+    flag unsupported
+
+glGetVertexAttribIuivRobustANGLE
+    flag unsupported
+
+glGetUniformuivRobustANGLE
+    flag unsupported
+
+glGetActiveUniformBlockivRobustANGLE
+    flag unsupported
+
+glGetInteger64vRobustANGLE
+    flag unsupported
+
+glGetInteger64i_vRobustANGLE
+    flag unsupported
+
+glGetBufferParameteri64vRobustANGLE
+    flag unsupported
+
+glSamplerParameterivRobustANGLE
+    flag unsupported
+
+glSamplerParameterfvRobustANGLE
+    flag unsupported
+
+glGetSamplerParameterivRobustANGLE
+    flag unsupported
+
+glGetSamplerParameterfvRobustANGLE
+    flag unsupported
+
+
+glGetFramebufferParameterivRobustANGLE
+    flag unsupported
+
+glGetProgramInterfaceivRobustANGLE
+    flag unsupported
+
+glGetBooleani_vRobustANGLE
+    flag unsupported
+
+glGetMultisamplefvRobustANGLE
+    flag unsupported
+
+glGetTexLevelParameterivRobustANGLE
+    flag unsupported
+
+glGetTexLevelParameterfvRobustANGLE
+    flag unsupported
+
+
+glGetPointervRobustANGLE
+    flag unsupported
+
+glReadnPixelsRobustANGLE
+    flag unsupported
+
+glGetnUniformfvRobustANGLE
+    flag unsupported
+
+glGetnUniformivRobustANGLE
+    flag unsupported
+
+glGetnUniformuivRobustANGLE
+    flag unsupported
+
+glTexParameterIivRobustANGLE
+    flag unsupported
+
+glTexParameterIuivRobustANGLE
+    flag unsupported
+
+glGetTexParameterIivRobustANGLE
+    flag unsupported
+
+glGetTexParameterIuivRobustANGLE
+    flag unsupported
+
+glSamplerParameterIivRobustANGLE
+    flag unsupported
+
+glSamplerParameterIuivRobustANGLE
+    flag unsupported
+
+glGetSamplerParameterIivRobustANGLE
+    flag unsupported
+
+glGetSamplerParameterIuivRobustANGLE
+    flag unsupported
+
+
+glGetQueryObjectivRobustANGLE
+    flag unsupported
+
+glGetQueryObjecti64vRobustANGLE
+    flag unsupported
+
+glGetQueryObjectui64vRobustANGLE
+    flag unsupported
