@@ -390,6 +390,9 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
         pos = last;
         std::string apiname = getNextToken(line, pos, &last, WHITESPACE);
         setCustomHostApi(apiname);
+    } else if (token == "custom_host_call") {
+        pos = last;
+        setCustomHostCall(line.substr(pos));
     } else {
         fprintf(stderr, "WARNING: %u: unknown attribute %s\n", (unsigned int)lc, token.c_str());
     }

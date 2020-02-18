@@ -11,6 +11,70 @@
   X(void, glVertexAttribPointerWithDataSize, (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize), (indx, size, type, normalized, stride, ptr, dataSize)) \
   X(void, glFramebufferTexture3DOES, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset), (target, attachment, textarget, texture, level, zoffset)) \
   X(void, glTestHostDriverPerformance, (GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us), (count, duration_us, duration_cpu_us)) \
+  X(void, glGetBooleanvRobustANGLE, (GLenum pname, GLsizei bufSize, GLsizei * length, GLboolean * data), (pname, bufSize, length, data)) \
+  X(void, glGetBufferParameterivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetFloatvRobustANGLE, (GLenum pname, GLsizei bufSize, GLsizei * length, float * data), (pname, bufSize, length, data)) \
+  X(void, glGetFramebufferAttachmentParameterivRobustANGLE, (GLenum target, GLenum attachment, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, attachment, pname, bufSize, length, params)) \
+  X(void, glGetIntegervRobustANGLE, (GLenum pname, GLsizei bufSize, GLsizei * length, int * data), (pname, bufSize, length, data)) \
+  X(void, glGetProgramivRobustANGLE, (GLuint program, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (program, pname, bufSize, length, params)) \
+  X(void, glGetRenderbufferParameterivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetShaderivRobustANGLE, (GLuint shader, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (shader, pname, bufSize, length, params)) \
+  X(void, glGetTexParameterfvRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, float * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetTexParameterivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetUniformfvRobustANGLE, (GLuint program, int location, GLsizei bufSize, GLsizei * length, float * params), (program, location, bufSize, length, params)) \
+  X(void, glGetUniformivRobustANGLE, (GLuint program, int location, GLsizei bufSize, GLsizei * length, int * params), (program, location, bufSize, length, params)) \
+  X(void, glGetVertexAttribfvRobustANGLE, (GLuint index, GLenum pname, GLsizei bufSize, GLsizei * length, float * params), (index, pname, bufSize, length, params)) \
+  X(void, glGetVertexAttribivRobustANGLE, (GLuint index, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (index, pname, bufSize, length, params)) \
+  X(void, glGetVertexAttribPointervRobustANGLE, (GLuint index, GLenum pname, GLsizei bufSize, GLsizei * length, void ** pointer), (index, pname, bufSize, length, pointer)) \
+  X(void, glReadPixelsRobustANGLE, (int x, int y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLsizei * length, GLsizei * columns, GLsizei * rows, void * pixels), (x, y, width, height, format, type, bufSize, length, columns, rows, pixels)) \
+  X(void, glTexImage2DRobustANGLE, (GLenum target, int level, int internalformat, GLsizei width, GLsizei height, int border, GLenum format, GLenum type, GLsizei bufSize, const void * pixels), (target, level, internalformat, width, height, border, format, type, bufSize, pixels)) \
+  X(void, glTexParameterfvRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, const GLfloat * params), (target, pname, bufSize, params)) \
+  X(void, glTexParameterivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, const GLint * params), (target, pname, bufSize, params)) \
+  X(void, glTexSubImage2DRobustANGLE, (GLenum target, int level, int xoffset, int yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, const void * pixels), (target, level, xoffset, yoffset, width, height, format, type, bufSize, pixels)) \
+  X(void, glCompressedTexImage2DRobustANGLE, (GLenum target, int level, GLenum internalformat, GLsizei width, GLsizei height, int border, GLsizei imageSize, GLsizei bufSize, const void* data), (target, level, internalformat, width, height, border, imageSize, bufSize, data)) \
+  X(void, glCompressedTexSubImage2DRobustANGLE, (GLenum target, int level, int xoffset, int yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLsizei bufSize, const void* data), (target, level, xoffset, yoffset, width, height, format, imageSize, bufSize, data)) \
+  X(void, glCompressedTexImage3DRobustANGLE, (GLenum target, int level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, int border, GLsizei imageSize, GLsizei bufSize, const void* data), (target, level, internalformat, width, height, depth, border, imageSize, bufSize, data)) \
+  X(void, glCompressedTexSubImage3DRobustANGLE, (GLenum target, int level, int xoffset, int yoffset, int zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLsizei bufSize, const void* data), (target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, bufSize, data)) \
+  X(void, glTexImage3DRobustANGLE, (GLenum target, int level, int internalformat, GLsizei width, GLsizei height, GLsizei depth, int border, GLenum format, GLenum type, GLsizei bufSize, const void * pixels), (target, level, internalformat, width, height, depth, border, format, type, bufSize, pixels)) \
+  X(void, glTexSubImage3DRobustANGLE, (GLenum target, int level, int xoffset, int yoffset, int zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLsizei bufSize, const void * pixels), (target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, bufSize, pixels)) \
+  X(void, glGetQueryivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetQueryObjectuivRobustANGLE, (GLuint id, GLenum pname, GLsizei bufSize, GLsizei * length, GLuint * params), (id, pname, bufSize, length, params)) \
+  X(void, glGetBufferPointervRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, void ** params), (target, pname, bufSize, length, params)) \
+  X(void, glGetIntegeri_vRobustANGLE, (GLenum target, GLuint index, GLsizei bufSize, GLsizei * length, int * data), (target, index, bufSize, length, data)) \
+  X(void, glGetInternalformativRobustANGLE, (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, internalformat, pname, bufSize, length, params)) \
+  X(void, glGetVertexAttribIivRobustANGLE, (GLuint index, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (index, pname, bufSize, length, params)) \
+  X(void, glGetVertexAttribIuivRobustANGLE, (GLuint index, GLenum pname, GLsizei bufSize, GLsizei * length, GLuint * params), (index, pname, bufSize, length, params)) \
+  X(void, glGetUniformuivRobustANGLE, (GLuint program, int location, GLsizei bufSize, GLsizei * length, GLuint * params), (program, location, bufSize, length, params)) \
+  X(void, glGetActiveUniformBlockivRobustANGLE, (GLuint program, GLuint uniformBlockIndex, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (program, uniformBlockIndex, pname, bufSize, length, params)) \
+  X(void, glGetInteger64vRobustANGLE, (GLenum pname, GLsizei bufSize, GLsizei * length, GLint64 * data), (pname, bufSize, length, data)) \
+  X(void, glGetInteger64i_vRobustANGLE, (GLenum target, GLuint index, GLsizei bufSize, GLsizei * length, GLint64 * data), (target, index, bufSize, length, data)) \
+  X(void, glGetBufferParameteri64vRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, GLint64 * params), (target, pname, bufSize, length, params)) \
+  X(void, glSamplerParameterivRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, const GLint * param), (sampler, pname, bufSize, param)) \
+  X(void, glSamplerParameterfvRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, const GLfloat * param), (sampler, pname, bufSize, param)) \
+  X(void, glGetSamplerParameterivRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (sampler, pname, bufSize, length, params)) \
+  X(void, glGetSamplerParameterfvRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei * length, float * params), (sampler, pname, bufSize, length, params)) \
+  X(void, glGetFramebufferParameterivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetProgramInterfaceivRobustANGLE, (GLuint program, GLenum programInterface, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (program, programInterface, pname, bufSize, length, params)) \
+  X(void, glGetBooleani_vRobustANGLE, (GLenum target, GLuint index, GLsizei bufSize, GLsizei * length, GLboolean * data), (target, index, bufSize, length, data)) \
+  X(void, glGetMultisamplefvRobustANGLE, (GLenum pname, GLuint index, GLsizei bufSize, GLsizei * length, float * val), (pname, index, bufSize, length, val)) \
+  X(void, glGetTexLevelParameterivRobustANGLE, (GLenum target, int level, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, level, pname, bufSize, length, params)) \
+  X(void, glGetTexLevelParameterfvRobustANGLE, (GLenum target, int level, GLenum pname, GLsizei bufSize, GLsizei * length, float * params), (target, level, pname, bufSize, length, params)) \
+  X(void, glGetPointervRobustANGLE, (GLenum pname, GLsizei bufSize, GLsizei * length, void ** params), (pname, bufSize, length, params)) \
+  X(void, glReadnPixelsRobustANGLE, (int x, int y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLsizei * length, GLsizei * columns, GLsizei * rows, void * data), (x, y, width, height, format, type, bufSize, length, columns, rows, data)) \
+  X(void, glGetnUniformfvRobustANGLE, (GLuint program, int location, GLsizei bufSize, GLsizei * length, float * params), (program, location, bufSize, length, params)) \
+  X(void, glGetnUniformivRobustANGLE, (GLuint program, int location, GLsizei bufSize, GLsizei * length, int * params), (program, location, bufSize, length, params)) \
+  X(void, glGetnUniformuivRobustANGLE, (GLuint program, int location, GLsizei bufSize, GLsizei * length, GLuint * params), (program, location, bufSize, length, params)) \
+  X(void, glTexParameterIivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, const GLint * params), (target, pname, bufSize, params)) \
+  X(void, glTexParameterIuivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, const GLuint * params), (target, pname, bufSize, params)) \
+  X(void, glGetTexParameterIivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (target, pname, bufSize, length, params)) \
+  X(void, glGetTexParameterIuivRobustANGLE, (GLenum target, GLenum pname, GLsizei bufSize, GLsizei * length, GLuint * params), (target, pname, bufSize, length, params)) \
+  X(void, glSamplerParameterIivRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, const GLint * param), (sampler, pname, bufSize, param)) \
+  X(void, glSamplerParameterIuivRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, const GLuint * param), (sampler, pname, bufSize, param)) \
+  X(void, glGetSamplerParameterIivRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (sampler, pname, bufSize, length, params)) \
+  X(void, glGetSamplerParameterIuivRobustANGLE, (GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei * length, GLuint * params), (sampler, pname, bufSize, length, params)) \
+  X(void, glGetQueryObjectivRobustANGLE, (GLuint id, GLenum pname, GLsizei bufSize, GLsizei * length, int * params), (id, pname, bufSize, length, params)) \
+  X(void, glGetQueryObjecti64vRobustANGLE, (GLuint id, GLenum pname, GLsizei bufSize, GLsizei * length, GLint64 * params), (id, pname, bufSize, length, params)) \
+  X(void, glGetQueryObjectui64vRobustANGLE, (GLuint id, GLenum pname, GLsizei bufSize, GLsizei * length, GLuint64 * params), (id, pname, bufSize, length, params)) \
 
 
 #endif  // GLES2_EXTENSIONS_FUNCTIONS_H

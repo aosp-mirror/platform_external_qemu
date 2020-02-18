@@ -7,3 +7,73 @@ void glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const
 void glVertexAttribPointerWithDataSize(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 void glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset);
 void glTestHostDriverPerformance(GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us);
+
+# ANGLE_robust_client_memory
+void glGetBooleanvRobustANGLE(GLenum pname, GLsizei bufSize, GLsizei *length, GLboolean *data);
+void glGetBufferParameterivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetFloatvRobustANGLE(GLenum pname, GLsizei bufSize, GLsizei *length, float *data);
+void glGetFramebufferAttachmentParameterivRobustANGLE(GLenum target, GLenum attachment, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetIntegervRobustANGLE(GLenum pname, GLsizei bufSize, GLsizei *length, int *data);
+void glGetProgramivRobustANGLE(GLuint program, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetRenderbufferParameterivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetShaderivRobustANGLE(GLuint shader, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetTexParameterfvRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+void glGetTexParameterivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetUniformfvRobustANGLE(GLuint program, int location, GLsizei bufSize, GLsizei *length, float *params);
+void glGetUniformivRobustANGLE(GLuint program, int location, GLsizei bufSize, GLsizei *length, int *params);
+void glGetVertexAttribfvRobustANGLE(GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+void glGetVertexAttribivRobustANGLE(GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetVertexAttribPointervRobustANGLE(GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, void **pointer);
+void glReadPixelsRobustANGLE(int x, int y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLsizei *length, GLsizei *columns, GLsizei *rows, void *pixels);
+void glTexImage2DRobustANGLE(GLenum target, int level, int internalformat, GLsizei width, GLsizei height, int border, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+void glTexParameterfvRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, const GLfloat *params);
+void glTexParameterivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, const GLint *params);
+void glTexSubImage2DRobustANGLE(GLenum target, int level, int xoffset, int yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+void glCompressedTexImage2DRobustANGLE(GLenum target, int level, GLenum internalformat, GLsizei width, GLsizei height, int border, GLsizei imageSize, GLsizei bufSize, const void* data);
+void glCompressedTexSubImage2DRobustANGLE(GLenum target, int level, int xoffset, int yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLsizei bufSize, const void* data);
+void glCompressedTexImage3DRobustANGLE(GLenum target, int level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, int border, GLsizei imageSize, GLsizei bufSize, const void* data);
+void glCompressedTexSubImage3DRobustANGLE(GLenum target, int level, int xoffset, int yoffset, int zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLsizei bufSize, const void* data);
+
+void glTexImage3DRobustANGLE(GLenum target, int level, int internalformat, GLsizei width, GLsizei height, GLsizei depth, int border, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+void glTexSubImage3DRobustANGLE(GLenum target, int level, int xoffset, int yoffset, int zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLsizei bufSize, const void *pixels);
+void glGetQueryivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetQueryObjectuivRobustANGLE(GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+void glGetBufferPointervRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, void **params);
+void glGetIntegeri_vRobustANGLE(GLenum target, GLuint index, GLsizei bufSize, GLsizei *length, int *data);
+void glGetInternalformativRobustANGLE(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetVertexAttribIivRobustANGLE(GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetVertexAttribIuivRobustANGLE(GLuint index, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+void glGetUniformuivRobustANGLE(GLuint program, int location, GLsizei bufSize, GLsizei *length, GLuint *params);
+void glGetActiveUniformBlockivRobustANGLE(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetInteger64vRobustANGLE(GLenum pname, GLsizei bufSize, GLsizei *length, GLint64 *data);
+void glGetInteger64i_vRobustANGLE(GLenum target, GLuint index, GLsizei bufSize, GLsizei *length, GLint64 *data);
+void glGetBufferParameteri64vRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, GLint64 *params);
+void glSamplerParameterivRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, const GLint *param);
+void glSamplerParameterfvRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, const GLfloat *param);
+void glGetSamplerParameterivRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetSamplerParameterfvRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+
+void glGetFramebufferParameterivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetProgramInterfaceivRobustANGLE(GLuint program, GLenum programInterface, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetBooleani_vRobustANGLE(GLenum target, GLuint index, GLsizei bufSize, GLsizei *length, GLboolean *data);
+void glGetMultisamplefvRobustANGLE(GLenum pname, GLuint index, GLsizei bufSize, GLsizei *length, float *val);
+void glGetTexLevelParameterivRobustANGLE(GLenum target, int level, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetTexLevelParameterfvRobustANGLE(GLenum target, int level, GLenum pname, GLsizei bufSize, GLsizei *length, float *params);
+
+void glGetPointervRobustANGLE(GLenum pname, GLsizei bufSize, GLsizei *length, void **params);
+void glReadnPixelsRobustANGLE(int x, int y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLsizei *length, GLsizei *columns, GLsizei *rows, void *data);
+void glGetnUniformfvRobustANGLE(GLuint program, int location, GLsizei bufSize, GLsizei *length, float *params);
+void glGetnUniformivRobustANGLE(GLuint program, int location, GLsizei bufSize, GLsizei *length, int *params);
+void glGetnUniformuivRobustANGLE(GLuint program, int location, GLsizei bufSize, GLsizei *length, GLuint *params);
+void glTexParameterIivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, const GLint *params);
+void glTexParameterIuivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, const GLuint *params);
+void glGetTexParameterIivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetTexParameterIuivRobustANGLE(GLenum target, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+void glSamplerParameterIivRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, const GLint *param);
+void glSamplerParameterIuivRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, const GLuint *param);
+void glGetSamplerParameterIivRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetSamplerParameterIuivRobustANGLE(GLuint sampler, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint *params);
+
+void glGetQueryObjectivRobustANGLE(GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, int *params);
+void glGetQueryObjecti64vRobustANGLE(GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, GLint64 *params);
+void glGetQueryObjectui64vRobustANGLE(GLuint id, GLenum pname, GLsizei bufSize, GLsizei *length, GLuint64 *params);
