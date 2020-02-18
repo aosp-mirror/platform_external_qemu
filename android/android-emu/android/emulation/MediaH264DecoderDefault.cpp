@@ -55,7 +55,9 @@ MediaH264DecoderPlugin* makeDecoderPlugin(uint64_t pluginid,
             "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
     if (useCuvidEnv != "") {
         H264_DPRINT("Using Cuvid decoder on Linux/Windows");
-        return new MediaH264DecoderCuvid(pluginid, parser);
+        if (MediaH264DecoderCuvid::initCudaDrivers()) {
+            return new MediaH264DecoderCuvid(pluginid, parser);
+        }
     }
 #endif
     return new MediaH264DecoderFfmpeg(pluginid, parser);
