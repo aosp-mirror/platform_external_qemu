@@ -1068,13 +1068,17 @@ R"(        // Do this on every iteration, as some commands may change the checks
             }
 
             if (pass == PASS_FunctionCall) {
-                if (e->customDecoder() && !e->notApi()) {
-                    fprintf(fp, "\t\t\tthis->%s_dec(", e->hostApiName().c_str());
+                if (e->hasCustomHostCall()) {
+                    fprintf(fp, "\t\t\tthis->%s;\n", e->custom
                 } else {
-                    fprintf(fp, "\t\t\tthis->%s(", e->hostApiName().c_str());
-                }
-                if (e->customDecoder()) {
-                    fprintf(fp, "this"); // add a context to the call
+                    if (e->customDecoder() && !e->notApi()) {
+                        fprintf(fp, "\t\t\tthis->%s_dec(", e->hostApiName().c_str());
+                    } else {
+                        fprintf(fp, "\t\t\tthis->%s(", e->hostApiName().c_str());
+                    }
+                    if (e->customDecoder()) {
+                        fprintf(fp, "this"); // add a context to the call
+                    }
                 }
             } else if (pass == PASS_DebugPrint) {
                 if (strstr(m_basename.c_str(), "gl")) {
@@ -1100,6 +1104,10 @@ R"(        // Do this on every iteration, as some commands may change the checks
             for (size_t j = 0; j < evars.size(); j++) {
                 Var *v = & evars[j];
                 if (v->isVoid()) {
+                    continue;
+                }
+                if (pass == PASS_FunctionCall &&
+                    e->hasCustomHostCall()) {
                     continue;
                 }
                 const char* var_name = v->name().c_str();
@@ -1369,7 +1377,11 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
             if (pass == PASS_FunctionCall ||
                 pass == PASS_DebugPrint) {
-                fprintf(fp, ");\n");
+
+                if (pass == PASS_FunctionCall &&
+                    !e->hasCustomHostCall()) {
+                    fprintf(fp, ");\n");
+                }
 
                 if (pass == PASS_FunctionCall) {
                     // unlock all dma buffers that have been passed

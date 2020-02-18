@@ -163,6 +163,7 @@ glGetAttribLocation
 glGetBooleanv
     dir params out
     len params (glUtilsParamSize(pname) * sizeof(GLboolean))
+    custom_host_call glGetBooleanvRobustANGLE(var_pname, size_params, nullptr, (GLboolean*)(outptr_params.get()))
 
 #void glGetBufferParameteriv(GLenum target, GLenum pname, GLint *params)
 glGetBufferParameteriv
