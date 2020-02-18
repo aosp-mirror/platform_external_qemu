@@ -39,6 +39,7 @@ static bool framebufferAttachment(GLenum attachment);
 static bool framebufferAttachmentParams(GLenum pname);
 static bool renderbufferTarget(GLenum target);
 static bool renderbufferParams(GLenum pname);
+static GLsizei paramValuesCount(GLenum e);
 };
 
 #endif

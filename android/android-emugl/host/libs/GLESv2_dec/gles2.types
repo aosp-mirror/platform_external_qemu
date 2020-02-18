@@ -48,3 +48,6 @@ GLuint64 64 0x%016lx
 GLuint64* 32 %p
 char* 32 0x%08x
 char** 32 0x%08x
+int* 32 0x%08x
+float* 32 0x%08x
+void** 32 0x%08x
