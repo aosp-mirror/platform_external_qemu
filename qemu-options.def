@@ -725,7 +725,7 @@ DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
 "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_I386)
 
 DEF("enable-gvm", 0, QEMU_OPTION_enable_gvm, \
-"-enable-gvm     enable GVM virtualization support\n", QEMU_ARCH_I386)
+"-enable-gvm     enable GVM full virtualization support\n", QEMU_ARCH_I386)
 
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
 "-xen-domid id   specify xen guest domain id\n", QEMU_ARCH_ALL)
@@ -1004,7 +1004,7 @@ DEF("restart-when-stalled", 0, QEMU_OPTION_restart_when_stalled,
 "-restart-when-stalled Allows restarting guest when it is stalled.", QEMU_ARCH_ALL)
 
 DEF("perf-stat", HAS_ARG, QEMU_OPTION_perf_stat,
-"perf-stat <file> Run periodic perf stat reporter in the background and write output to specified file.", QEMU_ARCH_ALL)
+"-perf-stat <file> Run periodic perf stat reporter in the background and write output to specified file.", QEMU_ARCH_ALL)
 
 DEF("multidisplay", HAS_ARG, QEMU_OPTION_multi_display,
 "-multidisplay config a number of (MAX 3) multidisplays", QEMU_ARCH_ALL)
@@ -1020,5 +1020,6 @@ DEF("record-session", HAS_ARG, QEMU_OPTION_record_session,
 
 DEF("legacy-fake-camera", 0, QEMU_OPTION_legacy_fake_camera,
 "-legacy-fake-camera emulates fake camera by legacy camera HAL", QEMU_ARCH_ALL)
+
 #endif  // CONFIG_ANDROID
 
