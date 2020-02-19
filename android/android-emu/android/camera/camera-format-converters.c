@@ -1688,8 +1688,13 @@ static const PIXFormat* get_pixel_format_descriptor(uint32_t pixel_format) {
 static bool valid_libyuv_pixformat(const PIXFormat* desc) {
     // Bayer formats are not supported, and RGB656 has the opposite byte order,
     // so libyuv cannot be used to convert it.
+    // libyuv does not support YYUV, YVYU, VYUY and YYVU format conversion
     return (desc->format_sel != PIX_FMT_BAYER &&
-            desc->fourcc_type != V4L2_PIX_FMT_RGB565);
+            desc->fourcc_type != V4L2_PIX_FMT_RGB565 &&
+            desc->fourcc_type != V4L2_PIX_FMT_YYUV &&
+            desc->fourcc_type != V4L2_PIX_FMT_YVYU &&
+            desc->fourcc_type != V4L2_PIX_FMT_VYUY &&
+            desc->fourcc_type != V4L2_PIX_FMT_YYVU);
 }
 
 /* Given a source format and |result_frame| structure, determine if the libyuv
