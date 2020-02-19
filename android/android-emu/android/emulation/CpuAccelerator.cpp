@@ -33,6 +33,7 @@
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
@@ -89,6 +90,7 @@
 
 namespace android {
 
+using base::split;
 using base::StringAppendFormat;
 using base::StringView;
 using base::ScopedFd;
@@ -266,9 +268,42 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
 
     // Check that kvm device can be opened.
     if (::android_access(kvm_device, R_OK)) {
-        StringAppendFormat(status,
-                           "This user doesn't have permissions to use KVM (%s)",
-                           kvm_device);
+        const char* kEtcGroupsPath = "/etc/group";
+        std::string etcGroupsKvmLine("LINE_NOT_FOUND");
+        const auto fileContents =
+            android::readFileIntoString(kEtcGroupsPath);
+
+        if (fileContents) {
+            split(*fileContents, StringView("\n"),
+                [&etcGroupsKvmLine](StringView line) {
+                auto lineStr = line.str();
+                if (!strncmp("kvm:", lineStr.c_str(), 4)) {
+                    etcGroupsKvmLine = lineStr;
+                }
+            });
+        }
+
+        StringAppendFormat(
+            status,
+            "This user doesn't have permissions to use KVM (%s).\n"
+            "The KVM line in /etc/group is: [%s]\n"
+            "\n"
+            "If the current user has KVM permissions,\n"
+            "the KVM line in /etc/group should end with \":\" followed by your username.\n"
+            "\n"
+            "If we see LINE_NOT_FOUND, the kvm group may need to be created along with permissions:\n"
+            "    sudo groupadd -r kvm\n"
+            "    # Then ensure /lib/udev/rules.d/50-udev-default.rules contains something like:\n"
+            "    # KERNEL==\"kvm\", GROUP=\"kvm\", MODE=\"0660\"\n"
+            "    # and then run:\n"
+            "    sudo gpasswd -a $USER kvm\n"
+            "\n"
+            "If we see kvm:... but no username at the end, running the following command may allow KVM access:\n"
+            "    sudo gpasswd -a $USER kvm\n"
+            "\n"
+            "You may need to log out and back in for changes to take effect.\n",
+            kvm_device,
+            etcGroupsKvmLine.c_str());
         return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
     }
 
