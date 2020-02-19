@@ -169,7 +169,11 @@ def main(argv=None):
     if FLAGS.tests:
         cross_compile = platform.system().lower() != FLAGS.target
         if not cross_compile:
-            run_tests(FLAGS.out, FLAGS.test_jobs)
+            run_tests_opts = []
+            if FLAGS.gfxstream:
+                run_tests_opts.append("--skip-emulator-check")
+
+            run_tests(FLAGS.out, FLAGS.test_jobs, run_tests_opts)
         else:
             logging.info("Not running tests for cross compile.")
 

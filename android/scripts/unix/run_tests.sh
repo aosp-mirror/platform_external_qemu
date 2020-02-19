@@ -49,6 +49,8 @@ option_register_var "--out-dir=<dir>" OPT_OUT "Use specific output directory"
 OPT_DEBS=
 option_register_var "--debs" OPT_DEBS "Discover the debian package dependencies, needed to launch the emulator (Debian/Ubuntu only)."
 
+option_register_var "--skip-emulator-check" OPT_SKIP_EMULATOR_CHECK "Skip emulator check"
+
 aosp_dir_register_option
 option_parse "$@"
 aosp_dir_parse_option
@@ -169,20 +171,24 @@ cd $OPT_OUT
 ${CTEST} -j ${NUM_JOBS}  --output-on-failure || ${CTEST} --rerun-failed --output-on-failure || FAILURES="$FAILURES unittests"
 cd ..
 
-log "Checking for 'emulator' launcher program."
-EMULATOR=$OPT_OUT/emulator$EXE_SUFFIX
-if [ ! -f "$EMULATOR" ]; then
-    warn "    - FAIL: $EMULATOR is missing!"
-    FAILURES="$FAILURES emulator"
-fi
+if [ "$OPT_SKIP_EMULATOR_CHECK" ] ; then
+    log "Skipping check for 'emulator' launcher program."
+else
+    log "Checking for 'emulator' launcher program."
+    EMULATOR=$OPT_OUT/emulator$EXE_SUFFIX
+    if [ ! -f "$EMULATOR" ]; then
+        warn "    - FAIL: $EMULATOR is missing!"
+        FAILURES="$FAILURES emulator"
+    fi
 
-log "Checking that 'emulator' is a $EXPECTED_EMULATOR_BITNESS-bit program."
-EMULATOR_FILE_TYPE=$(get_file_type "$EMULATOR")
-if ! check_file_type_substring "$EMULATOR_FILE_TYPE" "$EXPECTED_EMULATOR_FILE_TYPE"; then
-    warn "    - FAIL: $EMULATOR is not a 32-bit executable!"
-    warn "        File type: $EMULATOR_FILE_TYPE"
-    warn "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
-    FAILURES="$FAILURES emulator-bitness-check"
+    log "Checking that 'emulator' is a $EXPECTED_EMULATOR_BITNESS-bit program."
+    EMULATOR_FILE_TYPE=$(get_file_type "$EMULATOR")
+    if ! check_file_type_substring "$EMULATOR_FILE_TYPE" "$EXPECTED_EMULATOR_FILE_TYPE"; then
+        warn "    - FAIL: $EMULATOR is not a 32-bit executable!"
+        warn "        File type: $EMULATOR_FILE_TYPE"
+        warn "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
+        FAILURES="$FAILURES emulator-bitness-check"
+    fi
 fi
 
 if [ "$TARGET_OS" = "darwin-x86_64" ]; then

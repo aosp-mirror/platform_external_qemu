@@ -43,7 +43,7 @@ class TemporaryDirectory(object):
             shutil.rmtree(self.name)
 
 
-def run_tests(out_dir, jobs):
+def run_tests(out_dir, jobs, additional_opts):
     if platform.system() == 'Windows':
         run_binary_exists(out_dir)
         run_emugen_test(out_dir)
@@ -52,7 +52,7 @@ def run_tests(out_dir, jobs):
         with TemporaryDirectory() as tmpdir:
             logging.info("Running tests with TMPDIR=%s", tmpdir)
             run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix',
-                              'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose',  '-j', jobs], out_dir, {
+                              'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose',  '-j', jobs] + additional_opts, out_dir, {
                 'TMPDIR': tmpdir
             })
 
