@@ -583,4 +583,16 @@ USB_KEYMAP_DECLARATION {
   USB_KEYMAP(0x0c028c, 0x00e7, 0x00ef, 0x0000, 0xffff, "MailSend", MAIL_SEND),
   USB_KEYMAP(0x0c029f, 0x0078, 0x0080, 0x0000, 0xffff, "ShowAllWindows",
              SHOW_ALL_WINDOWS),  // AC Desktop Show All Windows
+
+
+  // EVDEV Codes for phones
+  //            USB     evdev    XKB     Win     Mac   Code
+  // Note, non printable should be added to android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp as well
+  // otherwise the Dom translation will fail.
+  USB_KEYMAP(0x0c0224, 0x009e, 0x0000, 0x0000, 0xffff, "GoBack", GO_BACK),  // AC Back in usb
+  USB_KEYMAP(0x07004a, 0x0066, 0x006e, 0xe047, 0x0073, "GoHome", GO_HOME), // Same as HOME
+  USB_KEYMAP(0x0c01a2, 0x0244, 0x024c, 0x0000, 0xffff, "AppSwitch", APP_SWITCH), // Same as AL Select Task/Application ("Overview" in android)
+
+  // TODO(jansene): Kernel excavation needed for others.
+  // USB_KEYMAP(0x0c0193, 0x00d4, 0x00d4, 0x0000, 0xffff, "Camera", CAMERA), // AL A/V Capture
 };
