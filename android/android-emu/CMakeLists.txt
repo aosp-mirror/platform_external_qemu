@@ -25,5 +25,7 @@ add_subdirectory(android/darwinn/proto)
 include(android-emu-base)
 include(android-emu)
 include(android-libui)
-include(crash-service)
+if (NOT OPTION_GFXSTREAM_BACKEND)
+  include(crash-service)
+endif()
 

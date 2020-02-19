@@ -149,6 +149,8 @@ TEST_F(EmulatorAdvertisementTest, system_wide_share_file_exists) {
     System::get()->deleteFile(testCfg.location());
 }
 
+#ifndef AEMU_GFXSTREAM_BACKEND
+
 TEST_F(EmulatorAdvertisementTest, pid_file_is_written) {
     auto pid = launchInBackground(mTempDir.path());
     EXPECT_TRUE(pid);
@@ -186,6 +188,8 @@ TEST_F(EmulatorAdvertisementTest, pid_file_is_cleaned_in_shared_dir) {
         }));
     }
 }
+
+#endif
 
 }  // namespace control
 }  // namespace emulation

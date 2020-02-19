@@ -474,6 +474,10 @@ if(WEBRTC)
   target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
 endif()
 
+if(OPTION_GFXSTREAM_BACKEND)
+    target_compile_definitions(android-emu PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
+endif()
+
 # Boo, we need the make_ext4fs executable
 add_dependencies(android-emu emulator_make_ext4fs)
 
@@ -630,7 +634,9 @@ target_compile_definitions(
 if(WEBRTC)
   target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
 endif()
+
 if(OPTION_GFXSTREAM_BACKEND)
+  target_compile_definitions(android-emu-shared PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
   android_install_shared(android-emu-shared)
 endif()
 android_add_library(
