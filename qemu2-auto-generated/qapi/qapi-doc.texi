@@ -8385,6 +8385,8 @@ redirect incoming TCP or UDP host connections to guest
 endpoints
 @item @code{guestfwd: array of String} (optional)
 forward guest TCP connections
+@item @code{ipv6-hostfwd: array of String} (optional)
+Not documented
 @end table
 
 @b{Since:}
