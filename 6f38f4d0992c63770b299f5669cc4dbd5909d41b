@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e85105c1_1bd953ed",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-02-19T03:48:39Z",
+      "side": 1,
+      "message": "The change makes sense to me, though I am a bit confused since I can access /dev/kvm on my corp workstation but I am not a member of \"kvm\" usergroup. The device file /dev/kvm has 660 access, with root as owner and kvm as owner group, so it looks everything works correctly. Though on my personal workstation I do have to add myself to kvm group to make AEMU work in kvm mode.\n\nDo you have any idea about this?",
+      "range": {
+        "startLine": 288,
+        "startChar": 19,
+        "endLine": 289,
+        "endChar": 67
+      },
+      "revId": "6f38f4d0992c63770b299f5669cc4dbd5909d41b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
