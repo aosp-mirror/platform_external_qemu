@@ -46,6 +46,30 @@
       "revId": "6f38f4d0992c63770b299f5669cc4dbd5909d41b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "397f9539_46fbb375",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-19T15:51:07Z",
+      "side": 1,
+      "message": "Still not sure what\u0027s going on but I added some extra steps if there isn\u0027t even a KVM group",
+      "parentUuid": "e28b95de_296c6e4f",
+      "range": {
+        "startLine": 288,
+        "startChar": 19,
+        "endLine": 289,
+        "endChar": 67
+      },
+      "revId": "6f38f4d0992c63770b299f5669cc4dbd5909d41b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
