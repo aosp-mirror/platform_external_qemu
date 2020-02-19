@@ -1206,6 +1206,53 @@ int slirp_add_hostfwd(Slirp *slirp, int is_udp, struct in_addr host_addr,
     return 0;
 }
 
+/* Drop host forwarding rule, return 0 if found. */
+int slirp_remove_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_addr,
+                         int host_port)
+{
+    struct socket *so;
+    struct socket *head = (is_udp ? &slirp->udb : &slirp->tcb);
+    struct sockaddr_in6 addr;
+    int port = htons(host_port);
+    socklen_t addr_len;
+
+    for (so = head->so_next; so != head; so = so->so_next) {
+        addr_len = sizeof(addr);
+        if ((so->so_state & SS_HOSTFWD) &&
+            getsockname(so->s, (struct sockaddr *)&addr, &addr_len) == 0 &&
+            addr_len == sizeof(host_addr) &&
+            !memcmp(&host_addr, &addr, addr_len) &&
+            addr.sin6_port == port) {
+            close(so->s);
+            sofree(so);
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+int slirp_add_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_addr,
+                      int host_port, struct in6_addr guest_addr, int guest_port)
+{
+    // TODO
+    // if (!guest_addr.s_addr) {
+    //     guest_addr = slirp->vdhcp_startaddr;
+    // }
+
+    if (is_udp) {
+        if (!udp6_listen(slirp, host_addr, htons(host_port),
+                         guest_addr, htons(guest_port), SS_HOSTFWD))
+            return -1;
+    } else {
+        if (!tcp6_listen(slirp, host_addr, htons(host_port),
+                         guest_addr, htons(guest_port), SS_HOSTFWD))
+            return -1;
+    }
+
+    return 0;
+}
+
 int slirp_add_exec(Slirp *slirp, int do_pty, const void *args,
                    struct in_addr *guest_addr, int guest_port)
 {

@@ -407,3 +407,59 @@ udp_listen(Slirp *slirp, uint32_t haddr, u_int hport, uint32_t laddr,
 
 	return so;
 }
+
+struct socket *
+udp6_listen(Slirp *slirp, struct in6_addr haddr, u_int hport,
+            struct in6_addr laddr, u_int lport, int flags) {
+    struct sockaddr_in6 addr;
+    struct socket *so;
+    socklen_t addrlen = sizeof(addr);
+
+    memset(&addr, 0, sizeof(addr));
+
+    so = socreate(slirp);
+
+    if (!so) {
+        return NULL;
+    }
+
+    so->s = qemu_socket(AF_INET6, SOCK_DGRAM, 0);
+
+    if (so->s < 0) {
+        sofree(so);
+        return NULL;
+    }
+
+    so->so_expire = curtime + SO_EXPIRE;
+    insque(so, &slirp->udb);
+
+    addr.sin6_family = AF_INET6;
+    addr.sin6_addr = haddr;
+    addr.sin6_port = hport;
+
+	/*
+	 * SO_REUSEADDR has to be set before binding the socket.
+	 * Some kernels disallow doing this on a connected/bound socket.
+	 */
+	socket_set_fast_reuse(so->s);
+
+    if (bind(so->s, (struct sockaddr*)&addr, addrlen) < 0) {
+        udp_detach(so);
+        return NULL;
+    }
+
+    getsockname(so->s, (struct sockaddr *)&addr, &addrlen);
+    so->fhost.sin6 = addr;
+    sotranslate_accept(so);
+    so->so_lfamily = AF_INET6;
+    so->so_lport = lport;
+    so->so_laddr6 = laddr;
+    if (flags != SS_FACCEPTONCE) {
+        so->so_expire = 0;
+    }
+
+    so->so_state &= SS_PERSISTENT_MASK;
+    so->so_state |= SS_ISFCONNECTED | flags;
+
+    return 0;
+}
