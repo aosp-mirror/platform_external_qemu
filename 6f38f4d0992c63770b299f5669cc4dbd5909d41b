@@ -22,6 +22,30 @@
       "revId": "6f38f4d0992c63770b299f5669cc4dbd5909d41b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e28b95de_296c6e4f",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-19T04:11:44Z",
+      "side": 1,
+      "message": "Ok, that\u0027s weird, it looks like there are other ways to get KVM working even if /etc/group doesn\u0027t return the right thing. Will have to research more then",
+      "parentUuid": "e85105c1_1bd953ed",
+      "range": {
+        "startLine": 288,
+        "startChar": 19,
+        "endLine": 289,
+        "endChar": 67
+      },
+      "revId": "6f38f4d0992c63770b299f5669cc4dbd5909d41b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
