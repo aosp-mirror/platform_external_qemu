@@ -33,6 +33,7 @@
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
@@ -89,6 +90,7 @@
 
 namespace android {
 
+using base::split;
 using base::StringAppendFormat;
 using base::StringView;
 using base::ScopedFd;
@@ -263,12 +265,37 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
                            "module not loaded", kvm_device);
         return ANDROID_CPU_ACCELERATION_DEV_NOT_FOUND;
     }
-
+{
+    }
     // Check that kvm device can be opened.
     if (::android_access(kvm_device, R_OK)) {
-        StringAppendFormat(status,
-                           "This user doesn't have permissions to use KVM (%s)",
-                           kvm_device);
+        const char* kEtcGroupsPath = "/etc/group";
+        std::string etcGroupsKvmLine("LINE_NOT_FOUND");
+        const auto fileContents =
+            android::readFileIntoString(kEtcGroupsPath);
+
+        if (fileContents) {
+            split(*fileContents, StringView("\n"),
+                [&etcGroupsKvmLine](StringView line) {
+                auto lineStr = line.str();
+                if (!strncmp("kvm:", lineStr.c_str(), 4)) {
+                    etcGroupsKvmLine = lineStr;
+                }
+            });
+        }
+
+        StringAppendFormat(
+            status,
+            "This user doesn't have permissions to use KVM (%s).\n"
+            "The KVM line in /etc/group is: [%s]\n"
+            "\n"
+            "If the current user has KVM permissions,\n"
+            "the KVM line in /etc/group should end with \":\" followed by your username.\n"
+            "\n"
+            "If not, running the following command may allow KVM access:\n"
+            "    sudo gpasswd -a $USER kvm\n",
+            kvm_device,
+            etcGroupsKvmLine.c_str());
         return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
     }
 
