@@ -60,8 +60,8 @@ else()
 endif()
 set(QEMU_UPSTREAM TRUE
     CACHE BOOL "True if the upstream version of qemu should be build.")
-set(ANDROIDSTUDIO TRUE
-    CACHE BOOL "True if we should build android studio components. Default on.")
+set(ANDROIDSTUDIO FALSE
+    CACHE BOOL "Deprecated. Android studio is using the gRPC interface directly.")
 set(OPTION_MINBUILD
     FALSE
     CACHE
