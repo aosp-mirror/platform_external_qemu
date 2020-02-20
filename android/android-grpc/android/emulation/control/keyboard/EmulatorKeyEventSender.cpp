@@ -1,6 +1,6 @@
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 
-#include <functional>                                    // for __base
+#include <functional>  // for __base
 
 #include "android/base/ArraySize.h"                      // for ARRAY_SIZE
 #include "android/console.h"                             // for AndroidConso...
@@ -10,6 +10,16 @@
 #include "android/utils/utf8_utils.h"                    // for android_utf8...
 #include "emulator_controller.pb.h"                      // for KeyboardEvent
 
+/* set to 1 for very verbose debugging */
+#define DEBUG 0
+
+#if DEBUG >= 1
+#define DD(fmt, ...)                                               \
+    printf("KeyEventSender: %s:%d| " fmt "\n", __func__, __LINE__, \
+           ##__VA_ARGS__)
+#else
+#define DD(...) (void)0
+#endif
 
 #define KEYEVENT_QUEUE_LENGTH 128
 
@@ -178,6 +188,12 @@ const struct NonPrintableCodeEntry {
         {DomCode::ZOOM_IN, DomKey::ZOOM_IN},
         {DomCode::ZOOM_OUT, DomKey::ZOOM_OUT},
         {DomCode::ZOOM_TOGGLE, DomKey::ZOOM_TOGGLE},
+
+        // Android specific events.
+        {DomCode::GO_BACK, DomKey::GO_BACK},        // AC Back in usb
+        {DomCode::GO_HOME, DomKey::GO_HOME},        // Same as HOME
+        {DomCode::APP_SWITCH, DomKey::APP_SWITCH},  // "Overview"
+        // {DomCode::CAMERA, DomKey::CAMERA},          // Camera
 };
 
 const size_t kDomKeyMapEntries = ARRAY_SIZE(dom_key_map);
@@ -189,8 +205,8 @@ EmulatorKeyEventSender::EmulatorKeyEventSender(
     : mAgents(consoleAgents),
       mEventQueue(KEYEVENT_QUEUE_LENGTH, mEventLock),
       mWorkerThread([this] { workerThread(); }) {
-          mWorkerThread.start();
-      }
+    mWorkerThread.start();
+}
 
 EmulatorKeyEventSender::~EmulatorKeyEventSender() {
     AutoLock alock(mEventLock);
@@ -228,14 +244,17 @@ void EmulatorKeyEventSender::sendKeyCode(
 
 bool EmulatorKeyEventSender::send(const KeyboardEvent* request) {
     AutoLock pushLock(mEventLock);
-    bool queued =  (mEventQueue.tryPushLocked(KeyboardEvent(*request)) ==
-            base::BufferQueueResult::Ok);
+    bool queued = (mEventQueue.tryPushLocked(KeyboardEvent(*request)) ==
+                   base::BufferQueueResult::Ok);
     return queued;
 }
 
 void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
     if (request->key().size() > 0) {
         keyboard::DomKey domkey = browserKeyToDomKey(request->key());
+        DD("%s -> domKey: %d, as Non printable: %d",
+           request->ShortDebugString().c_str(), (int)domkey,
+           (int)domKeyAsNonPrintableDomCode(domkey));
         if (domkey != keyboard::DomKey::NONE) {
             // okay, check if it is a non printable char:
             keyboard::DomCode code = domKeyAsNonPrintableDomCode(domkey);
@@ -245,22 +264,21 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
             } else {
                 // Nope we have to send the domcode..
                 auto evdev = domCodeToEvDevKeycode(code);
+                DD("%s -> evdev %d", request->ShortDebugString().c_str(),
+                   evdev);
                 auto eventType = request->eventtype();
-                if (eventType == KeyboardEvent::keydown ||
-                    eventType == KeyboardEvent::keypress) {
-                    mAgents->user_event->sendKeyCode(evdev | 0x400);
-                }
-                if (eventType == KeyboardEvent::keyup ||
-                    eventType == KeyboardEvent::keypress) {
-                    mAgents->user_event->sendKeyCode(evdev);
-                }
+                mAgents->user_event->sendKeyCode(evdev | 0x400);
+                mAgents->user_event->sendKeyCode(evdev);
             }
         }
     }
     if (request->text().size() > 0) {
+        DD("sendUtf8String: %s", request->text().c_str());
         sendUtf8String(request->text());
     }
     if (request->keycode() > 0) {
+        DD("keycode: %d, codetype:%d, eventtype:%d", request->keycode(),
+           request->codetype(), request->eventtype());
         sendKeyCode(request->keycode(), request->codetype(),
                     request->eventtype());
     }
