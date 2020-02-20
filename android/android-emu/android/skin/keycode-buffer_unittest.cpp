@@ -27,7 +27,7 @@ const int kMaxCodes = 256;
 int sCodes[kMaxCodes];
 int sCodesCount = 0;
 
-void myFlushFunc(int* codes, int count) {
+void myFlushFunc(int* codes, int count, void* context) {
     if (count > kMaxCodes) {
         count = kMaxCodes;
     }

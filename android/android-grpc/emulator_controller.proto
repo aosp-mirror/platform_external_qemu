@@ -503,17 +503,21 @@ message KeyboardEvent {
 
   // The value of the key pressed by the user, taking into consideration
   // the state of modifier keys such as Shift as well as the keyboard
-  // locale and layout. This follows the  w3c standard used in browsers.
+  // locale and layout. This follows the w3c standard used in browsers.
   // You can find an accurate description of valid values
   // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
-  // The values in text, keyCode, eventType and codeType will be ignored
-  // and a keypress event will be delivered to the emulator.
+  //
+  // Note that some keys can result in multiple evdev events that are delivered to the emulator.
+  // for example the Key "A" will result in a a sequence ["Shift", "a"] -> [0x2a, 0x1e]
+  // whereas "a" results in ["a"] -> [0x1e].
   string key = 4;
 
   // Series of utf8 encoded characters to send to the emulator. Every
   // character will be translated to an EvDev event type and send to the
   // emulator as a keypress event. The values in keyCode, eventType,
   // codeType and key will be ignored.
+  //
+  // Note that most printable utf-8 characters can be send individually with the "key" param.
   string text = 5;
 }
 

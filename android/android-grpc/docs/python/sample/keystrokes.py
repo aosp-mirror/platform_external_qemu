@@ -29,8 +29,8 @@ channel = getEmulatorChannel()
 stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
 # Let's type some text..
-for l in "Hello World":
-    textEvent = proto.emulator_controller_pb2.KeyboardEvent(text=l)
-    print("Typing: {}".format(l))
+for l in "Aa":
+    textEvent = proto.emulator_controller_pb2.KeyboardEvent(key=l, eventType=2)
+    print("Typing: {} ".format(l))
     response = stub.sendKey(textEvent)
     time.sleep(0.2)

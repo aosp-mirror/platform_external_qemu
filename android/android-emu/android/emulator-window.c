@@ -78,7 +78,7 @@ static void emulator_window_window_key_event(unsigned keycode, int down) {
     user_event_agent->sendKey(keycode, down);
 }
 
-static void emulator_window_keycodes_event(int* keycodes, int count) {
+static void emulator_window_keycodes_event(int* keycodes, int count, void* context) {
     user_event_agent->sendKeyCodes(keycodes, count);
 }
 

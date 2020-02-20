@@ -26,13 +26,14 @@ ANDROID_BEGIN_HEADER
 #define  MAX_KEYCODES   256*2
 
 // Type of a function used to flush buffered codes
-typedef void (*SkinKeyCodeFlushFunc)(int* codes, int count);
+typedef void (*SkinKeyCodeFlushFunc)(int* codes, int count, void* context);
 
 /* Describes array of keycodes collected for transferring to the core. */
 typedef struct SkinKeycodeBuffer {
     SkinKeyCodeFlushFunc keycode_flush;
     int keycode_count;
     int keycodes[MAX_KEYCODES];
+    void* context;
 } SkinKeycodeBuffer;
 
 void skin_keycode_buffer_init(SkinKeycodeBuffer* buffer,
