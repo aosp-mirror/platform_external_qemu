@@ -24,13 +24,8 @@ android_add_library(
   WINDOWS standalone_common/angle-util/windows/WindowsTimer.cpp
           standalone_common/angle-util/windows/win32/Win32Window.cpp)
 
-if(OPTION_GFXSTREAM_BACKEND)
-  android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
-                                                             android-emu)
-else()
-  android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
-                                                             android-emu-shared)
-endif()
+android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
+                                                           android-emu-shared)
 
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
 android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")

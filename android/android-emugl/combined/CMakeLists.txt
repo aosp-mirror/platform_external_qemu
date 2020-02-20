@@ -25,9 +25,14 @@ if(OPTION_GFXSTREAM_BACKEND)
       ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util
   )
 
+  android_target_properties(gfxstream_backend linux-x86_64
+      "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
+  android_target_properties(gfxstream_backend darwin-x86_64
+      "INSTALL_RPATH>=@loader_path")
+
   target_link_libraries(
-    gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu emugl_base
-                              OpenglRender_standalone_common)
+    gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
+                              OpenglRender)
 
   android_install_shared(gfxstream_backend)
 
