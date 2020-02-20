@@ -60,8 +60,8 @@ else()
 endif()
 set(QEMU_UPSTREAM TRUE
     CACHE BOOL "True if the upstream version of qemu should be build.")
-set(ANDROIDSTUDIO TRUE
-    CACHE BOOL "True if we should build android studio components. Default on.")
+set(ANDROIDSTUDIO FALSE
+    CACHE BOOL "Deprecated. Android studio is using the gRPC interface directly.")
 set(OPTION_MINBUILD
     FALSE
     CACHE
@@ -645,7 +645,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     SRC # cmake-format: sortable
         audio/paaudio-headless-impl-placeholder.c
     LINUX audio/paaudio-headless-impl.c)
-  
+
   android_add_interface(
     TARGET android-qemu-deps-headful
     LICENSE "GPL-2.0-only"
@@ -657,7 +657,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     NOTICE "REPO/LICENSE")
   android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE
                                 "-lpulse")
-  
+
   android_add_interface(
     TARGET android-qemu-deps-headless
     LICENSE "GPL-2.0-only"
@@ -669,7 +669,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     NOTICE "REPO/LICENSE")
   android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
                                 headless-paaudio)
-  
+
   android_add_library(
     TARGET libqemu2-util
     LICENSE "GPL-2.0-only"
@@ -685,7 +685,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
   android_target_link_libraries(libqemu2-util windows
                                 PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
   target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
-  
+
   android_add_library(
     TARGET libqemustub
     LICENSE "GPL-2.0-only"
@@ -699,7 +699,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
         ${libqemustub_sources} ${libqemuutil_generated_sources})
   target_link_libraries(libqemustub PRIVATE android-qemu-deps)
   target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
-  
+
   # Qemu-img
   android_add_executable(
     TARGET qemu-img INSTALL .
@@ -715,7 +715,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     LINUX scsi/pr-manager.c)
   target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub
                                          android-qemu-deps android-emu-base)
-  
+
   # Create the qemu targets.
   android_add_qemu_executable(
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
@@ -725,7 +725,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  
+
   if(NOT OPTION_MINBUILD)
     android_add_qemu_executable(
       i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
@@ -736,7 +736,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     android_add_qemu_headless_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-  
+
   # and the upstream qemu targets, if desired.
   if(QEMU_UPSTREAM)
     message(STATUS "Building upstream qemu.")
@@ -749,12 +749,12 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     android_add_qemu_upstream_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-  
+
   # The tests currently work on linux only.
   if(ANDROID_TARGET_TAG MATCHES "linux.*")
     include(qemu-test.cmake)
   endif()
-  
+
 endif()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/target.tag "${ANDROID_TARGET_TAG}")
