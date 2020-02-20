@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19b7f038_cc0c50f2",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-20T04:35:17Z",
+      "side": 1,
+      "message": "Add a function to aconfig for recursive searching to simplify?",
+      "revId": "536dc1b06831da216a26ab90e77876b98dc70063",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
