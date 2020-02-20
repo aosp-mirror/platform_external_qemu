@@ -26,8 +26,8 @@ if(OPTION_GFXSTREAM_BACKEND)
   )
 
   target_link_libraries(
-    gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu emugl_base
-                              OpenglRender_standalone_common)
+    gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
+                              OpenglRender)
 
   android_install_shared(gfxstream_backend)
 
