@@ -29,7 +29,7 @@
 #define kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder CFSTR("RequireHardwareAcceleratedVideoDecoder")
 #endif
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt,...) fprintf(stderr, "h264-videotoolbox-dec: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -86,6 +86,7 @@ void MediaH264DecoderVideoToolBox::videoToolboxDecompressCallback(void* opaque,
     ptr->mOutputPts = pts.value;
     ptr->mDecodedFrame = CVPixelBufferRetain(image_buffer);
     // Image is ready to be comsumed
+    ptr->copyFrame();
     ptr->mImageReady = true;
     H264_DPRINT("Got decoded frame");
 }
@@ -236,6 +237,8 @@ void MediaH264DecoderVideoToolBox::initH264ContextInternal(
         PixelFormat outPixFmt) {
     H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)",
                 __func__, width, height, outWidth, outHeight, (uint8_t)outPixFmt);
+    mWidth = width;
+    mHeight = height;
     mOutputWidth = outWidth;
     mOutputHeight = outHeight;
     mOutPixFmt = outPixFmt;
@@ -293,10 +296,15 @@ void MediaH264DecoderVideoToolBox::decodeFrame(void* ptr) {
     size_t szBytes = param.size;
     uint64_t pts = param.pts;
 
-    decodeFrameInternal(ptr, frame, szBytes, pts, 0);
+    decodeFrameInternal(param.pConsumedBytes, param.pDecoderErrorCode, frame, szBytes, pts, 0);
 }
 
-void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes) {
+void MediaH264DecoderVideoToolBox::oneShotDecode(std::vector<uint8_t> & data, uint64_t pts) {
+    //TODO: check if data has more than one Nalu
+    decodeFrameInternal(nullptr, nullptr, data.data(), data.size(), pts, 0);
+}
+
+void MediaH264DecoderVideoToolBox::decodeFrameInternal(size_t* pRetSzBytes, int32_t* pRetErr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes) {
     // IMPORTANT: There is an assumption that each |frame| we get from the guest are contain
     // complete NALUs. Usually, an H.264 bitstream would be continuously fed to us, but in this case,
     // it seems that the Android frameworks passes us complete NALUs, and may be more than one NALU at
@@ -307,20 +315,14 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
     // decoder context.
     H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
     Err h264Err = Err::NoErr;
-    // TODO: move this somewhere else
-    // First return parameter is the number of bytes processed,
-    // Second return parameter is the error code
-    uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
-    uint64_t* retSzBytes = (uint64_t*)retptr;
-    int32_t* retErr = (int32_t*)(retptr + 8);
 
     const uint8_t* currentNalu = H264NaluParser::getNextStartCodeHeader(frame, szBytes);
     if (currentNalu == nullptr) {
         H264_DPRINT("No start code header found in this frame");
         h264Err = Err::NoDecodedFrame;
         // TODO: return the error code and num bytes processed, szBytes.
-        *retSzBytes = szBytes;
-        *retErr = (int32_t)h264Err;
+        if (pRetSzBytes) *pRetSzBytes = szBytes;
+        if (pRetErr) *pRetErr = (int32_t)h264Err;
         return;
     }
     const uint8_t* nextNalu = nullptr;
@@ -348,9 +350,8 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
         mCmFmtDesc == nullptr) {
         H264_DPRINT("CMFormatDescription not set up yet. Need SPS/PPS frames.");
         h264Err = Err::NALUIgnored;
-        // TODO: return the error code and num bytes processed, szBytes.
-        *retSzBytes = currentNaluSize;
-        *retErr = (int32_t)h264Err;
+        if (pRetSzBytes) *pRetSzBytes = currentNaluSize;
+        if (pRetErr) *pRetErr = (int32_t)h264Err;
         return;
     }
 
@@ -360,6 +361,12 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
             // both sps and pps, we can create/recreate the decoder session.
             // Don't include the start code header when we copy the sps/pps.
             mSPS.assign(data, data + dataSize);
+            if (!mIsLoadingFromSnapshot) {
+                mSnapshotState = SnapshotState{};
+                std::vector<uint8_t> vec;
+                vec.assign(currentNalu, currentNalu + currentNaluSize);
+                mSnapshotState.saveSps(vec);
+            }
             break;
         case H264NaluType::PPS:
             mPPS.assign(data, data + dataSize);
@@ -369,6 +376,12 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
             if (mDecoderSession != nullptr) {
                 H264_DPRINT("Decoder session is restarting");
                 //h264Err = Err::DecoderRestarted;
+            }
+            if (!mIsLoadingFromSnapshot) {
+                std::vector<uint8_t> vec;
+                vec.assign(currentNalu, currentNalu + currentNaluSize);
+                mSnapshotState.savePps(vec);
+                mSnapshotState.savedPackets.clear();
             }
             recreateDecompressionSession();
             break;
@@ -380,9 +393,17 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
             break;
         case H264NaluType::CodedSliceIDR:
             handleIDRFrame(currentNalu, currentNaluSize, pts);
+            if (!mIsLoadingFromSnapshot) {
+                H264_DPRINT("disacarding previously saved frames %d", (int)mSnapshotState.savedPackets.size());
+                mSnapshotState.savedPackets.clear();
+                mSnapshotState.savePacket(currentNalu, currentNaluSize, pts);
+            }
             break;
         case H264NaluType::CodedSliceNonIDR:
             handleNonIDRFrame(currentNalu, currentNaluSize, pts);
+            if (!mIsLoadingFromSnapshot) {
+                mSnapshotState.savePacket(currentNalu, currentNaluSize, pts);
+            }
             break;
         default:
             H264_DPRINT("Support for nalu_type=%u not implemented", (uint8_t)naluType);
@@ -393,10 +414,9 @@ void MediaH264DecoderVideoToolBox::decodeFrameInternal(void* ptr, const uint8_t*
     currentNalu = nextNalu;
 
     // return two things: the error code and the number of bytes we processed.
-    *retSzBytes = currentNaluSize + consumedSzBytes;
-    *retErr = (int32_t)h264Err;
+    if (pRetSzBytes) *pRetSzBytes = currentNaluSize + consumedSzBytes;
+    if (pRetErr) *pRetErr = (int32_t)h264Err;
 
-    H264_DPRINT("calling decodeFrameInternal recursively");
     // disable recursive decoding due to the possibility of session creation failure
     // keep it simple for now
     //if (currentNalu) {
@@ -464,60 +484,23 @@ void MediaH264DecoderVideoToolBox::flush(void* ptr) {
     mIsInFlush = true;
 }
 
-void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
-    // return parameters:
-    // 1) either size of the image (> 0) or error code (<= 0).
-    // 2) image width
-    // 3) image height
-    GetImageParam param{};
-    mParser.parseGetImageParams(ptr, param);
-
-    int* retErr = param.pDecoderErrorCode;
-    uint32_t* retWidth = param.pRetWidth;
-    uint32_t* retHeight = param.pRetHeight;
-    uint32_t* retPts = param.pRetPts;
-    uint32_t* retColorPrimaries = param.pRetColorPrimaries;
-    uint32_t* retColorRange = param.pRetColorRange;
-    uint32_t* retColorTransfer = param.pRetColorTransfer;
-    uint32_t* retColorSpace = param.pRetColorSpace;
-
-    if (!mDecodedFrame) {
-        H264_DPRINT("%s: frame is null", __func__);
-        *retErr = static_cast<int>(Err::NoDecodedFrame);
-        return;
-    }
-    if (!mImageReady) {
-        bool hasMoreFrames = false;
-        if (mIsInFlush) {
-            OSStatus status = noErr;
-            status = VTDecompressionSessionWaitForAsynchronousFrames(mDecoderSession);
-            if (status == noErr) {
-                hasMoreFrames = mImageReady;
-                if (hasMoreFrames) {
-                    H264_DPRINT("%s: got frame in flush mode", __func__);
-                }
-            }
-        }
-
-        if (!hasMoreFrames) {
-            H264_DPRINT("%s: no new frame yet", __func__);
-            *retErr = static_cast<int>(Err::NoDecodedFrame);
-            return;
-        }
-    }
+void MediaH264DecoderVideoToolBox::copyFrame() {
+    if (mIsLoadingFromSnapshot) return;
 
     int imgWidth = CVPixelBufferGetWidth(mDecodedFrame);
     int imgHeight = CVPixelBufferGetHeight(mDecodedFrame);
     int imageSize = CVPixelBufferGetDataSize(mDecodedFrame);
     int stride = CVPixelBufferGetBytesPerRow(mDecodedFrame);
 
-    *retWidth = imgWidth;
-    *retHeight = imgHeight;
+    mOutputWidth = imgWidth;
+    mOutputHeight = imgHeight;
+    mOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
 
     H264_DPRINT("copying size=%d dimension=[%dx%d] stride=%d", imageSize, imgWidth, imgHeight, stride);
 
     // Copies the image data to the guest.
-    uint8_t* dst = param.pDecodedFrame;
+    mSavedDecodedFrame.resize(imgWidth * imgHeight * 3 / 2);
+    uint8_t* dst = mSavedDecodedFrame.data();
 
     CVPixelBufferLockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
     if (CVPixelBufferIsPlanar(mDecodedFrame)) {
@@ -568,14 +551,62 @@ void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
         memcpy(dst, data, imageSize);
     }
     CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
+}
+
+void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
+    // return parameters:
+    // 1) either size of the image (> 0) or error code (<= 0).
+    // 2) image width
+    // 3) image height
+    GetImageParam param{};
+    mParser.parseGetImageParams(ptr, param);
+
+    int* retErr = param.pDecoderErrorCode;
+    uint32_t* retWidth = param.pRetWidth;
+    uint32_t* retHeight = param.pRetHeight;
+    uint32_t* retPts = param.pRetPts;
+    uint32_t* retColorPrimaries = param.pRetColorPrimaries;
+    uint32_t* retColorRange = param.pRetColorRange;
+    uint32_t* retColorTransfer = param.pRetColorTransfer;
+    uint32_t* retColorSpace = param.pRetColorSpace;
+
+    if (!mDecodedFrame) {
+        H264_DPRINT("%s: frame is null", __func__);
+        *retErr = static_cast<int>(Err::NoDecodedFrame);
+        return;
+    }
+    if (!mImageReady) {
+        bool hasMoreFrames = false;
+        if (mIsInFlush) {
+            OSStatus status = noErr;
+            status = VTDecompressionSessionWaitForAsynchronousFrames(mDecoderSession);
+            if (status == noErr) {
+                hasMoreFrames = mImageReady;
+                if (hasMoreFrames) {
+                    H264_DPRINT("%s: got frame in flush mode", __func__);
+                }
+            }
+        }
+
+        if (!hasMoreFrames) {
+            H264_DPRINT("%s: no new frame yet", __func__);
+            *retErr = static_cast<int>(Err::NoDecodedFrame);
+            return;
+        }
+    }
+
+    *retWidth = mOutputWidth;
+    *retHeight = mOutputHeight;
 
     if (mParser.version() == 200 && param.hostColorBufferId >= 0) {
         mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                           mOutputWidth, mOutputHeight,
-                                          param.pDecodedFrame);
+                                          mSavedDecodedFrame.data());
+    } else {
+        memcpy(param.pDecodedFrame, mSavedDecodedFrame.data(), mSavedDecodedFrame.size());;
     }
 
-    *retErr = imageSize;
+    *retErr = mSavedDecodedFrame.size();
 
     *retPts = mOutputPts;
 
@@ -660,9 +691,67 @@ void MediaH264DecoderVideoToolBox::recreateDecompressionSession() {
 }
 
 void MediaH264DecoderVideoToolBox::save(base::Stream* stream) const {
+    stream->putBe32(mParser.version());
+    stream->putBe32(mWidth);
+    stream->putBe32(mHeight);
+    stream->putBe32((int)mOutPixFmt);
+
+    const int hasContext = mDecoderSession != nullptr ? 1 : 0;
+    stream->putBe32(hasContext);
+
+    if (mImageReady) {
+        mSnapshotState.saveDecodedFrame(
+                mSavedDecodedFrame, mOutputWidth, mOutputHeight,
+                ColorAspects{}, mOutputPts);
+    } else {
+        mSnapshotState.savedDecodedFrame.data.clear();
+    }
+    H264_DPRINT("saving packets now %d",
+                (int)(mSnapshotState.savedPackets.size()));
+    mSnapshotState.save(stream);
 }
 
 bool MediaH264DecoderVideoToolBox::load(base::Stream* stream) {
+    mIsLoadingFromSnapshot = true;
+    uint32_t version = stream->getBe32();
+    mParser = H264PingInfoParser{version};
+
+    mWidth = stream->getBe32();
+    mHeight = stream->getBe32();
+    mOutPixFmt = (PixelFormat)stream->getBe32();
+
+    const int hasContext = stream->getBe32();
+    if (hasContext) {
+        initH264ContextInternal(mWidth, mHeight, mWidth, mHeight, mOutPixFmt);
+    }
+    mSnapshotState.load(stream);
+    if (hasContext && mSnapshotState.sps.size() > 0) {
+        oneShotDecode(mSnapshotState.sps, 0);
+        if (mSnapshotState.pps.size() > 0) {
+            oneShotDecode(mSnapshotState.pps, 0);
+            if (mSnapshotState.savedPackets.size() > 0) {
+                for (int i = 0; i < mSnapshotState.savedPackets.size(); ++i) {
+                    PacketInfo& pkt = mSnapshotState.savedPackets[i];
+                    oneShotDecode(pkt.data, pkt.pts);
+                }
+            }
+        }
+    }
+
+    if (mSnapshotState.savedDecodedFrame.data.size() > 0) {
+        mSavedDecodedFrame = std::move(mSnapshotState.savedDecodedFrame.data);
+        mOutBufferSize = mSnapshotState.savedDecodedFrame.data.size();
+        mOutputWidth = mSnapshotState.savedDecodedFrame.width;
+        mOutputHeight = mSnapshotState.savedDecodedFrame.height;
+        mOutputPts = mSnapshotState.savedDecodedFrame.pts;
+        mImageReady = true;
+    } else {
+        mOutputWidth = mWidth;
+        mOutputHeight = mHeight;
+        mOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
+        mImageReady = false;
+    }
+    mIsLoadingFromSnapshot = false;
     return true;
 }
 
