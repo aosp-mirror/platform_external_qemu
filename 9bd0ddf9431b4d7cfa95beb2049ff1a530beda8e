@@ -22,6 +22,30 @@
       "revId": "9bd0ddf9431b4d7cfa95beb2049ff1a530beda8e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f738c2e4_fc2918e6",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-20T03:39:42Z",
+      "side": 1,
+      "message": "That would result in the \"SensorTyper\" is not a message type error.",
+      "parentUuid": "9e2c0b84_173d421b",
+      "range": {
+        "startLine": 39,
+        "startChar": 18,
+        "endLine": 39,
+        "endChar": 29
+      },
+      "revId": "9bd0ddf9431b4d7cfa95beb2049ff1a530beda8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
