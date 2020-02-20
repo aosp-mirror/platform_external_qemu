@@ -25,6 +25,6 @@ channel = getEmulatorChannel()
 # Create a client
 stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
 
-response = stub.listSnapshots(_EMPTY_)
+response = stub.ListSnapshots(_EMPTY_)
 ids = [f.snapshot_id for f in response.snapshots]
 print(ids)

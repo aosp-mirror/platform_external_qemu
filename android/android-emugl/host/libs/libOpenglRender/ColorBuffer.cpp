@@ -861,6 +861,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
 
 void ColorBuffer::restore() {
     RecursiveScopedHelperContext context(m_helper);
+    printf("hndl 0x%x\n", mHndl);
     s_gles2.glGenTextures(1, &m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);

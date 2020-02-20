@@ -877,6 +877,7 @@ GL_APICALL void GL_APIENTRY glDeleteSamplers(GLsizei n, const GLuint * samplers)
 }
 
 GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
+    return;
     GET_CTX_V2();
     gles30usages->set_is_used(true);
     if (ctx->shareGroup().get()) {

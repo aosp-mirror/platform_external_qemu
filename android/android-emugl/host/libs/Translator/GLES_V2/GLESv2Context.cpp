@@ -321,6 +321,8 @@ void GLESv2Context::postLoadRestoreCtx() {
                 dispatcher.glVertexAttribDivisor(i, bufferBinding.divisor);
             }
         }
+        dispatcher.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+            m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, vaoIte.second.element_array_buffer_binding));
     }
     dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
     if (m_glesMajorVersion >= 3) {

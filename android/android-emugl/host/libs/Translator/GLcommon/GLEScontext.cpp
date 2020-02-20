@@ -331,11 +331,13 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
 }
 
 bool GLEScontext::setVertexArrayObject(GLuint array) {
+    printf("set vao %d\n", (int)array);
     VAOStateMap::iterator it = m_vaoStateMap.find(array);
     if (it != m_vaoStateMap.end()) {
         m_currVaoState = VAOStateRef(it);
         return true;
     }
+    printf("setVertexArrayObject  failed\n");
     return false;
 }
 
@@ -779,8 +781,9 @@ void GLEScontext::postLoadRestoreCtx() {
         this->dispatcher().glBindBuffer(target,
                 m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
     };
-    bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
-    bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+
+    //bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
+    //bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
@@ -2465,6 +2468,7 @@ void GLEScontext::copyTexImageWithEmulation(
     } else {
         gl.glCopyTexImage2D(target, level, internalformat, 0, 0, width, height, border);
     }
+    gl.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
 }
 
 // static

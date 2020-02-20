@@ -1555,7 +1555,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
             texData->makeDirty();
         }
     }
-
+    printf("global texture name 0x%x\n", globalTextureName);
     ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
 
     // Update the the current framebuffer object attachment state
@@ -3349,6 +3349,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
 
 static void sEmulateUserTextureSwizzle(TextureData* texData,
                                        GLenum target, GLenum pname, GLint param) {
+    return;
     GET_CTX_V2();
     TextureSwizzle emulatedBaseSwizzle =
         getSwizzleForEmulatedFormat(texData->format);
@@ -3833,6 +3834,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             // with |img|'s global GL texture id
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
+            printf("glEGLImageTargetTexture2DOES global obj 0x%x\n", img->globalTexObj->getGlobalName()); 
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
             TextureData *texData = getTextureTargetData(target);
             SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);

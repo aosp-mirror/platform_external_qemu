@@ -2260,12 +2260,16 @@ bool FrameBuffer::decColorBufferRefCountLocked(HandleType p_colorbuffer) {
 bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     ComposeDevice* p = (ComposeDevice*)buffer;
     AutoLock mutex(m_lock);
-
+    printf("composer version %d\n", p->version);
     switch (p->version) {
     case 1: {
         Post composeCmd;
         composeCmd.cmd = PostCmd::Compose;
         composeCmd.d = p;
+        for (int i = 0; i < (int)(p->numLayers); i++) {
+            printf("%d ", p->layer[i].cbHandle);
+        }
+        printf("\n");
         sendPostWorkerCmd(composeCmd);
         post(p->targetHandle, false);
         return true;
@@ -2279,6 +2283,11 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
             setDisplayColorBuffer(p2->displayId, p2->targetHandle);
             mutex.lock();
        }
+        for (int i = 0; i < (int)(p2->numLayers); i++) {
+            printf("0x%x ", p2->layer[i].cbHandle);
+        }
+        printf("\n");
+
        Post composeCmd;
        composeCmd.cmd = PostCmd::Compose;
        composeCmd.d = p;
