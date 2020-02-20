@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4fbac0cd_d4358511",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-20T19:32:24Z",
+      "side": 1,
+      "message": "Nit:\n  AConfig* foregroundConfig \u003d getForegroundConfig();\n  if (foregroundConfig \u003d\u003d nullptr)\n          return;\n\navdInfo_getSkinInfo is not needed if there is no foregroundconfig.",
+      "revId": "8d49a39d41f3dfca4422c6a4499a0fbc122b5296",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
