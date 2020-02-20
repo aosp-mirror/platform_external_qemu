@@ -1,6 +1,10 @@
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 
-#include <functional>  // for __base
+#include <codecvt>                                       // for codecvt_utf8
+#include <cstdint>                                       // for uint32_t
+#include <functional>                                    // for __base
+#include <locale>                                        // for wstring_convert
+#include <string>                                        // for string, oper...
 
 #include "android/base/ArraySize.h"                      // for ARRAY_SIZE
 #include "android/console.h"                             // for AndroidConso...
@@ -221,12 +225,6 @@ void EmulatorKeyEventSender::workerThread() {
     }
 }
 
-void EmulatorKeyEventSender::sendUtf8String(const std::string str) {
-    mAgents->libui->convertUtf8ToKeyCodeEvents(
-            (const unsigned char*)str.c_str(), str.size(),
-            (LibuiKeyCodeSendFunc)mAgents->user_event->sendKeyCodes);
-}
-
 void EmulatorKeyEventSender::sendKeyCode(
         int32_t code,
         const KeyboardEvent::KeyCodeType codeType,
@@ -234,10 +232,12 @@ void EmulatorKeyEventSender::sendKeyCode(
     uint32_t evdev = convertToEvDev(code, codeType);
     if (eventType == KeyboardEvent::keydown ||
         eventType == KeyboardEvent::keypress) {
+        DD("Down %d -> evdev 0x%x", code, evdev | 0x400);
         mAgents->user_event->sendKeyCode(evdev | 0x400);
     }
     if (eventType == KeyboardEvent::keyup ||
         eventType == KeyboardEvent::keypress) {
+        DD("Up %d -> evdev 0x%x", code, evdev);
         mAgents->user_event->sendKeyCode(evdev);
     }
 }  // namespace keyboard
@@ -255,26 +255,43 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
         DD("%s -> domKey: %d, as Non printable: %d",
            request->ShortDebugString().c_str(), (int)domkey,
            (int)domKeyAsNonPrintableDomCode(domkey));
+
         if (domkey != keyboard::DomKey::NONE) {
             // okay, check if it is a non printable char:
             keyboard::DomCode code = domKeyAsNonPrintableDomCode(domkey);
+            std::vector<uint32_t> evdevs;
             if (code == keyboard::DomCode::NONE) {
-                // We can print it.. Just use the utf8 rep
-                sendUtf8String(domkey.ToUtf8());
+                auto evdevs = convertUtf8ToEvDev(domkey.ToUtf8());
+                auto eventType = request->eventtype();
+                if (eventType == KeyboardEvent::keydown ||
+                    eventType == KeyboardEvent::keypress) {
+                    for (auto evdev : evdevs) {
+                        DD("Down %s -> evdev 0x%x", request->ShortDebugString().c_str(), evdev | 0x400);
+                        mAgents->user_event->sendKeyCode(evdev | 0x400);
+                    }
+                }
+                if (eventType == KeyboardEvent::keyup ||
+                    eventType == KeyboardEvent::keypress) {
+                    for (auto evdev : evdevs) {
+                        DD("Up %s -> evdev 0x%x", request->ShortDebugString().c_str(), evdev);
+                        mAgents->user_event->sendKeyCode(evdev);
+                    }
+                }
             } else {
                 // Nope we have to send the domcode..
-                auto evdev = domCodeToEvDevKeycode(code);
-                DD("%s -> evdev %d", request->ShortDebugString().c_str(),
-                   evdev);
-                auto eventType = request->eventtype();
-                mAgents->user_event->sendKeyCode(evdev | 0x400);
-                mAgents->user_event->sendKeyCode(evdev);
+                sendKeyCode(domCodeToEvDevKeycode(code), KeyboardEvent::Evdev,
+                            request->eventtype());
             }
         }
     }
     if (request->text().size() > 0) {
         DD("sendUtf8String: %s", request->text().c_str());
-        sendUtf8String(request->text());
+        for (auto evdev : convertUtf8ToEvDev(request->text())) {
+            DD("Press %s -> evdev %d", request->ShortDebugString().c_str(),
+               evdev);
+            mAgents->user_event->sendKeyCode(evdev | 0x400);
+            mAgents->user_event->sendKeyCode(evdev);
+        }
     }
     if (request->keycode() > 0) {
         DD("keycode: %d, codetype:%d, eventtype:%d", request->keycode(),
@@ -301,12 +318,37 @@ uint32_t EmulatorKeyEventSender::domCodeToEvDevKeycode(DomCode key) {
     return 0;
 }
 
+static std::string to_utf8(const std::u32string& s) {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
+    return conv.to_bytes(s);
+}
+
+std::vector<uint32_t> EmulatorKeyEventSender::convertUtf8ToEvDev(
+        std::string utf8) {
+    std::vector<uint32_t> evdevs;
+    mAgents->libui->convertUtf8ToKeyCodeEvents(
+            (const unsigned char*)utf8.c_str(), utf8.size(),
+            (LibuiKeyCodeSendFunc)[](int* codes, int count, void* context) {
+                auto evdevs = reinterpret_cast<std::vector<uint32_t>*>(context);
+                for (int i = 0; i < count; i++) {
+                    auto code = codes[i];
+                    if (code & 0x400) {
+                        evdevs->push_back(code & 0x3ff);
+                    }
+                }
+            },
+            &evdevs);
+
+    return evdevs;
+}
+
 uint32_t EmulatorKeyEventSender::convertToEvDev(
         uint32_t from,
         KeyboardEvent::KeyCodeType source) {
     if (source == KeyboardEvent::Evdev) {
         return from;
     }
+
     int offset = mOffset[source];
     for (int i = 0; i < kKeycodeMapEntries; i++) {
         int32_t entry = *(int32_t*)((char*)&usb_keycode_map[i] + offset);
