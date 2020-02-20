@@ -96,6 +96,12 @@ public:
             PacketInfo pkt{data, pts};
             savedPackets.push_back(std::move(pkt));
         }
+        void savePacket(const uint8_t* frame, size_t size, uint64_t pts = 0) {
+            std::vector<uint8_t> vec;
+            vec.assign(frame, frame+size);
+            PacketInfo pkt{vec, pts};
+            savedPackets.push_back(std::move(pkt));
+        }
 
         void saveDecodedFrame(std::vector<uint8_t> data,
                               int width = 0,

@@ -46,6 +46,11 @@ public:
     virtual void reset(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
+    virtual int type() const override { return PLUGIN_TYPE_VIDEO_TOOL_BOX_PROXY; }
+
     explicit MediaH264DecoderVideoToolBoxProxy(uint64_t id,
                                                H264PingInfoParser parser);
     virtual ~MediaH264DecoderVideoToolBoxProxy();
