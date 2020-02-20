@@ -676,7 +676,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         return false;
     }
 
-    KernelVersion kernelVersion = 0;
+    KernelVersion kernelVersion = KERNEL_VERSION_0;
     if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
         derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
                versionString);
