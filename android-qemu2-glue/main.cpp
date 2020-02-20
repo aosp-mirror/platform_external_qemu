@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-virtualscene.h"
@@ -619,6 +620,27 @@ static void enableSignalTermination() {
 
 }  // namespace
 
+extern "C" int run_hostapd_main(int argc,
+                                 const char** argv,
+                                 void (*on_main_loop_done)(void));
+extern "C" void eloop_terminate(void);
+
+// Hostapd is running in a functor thread with all signals masked.
+// Thus, SIGINT signal will not be delivered to the hostpad event
+// loop when emulator quits. So we explicity terminate hostapd.
+static void stop_hostapd() {
+    eloop_terminate();
+}
+
+static void enter_hostapd_event_loop() {
+    android::ParameterList args{"hostapd"};
+    std::string hostapdConf = PathUtils::join(
+                                  System::get()->getLauncherDirectory(), "lib", "hostapd.conf");
+    args.add(hostapdConf);
+    D("Starting hostapd main loop");
+    run_hostapd_main(args.size(), (const char**)args.array(), []{});
+}
+
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
                              void (*on_main_loop_done)(void));
@@ -876,7 +898,7 @@ static int startEmulatorWithMinConfig(
             printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
         }
     }
-
+    async(&enter_hostapd_event_loop);
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
@@ -884,6 +906,7 @@ static int startEmulatorWithMinConfig(
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     stopRenderer();
+    stop_hostapd();
     emulator_finiUserInterface();
 
     process_late_teardown();
@@ -1685,7 +1708,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Network
-    args.add("-netdev");
+    /*args.add("-netdev");
     if (opts->net_tap) {
         const char* upScript =
                 opts->net_tap_script_up ? opts->net_tap_script_up : "no";
@@ -1704,7 +1727,7 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
-
+    */
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");
@@ -1721,7 +1744,10 @@ extern "C" int main(int argc, char** argv) {
         args.add("virtio-gpu-pci");
     }
     initialize_virtio_input_devs(args, hw);
-
+    args.add("-netdev");
+    args.add("user,id=mynet1");
+    args.add("-device");
+    args.add("virtio-wifi-pci,netdev=mynet1");
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
@@ -1980,7 +2006,7 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
-
+    async(&enter_hostapd_event_loop);
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
 
@@ -1989,8 +2015,8 @@ extern "C" int main(int argc, char** argv) {
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     stopRenderer();
+    stop_hostapd();
     emulator_finiUserInterface();
-
     process_late_teardown();
     return 0;
 }

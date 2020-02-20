@@ -7,6 +7,7 @@ set(hostapd_src
         ${HOSTAPD_ROOT}/eap_register.c
         ${WPA_SUPPLICANT_ROOT}/src/drivers/drivers.c
         ${WPA_SUPPLICANT_ROOT}/src/drivers/driver_common.c
+        ${WPA_SUPPLICANT_ROOT}/src/drivers/driver_virtio_wifi.c
         ${WPA_SUPPLICANT_ROOT}/src/utils/eloop.c
         ${WPA_SUPPLICANT_ROOT}/src/utils/common.c
         ${WPA_SUPPLICANT_ROOT}/src/utils/wpa_debug.c
@@ -127,8 +128,8 @@ set(hostapd_darwin-x86_64_src
 
 android_add_library(hostapd)
 
+target_include_directories(hostapd PUBLIC ${WPA_SUPPLICANT_ROOT}/src)
 target_include_directories(hostapd PRIVATE ${HOSTAPD_ROOT}
-                                           ${WPA_SUPPLICANT_ROOT}/src
                                            ${WPA_SUPPLICANT_ROOT}/src/utils)
 
 target_compile_definitions(hostapd PRIVATE -DWPA_IGNORE_CONFIG_ERRORS
@@ -150,7 +151,7 @@ target_compile_definitions(hostapd PRIVATE -DWPA_IGNORE_CONFIG_ERRORS
                                            #-DCONFIG_OWE
                                            -DCONFIG_WNM
                                            -DCONFIG_WNM_AP
-                                           #-DCONFIG_IEEE80211N
+                                           -DCONFIG_IEEE80211N
                                            #-DCONFIG_IEEE80211AC
                                            #-DEAP_SERVER_MD5
                                            #-DEAP_SERVER_TLS
