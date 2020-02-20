@@ -23,6 +23,7 @@ android_add_library(
       emulation/serial_line.cpp
       emulation/virtio-goldfish-pipe.cpp
       emulation/virtio-input-multi-touch.c
+      emulation/virtio-wifi.c
       looper-qemu.cpp
       net-android.cpp
       proxy/slirp_proxy.cpp
@@ -59,7 +60,9 @@ if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
-                                            PIXMAN::PIXMAN emulator-libdtb ssl)
+                                            PIXMAN::PIXMAN emulator-libdtb
+                                            ssl hostapd)
+
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 android_add_library(
   TARGET libqemu2-glue-vm-operations LICENSE Apache-2.0
