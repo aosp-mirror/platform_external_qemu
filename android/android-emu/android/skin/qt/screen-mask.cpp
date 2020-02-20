@@ -107,9 +107,7 @@ static void setPaddingAndCutout(AdbInterface* adbInterface, AConfig* config) {
     }
 }
 
-// Handle the screen mask. This includes the mask image itself
-// and any associated cutout and padding offset.
-void loadMask(AdbInterface* adbInterface) {
+AConfig* getForegroundConfig() {
     char* skinName;
     char* skinDir;
 
@@ -119,21 +117,35 @@ void loadMask(AdbInterface* adbInterface) {
     aconfig_load_file(rootConfig, layoutPath.toStdString().c_str());
 
     // Look for parts/portrait/foreground
-
     AConfig* nextConfig = aconfig_find(rootConfig, "parts");
-    if (nextConfig == NULL) {
-        return;
+    if (nextConfig == nullptr) {
+        return nullptr;
     }
     nextConfig = aconfig_find(nextConfig, "portrait");
-    if (nextConfig == NULL) {
-        return;
+    if (nextConfig == nullptr) {
+        return nullptr;
     }
-    AConfig* foregroundConfig = aconfig_find(nextConfig, "foreground");
 
-    if (foregroundConfig != NULL) {
-        setPaddingAndCutout(adbInterface, foregroundConfig);
+    return aconfig_find(nextConfig, "foreground");
+}
+
+// Handle the screen mask. This includes the mask image itself
+// and any associated cutout and padding offset.
+void loadMask() {
+    char* skinName;
+    char* skinDir;
+
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    AConfig* foregroundConfig = getForegroundConfig();
+    if (foregroundConfig != nullptr) {
         loadMaskImage(foregroundConfig, skinDir, skinName);
     }
 }
 
+void setAndroidOverlay(AdbInterface* adbInterface) {
+    AConfig* foregroundConfig = getForegroundConfig();
+    if (foregroundConfig != nullptr) {
+        setPaddingAndCutout(adbInterface, foregroundConfig);
+    }
+}
 }

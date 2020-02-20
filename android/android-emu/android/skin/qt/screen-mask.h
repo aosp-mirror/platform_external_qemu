@@ -20,6 +20,7 @@ class AdbInterface;
 
 namespace ScreenMask {
 
-    void loadMask(android::emulation::AdbInterface* adbInterface);
+    void loadMask();
+    void setAndroidOverlay(android::emulation::AdbInterface* adbInterface);
 
 };
