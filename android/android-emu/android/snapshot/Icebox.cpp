@@ -37,7 +37,7 @@
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -444,6 +444,12 @@ bool track(int pid, const std::string snapshot_name) {
         D("ID size query OK");
         _RECV_PACKET_OK(reply);
         id_size.parseFrom(reply.data.data() + 11);
+        D("ID sizes: field %d method %d obj %d ref %d frame %d",
+            id_size.field_id_size,
+            id_size.method_id_size,
+            id_size.object_id_size,
+            id_size.reference_typ_id_size,
+            id_size.frame_id_size);
 
         // Version
         jdwp_query.command = VirtualMachineCommand::Version;
@@ -484,7 +490,7 @@ bool track(int pid, const std::string snapshot_name) {
             }
         }
 
-#if DEBUG >= 1
+#if DEBUG >= 2
         {
             // Query all classes and validate exception class id
             jdwp_query.command = VirtualMachineCommand::AllClasses;
