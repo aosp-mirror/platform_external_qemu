@@ -57,15 +57,19 @@ Image takeScreenshot(
                            int* h,
                            int* lineSize,
                            int* bytesPerPixel,
-                           uint8_t** frameBufferData)> getFrameBuffer) {
+                           uint8_t** frameBufferData)> getFrameBuffer,
+        int displayId,
+        int desiredWidth,
+        int desiredHeight
+        ) {
     unsigned int nChannels = 4;
     unsigned int width;
     unsigned int height;
     ImageFormat outputFormat = ImageFormat::RGBA8888;
     std::vector<unsigned char> pixelBuffer;
     if (renderer) {
-        LOG(INFO) << "Screenshot from renderer";
-        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer);
+        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer, displayId,
+                                desiredWidth, desiredHeight, rotation);
     } else {
         unsigned char* pixels = nullptr;
         int bpp = 4;
@@ -114,24 +118,26 @@ Image takeScreenshot(
     }
     // We only convert png at this time..
     if (desiredFormat == ImageFormat::PNG) {
-            std::vector<uint8_t> pngData;
-            png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                                    NULL, NULL);
-            png_infop pi = png_create_info_struct(p);
-            png_set_write_fn(
-                    p, &pngData,
-                    [](png_structp png_ptr, png_bytep data, png_size_t length) {
-                        std::vector<uint8_t>* vec =
-                                reinterpret_cast<std::vector<uint8_t>*>(
-                                        png_get_io_ptr(png_ptr));
-                        vec->insert(vec->end(), &data[0], &data[length]);
-                    },
-                    [](png_structp png_ptr) {});
-            write_png_user_function(p, pi, nChannels, width,
-                                    height, rotation,
-                                    pixelBuffer.data());
-            png_destroy_write_struct(&p, &pi);
-            return Image((uint16_t)width, (uint16_t)height, nChannels, ImageFormat::PNG, pngData);
+        std::vector<uint8_t> pngData;
+        png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                                NULL, NULL);
+        png_infop pi = png_create_info_struct(p);
+        png_set_write_fn(
+                p, &pngData,
+                [](png_structp png_ptr, png_bytep data, png_size_t length) {
+                    std::vector<uint8_t>* vec =
+                            reinterpret_cast<std::vector<uint8_t>*>(
+                                    png_get_io_ptr(png_ptr));
+                    vec->insert(vec->end(), &data[0], &data[length]);
+                },
+                [](png_structp png_ptr) {});
+        // already rotated through rendering
+        rotation = renderer ? SKIN_ROTATION_0 : rotation;
+        write_png_user_function(p, pi, nChannels, width,
+                                height, rotation,
+                                pixelBuffer.data());
+        png_destroy_write_struct(&p, &pi);
+        return Image((uint16_t)width, (uint16_t)height, nChannels, ImageFormat::PNG, pngData);
     }
     return Image((uint16_t)width, (uint16_t)height, nChannels, outputFormat, pixelBuffer);
 }
@@ -145,13 +151,14 @@ bool captureScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         SkinRotation rotation,
         android::base::StringView outputDirectoryPath,
-        std::string* pOutputFilepath) {
+        std::string* pOutputFilepath,
+        int displayId) {
     if (!renderer && !getFrameBuffer) {
         LOG(WARNING) << "Cannot take screenshots.\n";
         return false;
     }
 
-    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer, getFrameBuffer);
+    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer, getFrameBuffer, displayId);
 
     if (img.getWidth() == 0 || img.getHeight() == 0) {
         return false;
@@ -197,6 +204,8 @@ bool captureScreenshot(
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;
     }
+    // already rotated through rendering
+    rotation = renderer ? SKIN_ROTATION_0 : rotation;
     savepng(outputFilePath.c_str(), img.getChannels(), img.getWidth(),
             img.getHeight(), rotation, img.getPixelBuf());
     return true;
