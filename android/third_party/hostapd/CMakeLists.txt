@@ -135,6 +135,7 @@ android_add_library(
 
 target_include_directories(hostapd PUBLIC ${WPA_SUPPLICANT_ROOT}/src)
 
+target_include_directories(hostapd PUBLIC ${WPA_SUPPLICANT_ROOT}/src)
 target_include_directories(hostapd PRIVATE ${HOSTAPD_ROOT}
                                            ${WPA_SUPPLICANT_ROOT}/src/utils)
 
