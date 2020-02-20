@@ -20,6 +20,7 @@ void skin_keycode_buffer_init(SkinKeycodeBuffer* buffer,
                               SkinKeyCodeFlushFunc flush_func) {
     buffer->keycode_flush = flush_func;
     buffer->keycode_count = 0;
+    buffer->context = NULL;
 }
 
 void skin_keycode_buffer_add(SkinKeycodeBuffer* keycodes,
@@ -45,7 +46,7 @@ void skin_keycode_buffer_flush(SkinKeycodeBuffer* keycodes) {
         }
         if (keycodes->keycode_flush) {
             keycodes->keycode_flush(keycodes->keycodes,
-                                    keycodes->keycode_count);
+                                    keycodes->keycode_count, keycodes->context);
         }
         keycodes->keycode_count = 0;
     }

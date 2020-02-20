@@ -12,17 +12,17 @@
 
 #pragma once
 
-#include "android/cmdline-option.h"
-#include "android/framebuffer.h"
-#include "android/recording/screen-recorder.h"
-#include "android/skin/file.h"
-#include "android/skin/keyboard.h"
-#include "android/skin/window.h"
-#include "android/utils/aconfig-file.h"
-#include "android/utils/stralloc.h"
+#include <stdbool.h>                            // for bool
 
-#include "android/skin/ui.h"
-#include "android/ui-emu-agent.h"
+#include "android/cmdline-option.h"             // for AndroidOptions
+#include "android/recording/screen-recorder.h"  // for RecordingInfo, Record...
+#include "android/skin/file.h"                  // for SkinFile, SkinLayout
+#include "android/skin/image.h"                 // for SkinImage
+#include "android/skin/rect.h"                  // for SkinRotation
+#include "android/skin/ui.h"                    // for SkinUI
+#include "android/ui-emu-agent.h"               // for UiEmuAgent
+#include "android/utils/aconfig-file.h"         // for AConfig
+#include "android/utils/compiler.h"             // for ANDROID_BEGIN_HEADER
 
 ANDROID_BEGIN_HEADER
 

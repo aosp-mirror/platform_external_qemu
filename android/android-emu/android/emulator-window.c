@@ -12,24 +12,33 @@
 
 #include "android/emulator-window.h"
 
-#include "android/android.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/framebuffer.h"
-#include "android/globals.h"
-#include "android/gpu_frame.h"
-#include "android/hw-control.h"
-#include "android/hw-sensors.h"
-#include "android/network/globals.h"
-#include "android/opengles.h"
-#include "android/skin/keycode.h"
-#include "android/skin/winsys.h"
-#include "android/ui-emu-agent.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/looper.h"
+#include <stdio.h>                                       // for snprintf
+#include <stdlib.h>                                      // for NULL, calloc
+#include <string.h>                                      // for strcmp
 
-#include "android/telephony/modem_driver.h"
+#include "android/android.h"                             // for android_base...
+#include "android/avd/hw-config.h"                       // for androidHwCon...
+#include "android/avd/info.h"                            // for avdInfo_getName
+#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
+#include "android/emulation/control/vm_operations.h"     // for QEMU_SHUTDOW...
+#include "android/emulation/control/window_agent.h"      // for EmulatorWindow
+#include "android/framebuffer.h"                         // for QFrameBuffer
+#include "android/globals.h"                             // for android_hw
+#include "android/gpu_frame.h"                           // for gpu_frame_se...
+#include "android/hw-control.h"                          // for android_hw_c...
+#include "android/hw-sensors.h"                          // for android_sens...
+#include "android/network/globals.h"                     // for android_net_...
+#include "android/opengles.h"                            // for android_redr...
+#include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
+#include "android/skin/keycode.h"                        // for SkinKeyCode
+#include "android/skin/trackball.h"                      // for SkinTrackBal...
+#include "android/skin/window.h"                         // for SkinWindowFuncs
+#include "android/skin/winsys.h"                         // for skin_winsys_...
+#include "android/telephony/modem.h"                     // for amodem_set_d...
+#include "android/telephony/modem_driver.h"              // for android_modem
+#include "android/ui-emu-agent.h"                        // for UiEmuAgent
+#include "android/utils/debug.h"                         // for dprint, dwar...
+#include "android/utils/looper.h"                        // for looper_getFo...
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -78,7 +87,7 @@ static void emulator_window_window_key_event(unsigned keycode, int down) {
     user_event_agent->sendKey(keycode, down);
 }
 
-static void emulator_window_keycodes_event(int* keycodes, int count) {
+static void emulator_window_keycodes_event(int* keycodes, int count, void* context) {
     user_event_agent->sendKeyCodes(keycodes, count);
 }
 

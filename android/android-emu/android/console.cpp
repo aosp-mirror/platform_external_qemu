@@ -2275,7 +2275,7 @@ do_event_text( ControlClient  client, char*  args )
     }
 
     if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(p, textlen,
-        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes)) {
+        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes, nullptr)) {
         control_write( client, "KO: device is unable to recieve text input now\r\n" );
         return -1;
     }

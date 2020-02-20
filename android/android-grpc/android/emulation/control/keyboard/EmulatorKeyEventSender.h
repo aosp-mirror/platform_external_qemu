@@ -1,6 +1,7 @@
 #include <stdint.h>                                      // for uint32_t
 #include <cstddef>                                       // for offsetof
 #include <string>                                        // for string
+#include <vector>                                        // for vector
 
 #include "android/base/containers/BufferQueue.h"         // for BufferQueue
 #include "android/base/synchronization/Lock.h"           // for AutoLock (pt...
@@ -89,6 +90,11 @@ private:
     // Converts the incoming code type to evdev code that the emulator
     // understands.
     uint32_t convertToEvDev(uint32_t from, KeyboardEvent::KeyCodeType source);
+
+    // Translates a string with one or more Utf8 characters to a sequence of
+    // evdev values.
+    std::vector<uint32_t> convertUtf8ToEvDev(const std::string);
+
     int mOffset[KeyboardEvent::KeyCodeType_MAX + 1] = {
             offsetof(KeycodeMapEntry, usb), offsetof(KeycodeMapEntry, evdev),
             offsetof(KeycodeMapEntry, xkb), offsetof(KeycodeMapEntry, win),
