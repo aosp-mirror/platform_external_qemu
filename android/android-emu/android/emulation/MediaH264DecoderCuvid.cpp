@@ -185,17 +185,18 @@ void MediaH264DecoderCuvid::decodeFrame(void* ptr) {
     size_t szBytes = param.size;
     uint64_t inputPts = param.pts;
 
+    decodeFrameInternal(param.pConsumedBytes, param.pDecoderErrorCode, frame,
+                        szBytes, inputPts);
+}
+
+void MediaH264DecoderCuvid::decodeFrameInternal(uint64_t* pRetSzBytes,
+                                                int32_t* pRetErr,
+                                                const uint8_t* frame,
+                                                size_t szBytes,
+                                                uint64_t inputPts) {
     mIsInFlush = false;
-    static int numbers = 0;
-    // H264_DPRINT("calling decodeframe %d for %d bytes", numbers++,
-    // (int)szBytes);
     H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
     Err h264Err = Err::NoErr;
-    // TODO: move this somewhere else
-    // First return parameter is the number of bytes processed,
-    // Second return parameter is the error code
-    uint64_t* retSzBytes = param.pConsumedBytes;
-    int32_t* retErr = param.pDecoderErrorCode;
 
     CUVIDSOURCEDATAPACKET packet = {0};
     packet.payload = frame;
@@ -206,8 +207,10 @@ void MediaH264DecoderCuvid::decodeFrame(void* ptr) {
         packet.flags |= CUVID_PKT_ENDOFSTREAM;
     }
     NVDEC_API_CALL(cuvidParseVideoData(mCudaParser, &packet));
-    *retSzBytes = szBytes;
-    *retErr = (int32_t)h264Err;
+    if (pRetSzBytes)
+        *pRetSzBytes = szBytes;
+    if (pRetErr)
+        *pRetErr = (int32_t)h264Err;
 }
 
 void MediaH264DecoderCuvid::doFlush() {
@@ -495,7 +498,7 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     NVDEC_API_CALL(cuCtxPopCurrent(NULL));
 
     NVDEC_API_CALL(cuvidUnmapVideoFrame(mCudaDecoder, dpSrcFrame));
-    {
+    if (!mIsLoadingFromSnapshot) {
         std::lock_guard<std::mutex> g(mFrameLock);
         mSavedFrames.push_back(myFrame);
         mSavedPts.push_back(myOutputPts);
@@ -505,6 +508,99 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     mImageReady = true;
     H264_DPRINT("successfully called.");
     return 1;
+}
+
+void MediaH264DecoderCuvid::oneShotDecode(std::vector<uint8_t>& data,
+                                          uint64_t pts) {
+    H264_DPRINT("decoding pts %lld", (long long)pts);
+    decodeFrameInternal(nullptr, nullptr, data.data(), data.size(), pts);
+}
+
+void MediaH264DecoderCuvid::save(base::Stream* stream) const {
+    stream->putBe32(mParser.version());
+    stream->putBe32(mWidth);
+    stream->putBe32(mHeight);
+    stream->putBe32(mOutputWidth);
+    stream->putBe32(mOutputHeight);
+    stream->putBe32((int)mOutPixFmt);
+
+    const int hasContext = mCudaContext == nullptr ? 0 : 1;
+    stream->putBe32(hasContext);
+
+    mSnapshotState.savedFrames.clear();
+    mSnapshotState.savedDecodedFrame.data.clear();
+    for (size_t i = 0; i < mSavedFrames.size(); ++i) {
+        const std::vector<uint8_t>& myFrame = mSavedFrames.front();
+        int myOutputWidth = mSavedW.front();
+        int myOutputHeight = mSavedH.front();
+        int myOutputPts = mSavedPts.front();
+        mSnapshotState.saveDecodedFrame(
+                myFrame, myOutputWidth, myOutputHeight,
+                ColorAspects{mColorPrimaries, mColorRange, mColorTransfer,
+                             mColorSpace},
+                myOutputPts);
+        mSavedPts.pop_front();
+        mSavedW.pop_front();
+        mSavedH.pop_front();
+        mSavedPts.pop_front();
+    }
+    H264_DPRINT("saving packets now %d",
+                (int)(mSnapshotState.savedPackets.size()));
+    mSnapshotState.save(stream);
+}
+
+bool MediaH264DecoderCuvid::load(base::Stream* stream) {
+    mIsLoadingFromSnapshot = true;
+    uint32_t version = stream->getBe32();
+    mParser = H264PingInfoParser{version};
+
+    mWidth = stream->getBe32();
+    mHeight = stream->getBe32();
+    mOutputWidth = stream->getBe32();
+    mOutputHeight = stream->getBe32();
+    mOutPixFmt = (PixelFormat)stream->getBe32();
+
+    const int hasContext = stream->getBe32();
+    if (hasContext) {
+        initH264ContextInternal(mWidth, mHeight, mWidth, mHeight, mOutPixFmt);
+    }
+
+    mSnapshotState.load(stream);
+
+    H264_DPRINT("loaded packets %d, now restore decoder",
+                (int)(mSnapshotState.savedPackets.size()));
+    if (hasContext && mSnapshotState.sps.size() > 0) {
+        oneShotDecode(mSnapshotState.sps, 0);
+        if (mSnapshotState.pps.size() > 0) {
+            oneShotDecode(mSnapshotState.pps, 0);
+            if (mSnapshotState.savedPackets.size() > 0) {
+                for (int i = 0; i < mSnapshotState.savedPackets.size(); ++i) {
+                    PacketInfo& pkt = mSnapshotState.savedPackets[i];
+                    oneShotDecode(pkt.data, pkt.pts);
+                }
+            }
+        }
+    }
+
+    mImageReady = false;
+    for (size_t i = 0; i < mSnapshotState.savedFrames.size(); ++i) {
+        auto& frame = mSnapshotState.savedFrames[i];
+        mOutBufferSize = frame.data.size();
+        mOutputWidth = frame.width;
+        mOutputHeight = frame.height;
+        mColorPrimaries = frame.color.primaries;
+        mColorRange = frame.color.range;
+        mColorTransfer = frame.color.transfer;
+        mColorSpace = frame.color.space;
+        mOutputPts = frame.pts;
+        mSavedFrames.push_back(frame.data);
+        mSavedW.push_back(mOutputWidth);
+        mSavedH.push_back(mOutputHeight);
+        mSavedPts.push_back(mOutputPts);
+        mImageReady = true;
+    }
+    mIsLoadingFromSnapshot = false;
+    return true;
 }
 
 bool MediaH264DecoderCuvid::s_isCudaInitialized = false;
