@@ -52,6 +52,11 @@ public:
     explicit MediaH264DecoderCuvid(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderCuvid();
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
+    virtual int type() const override { return PLUGIN_TYPE_CUVID; }
+
 private:
     void initH264ContextInternal(unsigned int width,
                                  unsigned int height,
@@ -143,6 +148,10 @@ private:
     CUvideoctxlock mCtxLock;
     CUvideoparser mCudaParser = nullptr;
     CUvideodecoder mCudaDecoder = nullptr;
+
+private:
+    mutable SnapshotState mSnapshotState;
+    void oneShotDecode(std::vector<uint8_t>& data, uint64_t pts);
 
 };  // MediaH264DecoderCuvid
 }  // namespace emulation

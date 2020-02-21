@@ -507,6 +507,80 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     return 1;
 }
 
+void MediaH264DecoderCuvid::oneShotDecode(std::vector<uint8_t>& data,
+                                          uint64_t pts) {
+    H264_DPRINT("decoding pts %lld", (long long)pts);
+    // TODO
+}
+
+void MediaH264DecoderCuvid::save(base::Stream* stream) const {
+    stream->putBe32(mParser.version());
+    stream->putBe32(mWidth);
+    stream->putBe32(mHeight);
+    stream->putBe32(mOutputWidth);
+    stream->putBe32(mOutputHeight);
+    stream->putBe32((int)mOutPixFmt);
+
+    const int hasContext = mCudaDecoder == nullptr ? 0 : 1;
+    stream->putBe32(hasContext);
+
+    if (mImageReady) {
+    } else {
+        mSnapshotState.savedDecodedFrame.data.clear();
+    }
+    H264_DPRINT("saving packets now %d",
+                (int)(mSnapshotState.savedPackets.size()));
+    mSnapshotState.save(stream);
+}
+
+bool MediaH264DecoderCuvid::load(base::Stream* stream) {
+    uint32_t version = stream->getBe32();
+    mParser = H264PingInfoParser{version};
+
+    mWidth = stream->getBe32();
+    mHeight = stream->getBe32();
+    mOutputWidth = stream->getBe32();
+    mOutputHeight = stream->getBe32();
+    mOutPixFmt = (PixelFormat)stream->getBe32();
+
+    const int hasContext = stream->getBe32();
+    if (hasContext) {
+        initH264ContextInternal(mWidth, mHeight, mWidth, mHeight, mOutPixFmt);
+    }
+
+    mSnapshotState.load(stream);
+
+    H264_DPRINT("loaded packets %d, now restore decoder",
+                (int)(mSnapshotState.savedPackets.size()));
+    if (hasContext && mSnapshotState.sps.size() > 0) {
+        oneShotDecode(mSnapshotState.sps, 0);
+        if (mSnapshotState.pps.size() > 0) {
+            oneShotDecode(mSnapshotState.pps, 0);
+            if (mSnapshotState.savedPackets.size() > 0) {
+                for (int i = 0; i < mSnapshotState.savedPackets.size(); ++i) {
+                    PacketInfo& pkt = mSnapshotState.savedPackets[i];
+                    oneShotDecode(pkt.data, pkt.pts);
+                }
+            }
+        }
+    }
+
+    if (mSnapshotState.savedDecodedFrame.data.size() > 0) {
+        mOutBufferSize = mSnapshotState.savedDecodedFrame.data.size();
+        mOutputWidth = mSnapshotState.savedDecodedFrame.width;
+        mOutputHeight = mSnapshotState.savedDecodedFrame.height;
+        mColorPrimaries = mSnapshotState.savedDecodedFrame.color.primaries;
+        mColorRange = mSnapshotState.savedDecodedFrame.color.range;
+        mColorTransfer = mSnapshotState.savedDecodedFrame.color.transfer;
+        mColorSpace = mSnapshotState.savedDecodedFrame.color.space;
+        mOutputPts = mSnapshotState.savedDecodedFrame.pts;
+        mImageReady = true;
+    } else {
+        mImageReady = false;
+    }
+    return true;
+}
+
 bool MediaH264DecoderCuvid::s_isCudaInitialized = false;
 // static
 
