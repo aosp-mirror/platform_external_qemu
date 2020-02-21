@@ -45,6 +45,7 @@
 #include "TransformFeedbackData.h"
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/metrics.h"
 
 #include "ANGLEShaderParser.h"
 
@@ -81,7 +82,6 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
                                       SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
-static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
 static bool vulkanInteropSupported();
 static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
 static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
@@ -118,14 +118,13 @@ static GLESiface s_glesIface = {
     .restoreTexture = restoreTexture,
     .deleteRbo = deleteRenderbufferGlobal,
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
-    .fillGLESUsages = fillGLESUsages,
     .vulkanInteropSupported = vulkanInteropSupported,
     .getSynciv = (FUNCPTR_GET_SYNC_IV)internal_glGetSynciv,
 };
 
 #include <GLcommon/GLESmacros.h>
 
-static android::base::LazyInstance<android_studio::EmulatorGLESv30Usages> gles30usages = {};
+static android::base::LazyInstance<GLES3Usage> gles30usages = {};
 
 extern "C" {
 
@@ -295,10 +294,6 @@ GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return & s_glesIface;
-}
-
-static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
-    usage->mutable_gles_3_0_usages()->CopyFrom(*gles30usages);
 }
 
 static bool vulkanInteropSupported() {

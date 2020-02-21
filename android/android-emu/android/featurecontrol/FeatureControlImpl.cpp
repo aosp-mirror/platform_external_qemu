@@ -276,6 +276,7 @@ FeatureControlImpl::FeatureControlImpl() {
     init(defaultIniHostName, defaultIniGuestName.get(), userIniHostName,
          userIniGuestName);
 
+#ifndef AEMU_MIN
     using android::crashreport::CrashReporter;
     CrashReporter::get()->addCrashCallback([this]() {
         base::ScopedFd file = CrashReporter::get()->openDataAttachFile(
@@ -293,6 +294,7 @@ FeatureControlImpl::FeatureControlImpl() {
                                buffer, std::min<int>(count, sizeof(buffer))));
         }
     });
+#endif
 }
 
 FeatureControlImpl& FeatureControlImpl::get() {
