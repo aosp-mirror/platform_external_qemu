@@ -19,8 +19,6 @@
 #include "VulkanHandleMapping.h"
 #include "VulkanHandles.h"
 
-#include "goldfish_vk_baseprotodefs.pb.h"
-#include "common/goldfish_vk_baseprotoconversion.h"
 #include "common/goldfish_vk_marshaling.h"
 
 // A class that captures all important data structures for
@@ -37,8 +35,6 @@ public:
         uint32_t opCode;
         std::vector<uint8_t> trace;
         size_t traceBytes = 0;
-        // Slow
-        goldfish_vk_proto::VkApiCall apiCall;
         // Book-keeping for which handles were created by this API
         std::vector<uint64_t> createdHandles;
     };
