@@ -584,15 +584,19 @@ bool track(int pid, const std::string snapshot_name) {
                         D("ready to take snapshot");
                         const AndroidSnapshotStatus result =
                                 androidSnapshot_save("test_failure_snapshot");
-                        D("Snapshot done, result %d", result);
+                        D("Snapshot done, result %d (expect %d)", result,
+                                SNAPSHOT_STATUS_OK);
                         snapshot_lock.lock();
                         snapshot_done = true;
                         snapshot_signal.broadcastAndUnlock(&snapshot_lock);
+                        D("Snapshot thread done");
                     });
+            D("Icebox thread waiting for snapshot");
             snapshot_lock.lock();
             snapshot_signal.wait(&snapshot_lock,
                                  [&snapshot_done]() { return snapshot_done; });
             snapshot_lock.unlock();
+            D("Icebox thread resume after snapshot");
             _SEND_PACKET(ok_out);
             // Resume and quit
             JdwpCommandHeader jdwp_command = {
@@ -611,8 +615,9 @@ bool track(int pid, const std::string snapshot_name) {
             packet_out.mesg.data_length = 0;
             packet_out.data.resize(0);
             packet_out.mesg.magic = packet_out.mesg.command ^ 0xffffffff;
+            D("Icebox thread ready to close");
             _SEND_PACKET(packet_out);
-            //_RECV_PACKET(reply);
+            _RECV_PACKET(reply);
             return true;
         }
         _SEND_PACKET(ok_out);
