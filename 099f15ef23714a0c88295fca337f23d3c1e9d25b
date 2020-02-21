@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cde10600_ab13f22d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-02-21T18:31:58Z",
+      "side": 1,
+      "message": "we can probably keep doing vkDestroyInstanceIMpl here, and only suppress in the callback above (unles you also see flakiness here too?)",
+      "revId": "099f15ef23714a0c88295fca337f23d3c1e9d25b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
