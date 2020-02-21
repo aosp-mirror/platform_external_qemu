@@ -481,9 +481,106 @@ endif()
 # Boo, we need the make_ext4fs executable
 add_dependencies(android-emu emulator_make_ext4fs)
 
+set(android-emu-min
+    android/avd/hw-config.c
+    android/avd/info.c
+    android/avd/util.c
+    android/avd/util_wrapper.cpp
+    android/base/async/ScopedSocketWatch.cpp
+    android/base/async/DefaultLooper.cpp
+    android/base/async/Looper.cpp
+    android/base/async/ScopedSocketWatch.cpp
+    android/base/async/ThreadLooper.cpp
+    android/base/sockets/SocketDrainer.cpp
+    android/base/sockets/SocketWaiter.cpp
+    android/base/sockets/SocketUtils.cpp
+    android/cmdline-option.cpp
+    android/emulation/AndroidAsyncMessagePipe.cpp
+    android/emulation/AndroidMessagePipe.cpp
+    android/emulation/AndroidPipe.cpp
+    android/emulation/android_pipe_host.cpp
+    android/emulation/AudioCaptureEngine.cpp
+    android/emulation/AudioOutputEngine.cpp
+    android/emulation/bufprint_config_dirs.cpp
+    android/emulation/ClipboardPipe.cpp
+    android/emulation/ComponentVersion.cpp
+    android/emulation/ConfigDirs.cpp
+    android/emulation/control/FilePusher.cpp
+    android/emulation/control/LineConsumer.cpp
+    android/emulation/control/NopRtcBridge.cpp
+    android/emulation/DmaMap.cpp
+    android/emulation/GoldfishDma.cpp
+    android/emulation/GoldfishSyncCommandQueue.cpp
+    android/emulation/goldfish_sync.cpp
+    android/emulation/hostdevices/HostGoldfishPipe.cpp
+    android/emulation/address_space_device.cpp
+    android/emulation/address_space_graphics.cpp
+    android/emulation/address_space_host_memory_allocator.cpp
+    android/emulation/HostmemIdMapping.cpp
+    android/emulation/hostdevices/HostAddressSpace.cpp
+    android/emulation/LogcatPipe.cpp
+    android/emulation/MultiDisplayPipe.cpp
+    android/emulation/nand_limits.c
+    android/emulation/ParameterList.cpp
+    android/emulation/RefcountPipe.cpp
+    android/emulation/serial_line.cpp
+    android/emulation/SerialLine.cpp
+    android/emulation/SetupParameters.cpp
+    android/emulation/testing/TestVmLock.cpp
+    android/emulation/VmLock.cpp
+    android/error-messages.cpp
+    android/featurecontrol/FeatureControl.cpp
+    android/featurecontrol/FeatureControlImpl.cpp
+    android/featurecontrol/feature_control.cpp
+    android/framebuffer.c
+    android/gps.c
+    android/gpu_frame.cpp
+    android/hw-events.c
+    android/hw-kmsg.c
+    android/hw-lcd.c
+    android/kernel/kernel_utils.cpp
+    android/loadpng.c
+    android/opengl/EmuglBackendList.cpp
+    android/opengl/EmuglBackendScanner.cpp
+    android/opengl/emugl_config.cpp
+    android/opengl/GpuFrameBridge.cpp
+    android/opengl/GLProcessPipe.cpp
+    android/opengl/gpuinfo.cpp
+    android/opengl/logger.cpp
+    android/opengl/OpenglEsPipe.cpp
+    android/opengles.cpp
+    android/protobuf/LoadSave.cpp
+    android/snaphost-android.c
+    android/snapshot.c
+    android/snapshot/common.cpp
+    android/snapshot/Compressor.cpp
+    android/snapshot/Decompressor.cpp
+    android/snapshot/GapTracker.cpp
+    android/snapshot/IncrementalStats.cpp
+    android/snapshot/interface.cpp
+    android/snapshot/Loader.cpp
+    android/snapshot/MemoryWatch_common.cpp
+    android/snapshot/PathUtils.cpp
+    android/snapshot/Hierarchy.cpp
+    android/snapshot/Quickboot.cpp
+    android/snapshot/RamLoader.cpp
+    android/snapshot/RamSaver.cpp
+    android/snapshot/RamSnapshotTesting.cpp
+    android/snapshot/Saver.cpp
+    android/snapshot/Snapshot.cpp
+    android/snapshot/Snapshotter.cpp
+    android/snapshot/TextureLoader.cpp
+    android/snapshot/TextureSaver.cpp
+    android/uncompress.cpp
+    android/user-config.cpp
+    android/utils/looper.cpp
+    android/utils/Random.cpp
+    android/utils/socket_drainer.cpp
+    android/utils/sockets.c)
+
 # Shared version of the library. Note that this only has the set of common
 # sources, otherwise you will get a lot of linker errors.
-set(android-emu-shared_src ${android-emu-common} stubs/stubs.cpp)
+set(android-emu-shared_src ${android-emu-min} stubs/stubs.cpp stubs/gfxstream-stubs.cpp)
 # The dependent target os specific sources, they are pretty much the same as
 # above, excluding camera support, because that brings in a whole slew of
 # dependencies
@@ -495,62 +592,28 @@ android_add_library(
   WINDOWS # cmake-format: sortable
           android/opengl/NativeGpuInfo_windows.cpp
           android/snapshot/MemoryWatch_windows.cpp
-          android/emulation/MediaH264DecoderCuvid.cpp
           android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
           android/windows_installer.cpp
-          android/crashreport/CrashReporter_windows.cpp
   LINUX # cmake-format: sortable
         android/opengl/NativeGpuInfo_linux.cpp
         android/snapshot/MemoryWatch_linux.cpp
-        android/emulation/MediaH264DecoderCuvid.cpp
         android/emulation/dynlink_cuda.cpp
         android/emulation/dynlink_nvcuvid.cpp
-        android/crashreport/CrashReporter_linux.cpp
   DARWIN # cmake-format: sortable
          android/opengl/NativeGpuInfo_darwin.cpp
          android/snapshot/MemoryWatch_darwin.cpp
          android/opengl/macTouchOpenGL.m
-         android/emulation/MediaH264DecoderVideoToolBox.cpp
-         android/emulation/MediaH264DecoderVideoToolBoxProxy.cpp
-         android/snapshot/MacSegvHandler.cpp
-         android/crashreport/CrashReporter_darwin.cpp)
+         android/snapshot/MacSegvHandler.cpp)
 # Note that these are basically the same as android-emu-shared. We should clean
 # this up
 target_link_libraries(
   android-emu-shared
-  PUBLIC emulator-libext4_utils
-         FFMPEG::FFMPEG
-         VPX::VPX
-         android-emu-base
-         android-net
-         emulator-libsparse
-         emulator-libselinux
-         emulator-libjpeg
-         emulator-libyuv
-         emulator-libwebp
-         emulator-tinyobjloader
-         emulator-libkeymaster3
+  PUBLIC android-emu-base
          emulator-murmurhash
-         emulator-tinyepoxy
-         emulator-libyuv
-         picosha2
          # Protobuf dependencies
-         metrics
-         featurecontrol
-         crashreport
-         location
-         emulation
          snapshot
-         telephony
-         verified-boot
-         automation
-         offworld
          # Prebuilt libraries
-         breakpad_client
-         curl
-         ssl
-         LibXml2::LibXml2
          png
          lz4
          zlib
@@ -634,6 +697,8 @@ target_compile_definitions(
 if(WEBRTC)
   target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
 endif()
+
+target_compile_definitions(android-emu-shared PUBLIC -DAEMU_MIN=1)
 
 if(OPTION_GFXSTREAM_BACKEND)
   target_compile_definitions(android-emu-shared PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)

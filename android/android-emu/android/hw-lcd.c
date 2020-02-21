@@ -66,7 +66,9 @@ hwLcd_setBootProperty(int density)
 
 
     snprintf(temp, sizeof temp, "%d", mapped_density);
+#ifndef AEMU_MIN
     boot_property_add("qemu.sf.lcd_density", temp);
+#endif
 }
 
 hwLcd_screenSize_t hwLcd_getScreenSize(int heightPx, int widthPx, int density) {

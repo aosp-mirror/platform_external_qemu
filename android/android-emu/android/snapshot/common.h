@@ -124,5 +124,11 @@ constexpr const char* kMappedRamFileDirtyName = "ram.img.dirty";
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
 
+#ifdef AEMU_MIN
+#define SNAPSHOT_METRICS 0
+#else
+#define SNAPSHOT_METRICS 1
+#endif
+
 }  // namespace snapshot
 }  // namespace android
