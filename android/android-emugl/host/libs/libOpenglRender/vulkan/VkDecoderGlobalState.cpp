@@ -251,13 +251,16 @@ public:
         auto fb = FrameBuffer::getFB();
         if (!fb) return res;
 
-        fb->registerProcessCleanupCallback(
-                unbox_VkInstance(boxed),
-                [this, boxed] {
+        if (System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1") {
+          fb->registerProcessCleanupCallback(
+              unbox_VkInstance(boxed),
+              [this, boxed] {
+
                 vkDestroyInstanceImpl(
-                        unbox_VkInstance(boxed),
-                        nullptr);
-                });
+                    unbox_VkInstance(boxed),
+                    nullptr);
+              });
+        }
 
         return res;
     }
@@ -291,7 +294,9 @@ public:
 
         auto instance = unbox_VkInstance(boxed_instance);
 
-        vkDestroyInstanceImpl(instance, pAllocator);
+        if (System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1") {
+          vkDestroyInstanceImpl(instance, pAllocator);
+        }
 
         auto fb = FrameBuffer::getFB();
         if (!fb) return;
