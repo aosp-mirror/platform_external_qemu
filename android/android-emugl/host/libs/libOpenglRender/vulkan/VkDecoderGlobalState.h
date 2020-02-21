@@ -56,6 +56,10 @@ public:
     // Snapshot save/load
     bool snapshotsEnabled() const;
 
+    // Whether to clean up VK instance.
+    // bug 149997534
+    bool vkCleanupEnabled() const;
+
     void save(android::base::Stream* stream);
     void load(android::base::Stream* stream);
 

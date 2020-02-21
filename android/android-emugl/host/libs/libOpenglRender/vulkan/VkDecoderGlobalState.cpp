@@ -95,6 +95,7 @@ public:
         mSnapshotsEnabled =
             emugl::emugl_feature_is_enabled(
                 android::featurecontrol::VulkanSnapshots);
+        mVkCleanupEnabled = System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1";
     }
 
     ~Impl() = default;
@@ -132,6 +133,10 @@ public:
 
     bool snapshotsEnabled() const {
         return mSnapshotsEnabled;
+    }
+
+    bool vkCleanupEnabled() const {
+        return mVkCleanupEnabled;
     }
 
     void save(android::base::Stream* stream) {
@@ -251,13 +256,16 @@ public:
         auto fb = FrameBuffer::getFB();
         if (!fb) return res;
 
-        fb->registerProcessCleanupCallback(
-                unbox_VkInstance(boxed),
-                [this, boxed] {
+        if (vkCleanupEnabled()) {
+          fb->registerProcessCleanupCallback(
+              unbox_VkInstance(boxed),
+              [this, boxed] {
+
                 vkDestroyInstanceImpl(
-                        unbox_VkInstance(boxed),
-                        nullptr);
-                });
+                    unbox_VkInstance(boxed),
+                    nullptr);
+              });
+        }
 
         return res;
     }
@@ -4964,6 +4972,7 @@ private:
     VulkanDispatch* m_vk;
     VkEmulation* m_emu;
     bool mSnapshotsEnabled = false;
+    bool mVkCleanupEnabled = true;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
@@ -5335,6 +5344,10 @@ VkDecoderGlobalState* VkDecoderGlobalState::get() {
 // Snapshots
 bool VkDecoderGlobalState::snapshotsEnabled() const {
     return mImpl->snapshotsEnabled();
+}
+
+bool VkDecoderGlobalState::vkCleanupEnabled() const {
+    return mImpl->vkCleanupEnabled();
 }
 
 void VkDecoderGlobalState::save(android::base::Stream* stream) {
