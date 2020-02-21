@@ -16,6 +16,24 @@
       "revId": "099f15ef23714a0c88295fca337f23d3c1e9d25b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1a87053_331bee71",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1238553
+      },
+      "writtenOn": "2020-02-21T18:43:10Z",
+      "side": 1,
+      "message": "Yes good point, just tested and I don\u0027t see the flakiness here.",
+      "parentUuid": "cde10600_ab13f22d",
+      "revId": "099f15ef23714a0c88295fca337f23d3c1e9d25b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
