@@ -185,7 +185,9 @@ void Quickboot::onLivenessTimer() {
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
                     WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+#ifndef AEMU_MIN
             android_adb_reset_connection();
+#endif
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
             reportAdbConnectionRetries(mAdbConnectionRetries);
@@ -277,9 +279,11 @@ bool Quickboot::load(StringView name) {
         // the same load.
         // Don't try to delete it completely as that is a heavyweight
         // operation and we are in the middle of crashing.
+#ifndef AEMU_MIN
         CrashReporter::get()->addCrashCallback([this, nameStr = name.str()]() {
             Snapshotter::get().onCrashedSnapshot(nameStr.c_str());
         });
+#endif
 
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
