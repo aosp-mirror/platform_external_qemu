@@ -151,38 +151,6 @@ void MediaH264DecoderFfmpeg::resetDecoder() {
     avcodec_open2(mCodecCtx, mCodec, 0);
 }
 
-bool MediaH264DecoderFfmpeg::checkSpsFrame(const uint8_t* frame,
-                                           size_t szBytes) {
-    H264NaluParser::H264NaluType currNaluType =
-            H264NaluParser::getFrameNaluType(frame, szBytes, NULL);
-    if (currNaluType != H264NaluParser::H264NaluType::SPS) {
-        return false;
-    }
-    H264_DPRINT("found sps");
-    return true;
-}
-
-bool MediaH264DecoderFfmpeg::checkIFrame(const uint8_t* frame, size_t szBytes) {
-    H264NaluParser::H264NaluType currNaluType =
-            H264NaluParser::getFrameNaluType(frame, szBytes, NULL);
-    if (currNaluType != H264NaluParser::H264NaluType::CodedSliceIDR) {
-        return false;
-    }
-    H264_DPRINT("found i frame");
-    return true;
-}
-
-bool MediaH264DecoderFfmpeg::checkPpsFrame(const uint8_t* frame,
-                                           size_t szBytes) {
-    H264NaluParser::H264NaluType currNaluType =
-            H264NaluParser::getFrameNaluType(frame, szBytes, NULL);
-    if (currNaluType != H264NaluParser::H264NaluType::PPS) {
-        return false;
-    }
-    H264_DPRINT("found pps");
-    return true;
-}
-
 bool MediaH264DecoderFfmpeg::checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes) {
     // get frame type
     // if the frame is none SPS/PPS, return false
@@ -255,18 +223,18 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
     if (enableSnapshot) {
         std::vector<uint8_t> v;
         v.assign(frame, frame + szBytes);
-        bool hasSps = checkSpsFrame(frame, szBytes);
+        bool hasSps = H264NaluParser::checkSpsFrame(frame, szBytes);
         if (hasSps) {
             mSnapshotState = SnapshotState{};
             mSnapshotState.saveSps(v);
         } else {
-            bool hasPps = checkPpsFrame(frame, szBytes);
+            bool hasPps = H264NaluParser::checkPpsFrame(frame, szBytes);
             if (hasPps) {
                 mSnapshotState.savePps(v);
                 mSnapshotState.savedPackets.clear();
                 mSnapshotState.savedDecodedFrame.data.clear();
             } else {
-                bool isIFrame = checkIFrame(frame, szBytes);
+                bool isIFrame = H264NaluParser::checkIFrame(frame, szBytes);
                 if (isIFrame) {
                     mSnapshotState.savedPackets.clear();
                 }

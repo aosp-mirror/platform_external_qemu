@@ -131,10 +131,6 @@ private:
     void resetDecoder();
     bool checkWhetherConfigChanged(const uint8_t* frame, size_t szBytes);
 
-    bool checkSpsFrame(const uint8_t* frame, size_t szBytes);
-    bool checkPpsFrame(const uint8_t* frame, size_t szBytes);
-    bool checkIFrame(const uint8_t* frame, size_t szBytes);
-
     void oneShotDecode(std::vector<uint8_t>& data, uint64_t pts);
 };  // MediaH264DecoderFfmpeg
 
