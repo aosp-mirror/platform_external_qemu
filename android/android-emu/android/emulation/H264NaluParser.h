@@ -90,6 +90,9 @@ enum class H264NaluType : uint8_t {
 
 static const std::string kNaluTypesStrings[];
 
+static bool checkSpsFrame(const uint8_t* frame, size_t szBytes);
+static bool checkPpsFrame(const uint8_t* frame, size_t szBytes);
+static bool checkIFrame(const uint8_t* frame, size_t szBytes);
 // Returns the description of the H264NaluType.
 static const std::string& naluTypeToString(H264NaluType n);
 // Parses |frame| for the NALU type. |szBytes| is the size of |frame|, |data| will be set to
