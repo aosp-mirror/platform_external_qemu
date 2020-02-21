@@ -63,7 +63,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--verbose"
-                "--gtest_repeat=-1", "--gtest_break_on_failure", "--gtest_filter=StudioDiscoveryTest.pid_file_is_cleaned_in_shared_dir"
+                "--gtest_repeat=-1", "--gtest_break_on_failure", "--gtest_filter=AdbShellStream.handles_null"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -94,7 +94,10 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "@Q", // Pick the image you would like to use
-                "-verbose", // With some additional parameters.
+                "-wipe-data",
+                "-no-direct-adb",
+                "-waterfall", "adb",
+                "-debug-metrics", // With some additional parameters.
             ],
             "linux": {
                 "env": {
