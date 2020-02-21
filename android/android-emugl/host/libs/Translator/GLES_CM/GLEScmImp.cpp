@@ -21,7 +21,6 @@
 #endif
 #define GL_GLEXT_PROTOTYPES
 #include "android/base/memory/LazyInstance.h"
-#include "android/metrics/proto/studio_stats.pb.h"
 #include "GLEScmContext.h"
 #include "GLEScmValidate.h"
 #include "GLEScmUtils.h"
@@ -35,6 +34,7 @@
 #include <GLcommon/FramebufferData.h>
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/metrics.h"
 
 #include <cmath>
 #include <unordered_map>
@@ -60,7 +60,6 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
 static bool vulkanInteropSupported();
 }
 
@@ -92,14 +91,13 @@ static GLESiface  s_glesIface = {
     .restoreTexture                   = NULL,
     .deleteRbo                        = NULL,
     .blitFromCurrentReadBufferANDROID = NULL,
-    .fillGLESUsages = fillGLESUsages,
     .vulkanInteropSupported = vulkanInteropSupported,
     .getSynciv = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>
 
-static android::base::LazyInstance<android_studio::EmulatorGLEScmUsages> gles1usages = {};
+static android::base::LazyInstance<GLES1Usage> gles1usages = {};
 
 extern "C" {
 
@@ -162,10 +160,6 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
     if(ctx) {
         ctx->setShareGroup(grp);
     }
-}
-
-static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
-    usage->mutable_gles_1_usages()->CopyFrom(*gles1usages);
 }
 
 static bool vulkanInteropSupported() {
