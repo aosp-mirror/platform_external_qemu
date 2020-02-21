@@ -1,0 +1,9 @@
+Code-Review+2: Erwin Jansen <jansene@google.com>
+Code-Review+2: Akash Agrawal <akagrawal@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Submitted-by: Erwin Jansen <jansene@google.com>
+Submitted-at: Fri, 21 Feb 2020 22:03:31 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1238755
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
