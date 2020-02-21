@@ -254,16 +254,20 @@ public:
         fb->registerProcessCleanupCallback(
                 unbox_VkInstance(boxed),
                 [this, boxed] {
+
+                AutoLock lock(mLock);
+                fb->lock();
+
                 vkDestroyInstanceImpl(
                         unbox_VkInstance(boxed),
                         nullptr);
+                fb->unlock();
                 });
 
         return res;
     }
 
     void vkDestroyInstanceImpl(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
-        AutoLock lock(mLock);
 
         teardownInstanceLocked(instance);
 
@@ -291,6 +295,7 @@ public:
 
         auto instance = unbox_VkInstance(boxed_instance);
 
+        AutoLock lock(mLock);
         vkDestroyInstanceImpl(instance, pAllocator);
 
         auto fb = FrameBuffer::getFB();
