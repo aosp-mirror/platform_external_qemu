@@ -55,6 +55,7 @@ namespace snapshot {
 static void reportFailedLoad(
         pb::EmulatorQuickbootLoad::EmulatorQuickbootLoadState state,
         FailureReason failureReason) {
+#if SNAPSHOT_METRICS
     MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_load()->set_state(
                 state);
@@ -62,10 +63,12 @@ static void reportFailedLoad(
             mutable_snapshot()->set_load_failure_reason(
                 (pb::EmulatorSnapshotFailureReason)failureReason);
     });
+#endif
 }
 
 static void reportFailedSave(
         pb::EmulatorQuickbootSave::EmulatorQuickbootSaveState state) {
+#if SNAPSHOT_METRICS
     MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_save()->set_state(
                 state);
@@ -73,13 +76,16 @@ static void reportFailedSave(
             mutable_snapshot()->set_save_failure_reason(
                 (pb::EmulatorSnapshotFailureReason)FailureReason::Empty);
     });
+#endif
 }
 
 static void reportAdbConnectionRetries(uint32_t retries) {
+#if SNAPSHOT_METRICS
     MetricsReporter::get().report([retries](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_load()->
             set_adb_connection_retries(retries);
     });
+#endif
 }
 
 constexpr const char* Quickboot::kDefaultBootSnapshot;
@@ -105,6 +111,7 @@ Quickboot::~Quickboot() { }
 
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
+#if SNAPSHOT_METRICS
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
@@ -118,11 +125,13 @@ void Quickboot::reportSuccessfulLoad(StringView name,
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
         Snapshotter::fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 void Quickboot::reportSuccessfulSave(StringView name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
+#if SNAPSHOT_METRICS
     auto stats = Snapshotter::get().getSaveStats(c_str(name), durationMs);
 
     MetricsReporter::get().report([stats, sessionUptimeMs](pb::AndroidStudioEvent* event) {
@@ -133,6 +142,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
         save->set_sesion_uptime_ms(sessionUptimeMs);
         Snapshotter::fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 constexpr int kLivenessTimerTimeoutMs = 100;
@@ -185,7 +195,9 @@ void Quickboot::onLivenessTimer() {
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
                     WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+#ifndef AEMU_MIN
             android_adb_reset_connection();
+#endif
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
             reportAdbConnectionRetries(mAdbConnectionRetries);
