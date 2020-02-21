@@ -13,32 +13,36 @@
 // limitations under the License.
 #include "android/emulation/control/adb/AdbConnection.h"
 
-#include <assert.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <algorithm>
-#include <atomic>
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <assert.h>                                          // for assert
+#include <ctype.h>                                           // for isprint
+#include <stdio.h>                                           // for fprintf
+#include <algorithm>                                         // for min
+#include <atomic>                                            // for atomic
+#include <memory>                                            // for shared_ptr
+#include <type_traits>                                       // for enable_i...
+#include <unordered_map>                                     // for unordere...
+#include <unordered_set>                                     // for unordere...
+#include <utility>                                           // for move, pair
+#include <vector>                                            // for vector
 
-#include "android/base/ArraySize.h"
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/QueueStreambuf.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/emulation/control/adb/adbkey.h"
-#include "emulator/net/AsyncSocketAdapter.h"
+#include "android/base/ArraySize.h"                          // for stringLi...
+#include "android/base/Log.h"                                // for LogStream
+#include "android/base/async/AsyncSocket.h"                  // for AsyncSocket
+#include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
+#include "android/base/files/PathUtils.h"                    // for pj
+#include "android/base/files/QueueStreambuf.h"               // for QueueStr...
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/emulation/control/adb/adbkey.h"            // for adb_auth...
+#include "emulator/net/AsyncSocketAdapter.h"                 // for AsyncSoc...
 
 namespace android {
 namespace base {
-class AsyncSocket;
+class AsyncThreadWithLooper;
 }  // namespace base
+
 namespace emulation {
 struct amessage;
 struct apacket;
@@ -634,6 +638,7 @@ public:
 
         mPacketOffset = 0;
         handlePacket(mIncoming);
+        onRead(socket);
     }
 
     // Called when this socket (re-)establishes a connection
@@ -684,7 +689,7 @@ private:
     std::unordered_map<int32_t, std::shared_ptr<BasicAdbStream>> mActiveStreams;
 
     uint32_t mNextClientId{1};  // Client id generator.
-    int8_t mAuthAttempts{1};
+    int8_t mAuthAttempts{8};
 
     uint32_t mMaxPayloadSize{MAX_PAYLOAD};
     uint32_t mProtocolVersion{A_VERSION_MIN};
@@ -699,6 +704,11 @@ std::shared_ptr<AdbConnection> AdbConnection::connection(int timeoutMs) {
                      << "Connection state: " << gAdbConnection->state();
     }
     return gAdbConnection;
+}
+
+void AdbConnection::setAdbPort(int adbPort) {
+    auto looper = android::base::ThreadLooper::get();
+    setAdbSocket(new AsyncSocket(looper, adbPort));
 }
 
 void AdbConnection::setAdbSocket(AsyncSocketAdapter* socket) {
