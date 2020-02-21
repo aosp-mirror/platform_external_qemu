@@ -87,7 +87,7 @@ service EmulatorController {
 
   // Streams a series of screenshots in the desired format.
   // A new frame will be delivered whenever the device produces a new frame.
-  // (Beware that this can produce a significant amout of data, and that
+  // (Beware that this can produce a significant amount of data, and that
   // certain translations are (png transform) can be costly).
   rpc streamScreenshot(ImageFormat) returns (stream Image) {}
 
@@ -458,7 +458,7 @@ message KeyboardEvent {
   // will do its best to translate the code to an evdev value that
   // will be send to the emulator. This translation is based on
   // the chromium translation tables. See
-  // https://chromium.googlesource.com/chromium/src/+/lkgr/ui/events/keycodes/dom/keycode_converter_data.inc
+  // (this)[https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-grpc/android/emulation/control/keyboard/keycode_converter_data.inc]
   // for details on the translation.
   enum KeyCodeType {
     Usb = 0;
@@ -507,17 +507,22 @@ message KeyboardEvent {
   // You can find an accurate description of valid values
   // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
   //
-  // Note that some keys can result in multiple evdev events that are delivered to the emulator.
-  // for example the Key "A" will result in a a sequence ["Shift", "a"] -> [0x2a, 0x1e]
-  // whereas "a" results in ["a"] -> [0x1e].
+  // Note that some keys can result in multiple evdev events that are delivered
+  // to the emulator. for example the Key "A" will result in a a sequence
+  // ["Shift", "a"] -> [0x2a, 0x1e] whereas "a" results in ["a"] -> [0x1e].
+  //
+  // Not all documented keys are understood by android, and only printable ASCII
+  // characters are properly translated.
   string key = 4;
 
-  // Series of utf8 encoded characters to send to the emulator. Every
-  // character will be translated to an EvDev event type and send to the
-  // emulator as a keypress event. The values in keyCode, eventType,
+  // Series of utf8 encoded characters to send to the emulator. An attempt will
+  // be made to translate every character will an EvDev event type and send to
+  // the emulator as a keypress event. The values in keyCode, eventType,
   // codeType and key will be ignored.
   //
-  // Note that most printable utf-8 characters can be send individually with the "key" param.
+  // Note that most printable ASCII characters can be send individually with the
+  // "key" param. Do not expect arbitrary utf-8 symbols to arrive in the
+  // emulator (most will be ignored).
   string text = 5;
 }
 
