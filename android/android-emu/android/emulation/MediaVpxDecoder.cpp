@@ -58,6 +58,15 @@ void MediaVpxDecoder::handlePing(MediaCodecType type, MediaOperation op, void* p
     }
 }
 
+void MediaVpxDecoder::save(base::Stream* stream) const {
+    // NOT IMPLEMENTED
+}
+
+bool MediaVpxDecoder::load(base::Stream* stream) {
+    // NOT IMPLEMENTED
+    return true;
+}
+
 void MediaVpxDecoder::initVpxContext(void* ptr, MediaCodecType type) {
     assert(type == MediaCodecType::VP8Codec || type == MediaCodecType::VP9Codec);
     mCtx.reset(new vpx_codec_ctx_t);

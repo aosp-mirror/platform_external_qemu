@@ -40,7 +40,10 @@ AddressSpaceDeviceType AddressSpaceHostMediaContext::getDeviceType() const {
 }
 
 void AddressSpaceHostMediaContext::save(base::Stream* stream) const {
-    // TODO: NOT IMPLEMENTED
+    mVpxDecoder.save(stream);
+    if (mH264Decoder != nullptr) {
+        mH264Decoder->save(stream);
+    }
 }
 
 bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
