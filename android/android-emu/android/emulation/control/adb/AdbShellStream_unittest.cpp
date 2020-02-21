@@ -93,6 +93,11 @@ TEST(AdbShellStream, no_read_from_closed_v2) {
     EXPECT_EQ(exitcode, 0);
 }
 
+TEST(AdbShellStream, handles_null) {
+    AdbShellStream adb("foo", nullptr);
+    EXPECT_FALSE(adb.good());
+}
+
 TEST(AdbShellStream, reads_exit_v2) {
     std::stringbuf buf;
     MockAdbConnection fake;

@@ -14,10 +14,10 @@
 // limitations under the License.
 #include "android/emulation/control/adb/AdbShellStream.h"
 
-#include <stdint.h>            // for uint32_t
-#include <algorithm>           // for min
-#include <istream>             // for basic_istream<>::__istream_type, basic...
-#include <iterator>            // for begin, end
+#include <stdint.h>   // for uint32_t
+#include <algorithm>  // for min
+#include <istream>    // for basic_istream<>::__istream_type, basic...
+#include <iterator>   // for begin, end
 
 #include "android/base/Log.h"  // for LOG, LogMessage, LogStream
 
@@ -39,6 +39,10 @@ namespace emulation {
 AdbShellStream::AdbShellStream(std::string service,
                                std::shared_ptr<AdbConnection> connection)
     : mAdb(connection) {
+    // Bad stream..
+    if (!mAdb)
+        return;
+
     mShellV2 = mAdb->hasFeature("shell_v2");
     if (mShellV2) {
         mAdbStream = mAdb->open("shell,v2,raw:" + service);
@@ -47,11 +51,12 @@ AdbShellStream::AdbShellStream(std::string service,
     }
 }
 AdbShellStream::~AdbShellStream() {
-    mAdbStream->close();
+    if (mAdbStream)
+        mAdbStream->close();
 }
 
 bool AdbShellStream::good() {
-    return mAdb->state() == AdbState::connected && mAdbStream &&
+    return mAdb && mAdb->state() == AdbState::connected && mAdbStream &&
            mAdbStream->good();
 }
 
