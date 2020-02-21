@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a251170_607cc213",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-02-21T19:32:11Z",
+      "side": 1,
+      "message": "do you really want it to be dynamic, e.g. some instances have the cleanup registered and some don\u0027t? It may get very confusing if you change the value mid-run. IMO it\u0027s better to cache the variable value on startup, unless there\u0027s a specific expectation - in that case a comment would help",
+      "range": {
+        "startLine": 254,
+        "startChar": 8,
+        "endLine": 254,
+        "endChar": 72
+      },
+      "revId": "ca86abf739d12d3ea6beb02990af9318479a4749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
