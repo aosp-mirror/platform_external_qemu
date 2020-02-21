@@ -34,6 +34,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/globals.h"
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
@@ -582,10 +583,12 @@ bool track(int pid, const std::string snapshot_name) {
             android::base::ThreadLooper::runOnMainLooper(
                     [&snapshot_done, &snapshot_signal, &snapshot_lock]() {
                         D("ready to take snapshot");
+                        gQAndroidVmOperations->vmStop();
                         const AndroidSnapshotStatus result =
                                 androidSnapshot_save("test_failure_snapshot");
                         D("Snapshot done, result %d (expect %d)", result,
                                 SNAPSHOT_STATUS_OK);
+                        gQAndroidVmOperations->vmStart();
                         snapshot_lock.lock();
                         snapshot_done = true;
                         snapshot_signal.broadcastAndUnlock(&snapshot_lock);
