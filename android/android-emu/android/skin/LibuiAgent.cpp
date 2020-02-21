@@ -44,7 +44,8 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         // convertUtf8ToKeyCodeEvents
         [](const unsigned char* text,
            int len,
-           LibuiKeyCodeSendFunc sendFunc) -> bool {
+           LibuiKeyCodeSendFunc sendFunc,
+           void* context) -> bool {
             const auto charmap = skin_charmap_get();
             if (!charmap) {
                 return false;
@@ -52,6 +53,7 @@ static const QAndroidLibuiAgent kLibuiAgent = {
 
             SkinKeycodeBuffer keycodes;
             skin_keycode_buffer_init(&keycodes, (SkinKeyCodeFlushFunc)sendFunc);
+            keycodes.context = context;
 
             const auto end = text + len;
             while (text < end) {
