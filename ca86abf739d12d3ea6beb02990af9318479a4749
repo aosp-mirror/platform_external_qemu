@@ -46,6 +46,30 @@
       "revId": "ca86abf739d12d3ea6beb02990af9318479a4749",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f25babee_b10a6073",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1238553
+      },
+      "writtenOn": "2020-02-21T19:54:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b3c5a85_63a7bb6d",
+      "range": {
+        "startLine": 254,
+        "startChar": 8,
+        "endLine": 254,
+        "endChar": 72
+      },
+      "revId": "ca86abf739d12d3ea6beb02990af9318479a4749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
