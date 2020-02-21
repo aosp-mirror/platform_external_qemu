@@ -14,9 +14,7 @@
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
 #include "android/emulation/address_space_graphics.h"
-#ifndef AEMU_MIN
 #include "android/emulation/address_space_host_media.h"
-#endif
 #include "android/emulation/address_space_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
@@ -235,11 +233,9 @@ private:
         case AddressSpaceDeviceType::Graphics:
             asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
             return DeviceContextPtr(new asg::AddressSpaceGraphicsContext());
-#ifndef AEMU_MIN
         case AddressSpaceDeviceType::Media:
             AS_DEVICE_DPRINT("allocating media context");
             return DeviceContextPtr(new AddressSpaceHostMediaContext(phys_addr, get_address_space_device_control_ops()));
-#endif
         case AddressSpaceDeviceType::Sensors:
             return nullptr;
         case AddressSpaceDeviceType::Power:

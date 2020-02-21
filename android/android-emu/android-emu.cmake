@@ -516,7 +516,15 @@ set(android-emu-min
     android/emulation/address_space_device.cpp
     android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_memory_allocator.cpp
+    android/emulation/address_space_host_media.cpp
+    android/emulation/H264NaluParser.cpp
+    android/emulation/H264PingInfoParser.cpp
     android/emulation/HostmemIdMapping.cpp
+    android/emulation/MediaVpxDecoder.cpp
+    android/emulation/MediaH264DecoderDefault.cpp
+    android/emulation/MediaH264DecoderFfmpeg.cpp
+    android/emulation/MediaH264Decoder.cpp
+    android/emulation/MediaHostRenderer.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/MultiDisplayPipe.cpp
@@ -592,18 +600,22 @@ android_add_library(
   WINDOWS # cmake-format: sortable
           android/opengl/NativeGpuInfo_windows.cpp
           android/snapshot/MemoryWatch_windows.cpp
+          android/emulation/MediaH264DecoderCuvid.cpp
           android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
           android/windows_installer.cpp
   LINUX # cmake-format: sortable
         android/opengl/NativeGpuInfo_linux.cpp
         android/snapshot/MemoryWatch_linux.cpp
+        android/emulation/MediaH264DecoderCuvid.cpp
         android/emulation/dynlink_cuda.cpp
         android/emulation/dynlink_nvcuvid.cpp
   DARWIN # cmake-format: sortable
          android/opengl/NativeGpuInfo_darwin.cpp
          android/snapshot/MemoryWatch_darwin.cpp
          android/opengl/macTouchOpenGL.m
+         android/emulation/MediaH264DecoderVideoToolBox.cpp
+         android/emulation/MediaH264DecoderVideoToolBoxProxy.cpp
          android/snapshot/MacSegvHandler.cpp)
 # Note that these are basically the same as android-emu-shared. We should clean
 # this up
@@ -611,6 +623,8 @@ target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
          emulator-murmurhash
+         FFMPEG::FFMPEG
+         VPX::VPX
          # Protobuf dependencies
          snapshot
          # Prebuilt libraries
