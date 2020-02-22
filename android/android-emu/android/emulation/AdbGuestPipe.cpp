@@ -496,8 +496,8 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
             if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantRead()) {
                 mFdWatcher->dontWantRead();
             }
-            if (count > 0 && mAdbHub->socketWantWrite()) {
-                mFdWatcher->wantWrite();
+            if (mAdbHub->socketWantRead()) {
+                mFdWatcher->wantRead();
             }
         }
         return count;
@@ -540,7 +540,7 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                 stopSocketTraffic();
                 mHostSocket.reset();
             }
-            if (count == PIPE_ERROR_AGAIN) {
+            if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
                 mFdWatcher->dontWantWrite();
             }
             if (count > 0 && mAdbHub->socketWantWrite()) {
