@@ -659,5 +659,12 @@ void MediaH264DecoderVideoToolBox::recreateDecompressionSession() {
     }
 }
 
+void MediaH264DecoderVideoToolBox::save(base::Stream* stream) const {
+}
+
+bool MediaH264DecoderVideoToolBox::load(base::Stream* stream) {
+    return true;
+}
+
 }  // namespace emulation
 }  // namespace android
