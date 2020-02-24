@@ -306,10 +306,16 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
     convert8.UVInterleavedToPlanar(dst);
 
-    if (mParser.version() == 200) {
+    if (mParser.version() / 100 == 2) {
         if (param.hostColorBufferId >= 0) {
-            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth,
-                                          myOutputHeight, dst);
+            int xOutputWidth = (mParser.version() >= 210)
+                                       ? param.hostColorBufferWidth
+                                       : myOutputWidth;
+            int xOutputHeight = (mParser.version() >= 210)
+                                        ? param.hostColorBufferHeight
+                                        : myOutputHeight;
+            mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+                                              xOutputWidth, xOutputHeight, dst);
         }
     }
 

@@ -67,6 +67,8 @@ public:
         // input
         uint64_t hostDecoderId;
         int32_t hostColorBufferId;
+        int32_t hostColorBufferWidth;
+        int32_t hostColorBufferHeight;
 
         // output
         int32_t* pDecoderErrorCode;
@@ -100,6 +102,8 @@ public:
 
 private:
     int32_t parseHostColorBufferId(void* ptr);
+    int32_t parseHostColorBufferWidth(void* ptr);
+    int32_t parseHostColorBufferHeight(void* ptr);
     void* getReturnAddress(void* ptr);
     uint32_t mVersion = 100;
 };

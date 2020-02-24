@@ -398,10 +398,16 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
     if (mParser.version() == 100) {
         uint8_t* dst = param.pDecodedFrame;
         memcpy(dst, mDecodedFrame.data(), mOutBufferSize);
-    } else if (mParser.version() == 200) {
+    } else if (mParser.version() / 100 == 2) {
         if (param.hostColorBufferId >= 0) {
+            int xOutputWidth = (mParser.version() >= 210)
+                                       ? param.hostColorBufferWidth
+                                       : mOutputWidth;
+            int xOutputHeight = (mParser.version() >= 210)
+                                        ? param.hostColorBufferHeight
+                                        : mOutputHeight;
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
-                                              mOutputWidth, mOutputHeight,
+                                              xOutputWidth, xOutputHeight,
                                               mDecodedFrame.data());
         } else {
             uint8_t* dst = param.pDecodedFrame;

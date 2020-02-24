@@ -598,10 +598,17 @@ void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
     *retWidth = mOutputWidth;
     *retHeight = mOutputHeight;
 
-    if (mParser.version() == 200 && param.hostColorBufferId >= 0) {
-        mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
-                                          mOutputWidth, mOutputHeight,
+    if (mParser.version() / 100 == 2 && param.hostColorBufferId >= 0) {
+        int xOutputWidth = (mParser.version() >= 210)
+                                   ? param.hostColorBufferWidth
+                                   : mOutputWidth;
+        int xOutputHeight = (mParser.version() >= 210)
+                                    ? param.hostColorBufferHeight
+                                    : mOutputHeight;
+        mRenderer.renderToHostColorBuffer(param.hostColorBufferId, xOutputWidth,
+                                          xOutputHeight,
                                           mSavedDecodedFrame.data());
+
     } else {
         memcpy(param.pDecodedFrame, mSavedDecodedFrame.data(), mSavedDecodedFrame.size());;
     }

@@ -101,6 +101,20 @@ int32_t H264PingInfoParser::parseHostColorBufferId(void* ptr) {
     return colorBufferId;
 }
 
+int32_t H264PingInfoParser::parseHostColorBufferWidth(void* ptr) {
+    // Guest will pass us the hsot color buffer id to send decoded frame to
+    uint8_t* xptr = (uint8_t*)ptr;
+    int32_t colorBufferWidth = *(int32_t*)(xptr + 16 + 8);
+    return colorBufferWidth;
+}
+
+int32_t H264PingInfoParser::parseHostColorBufferHeight(void* ptr) {
+    // Guest will pass us the hsot color buffer id to send decoded frame to
+    uint8_t* xptr = (uint8_t*)ptr;
+    int32_t colorBufferHeight = *(int32_t*)(xptr + 16 + 8 + 8);
+    return colorBufferHeight;
+}
+
 void* H264PingInfoParser::getReturnAddress(void* ptr) {
     uint8_t* xptr = (uint8_t*)ptr;
     void* pint = (void*)(xptr + 256);
@@ -109,8 +123,12 @@ void* H264PingInfoParser::getReturnAddress(void* ptr) {
 
 void H264PingInfoParser::parseGetImageParams(void* ptr, GetImageParam& param) {
     param.hostDecoderId = parseHostDecoderId(ptr);
-    if (mVersion == 200) {
+    if (mVersion / 100 == 2) {
         param.hostColorBufferId = parseHostColorBufferId(ptr);
+        if (mVersion >= 210) {
+            param.hostColorBufferWidth = parseHostColorBufferWidth(ptr);
+            param.hostColorBufferHeight = parseHostColorBufferHeight(ptr);
+        }
     }
     uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
     param.pDecoderErrorCode = (int*)(retptr);
