@@ -356,7 +356,6 @@ void AdbHub::pushToRecvQueue(apacket&& packet) {
     mRecvFromHostQueue.push(std::move(packet));
     DD("Wake pipe read");
     mWantRecv = true;
-    mWakePipe(PIPE_WAKE_READ);
 }
 
 AdbProxy* AdbHub::onNewConnection(const apacket& requestPacket,
