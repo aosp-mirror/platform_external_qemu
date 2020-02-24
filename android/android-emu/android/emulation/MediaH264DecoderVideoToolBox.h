@@ -124,7 +124,7 @@ private:
     unsigned int mOutputWidth = 0;
     unsigned int mWidth = 0;
     unsigned int mHeight = 0;
-    PixelFormat mOutPixFmt; 
+    PixelFormat mOutPixFmt;
     // The calculated size of the outHeader buffer size allocated in the guest.
     // It should be sizeY + (sizeUV * 2), where:
     //  sizeY = outWidth * outHeight,
