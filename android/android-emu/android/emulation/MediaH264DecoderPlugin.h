@@ -93,15 +93,25 @@ public:
         void saveSps(std::vector<uint8_t> xsps) { sps = std::move(xsps); }
 
         void savePps(std::vector<uint8_t> xpps) { pps = std::move(xpps); }
-        void savePacket(std::vector<uint8_t> data, uint64_t pts = 0) {
+        bool savePacket(std::vector<uint8_t> data, uint64_t pts = 0) {
+            if (pts > 0 && savedPackets.size() > 0 &&
+                pts == savedPackets.back().pts) {
+                return false;
+            }
             PacketInfo pkt{data, pts};
             savedPackets.push_back(std::move(pkt));
+            return true;
         }
-        void savePacket(const uint8_t* frame, size_t size, uint64_t pts = 0) {
+        bool savePacket(const uint8_t* frame, size_t size, uint64_t pts = 0) {
+            if (pts > 0 && savedPackets.size() > 0 &&
+                pts == savedPackets.back().pts) {
+                return false;
+            }
             std::vector<uint8_t> vec;
             vec.assign(frame, frame+size);
             PacketInfo pkt{vec, pts};
             savedPackets.push_back(std::move(pkt));
+            return true;
         }
 
         void saveDecodedFrame(std::vector<uint8_t> data,
