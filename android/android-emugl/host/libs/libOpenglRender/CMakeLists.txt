@@ -78,6 +78,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ChannelStream.cpp
       ColorBuffer.cpp
+      EdidGenerator.cpp
       FbConfig.cpp
       FenceSync.cpp
       FrameBuffer.cpp
@@ -136,6 +137,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ChannelStream.cpp
       ColorBuffer.cpp
+      EdidGenerator.cpp
       FbConfig.cpp
       FenceSync.cpp
       FrameBuffer.cpp
