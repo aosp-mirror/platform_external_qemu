@@ -82,6 +82,36 @@ const std::string& H264NaluParser::naluTypeToString(H264NaluType n) {
     return kNaluTypesStrings[idx];
 }
 
+bool H264NaluParser::checkSpsFrame(const uint8_t* frame, size_t szBytes) {
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(frame, szBytes, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::SPS) {
+        return false;
+    }
+    H264_INFO("found sps");
+    return true;
+}
+
+bool H264NaluParser::checkIFrame(const uint8_t* frame, size_t szBytes) {
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(frame, szBytes, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::CodedSliceIDR) {
+        return false;
+    }
+    H264_INFO("found i frame");
+    return true;
+}
+
+bool H264NaluParser::checkPpsFrame(const uint8_t* frame, size_t szBytes) {
+    H264NaluParser::H264NaluType currNaluType =
+            H264NaluParser::getFrameNaluType(frame, szBytes, NULL);
+    if (currNaluType != H264NaluParser::H264NaluType::PPS) {
+        return false;
+    }
+    H264_INFO("found pps");
+    return true;
+}
+
 H264NaluParser::H264NaluType H264NaluParser::getFrameNaluType(const uint8_t* frame, size_t szBytes, uint8_t** data) {
     if (szBytes < 4) {
         H264_INFO("Not enough bytes for start code header and NALU type");

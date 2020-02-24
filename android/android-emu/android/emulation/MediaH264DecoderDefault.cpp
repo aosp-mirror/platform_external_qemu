@@ -237,7 +237,27 @@ bool MediaH264DecoderDefault::load(base::Stream* stream) {
                     new MediaH264DecoderFfmpeg(id, H264PingInfoParser(100));
             decoder->load(stream);
             mDecoders[id] = decoder;
+            continue;
         }
+#ifdef __APPLE__
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_VIDEO_TOOL_BOX_PROXY) {
+            MediaH264DecoderVideoToolBoxProxy* decoder =
+                    new MediaH264DecoderVideoToolBoxProxy(id, H264PingInfoParser(100));
+            decoder->load(stream);
+            mDecoders[id] = decoder;
+            continue;
+        }
+#else
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_CUVID) {
+            MediaH264DecoderCuvid* decoder =
+                    new MediaH264DecoderCuvid(id, H264PingInfoParser(100));
+            decoder->load(stream);
+            mDecoders[id] = decoder;
+            continue;
+        }
+#endif
+        fprintf(stderr, "Error, un-implemented %s %d\n", __func__, __LINE__);
+        exit(1);
     }
     return true;
 }

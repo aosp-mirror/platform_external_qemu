@@ -88,12 +88,19 @@ public:
         std::vector<uint8_t> pps;  // pps NALU
         std::vector<PacketInfo> savedPackets;
         FrameInfo savedDecodedFrame;  // only one or nothing
+        std::vector<FrameInfo> savedFrames;
 
         void saveSps(std::vector<uint8_t> xsps) { sps = std::move(xsps); }
 
         void savePps(std::vector<uint8_t> xpps) { pps = std::move(xpps); }
         void savePacket(std::vector<uint8_t> data, uint64_t pts = 0) {
             PacketInfo pkt{data, pts};
+            savedPackets.push_back(std::move(pkt));
+        }
+        void savePacket(const uint8_t* frame, size_t size, uint64_t pts = 0) {
+            std::vector<uint8_t> vec;
+            vec.assign(frame, frame+size);
+            PacketInfo pkt{vec, pts};
             savedPackets.push_back(std::move(pkt));
         }
 
@@ -104,6 +111,7 @@ public:
                               uint64_t pts = 0) {
             FrameInfo frame{data, width, height, xcolor, pts};
             savedDecodedFrame = std::move(frame);
+            savedFrames.push_back(savedDecodedFrame);
         }
 
         void saveVec(base::Stream* stream,

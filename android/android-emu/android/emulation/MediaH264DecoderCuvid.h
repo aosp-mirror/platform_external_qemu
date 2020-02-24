@@ -52,6 +52,11 @@ public:
     explicit MediaH264DecoderCuvid(uint64_t id, H264PingInfoParser parser);
     virtual ~MediaH264DecoderCuvid();
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
+    virtual int type() const override { return PLUGIN_TYPE_CUVID; }
+
 private:
     void initH264ContextInternal(unsigned int width,
                                  unsigned int height,
@@ -132,10 +137,10 @@ private:
     // and output address is only available in getImage().
     // TODO: this should be set to the output address to avoid
     // extra copying
-    std::list<int> mSavedW;
-    std::list<int> mSavedH;
-    std::list<uint64_t> mSavedPts;
-    std::list<std::vector<uint8_t>> mSavedFrames;
+    mutable std::list<int> mSavedW;
+    mutable std::list<int> mSavedH;
+    mutable std::list<uint64_t> mSavedPts;
+    mutable std::list<std::vector<uint8_t>> mSavedFrames;
     std::mutex mFrameLock;
 
     // cuda stuff
@@ -144,6 +149,16 @@ private:
     CUvideoparser mCudaParser = nullptr;
     CUvideodecoder mCudaDecoder = nullptr;
 
+private:
+    bool mIsLoadingFromSnapshot = false;
+    mutable SnapshotState mSnapshotState;
+    void oneShotDecode(std::vector<uint8_t>& data, uint64_t pts);
+
+    void decodeFrameInternal(uint64_t* pRetSzBytes,
+                             int32_t* pRetErr,
+                             const uint8_t* frame,
+                             size_t szBytes,
+                             uint64_t inputPts);
 };  // MediaH264DecoderCuvid
 }  // namespace emulation
 }  // namespace android
