@@ -238,9 +238,18 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
                 if (isIFrame) {
                     mSnapshotState.savedPackets.clear();
                 }
-                mSnapshotState.savePacket(std::move(v), inputPts);
-                H264_DPRINT("saving packet; total is %d",
+                const bool saveOK = mSnapshotState.savePacket(std::move(v), inputPts);
+                if (saveOK) {
+                    H264_DPRINT("saving packet; total is %d",
                             (int)(mSnapshotState.savedPackets.size()));
+                } else {
+                    H264_DPRINT("saving packet; has duplicate, skip; total is %d",
+                            (int)(mSnapshotState.savedPackets.size()));
+                    *retSzBytes = szBytes;
+                    *retErr = (int32_t)h264Err;
+                    mImageReady = true;
+                    return;
+                }
             }
         }
     }
@@ -279,7 +288,6 @@ void MediaH264DecoderFfmpeg::decodeFrameInternal(DecodeFrameParam& param) {
     mFrameFormatChanged = false;
     ++mNumDecodedFrame;
     copyFrame();
-    mOutputPts = mFrame->pts;
     H264_DPRINT("%s: got frame in decode mode", __func__);
     mImageReady = true;
 }
@@ -322,6 +330,7 @@ void MediaH264DecoderFfmpeg::copyFrame() {
     mColorRange = mFrame->color_range;
     mColorTransfer = mFrame->color_trc;
     mColorSpace = mFrame->colorspace;
+    mOutputPts = mFrame->pts;
     H264_DPRINT("copied Frame and it has presentation time at %lld", (long long)(mFrame->pts));
     H264_DPRINT("Frame primary %d range %d transfer %d space %d", mFrame->color_primaries,
             mFrame->color_range, mFrame->color_trc, mFrame->colorspace);
@@ -378,7 +387,6 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
             H264_DPRINT("%s: got frame in flush mode retrun code %d", __func__, retframe);
             //now copy to mDecodedFrame
             copyFrame();
-            mOutputPts = mFrame->pts;
             mImageReady = true;
         } else {
             H264_DPRINT("%s: no new frame yet", __func__);
@@ -411,6 +419,7 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
 
     mImageReady = false;
     *retErr = mOutBufferSize;
+    H264_DPRINT("getImage %p done", ptr);
 }
 
 void MediaH264DecoderFfmpeg::save(base::Stream* stream) const {
@@ -442,7 +451,7 @@ void MediaH264DecoderFfmpeg::oneShotDecode(std::vector<uint8_t>& data,
     mPacket.data = (unsigned char*)(data.data());
     mPacket.size = data.size();
     mPacket.pts = pts;
-    H264_DPRINT("decoding pts %lld", (long long)pts);
+    H264_DPRINT("decoding pts %lld packet size %d", (long long)pts, (int)data.size());
     avcodec_send_packet(mCodecCtx, &mPacket);
     avcodec_receive_frame(mCodecCtx, mFrame);
 }
@@ -474,6 +483,7 @@ bool MediaH264DecoderFfmpeg::load(base::Stream* stream) {
                     PacketInfo& pkt = mSnapshotState.savedPackets[i];
                     oneShotDecode(pkt.data, pkt.pts);
                 }
+                copyFrame(); //save the last frame
             }
         }
     }
@@ -492,6 +502,7 @@ bool MediaH264DecoderFfmpeg::load(base::Stream* stream) {
     } else {
         mImageReady = false;
     }
+    H264_DPRINT("Done loading snapshots frames\n\n");
     return true;
 }
 
