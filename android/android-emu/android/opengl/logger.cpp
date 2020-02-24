@@ -85,6 +85,9 @@ OpenGLLogger* OpenGLLogger::get() {
 }
 
 OpenGLLogger::OpenGLLogger() {
+#ifdef AEMU_MIN
+    return;
+#else
     const std::string& data_dir =
         CrashReporter::get()->getDataExchangeDir();
     mFileName = PathUtils::join(data_dir,
@@ -93,6 +96,7 @@ OpenGLLogger::OpenGLLogger() {
     mFineLogFileName = PathUtils::join(data_dir,
                                        "opengl_cxt_log.txt");
     mFineLogFileHandle.open(mFineLogFileName, std::ios::app);
+#endif
 }
 
 OpenGLLogger::OpenGLLogger(const char* filename) :
@@ -184,16 +188,18 @@ void OpenGLLogger::stopFineLogLocked() {
                   return x.first < y.first;
               });
 
-    for (const auto& entry : mFineLog) {
-        // The fine log does not print newlines
-        // as it is used with the opengl debug
-        // printout in emugl, which adds
-        // newlines of its own.
-        mFineLogFileHandle << entry.second;
-    }
-    mFineLogFileHandle.close();
-    if (!mFineLog.empty()) {
-        fprintf(stderr, "done\n");
+    if (mFineLogFileHandle) {
+        for (const auto& entry : mFineLog) {
+            // The fine log does not print newlines
+            // as it is used with the opengl debug
+            // printout in emugl, which adds
+            // newlines of its own.
+            mFineLogFileHandle << entry.second;
+        }
+        mFineLogFileHandle.close();
+        if (!mFineLog.empty()) {
+            fprintf(stderr, "done\n");
+        }
     }
     mFineLog.clear();
 }

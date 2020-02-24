@@ -22,7 +22,11 @@
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
+
+#if SNAPSHOT_METRICS
 #include "android/metrics/proto/studio_stats.pb.h"
+#endif
+
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/PathUtils.h"
@@ -51,6 +55,8 @@ extern bool userSettingIsDontSaveSnapshot();
 
 namespace android {
 namespace snapshot {
+
+#if SNAPSHOT_METRICS
 
 static void reportFailedLoad(
         pb::EmulatorQuickbootLoad::EmulatorQuickbootLoadState state,
@@ -81,6 +87,13 @@ static void reportAdbConnectionRetries(uint32_t retries) {
             set_adb_connection_retries(retries);
     });
 }
+#else
+
+#define reportFailedLoad(...)
+#define reportFailedSave(...)
+#define reportAdbConnectionRetries(...)
+
+#endif
 
 constexpr const char* Quickboot::kDefaultBootSnapshot;
 static Quickboot* sInstance = nullptr;
@@ -105,6 +118,7 @@ Quickboot::~Quickboot() { }
 
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
+#if SNAPSHOT_METRICS
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
@@ -118,11 +132,13 @@ void Quickboot::reportSuccessfulLoad(StringView name,
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
         Snapshotter::fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 void Quickboot::reportSuccessfulSave(StringView name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
+#if SNAPSHOT_METRICS
     auto stats = Snapshotter::get().getSaveStats(c_str(name), durationMs);
 
     MetricsReporter::get().report([stats, sessionUptimeMs](pb::AndroidStudioEvent* event) {
@@ -133,6 +149,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
         save->set_sesion_uptime_ms(sessionUptimeMs);
         Snapshotter::fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 constexpr int kLivenessTimerTimeoutMs = 100;
@@ -185,7 +202,9 @@ void Quickboot::onLivenessTimer() {
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
                     WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+#ifndef AEMU_MIN
             android_adb_reset_connection();
+#endif
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
             reportAdbConnectionRetries(mAdbConnectionRetries);
@@ -277,9 +296,11 @@ bool Quickboot::load(StringView name) {
         // the same load.
         // Don't try to delete it completely as that is a heavyweight
         // operation and we are in the middle of crashing.
+#ifndef AEMU_MIN
         CrashReporter::get()->addCrashCallback([this, nameStr = name.str()]() {
             Snapshotter::get().onCrashedSnapshot(nameStr.c_str());
         });
+#endif
 
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
