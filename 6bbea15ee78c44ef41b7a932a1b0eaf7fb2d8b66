@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e513e679_0c202fb3",
+        "filename": "android/android-emu/android/emulation/MediaH264DecoderPlugin.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-02-24T22:39:30Z",
+      "side": 1,
+      "message": "I think this is redundant, since you already checked pts \u003e 0 and are comparing pts \u003d\u003d savedPackets.back().pts. Same for below as well.",
+      "range": {
+        "startLine": 98,
+        "startChar": 16,
+        "endLine": 98,
+        "endChar": 43
+      },
+      "revId": "6bbea15ee78c44ef41b7a932a1b0eaf7fb2d8b66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
