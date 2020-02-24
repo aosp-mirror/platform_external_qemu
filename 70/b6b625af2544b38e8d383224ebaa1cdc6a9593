@@ -1,0 +1,9 @@
+Verified+1: Bo Hu <bohu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Code-Review+2: Bo Hu <bohu@google.com>
+Submitted-by: Bo Hu <bohu@google.com>
+Submitted-at: Mon, 24 Feb 2020 17:07:36 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1242894
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
