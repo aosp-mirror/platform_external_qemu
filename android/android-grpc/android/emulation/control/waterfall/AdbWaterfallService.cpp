@@ -69,7 +69,7 @@ static std::string shellStr(const ::waterfall::Cmd& cmd) {
 
 class WaterfallAdbImpl final : public waterfall::Waterfall::Service {
 public:
-    WaterfallAdbImpl() = default;
+    WaterfallAdbImpl() { LOG(INFO) << "Active!"; };
 
     Status Exec(ServerContext* context,
                 ::grpc::ServerReaderWriter<::waterfall::CmdProgress,

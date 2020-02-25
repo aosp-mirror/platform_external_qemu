@@ -52,13 +52,6 @@
             ##__VA_ARGS__)
 #endif
 
-/* Encodes |key| in the Android RSA public key binary format and stores the
- * bytes in |key_buffer|. |key_buffer| should be of size at least
- * |ANDROID_PUBKEY_ENCODED_SIZE|.
- *
- * Returns true if successful, false on error.
- */
-bool android_pubkey_encode(const RSA* key, uint8_t* key_buffer, size_t size);
 
 using android::base::PathUtils;
 using android::base::System;
@@ -71,8 +64,22 @@ static_assert(ANDROID_PUBKEY_MODULUS_SIZE % 4 == 0,
 constexpr const int ANDROID_PUBKEY_MODULUS_SIZE_WORDS =
         ANDROID_PUBKEY_MODULUS_SIZE / 4;
 
+
+namespace {
+std::string get_user_info() {
+    std::string hostname = System::get()->getEnvironmentVariable("HOSTNAME");
+    if (hostname.empty()) hostname = "unknown";
+
+    std::string username;
+    if (getenv("LOGNAME")) username = getenv("LOGNAME");
+    if (username.empty()) hostname = "unknown";
+    return " " + username + "@" + hostname;
+}
+
+}
+
 // From ${AOSP}/system/core/adb/client/auth.cpp
-static bool calculate_public_key(std::string* out, RSA* private_key) {
+bool calculate_public_key(std::string* out, RSA* private_key) {
     uint8_t binary_key_data[ANDROID_PUBKEY_ENCODED_SIZE];
     if (!android_pubkey_encode(private_key, binary_key_data,
                                sizeof(binary_key_data))) {
@@ -86,11 +93,12 @@ static bool calculate_public_key(std::string* out, RSA* private_key) {
         return false;
     }
 
-    std::vector<char> buffer(expected_length);
+    out->resize(expected_length);
     size_t actual_length =
-            EVP_EncodeBlock(reinterpret_cast<uint8_t*>(buffer.data()),
+            EVP_EncodeBlock((uint8_t*) out->data(),
                             binary_key_data, sizeof(binary_key_data));
-    out->assign(buffer.data(), actual_length);
+    out->resize(actual_length);
+    out->append(get_user_info());
     return true;
 }
 

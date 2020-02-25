@@ -13,32 +13,37 @@
 // limitations under the License.
 #include "android/emulation/control/adb/AdbConnection.h"
 
-#include <assert.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <algorithm>
-#include <atomic>
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <assert.h>  // for assert
+#include <ctype.h>   // for isprint
+#include <stdio.h>   // for fprintf
 
-#include "android/base/ArraySize.h"
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/QueueStreambuf.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/emulation/control/adb/adbkey.h"
-#include "emulator/net/AsyncSocketAdapter.h"
+#include <algorithm>      // for min
+#include <atomic>         // for atomic
+#include <memory>         // for shared_ptr
+#include <type_traits>    // for enable_i...
+#include <unordered_map>  // for unordere...
+#include <unordered_set>  // for unordere...
+#include <utility>        // for move, pair
+#include <vector>         // for vector
+
+#include "android/base/ArraySize.h"                          // for stringLi...
+#include "android/base/Log.h"                                // for LogStream
+#include "android/base/async/AsyncSocket.h"                  // for AsyncSocket
+#include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
+#include "android/base/files/PathUtils.h"                    // for pj
+#include "android/base/files/QueueStreambuf.h"               // for QueueStr...
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/emulation/control/adb/adbkey.h"            // for adb_auth...
+#include "emulator/net/AsyncSocketAdapter.h"                 // for AsyncSoc...
 
 namespace android {
 namespace base {
-class AsyncSocket;
+class AsyncThreadWithLooper;
 }  // namespace base
+
 namespace emulation {
 struct amessage;
 struct apacket;
@@ -92,6 +97,9 @@ using emulator::net::AsyncSocketAdapter;
 constexpr size_t MAX_PAYLOAD_V1 = 4 * 1024;
 constexpr size_t MAX_PAYLOAD = 1024 * 1024;
 constexpr size_t RECV_BUFFER_SIZE = 512;
+
+// True if we disable to the internal bridge.
+static bool sAdbInternalDisabled = false;
 
 enum class AdbWireMessage {
     A_SYNC = 0x434e5953,
@@ -373,6 +381,11 @@ public:
     std::shared_ptr<AdbStream> open(const std::string& id,
                                     uint32_t timeoutMs) override {
         D("Open %s, :%d", id.c_str(), timeoutMs);
+        if (mState == AdbState::failed) {
+            LOG(INFO) << "No proper keys installed, refusing to "
+                         "connect, adb direct is disabled.";
+            return std::make_shared<BasicAdbStream>(nullptr);
+        }
         // Hand out "bad" streams on closed connections that we are not yet
         // establishing.
         if (!connectToEmulator(timeoutMs)) {
@@ -468,6 +481,12 @@ public:
 
     void setState(const AdbState newState) {
         base::AutoLock lock(mStateLock);
+        if (mState == AdbState::failed) {
+            LOG(VERBOSE) << "We are in a failed state.. We give up.";
+            sAdbInternalDisabled = true;
+            return;
+        }
+
         LOG(VERBOSE) << "Adb transition " << mState << " -> " << newState;
         mState = newState;
         mStateChange = System::get()->getUnixTimeUs();
@@ -547,6 +566,18 @@ public:
     void sendPublicKeyToDevice() {
         // So we have a mismatch between our private key and the pub. key inside
         // the emulator.
+        // Currently that means we get into a fight with potential other ADB
+        // connections b/150160590.. For now we will just completely disable
+        // ourselves and give up the fight.
+        setState(AdbState::failed);
+        mSocket->close();
+        LOG(ERROR) << "We are not offering to install a public key due to "
+                      "b/150160590, direct bridge disabled.\n"
+                      "Depending on your system image you might experience ADB "
+                      "connection problems. If you do restart the image with "
+                      "-wipe-data flag.";
+        return;
+
         auto privkey = getPrivateAdbKeyPath();
         if (privkey.empty()) {
             LOG(WARNING) << "No private key exists, we will have to "
@@ -634,6 +665,7 @@ public:
 
         mPacketOffset = 0;
         handlePacket(mIncoming);
+        onRead(socket);
     }
 
     // Called when this socket (re-)establishes a connection
@@ -684,7 +716,7 @@ private:
     std::unordered_map<int32_t, std::shared_ptr<BasicAdbStream>> mActiveStreams;
 
     uint32_t mNextClientId{1};  // Client id generator.
-    int8_t mAuthAttempts{1};
+    int8_t mAuthAttempts{8};
 
     uint32_t mMaxPayloadSize{MAX_PAYLOAD};
     uint32_t mProtocolVersion{A_VERSION_MIN};
@@ -699,6 +731,15 @@ std::shared_ptr<AdbConnection> AdbConnection::connection(int timeoutMs) {
                      << "Connection state: " << gAdbConnection->state();
     }
     return gAdbConnection;
+}
+
+bool AdbConnection::failed() {
+    return sAdbInternalDisabled;
+}
+
+void AdbConnection::setAdbPort(int adbPort) {
+    auto looper = android::base::ThreadLooper::get();
+    setAdbSocket(new AsyncSocket(looper, adbPort));
 }
 
 void AdbConnection::setAdbSocket(AsyncSocketAdapter* socket) {

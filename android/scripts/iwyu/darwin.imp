@@ -9,6 +9,7 @@
 { include: ['<malloc/_malloc.h>', 'private',  '"android/base/memory/MallocUsableSize.h"', 'public'] },
 { include: ['<sys/syslimits.h>', 'private',  '<limits.h>', 'public'] },
 { include: ['<sys/proc.h>', 'private',  '<sys/types.h>', 'public'] },
+{ include: ['<sys/errno.h>', 'private',  '<errno.h>', 'public'] },
 { include: ['<sys/unistd.h>', 'private',  '<unistd.h>', 'public'] },
 { include: ['<sys/fcntl.h>', 'private',  '<fcntl.h>', 'public'] },
 { include: ['<sys/dirent.h>', 'private',  '<dirent.h>', 'public'] },

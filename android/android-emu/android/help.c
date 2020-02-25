@@ -1845,11 +1845,10 @@ help_legacy_fake_camera(stralloc_t* out)
 
 
 static void
-help_direct_adb(stralloc_t* out)
+help_no_direct_adb(stralloc_t* out)
 {
     PRINTF(
-    "  Use an internal ADB bridge versus the external adb bridge.\n"
-    "  currently experimental.\n\n"
+    "  Disables the internal ADB bridge and use the external adb bridge.\n"
     );
 }
 #define  help_no_skin   NULL
