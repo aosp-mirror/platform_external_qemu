@@ -367,8 +367,6 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
     if (proxyCount >= 0) {
         mAdbHub.reset(new AdbHub());
         mAdbHub->onLoad(stream);
-        mAdbHub->setWakePipeFunc(
-                [this](int wakeFlag) { signalWake(wakeFlag); });
     }
 }
 
@@ -488,7 +486,6 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
         }
         if (needsHubTranslation()) {
             if (count == PIPE_ERROR_IO) {
-                D("onGuestRecv PIPE_ERROR_IO");
                 mState = State::ClosedByHost;
                 stopSocketTraffic();
                 mHostSocket.reset();
@@ -496,8 +493,8 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
             if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantRead()) {
                 mFdWatcher->dontWantRead();
             }
-            if (count > 0 && mAdbHub->socketWantWrite()) {
-                mFdWatcher->wantWrite();
+            if (mAdbHub->socketWantRead()) {
+                mFdWatcher->wantRead();
             }
         }
         return count;
@@ -540,10 +537,10 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                 stopSocketTraffic();
                 mHostSocket.reset();
             }
-            if (count == PIPE_ERROR_AGAIN) {
+            if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
                 mFdWatcher->dontWantWrite();
             }
-            if (count > 0 && mAdbHub->socketWantWrite()) {
+            if (mAdbHub->socketWantWrite()) {
                 mFdWatcher->wantWrite();
             }
         }
@@ -566,14 +563,34 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
 
 void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     DD("%s: [%p] flags=%x (%d)", __func__, this, (unsigned)flags, flags);
-    if (needsHubTranslation() || !mHostSocket.valid()) {
+    if (!mHostSocket.valid()) {
         return;
     }
-    if (flags & PIPE_WAKE_READ) {
-        mFdWatcher->wantRead();
-    }
-    if (flags & PIPE_WAKE_WRITE) {
-        mFdWatcher->wantWrite();
+    if (needsHubTranslation()) {
+        int hubWakeFlags = mAdbHub->pipeWakeFlags();
+        // If guest read/write would block, signal host socket event to
+        // clear/fill the internal buffer.
+        if (flags & PIPE_WAKE_READ) {
+            if (!(hubWakeFlags & PIPE_WAKE_READ)) {
+                mFdWatcher->wantRead();
+            }
+        }
+        if (flags & PIPE_WAKE_WRITE) {
+            if (!(hubWakeFlags & PIPE_WAKE_WRITE)) {
+                mFdWatcher->wantWrite();
+            }
+        }
+        flags &= hubWakeFlags;
+        if (flags) {
+            signalWake(flags);
+        }
+    } else {
+        if (flags & PIPE_WAKE_READ) {
+            mFdWatcher->wantRead();
+        }
+        if (flags & PIPE_WAKE_WRITE) {
+            mFdWatcher->wantWrite();
+        }
     }
 }
 
@@ -655,9 +672,7 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
             mState = State::ClosedByHost;
             resetConnection();
         });
-        // TODO: track PIPE_ERROR_AGAIN
         if (mState != State::ClosedByHost) {
-            // AdbHub might want to send/recv packets
             if (mAdbHub->socketWantRead()) {
                 mFdWatcher->wantRead();
             } else {
@@ -762,7 +777,7 @@ static int parseMsgSize(const char* msg) {
 
 int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                                   int numBuffers) {
-    D("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
     CHECK(mState == State::ProxyingData);
     int result = 0;
 #ifdef _DEBUG
@@ -898,8 +913,6 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                     DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
                     if (needsHubTranslation()) {
                         mAdbHub.reset(new AdbHub());
-                        mAdbHub->setWakePipeFunc(
-                                [this](int wakeFlag) { signalWake(wakeFlag); });
                         if (mAdbHub->socketWantRead()) {
                             mFdWatcher->wantRead();
                         }

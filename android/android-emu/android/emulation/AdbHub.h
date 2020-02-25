@@ -41,7 +41,6 @@ namespace emulation {
 // disconnecting the guest.
 class AdbHub {
 public:
-    typedef std::function<void(int)> WakePipeFunc;
     void onSave(android::base::Stream* stream);
     void onLoad(android::base::Stream* stream);
     int onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers);
@@ -49,7 +48,6 @@ public:
     // Only used on snapshot to figure out if we should snapshot this pipe,
     // and in unit tests.
     int getProxyCount();
-    void setWakePipeFunc(WakePipeFunc wakePipe);
     unsigned onGuestPoll() const;
     void onHostSocketEvent(int fd,
                            unsigned events,
@@ -89,7 +87,6 @@ private:
     apacket mCurrentHostRecvPacket;
     size_t mCurrentHostRecvPacketPst = 0;
 
-    WakePipeFunc mWakePipe = nullptr;
     emulation::apacket mCnxnPacket;
     bool mShouldReconnect = false;
 };
