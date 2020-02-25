@@ -43,9 +43,7 @@ MediaHostRenderer::MediaHostRenderer() {
 
 const uint32_t kGlUnsignedByte = 0x1401;
 
-constexpr uint32_t kFwkFormatYV12 = 1;
-constexpr uint32_t kFwkFormatYUV420888 = 2;
-constexpr uint32_t kFwkFormatNV12 = 3;
+constexpr uint32_t kGL_RGBA8 = 0x8058;
 
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
                                                 unsigned int outputWidth,
@@ -59,7 +57,7 @@ void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
     }
     if (mVirtioGpuOps) {
         mVirtioGpuOps->update_color_buffer(hostColorBufferId, 0, 0, outputWidth,
-                                           outputHeight, kFwkFormatYUV420888,
+                                           outputHeight, kGL_RGBA8,
                                            kGlUnsignedByte, decodedFrame);
     } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
