@@ -138,8 +138,7 @@
             "type": "lldb",
             "request": "attach",
             // Replace this with the process executable you want to attach to
-            "program": "${command:cmake.launchTargetPath}",
-            "pid": 80501, // replace pid with your real pid
+            "pid": 40203, // replace pid with your real pid
             // Ignore signal SIGUSR1
             "postRunCommands": [
                 "pro hand -p true -s false SIGUSR1",

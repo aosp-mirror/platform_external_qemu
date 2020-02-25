@@ -125,6 +125,9 @@ public:
     // initializing it with its own socket. The thread looper associated
     // with this thread will be used.
     static void setAdbPort(int port);
+
+    // We cannot offer auth keys from different connections. b/150160590
+    static bool failed();
 };
 
 // Adb uses the shell protocol when making use of the shell service v2.

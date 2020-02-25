@@ -13,17 +13,18 @@
 // limitations under the License.
 #include "android/emulation/control/adb/AdbConnection.h"
 
-#include <assert.h>                                          // for assert
-#include <ctype.h>                                           // for isprint
-#include <stdio.h>                                           // for fprintf
-#include <algorithm>                                         // for min
-#include <atomic>                                            // for atomic
-#include <memory>                                            // for shared_ptr
-#include <type_traits>                                       // for enable_i...
-#include <unordered_map>                                     // for unordere...
-#include <unordered_set>                                     // for unordere...
-#include <utility>                                           // for move, pair
-#include <vector>                                            // for vector
+#include <assert.h>  // for assert
+#include <ctype.h>   // for isprint
+#include <stdio.h>   // for fprintf
+
+#include <algorithm>      // for min
+#include <atomic>         // for atomic
+#include <memory>         // for shared_ptr
+#include <type_traits>    // for enable_i...
+#include <unordered_map>  // for unordere...
+#include <unordered_set>  // for unordere...
+#include <utility>        // for move, pair
+#include <vector>         // for vector
 
 #include "android/base/ArraySize.h"                          // for stringLi...
 #include "android/base/Log.h"                                // for LogStream
@@ -96,6 +97,9 @@ using emulator::net::AsyncSocketAdapter;
 constexpr size_t MAX_PAYLOAD_V1 = 4 * 1024;
 constexpr size_t MAX_PAYLOAD = 1024 * 1024;
 constexpr size_t RECV_BUFFER_SIZE = 512;
+
+// True if we disable to the internal bridge.
+static bool sAdbInternalDisabled = false;
 
 enum class AdbWireMessage {
     A_SYNC = 0x434e5953,
@@ -377,6 +381,11 @@ public:
     std::shared_ptr<AdbStream> open(const std::string& id,
                                     uint32_t timeoutMs) override {
         D("Open %s, :%d", id.c_str(), timeoutMs);
+        if (mState == AdbState::failed) {
+            LOG(INFO) << "No proper keys installed, refusing to "
+                         "connect, adb direct is disabled.";
+            return std::make_shared<BasicAdbStream>(nullptr);
+        }
         // Hand out "bad" streams on closed connections that we are not yet
         // establishing.
         if (!connectToEmulator(timeoutMs)) {
@@ -472,6 +481,12 @@ public:
 
     void setState(const AdbState newState) {
         base::AutoLock lock(mStateLock);
+        if (mState == AdbState::failed) {
+            LOG(VERBOSE) << "We are in a failed state.. We give up.";
+            sAdbInternalDisabled = true;
+            return;
+        }
+
         LOG(VERBOSE) << "Adb transition " << mState << " -> " << newState;
         mState = newState;
         mStateChange = System::get()->getUnixTimeUs();
@@ -551,6 +566,18 @@ public:
     void sendPublicKeyToDevice() {
         // So we have a mismatch between our private key and the pub. key inside
         // the emulator.
+        // Currently that means we get into a fight with potential other ADB
+        // connections b/150160590.. For now we will just completely disable
+        // ourselves and give up the fight.
+        setState(AdbState::failed);
+        mSocket->close();
+        LOG(ERROR) << "We are not offering to install a public key due to "
+                      "b/150160590, direct bridge disabled.\n"
+                      "Depending on your system image you might experience ADB "
+                      "connection problems. If you do restart the image with "
+                      "-wipe-data flag.";
+        return;
+
         auto privkey = getPrivateAdbKeyPath();
         if (privkey.empty()) {
             LOG(WARNING) << "No private key exists, we will have to "
@@ -704,6 +731,10 @@ std::shared_ptr<AdbConnection> AdbConnection::connection(int timeoutMs) {
                      << "Connection state: " << gAdbConnection->state();
     }
     return gAdbConnection;
+}
+
+bool AdbConnection::failed() {
+    return sAdbInternalDisabled;
 }
 
 void AdbConnection::setAdbPort(int adbPort) {

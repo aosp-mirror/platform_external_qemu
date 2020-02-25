@@ -483,7 +483,7 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         System::Duration timeout_ms,
         bool want_output) {
     AdbCommandPtr command;
-    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) &&
+    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {
         command = std::shared_ptr<AdbDirect>(
                 new AdbDirect(args, std::move(result_callback), want_output));
