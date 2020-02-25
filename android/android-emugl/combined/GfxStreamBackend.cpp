@@ -287,6 +287,27 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
                           System::get()->getProgramDirectory());
 
+    // Need to manually set the GLES backend paths in gfxstream environment
+    // because the library search paths are not automatically set to include
+    // the directory in whioch the GLES backend resides.
+#if defined(__linux__)
+#define GFXSTREAM_LIB_SUFFIX ".so"
+#elif defined(__APPLE__)
+#define GFXSTREAM_LIB_SUFFIX ".dylib"
+#else // Windows
+#define GFXSTREAM_LIB_SUFFIX ".dll"
+#endif
+
+    System::get()->envSet("ANDROID_EGL_LIB",
+        pj(System::get()->getProgramDirectory(), "libEGL_translator" GFXSTREAM_LIB_SUFFIX));
+    System::get()->envSet("ANDROID_GLESv1_LIB",
+        pj(System::get()->getProgramDirectory(), "libGLES_CM_translator" GFXSTREAM_LIB_SUFFIX));
+    System::get()->envSet("ANDROID_GLESv2_LIB",
+        pj(System::get()->getProgramDirectory(), "libGLES_V2_translator" GFXSTREAM_LIB_SUFFIX));
+
+    fprintf(stderr, "%s: program directory: %s\n", __func__, System::get()->getProgramDirectory().c_str());
+
+
     auto dispString = System::get()->envGet("DISPLAY");
     GFXS_LOG("current display: %s", dispString.c_str());
 

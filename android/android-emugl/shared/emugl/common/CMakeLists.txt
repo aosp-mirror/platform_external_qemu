@@ -10,13 +10,9 @@ set(emugl_common_src
     stringparsing.cpp
     sync_device.cpp)
 
-if(OPTION_GFXSTREAM_BACKEND)
-    android_add_library(TARGET emugl_common STATIC LICENSE Apache-2.0 SRC ${emugl_common_src})
-else()
-   android_add_library(
-    TARGET emugl_common SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                                      ${emugl_common_src})
-endif()
+android_add_library(
+ TARGET emugl_common SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                   ${emugl_common_src})
 
 android_target_compile_definitions(emugl_common windows_msvc-x86_64 PRIVATE
                                    "-DBUILDING_EMUGL_COMMON_SHARED")
@@ -26,9 +22,7 @@ target_link_libraries(emugl_common PRIVATE android-emu-base)
 target_include_directories(
   emugl_common PRIVATE ${ANDROID_EMUGL_DIR}/host/include
                        ${ANDROID_EMUGL_DIR}/shared)
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  android_install_shared(emugl_common)
-endif()
+android_install_shared(emugl_common)
 
 set(emugl_test_shared_library_src testing/test_shared_library.cpp)
 android_add_library(

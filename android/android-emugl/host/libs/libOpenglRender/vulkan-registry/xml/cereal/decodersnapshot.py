@@ -9,8 +9,6 @@ from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
 
-from .baseprotoconversion import VulkanStructToProtoCodegen, VulkanProtoToStructCodegen
-
 from copy import copy
 
 decoder_snapshot_decl_preamble = """
