@@ -314,11 +314,17 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    // Only enable the grpc port if:
-    // 1. The user specifically requests it with the -grpc flag.
-    // 2. There is no explicit adb/serial port configuration.
-    if (!android_op_ports || android_cmdLineOptions->grpc) {
-        qemu_setup_grpc();
+    if (android_qemu_mode) {
+        if (!android_op_ports || android_cmdLineOptions->grpc) {
+            qemu_setup_grpc();
+        }
+    } else {
+        // Fuchsia: Only proceed if flag is there
+        int grpc;
+        if (android_cmdLineOptions->grpc &&
+            sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
+            qemu_setup_grpc();
+        }
     }
 
     // We are sharing video, time to launch the shared memory recorder.
