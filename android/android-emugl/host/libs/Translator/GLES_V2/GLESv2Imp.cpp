@@ -28,7 +28,6 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/metrics/proto/studio_stats.pb.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
