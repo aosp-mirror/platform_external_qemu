@@ -10,13 +10,14 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include <stdint.h>  // for uint32_t, uint64_t
-#include <memory>    // for shared_ptr
-#include <queue>     // for queue
-#include <string>    // for string
+#include <stdint.h>                         // for uint32_t
+#include <chrono>                           // for milliseconds
+#include <memory>                           // for shared_ptr
+#include <queue>                            // for queue
+#include <string>                           // for string
 
 #include "android/metrics/MetricsWriter.h"  // for MetricsWriter
-#include "android/metrics/proto/google_logs_publishing.pb.h"  //  for android_studio
+#include "android/metrics/proto/google_logs_publishing.pb.h" // IWYU pragma: keep
 
 #ifdef NDEBUG
 #define PLAYURL "https://play.googleapis.com/log"
@@ -48,7 +49,7 @@ public:
 
     // Creates a new instance of a PlaystoreMetricsWriter.
     //  |sessionId| - emulator session (run) ID for metrics logging.
-    //  |cookieFile| - Cookie file used to store/retrieve mSendAfterUs.
+    //  |cookieFile| - Cookie file used to store/retrieve mSendAfterMs.
     static Ptr create(const std::string& sessionId,
                       const std::string& cookieFile);
 
@@ -60,7 +61,7 @@ private:
     const std::string mUrl;
     const std::string mCookieFile;
     uint32_t mBytes{0};       // # of bytes in our event queue, <= kMaxStorage.
-    uint64_t mSendAfterUs{0}; // Earliest timestamp after which we send metrics.
+    std::chrono::milliseconds mSendAfterMs{0}; // Earliest timestamp after which we send metrics.
     const uint32_t kMaxStorage{1024 * 128};  // 128 Kb.
 };
 

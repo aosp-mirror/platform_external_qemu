@@ -10,28 +10,37 @@
 // GNU General Public License for more details.
 #include "android/metrics/PlaystoreMetricsWriter.h"
 
-#include <assert.h>    // for assert
-#include <inttypes.h>  // for PRIi64
-#include <stdlib.h>    // for size_t, free
-#include <fstream>     // for ios, ifstream
-#include <sstream>     // for stringbuf
-#include <utility>     // for move
+#include <assert.h>                                           // for assert
+#include <inttypes.h>                                         // for PRIi64
+#include <stdlib.h>                                           // for size_t
+#include <chrono>                                             // for millise...
+#include <fstream>                                            // for ios
+#include <sstream>                                            // IWYU pragma: keep
+#include <utility>                                            // for move
 
-#include "android/base/Log.h"                  // for LOG, LogMessage
-#include "android/base/Uuid.h"                 // for Uuid
-#include "android/base/files/GzipStreambuf.h"  // for GzipOutputStream
-#include "android/base/system/System.h"        // for System, OsType
-#include "android/curl-support.h"              // for curl_post
-#include "android/metrics/MetricsLogging.h"    // for D
-#include "android/metrics/proto/google_logs_publishing.pb.h"  // for LogEvent, LogR...
-#include "android/metrics/proto/studio_stats.pb.h"  // for AndroidStudioE...
-#include "android/utils/debug.h"                    // for VERBOSE_metrics
-#include "android/version.h"                        // for EMULATOR_VERSI...
+
+#include "android/base/Log.h"                                 // for LOG
+#include "android/base/Uuid.h"                                // for Uuid
+#include "android/base/files/GzipStreambuf.h"                 // for GzipOut...
+#include "android/base/system/System.h"                       // for System
+#include "android/curl-support.h"                             // for curl_post
+#include "android/metrics/MetricsLogging.h"                   // for D
+#include "android/metrics/proto/google_logs_publishing.pb.h"  // for LogEvent
+#include "android/metrics/proto/studio_stats.pb.h"            // for Android...
+#include "android/utils/debug.h"                              // for VERBOSE...
+#include "android/version.h"                                  // for EMULATO...
 
 namespace android {
 namespace metrics {
 
 using namespace wireless_android_play_playlog;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+
+static milliseconds epoch_time_in_ms() {
+    std::chrono::microseconds nowUs(base::System::get()->getUnixTimeUs());
+    return duration_cast<milliseconds>(nowUs);
+}
 
 PlaystoreMetricsWriter::PlaystoreMetricsWriter(const std::string& sessionId,
                                                const std::string& cookieFile,
@@ -41,9 +50,9 @@ PlaystoreMetricsWriter::PlaystoreMetricsWriter(const std::string& sessionId,
     if (cookieResponse.good()) {
         LogResponse response;
         response.ParseFromIstream(&cookieResponse);
-        mSendAfterUs = response.next_request_wait_millis() * 1000;
+        mSendAfterMs = milliseconds(response.next_request_wait_millis());
         D("Read a timeout cookie from %s, wait until %lu.", mCookieFile.c_str(),
-          mSendAfterUs);
+          mSendAfterMs);
     }
 }
 
@@ -100,7 +109,7 @@ static const char* osType() {
 // what android studio produces on this OS.
 static LogRequest buildBaseRequest() {
     LogRequest request;
-    request.set_request_time_ms(base::System::get()->getUnixTimeUs() * 1000);
+    request.set_request_time_ms(epoch_time_in_ms().count());
     request.set_log_source(LogRequest::ANDROID_STUDIO);
 
     auto client = request.mutable_client_info();
@@ -133,9 +142,9 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
     if (response.ParseFromString(proto)) {
         // The cookie will contain the earlies timestamp after which we are
         // good to send data.
-        mSendAfterUs = response.next_request_wait_millis() +
-                       base::System::get()->getUnixTimeUs() * 1000;
-        response.set_next_request_wait_millis(mSendAfterUs);
+        mSendAfterMs = milliseconds(response.next_request_wait_millis()) + epoch_time_in_ms();
+
+        response.set_next_request_wait_millis(mSendAfterMs.count());
         std::ofstream cookieResponse(mCookieFile, std::ios::out |
                                                           std::ios::binary |
                                                           std::ios::trunc);
@@ -148,9 +157,9 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
 
 void PlaystoreMetricsWriter::commit() {
     if (mEvents.empty() ||
-        base::System::get()->getUnixTimeUs() < mSendAfterUs) {
+        epoch_time_in_ms() < mSendAfterMs) {
         D("Not reporting %d metrics time: %" PRIi64 ", wait until %" PRIi64,
-          mEvents.empty(), base::System::get()->getUnixTimeUs(), mSendAfterUs);
+          mEvents.empty(), epoch_time_in_ms(), mSendAfterMs);
         return;
     }
 
