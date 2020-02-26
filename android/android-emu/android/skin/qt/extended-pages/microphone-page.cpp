@@ -31,6 +31,11 @@ MicrophonePage::MicrophonePage(QWidget* parent)
     // The Hook button is not functional yet.
     // Hide it for now.
     mUi->mic_hookButton->hide();
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        // Android Auto doesn't support the key event used in voice assist button
+        mUi->mic_voiceAssistButton->setHidden(true);
+    }
 }
 
 void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
