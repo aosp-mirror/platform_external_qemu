@@ -4,13 +4,16 @@
 #include <vector>                                        // for vector
 
 #include "android/base/containers/BufferQueue.h"         // for BufferQueue
-#include "android/base/synchronization/Lock.h"           // for AutoLock (pt...
-#include "android/base/threads/FunctorThread.h"          // for FunctorThread
 #include "android/console.h"                             // for AndroidConso...
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
 #include "emulator_controller.pb.h"                      // for KeyboardEvent
 
+
 namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+
 namespace emulation {
 namespace control {
 namespace keyboard {
@@ -66,9 +69,6 @@ struct DomKeyMapEntry {
 #undef DOM_KEY_UNI
 
 using KeyEventQueue = base::BufferQueue<KeyboardEvent>;
-using base::AutoLock;
-using base::FunctorThread;
-using base::Lock;
 class EmulatorKeyEventSender {
 public:
     EmulatorKeyEventSender(const AndroidConsoleAgents* const consoleAgents);
@@ -100,9 +100,7 @@ private:
             offsetof(KeycodeMapEntry, mac)};
 
     const AndroidConsoleAgents* const mAgents;
-    FunctorThread mWorkerThread;
-    KeyEventQueue mEventQueue;
-    Lock mEventLock;
+    base::Looper* mLooper;
 };
 
 }  // namespace keyboard
