@@ -103,15 +103,17 @@ public:
 };
 
 const char* gModule = nullptr;
-int gFps = 0;
 bool gRtcRunning = false;
 
 extern "C" {
-const char* startSharedMemoryModule(int fps) {
+const char* initSharedMemoryModule() {
     gModule = "shared_region";
-    gFps = fps;
-    gRtcRunning = true;
     return gModule;
+}
+
+bool startSharedMemoryModule() {
+    gRtcRunning = true;
+    return true ;
 }
 
 bool stopSharedMemoryModule() {
@@ -120,8 +122,8 @@ bool stopSharedMemoryModule() {
 }
 }
 
-
 static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
+        .initalizeSharedMemoryModule = initSharedMemoryModule,
         .startSharedMemoryModule = startSharedMemoryModule,
         .stopSharedMemoryModule = stopSharedMemoryModule};
 
@@ -285,6 +287,8 @@ TEST(WebRtcBridge, nextMessageByeDisconnects) {
     // Connect with id moi, and block and wait for message..
     bridge.connect("moi");
 
+    // Connection turns on the bridge.
+    EXPECT_TRUE(gRtcRunning);
     // Signal a new message
     socket->signalRecv(msg1.dump());
 
@@ -405,14 +409,11 @@ TEST(WebRtcBridge, startStopSharedMemoryModule) {
 
     EXPECT_FALSE(socket->connected());
     gRtcRunning = false;
-    gFps = 0;
     EXPECT_TRUE(bridge.start());
 
     // Activated rtc module, and a connection should have been opened.
-    EXPECT_TRUE(gRtcRunning);
     EXPECT_TRUE(socket->connected());
 
-    EXPECT_NE(0, gFps);
     EXPECT_NE(nullptr, gModule);
     bridge.terminate();
 
