@@ -58,7 +58,7 @@ WebRtcBridge::~WebRtcBridge() {
 void WebRtcBridge::updateBridgeState() {
     if (mId.size() > 0) {
         LOG(INFO) << "Starting shared memory module";
-        mScreenAgent->startSharedMemoryModule(mFps);
+        mScreenAgent->startSharedMemoryModule();
     } else {
         LOG(INFO) << "Stopping shared memory module";
         mScreenAgent->stopSharedMemoryModule();
@@ -317,7 +317,7 @@ bool WebRtcBridge::start() {
 
     // TODO(jansen): We should pause the recorder when no connections are
     // active.
-    mVideoModule = mScreenAgent->startSharedMemoryModule(mFps);
+    mVideoModule = mScreenAgent->initalizeSharedMemoryModule();
     if (mVideoModule.empty()) {
         LOG(ERROR) << "Failed to start webrtc module, no video available.";
         return false;
