@@ -83,7 +83,6 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
-
 extern "C" {
 
 #include "qemu/abort.h"
@@ -250,8 +249,7 @@ const AndroidConsoleAgents* getConsoleAgents() {
             gQAndroidLibuiAgent,
             gQCarDataAgent,
             gQGrpcAgent,
-            gQAndroidSensorsAgent
-    };
+            gQAndroidSensorsAgent};
     return &consoleAgents;
 }
 
@@ -283,15 +281,19 @@ static void qemu_setup_grpc() {
     int grpc_end = grpc_start + 1000;
     std::string address = "127.0.0.1";
 
+    android::emulation::control::RtcBridge* bridge;
     if (android_cmdLineOptions->grpc &&
         sscanf(android_cmdLineOptions->grpc, "%d", &grpc_start) == 1) {
         grpc_end = grpc_start + 1;
         address = "0.0.0.0";
+        bridge = qemu_setup_rtc_bridge();
+    } else {
+        bridge = new android::emulation::control::NopRtcBridge();
     }
 
     auto service = android::emulation::control::GrpcServices::setup(
-            grpc_start, grpc_end, address, getConsoleAgents(),
-            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
+            grpc_start, grpc_end, address, getConsoleAgents(), bridge,
+            android_cmdLineOptions->waterfall);
 
     if (service) {
         props["grpc.port"] = std::to_string(service->port());
