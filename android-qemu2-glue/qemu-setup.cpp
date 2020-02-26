@@ -314,17 +314,11 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    if (android_qemu_mode) {
-        if (!android_op_ports || android_cmdLineOptions->grpc) {
-            qemu_setup_grpc();
-        }
-    } else {
-        // Fuchsia: Only proceed if flag is there
-        int grpc;
-        if (android_cmdLineOptions->grpc &&
-            sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-            qemu_setup_grpc();
-        }
+    // Only proceed if flag is there
+    int grpc;
+    if (android_cmdLineOptions->grpc &&
+        sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
+        qemu_setup_grpc();
     }
 
     // We are sharing video, time to launch the shared memory recorder.
