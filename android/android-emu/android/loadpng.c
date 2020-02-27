@@ -145,7 +145,6 @@ int write_png_user_function(png_structp p,
             rotation == SKIN_ROTATION_0 || rotation == SKIN_ROTATION_180;
     unsigned int rows = isPortrait ? height : width;
     unsigned int cols = isPortrait ? width : height;
-    printf("row %d cols %d rotation %d\n", rows, cols, rotation);
 
     if (setjmp(png_jmpbuf(p))) {
         LOG("Failed to set IHDR header\n");
