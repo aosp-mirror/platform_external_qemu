@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/emulation/control/logcat/LogcatParser.h"
-#include <cinttypes>
-#include <ctime>
-#include <iomanip>
-#include <locale>
-#include <regex>
-#include <sstream>
-#include <utility>
-#include <vector>
-#include "emulator_controller.pb.h"
+
+#include <stdint.h>                  // for uint64_t
+#include <stdio.h>                   // for sscanf
+#include <cinttypes>                 // for SCNd64
+#include <ctime>                     // for tm, localtime, mktime, time, time_t
+#include <regex>                     // for match_results, match_results<>::...
+#include <utility>                   // for make_pair, pair
+#include <vector>                    // for vector
+
+#include "emulator_controller.pb.h"  // for LogcatEntry, LogcatEntry::UNKNOWN
 
 namespace android {
 namespace emulation {

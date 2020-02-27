@@ -1,6 +1,7 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <stdio.h>            // for sscanf
+#include <stdio.h>  // for sscanf
+
 #include <memory>             // for shared_ptr, shared_pt...
 #include <new>                // for operator new
 #include <nlohmann/json.hpp>  // for basic_json<>::value_type
@@ -163,15 +164,16 @@ bool WebRtcBridge::acceptJsepMessage(std::string identity,
 
 void WebRtcBridge::terminate() {
     LOG(INFO) << "Closing transport.";
-    mTransport.close();
     if (mBridgePid) {
         LOG(INFO) << "Terminating video bridge.";
         System::get()->killProcess(mBridgePid);
     }
+    mTransport.close();
     // Note, closing the shared memory region can crash the bridge as it might
     // attempt to read inaccessible memory.
     LOG(INFO) << "Stopping the rtc module.";
     mScreenAgent->stopSharedMemoryModule();
+
 }
 
 void WebRtcBridge::received(SocketTransport* from, json object) {
@@ -226,6 +228,7 @@ void WebRtcBridge::stateConnectionChange(SocketTransport* connection,
                                          State current) {
     // Clear out everyone, as the video bridge disappeared / just connected..
     AutoWriteLock lock(mMapLock);
+    std::unique_lock<std::mutex> lck(mStateLock);
     mId.clear();
     mLocks.clear();
     switch (current) {
@@ -239,6 +242,7 @@ void WebRtcBridge::stateConnectionChange(SocketTransport* connection,
             mState = BridgeState::Pending;
             break;
     }
+    mCvConnected.notify_all();
 }
 
 static Optional<System::Pid> launchAsDaemon(std::string executable,
@@ -341,14 +345,19 @@ bool WebRtcBridge::start() {
     }
 
     mBridgePid = *bridgePid;
-    // Let's connect the socket transport if needed.
-    if (mTransport.state() == State::CONNECTED) {
-        mState = BridgeState::Connected;
-    }
-    return mTransport.connect();
+    mTransport.connect();
+    std::unique_lock<std::mutex> lock(mStateLock);
+    auto future = std::chrono::system_clock::now() + std::chrono::seconds(2);
+    bool timedOut = !mCvConnected.wait_until(
+            lock, future, [=]() { return mState == BridgeState::Connected; });
+    bool connected = mState == BridgeState::Connected;
+    LOG(INFO) << "WebRtcBridge state: "
+              << (connected ? "Connected" : "Disconnected");
+    return connected;
 }
 
-RtcBridge* WebRtcBridge::create(int port,
+RtcBridge* WebRtcBridge::create(android::base::Looper* looper,
+                                int port,
                                 const AndroidConsoleAgents* const consoleAgents,
                                 std::string turncfg) {
     if (port == 0) {
@@ -364,7 +373,6 @@ RtcBridge* WebRtcBridge::create(int port,
         return new NopRtcBridge();
     }
 
-    Looper* looper = android::base::ThreadLooper::get();
     AsyncSocket* socket = new AsyncSocket(looper, port);
     return new WebRtcBridge(socket, consoleAgents, kMaxFPS, port, turncfg);
 }
