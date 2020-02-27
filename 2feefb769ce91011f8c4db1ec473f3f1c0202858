@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2479fbf0_5d411399",
+        "filename": "android/android-emu/android/recording/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-02-27T00:07:50Z",
+      "side": 1,
+      "message": "nit: brackets after if",
+      "range": {
+        "startLine": 475,
+        "startChar": 8,
+        "endLine": 475,
+        "endChar": 39
+      },
+      "revId": "2feefb769ce91011f8c4db1ec473f3f1c0202858",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2c9d9c4_12fc0dc1",
+        "filename": "android/android-emu/android/recording/screen-recorder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-02-27T00:07:50Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 87,
+        "startChar": 17,
+        "endLine": 87,
+        "endChar": 22
+      },
+      "revId": "2feefb769ce91011f8c4db1ec473f3f1c0202858",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
