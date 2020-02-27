@@ -11,10 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <utility>
-#include <string>
-#include <vector>
-#include "emulator_controller.pb.h"
+#pragma once
+#include <string>   // for string
+#include <utility>  // for pair
+#include <vector>   // for vector
+
+#include "emulator_controller.pb.h"  // for LogcatEntry, LogcatEntry::UNKNOWN
 
 namespace android {
 namespace emulation {

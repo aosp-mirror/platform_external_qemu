@@ -13,5 +13,5 @@
 { include: ['<sys/unistd.h>', 'private',  '<unistd.h>', 'public'] },
 { include: ['<sys/fcntl.h>', 'private',  '<fcntl.h>', 'public'] },
 { include: ['<sys/dirent.h>', 'private',  '<dirent.h>', 'public'] },
-{ include: ['<sys/_select.h>', 'private',  '<sys/select.h>' 'public'] },
+{ include: ['<sys/_select.h>', 'private',  '<sys/select.h>', 'public'] },
 ]

@@ -13,29 +13,19 @@
 // limitations under the License.
 
 #include <grpcpp/grpcpp.h>
-#include <functional>
+#include <stdio.h>                                                 // for stdin
+#include <string.h>
 #include <memory>
+#include <string>
 #include <thread>
+#include <vector>
 
-#include "android/base/Log.h"
+#include "android/base/Log.h"                                      // for LOG
 #include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
-#include "grpcpp/server.h"
-#include "grpcpp/server_builder.h"
 #include "waterfall.grpc.pb.h"
-namespace google {
-namespace protobuf {
-class Empty;
-}  // namespace protobuf
-}  // namespace google
-namespace waterfall {
-class CmdProgress;
-class ForwardMessage;
-class Message;
-class Transfer;
-class VersionMessage;
-}  // namespace waterfall
+#include "waterfall.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -78,7 +68,8 @@ public:
         ::waterfall::CmdProgress fst;
 
         ::waterfall::CmdProgress incoming;
-        // We are willing to wait 200ms to establish a connection if none exists.
+        // We are willing to wait 200ms to establish a connection if none
+        // exists.
         auto adb = AdbConnection::connection(2000);
         if (adb->state() != AdbState::connected || !stream->Read(&incoming)) {
             // TODO(jansene): what error code?
@@ -115,11 +106,21 @@ public:
     }
 };  // namespace control
 
-waterfall::Waterfall::Service* getAdbWaterfallService() {
+grpc::Service* getAdbWaterfallService() {
     return new WaterfallAdbImpl();
 };
 
-waterfall::Waterfall::Service* getWaterfallService(WaterfallProvider variant) {
+grpc::Service* getWaterfallService(const char* type) {
+    WaterfallProvider variant = WaterfallProvider::none;
+    if (type && strcmp("adb", type) == 0)
+        variant = WaterfallProvider::adb;
+    else if (type && strcmp("forward", type) == 0)
+        variant = WaterfallProvider::forward;
+
+    return getWaterfallService(variant);
+}
+
+grpc::Service* getWaterfallService(WaterfallProvider variant) {
     switch (variant) {
         case WaterfallProvider::adb:
             return getAdbWaterfallService();
