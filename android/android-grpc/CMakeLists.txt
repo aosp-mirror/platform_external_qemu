@@ -41,7 +41,6 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
-      ${android-grpc_src}
       android/emulation/control/EmulatorService.cpp
       android/emulation/control/GrpcServices.cpp
       android/emulation/control/interceptor/LoggingInterceptor.cpp
@@ -54,7 +53,9 @@ android_add_library(
       android/emulation/control/snapshot/TarStream.cpp
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
-      android/emulation/control/utils/ServiceUtils.cpp)
+      android/emulation/control/utils/ServiceUtils.cpp
+      android/emulation/control/waterfall/WaterfallFactory.cpp)
+
 target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
                                                       android-net grpc++)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
