@@ -56,6 +56,7 @@
 #include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -65,6 +66,7 @@
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/DmaMap.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/VmLock.h"
@@ -74,15 +76,21 @@
 #include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/record_screen_agent.h"
+#include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
+#include "snapshot_service.grpc.pb.h"
 
+#ifdef ANDROID_WEBRTC
+#include "android/emulation/control/RtcService.h"
+#endif
 
 extern "C" {
 
@@ -110,7 +118,9 @@ extern char* op_http_proxy;
 
 using android::DmaMap;
 using android::VmLock;
+using android::base::PathUtils;
 using android::emulation::control::EmulatorAdvertisement;
+using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorProperties;
 
 extern "C" void ranchu_device_tree_setup(void* fdt) {
@@ -232,6 +242,7 @@ bool qemu_android_emulation_early_setup() {
 }
 
 static std::unique_ptr<EmulatorAdvertisement> advertiser;
+static std::unique_ptr<EmulatorControllerService> grpcService;
 
 const AndroidConsoleAgents* getConsoleAgents() {
     // Initialize UI/console agents.
@@ -250,8 +261,7 @@ const AndroidConsoleAgents* getConsoleAgents() {
             gQAndroidLibuiAgent,
             gQCarDataAgent,
             gQGrpcAgent,
-            gQAndroidSensorsAgent
-    };
+            gQAndroidSensorsAgent};
     return &consoleAgents;
 }
 
@@ -259,20 +269,13 @@ bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
 }
 
-static android::emulation::control::RtcBridge* qemu_setup_rtc_bridge() {
-#ifdef ANDROID_WEBRTC
-    std::string turn;
-    if (android_cmdLineOptions->turncfg) {
-        turn = android_cmdLineOptions->turncfg;
-    }
-    return android::emulation::control::WebRtcBridge::create(
-            0, getConsoleAgents(), turn);
-#else
-    return new android::emulation::control::NopRtcBridge();
-#endif
-}
+static const std::string kCertFileName{"emulator-grpc.cer"};
+static const std::string kPrivateKeyFileName{"emulator-grpc.key"};
 
-static void qemu_setup_grpc() {
+int qemu_setup_grpc() {
+    if (grpcService)
+        return grpcService->port();
+
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
@@ -289,18 +292,43 @@ static void qemu_setup_grpc() {
         address = "0.0.0.0";
     }
 
-    auto service = android::emulation::control::GrpcServices::setup(
-            grpc_start, grpc_end, address, getConsoleAgents(),
-            qemu_setup_rtc_bridge(), android_cmdLineOptions->waterfall);
+    auto emulator = android::emulation::control::getEmulatorController(
+            getConsoleAgents());
+    auto h2o = android::emulation::control::getWaterfallService(
+            android_cmdLineOptions->waterfall);
+    auto snapshot = android::emulation::control::getSnapshotService();
+    auto builder =
+            EmulatorControllerService::Builder()
+                    .withConsoleAgents(getConsoleAgents())
+                    .withPortRange(grpc_start, grpc_end)
+                    .withCertAndKey(
+                            PathUtils::join(
+                                    android::ConfigDirs::getUserDirectory(),
+                                    kCertFileName),
+                            PathUtils::join(
+                                    android::ConfigDirs::getUserDirectory(),
+                                    kPrivateKeyFileName))
+                    .withAddress(address)
+                    .withService(emulator)
+                    .withService(h2o)
+                    .withService(snapshot);
 
-    if (service) {
-        props["grpc.port"] = std::to_string(service->port());
-        props["grpc.certificate"] = service->publicCert();
+#ifdef ANDROID_WEBRTC
+    builder.withService(android::emulation::control::getRtcService(
+            getConsoleAgents(), android_cmdLineOptions->turncfg));
+#endif
+
+    grpcService = builder.build();
+
+    if (grpcService) {
+        props["grpc.port"] = std::to_string(grpcService->port());
+        props["grpc.certificate"] = grpcService->publicCert();
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();
     advertiser->write();
+    return grpcService->port();
 }
 
 bool qemu_android_emulation_setup() {
@@ -382,7 +410,13 @@ void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
     androidSnapshot_finalize();
     android_emulation_teardown();
-    android::emulation::control::GrpcServices::teardown();
+    if (grpcService) {
+        // Explicitly cleanup resources. We do not want to do this at program exit
+        // as we may be holding on to loopers, which threads have likely been destroyed
+        // at that point.
+        grpcService->stop();
+        grpcService = nullptr;
+    }
     if (advertiser)
         advertiser->remove();
 }
