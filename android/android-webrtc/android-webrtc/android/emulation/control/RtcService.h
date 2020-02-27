@@ -1,4 +1,4 @@
-// Copyright (C) 2019 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <string>   // for string
-#include <utility>  // for pair
-#include <vector>   // for vector
+#include "android/console.h"  // for AndroidConsoleAgents
 
-#include "emulator_controller.pb.h"  // for LogcatEntry, LogcatEntry::UNKNOWN
+namespace grpc {
+class Service;
+}  // namespace grpc
 
 namespace android {
 namespace emulation {
 namespace control {
 
-class LogcatParser {
-public:
-    static std::pair<int, std::vector<LogcatEntry>> parseLines(
-            const std::string lines);
-};
+grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
+                             const char* turncfg);
 
 }  // namespace control
 }  // namespace emulation

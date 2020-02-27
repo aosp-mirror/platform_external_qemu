@@ -14,15 +14,16 @@
 
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <fcntl.h>                               // for open, O_CREAT, O_WRONLY
-#include <gtest/gtest.h>                         // for Test, AssertionResult
-#include <string.h>                              // for memcpy
-#include <unistd.h>                              // for close
-#include <algorithm>                             // for min
-#include <functional>                            // for __base
-#include <new>                                   // for operator new
-#include <string>                                // for string, to_string
-#include <vector>                                // for vector
+#include <fcntl.h>        // for open, O_CREAT, O_WRONLY
+#include <gtest/gtest.h>  // for Test, AssertionResult
+#include <string.h>       // for memcpy
+#include <unistd.h>       // for close
+
+#include <algorithm>   // for min
+#include <functional>  // for __base
+#include <new>         // for operator new
+#include <string>      // for string, to_string
+#include <vector>      // for vector
 
 #include "android/base/Log.h"                    // for setMinLogLevel, LOG_...
 #include "android/base/Optional.h"               // for Optional
@@ -52,7 +53,7 @@ public:
             mListener->onClose(this, 123);
         mConnected = false;
     }
-    void dispose() override {};
+    void dispose() override{};
 
     uint64_t recv(char* buffer, uint64_t bufferSize) override {
         base::AutoLock lock(mReadLock);
@@ -76,6 +77,8 @@ public:
 
     bool connect() override {
         mConnected = true;
+        if (mListener)
+            mListener->onConnected(this);
         return true;
     }
 
@@ -120,7 +123,6 @@ bool stopSharedMemoryModule() {
 }
 }
 
-
 static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
         .startSharedMemoryModule = startSharedMemoryModule,
         .stopSharedMemoryModule = stopSharedMemoryModule};
@@ -128,11 +130,9 @@ static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
         &sQAndroidRecordScreenAgent;
 
-
 static const AndroidConsoleAgents fakeAgents = {
-    .record = gQAndroidRecordScreenAgent,
+        .record = gQAndroidRecordScreenAgent,
 };
-
 
 json msg1 = {{"topic", "moi"}, {"msg", "hello"}};
 json msg2 = {{"topic", "moi"}, {"msg", "world"}};
@@ -311,8 +311,7 @@ TEST(WebRtcBridge, unconnectedSaysBye) {
 
 TEST(WebRtcBridge, connectedTimeoutSaysNothing) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
-    WebRtcBridge bridge(socket, &fakeAgents,
-                        WebRtcBridge::kMaxFPS, 1234);
+    WebRtcBridge bridge(socket, &fakeAgents, WebRtcBridge::kMaxFPS, 1234);
     std::string msg;
 
     // Connect with id moi
@@ -330,9 +329,9 @@ TEST(WebRtcBridge, deliverWithoutLoss) {
     // Connect with id moi
     bridge.connect("moi");
 
-    // Let's not push more message into our buffer than we can handle. Some build bots
-    // are very overworked and can get into a state where the reader thread is not scheduled
-    // in time.
+    // Let's not push more message into our buffer than we can handle. Some
+    // build bots are very overworked and can get into a state where the reader
+    // thread is not scheduled in time.
     const int maxMessageToPush = WebRtcBridge::kMaxMessageQueueLen - 1;
 
     // No messages during timeout will be empty string..
@@ -392,6 +391,7 @@ TEST(WebRtcBridge, OutOfOrderConnectDisconnect) {
 
 TEST(WebRtcBridge, startChangesState) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
+    socket->close();
     TestBridge bridge(socket);
     EXPECT_EQ(bridge.state(), RtcBridge::BridgeState::Disconnected);
     EXPECT_TRUE(bridge.start());
@@ -400,9 +400,8 @@ TEST(WebRtcBridge, startChangesState) {
 
 TEST(WebRtcBridge, startStopSharedMemoryModule) {
     TestAsyncSocketAdapter* socket = new TestAsyncSocketAdapter({});
-    TestBridge bridge(socket);
     socket->close();
-
+    TestBridge bridge(socket);
     EXPECT_FALSE(socket->connected());
     gRtcRunning = false;
     gFps = 0;
@@ -420,7 +419,6 @@ TEST(WebRtcBridge, startStopSharedMemoryModule) {
     EXPECT_FALSE(gRtcRunning);
     EXPECT_FALSE(socket->connected());
 }
-
 
 #ifndef NDEBUG
 TEST(WebRtcBridge, DISABLED_connectDisconnectParty) {
