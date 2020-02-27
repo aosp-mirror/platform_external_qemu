@@ -19,7 +19,7 @@
 #else
 #include <sys/time.h>
 #endif
-#include <assert.h>
+
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,7 +28,6 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -52,21 +51,18 @@
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
-#include "android/emulation/control/interceptor/MetricsInterceptor.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
 #include "android/emulation/control/sensors_agent.h"
-#include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/ServiceUtils.h"
 #include "android/emulation/control/vm_operations.h"
-#include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -77,9 +73,6 @@
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
-#include "grpcpp/server_builder_impl.h"
-#include "grpcpp/server_impl.h"
-#include "snapshot_service.grpc.pb.h"
 
 namespace google {
 namespace protobuf {
@@ -87,49 +80,22 @@ class Empty;
 }  // namespace protobuf
 }  // namespace google
 
-using grpc::Server;
-using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerWriter;
 using grpc::Status;
 using namespace android::base;
 using namespace android::control::interceptor;
+using ::google::protobuf::Empty;
 
 namespace android {
 namespace emulation {
 namespace control {
 
-class EmulatorControllerServiceImpl : public EmulatorControllerService {
-public:
-    void stop() override {
-        auto deadline = std::chrono::system_clock::now() +
-                        std::chrono::milliseconds(500);
-        mServer->Shutdown(deadline);
-    }
-
-    EmulatorControllerServiceImpl(int port,
-                                  std::string cert,
-                                  EmulatorController::Service* service,
-                                  grpc::Server* server)
-        : mPort(port), mCert(cert), mService(service), mServer(server) {}
-
-    int port() override { return mPort; }
-    std::string publicCert() override { return mCert; }
-
-private:
-    std::unique_ptr<EmulatorController::Service> mService;
-    std::unique_ptr<grpc::Server> mServer;
-    int mPort;
-    std::string mCert;
-};
-
 // Logic and data behind the server's behavior.
 class EmulatorControllerImpl final : public EmulatorController::Service {
 public:
-    EmulatorControllerImpl(const AndroidConsoleAgents* agents,
-                           RtcBridge* rtcBridge)
+    EmulatorControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents),
-          mRtcBridge(rtcBridge),
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
@@ -208,7 +174,7 @@ public:
     }
 
     Status getBattery(ServerContext* context,
-                      const ::google::protobuf::Empty* request,
+                      const Empty* request,
                       BatteryState* reply) override {
         auto agent = mAgents->battery;
 
@@ -248,7 +214,7 @@ public:
     }
 
     Status getGps(ServerContext* context,
-                  const ::google::protobuf::Empty* request,
+                  const Empty* request,
                   GpsState* reply) override {
         auto agent = mAgents->location;
 
@@ -275,7 +241,7 @@ public:
 
     Status setPhysicalModel(ServerContext* context,
                             const PhysicalModelValue* request,
-                            ::google::protobuf::Empty* reply) override {
+                            Empty* reply) override {
         auto values = request->value();
         int size = values.data().size();
         float a = size > 0 ? values.data(0) : 0;
@@ -384,7 +350,7 @@ public:
     }
 
     Status getStatus(ServerContext* context,
-                     const ::google::protobuf::Empty* request,
+                     const Empty* request,
                      EmulatorStatus* reply) override {
         ::VmConfiguration config;
         mAgents->vm->getVmConfiguration(&config);
@@ -657,177 +623,21 @@ public:
         return Status::OK;
     }
 
-    Status requestRtcStream(ServerContext* context,
-                            const ::google::protobuf::Empty* request,
-                            RtcId* reply) override {
-        std::string id = base::Uuid::generate().toString();
-        mRtcBridge->connect(id);
-        reply->set_guid(id);
-        return Status::OK;
-    }
-
-    Status sendJsepMessage(ServerContext* context,
-                           const JsepMsg* request,
-                           ::google::protobuf::Empty* reply) override {
-        std::string id = request->id().guid();
-        std::string msg = request->message();
-        mRtcBridge->acceptJsepMessage(id, msg);
-        return Status::OK;
-    }
-
-    Status receiveJsepMessage(ServerContext* context,
-                              const RtcId* request,
-                              JsepMsg* reply) override {
-        std::string msg;
-        std::string id = request->guid();
-        // Block and wait for at most 5 seconds.
-        mRtcBridge->nextMessage(id, &msg, k5SecondsWait);
-        reply->mutable_id()->set_guid(request->guid());
-        reply->set_message(msg);
-        return Status::OK;
-    }
-
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
     Looper* mLooper;
-    RtcBridge* mRtcBridge;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
     const uint16_t kNoWait = 0;
-};  // namespace control
+};
 
-using Builder = EmulatorControllerService::Builder;
-
-Builder::Builder() : mCredentials{grpc::InsecureServerCredentials()} {}
-
-Builder& Builder::withConsoleAgents(
-        const AndroidConsoleAgents* const consoleAgents) {
-    mAgents = consoleAgents;
-    return *this;
-}
-
-int Builder::port() {
-    return mPort;
-}
-
-Builder& Builder::withRtcBridge(RtcBridge* bridge) {
-    mBridge = bridge;
-    return *this;
-}
-
-Builder& Builder::withWaterfall(const char* mode) {
-    if (mode == nullptr)
-        return *this;
-
-    if (strcmp("adb", mode) == 0)
-        mWaterfall = WaterfallProvider::adb;
-    if (strcmp("forward", mode) == 0)
-        mWaterfall = WaterfallProvider::forward;
-
-    return *this;
-}
-
-Builder& Builder::withCertAndKey(std::string certfile,
-                                 std::string privateKeyFile) {
-    if (!System::get()->pathExists(certfile)) {
-        LOG(WARNING) << "Cannot find certfile: " << certfile
-                     << " security will be disabled.";
-        return *this;
-    }
-
-    if (!!System::get()->pathExists(privateKeyFile)) {
-        LOG(WARNING) << "Cannot find private key file: " << privateKeyFile
-                     << " security will be disabled, the emulator might be "
-                        "publicly accessible!";
-        return *this;
-    }
-    mCertfile = certfile;
-
-    std::ifstream key_file(privateKeyFile);
-    std::string key((std::istreambuf_iterator<char>(key_file)),
-                    std::istreambuf_iterator<char>());
-
-    std::ifstream cert_file(certfile);
-    std::string cert((std::istreambuf_iterator<char>(cert_file)),
-                     std::istreambuf_iterator<char>());
-
-    grpc::SslServerCredentialsOptions::PemKeyCertPair keycert = {key, cert};
-    grpc::SslServerCredentialsOptions ssl_opts;
-    ssl_opts.pem_key_cert_pairs.push_back(keycert);
-    mCredentials = grpc::SslServerCredentials(ssl_opts);
-    return *this;
-}
-
-Builder& Builder::withAddress(std::string address) {
-    mBindAddress = address;
-    return *this;
-}
-
-Builder& Builder::withPortRange(int start, int end) {
-    assert(end > start);
-    int port = start;
-    bool found = false;
-    for (port = start; !found && port < end; port++) {
-        // Find a free port.
-        android::base::ScopedSocket s0(socketTcp4LoopbackServer(port));
-        if (s0.valid()) {
-            mPort = android::base::socketGetPort(s0.get());
-            found = true;
-        }
-    }
-
-    return *this;
-}  // namespace control
-
-std::unique_ptr<EmulatorControllerService> Builder::build() {
-    if (mAgents == nullptr || mPort == -1) {
-        // No agents, or no port was found.
-        LOG(INFO) << "No agents, or valid port was found";
-        return nullptr;
-    }
-
-    std::string server_address = mBindAddress + ":" + std::to_string(mPort);
-    std::unique_ptr<EmulatorController::Service> controller(
-            new EmulatorControllerImpl(mAgents, mBridge));
-
-    std::unique_ptr<SnapshotService::Service> snapshotService(
-            getSnapshotService());
-
-    ServerBuilder builder;
-    builder.AddListeningPort(server_address, mCredentials);
-    builder.RegisterService(controller.release());
-    builder.RegisterService(snapshotService.release());
-
-#ifndef _MSC_VER
-    auto wfall = getWaterfallService(mWaterfall);
-    if (wfall)
-        builder.RegisterService(wfall);
-#endif
-    // Register logging & metrics interceptor.
-    std::vector<std::unique_ptr<
-            grpc::experimental::ServerInterceptorFactoryInterface>>
-            creators;
-    creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
-    creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
-    builder.experimental().SetInterceptorCreators(std::move(creators));
-
-    // Allow large messages, as raw screenshots can take up a significant amount
-    // of memory.
-    const int megaByte = 1024 * 1024;
-    builder.SetMaxSendMessageSize(16 * megaByte);
-    auto service = builder.BuildAndStart();
-    if (!service)
-        return nullptr;
-
-    fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
-    return std::unique_ptr<EmulatorControllerService>(
-            new EmulatorControllerServiceImpl(
-                    mPort, mCertfile, controller.release(), service.release()));
+grpc::Service* getEmulatorController(const AndroidConsoleAgents* agents) {
+    return  new EmulatorControllerImpl(agents);
 }
 
 }  // namespace control

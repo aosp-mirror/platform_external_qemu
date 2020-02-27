@@ -14,10 +14,13 @@
 
 #pragma once
 
-#include <stdint.h>                                         // for uint16_t
-#include <map>                                              // for map
-#include <memory>                                           // for shared_ptr
-#include <string>                                           // for string
+#include <stdint.h>  // for uint16_t
+
+#include <condition_variable>  // std::condition_variable
+#include <map>                 // for map
+#include <memory>              // for shared_ptr
+#include <mutex>               // std::mutex, std::unique_lock
+#include <string>              // for string
 
 #include "android/base/containers/BufferQueue.h"            // for BufferQueue
 #include "android/base/synchronization/Lock.h"              // for Lock (ptr...
@@ -28,6 +31,7 @@
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
 #include "emulator/net/JsonProtocol.h"                      // for JsonProtocol
 #include "emulator/net/SocketTransport.h"                   // for SocketTra...
+#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
 
 namespace emulator {
 namespace net {
@@ -83,7 +87,8 @@ public:
     BridgeState state() override;
 
     // Returns a webrtc bridge, or NopBridge in case of failures..
-    static RtcBridge* create(int port,
+    static RtcBridge* create(Looper* looper,
+                             int port,
                              const AndroidConsoleAgents* const consoleAgents,
                              std::string turncfg);
 
@@ -103,6 +108,7 @@ public:
     static const uint16_t kMaxMessageQueueLen = 128;
 
     static std::string BRIDGE_RECEIVER;
+
 private:
     void received(std::string msg);
     void updateBridgeState();
@@ -126,6 +132,8 @@ private:
     // Transport layer.
     SocketTransport mTransport;
     JsonProtocol mProtocol;
+    std::mutex mStateLock;
+    std::condition_variable mCvConnected;
 };
 
 }  // namespace control

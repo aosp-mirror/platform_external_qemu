@@ -21,8 +21,6 @@
 #include "android/emulation/control/waterfall/SocketController.h"
 #include "android/emulation/control/waterfall/WaterfallForwarder.h"
 #include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
-#include "grpcpp/server.h"
-#include "grpcpp/server_builder.h"
 #include "waterfall.grpc.pb.h"
 
 namespace google {
@@ -116,7 +114,7 @@ private:
 };
 
 
-waterfall::Waterfall::Service* getWaterfallService() {
+grpc::Service* getWaterfallService() {
     return new WaterfallImpl();
 };
 
