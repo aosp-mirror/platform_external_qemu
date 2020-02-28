@@ -94,9 +94,8 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "@Q", // Pick the image you would like to use
-                "-wipe-data",
-                "-no-direct-adb",
-                "-waterfall", "adb",
+                "-grpc",
+                "8554",
                 "-debug-metrics", // With some additional parameters.
             ],
             "linux": {
@@ -111,10 +110,10 @@
             },
             "osx": {
                 "args": [
-                    "@Q",
+                    "@L",
                     "-verbose",
                     "-grpc",
-                    "5556",
+                    "8554",
                     "-feature",
                     "-HVF",
                 ],
