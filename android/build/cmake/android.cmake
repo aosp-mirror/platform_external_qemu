@@ -1090,3 +1090,29 @@ if(WINDOWS_MSVC_X86_64 AND NOT INCLUDE_MSVC_POSIX)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/msvc-posix-compat/
                    msvc-posix-compat)
 endif()
+
+# Rule to build cf crosvm based on a combination of dependencies
+# built locally / prebuilt
+function(android_crosvm_build DEP)
+    message(STATUS "building crosvm with dependency ${DEP}")
+    set(CMAKE_CARGO_HOME_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package/cargo_home")
+    set(CMAKE_CARGO_BIN_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package/cargo_home/bin")
+    # TODO: remove
+    set(CMAKE_CARGO_CROSVM_PREBUILT_LIB_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package/x86_64-linux-gnu/lib")
+    set(CMAKE_CROSVM_BUILD_SCRIPT_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package/crosvm-build.sh")
+    set(CMAKE_CROSVM_SRC_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../platform/crosvm")
+    add_custom_command(
+        OUTPUT "${CMAKE_CROSVM_SRC_PATH}/target/release/crosvm"
+        COMMAND
+            "${CMAKE_CROSVM_BUILD_SCRIPT_PATH}"
+            "${CMAKE_CROSVM_SRC_PATH}"
+            "${CMAKE_CARGO_HOME_PATH}"
+            "${CMAKE_CARGO_BIN_PATH}"
+            "${CMAKE_CARGO_CROSVM_PREBUILT_LIB_PATH}"
+        DEPENDS ${DEP})
+endfunction()
