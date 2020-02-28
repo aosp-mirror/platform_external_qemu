@@ -264,6 +264,7 @@ public:
     void waitSync(bool debug = false);
     void setDisplay(uint32_t displayId) { m_displayId = displayId; }
     uint32_t getDisplay() { return m_displayId; }
+    void saveToPng(std::string outputDir);
 
 public:
     void restore();

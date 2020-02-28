@@ -16,6 +16,8 @@
 #include "ColorBuffer.h"
 
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/files/PathUtils.h"
+#include "android/loadpng.h"
 
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
@@ -995,3 +997,19 @@ bool ColorBuffer::importMemory(
 void ColorBuffer::setInUse(bool inUse) {
     m_inUse = inUse;
 }
+
+void ColorBuffer::saveToPng(std::string outputDir) {
+    std::vector<unsigned char> pixels(m_width * m_height * 4);
+    readPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+    char fileName[100];
+    int fileNameSize = snprintf(
+            fileName, sizeof(fileName), "cb%d_%" PRIu64 ".png",
+            mHndl,
+            android::base::System::get()->getHighResTimeUs());
+    assert(fileNameSize < sizeof(fileName));
+    std::string outputFilePath =
+            android::base::PathUtils::join(outputDir, fileName);
+    savepng(outputFilePath.c_str(), 4, m_width, m_height, SKIN_ROTATION_0,
+            pixels.data());
+}
+
