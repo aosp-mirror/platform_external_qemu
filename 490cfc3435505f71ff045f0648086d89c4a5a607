@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a5e799e_cf0b881a",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-02-28T07:17:44Z",
+      "side": 1,
+      "message": "Instead loop and wait for the next message, would it be better it the bridge can push and notify this thread when there\u0027s a new message?\n\nIn our implementation, we use a golang like channel in google3\u0027s fiber libraries: http://google3/thread/fiber/channel.h Not sure if Android code base has similar utils.",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 100,
+        "endChar": 0
+      },
+      "revId": "490cfc3435505f71ff045f0648086d89c4a5a607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
