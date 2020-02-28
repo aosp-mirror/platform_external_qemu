@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7225d568_3133f810",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-02-28T07:31:21Z",
+      "side": 1,
+      "message": "nit: this is google3 style, not sure if it applies here: forward declarations should be avoided and #include should be used instead.\n\nhttps://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.md?cl\u003dhead#Forward_Declarations",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 12
+      },
+      "revId": "490cfc3435505f71ff045f0648086d89c4a5a607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8a5e799e_cf0b881a",
         "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
         "patchSetId": 1
