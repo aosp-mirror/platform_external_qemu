@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "849925ad_80fb9644",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-28T20:07:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8d41d877_edf941f8",
+      "range": {
+        "startLine": 87,
+        "startChar": 40,
+        "endLine": 87,
+        "endChar": 43
+      },
+      "revId": "0c4b898e047b1eee6dda655581bfbb337265fd76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f16d38a_027a64f3",
         "filename": "android/android-grpc/snapshot_service.proto",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "0c4b898e047b1eee6dda655581bfbb337265fd76",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7547296e_a2feacfc",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-28T20:07:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2f16d38a_027a64f3",
+      "range": {
+        "startLine": 90,
+        "startChar": 5,
+        "endLine": 90,
+        "endChar": 11
+      },
+      "revId": "0c4b898e047b1eee6dda655581bfbb337265fd76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
