@@ -3685,8 +3685,7 @@ private:
                 }
                 // External semaphore maps to the win32 version on windows,
                 // continues with external semaphore fd on non-windows
-                if (!strcmp("VK_KHR_external_semaphore_fd", extName) ||
-                    !strcmp("VK_FUCHSIA_external_semaphore", extName)) {
+                if (!strcmp("VK_KHR_external_semaphore_fd", extName)) {
 #ifdef _WIN32
                     res.push_back("VK_KHR_external_semaphore_win32");
 #else
