@@ -74,28 +74,35 @@ set(OPTION_TCMALLOC
       BOOL
       "True if we should use TCMalloc on its supported platforms (currently, linux)."
 )
-set(OPTION_GFXSTREAM_BACKEND FALSE
-    CACHE BOOL "True if we should build the gfxstream backend (plus everything else).")
+set(OPTION_GFXSTREAM_BACKEND
+    FALSE
+    CACHE
+      BOOL
+      "True if we should build the gfxstream backend (plus everything else).")
 
-set(GFXSTREAM FALSE
-    CACHE BOOL "True if we should build only gfxstream and its accompanying libraries/tests.")
+set(GFXSTREAM
+    FALSE
+    CACHE
+      BOOL
+      "True if we should build only gfxstream and its accompanying libraries/tests."
+)
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
 
-if (GFXSTREAM)
-    set(OPTION_AEMU_LIBS_ONLY TRUE)
-    set(OPTION_GFXSTREAM_BACKEND TRUE)
-    set(OPTION_TCMALLOC FALSE)
-    set(WEBRTC FALSE)
-    set(ANDROIDSTUDIO FALSE)
+if(GFXSTREAM)
+  set(OPTION_AEMU_LIBS_ONLY TRUE)
+  set(OPTION_GFXSTREAM_BACKEND TRUE)
+  set(OPTION_TCMALLOC FALSE)
+  set(WEBRTC FALSE)
+  set(ANDROIDSTUDIO FALSE)
 endif()
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
-  set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
+set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
@@ -118,8 +125,10 @@ endif()
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
-# So we are using some C++14 features
-set(CMAKE_CXX_STANDARD 14)
+# We are using Clang-10, so we can use C++17.
+# We do not pass the -std=c++17 flag in explicitly as this currently
+# causes some issues with include qemu headers directly.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++17-extensions")
 
 # Gather compile time statistics
 if(OPTION_TIME_INFO)
@@ -209,27 +218,23 @@ elseif(DARWIN_X86_64)
   set(ANDROID_NASM_TYPE macho64)
   # Always consider the source to be darwin.
   add_definitions(-D_DARWIN_C_SOURCE=1)
-  add_c_flag("-Wno-everything")
+  add_c_flag("-Werror")
+  add_c_flag("-Wno-format")
+  add_c_flag("-Wno-deprecated-declarations")
 else()
   message(FATAL_ERROR "Unknown target!")
 endif()
 
 # Note that clang in windows act as a drop in replacement for cl
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
+add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
 
-  # If macro expansion goes wrong, we like to see why
-  add_c_flag("-fmacro-backtrace-limit=0")
+# If macro expansion goes wrong, we like to see why
+add_c_flag("-fmacro-backtrace-limit=0")
 
-  # Let's not trip over warnings & errors that do not exist on every platform
-  # clang-cl != clang-lin != clang-darwin
-  add_c_flag("-Wno-unknown-warning-option")
-  add_c_flag("-Wno-unknown-argument")
-endif()
-
-if(DARWIN_X86_64)
-  add_c_flag("-Werror")
-endif()
+# Let's not trip over warnings & errors that do not exist on every platform
+# clang-cl != clang-lin != clang-darwin
+add_c_flag("-Wno-unknown-warning-option")
+add_c_flag("-Wno-unknown-argument")
 
 if(WINDOWS_MSVC_X86_64)
   add_c_flag("-MD")
@@ -536,6 +541,7 @@ android_target_compile_options(
   "-Wno-array-bounds"
   "-Wno-format"
   "-Wno-implicit-int-float-conversion"
+  "-Wno-shift-count-overflow"
   "-Wno-reorder-init-list")
 android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE
                                    "-D_DARWIN_C_SOURCE=1")
@@ -632,7 +638,7 @@ target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
-if (NOT OPTION_AEMU_LIBS_ONLY)
+if(NOT OPTION_AEMU_LIBS_ONLY)
 
   # Not allowed to have libraries without source files.
   android_add_library(
@@ -647,7 +653,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     SRC # cmake-format: sortable
         audio/paaudio-headless-impl-placeholder.c
     LINUX audio/paaudio-headless-impl.c)
-  
+
   android_add_interface(
     TARGET android-qemu-deps-headful
     LICENSE "GPL-2.0-only"
@@ -657,9 +663,9 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
       "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSE")
-  android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE
-                                "-lpulse")
-  
+  android_target_link_libraries(android-qemu-deps-headful linux-x86_64
+                                INTERFACE "-lpulse")
+
   android_add_interface(
     TARGET android-qemu-deps-headless
     LICENSE "GPL-2.0-only"
@@ -669,9 +675,9 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
       "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSE")
-  android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
-                                headless-paaudio)
-  
+  android_target_link_libraries(android-qemu-deps-headless linux-x86_64
+                                INTERFACE headless-paaudio)
+
   android_add_library(
     TARGET libqemu2-util
     LICENSE "GPL-2.0-only"
@@ -684,10 +690,10 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     SRC # cmake-format: sortable
         ${libqemuutil_sources} ${libqemuutil_generated_sources})
   target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
-  android_target_link_libraries(libqemu2-util windows
-                                PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
+  android_target_link_libraries(
+    libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
   target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
-  
+
   android_add_library(
     TARGET libqemustub
     LICENSE "GPL-2.0-only"
@@ -701,7 +707,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
         ${libqemustub_sources} ${libqemuutil_generated_sources})
   target_link_libraries(libqemustub PRIVATE android-qemu-deps)
   target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
-  
+
   # Qemu-img
   android_add_executable(
     TARGET qemu-img INSTALL .
@@ -717,17 +723,17 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     LINUX scsi/pr-manager.c)
   target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub
                                          android-qemu-deps android-emu-base)
-  
+
   # Create the qemu targets.
   android_add_qemu_executable(
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_executable(aarch64
-                              "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_executable(
+    aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  
+
   if(NOT OPTION_MINBUILD)
     android_add_qemu_executable(
       i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
@@ -738,7 +744,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     android_add_qemu_headless_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-  
+
   # and the upstream qemu targets, if desired.
   if(QEMU_UPSTREAM)
     message(STATUS "Building upstream qemu.")
@@ -751,12 +757,12 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     android_add_qemu_upstream_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-  
+
   # The tests currently work on linux only.
   if(ANDROID_TARGET_TAG MATCHES "linux.*")
     include(qemu-test.cmake)
   endif()
-  
+
 endif()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/target.tag "${ANDROID_TARGET_TAG}")

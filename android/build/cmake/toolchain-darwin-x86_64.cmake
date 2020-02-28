@@ -75,7 +75,6 @@ if(NOT APPLE)
       "${OSXCROSS_TARGET_DIR}/bin/${OSXCROSS_HOST}-install_name_tool"
       CACHE FILEPATH "install_name_tool")
   set(CMAKE_STRIP_CMD "${OSXCROSS_TARGET_DIR}/bin/${OSXCROSS_HOST}-strip")
-
   set(ENV{PKG_CONFIG_LIBDIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs/opt/local/lib/pkgconfig")
   set(ENV{PKG_CONFIG_SYSROOT_DIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs")
   add_definitions(-DMACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
@@ -90,6 +89,9 @@ endif()
 # Always consider the source to be darwin.
 add_definitions(-D_DARWIN_C_SOURCE=1)
 
+# We produce some archives with no symbols, let's not print a lot of warnings.
+set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 
 # And the asm type if we are compiling with ASM
 set(ANDROID_ASM_TYPE macho64)
