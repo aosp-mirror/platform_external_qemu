@@ -107,6 +107,26 @@ typedef struct {
     int64_t ramSizeBytes;
 } VmConfiguration;
 
+typedef enum EmuRunState {
+    QEMU_RUN_STATE_DEBUG = 0,
+    QEMU_RUN_STATE_INMIGRATE = 1,
+    QEMU_RUN_STATE_INTERNAL_ERROR = 2,
+    QEMU_RUN_STATE_IO_ERROR = 3,
+    QEMU_RUN_STATE_PAUSED = 4,
+    QEMU_RUN_STATE_POSTMIGRATE = 5,
+    QEMU_RUN_STATE_PRELAUNCH = 6,
+    QEMU_RUN_STATE_FINISH_MIGRATE = 7,
+    QEMU_RUN_STATE_RESTORE_VM = 8,
+    QEMU_RUN_STATE_RUNNING = 9,
+    QEMU_RUN_STATE_SAVE_VM = 10,
+    QEMU_RUN_STATE_SHUTDOWN = 11,
+    QEMU_RUN_STATE_SUSPENDED = 12,
+    QEMU_RUN_STATE_WATCHDOG = 13,
+    QEMU_RUN_STATE_GUEST_PANICKED = 14,
+    QEMU_RUN_STATE_COLO = 15,
+    QEMU_RUN_STATE__MAX = 16,
+} EmuRunState;
+
 // C interface to expose Qemu implementations of common VM related operations.
 typedef struct QAndroidVmOperations {
     bool (*vmStop)(void);
@@ -184,6 +204,7 @@ typedef struct QAndroidVmOperations {
     uint64_t (*hostmemRegister)(uint64_t hva, uint64_t size);
     void (*hostmemUnregister)(uint64_t id);
     struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
+    EmuRunState (*getRunState)();
 
 } QAndroidVmOperations;
 

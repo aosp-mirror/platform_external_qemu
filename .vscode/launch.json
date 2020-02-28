@@ -96,7 +96,7 @@
             "args": [
                 "@Q", // Pick the image you would like to use
                 "-grpc",
-                "8554"
+                "8554",
             ],
             "linux": {
                 "env": {
@@ -110,10 +110,10 @@
             },
             "osx": {
                 "args": [
-                    "@Q",
+                    "@L",
                     "-verbose",
                     "-grpc",
-                    "5556",
+                    "8554",
                     "-feature",
                     "-HVF",
                 ],

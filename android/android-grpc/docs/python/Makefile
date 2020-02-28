@@ -47,4 +47,4 @@ run: protoc
 	$(PYTHON) -m sample.logcat
 
 deps:
-		$(PYTHON) -m pip install --user grpcio grpcio-tools PIL
+		$(PYTHON) -m pip install --user grpcio grpcio-tools pillow
