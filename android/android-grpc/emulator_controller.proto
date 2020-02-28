@@ -108,6 +108,14 @@ service EmulatorController {
   // it is possible that the logcat buffer gets overwritten, or falls behind.
   rpc streamLogcat(LogMessage) returns (stream LogMessage) {}
 
+  // Transition the virtual machine to the desired state. Note that
+  // some states are only observable. For example you cannot transition
+  // to the error state.
+  rpc setVmState(VmRunState) returns (google.protobuf.Empty) {}
+
+  // Gets the state of the virtual machine.
+  rpc getVmState(google.protobuf.Empty) returns (VmRunState) {}
+
   // The following endpoints are needed to establish the webrtc protocol
   // Due to limitiations in Javascript we cannot make use of bidirectional
   // endpoints See this [blog](https://grpc.io/blog/state-of-grpc-web) for
@@ -129,6 +137,40 @@ service EmulatorController {
   // The ice candidates for example will trickle in on this callback,
   // as will the SDP negotation.
   rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
+}
+
+// A Run State that describes the state of the Virtual Machine.
+message VmRunState {
+  enum RunState {
+    // The emulator is in an unknown state. You cannot transition to this state.
+    UNKNOWN = 0;
+    // Guest is actively running. You can transition to this state from the
+    // paused state.
+    RUNNING = 1;
+    // Guest is paused to load a snapshot. You cannot transition to this state.
+    RESTORE_VM = 2;
+    // Guest has been paused. Transitioning to this state will pause the
+    // emulator the guest will not be consuming any cpu cycles.
+    PAUSED = 3;
+    // Guest is paused to take or export a snapshot. You cannot
+    // transition to this state.
+    SAVE_VM = 4;
+    // System shutdown, note that it is similar to power off. It tries to set
+    // the system status and notify guest. The system is likely going to
+    // disappear soon and do proper cleanup of resources, possibly taking
+    // a snapshot. This is the same behavior as closing the emulator by clicking
+    // the X (close) in the user interface.
+    SHUTDOWN = 5;
+    // Immediately terminate the emulator. No resource cleanup will take place.
+    // There is a good change to corrupt the system.
+    TERMINATE = 7;
+    // Will cause the emulator to reset. This is not a state you can observe.
+    RESET = 9;
+    // Guest experienced some error state, you cannot transition to this state.
+    INTERNAL_ERROR = 10;
+  }
+
+  RunState state = 1;
 }
 
 message ParameterValue { repeated float data = 1 [ packed = true ]; }
@@ -512,22 +554,23 @@ message KeyboardEvent {
   // You can find an accurate description of valid values
   // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
   //
-  // Note that some keys can result in multiple evdev events that are delivered
-  // to the emulator. for example the Key "A" will result in a a sequence
+  // Note that some keys can result in multiple evdev events that are
+  // delivered to the emulator. for example the Key "A" will result in a
+  // sequence:
   // ["Shift", "a"] -> [0x2a, 0x1e] whereas "a" results in ["a"] -> [0x1e].
   //
-  // Not all documented keys are understood by android, and only printable ASCII
-  // characters are properly translated.
+  // Not all documented keys are understood by android, and only printable
+  // ASCII [32-127) characters are properly translated.
   string key = 4;
 
-  // Series of utf8 encoded characters to send to the emulator. An attempt will
-  // be made to translate every character will an EvDev event type and send to
-  // the emulator as a keypress event. The values in keyCode, eventType,
-  // codeType and key will be ignored.
+  // Series of utf8 encoded characters to send to the emulator. An attempt
+  // will be made to translate every character will an EvDev event type and
+  // send to the emulator as a keypress event. The values in keyCode,
+  // eventType, codeType and key will be ignored.
   //
-  // Note that most printable ASCII characters can be send individually with the
-  // "key" param. Do not expect arbitrary utf-8 symbols to arrive in the
-  // emulator (most will be ignored).
+  // Note that most printable ASCII characters (range [32-127) can be send
+  // individually with the "key" param. Do not expect arbitrary UTF symbols to
+  // arrive in the emulator (most will be ignored).
   string text = 5;
 }
 

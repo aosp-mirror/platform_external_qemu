@@ -39,6 +39,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/Uuid.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
@@ -129,7 +130,8 @@ public:
           mRtcBridge(rtcBridge),
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
-          mTouchEventSender(agents) {
+          mTouchEventSender(agents),
+          mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -478,6 +480,73 @@ public:
         return Status::OK;
     }
 
+    Status getVmState(ServerContext* context,
+                      const ::google::protobuf::Empty* request,
+                      VmRunState* reply) override {
+        switch (mAgents->vm->getRunState()) {
+            case QEMU_RUN_STATE_PAUSED:
+            case QEMU_RUN_STATE_SUSPENDED:
+                reply->set_state(VmRunState::PAUSED);
+                break;
+            case QEMU_RUN_STATE_RESTORE_VM:
+                reply->set_state(VmRunState::RESTORE_VM);
+                break;
+            case QEMU_RUN_STATE_RUNNING:
+                reply->set_state(VmRunState::RUNNING);
+                break;
+            case QEMU_RUN_STATE_SAVE_VM:
+                reply->set_state(VmRunState::SAVE_VM);
+                break;
+            case QEMU_RUN_STATE_SHUTDOWN:
+                reply->set_state(VmRunState::SHUTDOWN);
+                break;
+            case QEMU_RUN_STATE_GUEST_PANICKED:
+            case QEMU_RUN_STATE_INTERNAL_ERROR:
+            case QEMU_RUN_STATE_IO_ERROR:
+                reply->set_state(VmRunState::INTERNAL_ERROR);
+                break;
+            default:
+                reply->set_state(VmRunState::UNKNOWN);
+                break;
+        };
+
+        return Status::OK;
+    }
+
+    Status setVmState(ServerContext* context,
+                      const VmRunState* request,
+                      ::google::protobuf::Empty* reply) override {
+        const std::chrono::milliseconds kWaitToDie = std::chrono::seconds(60);
+
+        // These need to happen on the qemu looper as these transitions
+        // will require io locks.
+        mLooper->scheduleCallback([=]() {
+            switch (request->state()) {
+                case VmRunState::RESET:
+                    mAgents->vm->vmReset();
+                    break;
+                case VmRunState::SHUTDOWN:
+                    mAgents->vm->vmShutdown();
+                    break;
+                case VmRunState::TERMINATE: {
+                    LOG(INFO) << "Terminating the emulator.";
+                    auto pid = System::get()->getCurrentProcessId();
+                    System::get()->killProcess(pid);
+                }; break;
+                case VmRunState::PAUSED:
+                    mAgents->vm->vmPause();
+                    break;
+                case VmRunState::RUNNING:
+                    mAgents->vm->vmResume();
+                    break;
+                default:
+                    break;
+            };
+        });
+
+        return Status::OK;
+    }
+
     Status sendPhone(ServerContext* context,
                      const PhoneCall* request,
                      PhoneResponse* reply) override {
@@ -524,6 +593,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
+    Looper* mLooper;
     RtcBridge* mRtcBridge;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
