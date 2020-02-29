@@ -1,3 +1,18 @@
+/*
+* Copyright (C) 2017 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 #include "PostWorker.h"
 
 #include "ColorBuffer.h"
@@ -8,6 +23,8 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "emugl/common/misc.h"
 
+#include "emugl/common/misc.h"
+
 #define POST_DEBUG 0
 #if POST_DEBUG >= 1
 #define DD(fmt, ...) \
@@ -16,10 +33,25 @@
 #define DD(fmt, ...) (void)0
 #endif
 
+static void sDefaultRunOnUiThread(UiUpdateFunc f, void* data, bool wait) {
+    (void)f;
+    (void)data;
+    (void)wait;
+}
 
-PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
+PostWorker::PostWorker(
+        PostWorker::BindSubwinCallback&& cb,
+        bool mainThreadPostingOnly,
+        EGLContext eglContext,
+        EGLSurface eglSurface) :
     mFb(FrameBuffer::getFB()),
-    mBindSubwin(cb) {}
+    mBindSubwin(cb),
+    m_mainThreadPostingOnly(mainThreadPostingOnly),
+    m_runOnUiThread(m_mainThreadPostingOnly ?
+        emugl::get_emugl_window_operations().runOnUiThread :
+        sDefaultRunOnUiThread),
+    mContext(eglContext),
+    mSurface(eglSurface) {}
 
 void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l,
                                             hwc_rect_t displayArea,
@@ -33,9 +65,9 @@ void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l,
     l->crop = cropArea;
 }
 
-void PostWorker::post(ColorBuffer* cb) {
+void PostWorker::postImpl(ColorBuffer* cb) {
     // bind the subwindow eglSurface
-    if (!m_initialized) {
+    if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
 
@@ -138,10 +170,12 @@ void PostWorker::post(ColorBuffer* cb) {
 // This rebinds the subwindow context (to account for
 // when the refresh is a display change, for instance)
 // and resets the posting viewport.
-void PostWorker::viewport(int width, int height) {
+void PostWorker::viewportImpl(int width, int height) {
     // rebind the subwindow eglSurface unconditionally---
     // this could be from a display change
-    m_initialized = mBindSubwin();
+    if (!m_mainThreadPostingOnly) {
+        m_initialized = mBindSubwin();
+    }
 
     float dpr = mFb->getDpr();
     m_viewportWidth = width * dpr;
@@ -153,18 +187,17 @@ void PostWorker::viewport(int width, int height) {
 // last posted color buffer to show to the user. Instead of
 // displaying whatever happens to be in the back buffer,
 // clear() is useful for outputting consistent colors.
-void PostWorker::clear() {
+void PostWorker::clearImpl() {
 #ifndef __linux__
-    // Bug: 166317060 (Except it crashes on iris_dri.so)
     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                     GL_STENCIL_BUFFER_BIT);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 #endif
 }
 
-void PostWorker::compose(ComposeDevice* p) {
+void PostWorker::composeImpl(ComposeDevice* p) {
     // bind the subwindow eglSurface
-    if (!m_initialized) {
+    if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
 
@@ -203,9 +236,9 @@ void PostWorker::compose(ComposeDevice* p) {
     mFb->getTextureDraw()->cleanupForDrawLayer();
 }
 
-void PostWorker::compose(ComposeDevice_v2* p) {
+void PostWorker::composev2Impl(ComposeDevice_v2* p) {
     // bind the subwindow eglSurface
-    if (!m_initialized) {
+    if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
 
@@ -242,6 +275,26 @@ void PostWorker::compose(ComposeDevice_v2* p) {
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     mFb->getTextureDraw()->cleanupForDrawLayer();
+}
+
+void PostWorker::bind() {
+    if (m_mainThreadPostingOnly) {
+        if (mFb->getDisplay() != EGL_NO_DISPLAY) {
+            EGLint res = s_egl.eglMakeCurrent(mFb->getDisplay(), mFb->getWindowSurface(), mFb->getWindowSurface(), mContext);
+            if (!res) fprintf(stderr, "%s: error in binding: 0x%x\n", __func__, s_egl.eglGetError());
+        } else {
+            fprintf(stderr, "%s: no display!\n", __func__);
+        }
+    } else {
+        mBindSubwin();
+    }
+}
+
+void PostWorker::unbind() {
+    if (mFb->getDisplay() != EGL_NO_DISPLAY) {
+        s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                             EGL_NO_CONTEXT);
+    }
 }
 
 void PostWorker::composeLayer(ComposeLayer* l) {
@@ -279,3 +332,137 @@ PostWorker::~PostWorker() {
                              EGL_NO_CONTEXT);
     }
 }
+
+void PostWorker::post(ColorBuffer* cb) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .postCb = cb,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->postImpl(uiThreadArgs.postCb);
+            p->m_fromUiThread.send(0);
+        },
+        this,
+        false /* no wait */);
+
+        int response;
+        m_fromUiThread.receive(&response);
+
+    } else {
+        postImpl(cb);
+    }
+}
+
+void PostWorker::viewport(int width, int height) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .width = width,
+            .height = height,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->viewportImpl(uiThreadArgs.width, uiThreadArgs.height);
+            p->m_fromUiThread.send(0);
+        },
+        this,
+        false /* no wait */);
+
+        int response;
+        m_fromUiThread.receive(&response);
+
+    } else {
+        viewportImpl(width, height);
+    }
+}
+
+void PostWorker::compose(ComposeDevice* p) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .composeDevice = p,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->composeImpl(uiThreadArgs.composeDevice);
+            p->m_fromUiThread.send(0);
+        },
+        this,
+        false /* no wait */);
+
+        int response;
+        m_fromUiThread.receive(&response);
+    } else {
+        composeImpl(p);
+    }
+}
+
+void PostWorker::compose(ComposeDevice_v2* p) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .composeDevice_v2 = p,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->composev2Impl(uiThreadArgs.composeDevice_v2);
+            p->m_fromUiThread.send(0);
+        },
+        this,
+        false /* no wait */);
+
+        int response;
+        m_fromUiThread.receive(&response);
+    } else {
+        composev2Impl(p);
+    }
+}
+
+void PostWorker::clear() {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .postCb = 0,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->clearImpl();
+            p->m_fromUiThread.send(0);
+        },
+        this,
+        false /* no wait */);
+
+        int response;
+        m_fromUiThread.receive(&response);
+    } else {
+        clearImpl();
+    }
+}
+
