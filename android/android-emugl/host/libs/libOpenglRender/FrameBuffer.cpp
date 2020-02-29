@@ -841,19 +841,38 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 }
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
+#ifdef __APPLE__
+    bool postOnlyOnMainThread = m_subWin;
+#else
+    bool postOnlyOnMainThread = false;
+#endif
+
     if (!m_postThread.isStarted()) {
+        if (postOnlyOnMainThread) {
+            EGLContext prevContext = s_egl.eglGetCurrentContext();
+            EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
+            EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+            m_prevContext = prevContext;
+            m_prevReadSurf = prevReadSurf;
+            m_prevDrawSurf = prevDrawSurf;
+        }
         m_postWorker.reset(new PostWorker([this]() {
             if (m_subWin) {
                 return bindSubwin_locked();
             } else {
                 return bindFakeWindow_locked();
             }
-        }));
+        },
+        postOnlyOnMainThread,
+        m_eglContext,
+        m_eglSurface));
         m_postThread.start();
     }
 
     m_postThread.enqueue(Post(post));
-    m_postThread.waitQueuedItems();
+    if (!postOnlyOnMainThread) {
+        m_postThread.waitQueuedItems();
+    }
 }
 
 void FrameBuffer::setPostCallback(
