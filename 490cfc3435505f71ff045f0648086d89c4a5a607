@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb07ea5f_e461bfa4",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-29T00:31:18Z",
+      "side": 1,
+      "message": "Automated tool created this, will fix.",
+      "parentUuid": "7225d568_3133f810",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 12
+      },
+      "revId": "490cfc3435505f71ff045f0648086d89c4a5a607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8a5e799e_cf0b881a",
         "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2020-02-28T07:17:44Z",
       "side": 1,
       "message": "Instead loop and wait for the next message, would it be better it the bridge can push and notify this thread when there\u0027s a new message?\n\nIn our implementation, we use a golang like channel in google3\u0027s fiber libraries: http://google3/thread/fiber/channel.h Not sure if Android code base has similar utils.",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 100,
+        "endChar": 0
+      },
+      "revId": "490cfc3435505f71ff045f0648086d89c4a5a607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84c94565_a9e4fa93",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-02-29T00:31:18Z",
+      "side": 1,
+      "message": "That would require a significant rewrite on how we are doing gRPC, and increase the complexity a lot. (See https://github.com/grpc/grpc/blob/master/examples/cpp/helloworld/greeter_server.cc vs https://github.com/grpc/grpc/blob/master/examples/cpp/helloworld/greeter_async_server.cc).\n\nWe are not expecting too many users in this method to begin with. We expect 1 remote user per device. We can revisit this if it turns out to be a big bottleneck.",
+      "parentUuid": "8a5e799e_cf0b881a",
       "range": {
         "startLine": 98,
         "startChar": 12,
