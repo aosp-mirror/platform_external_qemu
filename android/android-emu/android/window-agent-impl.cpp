@@ -18,6 +18,7 @@
 #include "android/emulation/MultiDisplay.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
@@ -204,6 +205,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
 
                 },
 
+        .runOnUiThread =
+                [](UiUpdateFunc f, void* data, bool wait) {
+                    fprintf(stderr, "%s: runOnUiThread\n", __func__);
+                    skin_winsys_run_ui_update(f, data, wait);
+                }
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

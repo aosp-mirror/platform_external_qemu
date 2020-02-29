@@ -219,6 +219,7 @@ namespace egl {
 #define VALIDATE_SURFACE_RETURN(EGLSurface,ret,varName)      \
         SurfacePtr varName = dpy->getSurface(EGLSurface);    \
         if(!varName.get()) {                                 \
+            fprintf(stderr, "%s: no surf\n", __func__); \
             RETURN_ERROR(ret,EGL_BAD_SURFACE);               \
         }
 
@@ -842,6 +843,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface surface) {
+    fprintf(stderr, "%s: destroy %p\n", __func__, surface);
     VALIDATE_DISPLAY(display);
     emugl::Mutex::AutoLock mutex(s_eglLock);
     SurfacePtr srfc = dpy->getSurface(surface);
@@ -1097,8 +1099,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
        }
     } else { //assining new context
         VALIDATE_CONTEXT(context);
+        fprintf(stderr, "%s:%d validate surface\n", __func__, __LINE__);
         VALIDATE_SURFACE(draw,newDrawSrfc);
+        fprintf(stderr, "%s:%d validate surface\n", __func__, __LINE__);
         VALIDATE_SURFACE(read,newReadSrfc);
+        fprintf(stderr, "%s:%d validate surface (done)\n", __func__, __LINE__);
 
         EglSurface* newDrawPtr = newDrawSrfc.get();
         EglSurface* newReadPtr = newReadSrfc.get();
@@ -1552,6 +1557,8 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = getEGLImage(imagehndl);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    if (!img) return iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
 
     if (img->sync) {
         iface->deleteSync((GLsync)img->sync);
