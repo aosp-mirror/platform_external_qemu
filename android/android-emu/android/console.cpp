@@ -3432,12 +3432,13 @@ static int do_screenrecord_webrtc(ControlClient client, char* args) {
           }
         }
         // Start on the given handle!
-        const char* name = client->global->record_agent->startSharedMemoryModule(fps);
+        const char* name = client->global->record_agent->initalizeSharedMemoryModule();
         if (name) {
             control_write(client, name);
             control_write(client, "\r\n");
         }
-        return name  ? 0 : -1;
+        auto recording = client->global->record_agent->startSharedMemoryModule();
+        return recording ? 0 : -1;
 
     } else if (splitArgs[0] == "stop") {
         return client->global->record_agent->stopSharedMemoryModule() ? 0 : -1;

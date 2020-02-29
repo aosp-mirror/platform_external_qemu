@@ -14,14 +14,14 @@
 
 #include "android/recording/screen-recorder.h"
 
-#include <assert.h>                                          // for assert
-#include <string.h>                                          // for strlen
-#include <atomic>                                            // for atomic
-#include <functional>                                        // for __base
-#include <memory>                                            // for unique_ptr
-#include <string>                                            // for basic_st...
+#include <assert.h>    // for assert
+#include <string.h>    // for strlen
+#include <atomic>      // for atomic
+#include <functional>  // for __base
+#include <memory>      // for unique_ptr
+#include <string>      // for basic_st...
 #include <thread>
-#include <utility>                                           // for move
+#include <utility>  // for move
 
 #include "android/android.h"                                 // for android_...
 #include "android/base/Log.h"                                // for LOG, Log...
@@ -313,7 +313,8 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
         D("Defaulting time limit to %d seconds", kMaxTimeLimit);
         info.timeLimit = kMaxTimeLimit;
     } else if (info.timeLimit > kMaxTimeLimit &&
-               !(android_cmdLineOptions && android_cmdLineOptions->record_session)) {
+               !(android_cmdLineOptions &&
+                 android_cmdLineOptions->record_session)) {
         // Allow indefinite recording for emulator recording sessions.
         D("Defaulting time limit to %d seconds", kMaxTimeLimit);
         info.timeLimit = kMaxTimeLimit;
@@ -347,11 +348,12 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
     // Format is <filename>,<delay[,<duration>].
     // If no duration, then record until the emulator shuts down.
     std::vector<std::string> tokens;
-    android::base::split(cmdLineArgs, ",", [&tokens](android::base::StringView s) {
-        if (!s.empty()) {
-            tokens.push_back(s);
-        }
-    });
+    android::base::split(cmdLineArgs, ",",
+                         [&tokens](android::base::StringView s) {
+                             if (!s.empty()) {
+                                 tokens.push_back(s);
+                             }
+                         });
 
     if (tokens.size() < 2) {
         fprintf(stderr, "Not enough arguments for record-session\n");
@@ -373,18 +375,22 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
         duration = atoi(tokens[2].c_str());
     }
 
-    std::thread(std::bind([](std::string filename, int delay, int duration) {
-        RecordingInfo info = {};
-        if (delay > 0) {
-            android::base::Thread::sleepMs(delay * 1000);
-        }
-        info.fileName = filename.c_str();
-        info.timeLimit = duration;
-        // Make the quality and fps low, so we don't have so much cpu usage.
-        info.fps = 3;
-        info.videoBitrate = 500000;
-        screen_recorder_start(&info, true);
-    }, tokens[0], delay, duration)).detach();
+    std::thread(std::bind(
+                        [](std::string filename, int delay, int duration) {
+                            RecordingInfo info = {};
+                            if (delay > 0) {
+                                android::base::Thread::sleepMs(delay * 1000);
+                            }
+                            info.fileName = filename.c_str();
+                            info.timeLimit = duration;
+                            // Make the quality and fps low, so we don't have so
+                            // much cpu usage.
+                            info.fps = 3;
+                            info.videoBitrate = 500000;
+                            screen_recorder_start(&info, true);
+                        },
+                        tokens[0], delay, duration))
+            .detach();
 }
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
@@ -436,7 +442,7 @@ bool screen_recorder_stop(bool async) {
     return false;
 }
 
-const char* start_shared_memory_module(int fps) {
+const char* initialize_shared_memory_module() {
     auto& globals = *sGlobals;
 
     // emulator name --> shared memory handle.
@@ -458,24 +464,23 @@ const char* start_shared_memory_module(int fps) {
         }
     }
 
-    globals.webrtc_module->start();
-    gpu_frame_set_record_mode(true);
     const char* handle = globals.sharedMemoryHandle.c_str();
-    D("%s(handle=%s, fps=%d)", __func__, handle, fps);
+    D("%s(handle=%s)", __func__, handle);
     return handle;
 }
 
+bool start_shared_memory_module() {
+    auto& globals = *sGlobals;
+    if (globals.webrtc_module) {
+        globals.webrtc_module->start();
+    }
+    return gpu_frame_set_record_mode(true);
+}
+
 bool stop_shared_memory_module() {
+    auto& globals = *sGlobals;
+    if (globals.webrtc_module)
+        globals.webrtc_module->stop();
     gpu_frame_set_record_mode(false);
     return true;
-}
-
-extern "C" {
-const char* start_webrtc(int fps) {
-    return start_shared_memory_module(fps);
-}
-
-bool stop_webrtc() {
-    return stop_shared_memory_module();
-}
 }
