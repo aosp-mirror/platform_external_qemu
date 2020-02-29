@@ -93,6 +93,30 @@
       "revId": "490cfc3435505f71ff045f0648086d89c4a5a607",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35ae5215_085ae0e1",
+        "filename": "android/android-webrtc/android-webrtc/android/emulation/control/RtcService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-02-29T04:20:18Z",
+      "side": 1,
+      "message": "SG. My concern about this approach is that when nextMessage is called, looks like it will hold some lock. So make sure that other operations won\u0027t be blocked because of the lock holding in this loop.\n\nI didn\u0027t take a very close look at the WebRTCBridge implementation so feel free to resolve it if there\u0027s no such concern.",
+      "parentUuid": "84c94565_a9e4fa93",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 100,
+        "endChar": 0
+      },
+      "revId": "490cfc3435505f71ff045f0648086d89c4a5a607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
