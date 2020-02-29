@@ -142,6 +142,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 // Not implemented
                 return false;
                 },
+        .runOnUiThread =
+                [](UiUpdateFunc f, void* data, bool wait) {
+                    f(data);
+                }
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
