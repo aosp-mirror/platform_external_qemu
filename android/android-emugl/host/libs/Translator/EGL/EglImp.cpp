@@ -1552,6 +1552,8 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = getEGLImage(imagehndl);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    if (!img) return iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
 
     if (img->sync) {
         iface->deleteSync((GLsync)img->sync);
