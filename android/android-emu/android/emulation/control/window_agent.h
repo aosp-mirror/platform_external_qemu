@@ -31,6 +31,8 @@ static const int kWindowMessageTimeoutInfinite = -1;
 
 typedef struct EmulatorWindow EmulatorWindow;
 
+typedef void (*UiUpdateFunc)(void* data);
+
 typedef struct QAndroidEmulatorWindowAgent {
     // Get a pointer to the emulator window structure.
     EmulatorWindow* (*getEmulatorWindow)();
@@ -91,6 +93,7 @@ typedef struct QAndroidEmulatorWindowAgent {
                                uint32_t,
                                uint32_t);
     void (*updateUIMultiDisplayPage)(uint32_t);
+    void (*runOnUiThread)(UiUpdateFunc f, void* data, bool wait);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp
