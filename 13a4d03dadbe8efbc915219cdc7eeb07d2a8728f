@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a664653_9442cdec",
+        "filename": "android/android-emu/android/window-agent-impl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-02-29T22:55:30Z",
+      "side": 1,
+      "message": "do we need this ? maybe DPRINT(\"\") ?",
+      "range": {
+        "startLine": 189,
+        "startChar": 19,
+        "endLine": 189,
+        "endChar": 48
+      },
+      "revId": "13a4d03dadbe8efbc915219cdc7eeb07d2a8728f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
