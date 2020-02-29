@@ -210,6 +210,8 @@ struct NetdevUserOptions {
     StringList *hostfwd;
     bool has_guestfwd;
     StringList *guestfwd;
+    bool has_ipv6_hostfwd;
+    StringList *ipv6_hostfwd;
 };
 
 void qapi_free_NetdevUserOptions(NetdevUserOptions *obj);

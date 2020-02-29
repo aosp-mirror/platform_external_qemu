@@ -801,6 +801,27 @@
 
 #endif
 
+#ifdef CONFIG_SLIRP
+{
+.name       = "ipv6_hostfwd_add",
+.args_type  = "arg1:s,arg2:s?,arg3:s?",
+.params     = "[hub_id name]|[netdev_id] [tcp|udp]:[hostaddr6]:hostport-[guestaddr6]:guestport",
+.help       = "redirect TCP6 or UDP6 connections from host to guest (requires -net user)",
+.cmd        = hmp_ipv6_hostfwd_add,
+},
+#endif
+
+#ifdef CONFIG_SLIRP
+{
+.name       = "ipv6_hostfwd_remove",
+.args_type  = "arg1:s,arg2:s?,arg3:s?",
+.params     = "[hub_id name]|[netdev_id] [tcp|udp]:[hostaddr6]:hostport",
+.help       = "remove host-to-guest TCP6 or UDP6 redirection",
+.cmd        = hmp_ipv6_hostfwd_remove,
+},
+
+#endif
+
 {
 .name       = "balloon",
 .args_type  = "value:M",

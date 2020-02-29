@@ -81,6 +81,8 @@ int udp_reattach(struct socket *, unsigned short af);
 void udp_detach(struct socket *);
 struct socket * udp_listen(Slirp *, uint32_t, u_int, uint32_t, u_int,
                            int);
+struct socket * udp6_listen(Slirp *, struct in6_addr, u_int, struct in6_addr, u_int,
+                           int);
 int udp_output(struct socket *so, struct mbuf *m,
                 struct sockaddr_in *saddr, struct sockaddr_in *daddr,
                 int iptos);

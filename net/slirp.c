@@ -69,6 +69,7 @@ static int get_str_sep(char *buf, int buf_size, const char **pp, int sep)
 
 #define SLIRP_CFG_HOSTFWD 1
 #define SLIRP_CFG_LEGACY  2
+#define SLIRP_CFG_IPV6_HOSTFWD (1 << 2)
 
 struct slirp_config_str {
     struct slirp_config_str *next;
@@ -102,6 +103,8 @@ static QTAILQ_HEAD(slirp_stacks, SlirpState) slirp_stacks =
 
 static int slirp_hostfwd(SlirpState *s, const char *redir_str,
                          int legacy_format, Error **errp);
+static int slirp_ipv6_hostfwd(SlirpState *s, const char *redir_str,
+                              int legacy_format, Error **errp);
 static int slirp_guestfwd(SlirpState *s, const char *config_str,
                           int legacy_format, Error **errp);
 
@@ -409,6 +412,11 @@ static int net_slirp_init(NetClientState *peer, const char *model,
                               config->flags & SLIRP_CFG_LEGACY, errp) < 0) {
                 goto error;
             }
+        } else if (config->flags & SLIRP_CFG_IPV6_HOSTFWD) {
+            if (slirp_ipv6_hostfwd(s, config->str,
+                                   config->flags & SLIRP_CFG_LEGACY, errp) < 0) {
+                goto error;
+            }
         } else {
             if (slirp_guestfwd(s, config->str,
                                config->flags & SLIRP_CFG_LEGACY, errp) < 0) {
@@ -536,6 +544,74 @@ void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "invalid format\n");
 }
 
+void hmp_ipv6_hostfwd_remove(Monitor *mon, const QDict *qdict)
+{
+    struct in6_addr host_addr = in6addr_any;
+    int host_port;
+    char buf[256];
+    const char *src_str, *p;
+    SlirpState *s;
+    int is_udp = 0;
+    int err;
+    const char *arg1 = qdict_get_str(qdict, "arg1");
+    const char *arg2 = qdict_get_try_str(qdict, "arg2");
+    const char *arg3 = qdict_get_try_str(qdict, "arg3");
+
+    if (arg2) {
+        s = slirp_lookup(mon, arg1, arg2);
+        src_str = arg3;
+    } else {
+        s = slirp_lookup(mon, NULL, NULL);
+        src_str = arg1;
+    }
+    if (!s) {
+        return;
+    }
+
+    p = src_str;
+    if (!p || get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        goto fail_syntax;
+    }
+
+    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
+        is_udp = 0;
+    } else if (!strcmp(buf, "udp")) {
+        is_udp = 1;
+    } else {
+        goto fail_syntax;
+    }
+
+    if (*(p++) != '[') {
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p, ']') < 0) {
+        goto fail_syntax;
+    }
+
+    if (!inet_pton(AF_INET6, buf, &host_addr)) {
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        goto fail_syntax;
+    }
+
+    if (qemu_strtoi(p, NULL, 10, &host_port) < 0) {
+        goto fail_syntax;
+    }
+
+    err = slirp_remove_ipv6_hostfwd(s->slirp, is_udp, host_addr, host_port);
+
+    monitor_printf(mon, "host forwarding rule for %s %s\n", src_str,
+                   err ? "not found" : "removed");
+    return;
+
+ fail_syntax:
+    monitor_printf(mon, "invalid format\n");
+}
+
+
 static int slirp_hostfwd(SlirpState *s, const char *redir_str,
                          int legacy_format, Error **errp)
 {
@@ -612,6 +688,120 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str,
     return -1;
 }
 
+static int slirp_ipv6_hostfwd(SlirpState *s, const char *redir_str, int legacy_format,
+                              Error **errp)
+{
+    struct in6_addr host_addr = in6addr_any;
+    struct in6_addr guest_addr;
+    int host_port, guest_port;
+    const char *p;
+    char buf[256];
+    int is_udp;
+    const char *end;
+    const char *fail_reason = "Unknown reason";
+
+    memset(&guest_addr, 0, sizeof(guest_addr));
+
+    p = redir_str;
+    if (!p || get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        fail_reason = "No : separators";
+        goto fail_syntax;
+    }
+    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
+        is_udp = 0;
+    } else if (!strcmp(buf, "udp")) {
+        is_udp = 1;
+    } else {
+        fail_reason = "Bad protocol name";
+        goto fail_syntax;
+    }
+
+    if (*(p++) != '[') {
+        fail_reason = "IPv6 address must be enclosed in square brackets";
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p, ']') < 0) {
+        fail_reason = "IPv6 address must be enclosed in square brackets";
+        goto fail_syntax;
+    }
+
+    if (!inet_pton(AF_INET6, buf, &host_addr)) {
+        fail_reason = "Bad host address";
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0 ||
+        buf[0] != '\0') {
+        fail_reason = "Bad ipv6 address and port separator";
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
+        fail_reason = "Bad host port separator";
+        goto fail_syntax;
+    }
+
+    if (qemu_strtoi(buf, &end, 0, &host_port)) {
+        fail_reason = "Bad host port";
+        goto fail_syntax;
+    }
+
+    if (*end != '\0' || host_port < 0 || host_port > 65535) {
+        fail_reason = "Host port out of range";
+        goto fail_syntax;
+    }
+
+    if (*p == '\0') {
+        fail_reason = "Missing guest ipv6 address";
+        goto fail_syntax;
+    }
+
+    if (*(p++) != '[') {
+        fail_reason = "IPv6 address must be enclosed in square brackets";
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p,  ']') < 0) {
+        fail_reason = "IPv6 address must be enclosed in square brackets";
+        goto fail_syntax;
+    }
+
+    if (!inet_pton(AF_INET6, buf, &guest_addr)) {
+        fail_reason = "Bad guest address";
+        goto fail_syntax;
+    }
+
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0 || buf[0] != '\0') {
+        fail_reason = "Bad ipv6 address and port separator";
+        goto fail_syntax;
+    }
+
+    if (qemu_strtoi(p, &end, 0, &guest_port) < 0) {
+        fail_reason = "Bad guest port";
+        goto fail_syntax;
+    }
+
+    if (*end != '\0' || guest_port < 1 || guest_port > 65535) {
+        fail_reason = "Guest port number out of range";
+        goto fail_syntax;
+    }
+
+    if (slirp_add_ipv6_hostfwd(s->slirp, is_udp, host_addr, host_port,
+                               guest_addr, guest_port) < 0) {
+        error_report("could not set up host forwarding rule '%s'",
+                     redir_str);
+        return -1;
+    }
+    return 0;
+
+ fail_syntax:
+    error_setg(errp, "Invalid host forwarding rule '%s' (%s)", redir_str,
+               fail_reason);
+    return -1;
+}
+
+
 void hmp_hostfwd_add(Monitor *mon, const QDict *qdict)
 {
     const char *redir_str;
@@ -637,6 +827,32 @@ void hmp_hostfwd_add(Monitor *mon, const QDict *qdict)
         }
     }
 
+}
+
+void hmp_ipv6_hostfwd_add(Monitor *mon, const QDict *qdict)
+{
+    const char *redir_str;
+    SlirpState *s;
+    const char *arg1 = qdict_get_str(qdict, "arg1");
+    const char *arg2 = qdict_get_try_str(qdict, "arg2");
+    const char *arg3 = qdict_get_try_str(qdict, "arg3");
+
+    if (arg2) {
+        s = slirp_lookup(mon, arg1, arg2);
+        redir_str = arg3;
+    } else if (arg2) {
+        s = slirp_lookup(mon, NULL, arg1);
+        redir_str = arg2;
+    } else {
+        s = slirp_lookup(mon, NULL, NULL);
+        redir_str = arg1;
+    }
+    if (s) {
+        Error *err = NULL;
+        if (slirp_ipv6_hostfwd(s, redir_str, 0, &err) < 0) {
+            error_report_err(err);
+        }
+    }
 }
 
 int net_slirp_redir(const char *redir_str)
@@ -988,6 +1204,7 @@ int net_init_slirp(const Netdev *netdev, const char *name,
     /* all optional fields are initialized to "all bits zero" */
 
     net_init_slirp_configs(user->hostfwd, SLIRP_CFG_HOSTFWD);
+    net_init_slirp_configs(user->ipv6_hostfwd, SLIRP_CFG_IPV6_HOSTFWD);
     net_init_slirp_configs(user->guestfwd, 0);
 
     ret = net_slirp_init(peer, "user", name, user->q_restrict,
