@@ -104,6 +104,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                  uint32_t dpi,
                                  uint32_t flag)->bool { return true; },
         .updateUIMultiDisplayPage = [](uint32_t id) { },
+        .runOnUiThread =
+                [](UiUpdateFunc f, void* data, bool wait) {
+                    fprintf(stderr, "%s: runOnUiThread-headless\n", __func__);
+                    f(data);
+                }
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

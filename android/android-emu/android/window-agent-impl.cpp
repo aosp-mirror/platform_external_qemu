@@ -16,6 +16,7 @@
 
 #include "android/emulator-window.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
@@ -182,6 +183,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->updateUIMultiDisplayPage(id);
                     }
+                },
+        .runOnUiThread =
+                [](UiUpdateFunc f, void* data, bool wait) {
+                    fprintf(stderr, "%s: runOnUiThread\n", __func__);
+                    skin_winsys_run_ui_update(f, data, wait);
                 }
 };
 

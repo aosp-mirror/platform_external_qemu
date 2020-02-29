@@ -753,19 +753,34 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 }
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
+    bool postOnlyOnMainThread = true;
+
     if (!m_postThread.isStarted()) {
+        if (postOnlyOnMainThread) {
+            EGLContext prevContext = s_egl.eglGetCurrentContext();
+            EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
+            EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+            m_prevContext = prevContext;
+            m_prevReadSurf = prevReadSurf;
+            m_prevDrawSurf = prevDrawSurf;
+        }
         m_postWorker.reset(new PostWorker([this]() {
             if (m_subWin) {
                 return bindSubwin_locked();
             } else {
                 return bindFakeWindow_locked();
             }
-        }));
+        },
+        postOnlyOnMainThread,
+        m_eglContext,
+        m_eglSurface));
         m_postThread.start();
     }
 
     m_postThread.enqueue(Post(post));
-    m_postThread.waitQueuedItems();
+    if (!postOnlyOnMainThread) {
+        m_postThread.waitQueuedItems();
+    }
 }
 
 void FrameBuffer::setPostCallback(
@@ -886,6 +901,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             // create EGLSurface from the generated subwindow
             m_eglSurface = s_egl.eglCreateWindowSurface(
                     m_eglDisplay, m_eglConfig, m_subWin, NULL);
+            fprintf(stderr, "%s: m_eglSurface: %p\n", __func__, m_eglSurface);
 
             if (m_eglSurface == EGL_NO_SURFACE) {
                 // NOTE: This can typically happen with software-only renderers
@@ -1921,6 +1937,7 @@ bool FrameBuffer::bind_locked() {
 }
 
 bool FrameBuffer::bindSubwin_locked() {
+    fprintf(stderr, "%s: call\n", __func__);
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
