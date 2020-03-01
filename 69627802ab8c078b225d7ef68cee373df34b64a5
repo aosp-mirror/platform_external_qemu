@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7e4d74e_59422a71",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-01T21:39:12Z",
+      "side": 1,
+      "message": "Does SHUTDOWN terminate the Emulator process or just shuts down Android?",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 162,
+        "endChar": 12
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fa8bfb5_bc7595e3",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-01T21:39:12Z",
+      "side": 1,
+      "message": "a a -\u003e a",
+      "range": {
+        "startLine": 558,
+        "startChar": 71,
+        "endLine": 558,
+        "endChar": 74
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4876526f_5a449ad9",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-01T21:39:12Z",
+      "side": 1,
+      "message": "Add colon",
+      "range": {
+        "startLine": 559,
+        "startChar": 5,
+        "endLine": 559,
+        "endChar": 13
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "086bf695_a34b15a9",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-01T21:39:12Z",
+      "side": 1,
+      "message": "ASCII or UTF-8?",
+      "range": {
+        "startLine": 563,
+        "startChar": 5,
+        "endLine": 563,
+        "endChar": 10
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60027951_1719f7c4",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-01T21:39:12Z",
+      "side": 1,
+      "message": "utf -\u003e UTF",
+      "range": {
+        "startLine": 572,
+        "startChar": 46,
+        "endLine": 572,
+        "endChar": 49
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
