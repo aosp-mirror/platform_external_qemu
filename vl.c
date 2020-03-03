@@ -883,6 +883,11 @@ bool runstate_check(RunState state)
     return current_run_state == state;
 }
 
+RunState get_runstate()
+{
+    return current_run_state;
+}
+
 bool runstate_store(char *str, size_t size)
 {
     const char *state = RunState_str(current_run_state);

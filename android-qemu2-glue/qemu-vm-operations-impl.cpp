@@ -12,67 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android-qemu2-glue/qemu-control-impl.h"
+#include <assert.h>                                   // for assert
+#include <errno.h>                                    // for errno
+#include <nlohmann/json.hpp>                          // for basic_json, bas...
+#include <stdint.h>                                   // for uint64_t, int64_t
 
-#include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/emulation/CpuAccelerator.h"
-#include "android/emulation/HostmemIdMapping.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulation/control/callbacks.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/snapshot/MemoryWatch.h"
-#include "android/snapshot/PathUtils.h"
-#include "android/snapshot/Snapshotter.h"
-#include "android/snapshot/common.h"
-#include "android/snapshot/interface.h"
-#include "android/utils/path.h"
-
-#include <nlohmann/json.hpp>
+#include "android/base/Log.h"                         // for LOG, LogMessage
+#include "android/base/Optional.h"                    // for Optional
+#include "android/base/StringFormat.h"                // for StringFormatWit...
+#include "android/base/StringView.h"                  // for StringView
+#include "android/base/files/PathUtils.h"             // for pj, PathUtils
+#include "android/base/system/System.h"               // for System
+#include "android/emulation/CpuAccelerator.h"         // for GetCurrentCpuAc...
+#include "android/emulation/HostmemIdMapping.h"       // for android_emulati...
+#include "android/emulation/VmLock.h"                 // for RecursiveScoped...
+#include "android/emulation/control/callbacks.h"      // for LineConsumerCal...
+#include "android/emulation/control/vm_operations.h"  // for SnapshotCallbacks
+#include "android/snapshot/MemoryWatch.h"             // for set_address_tra...
+#include "android/snapshot/PathUtils.h"               // for getSnapshotBaseDir
+#include "android/snapshot/Snapshotter.h"             // for Snapshotter
+#include "android/snapshot/common.h"                  // for SnapshotRamBlock
+#include "android/snapshot/interface.h"               // for androidSnapshot...
+#include "android/utils/path.h"                       // for path_copy_file
 
 extern "C" {
+
 #include "qemu/osdep.h"
+#include "block/aio.h"                                // for aio_context_acq...
+#include "migration/qemu-file-types.h"                // for qemu_put_be64
+#include "qapi/qapi-types-run-state.h"                // for RUN_STATE_SAVE_VM
+#include "qemu-common.h"                              // for tcg_enabled
+#include "qemu/typedefs.h"                            // for QEMUFile, Error
 
-#include "block/block.h"
-#include "exec/cpu-common.h"
-#include "migration/qemu-file.h"
-#include "qapi/error.h"
-#include "qapi/qapi-commands-misc.h"
-#include "qapi/qmp/qdict.h"
-#include "qapi/qmp/qobject.h"
-#include "qapi/qmp/qstring.h"
-
-#include "exec/cpu-common.h"
-#include "exec/memory-remap.h"
-#include "sysemu/block-backend.h"
-#include "sysemu/cpus.h"
-#include "sysemu/gvm.h"
-#include "sysemu/hax.h"
-#include "sysemu/hvf.h"
-#include "sysemu/kvm.h"
-#include "sysemu/sysemu.h"
-#include "sysemu/whpx.h"
-
-#include "qapi/qapi-commands-block-core.h"
-#include "qapi/qapi-types-block-core.h"
+#include "block/block.h"                              // for bdrv_get_aio_co...
+#include "exec/cpu-common.h"                          // for qemu_ram_block_...
+#include "exec/memory-remap.h"                        // for ram_blocks_rema...
+#include "migration/qemu-file.h"                      // for migrate_set_fil...
+#include "qapi/error.h"                               // for error_get_pretty
+#include "qapi/qapi-commands-block-core.h"            // for qmp_query_block
+#include "qapi/qapi-commands-misc.h"                  // for qmp_cont, qmp_stop
+#include "qapi/qapi-types-block-core.h"               // for BlockInfoList
+#include "qapi/qmp/qdict.h"                           // for qdict_set_defau...
+#include "sysemu/block-backend.h"                     // for blk_flush, blk_...
+#include "sysemu/cpus.h"                              // for smp_cores, smp_...
+#include "sysemu/gvm.h"                               // for gvm_gpa2hva
+#include "sysemu/hax.h"                               // for hax_gpa2hva
+#include "sysemu/hvf.h"                               // for hvf_enabled
+#include "sysemu/kvm.h"                               // for kvm_enabled
+#include "sysemu/sysemu.h"                            // for vm_start, vm_stop
+#include "sysemu/whpx.h"                              // for whpx_gpa2hva
 }
 
 // Qemu includes can redefine some windows behavior..
 // clang-format off
-#include "android/snapshot/Snapshot.h"
+#include "android/snapshot/Snapshot.h"                // for Snapshot
 // clang-format on
 
 // As well as introduce some workarounds we don't want..
 #ifdef accept
 #undef accept
 #endif
-#include <string>
-
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdarg.h>                                   // for va_end, va_list
+#include <string.h>                                   // for strcmp, strlen
+#include <algorithm>                                  // for find_if
+#include <cstdio>                                     // for NULL, rename
+#include <string>                                     // for string, operator+
+#include <vector>                                     // for vector
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0
@@ -915,6 +920,10 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
     return success;
 }
 
+static EmuRunState qemu_get_runstate() {
+    return (EmuRunState) get_runstate();
+};
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -943,6 +952,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemRegister = android_emulation_hostmem_register,
         .hostmemUnregister = android_emulation_hostmem_unregister,
         .hostmemGetInfo = android_emulation_hostmem_get_info,
+        .getRunState = qemu_get_runstate,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =
