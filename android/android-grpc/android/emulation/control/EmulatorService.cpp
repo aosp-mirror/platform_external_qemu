@@ -365,8 +365,14 @@ public:
                             ServerWriter<Image>* writer) override {
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
-        bool clientAvailable = !context->IsCancelled();
-        bool lastFrameWasEmpty = false;
+
+        // Make sure we always write the first frame, this can be
+        // a completely empty frame if the screen is not active.
+        Image first;
+        getScreenshot(context, request, &first);
+        bool clientAvailable = writer->Write(first);
+        bool lastFrameWasEmpty = first.format().width() == 0;
+
         while (clientAvailable) {
             Image reply;
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
@@ -376,10 +382,11 @@ public:
             // interval. Since this is a synchronous call we want to wait at
             // most kTimeToWaitForFrame so we can check if the client is still
             // there. (All clients get disconnected on emulator shutdown).
-            auto frame = frameEvent.next(kTimeToWaitForFrame);
-            if (frame > 0) {
+            auto arrived = frameEvent.next(kTimeToWaitForFrame);
+            if (arrived > 0) {
                 // TODO(jansene): Add metrics around dropped frames/timing?
                 getScreenshot(context, request, &reply);
+                reply.set_seq(frameEvent.current());
 
                 // We send the first empty frame, after that we wait for frames
                 // to come, or until the client gives up on us. So for a screen

@@ -66,7 +66,7 @@ def _img_producer(queue, lock):
         lock.acquire()
         i = i + 1
         fmt = google.protobuf.text_format.MessageToString(img.format, as_one_line=True)
-        print("Enquing image {} - {}".format(i, fmt))
+        print("Enquing image {}:{}- {}".format(i, img.frameNumber, fmt))
         queue.append(img)
         lock.release()
 
@@ -101,6 +101,9 @@ def _img_consumer(queue, lock, label, root):
 
 
 def main():
+    if sys.version_info[0] == 2:
+        print("This sample only runs under Python3")
+        sys.exit(1)
     root = Tk()
     label = Label(root)
     queue = []
