@@ -451,6 +451,20 @@ bool track(int pid, const std::string snapshot_name) {
             id_size.object_id_size,
             id_size.reference_typ_id_size,
             id_size.frame_id_size);
+#if DEBUG >= 1
+        // Check suspecious values
+        if (reply.data[8] != kJdwpReplyFlag || // reply flag not set
+            reply.data[9] || reply.data[10] || // error flag not zero
+            (id_size.field_id_size != 4 && id_size.field_id_size != 8)) {
+            D("WARNING: abnormal ID size reply message.");
+            D("Reply flag 0x%x, error 0x%x%x", reply.data[8], reply.data[9], reply.data[10]);
+            D("Whole message:");
+            for (size_t i = 0; i < reply.data.size(); i++) {
+                fprintf(stderr, "0x%x", reply.data[i]);
+            }
+            fprintf(stderr, "\n");
+        }
+#endif
 
         // Version
         jdwp_query.command = VirtualMachineCommand::Version;
