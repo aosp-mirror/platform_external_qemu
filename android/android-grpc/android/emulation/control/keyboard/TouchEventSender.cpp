@@ -1,7 +1,7 @@
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 
-#include <functional>                                    // for __base
-#include <vector>                                        // for vector
+#include <functional>  // for __base
+#include <vector>      // for vector
 
 #include "android/base/Log.h"                            // for LogStream, LOG
 #include "android/base/async/Looper.h"                   // for Looper
@@ -12,15 +12,17 @@
 #include "android/skin/linux_keycodes.h"                 // for LINUX_ABS_MT...
 #include "emulator_controller.pb.h"                      // for Touch, Touch...
 #include "google/protobuf/repeated_field.h"              // for RepeatedPtrF...
-
 namespace android {
 namespace emulation {
 namespace control {
 
 /* Maximum number of pointers, supported by multi-touch emulation. */
-#define MTS_POINTERS_NUM    10
+#define MTS_POINTERS_NUM 10
 /* Signals that pointer is not tracked (or is "up"). */
-#define MTS_POINTER_UP      -1
+#define MTS_POINTER_UP -1
+
+#define EV_ABS_MIN 0x0000
+#define EV_ABS_MAX 0x7FFF
 
 TouchEventSender::TouchEventSender(
         const AndroidConsoleAgents* const consoleAgents)
@@ -33,14 +35,39 @@ TouchEventSender::~TouchEventSender(){};
 bool TouchEventSender::send(const TouchEvent* request) {
     // Send the event on the background looper.
     TouchEvent event = *request;
-    mLooper->scheduleCallback([this, event]() {
-        this->doSend(event); });
+    mLooper->scheduleCallback([this, event]() { this->doSend(event); });
     return true;
 }
 
+// Scales an axis to the proper EVDEV value..
+static int scaleAxis(int value,
+                     int min_in,
+                     int max_in) {
+    constexpr int64_t min_out = EV_ABS_MIN;
+    constexpr int64_t max_out = EV_ABS_MAX;
+    constexpr int64_t range_out = (int64_t)max_out - min_out;
+
+    int64_t range_in = (int64_t)max_in - min_in;
+    if (range_in < 1) {
+        return min_out + range_out / 2;
+    }
+    return ((int64_t)value - min_in) * range_out / range_in + min_out;
+}
+
 void TouchEventSender::doSend(const TouchEvent request) {
+
+    // Obtain display width, height for the given display id.
+    auto displayId = request.device();
+    uint32_t w = 0;
+    uint32_t h = 0;
+    if (!mAgents->emu->getMultiDisplay(displayId, NULL, NULL, &w, &h, NULL,
+                                       NULL, NULL)) {
+        mAgents->display->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL, NULL);
+    }
+
     // Sends a sequence of touch events to the linux kernel using "Protocol B"
     std::vector<SkinGenericEventCode> events;
+
     for (auto touch : request.touches()) {
         int slot = touch.identifier();
         if (slot < 0 || slot > MTS_POINTERS_NUM) {
@@ -54,9 +81,13 @@ void TouchEventSender::doSend(const TouchEvent request) {
             mUsedSlots.insert(slot);
         }
 
+        // Scale to proper evdev values.
+        int dx = scaleAxis(touch.x(), 0, w);
+        int dy = scaleAxis(touch.y(), 0, h);
+
         events.push_back({EV_ABS, LINUX_ABS_MT_SLOT, slot});
-        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_X, touch.x()});
-        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_Y, touch.y()});
+        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_X, dx});
+        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_Y, dy});
 
         if (touch.touch_major()) {
             events.push_back(
@@ -70,7 +101,8 @@ void TouchEventSender::doSend(const TouchEvent request) {
 
         // Clean up slot if pressure is 0 (implies finger has been lifted)
         if (touch.pressure() == 0) {
-            events.push_back({EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP});
+            events.push_back(
+                    {EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP});
             mUsedSlots.erase(slot);
         } else {
             events.push_back({EV_ABS, LINUX_ABS_MT_PRESSURE, touch.pressure()});

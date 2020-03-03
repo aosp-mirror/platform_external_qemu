@@ -467,6 +467,9 @@ message TouchEvent {
 
   // The display device where the touch event occurred.
   // Omitting or using the value 0 indicates the main display.
+  //
+  // Touch events cannot be send to devices other than 0, due to
+  // https://issuetracker.google.com/issues/150699691
   int32 device = 2;
 }
 
