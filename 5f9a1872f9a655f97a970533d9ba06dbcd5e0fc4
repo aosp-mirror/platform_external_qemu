@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54a7b12b_509c34fc",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/TouchEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-03-03T20:32:14Z",
+      "side": 1,
+      "message": "This static function can be replaced with qemu_input_scale_axis defined in \"ui/input.h\"",
+      "revId": "5f9a1872f9a655f97a970533d9ba06dbcd5e0fc4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdc34574_b16c8efb",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/TouchEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-03-03T20:32:14Z",
+      "side": 1,
+      "message": "Given the implementation on scaling x y coords and sending them down virtio input device , I think it is equivalent to the interface user_event_mouse defined in qemu-user-event-agent-impl.c. Because both implementation retrieves the width and height of the the secondary display and scale with respect ABS_MIN and ABS_MAX. Would it be possible for you to try to call user_event-\u003esendMouseEvent() instead of sendGenericEvents? If that does work, I actually think it might be less duplication of code.",
+      "revId": "5f9a1872f9a655f97a970533d9ba06dbcd5e0fc4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
