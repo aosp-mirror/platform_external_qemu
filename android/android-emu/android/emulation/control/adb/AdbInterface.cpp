@@ -483,8 +483,12 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         System::Duration timeout_ms,
         bool want_output) {
     AdbCommandPtr command;
-    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
-        (args[0] == "shell" || args[0] == "logcat")) {
+
+    bool bridge_allowed = !(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb);
+    bool bridge_operational = !AdbConnection::failed();
+    bool bridge_can_handle_cmd = (args[0] == "shell" || args[0] == "logcat");
+
+    if (bridge_allowed && bridge_operational && bridge_can_handle_cmd) {
         command = std::shared_ptr<AdbDirect>(
                 new AdbDirect(args, std::move(result_callback), want_output));
     } else {
