@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4842b06f_284f0d04",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-03T19:33:33Z",
+      "side": 1,
+      "message": "Can we also make sure that if there is a pause in the new frame arrival, we resend the last frame with exponential backoff between moments of sending it? This will guarantee that the receiver doesn\u0027t get stuck on a out-of-date frame do to frame drop.",
+      "range": {
+        "startLine": 361,
+        "startChar": 11,
+        "endLine": 361,
+        "endChar": 27
+      },
+      "revId": "845732fce232c41b72006bd40162e158a8fe95d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bf96f12_9506c30f",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 656,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-03T19:33:33Z",
+      "side": 1,
+      "message": "Consider renaming to frame_number to make it more self-explanatory.",
+      "range": {
+        "startLine": 656,
+        "startChar": 9,
+        "endLine": 656,
+        "endChar": 12
+      },
+      "revId": "845732fce232c41b72006bd40162e158a8fe95d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
