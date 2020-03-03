@@ -1,12 +1,14 @@
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 
-#include <codecvt>                                       // for codecvt_utf8
-#include <cstdint>                                       // for uint32_t
-#include <functional>                                    // for __base
-#include <locale>                                        // for wstring_convert
-#include <string>                                        // for string, oper...
+#include <codecvt>     // for codecvt_utf8
+#include <cstdint>     // for uint32_t
+#include <functional>  // for __base
+#include <locale>      // for wstring_convert
+#include <string>      // for string, oper...
 
-#include "android/base/ArraySize.h"                      // for ARRAY_SIZE
+#include "android/base/ArraySize.h"  // for ARRAY_SIZE
+#include "android/base/async/Looper.h"
+#include "android/base/async/ThreadLooper.h"             // for ThreadLo...
 #include "android/console.h"                             // for AndroidConso...
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
 #include "android/emulation/control/libui_agent.h"       // for LibuiKeyCode...
@@ -206,24 +208,11 @@ const size_t kNonPrintableCodeEntries = ARRAY_SIZE(kNonPrintableCodeMap);
 
 EmulatorKeyEventSender::EmulatorKeyEventSender(
         const AndroidConsoleAgents* const consoleAgents)
-    : mAgents(consoleAgents),
-      mEventQueue(KEYEVENT_QUEUE_LENGTH, mEventLock),
-      mWorkerThread([this] { workerThread(); }) {
-    mWorkerThread.start();
+    : mAgents(consoleAgents) {
+    mLooper = android::base::ThreadLooper::get();
 }
 
-EmulatorKeyEventSender::~EmulatorKeyEventSender() {
-    AutoLock alock(mEventLock);
-    mEventQueue.closeLocked();
-}
-
-void EmulatorKeyEventSender::workerThread() {
-    KeyboardEvent event;
-    AutoLock alock(mEventLock);
-    while (mEventQueue.popLocked(&event) == base::BufferQueueResult::Ok) {
-        doSend(&event);
-    }
-}
+EmulatorKeyEventSender::~EmulatorKeyEventSender() {}
 
 void EmulatorKeyEventSender::sendKeyCode(
         int32_t code,
@@ -242,11 +231,9 @@ void EmulatorKeyEventSender::sendKeyCode(
     }
 }  // namespace keyboard
 
-bool EmulatorKeyEventSender::send(const KeyboardEvent* request) {
-    AutoLock pushLock(mEventLock);
-    bool queued = (mEventQueue.tryPushLocked(KeyboardEvent(*request)) ==
-                   base::BufferQueueResult::Ok);
-    return queued;
+void EmulatorKeyEventSender::send(const KeyboardEvent* request) {
+    auto event = KeyboardEvent(*request);
+    mLooper->createTask([=]() { doSend(&event); });
 }
 
 void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
@@ -266,14 +253,16 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
                 if (eventType == KeyboardEvent::keydown ||
                     eventType == KeyboardEvent::keypress) {
                     for (auto evdev : evdevs) {
-                        DD("Down %s -> evdev 0x%x", request->ShortDebugString().c_str(), evdev | 0x400);
+                        DD("Down %s -> evdev 0x%x",
+                           request->ShortDebugString().c_str(), evdev | 0x400);
                         mAgents->user_event->sendKeyCode(evdev | 0x400);
                     }
                 }
                 if (eventType == KeyboardEvent::keyup ||
                     eventType == KeyboardEvent::keypress) {
                     for (auto evdev : evdevs) {
-                        DD("Up %s -> evdev 0x%x", request->ShortDebugString().c_str(), evdev);
+                        DD("Up %s -> evdev 0x%x",
+                           request->ShortDebugString().c_str(), evdev);
                         mAgents->user_event->sendKeyCode(evdev);
                     }
                 }
