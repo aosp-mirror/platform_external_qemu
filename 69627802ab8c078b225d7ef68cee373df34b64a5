@@ -49,6 +49,47 @@
     },
     {
       "key": {
+        "uuid": "69107ba0_bedc196e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-03T19:15:22Z",
+      "side": 1,
+      "message": "Pressing the X button will result in sending qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI) and disables processing of further UI events.\n\nIn certain cases it can be followed by a forceful termination (pending the type of image you are running).",
+      "parentUuid": "0220a2bb_f877d6af",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 162,
+        "endChar": 12
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eea5755d_3edea919",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-03T19:15:22Z",
+      "side": 1,
+      "message": "It might be better to just make terminate hard exit the process. This way studio can be in full control over how to clean up the resources.\n\nThe expected behavior would be as follows:\n\nsend shutdown -\u003e emulator will create snapshot and do proper resource cleanup. The gRPC connection will likely go to the void, the emulator files we use for indicating the emulator is running should be cleaned up. \n\nIf this fails, (i.e. gRPC connection remains alive, we could send the terminate signal). Or you could send a kill signal yourself based on the PID of the sharing file.",
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7fa8bfb5_bc7595e3",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 2
@@ -69,6 +110,30 @@
       "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "965eb6e8_55a0707c",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-03T19:15:22Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7fa8bfb5_bc7595e3",
+      "range": {
+        "startLine": 558,
+        "startChar": 71,
+        "endLine": 558,
+        "endChar": 74
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -95,6 +160,30 @@
     },
     {
       "key": {
+        "uuid": "4210f70e_b7dcfcba",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-03T19:15:22Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4876526f_5a449ad9",
+      "range": {
+        "startLine": 559,
+        "startChar": 5,
+        "endLine": 559,
+        "endChar": 13
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "086bf695_a34b15a9",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 2
@@ -106,6 +195,30 @@
       "writtenOn": "2020-03-01T21:39:12Z",
       "side": 1,
       "message": "ASCII or UTF-8?",
+      "range": {
+        "startLine": 563,
+        "startChar": 5,
+        "endLine": 563,
+        "endChar": 10
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fbdbc54_c3955098",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-03T19:15:22Z",
+      "side": 1,
+      "message": "Printable ascii codes are usually defined as the codes in the range [32,127]. Let me update the documentation to clarify this.",
+      "parentUuid": "086bf695_a34b15a9",
       "range": {
         "startLine": 563,
         "startChar": 5,
@@ -138,6 +251,30 @@
       "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "76dbb8bf_df34c79f",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-03T19:15:22Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "60027951_1719f7c4",
+      "range": {
+        "startLine": 572,
+        "startChar": 46,
+        "endLine": 572,
+        "endChar": 49
+      },
+      "revId": "69627802ab8c078b225d7ef68cee373df34b64a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
