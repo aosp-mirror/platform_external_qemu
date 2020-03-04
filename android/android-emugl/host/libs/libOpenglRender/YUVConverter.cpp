@@ -20,6 +20,8 @@
 #include "emugl/common/feature_control.h"
 #include <assert.h>
 #include <stdio.h>
+#include <chrono>
+
 #include <string.h>
 
 #define FATAL(fmt,...) do { \
@@ -121,17 +123,20 @@ static void createYUVGLTex(GLenum texture_unit,
                            bool uvInterleaved) {
     assert(texName_out);
 
+    std::vector<uint8_t> myvec(width*height*2, 0x0);
     s_gles2.glActiveTexture(texture_unit);
     s_gles2.glGenTextures(1, texName_out);
     s_gles2.glBindTexture(GL_TEXTURE_2D, *texName_out);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     if (uvInterleaved) {
+        fprintf(stderr, "%s: upload fake data width %d height %d\n", __func__, width, height);
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA,
                              width, height, 0,
                              GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
-                             NULL);
+                             myvec.data());
     } else {
+        fprintf(stderr, "%s: upload fake data width %d height %d\n", __func__, width, height);
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
                              width, height, 0,
                              GL_LUMINANCE, GL_UNSIGNED_BYTE,
@@ -154,17 +159,34 @@ static void subUpdateYUVGLTex(GLenum texture_unit,
     s_gles2.glBindTexture(GL_TEXTURE_2D, tex);
     fprintf(stderr, "%s: global name: %u -> %u\n", __func__, tex,
             s_gles2.glGetGlobalTexName(tex));
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     if (uvInterleaved) {
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0,
                                 x, y, width, height,
                                 GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
                                 pixels);
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     } else {
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0,
                                 x, y, width, height,
                                 GL_LUMINANCE, GL_UNSIGNED_BYTE,
                                 pixels);
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     }
+    s_gles2.glActiveTexture(GL_TEXTURE0);
+}
+
+static void subUpdateYUVGLTexCallback(GLenum texture_unit,
+                              GLuint tex, int mode,
+                              int x, int y, int width, int height,
+                              void* pixels, cuda_video_decoder_callback_t callback) {
+    fprintf(stderr, "%s: tex: %u\n", __func__, tex);
+    // s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    //unsigned int mytex[1];
+    //s_gles2.glGenTextures(1, mytex);
+    s_gles2.glActiveTexture(texture_unit);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, tex);
+    callback(pixels, s_gles2.glGetGlobalTexName(tex), mode, width, height);
     s_gles2.glActiveTexture(GL_TEXTURE0);
 }
 
@@ -263,7 +285,7 @@ static void createYUVInterleavedGLShader(GLuint* program_out,
                                          GLint* ywidthcutoffloc_out,
                                          GLint* cwidthcutoffloc_out,
                                          GLint* ysamplerloc_out,
-                                         GLint* vusamplerloc_out,
+                                         GLint* uvsamplerloc_out,
                                          GLint* incoordloc_out,
                                          GLint* posloc_out,
                                          YUVInterleaveDirection interleaveDir) {
@@ -371,7 +393,7 @@ void main(void) {
     *ywidthcutoffloc_out = s_gles2.glGetUniformLocation(*program_out, "yWidthCutoff");
     *cwidthcutoffloc_out = s_gles2.glGetUniformLocation(*program_out, "cWidthCutoff");
     *ysamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "ysampler");
-    *vusamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "vusampler");
+    *uvsamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "uvsampler");
     *posloc_out = s_gles2.glGetAttribLocation(*program_out, "position");
     *incoordloc_out = s_gles2.glGetAttribLocation(*program_out, "inCoord");
 
@@ -475,6 +497,7 @@ static void doYUVConversionDraw(GLuint program,
 // and create shaders and vertex data.
 YUVConverter::YUVConverter(int width, int height, FrameworkFormat format) : mFormat(format){
 
+    mFormat = FRAMEWORK_FORMAT_NV12;
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
     getYUVOffsets(width, height, mFormat,
                   &yoff, &uoff, &voff,
@@ -562,8 +585,16 @@ void YUVConverter::restoreGLState() {
 // with the RGB colors.
 void YUVConverter::drawConvert(int x, int y,
                                int width, int height,
-                               char* pixels) {
+                               char* pixels, cuda_video_decoder_callback_t callback) {
+
+        auto startTime = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::milliseconds::zero();
+
+    bool bohuprint = width==1920 || height == 1920;
+
     saveGLState();
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
 
     s_gles2.glViewport(x, y, width, height);
 
@@ -575,12 +606,28 @@ void YUVConverter::drawConvert(int x, int y,
     cheight = height / 2;
     updateCutoffs(width, ywidth, width / 2, cwidth);
 
-    subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
-                      x, y, ywidth, height,
-                      pixels + yoff, false);
+    if (0) {
+        //copy Y
+        callback(pixels, mYtex, 1, width, height);
+        //copy interleaved UV 
+        callback(pixels, mUVtex, 2, width, height);
+    }
 
+    if (callback) {
+        fprintf(stderr, "%s %d before calling subUpdateYUVGLTexCallback\n", __func__, __LINE__);
+        subUpdateYUVGLTexCallback(GL_TEXTURE0, mYtex, 1, x, y, ywidth, height, pixels, callback);
+        fprintf(stderr, "%s %d after calling subUpdateYUVGLTexCallback\n", __func__, __LINE__);
+    } else {
+        subUpdateYUVGLTex(GL_TEXTURE0, mYtex, x, y, ywidth, height, pixels + yoff, false);
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
+    }
+
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
     switch (mFormat) {
         case FRAMEWORK_FORMAT_YV12:
+
+        fprintf(stderr, "fomrat is YV12 %s %d\n", __func__, __LINE__);
             subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
                               x, y, cwidth, cheight,
                               pixels + uoff, false);
@@ -604,6 +651,7 @@ void YUVConverter::drawConvert(int x, int y,
                                 false);
             break;
         case FRAMEWORK_FORMAT_YUV_420_888:
+        fprintf(stderr, "fomrat is YUV420 %s %d\n", __func__, __LINE__);
             if (emugl::emugl_feature_is_enabled(
                 android::featurecontrol::YUV420888toNV21)) {
                 subUpdateYUVGLTex(GL_TEXTURE1, mVUtex,
@@ -624,6 +672,8 @@ void YUVConverter::drawConvert(int x, int y,
                                     mYWidthCutoff,
                                     mCWidthCutoff,
                                     true);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
             } else {
                 subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
                                   x, y, cwidth, cheight,
@@ -646,12 +696,18 @@ void YUVConverter::drawConvert(int x, int y,
                                     mYWidthCutoff,
                                     mCWidthCutoff,
                                     false);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
             }
             break;
         case FRAMEWORK_FORMAT_NV12:
-            subUpdateYUVGLTex(GL_TEXTURE1, mUVtex,
-                              x, y, cwidth, cheight,
-                              pixels + uoff, true);
+        fprintf(stderr, "fomrat is NV12 %s %d\n", __func__, __LINE__);
+            if (callback) {
+                subUpdateYUVGLTexCallback(GL_TEXTURE1, mUVtex, 2, x, y, width, height, pixels + uoff, callback);
+            } else {
+                subUpdateYUVGLTex(GL_TEXTURE1, mUVtex, x, y, cwidth, cheight, pixels + uoff, true);
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
+            }
             doYUVConversionDraw(mProgram,
                                 mYWidthCutoffLoc,
                                 mCWidthCutoffLoc,
@@ -672,6 +728,7 @@ void YUVConverter::drawConvert(int x, int y,
             FATAL("Unknown format: 0x%x", mFormat);
     }
 
+    /*
     if (emugl::emugl_feature_is_enabled(
         android::featurecontrol::YUV420888toNV21)) {
         if (mFormat == FRAMEWORK_FORMAT_YV12) {
@@ -718,13 +775,19 @@ void YUVConverter::drawConvert(int x, int y,
         } else {
             FATAL("Input not a YUV format!");
         }
-    } else {
+    } else if (0){
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
         subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
                           x, y, cwidth, cheight,
                           pixels + uoff, false);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
         subUpdateYUVGLTex(GL_TEXTURE2, mVtex,
                           x, y, cwidth, cheight,
                           pixels + voff, false);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
         doYUVConversionDraw(mProgram,
                             mYWidthCutoffLoc,
                             mCWidthCutoffLoc,
@@ -742,7 +805,11 @@ void YUVConverter::drawConvert(int x, int y,
                             false);
     }
 
+    */
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
     restoreGLState();
+         if (bohuprint) fprintf(stderr, "%d drawConvert take %lld ms\n", __LINE__, elapsed.count());
 }
 
 void YUVConverter::updateCutoffs(float width, float ywidth,

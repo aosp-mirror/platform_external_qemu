@@ -30,6 +30,8 @@
 
 #include <GLES2/gl2ext.h>
 
+#include <chrono>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -414,6 +416,8 @@ void ColorBuffer::readPixelsYUVCached(int x,
 }
 
 void ColorBuffer::reformat(GLint internalformat, GLenum type) {
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
+
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     GLint sizedInternalFormat = GL_RGBA8;
@@ -444,9 +448,11 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     }
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
                          0, texFormat, pixelType, nullptr);
 
+    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
                          0, texFormat, pixelType, nullptr);
@@ -480,7 +486,13 @@ void ColorBuffer::subUpdate(int x,
                             int height,
                             GLenum p_format,
                             GLenum p_type,
-                            void* pixels) {
+                            void* pixels,
+                            cuda_video_decoder_callback_t callback) {
+        auto startTime = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::milliseconds::zero();
+
+    bool bohuprint = true;
+
     const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
     RecursiveScopedHelperContext context(m_helper);
 
@@ -488,24 +500,46 @@ void ColorBuffer::subUpdate(int x,
         return;
     }
 
+    fprintf(stderr, "%s %d, handle %d\n", __func__, __LINE__, mHndl);
+
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
     touch();
 
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
     if (m_needFormatCheck) {
         if (p_type != m_type || p_format != m_format) {
+            fprintf(stderr, "%s %d: ptype %d mtype %d pformat %x mformat %x\n", __func__, __LINE__,
+                    (int)p_type, (int)m_type, p_format, m_format);
             reformat((GLint)p_format, p_type);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
         }
         m_needFormatCheck = false;
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
     }
 
     if (m_frameworkFormat != FRAMEWORK_FORMAT_GL_COMPATIBLE) {
-        assert(m_yuv_converter.get());
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
+        YUVConverter* my_yuv_converter = m_yuv_converter.get();
+        //static YUVConverter* s_my_yuv_converter = new YUVConverter(m_width, m_height, FRAMEWORK_FORMAT_NV12);
+        //if (callback) {
+        //    my_yuv_converter = s_my_yuv_converter;
+        //}
 
         // This FBO will convert the YUV frame to RGB
         // and render it to |m_tex|.
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
         bindFbo(&m_yuv_conversion_fbo, m_tex);
-        m_yuv_converter->drawConvert(x, y, width, height, (char*)pixels);
+        my_yuv_converter->drawConvert(x, y, width, height, (char*)pixels, callback);
         unbindFbo();
 
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
         // |m_tex| still needs to be bound afterwards
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
 
@@ -519,18 +553,27 @@ void ColorBuffer::subUpdate(int x,
         m_yuv_buf.clear();
         uint8_t* data = (uint8_t*)pixels;
         m_yuv_buf.insert(m_yuv_buf.begin(), data, data + dataSize);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_unsizedFormat,
                                 p_type, pixels);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
     }
 
     if (m_fastBlitSupported) {
         s_gles2.glFlush();
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
     }
+         elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+         if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
+
 }
 
 bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
