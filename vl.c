@@ -5452,12 +5452,31 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_emulator_set_base_port(android_base_port);
 
         {
-            // Now that we know the serial number we can set it as the MAC prefix
-            // for wifi. This keeps the MAC addresses unique across several
-            // emulators that may have connected WiFi networks.
-            char* combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
-                                             current_machine->kernel_cmdline,
-                                             android_serial_number_port);
+            char* combined;
+
+            if (avdInfo_getKernelVersion(android_avdInfo) >= 0x050400) {
+                char wifi_mac_prefix_str[8];
+
+                // 5.4+ kernels do not support mac80211_hwsim.mac_prefix, in
+                // those kernels we have to ask the driver not to create radios
+                // by default and create radios in userdpace.
+                combined = g_strdup_printf("%s mac80211_hwsim.radios=0",
+                                           current_machine->kernel_cmdline);
+
+                snprintf(wifi_mac_prefix_str, sizeof(wifi_mac_prefix_str),
+                         "%d", android_serial_number_port);
+
+                boot_property_add("net.wifi_mac_prefix", wifi_mac_prefix_str);
+            } else {
+                // Now that we know the serial number we can set it as the MAC prefix
+                // for wifi. This keeps the MAC addresses unique across several
+                // emulators that may have connected WiFi networks.
+
+                combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
+                                           current_machine->kernel_cmdline,
+                                           android_serial_number_port);
+            }
+
             g_free(current_machine->kernel_cmdline);
             current_machine->kernel_cmdline = combined;
         }

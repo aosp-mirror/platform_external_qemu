@@ -134,6 +134,7 @@ struct AvdInfo {
     /* for both */
     int       apiLevel;
     int       incrementalVersion;
+    int       kernelVersion;
 
     /* For preview releases where we don't know the exact API level this flag
      * indicates that at least we know it's M+ (for some code that needs to
@@ -609,6 +610,14 @@ AvdFlavor avdInfo_getAvdFlavor(const AvdInfo* i) {
 int
 avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
+}
+
+void avdInfo_setKernelVersion(AvdInfo* i, int kernelVersion) {
+    i->kernelVersion = kernelVersion;
+}
+
+int avdInfo_getKernelVersion(const AvdInfo* i) {
+    return i->kernelVersion;
 }
 
 // This information was taken from the SDK Manager:
