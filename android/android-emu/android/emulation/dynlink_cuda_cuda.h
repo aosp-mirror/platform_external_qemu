@@ -1522,6 +1522,7 @@ typedef CUresult CUDAAPI  tcuStreamDestroy(CUstream hStream);
  ***********************************/
 typedef CUresult CUDAAPI tcuGraphicsUnregisterResource(CUgraphicsResource resource);
 typedef CUresult CUDAAPI tcuGraphicsSubResourceGetMappedArray(CUarray *pArray, CUgraphicsResource resource, unsigned int arrayIndex, unsigned int mipLevel);
+typedef CUresult CUDAAPI tcuGraphicsGLRegisterImage ( CUgraphicsResource* pCudaResource, unsigned int image, unsigned int target, unsigned int  Flags );
 
 #if __CUDA_API_VERSION >= 3020
     typedef CUresult CUDAAPI tcuGraphicsResourceGetMappedPointer(CUdeviceptr *pDevPtr, size_t *pSize, CUgraphicsResource resource);
@@ -1635,6 +1636,7 @@ extern tcuStreamSynchronize            *cuStreamSynchronize;
 extern tcuStreamDestroy                *cuStreamDestroy;
 extern tcuGraphicsUnregisterResource   *cuGraphicsUnregisterResource;
 extern tcuGraphicsSubResourceGetMappedArray  *cuGraphicsSubResourceGetMappedArray;
+extern tcuGraphicsGLRegisterImage      *cuGraphicsGLRegisterImage;
 extern tcuGraphicsResourceSetMapFlags  *cuGraphicsResourceSetMapFlags;
 extern tcuGraphicsMapResources         *cuGraphicsMapResources;
 extern tcuGraphicsUnmapResources       *cuGraphicsUnmapResources;
