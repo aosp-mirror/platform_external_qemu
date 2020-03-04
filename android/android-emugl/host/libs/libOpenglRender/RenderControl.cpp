@@ -1142,12 +1142,16 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
 
 static int rcCreateDisplay(uint32_t* displayId) {
     FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb) {
+    if (!fb || !displayId) {
         return -1;
     }
 
     // Assume this API call always allocates a new displayId
-    *displayId = FrameBuffer::s_invalidIdMultiDisplay;
+    // if displayID out of range
+    if (*displayId < FrameBuffer::s_displayIdInternalBegin ||
+        *displayId > FrameBuffer::s_maxNumMultiDisplay) {
+        *displayId = FrameBuffer::s_invalidIdMultiDisplay;
+    }
     return fb->createDisplay(displayId);
 }
 
