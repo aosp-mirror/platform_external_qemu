@@ -15,9 +15,13 @@
 #include "android/emulation/MediaH264DecoderCuvid.h"
 #include "android/emulation/H264NaluParser.h"
 #include "android/emulation/YuvConverter.h"
+
+#include "android/utils/system.h"
+
 // MediaH264DecoderCuvid.h
 #include <cstdint>
 #include <string>
+#include <chrono>
 #include <vector>
 
 #ifdef _WIN32
@@ -33,11 +37,11 @@ extern "C" {
 #include "android/emulation/dynlink_cuda.h"
 #include "android/emulation/dynlink_nvcuvid.h"
 }
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt, ...)                                              \
-    fprintf(stderr, "h264-cuvid-dec: %s:%d " fmt "\n", __func__, __LINE__, \
+    fprintf(stderr, "h264-cuvid-dec: %s:%d tid: %ld " fmt "\n", __func__, __LINE__, android_get_thread_id(), \
             ##__VA_ARGS__);
 #else
 #define H264_DPRINT(fmt, ...)
@@ -51,6 +55,12 @@ extern "C" {
                         (int)errorCode);                             \
         }                                                            \
     } while (0)
+
+static CUcontext g_mCudaContext = nullptr;
+static unsigned int g_nSrcPitch = 0;
+static CUdeviceptr g_dpSrcFrame = 0;
+static unsigned int g_mSurfaceHeight = 0;
+static int g_hostColorBufferId = 0;
 
 namespace android {
 namespace emulation {
@@ -178,6 +188,9 @@ void MediaH264DecoderCuvid::destroyH264Context() {
 }
 
 void MediaH264DecoderCuvid::decodeFrame(void* ptr) {
+    auto startTime = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::milliseconds::zero();
+
     DecodeFrameParam param{};
     mParser.parseDecodeFrameParams(ptr, param);
 
@@ -212,17 +225,25 @@ void MediaH264DecoderCuvid::decodeFrame(void* ptr) {
     }
 
     decodeFrameInternal(param.pConsumedBytes, param.pDecoderErrorCode, frame,
-                        szBytes, inputPts);
+                        szBytes, inputPts, param.hostColorBufferId);
+     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startTime);
+
+     H264_DPRINT("decoding takes %lld ms", elapsed.count());
+
 }
+
 
 void MediaH264DecoderCuvid::decodeFrameInternal(uint64_t* pRetSzBytes,
                                                 int32_t* pRetErr,
                                                 const uint8_t* frame,
                                                 size_t szBytes,
-                                                uint64_t inputPts) {
+                                                uint64_t inputPts, int hostColorBufferId) {
     mIsInFlush = false;
-    H264_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
+    H264_DPRINT("%s frame=%p, sz=%zu pts %lu hostcolorbufferid %d $$$$$$$$$$", __func__, frame, szBytes, inputPts, hostColorBufferId);
     Err h264Err = Err::NoErr;
+
+    g_hostColorBufferId = hostColorBufferId;
 
     CUVIDSOURCEDATAPACKET packet = {0};
     packet.payload = frame;
@@ -239,6 +260,8 @@ void MediaH264DecoderCuvid::decodeFrameInternal(uint64_t* pRetSzBytes,
     if (pRetErr) {
         *pRetErr = (int32_t)h264Err;
     }
+
+    H264_DPRINT("done with %s %d ************\n\n", __func__, __LINE__);
 }
 
 void MediaH264DecoderCuvid::doFlush() {
@@ -260,6 +283,8 @@ void MediaH264DecoderCuvid::flush(void* ptr) {
 }
 
 void MediaH264DecoderCuvid::getImage(void* ptr) {
+    auto startTime = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::milliseconds::zero();
     H264_DPRINT("getImage %p", ptr);
     GetImageParam param{};
     mParser.parseGetImageParams(ptr, param);
@@ -274,7 +299,7 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     uint32_t* retColorSpace = param.pRetColorSpace;
 
     static int numbers = 0;
-    H264_DPRINT("calling getImage %d", numbers++);
+    H264_DPRINT("calling getImage %d colorbuffer %d", numbers++, param.hostColorBufferId);
     doFlush();
     uint8_t* dst = param.pDecodedFrame;
     int myOutputWidth = mOutputWidth;
@@ -296,22 +321,31 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     *retWidth = myOutputWidth;
     *retHeight = myOutputHeight;
 
-    memcpy(dst, pDecodedFrame, myOutputHeight * myOutputWidth * 3 / 2);
+    YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
+     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startTime);
+     H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
+    if (mParser.version() == 200) {
+        if (param.hostColorBufferId >= 0) {
+            convert8.UVInterleavedToPlanar(pDecodedFrame);
+            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth,
+                                          myOutputHeight, pDecodedFrame);
+     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startTime);
+     H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
+        } else {
+            memcpy(dst, pDecodedFrame, myOutputHeight * myOutputWidth * 3 / 2);
+        }
+    } else {
+        memcpy(dst, pDecodedFrame, myOutputHeight * myOutputWidth * 3 / 2);
+    }
     mSavedFrames.pop_front();
     mSavedPts.pop_front();
     mSavedW.pop_front();
     mSavedH.pop_front();
     }
 
-    YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
-    convert8.UVInterleavedToPlanar(dst);
 
-    if (mParser.version() == 200) {
-        if (param.hostColorBufferId >= 0) {
-            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth,
-                                          myOutputHeight, dst);
-        }
-    }
 
     mImageReady = false;
     *retErr = myOutputHeight * myOutputWidth * 3 / 2;
@@ -324,6 +358,9 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
                 (int)mColorPrimaries, (int)mColorRange, (int)mColorTransfer,
                 (int)mColorSpace);
     H264_DPRINT("Copying completed pts %lld", (long long)mOutputPts);
+     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startTime);
+     H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
 }
 
 bool MediaH264DecoderCuvid::initCudaDrivers() {
@@ -479,6 +516,42 @@ int MediaH264DecoderCuvid::HandlePictureDecode(CUVIDPICPARAMS* pPicParams) {
     return 1;
 }
 
+extern "C" {
+void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int mode, int width, int height) {
+
+    const unsigned int GL_TEXTURE_2D = 0x0DE1;
+    const unsigned int cudaGraphicsMapFlagsNone = 0x0;
+    CUgraphicsResource CudaRes;
+    cuGraphicsGLRegisterImage(&CudaRes, dest_texture_handle, GL_TEXTURE_2D, cudaGraphicsMapFlagsNone);
+    CUarray texture_ptr;
+    cuGraphicsMapResources(1, &CudaRes, 0);
+    cuGraphicsSubResourceGetMappedArray(&texture_ptr, CudaRes, 0, 0);
+
+    CUdeviceptr dpSrcFrame = g_dpSrcFrame;
+    CUDA_MEMCPY2D m = {0};
+    m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
+    m.srcDevice = dpSrcFrame;
+    m.srcPitch = g_nSrcPitch;
+    m.dstMemoryType = CU_MEMORYTYPE_ARRAY;
+    m.dstArray = texture_ptr;
+    m.dstPitch = width * 1;
+    m.WidthInBytes = width * 1;
+    m.Height = height;
+    H264_DPRINT("dstPitch %d, WidthInBytes %d Height %d", (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height);
+ 
+    NVDEC_API_CALL(cuCtxPushCurrent(g_mCudaContext));
+    if (mode == 1) { // copy Y data
+        NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    } else if (mode == 2) { //copy UV data
+        m.srcDevice = (CUdeviceptr)((uint8_t*)dpSrcFrame + m.srcPitch * g_mSurfaceHeight);
+        NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    }
+    NVDEC_API_CALL(cuStreamSynchronize(0));
+    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
+}
+
+}
+
 int MediaH264DecoderCuvid::HandlePictureDisplay(
         CUVIDPARSERDISPINFO* pDispInfo) {
     CUVIDPROCPARAMS videoProcessingParameters = {};
@@ -495,6 +568,10 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     NVDEC_API_CALL(cuvidMapVideoFrame(mCudaDecoder, pDispInfo->picture_index,
                                       &dpSrcFrame, &nSrcPitch,
                                       &videoProcessingParameters));
+
+    g_dpSrcFrame = dpSrcFrame;
+    g_nSrcPitch = nSrcPitch;
+    g_mCudaContext = mCudaContext;
 
     unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
     std::vector<uint8_t> myFrame(newOutBufferSize);
@@ -525,6 +602,13 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     NVDEC_API_CALL(cuStreamSynchronize(0));
     NVDEC_API_CALL(cuCtxPopCurrent(NULL));
 
+    if (mParser.version() == 200) {
+        if (g_hostColorBufferId >= 0) {
+            mRenderer.renderToHostColorBufferWithCallback(g_hostColorBufferId, mOutputWidth,
+                                          mOutputHeight, pDecodedFrame, cuda_copy_decoded_frame);
+        }
+    }
+    
     NVDEC_API_CALL(cuvidUnmapVideoFrame(mCudaDecoder, dpSrcFrame));
     if (!mIsLoadingFromSnapshot) {
         std::lock_guard<std::mutex> g(mFrameLock);
@@ -532,9 +616,11 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
         mSavedPts.push_back(myOutputPts);
         mSavedW.push_back(mOutputWidth);
         mSavedH.push_back(mOutputHeight);
+        H264_DPRINT("decoded pts %lu", myOutputPts);
     }
     mImageReady = true;
-    H264_DPRINT("successfully called.");
+    H264_DPRINT("successfully called.tid %ld saved frame %d", android_get_thread_id(),
+            (int)mSavedPts.size());
     return 1;
 }
 

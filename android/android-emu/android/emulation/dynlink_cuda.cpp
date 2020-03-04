@@ -139,6 +139,7 @@ tcuStreamSynchronize                  *cuStreamSynchronize;
 tcuStreamDestroy                      *cuStreamDestroy;
 tcuGraphicsUnregisterResource         *cuGraphicsUnregisterResource;
 tcuGraphicsSubResourceGetMappedArray  *cuGraphicsSubResourceGetMappedArray;
+tcuGraphicsGLRegisterImage      *cuGraphicsGLRegisterImage;
 tcuGraphicsResourceGetMappedPointer   *cuGraphicsResourceGetMappedPointer;
 tcuGraphicsResourceSetMapFlags        *cuGraphicsResourceSetMapFlags;
 tcuGraphicsMapResources               *cuGraphicsMapResources;
@@ -640,6 +641,8 @@ CUresult CUDAAPI cuInit(unsigned int Flags, int cudaVersion, void *pHandleDriver
         GET_PROC(cuMemcpyPeer);
         GET_PROC(cuLaunchKernel);
     }
+
+    GET_PROC(cuGraphicsGLRegisterImage);
 
 #if INIT_CUDA_GL
     if (cuInitGL(0, __CUDA_API_VERSION, CudaDrvLib) != CUDA_SUCCESS)
