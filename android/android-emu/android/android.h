@@ -88,6 +88,9 @@ extern bool   android_use_external_adb;
  * number is "emulator-5554". */
 extern int   android_serial_number_port;
 
+/* System image kernel version, 0xVVPPSS, e.g. 0x050415 for 5.4.21. */
+extern int   android_kernel_version;
+
 /* parses a network speed parameter and sets android_net_upload_speed and
  * android_net_download_speed accordingly. returns -1 on failure, 0 on success */
 extern int   android_parse_network_speed(const char*  speed);

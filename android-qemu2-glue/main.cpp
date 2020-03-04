@@ -1114,6 +1114,12 @@ extern "C" int main(int argc, char** argv) {
         args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
 
+    if (android_kernel_version >= 0x050400) {
+        args.add("-boot-property");
+        //args.addFormat("net.wifi_mac_prefix=%d", android_serial_number_port);
+        args.addFormat("net.wifi_mac_prefix=%d", 7777);
+    }
+
     // Add bluetooth parameters if applicable.
     char* bluetooth_opts = NULL;
 #ifdef __linux__

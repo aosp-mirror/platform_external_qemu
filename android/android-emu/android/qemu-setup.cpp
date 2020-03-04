@@ -100,6 +100,8 @@ int android_base_port;
 int android_adb_port = 5037;  // Default
 /* The device "serial number" is "emulator-<this number>" */
 int android_serial_number_port;
+/* System image kernel version, 0xVVPPSS, e.g. 0x050415 for 5.4.21. */
+int android_kernel_version = 0x050415;
 /* The port to use for WiFi forwarding as a server */
 uint16_t android_wifi_server_port = 0;
 /* The port to use for WiFi forwarding as a client */

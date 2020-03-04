@@ -64,6 +64,8 @@ const char*  android_skin_net_delay = NULL;
 static const char DEFAULT_SOFTWARE_GPU_MODE[] = "swiftshader_indirect";
 static const int DEFAULT_PARTITION_SIZE_IN_MB = 800;
 
+//extern int android_kernel_version;
+
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/
@@ -682,6 +684,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                versionString);
         return false;
     }
+
+//    android_kernel_version = (int)kernelVersion;
 
     // make sure we're using the proper engine (qemu1/qemu2) for the kernel
     if (is_qemu2 && kernelVersion < KERNEL_VERSION_3_10_0) {
