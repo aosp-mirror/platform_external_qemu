@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce74ff34_b6864bb4",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1120,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-03-04T23:44:32Z",
+      "side": 1,
+      "message": "subj\u003du:r:init:s0 msg\u003d\u0027avc: denied { set } for property\u003dnet.wifi_mac_prefix pid\u003d352 uid\u003d0 gid\u003d0 scontext\u003du:r:qemu_props:s0 tcontext\u003du:object_r:system_prop:s0 tclass\u003dproperty_service",
+      "range": {
+        "startLine": 1120,
+        "startChar": 8,
+        "endLine": 1120,
+        "endChar": 55
+      },
+      "revId": "20a17afc4fb22f1ee056b559e4f0dbfe286fdeb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
