@@ -1110,8 +1110,10 @@ extern "C" int main(int argc, char** argv) {
                     "255\n");
             return 1;
         }
-        args.add("-boot-property");
-        args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
+
+        char shared_net_ip_str[16];
+        snprintf(shared_net_ip_str, sizeof(shared_net_ip_str), "10.1.2.%ld", shared_net_id);
+        boot_property_add("net.shared_net_ip", shared_net_ip_str);
     }
 
     // Add bluetooth parameters if applicable.

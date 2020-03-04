@@ -163,6 +163,10 @@ const char*  avdInfo_getId( const AvdInfo*  i );
 static const int kUnknownApiLevel = 1000;
 int    avdInfo_getApiLevel( const AvdInfo*  i );
 
+/* Kernel version, 0xVVPPSS, e.g. 0x050416 for 5.4.21 */
+void avdInfo_setKernelVersion(AvdInfo* i, int kernelVersion);
+int avdInfo_getKernelVersion(const AvdInfo* i);
+
 /* Return the "dessert name" associated with the
  * API level
  */

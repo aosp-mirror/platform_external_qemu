@@ -683,6 +683,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         return false;
     }
 
+    avdInfo_setKernelVersion(avd, (int)kernelVersion);
+
     // make sure we're using the proper engine (qemu1/qemu2) for the kernel
     if (is_qemu2 && kernelVersion < KERNEL_VERSION_3_10_0) {
         derror("New emulator backend requires minimum kernel version 3.10+ (currently got lower)\n"
