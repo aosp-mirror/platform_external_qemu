@@ -1424,7 +1424,8 @@ message EmulatorFeatureFlagState {
     KEYCODE_FORWARDING = 53;
     VULKAN_IGNORED_HANDLES = 54;
     VIRTIO_GPU_NEXT = 55;
-    // Next tag: 56
+    MAC80211HWSIM_USERSPACE_MANAGED = 56;
+    // Next tag: 57
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
