@@ -1634,8 +1634,17 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int height,
                                     GLenum format,
                                     GLenum type,
-                                    void* pixels) {
+                                    void* pixels,
+                                    cuda_video_decoder_callback_t callback
+                                    ) {
+        auto startTime = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::milliseconds::zero();
+
+    
     AutoLock mutex(m_lock);
+
+     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+fprintf(stderr, "%s %d get lock takes %lld ms\n", __func__, __LINE__, elapsed.count());
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -1643,8 +1652,10 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
         return false;
     }
 
-    (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
+    (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels, callback);
 
+     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
+fprintf(stderr, "%s %d total updatecolorbuffer take %lld ms\n", __func__, __LINE__, elapsed.count());
     return true;
 }
 

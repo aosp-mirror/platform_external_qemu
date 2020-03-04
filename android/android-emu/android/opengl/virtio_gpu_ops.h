@@ -27,6 +27,14 @@ typedef void (*close_color_buffer_t)(uint32_t handle);
 typedef void (*update_color_buffer_t)(
     uint32_t handle, int x, int y, int width, int height,
     uint32_t format, uint32_t type, void* pixels);
+/*
+   call back to copy gpu data from src_frame to dest_texture_handle
+ */
+typedef void (*cuda_video_decoder_callback_t) (
+        void* src_frame, uint32_t dest_texture_handle, int src_pitch, int width, int heigh);
+typedef void (*update_color_buffer_with_cuda_callback_t)(
+    uint32_t handle, int x, int y, int width, int height,
+    uint32_t format, uint32_t type, void* pixels, cuda_video_decoder_callback_t fn);
 typedef void (*read_color_buffer_t)(
     uint32_t handle, int x, int y, int width, int height,
     uint32_t format, uint32_t type, void* pixels);
@@ -40,6 +48,7 @@ struct AndroidVirtioGpuOps {
     open_color_buffer_t open_color_buffer;
     close_color_buffer_t close_color_buffer;
     update_color_buffer_t update_color_buffer;
+    update_color_buffer_with_cuda_callback_t update_color_buffer_with_cuda_callback;
     read_color_buffer_t read_color_buffer;
     read_color_buffer_yuv_t read_color_buffer_yuv;
     post_color_buffer_t post_color_buffer;

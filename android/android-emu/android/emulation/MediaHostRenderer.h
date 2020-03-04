@@ -19,6 +19,11 @@
 
 #include <stddef.h>
 
+extern "C" {
+typedef void (*cuda_video_decoder_callback_t) (
+        void* src_frame, uint32_t dest_texture_handle, int src_pitch, int width, int heigh);
+}
+
 namespace android {
 namespace emulation {
 
@@ -30,6 +35,11 @@ public:
                                  unsigned int outputWidth,
                                  unsigned int outputHeight,
                                  uint8_t* decodedFrame);
+
+    void renderToHostColorBufferWithCallback(int hostColorBufferId,
+                                 unsigned int outputWidth,
+                                 unsigned int outputHeight,
+                                 uint8_t* decodedFrame, cuda_video_decoder_callback_t callback);
 
     MediaHostRenderer();
     ~MediaHostRenderer() = default;

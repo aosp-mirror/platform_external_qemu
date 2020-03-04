@@ -16,9 +16,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#define INIT_CUDA_GL 1
 #include "dynlink_cuda.h"
 #if INIT_CUDA_GL
-#include "../inc/dynlink_cudaGL.h"
+#include "dynlink_cudaGL.h"
 #endif
 #if INIT_CUDA_D3D9
 #include "../inc/dynlink_cudaD3D9.h"
@@ -642,8 +643,15 @@ CUresult CUDAAPI cuInit(unsigned int Flags, int cudaVersion, void *pHandleDriver
     }
 
 #if INIT_CUDA_GL
-    if (cuInitGL(0, __CUDA_API_VERSION, CudaDrvLib) != CUDA_SUCCESS)
+    fprintf(stderr, "calling cuInitGL\n");
+    if (cuInitGL(0, __CUDA_API_VERSION, CudaDrvLib) != CUDA_SUCCESS) {
+    fprintf(stderr, "calling cuInitGL failed\n");
+    exit(1);
         return CUDA_ERROR_INVALID_DEVICE;
+    }
+#else
+    fprintf(stderr, "why skipped init cuda gl ?\n");
+    exit(2);
 #endif
 
 #if INIT_CUDA_D3D9
