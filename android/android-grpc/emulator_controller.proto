@@ -693,6 +693,13 @@ message Image {
   // The organization of the pixels in the image buffer is from left to
   // right and bottom up.
   bytes image = 4;
+
+  // [Output Only] Monotonically increasing sequence number in a stream of
+  // screenshots. The first screenshot will have a sequence of 0. A single
+  // screenshot will always have a sequence number of 0. The sequence is not
+  // necessarily contiguous, and can be used to detect how many frames were
+  // dropped. An example sequence could be: [0, 3, 5, 7, 9, 11].
+  uint32 seq = 5;
 }
 
 message Rotation {
