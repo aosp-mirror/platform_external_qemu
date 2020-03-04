@@ -21,6 +21,12 @@
 
 #include "FrameworkFormats.h"
 
+extern "C" {
+    typedef void (*cuda_video_decoder_callback_t) (
+        void* src_frame, uint32_t dest_texture_handle, int src_pitch, int width, int heigh);
+}
+
+
 // The purpose of YUVConverter is to use
 // OpenGL shaders to convert YUV images to RGB
 // images that can be displayed on screen.
@@ -51,7 +57,7 @@ public:
     // call when gralloc_unlock updates
     // the host color buffer
     // (rcUpdateColorBuffer)
-    void drawConvert(int x, int y, int width, int height, char* pixels);
+    void drawConvert(int x, int y, int width, int height, char* pixels, cuda_video_decoder_callback_t callback = nullptr);
 private:
     // For dealing with n-pixel-aligned buffers
     void updateCutoffs(float width, float ywidth, float halfwidth, float cwidth);

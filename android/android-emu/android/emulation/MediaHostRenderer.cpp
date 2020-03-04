@@ -64,5 +64,24 @@ void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
     }
 }
 
+void MediaHostRenderer::renderToHostColorBufferWithCallback(int hostColorBufferId,
+                                                unsigned int outputWidth,
+                                                unsigned int outputHeight,
+                                                uint8_t* decodedFrame, cuda_video_decoder_callback_t callback) {
+    H264_DPRINT("Calling %s at %d buffer id %d", __func__, __LINE__,
+                hostColorBufferId);
+    if (hostColorBufferId < 0) {
+        H264_DPRINT("ERROR: negative buffer id %d", hostColorBufferId);
+        return;
+    }
+    if (mVirtioGpuOps) {
+        mVirtioGpuOps->update_color_buffer_with_cuda_callback(hostColorBufferId, 0, 0, outputWidth,
+                                           outputHeight, kGL_RGBA8,
+                                           kGlUnsignedByte, decodedFrame, callback);
+    } else {
+        H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
+    }
+}
+
 }  // namespace emulation
 }  // namespace android

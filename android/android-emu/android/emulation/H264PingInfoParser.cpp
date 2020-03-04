@@ -78,7 +78,12 @@ void H264PingInfoParser::parseDecodeFrameParams(void* ptr,
     uint64_t offset = *(uint64_t*)((uint8_t*)ptr + 8);
     param.pData = (uint8_t*)ptr + offset;
     param.size = *(size_t*)((uint8_t*)ptr + 16);
-    param.pts = *(size_t*)((uint8_t*)ptr + 24);
+    param.pts = *(uint64_t*)((uint8_t*)ptr + 24);
+    if (mVersion == 200) {
+        param.hostColorBufferId = *(int32_t*)((uint8_t*)ptr + 24 + 8);
+    } else if (mVersion == 100) {
+        param.hostDecoderId = -1;
+    }
     uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);
     param.pConsumedBytes = (size_t*)(retptr);
     param.pDecoderErrorCode = (int*)(retptr + 8);
