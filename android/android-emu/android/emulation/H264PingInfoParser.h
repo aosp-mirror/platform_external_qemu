@@ -48,6 +48,7 @@ public:
         uint8_t* pData;
         size_t size;
         uint64_t pts;
+        int32_t hostColorBufferId;
         // output
         size_t* pConsumedBytes;
         int32_t* pDecoderErrorCode;
