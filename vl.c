@@ -5455,9 +5455,16 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             // Now that we know the serial number we can set it as the MAC prefix
             // for wifi. This keeps the MAC addresses unique across several
             // emulators that may have connected WiFi networks.
+
+#if 0
             char* combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
                                              current_machine->kernel_cmdline,
                                              android_serial_number_port);
+#else
+            char* combined = g_strdup_printf("%s mac80211_hwsim.radios=0",
+                                             current_machine->kernel_cmdline);
+#endif
+
             g_free(current_machine->kernel_cmdline);
             current_machine->kernel_cmdline = combined;
         }
