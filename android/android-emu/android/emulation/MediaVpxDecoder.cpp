@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <cassert>
 
-#define MEDIA_VPX_DEBUG 0
+#define MEDIA_VPX_DEBUG 1
 
 #if MEDIA_VPX_DEBUG
 #define VPX_DPRINT(fmt,...) fprintf(stderr, "bohu-codec-vpx: %s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -115,7 +115,7 @@ void MediaVpxDecoder::decodeFrame(void* ptr) {
     unsigned int len = getDataLen(ptr);
     void* user_data = getUserData(ptr);
 
-    VPX_DPRINT("bohu-codec-vpx: calling decodeFrame");
+    VPX_DPRINT("bohu-codec-vpx: calling decodeFrame %d", (int)len);
     vpx_codec_decode(mCtx.get(), data, len, user_data, 0);
 
     // now the we can call getImage
