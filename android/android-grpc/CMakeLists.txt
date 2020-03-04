@@ -55,7 +55,7 @@ android_add_library(
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/ServiceUtils.cpp)
-target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
+target_link_libraries(android-grpc PRIVATE png PUBLIC  android-emu
                                                       android-net grpc++)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})

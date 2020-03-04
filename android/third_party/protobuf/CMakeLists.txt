@@ -67,20 +67,25 @@ android_add_library(
   REPO "${protobuf_source_dir}"
   LICENSE "BSD-3-Clause"
   NOTICE "REPO/NOTICE"
-  SRC ${protobuf_source_dir}/src/google/protobuf/arena.cc
+  SRC ${protobuf_source_dir}/src/google/protobuf/any_lite.cc
+      ${protobuf_source_dir}/src/google/protobuf/arena.cc
       ${protobuf_source_dir}/src/google/protobuf/extension_set.cc
+      ${protobuf_source_dir}/src/google/protobuf/generated_enum_util.cc
       ${protobuf_source_dir}/src/google/protobuf/generated_message_table_driven_lite.cc
       ${protobuf_source_dir}/src/google/protobuf/generated_message_util.cc
       ${protobuf_source_dir}/src/google/protobuf/implicit_weak_message.cc
       ${protobuf_source_dir}/src/google/protobuf/io/coded_stream.cc
+      ${protobuf_source_dir}/src/google/protobuf/io/io_win32.cc
+      ${protobuf_source_dir}/src/google/protobuf/io/strtod.cc
       ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream.cc
+      ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl.cc
       ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl_lite.cc
       ${protobuf_source_dir}/src/google/protobuf/message_lite.cc
+      ${protobuf_source_dir}/src/google/protobuf/parse_context.cc
       ${protobuf_source_dir}/src/google/protobuf/repeated_field.cc
       ${protobuf_source_dir}/src/google/protobuf/stubs/bytestream.cc
       ${protobuf_source_dir}/src/google/protobuf/stubs/common.cc
       ${protobuf_source_dir}/src/google/protobuf/stubs/int128.cc
-      ${protobuf_source_dir}/src/google/protobuf/stubs/io_win32.cc
       ${protobuf_source_dir}/src/google/protobuf/stubs/status.cc
       ${protobuf_source_dir}/src/google/protobuf/stubs/statusor.cc
       ${protobuf_source_dir}/src/google/protobuf/stubs/stringpiece.cc
@@ -136,9 +141,7 @@ android_add_library(
       ${protobuf_source_dir}/src/google/protobuf/generated_message_table_driven.cc
       ${protobuf_source_dir}/src/google/protobuf/io/gzip_stream.cc
       ${protobuf_source_dir}/src/google/protobuf/io/printer.cc
-      ${protobuf_source_dir}/src/google/protobuf/io/strtod.cc
       ${protobuf_source_dir}/src/google/protobuf/io/tokenizer.cc
-      ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl.cc
       ${protobuf_source_dir}/src/google/protobuf/map_field.cc
       ${protobuf_source_dir}/src/google/protobuf/message.cc
       ${protobuf_source_dir}/src/google/protobuf/reflection_ops.cc
@@ -267,7 +270,8 @@ endif()
 # Unit tests, only active when we are not cross compiling
 if(WINDOWS_MSVC_X86_64)
   message(STATUS "Disabling protobuf tests on MSVC! b/149265836")
-elseif(NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG OR NOT TARGET gmock_main)
+elseif(NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG OR NOT TARGET
+                                                           gmock_main)
   message(STATUS "Disabling protobuf tests when cross compiling")
 else()
   set(lite_test_protos
@@ -374,9 +378,9 @@ else()
         ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_bootstrap_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_move_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_plugin_unittest.cc
-        # ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/cpp_unittest.c
-        # c # Death tests are not stable ${protobuf_source_dir}/src/google/proto
-        # buf/compiler/cpp/cpp_unittest.inc # Death tests are not stable.
+        # Death tests are not stable ${protobuf_source_dir}/src/google/protobuf/
+        # compiler/cpp/cpp_unittest.cc ${protobuf_source_dir}/src/google/protobu
+        # f/compiler/cpp/cpp_unittest.inc
         ${protobuf_source_dir}/src/google/protobuf/compiler/cpp/metadata_test.cc
         ${protobuf_source_dir}/src/google/protobuf/compiler/importer_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/compiler/mock_code_generator.cc
@@ -388,6 +392,7 @@ else()
         ${protobuf_source_dir}/src/google/protobuf/extension_set_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/generated_message_reflection_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/io/coded_stream_unittest.cc
+        ${protobuf_source_dir}/src/google/protobuf/io/io_win32_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/io/printer_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/io/tokenizer_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_unittest.cc
@@ -407,7 +412,6 @@ else()
         ${protobuf_source_dir}/src/google/protobuf/stubs/bytestream_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/common_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/int128_unittest.cc
-        ${protobuf_source_dir}/src/google/protobuf/stubs/io_win32_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/status_test.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/statusor_test.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/stringpiece_unittest.cc
@@ -435,7 +439,7 @@ else()
         ${protobuf_source_dir}/src/google/protobuf/wire_format_unittest.cc
         # AUTOGEN(common_test_srcs)
         ${protobuf_source_dir}/src/google/protobuf/arena_test_util.cc
-        ${protobuf_source_dir}/src/google/protobuf/map_test_util.cc
+        ${protobuf_source_dir}/src/google/protobuf/map_test_util.inc
         ${protobuf_source_dir}/src/google/protobuf/test_util.cc
         ${protobuf_source_dir}/src/google/protobuf/test_util.inc
         ${protobuf_source_dir}/src/google/protobuf/testing/file.cc
