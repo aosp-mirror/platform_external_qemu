@@ -32,6 +32,7 @@
 #include "android/utils/debug.h"
 #include "android/base/StringView.h"
 #include "android/base/Tracing.h"
+#include "android/emulation/MultiDisplay.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
@@ -1162,12 +1163,16 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
 
 static int rcCreateDisplay(uint32_t* displayId) {
     FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb) {
+    if (!fb || !displayId) {
         return -1;
     }
 
     // Assume this API call always allocates a new displayId
-    *displayId = FrameBuffer::s_invalidIdMultiDisplay;
+    // if displayID out of range
+    if (*displayId < android::MultiDisplay::s_displayIdInternalBegin ||
+        *displayId > android::MultiDisplay::s_maxNumMultiDisplay) {
+        *displayId = FrameBuffer::s_invalidIdMultiDisplay;
+    }
     return fb->createDisplay(displayId);
 }
 
