@@ -29,6 +29,10 @@
 #include "RenderContext.h"
 
 #include <memory>
+extern "C" {
+    typedef void (*cuda_video_decoder_callback_t) (
+        void* src_frame, uint32_t dest_texture_handle, int src_pitch, int width, int heigh);
+}
 
 class TextureDraw;
 class TextureResize;
@@ -188,7 +192,8 @@ public:
                    int height,
                    GLenum p_format,
                    GLenum p_type,
-                   void* pixels);
+                   void* pixels,
+                   cuda_video_decoder_callback_t callback = nullptr);
 
     // Completely replaces contents, assuming that |pixels| is a buffer
     // that is allocated and filled with the same format.

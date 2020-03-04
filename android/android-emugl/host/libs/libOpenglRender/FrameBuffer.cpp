@@ -1634,7 +1634,9 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int height,
                                     GLenum format,
                                     GLenum type,
-                                    void* pixels) {
+                                    void* pixels,
+                                    cuda_video_decoder_callback_t callback
+                                    ) {
     AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -1643,7 +1645,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
         return false;
     }
 
-    (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
+    (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels, callback);
 
     return true;
 }
