@@ -85,4 +85,6 @@ enum Feature {
     KeycodeForwarding = 48;
 
     VirtioGpuNext = 49;
+
+    Mac80211hwsimUserspaceManaged = 50;
 }
