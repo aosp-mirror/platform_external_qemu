@@ -158,7 +158,7 @@ private:
                              int32_t* pRetErr,
                              const uint8_t* frame,
                              size_t szBytes,
-                             uint64_t inputPts);
+                             uint64_t inputPts, int hostColorBufferId=-1);
 };  // MediaH264DecoderCuvid
 }  // namespace emulation
 }  // namespace android
