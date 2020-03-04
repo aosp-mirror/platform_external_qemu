@@ -483,6 +483,12 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
         uint32_t format, uint32_t type, void* pixels) {
         FrameBuffer::getFB()->updateColorBuffer(handle, x, y, width, height, format, type, pixels);
     },
+    .update_color_buffer_with_cuda_callback = [](
+        uint32_t handle, int x, int y, int width, int height,
+        uint32_t format, uint32_t type, void* pixels, cuda_video_decoder_callback_t callback) {
+        FrameBuffer::getFB()->updateColorBuffer(handle, x, y, width, height, format, type, pixels,
+                callback);
+    },
     .read_color_buffer = [](
         uint32_t handle, int x, int y, int width, int height,
         uint32_t format, uint32_t type, void* pixels) {

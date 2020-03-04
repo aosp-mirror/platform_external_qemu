@@ -44,6 +44,11 @@
 
 #include <stdint.h>
 
+extern "C" {
+    typedef void (*cuda_video_decoder_callback_t) (
+        void* src_frame, uint32_t dest_texture_handle, int src_pitch, int width, int heigh);
+}
+
 struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
@@ -334,7 +339,7 @@ public:
     // Returns true on success, false otherwise.
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
-                           GLenum format, GLenum type, void *pixels);
+                           GLenum format, GLenum type, void *pixels, cuda_video_decoder_callback_t fn = nullptr);
     // Replaces contents completely using the color buffer's current format,
     // with row length equal to width of a row in bytes.
     // The number of bytes is passed as a check.
