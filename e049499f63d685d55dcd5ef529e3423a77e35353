@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d51d42c_9b54ac51",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-05T17:32:11Z",
+      "side": 1,
+      "message": "we need to set m_frameworkFormat to FRAMEWORK_FORMAT_NV12",
+      "revId": "e049499f63d685d55dcd5ef529e3423a77e35353",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
