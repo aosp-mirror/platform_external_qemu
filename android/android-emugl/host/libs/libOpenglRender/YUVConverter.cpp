@@ -152,6 +152,8 @@ static void subUpdateYUVGLTex(GLenum texture_unit,
                               void* pixels, bool uvInterleaved) {
     s_gles2.glActiveTexture(texture_unit);
     s_gles2.glBindTexture(GL_TEXTURE_2D, tex);
+    fprintf(stderr, "%s: global name: %u -> %u\n", __func__, tex,
+            s_gles2.glGetGlobalTexName(tex));
     if (uvInterleaved) {
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0,
                                 x, y, width, height,
