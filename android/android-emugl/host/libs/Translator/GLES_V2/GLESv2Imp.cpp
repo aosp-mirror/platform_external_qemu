@@ -213,6 +213,9 @@ GL_APICALL void GL_APIENTRY glGetSemaphoreParameterui64vEXT(GLuint semaphore, GL
 GL_APICALL void GL_APIENTRY glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts);
 GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts);
 
+// Utility to get global names
+GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName);
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
@@ -255,6 +258,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glGetSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetSemaphoreParameterui64vEXT;
         (*s_glesExtensions)["glWaitSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glWaitSemaphoreEXT;
         (*s_glesExtensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glSignalSemaphoreEXT;
+        (*s_glesExtensions)["glGetGlobalTexName"] = (__translatorMustCastToProperFunctionPointerType)glGetGlobalTexName;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -620,6 +624,13 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
+}
+
+GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName) {
+    GET_CTX_V2_RET(0);
+    GLuint globalTextureName = ctx->shareGroup()->getGlobalName(
+            NamedObjectType::TEXTURE, localName);
+    return globalTextureName;
 }
 
 GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
