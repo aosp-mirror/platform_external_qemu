@@ -54,6 +54,7 @@
   X(void, glGetSemaphoreParameterui64vEXT, (GLuint semaphore, GLenum pname, GLuint64 * params), (semaphore, pname, params)) \
   X(void, glWaitSemaphoreEXT, (GLuint semaphore, GLuint numBufferBarriers, const GLuint * buffers, GLuint numTextureBarriers, const GLuint * textures, const GLenum * srcLayouts), (semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, srcLayouts)) \
   X(void, glSignalSemaphoreEXT, (GLuint semaphore, GLuint numBufferBarriers, const GLuint * buffers, GLuint numTextureBarriers, const GLuint * textures, const GLenum * dstLayouts), (semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts)) \
+  X(GLuint, glGetGlobalTexName, (GLuint localTexName), (localTexName)) \
 
 
 #endif  // GLES_EXTENSIONS_FUNCTIONS_H

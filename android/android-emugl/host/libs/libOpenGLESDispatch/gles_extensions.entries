@@ -64,3 +64,6 @@ void glSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, const GLuint64
 void glGetSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, GLuint64 *params);
 void glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts);
 void glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts);
+
+# CUDA interop
+GLuint glGetGlobalTexName(GLuint localTexName);
