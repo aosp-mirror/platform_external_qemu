@@ -45,6 +45,27 @@ public:
             }
         }
     }
+    void PlanarToVUInterleaved(T* pFrame, int nPitch = 0) {
+        if (nPitch == 0) {
+            nPitch = nWidth;
+        }
+        T* pvu = pFrame + nPitch * nHeight;
+        if (nPitch == nWidth) {
+            memcpy(pQuad, pvu, nWidth * nHeight / 4 * sizeof(T));
+        } else {
+            for (int i = 0; i < nHeight / 2; i++) {
+                memcpy(pQuad + nWidth / 2 * i, pvu + nPitch / 2 * i,
+                       nWidth / 2 * sizeof(T));
+            }
+        }
+        T* pv = pvu + (nPitch / 2) * (nHeight / 2);
+        for (int y = 0; y < nHeight / 2; y++) {
+            for (int x = 0; x < nWidth / 2; x++) {
+                pvu[y * nPitch + x * 2] = pv[y * nPitch / 2 + x];
+                pvu[y * nPitch + x * 2 + 1] = pQuad[y * nWidth / 2 + x];
+            }
+        }
+    }
     void UVInterleavedToPlanar(T* pFrame, int nPitch = 0) {
         if (nPitch == 0) {
             nPitch = nWidth;

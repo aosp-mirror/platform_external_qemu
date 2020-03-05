@@ -408,6 +408,8 @@ void MediaH264DecoderFfmpeg::getImage(void* ptr) {
         memcpy(dst, mDecodedFrame.data(), mOutBufferSize);
     } else if (mParser.version() == 200) {
         if (param.hostColorBufferId >= 0) {
+        YuvConverter<uint8_t> convert8(mOutputWidth, mOutputHeight);
+        convert8.PlanarToVUInterleaved(mDecodedFrame.data());
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               mOutputWidth, mOutputHeight,
                                               mDecodedFrame.data());
