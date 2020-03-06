@@ -836,6 +836,7 @@ builder_build_autotools_package_full_install_ffmpeg () {
         export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
         export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
         export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        log "Running configure"
         run "$PKG_SRC_DIR"/configure \
             --prefix=$_SHU_BUILDER_PREFIX \
             $_SHU_BUILDER_CONFIGURE_FLAGS \

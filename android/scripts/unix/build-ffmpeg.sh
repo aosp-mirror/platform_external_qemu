@@ -29,6 +29,7 @@
 
 . $(dirname "$0")/utils/common.shi
 
+# set -x
 shell_import utils/aosp_dir.shi
 shell_import utils/emulator_prebuilts.shi
 shell_import utils/install_dir.shi
@@ -60,6 +61,7 @@ install_dir_parse_option
 package_builder_process_options ffmpeg
 package_builder_parse_package_list
 
+
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote ffmpeg build for: $DARWIN_SYSTEMS"
@@ -83,29 +85,49 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         case $SYSTEM in
         linux-x86_64)
-            MY_FLAGS="--extra-ldflags=\"-ldl\" --disable-xlib"
+            MY_FLAGS="--extra-ldflags=\"-ldl\" --disable-xlib --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" --enable-pic --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\" --enable-libx264"
+
             ;;
         linux-aarch64)
-            MY_FLAGS="--extra-ldflags=\"-ldl\" --disable-xlib"
+            MY_FLAGS="--extra-ldflags=\"-ldl\" --disable-xlib --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" --enable-pic --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\ --enable-libx264"
             ;;
-        windows-x86_64)
-            MY_FLAGS="--target-os=mingw32 --arch=x86_64 --enable-cross-compile --cc=gcc "
+        windows_msvc-x86_64)
+            MY_FLAGS="--target-os=win64 --arch=x86_64 --toolchain=msvc  --extra-cflags=\"-Wno-everything\" --extra_cxxflags=\"-Wno-everything\" --enable-cross-compile --extra-ldflags=\"-Wl,-libpath:/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/common/x264/windows_msvc-x86_64/lib\"  --extra-ldflags=\"-Wl,-libpath:/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/common/libvpx/windows_msvc-x86_64/lib\""
+            warn "X264 encoder is disabled until b/150910477 is fixed."
             ;;
         darwin-*)
             # Use host compiler.
-            MY_FLAGS="--disable-iconv"
+            MY_FLAGS="--disable-iconv  --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" --enable-pic --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\" --enable-libx264"
             ;;
         *)
             panic "Host system '$CURRENT_HOST' is not supported by this script!"
             ;;
         esac
 
+
+        # Be very careful with changing the prebuilts:
+        #
+        # - Only enable muxers you need.
+        # - Only enable de-muxets you need
+        # - Only enable protocols that you need
+        # - Only enable coders you need
+        # - Only enable decoders you need
+        #
+        # Ffmpeg is basically a self contained enormous static library with all
+        # the filters, codec, protocols and (de)muxers you would ever need.
+        # Due to this you get *EVERYTHING* if you link against it, if if you
+        # never use speex, or rtmp.
+        #
+        #  - webm: used by recording, we need to be able to write its.
+        #  - matroska: used by recording, we need this for opening files we
+        #  wrote.
+        # - vorbis: audio codec for recording
+        # - vp9: video coded used for recording
+        # - h264: encoder used by newer system images.
         builder_build_autotools_package_ffmpeg ffmpeg \
                 $MY_FLAGS \
                 --extra-cflags=\"-I$PREBUILTS_DIR/common/x264/$SYSTEM/include\" \
-                --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" \
                 --extra-cflags=\"-I$PREBUILTS_DIR/common/libvpx/$SYSTEM/include\" \
-                --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\" \
                 --enable-static \
                 --disable-doc \
                 --disable-programs \
@@ -113,14 +135,27 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-asm \
                 --disable-yasm \
                 --disable-avdevice \
+                --disable-filters \
                 --enable-avresample \
-                --enable-pic \
-                --enable-libx264 \
                 --enable-libvpx \
-                --disable-protocol=tls \
-                --disable-protocol=tls_securetransport \
-                --disable-openssl \
-                --disable-sdl2
+                --disable-muxers \
+                --enable-muxer=webm \
+                --enable-muxer=webm_chunk_muxer \
+                --enable-muxer=webm_dash_manifest_muxer \
+                --disable-demuxers \
+                --enable-demuxer=webm \
+                --enable-demuxer=matroska \
+                --enable-demuxer=webm_chunk_muxer \
+                --enable-demuxer=webm_dash_manifest_muxer \
+                --disable-protocols \
+                --enable-protocol=file \
+                --disable-encoders \
+                --enable-encoder=libvpx_vp9 \
+                --enable-encoder=vorbis \
+                --disable-decoders \
+                --enable-decoder=libvpx_vp9 \
+                --enable-decoder=vorbis \
+                --enable-decoder=h264
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.
