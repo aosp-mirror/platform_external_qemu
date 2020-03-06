@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76266022_c63c55dd",
+        "filename": "vl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5457,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-03-06T04:24:59Z",
+      "side": 1,
+      "message": "I think we want to introduce a feature instead of checking the kernel version.",
+      "range": {
+        "startLine": 5457,
+        "startChar": 16,
+        "endLine": 5457,
+        "endChar": 69
+      },
+      "revId": "a65601637bedf939fede10dc2e947c68648bbd0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
