@@ -14,7 +14,9 @@
 #ifdef _WIN32
 #include <rpc.h>
 #else
-#include <uuid/uuid.h>
+
+// #include <uuid/uuid.h>
+
 #endif
 
 namespace android {

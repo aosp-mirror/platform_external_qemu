@@ -3,7 +3,10 @@ get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 
 # Dependencies
+if (NOT OPTION_GFXSTREAM_BACKEND)
 prebuilt(E2FSPROGS)
+endif()
+
 prebuilt(LIBXML2)
 prebuilt(UUID)
 
