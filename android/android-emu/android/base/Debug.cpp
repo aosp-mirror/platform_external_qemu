@@ -92,7 +92,11 @@ void DebugBreak() {
 #ifdef _WIN32
     ::DebugBreak();
 #else
+#ifdef __x86_64__
     asm("int $3");
+#elif defined(__aarch64)
+    asm("trap");
+#endif
 #endif
 }
 
